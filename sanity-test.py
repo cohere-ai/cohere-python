@@ -27,7 +27,7 @@ best_options = co.choose_best(
             model="baseline-likelihood",
            	query="hello `{`}",
             options=["world", "cohere"])
-print('Best option to fill placeholder is `{}` which has the likelihood value of {}'.format(best_options[0]['option'], best_options[0]['likelihood']))
+print('Best option is `{}`, with likelihood value of {}'.format(best_options[0]['option'], best_options[0]['likelihood']))
 
 
 try:
