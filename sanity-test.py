@@ -25,7 +25,7 @@ print('Similarity value of `co:here`: {}'.format(similarities[0]))
 
 best_options = co.choose_best(
             model="baseline-likelihood",
-           	query="hello `{`}",
+            query="hello `{`}",
             options=["world", "cohere"])
 print('Best option is `{}`, with likelihood value of {}'.format(best_options[0]['option'], best_options[0]['likelihood']))
 
