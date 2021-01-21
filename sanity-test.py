@@ -6,6 +6,8 @@ API_KEY = os.getenv("CO_API_KEY")
 import cohere
 
 co = cohere.CohereClient(API_KEY)
+
+
 predictions = co.sample(
             model="baseline-124m",
             prompt="co:here",
@@ -28,7 +30,6 @@ best_options = co.choose_best(
             query="hello `{`}",
             options=["world", "cohere"])
 print('Best option is `{}`, with likelihood value of {}'.format(best_options[0]['option'], best_options[0]['likelihood']))
-
 
 try:
 	predictions = co.sample(
