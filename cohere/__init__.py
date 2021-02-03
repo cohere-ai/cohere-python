@@ -39,7 +39,7 @@ class CohereClient:
     response = self.__request(json_body, EMBED_URL, model)
     return response["embeddings"]
 
-  def choose_best(self, model, query, options, mode):
+  def choose_best(self, model, query, options, mode=""):
     json_body = json.dumps({
         "query": query,
         "options": options,
