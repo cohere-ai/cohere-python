@@ -11,6 +11,7 @@ CHOOSE_BEST_URL = "choose-best"
 class CohereClient:
   def __init__(self, api_key):
     self.api_key = api_key
+    self.api_url = COHERE_API_URL
     self.model = None
 
   def sample(self, model, prompt, num_tokens=20, num_samples=1, temperature=1):
@@ -38,20 +39,21 @@ class CohereClient:
     response = self.__request(json_body, EMBED_URL, model)
     return response["embeddings"]
 
-  def choose_best(self, model, query, options):
+  def choose_best(self, model, query, options, mode):
     json_body = json.dumps({
         "query": query,
         "options": options,
+        "mode": mode,
       })
     response = self.__request(json_body, CHOOSE_BEST_URL, model)
-    return response["rankedOptions"]
+    return response
 
   def __request(self, json_body, endpoint, model):
     headers = {
       'Authorization': 'BEARER {}'.format(self.api_key),
       'Content-Type': 'application/json'
     }
-    url = urljoin(COHERE_API_URL, model + "/" + endpoint)
+    url = urljoin(self.api_url, model + "/" + endpoint)
     response = requests.request("POST", url, headers=headers, data=json_body)
     res = json.loads(response.text)
     if "message" in res.keys(): # has errors
