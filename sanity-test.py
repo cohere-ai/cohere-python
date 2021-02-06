@@ -7,11 +7,11 @@ import cohere
 
 co = cohere.CohereClient(API_KEY)
 
-predictions = co.sample(
+predictions = co.generate(
             model="baseline-124m",
             prompt="co:here",
             num_tokens=10,
-            num_samples=3)
+            num_generations=3)
 print('First prediction: {}'.format(predictions[0]))
 
 embeddings = co.embed(
@@ -32,19 +32,19 @@ print('Best option is `{}`, with likelihood value of {}'.format(best_options['ra
 print('Selected mode was {}'.format(best_options['mode']))
 
 try:
-	predictions = co.sample(
+	predictions = co.generate(
             model="fake-model",
             prompt="co:here",
             num_tokens=10,
-            num_samples=3)
+            num_generations=3)
 except cohere.CohereError as e:
 	print(e) # could not find model with name fake-model
 
 try:
-	predictions = co.sample(
+	predictions = co.generate(
             model="baseline-124m",
             prompt="",
             num_tokens=10,
-            num_samples=3)
+            num_generations=3)
 except cohere.CohereError as e:
 	print(e) # prompt length must be greater than 0
