@@ -3,7 +3,7 @@ from urllib.parse import urljoin
 import requests
 
 COHERE_API_URL = "https://api.cohere.ai"
-SAMPLE_URL = "sample"
+GENERATE_URL = "generate"
 SIMILARITY_URL = "similarity"
 EMBED_URL = "embed"
 CHOOSE_BEST_URL = "choose-best"
@@ -14,14 +14,14 @@ class CohereClient:
     self.api_url = COHERE_API_URL
     self.model = None
 
-  def sample(self, model, prompt, num_tokens=20, num_samples=1, temperature=1):
+  def generate(self, model, prompt, num_tokens=20, num_generations=1, temperature=1):
     json_body = json.dumps({
         "prompt": prompt,
-        "num_samples": num_samples,
+        "num_generations": num_generations,
         "max_tokens": num_tokens,
         "temperature": temperature,
       })
-    response = self.__request(json_body, SAMPLE_URL, model)
+    response = self.__request(json_body, GENERATE_URL, model)
     return response["text"]
 
   def similarity(self, model, anchor, targets):
