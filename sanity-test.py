@@ -6,7 +6,7 @@ import cohere
 
 co = cohere.CohereClient(API_KEY)
 
-predictions = co.sample(
+predictions = co.generate(
             model="baseline-124m",
             prompt="co:here",
             max_tokens=10)
@@ -30,7 +30,7 @@ print('Best option is `{}`, with likelihood value of {}'.format(best_options['ra
 print('Selected mode was {}'.format(best_options['mode']))
 
 try:
-	predictions = co.sample(
+	predictions = co.generate(
             model="fake-model",
             prompt="co:here",
             max_tokens=10)
@@ -38,7 +38,7 @@ except cohere.CohereError as e:
 	print(e) # could not find model with name fake-model
 
 try:
-	predictions = co.sample(
+	predictions = co.generate(
             model="baseline-124m",
             prompt="",
             max_tokens=10)
