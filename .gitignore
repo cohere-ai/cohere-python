@@ -2,3 +2,5 @@
 build/
 cohere.egg-info/
 dist/
+*.pyc
+__pycache__

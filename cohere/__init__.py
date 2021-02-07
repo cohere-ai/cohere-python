@@ -1,5 +1,6 @@
 import json
 from urllib.parse import urljoin
+
 import requests
 
 COHERE_API_URL = "https://api.cohere.ai"
@@ -9,16 +10,15 @@ EMBED_URL = "embed"
 CHOOSE_BEST_URL = "choose-best"
 
 class CohereClient:
-  def __init__(self, api_key):
+  def __init__(self, api_key, api_url=COHERE_API_URL):
     self.api_key = api_key
-    self.api_url = COHERE_API_URL
+    self.api_url = api_url
     self.model = None
 
-  def sample(self, model, prompt, num_tokens=20, num_samples=1, temperature=1):
+  def sample(self, model, prompt, max_tokens=20, temperature=1):
     json_body = json.dumps({
         "prompt": prompt,
-        "num_samples": num_samples,
-        "max_tokens": num_tokens,
+        "max_tokens": max_tokens,
         "temperature": temperature,
       })
     response = self.__request(json_body, SAMPLE_URL, model)
