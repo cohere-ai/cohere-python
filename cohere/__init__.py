@@ -11,8 +11,8 @@ CHOOSE_BEST_URL = "choose-best"
 
 class CohereClient:
   def __init__(self, api_key):
-    self.api_key = COHERE_API_URL
-    self.api_url = api_url
+    self.api_key = api_key
+    self.api_url = COHERE_API_URL
     self.model = None
 
   def generate(self, model, prompt, max_tokens=20, temperature=1):
