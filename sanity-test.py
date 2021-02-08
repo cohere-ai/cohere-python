@@ -13,17 +13,17 @@ predictions = co.generate(
 print('First prediction: {}'.format(predictions[0]))
 
 embeddings = co.embed(
-            model="baseline-embed",
+            model="baseline-124m",
             texts=["co:here", "cohere"])
 
 similarities = co.similarity(
-            model="baseline-similarity",
+            model="baseline-124m",
            	anchor="cohere ai",
             targets=["co:here", "cohere"])
 print('Similarity value of `co:here`: {}'.format(similarities[0]))
 
 best_options = co.choose_best(
-            model="baseline-likelihood",
+            model="baseline-355m",
             query="hello {}",
             options=["world", "cohere"])
 print('Best option is `{}`, with likelihood value of {}'.format(best_options['rankedOptions'][0]['option'], best_options['rankedOptions'][0]['likelihood']))
