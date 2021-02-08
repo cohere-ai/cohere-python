@@ -1,6 +1,5 @@
 import os
-from dotenv import load_dotenv
-load_dotenv()
+
 API_KEY = os.getenv("CO_API_KEY")
 
 import cohere
@@ -8,24 +7,23 @@ import cohere
 co = cohere.CohereClient(API_KEY)
 
 predictions = co.generate(
-            model="baseline-124m",
+            model="baseline-1b",
             prompt="co:here",
-            num_tokens=10,
-            num_generations=3)
+            max_tokens=10)
 print('First prediction: {}'.format(predictions[0]))
 
 embeddings = co.embed(
-            model="baseline-embed",
+            model="baseline-124m",
             texts=["co:here", "cohere"])
 
 similarities = co.similarity(
-            model="baseline-similarity",
+            model="baseline-124m",
            	anchor="cohere ai",
             targets=["co:here", "cohere"])
 print('Similarity value of `co:here`: {}'.format(similarities[0]))
 
 best_options = co.choose_best(
-            model="baseline-likelihood",
+            model="baseline-355m",
             query="hello {}",
             options=["world", "cohere"])
 print('Best option is `{}`, with likelihood value of {}'.format(best_options['rankedOptions'][0]['option'], best_options['rankedOptions'][0]['likelihood']))
@@ -35,8 +33,7 @@ try:
 	predictions = co.generate(
             model="fake-model",
             prompt="co:here",
-            num_tokens=10,
-            num_generations=3)
+            max_tokens=10)
 except cohere.CohereError as e:
 	print(e) # could not find model with name fake-model
 
@@ -44,7 +41,6 @@ try:
 	predictions = co.generate(
             model="baseline-124m",
             prompt="",
-            num_tokens=10,
-            num_generations=3)
+            max_tokens=10)
 except cohere.CohereError as e:
 	print(e) # prompt length must be greater than 0
