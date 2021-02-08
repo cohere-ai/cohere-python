@@ -10,8 +10,8 @@ EMBED_URL = "embed"
 CHOOSE_BEST_URL = "choose-best"
 
 class CohereClient:
-  def __init__(self, api_key, api_url=COHERE_API_URL):
-    self.api_key = api_key
+  def __init__(self, api_key):
+    self.api_key = COHERE_API_URL
     self.api_url = api_url
     self.model = None
 
