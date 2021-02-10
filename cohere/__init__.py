@@ -1,5 +1,6 @@
 import json
 from urllib.parse import urljoin
+
 import requests
 
 COHERE_API_URL = "https://api.cohere.ai"
@@ -14,10 +15,9 @@ class CohereClient:
     self.api_url = COHERE_API_URL
     self.model = None
 
-  def generate(self, model, prompt, max_tokens=20, num_generations=1, temperature=1):
+  def generate(self, model, prompt, max_tokens=20, temperature=1):
     json_body = json.dumps({
         "prompt": prompt,
-        "num_generations": num_generations,
         "max_tokens": max_tokens,
         "temperature": temperature,
       })
