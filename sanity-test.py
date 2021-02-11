@@ -1,5 +1,8 @@
 import os
 
+from dotenv import load_dotenv
+load_dotenv()
+
 API_KEY = os.getenv("CO_API_KEY")
 
 import cohere
@@ -29,6 +32,13 @@ options = co.choose_best(
 print('first option is `world`, with likelihood value of {}'.format(options['likelihoods'][0]))
 print('Selected mode was {}'.format(options['mode']))
 
+likelihood = co.likelihood(
+            model="baseline-355m",
+            text="hello, my name is johnny SURPRISE")
+print('likelihood of text is {}'.format(likelihood['likelihood']))
+print('token likelihoods are: (first token has no likelihood)')
+for token in likelihood['token_likelihood']:
+      print(token['token'], token['likelihood'])
 try:
 	predictions = co.generate(
             model="fake-model",

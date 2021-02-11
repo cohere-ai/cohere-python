@@ -8,6 +8,7 @@ GENERATE_URL = "generate"
 SIMILARITY_URL = "similarity"
 EMBED_URL = "embed"
 CHOOSE_BEST_URL = "choose-best"
+LIKELIHOOD_URL = "likelihood"
 
 class CohereClient:
   def __init__(self, api_key):
@@ -46,6 +47,13 @@ class CohereClient:
         "mode": mode,
       })
     response = self.__request(json_body, CHOOSE_BEST_URL, model)
+    return response
+
+  def likelihood(self, model, text):
+    json_body = json.dumps({
+        "text": text,
+      })
+    response = self.__request(json_body, LIKELIHOOD_URL, model)
     return response
 
   def __request(self, json_body, endpoint, model):
