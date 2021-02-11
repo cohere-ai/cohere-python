@@ -10,7 +10,7 @@ import cohere
 co = cohere.CohereClient(API_KEY)
 
 predictions = co.generate(
-            model="baseline-1b",
+            model="baseline-355m",
             prompt="co:here",
             max_tokens=10)
 print('First prediction: {}'.format(predictions[0]))
