@@ -6,11 +6,11 @@ import cohere
 
 co = cohere.CohereClient(API_KEY)
 
-predictions = co.generate(
-            model="baseline-1b",
+prediction = co.generate(
+            model="baseline-355m",
             prompt="co:here",
             max_tokens=10)
-print('First prediction: {}'.format(predictions[0]))
+print('prediction: {}'.format(prediction))
 
 embeddings = co.embed(
             model="baseline-124m",
@@ -29,6 +29,13 @@ options = co.choose_best(
 print('first option is `world`, with likelihood value of {}'.format(options['likelihoods'][0]))
 print('Selected mode was {}'.format(options['mode']))
 
+likelihood = co.likelihood(
+            model="baseline-355m",
+            text="hello, my name is johnny SURPRISE")
+print('likelihood of text is {}'.format(likelihood['likelihood']))
+print('token likelihoods are: (first token has no likelihood)')
+for token in likelihood['token_likelihoods']:
+      print(token['token'], token.get('likelihood', None))
 try:
 	predictions = co.generate(
             model="fake-model",
