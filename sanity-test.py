@@ -35,7 +35,7 @@ likelihood = co.likelihood(
 print('likelihood of text is {}'.format(likelihood['likelihood']))
 print('token likelihoods are: (first token has no likelihood)')
 for token in likelihood['token_likelihoods']:
-      print(token['token'], token.get('likelihood', None))
+      print(token['token'], token.get('likelihood', ''))
 try:
 	predictions = co.generate(
             model="fake-model",
