@@ -1,19 +1,16 @@
 import os
 
-from dotenv import load_dotenv
-load_dotenv()
-
 API_KEY = os.getenv("CO_API_KEY")
 
 import cohere
 
 co = cohere.CohereClient(API_KEY)
 
-predictions = co.generate(
+prediction = co.generate(
             model="baseline-355m",
             prompt="co:here",
             max_tokens=10)
-print('First prediction: {}'.format(predictions[0]))
+print('prediction: {}'.format(prediction))
 
 embeddings = co.embed(
             model="baseline-124m",
@@ -37,8 +34,8 @@ likelihood = co.likelihood(
             text="hello, my name is johnny SURPRISE")
 print('likelihood of text is {}'.format(likelihood['likelihood']))
 print('token likelihoods are: (first token has no likelihood)')
-for token in likelihood['token_likelihood']:
-      print(token['token'], token['likelihood'])
+for token in likelihood['token_likelihoods']:
+      print(token['token'], token.get('likelihood', ''))
 try:
 	predictions = co.generate(
             model="fake-model",
