@@ -16,11 +16,13 @@ class CohereClient:
     self.api_url = COHERE_API_URL
     self.model = None
 
-  def generate(self, model, prompt, max_tokens=20, temperature=1):
+  def generate(self, model, prompt, max_tokens=20, temperature=1, k=0, p=0.75):
     json_body = json.dumps({
         "prompt": prompt,
         "max_tokens": max_tokens,
         "temperature": temperature,
+        "k": k,
+        "p": p,
       })
     response = self.__request(json_body, GENERATE_URL, model)
     return response["text"]
