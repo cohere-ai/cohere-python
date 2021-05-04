@@ -117,3 +117,4 @@ class CohereLikelihood:
     def __init__(self, likelihood, token_likelihoods):
         self.likelihood = likelihood
         self.token_likelihoods = token_likelihoods
+
