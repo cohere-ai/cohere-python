@@ -25,7 +25,7 @@ class CohereClient:
         "p": p,
       })
     response = self.__request(json_body, GENERATE_URL, model)
-    return CohereGenerate(response["text"])
+    return Generate(response["text"])
 
   def similarity(self, model, anchor, targets):
     json_body = json.dumps({
@@ -33,14 +33,14 @@ class CohereClient:
         "targets": targets,
       })
     response = self.__request(json_body, SIMILARITY_URL, model)
-    return CohereSimilarity(response["similarities"])
+    return Similarity(response["similarities"])
 
   def embed(self, model, texts):
     json_body = json.dumps({
         "texts": texts,
       })
     response = self.__request(json_body, EMBED_URL, model)
-    return CohereEmbed(response["embeddings"])
+    return Embed(response["embeddings"])
 
   def choose_best(self, model, query, options, mode=""):
     json_body = json.dumps({
@@ -49,14 +49,14 @@ class CohereClient:
         "mode": mode,
       })
     response = self.__request(json_body, CHOOSE_BEST_URL, model)
-    return CohereChooseBest(response['likelihoods'])
+    return ChooseBest(response['likelihoods'])
 
   def likelihood(self, model, text):
     json_body = json.dumps({
         "text": text,
       })
     response = self.__request(json_body, LIKELIHOOD_URL, model)
-    return CohereLikelihood(response['likelihood'], response['token_likelihoods'])
+    return Likelihood(response['likelihood'], response['token_likelihoods'])
 
   def __request(self, json_body, endpoint, model):
     headers = {
@@ -97,35 +97,35 @@ class CohereError(Exception):
             self.http_status,
         )
 
-class CohereGenerate:
+class Generate:
     def __init__(self, text):
         self.text = text
     
     def __str__(self):
         return self.text
 
-class CohereSimilarity:
+class Similarity:
     def __init__(self, similarities):
         self.similarities = similarities
 
     def __str__(self):
         return str(self.similarities)
         
-class CohereEmbed:
+class Embed:
     def __init__(self, embeddings):
         self.embeddings = embeddings
 
     def __str__(self):
         return str(self.embeddings)
 
-class CohereChooseBest:
+class ChooseBest:
     def __init__(self, likelihoods):
         self.likelihoods = likelihoods
     
     def __str__(self):
         return str(self.likelihoods)
 
-class CohereLikelihood:
+class Likelihood:
     def __init__(self, likelihood, token_likelihoods):
         self.likelihood = likelihood
         self.token_likelihoods = token_likelihoods
