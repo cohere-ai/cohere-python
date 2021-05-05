@@ -100,21 +100,35 @@ class CohereError(Exception):
 class CohereGenerate:
     def __init__(self, text):
         self.text = text
+    
+    def __str__(self):
+        return self.text
 
 class CohereSimilarity:
     def __init__(self, similarities):
         self.similarities = similarities
+
+    def __str__(self):
+        return str(self.similarities)
         
 class CohereEmbed:
     def __init__(self, embeddings):
         self.embeddings = embeddings
 
+    def __str__(self):
+        return str(self.embeddings)
+
 class CohereChooseBest:
     def __init__(self, likelihoods):
         self.likelihoods = likelihoods
+    
+    def __str__(self):
+        return str(self.likelihoods)
 
 class CohereLikelihood:
     def __init__(self, likelihood, token_likelihoods):
         self.likelihood = likelihood
         self.token_likelihoods = token_likelihoods
 
+    def __str__(self):
+        return str(self.likelihood) + "\n" + str(self.token_likelihoods)
