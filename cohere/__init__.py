@@ -49,7 +49,7 @@ class CohereClient:
         "mode": mode,
       })
     response = self.__request(json_body, CHOOSE_BEST_URL, model)
-    return BestOptions(response['likelihoods'])
+    return BestChoices(response['likelihoods'], mode)
 
   def likelihood(self, model, text):
     json_body = json.dumps({
@@ -118,9 +118,10 @@ class Embeddings:
     def __str__(self):
         return str(self.embeddings)
 
-class BestOptions:
-    def __init__(self, likelihoods):
+class BestChoices:
+    def __init__(self, likelihoods, mode):
         self.likelihoods = likelihoods
+        self.mode = mode
     
     def __str__(self):
         return str(self.likelihoods)
