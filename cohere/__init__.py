@@ -14,7 +14,6 @@ class CohereClient:
   def __init__(self, api_key):
     self.api_key = api_key
     self.api_url = COHERE_API_URL
-    self.model = None
 
   def generate(self, model, prompt, max_tokens=20, temperature=1, k=0, p=0.75):
     json_body = json.dumps({
