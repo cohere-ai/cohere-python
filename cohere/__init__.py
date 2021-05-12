@@ -1,4 +1,5 @@
 import json
+from typing import List
 from urllib.parse import urljoin
 
 import requests
@@ -10,12 +11,56 @@ EMBED_URL = "embed"
 CHOOSE_BEST_URL = "choose-best"
 LIKELIHOOD_URL = "likelihood"
 
+class Generation:
+    def __init__(self, text):
+        self.text = text
+    
+    def __str__(self) -> str:
+        return self.text
+
+class Similarities:
+    def __init__(self, similarities):
+        self.similarities = similarities
+
+    def __str__(self) -> str:
+        return str(self.similarities)
+        
+class Embeddings:
+    def __init__(self, embeddings):
+        self.embeddings = embeddings
+
+    def __str__(self) -> str:
+        return str(self.embeddings)
+
+class BestChoices:
+    def __init__(self, likelihoods, mode):
+        self.likelihoods = likelihoods
+        self.mode = mode
+    
+    def __str__(self) -> str:
+        return str(self.likelihoods)
+
+class Likelihoods:
+    def __init__(self, likelihood, token_likelihoods):
+        self.likelihood = likelihood
+        self.token_likelihoods = token_likelihoods
+
+    def __str__(self) -> str:
+        return str(self.likelihood) + "\n" + str(self.token_likelihoods)
+
 class CohereClient:
-  def __init__(self, api_key):
+    def __init__(self, api_key: str):
     self.api_key = api_key
     self.api_url = COHERE_API_URL
 
-  def generate(self, model, prompt, max_tokens=20, temperature=1, k=0, p=0.75):
+    def generate(
+        self, 
+        model: str, 
+        prompt: str, 
+        max_tokens: int = 20, 
+        temperature: float = 1.0, 
+        k: int = 0, p: float = 0.75
+    ) -> Generation:
     json_body = json.dumps({
         "prompt": prompt,
         "max_tokens": max_tokens,
@@ -26,7 +71,7 @@ class CohereClient:
     response = self.__request(json_body, GENERATE_URL, model)
     return Generation(response["text"])
 
-  def similarity(self, model, anchor, targets):
+  def similarity(self, model: str, anchor: str, targets: List[str]) -> Similarities:
     json_body = json.dumps({
         "anchor": anchor,
         "targets": targets,
@@ -34,14 +79,14 @@ class CohereClient:
     response = self.__request(json_body, SIMILARITY_URL, model)
     return Similarities(response["similarities"])
 
-  def embed(self, model, texts):
+  def embed(self, model: str, texts: List[str]) -> Embeddings:
     json_body = json.dumps({
         "texts": texts,
       })
     response = self.__request(json_body, EMBED_URL, model)
     return Embeddings(response["embeddings"])
 
-  def choose_best(self, model, query, options, mode=""):
+  def choose_best(self, model: str, query: str, options: List[str], mode:  str = "") -> BestChoices:
     json_body = json.dumps({
         "query": query,
         "options": options,
@@ -50,14 +95,14 @@ class CohereClient:
     response = self.__request(json_body, CHOOSE_BEST_URL, model)
     return BestChoices(response['likelihoods'], mode)
 
-  def likelihood(self, model, text):
+    def likelihood(self, model: str, text: List[str]) -> Likelihoods:
     json_body = json.dumps({
         "text": text,
       })
     response = self.__request(json_body, LIKELIHOOD_URL, model)
     return Likelihoods(response['likelihood'], response['token_likelihoods'])
 
-  def __request(self, json_body, endpoint, model):
+    def __request(self, json_body, endpoint, model):
     headers = {
       'Authorization': 'BEARER {}'.format(self.api_key),
       'Content-Type': 'application/json'
@@ -96,39 +141,3 @@ class CohereError(Exception):
             self.http_status,
         )
 
-class Generation:
-    def __init__(self, text):
-        self.text = text
-    
-    def __str__(self):
-        return self.text
-
-class Similarities:
-    def __init__(self, similarities):
-        self.similarities = similarities
-
-    def __str__(self):
-        return str(self.similarities)
-        
-class Embeddings:
-    def __init__(self, embeddings):
-        self.embeddings = embeddings
-
-    def __str__(self):
-        return str(self.embeddings)
-
-class BestChoices:
-    def __init__(self, likelihoods, mode):
-        self.likelihoods = likelihoods
-        self.mode = mode
-    
-    def __str__(self):
-        return str(self.likelihoods)
-
-class Likelihoods:
-    def __init__(self, likelihood, token_likelihoods):
-        self.likelihood = likelihood
-        self.token_likelihoods = token_likelihoods
-
-    def __str__(self):
-        return str(self.likelihood) + "\n" + str(self.token_likelihoods)
