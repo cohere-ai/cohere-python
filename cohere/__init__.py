@@ -1,3 +1,5 @@
+from .client import CohereClient
+
 COHERE_API_URL = "https://api.cohere.ai"
 GENERATE_URL = "generate"
 SIMILARITY_URL = "similarity"
