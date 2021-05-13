@@ -3,6 +3,7 @@ from typing import List
 from urllib.parse import urljoin
 
 import requests
+from requests import Response
 
 COHERE_API_URL = "https://api.cohere.ai"
 GENERATE_URL = "generate"
@@ -12,28 +13,28 @@ CHOOSE_BEST_URL = "choose-best"
 LIKELIHOOD_URL = "likelihood"
 
 class Generation:
-    def __init__(self, text):
+    def __init__(self, text) -> None:
         self.text = text
     
     def __str__(self) -> str:
         return self.text
 
 class Similarities:
-    def __init__(self, similarities):
+    def __init__(self, similarities) -> None:
         self.similarities = similarities
 
     def __str__(self) -> str:
         return str(self.similarities)
         
 class Embeddings:
-    def __init__(self, embeddings):
+    def __init__(self, embeddings) -> None:
         self.embeddings = embeddings
 
     def __str__(self) -> str:
         return str(self.embeddings)
 
 class BestChoices:
-    def __init__(self, likelihoods, mode):
+    def __init__(self, likelihoods, mode) -> None:
         self.likelihoods = likelihoods
         self.mode = mode
     
@@ -41,7 +42,7 @@ class BestChoices:
         return str(self.likelihoods)
 
 class Likelihoods:
-    def __init__(self, likelihood, token_likelihoods):
+    def __init__(self, likelihood, token_likelihoods) -> None:
         self.likelihood = likelihood
         self.token_likelihoods = token_likelihoods
 
@@ -49,7 +50,7 @@ class Likelihoods:
         return str(self.likelihood) + "\n" + str(self.token_likelihoods)
 
 class CohereClient:
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str) -> None:
         self.api_key = api_key
         self.api_url = COHERE_API_URL
 
@@ -102,7 +103,7 @@ class CohereClient:
         response = self.__request(json_body, LIKELIHOOD_URL, model)
         return Likelihoods(response['likelihood'], response['token_likelihoods'])
 
-    def __request(self, json_body, endpoint, model):
+    def __request(self, json_body, endpoint, model) -> Response:
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
             'Content-Type': 'application/json'
@@ -123,18 +124,18 @@ class CohereError(Exception):
         message=None,
         http_status=None,
         headers=None,
-    ):
+    ) -> None:
         super(CohereError, self).__init__(message)
 
         self.message = message
         self.http_status = http_status
         self.headers = headers or {}
 
-    def __str__(self):
+    def __str__(self) -> str:
         msg = self.message or "<empty message>"
         return msg
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "%s(message=%r, http_status=%r, request_id=%r)" % (
             self.__class__.__name__,
             self.message,
