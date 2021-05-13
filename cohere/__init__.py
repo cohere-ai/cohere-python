@@ -5,4 +5,4 @@ GENERATE_URL = "generate"
 SIMILARITY_URL = "similarity"
 EMBED_URL = "embed"
 CHOOSE_BEST_URL = "choose-best"
-LIKELIHOOD_URL = "likelihood
+LIKELIHOOD_URL = "likelihood"
