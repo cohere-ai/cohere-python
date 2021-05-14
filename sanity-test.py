@@ -7,30 +7,31 @@ import cohere
 co = cohere.CohereClient(API_KEY)
 
 prediction = co.generate(
-            model="baseline-355m",
+            model="baseline-shrimp",
             prompt="co:here",
             max_tokens=10)
 print('prediction: {}'.format(prediction.text))
 
 embeddings = co.embed(
-            model="baseline-124m",
+            model="baseline-shrimp",
             texts=["co:here", "cohere"])
 
 similarities = co.similarity(
-            model="baseline-124m",
+            model="baseline-shrimp",
            	anchor="cohere ai",
             targets=["co:here", "cohere"])
 print('Similarity value of `co:here`: {}'.format(similarities.similarities[0]))
 
 options = co.choose_best(
-            model="baseline-355m",
+            model="baseline-shrimp",
             query="hello {}",
-            options=["world", "cohere"])
+            options=["world", "cohere"],
+            mode="APPEND_OPTION")
 print('first option is `world`, with likelihood value of {}'.format(options.likelihoods[0]))
-print('Selected mode was {}'.format(options['mode']))
+print('Selected mode was {}'.format(options.mode))
 
 likelihood = co.likelihood(
-            model="baseline-355m",
+            model="baseline-shrimp",
             text="hello, my name is johnny SURPRISE")
 print('likelihood of text is {}'.format(likelihood.likelihood))
 print('token likelihoods are: (first token has no likelihood)')
@@ -46,7 +47,7 @@ except cohere.CohereError as e:
 
 try:
 	predictions = co.generate(
-            model="baseline-124m",
+            model="baseline-shrimp",
             prompt="",
             max_tokens=10)
 except cohere.CohereError as e:
