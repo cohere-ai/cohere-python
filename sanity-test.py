@@ -1,49 +1,54 @@
 import os
-from dotenv import load_dotenv
-load_dotenv()
+
 API_KEY = os.getenv("CO_API_KEY")
 
 import cohere
 
 co = cohere.CohereClient(API_KEY)
-predictions = co.sample(
-            model="baseline-124m",
+
+prediction = co.generate(
+            model="baseline-shrimp",
             prompt="co:here",
-            num_tokens=10,
-            num_samples=3)
-print('First prediction: {}'.format(predictions[0]))
+            max_tokens=10)
+print('prediction: {}'.format(prediction.text))
 
 embeddings = co.embed(
-            model="baseline-embed",
+            model="baseline-shrimp",
             texts=["co:here", "cohere"])
 
 similarities = co.similarity(
-            model="baseline-similarity",
+            model="baseline-shrimp",
            	anchor="cohere ai",
             targets=["co:here", "cohere"])
-print('Similarity value of `co:here`: {}'.format(similarities[0]))
+print('Similarity value of `co:here`: {}'.format(similarities.similarities[0]))
 
-best_options = co.choose_best(
-            model="baseline-likelihood",
-           	query="hello `{`}",
-            options=["world", "cohere"])
-print('Best option to fill placeholder is `{}` which has the likelihood value of {}'.format(best_options[0]['option'], best_options[0]['likelihood']))
+options = co.choose_best(
+            model="baseline-shrimp",
+            query="hello {}",
+            options=["world", "cohere"],
+            mode="APPEND_OPTION")
+print('first option is `world`, with likelihood value of {}'.format(options.likelihoods[0]))
+print('Selected mode was {}'.format(options.mode))
 
-
+likelihood = co.likelihood(
+            model="baseline-shrimp",
+            text="hello, my name is johnny SURPRISE")
+print('likelihood of text is {}'.format(likelihood.likelihood))
+print('token likelihoods are: (first token has no likelihood)')
+for token in likelihood.token_likelihoods:
+      print(token['token'], token.get('likelihood', ''))
 try:
-	predictions = co.sample(
+	predictions = co.generate(
             model="fake-model",
             prompt="co:here",
-            num_tokens=10,
-            num_samples=3)
+            max_tokens=10)
 except cohere.CohereError as e:
 	print(e) # could not find model with name fake-model
 
 try:
-	predictions = co.sample(
-            model="baseline-124m",
+	predictions = co.generate(
+            model="baseline-shrimp",
             prompt="",
-            num_tokens=10,
-            num_samples=3)
+            max_tokens=10)
 except cohere.CohereError as e:
 	print(e) # prompt length must be greater than 0
