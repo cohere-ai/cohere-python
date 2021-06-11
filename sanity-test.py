@@ -15,6 +15,7 @@ print('prediction: {}'.format(prediction.text))
 embeddings = co.embed(
             model="baseline-shrimp",
             texts=["co:here", "cohere"])
+print('Embedding of `co:here`: {}'.format(embeddings.embeddings[0]))
 
 similarities = co.similarity(
             model="baseline-shrimp",
@@ -37,6 +38,7 @@ print('likelihood of text is {}'.format(likelihood.likelihood))
 print('token likelihoods are: (first token has no likelihood)')
 for token in likelihood.token_likelihoods:
       print(token['token'], token.get('likelihood', ''))
+
 try:
 	predictions = co.generate(
             model="fake-model",
