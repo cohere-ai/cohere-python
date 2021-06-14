@@ -26,7 +26,12 @@ class CohereClient:
         prompt: str, 
         max_tokens: int = 20, 
         temperature: float = 1.0, 
-        k: int = 0, p: float = 0.75
+        k: int = 0, 
+        p: float = 0.75,
+        frequency_penalty: float = 0.0,
+        presence_penalty: float = 0.0,
+        stop_sequences: List[str] = None,
+        return_likelihoods: str = "NONE"
     ) -> Generation:
         json_body = json.dumps({
             "prompt": prompt,
@@ -34,9 +39,18 @@ class CohereClient:
             "temperature": temperature,
             "k": k,
             "p": p,
+            "frequency_penalty": frequency_penalty,
+            "presence_penalty": presence_penalty,
+            "stop_sequences": stop_sequences,
+            "return_likelihoods": return_likelihoods
         })
         response = self.__request(json_body, cohere.GENERATE_URL, model)
-        return Generation(response["text"])
+
+        token_likelihoods = None
+        if "token_likelihoods" in response:
+            token_likelihoods = response["token_likelihoods"]
+
+        return Generation(response["text"], token_likelihoods, return_likelihoods)
 
     def similarity(self, model: str, anchor: str, targets: List[str]) -> Similarities:
         json_body = json.dumps({
