@@ -15,6 +15,7 @@ print('prediction: {}'.format(prediction.text))
 embeddings = co.embed(
             model="baseline-shrimp",
             texts=["co:here", "cohere"])
+print('Embedding of `co:here`: {}'.format(embeddings.embeddings[0]))
 
 for em in embeddings:
       print(em)
