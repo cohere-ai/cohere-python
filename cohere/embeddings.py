@@ -3,7 +3,7 @@ from typing import List
 class Embeddings:
     def __init__(self, embeddings: List[List[float]]) -> None:
         self.embeddings = embeddings
-        self.iterator = iter(self.embeddings) 
+        self.iterator = iter(embeddings) 
 
     def __str__(self) -> str:
         return str(self.embeddings)
