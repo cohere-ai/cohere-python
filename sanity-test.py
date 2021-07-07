@@ -16,11 +16,17 @@ embeddings = co.embed(
             model="baseline-shrimp",
             texts=["co:here", "cohere"])
 
+for em in embeddings:
+      print(em)
+
 similarities = co.similarity(
             model="baseline-shrimp",
            	anchor="cohere ai",
             targets=["co:here", "cohere"])
 print('Similarity value of `co:here`: {}'.format(similarities.similarities[0]))
+
+for sim in similarities:
+      print(sim)
 
 options = co.choose_best(
             model="baseline-shrimp",
@@ -29,6 +35,9 @@ options = co.choose_best(
             mode="APPEND_OPTION")
 print('first option is `world`, with likelihood value of {}'.format(options.likelihoods[0]))
 print('Selected mode was {}'.format(options.mode))
+
+for op in options:
+      print(op)
 
 likelihood = co.likelihood(
             model="baseline-shrimp",
