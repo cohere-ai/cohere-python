@@ -42,7 +42,7 @@ options = co.choose_best(
             query="hello {}",
             options=["world", "cohere"],
             mode="APPEND_OPTION")
-print('first option is `world`, with likelihood value of {}'.format(options.likelihoods[0]))
+print('first option is `world`, with likelihood value of {}'.format(options.scores[0]))
 print('Selected mode was {}'.format(options.mode))
 
 for op in options:
