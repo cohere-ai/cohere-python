@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="cohere",
-    version="0.0.9",
+    version="0.0.10",
     author="kipply",
     author_email="carol@cohere.ai",
     description="A Python library for the Cohere API",

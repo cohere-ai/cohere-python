@@ -1,8 +1,10 @@
 from typing import List
 
 class BestChoices:
-    def __init__(self, scores: List[float], mode: str) -> None:
+    def __init__(self, scores: List[float], tokens: List[List[str]], token_log_likelihoods: List[List[float]], mode: str) -> None:
         self.scores = scores
+        self.tokens = tokens
+        self.token_log_likelihoods = token_log_likelihoods
         self.mode = mode
         self.iterator = iter(scores)
     

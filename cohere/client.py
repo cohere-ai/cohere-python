@@ -74,7 +74,7 @@ class CohereClient:
             "mode": mode,
         })
         response = self.__request(json_body, cohere.CHOOSE_BEST_URL, model)
-        return BestChoices(response['scores'], mode)
+        return BestChoices(response['scores'], response['tokens'], response['token_log_likelihoods'], mode)
 
     def likelihood(self, model: str, text: List[str]) -> Likelihoods:
         json_body = json.dumps({
