@@ -6,7 +6,12 @@ class Embeddings:
         self.iterator = iter(embeddings) 
 
     def __str__(self) -> str:
-        return str(self.embeddings)
+        contents = ""
+        contents += f"\tembddings: {self.embeddings}\n"
+
+        output = f"cohere.Embeddings {{\n{contents}}}"
+
+        return output
     
     def __iter__(self) -> iter:
         return self.iterator

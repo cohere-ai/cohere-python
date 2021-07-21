@@ -6,7 +6,12 @@ class Similarities:
         self.iterator = iter(similarities)
 
     def __str__(self) -> str:
-        return str(self.similarities)
+        contents = ""
+        contents += f"\tsimilarities: {self.similarities}\n"
+
+        output = f"cohere.Similarities {{\n{contents}}}"
+
+        return output
 
     def __iter__(self) -> iter:
         return self.iterator

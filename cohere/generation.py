@@ -7,4 +7,11 @@ class Generation:
         self.return_likelihoods = return_likelihoods
     
     def __str__(self) -> str:
-        return self.text
+        contents = ""
+        contents += f"\ttext: {self.text}\n"
+        contents += f"\ttoken_likelihoods: {self.token_likelihoods}\n"
+        contents += f"\treturn_likelihoods: {self.return_likelihoods}\n"
+
+        output = f"cohere.Generation {{\n{contents}}}"
+
+        return output

@@ -9,7 +9,14 @@ class BestChoices:
         self.iterator = iter(scores)
     
     def __str__(self) -> str:
-        return str(self.scores)
+        contents = ""
+        contents += f"\tscores: {self.scores}\n"
+        contents += f"\ttokens: {self.tokens}\n"
+        contents += f"\ttoken_log_likelihoods: {self.token_log_likelihoods}\n"
+
+        output = f"cohere.BestChoices {{\n{contents}}}"
+
+        return output
 
     def __iter__(self) -> iter:
         return self.iterator
