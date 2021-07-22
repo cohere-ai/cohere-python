@@ -1,17 +1,10 @@
+from cohere.response import CohereResponse
 from typing import List
 
-class Embeddings:
+class Embeddings(CohereResponse):
     def __init__(self, embeddings: List[List[float]]) -> None:
         self.embeddings = embeddings
-        self.iterator = iter(embeddings) 
-
-    def __str__(self) -> str:
-        contents = ""
-        contents += f"\tembddings: {self.embeddings}\n"
-
-        output = f"cohere.Embeddings {{\n{contents}}}"
-
-        return output
+        self.iterator = iter(embeddings)
     
     def __iter__(self) -> iter:
         return self.iterator

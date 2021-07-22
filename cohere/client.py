@@ -97,3 +97,6 @@ class Client:
                 http_status=response.status_code,
                 headers=response.headers)
         return res
+
+class CohereClient(Client):
+    pass

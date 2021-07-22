@@ -1,4 +1,4 @@
-from .client import Client
+from .client import Client, CohereClient
 from .error import CohereError
 
 COHERE_API_URL = "https://api.cohere.ai"
