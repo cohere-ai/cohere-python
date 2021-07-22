@@ -4,7 +4,7 @@ API_KEY = os.getenv("CO_API_KEY")
 
 import cohere
 
-co = cohere.CohereClient(API_KEY)
+co = cohere.Client(API_KEY)
 
 
 ### GENERATE

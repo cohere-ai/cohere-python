@@ -15,7 +15,7 @@ from cohere.best_choices import BestChoices
 from cohere.likelihoods import Likelihoods
 
 
-class CohereClient:
+class Client:
     def __init__(self, api_key: str) -> None:
         self.api_key = api_key
         self.api_url = cohere.COHERE_API_URL
@@ -97,3 +97,7 @@ class CohereClient:
                 http_status=response.status_code,
                 headers=response.headers)
         return res
+
+# will be deprecated in the future
+class CohereClient(Client):
+    pass
