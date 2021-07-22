@@ -98,5 +98,6 @@ class Client:
                 headers=response.headers)
         return res
 
+# will be deprecated in the future
 class CohereClient(Client):
     pass
