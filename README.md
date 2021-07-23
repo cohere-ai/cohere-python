@@ -31,7 +31,7 @@ python setup.py install
 import cohere
 
 # initialize the Cohere Client with an API Key
-co = cohere.CohereClient('YOUR_API_KEY')
+co = cohere.Client('YOUR_API_KEY')
 
 # generate a prediction for a prompt 
 prediction = co.generate(
