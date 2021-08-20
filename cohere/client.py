@@ -86,8 +86,8 @@ class Client:
     def __request(self, json_body, endpoint, model) -> Response:
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
-            'Content-Type': 'application/json'
-            'Request-Source': 'python-sdk'
+            'Content-Type': 'application/json',
+            'Request-Source': 'python-sdk',
         }
         url = urljoin(self.api_url, model + "/" + endpoint)
         response = requests.request("POST", url, headers=headers, data=json_body)
