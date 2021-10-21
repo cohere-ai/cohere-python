@@ -6,8 +6,6 @@ This package provides functionality developed to simplify interfacing with the [
 
 See the [API's documentation](https://docs.cohere.ai/). 
 
-Also see some code examples for the SDK [here](https://github.com/cohere-ai/cohere-python/blob/main/sanity-test.py).
-
 ## Installation
 
 The package can be installed with `pip`:
