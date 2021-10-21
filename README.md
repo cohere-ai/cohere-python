@@ -10,7 +10,7 @@ Also see some code examples for the SDK [here](https://github.com/cohere-ai/cohe
 
 ## Installation
 
-The package can be installed with `pip`:
+If you want the package, you can install it through `pip`:
 
 ```bash
 pip install --upgrade cohere
@@ -25,9 +25,7 @@ python setup.py install
 ### Requirements
 - Python 3.6+
 
-## Usage
-
-To use this library, you must have an API key and specify it as a string when creating the `cohere.Client` object. API keys can be created through the [Cohere CLI](https://docs.cohere.ai/cli-key/) or [Playground](https://os.cohere.ai). This is a basic example of the creating the client and using the `generate` endpoint.
+## Quick Start
 
 ```python
 import cohere
@@ -45,8 +43,6 @@ prediction = co.generate(
 print('prediction: {}'.format(prediction.text))
 ```
 
-More usage examples can be found [here](https://github.com/cohere-ai/cohere-python/blob/main/sanity-test.py).
-
 ## Endpoints
 For a full breakdown of endpoints and arguments, please consult the [Cohere Docs](https://docs.cohere.ai/).
 
@@ -62,7 +58,7 @@ Cohere Endpoint | Function
 To view an up-to-date list of available models please consult the [Cohere CLI](https://docs.cohere.ai/command/). To get started try out `baseline-shrimp` or `baseline-seal`.
 
 ## Responses
-All of the endpoint functions will return a Cohere object corresponding to the endpoint (e.g. for generation, it would be `Generation`). The responses can be found as instance variables of the object (e.g. generation would be `Generation.text`). The names of these instance variables and a detailed breakdown of the response body can be found in the [Cohere Docs](https://docs.cohere.ai/). Printing the Cohere response object itself will display an organized view of the instance variables.
+All of the endpoint functions will return some Cohere object (e.g. for generation, it would be `Generation`). The responses can be found as instance variables of the object (e.g. for generation, it would be `Generation.text`). The names of these instance variables and a detailed breakdown of the response body can be found in the [Cohere Docs](https://docs.cohere.ai/).
 
 ## Exceptions
 
