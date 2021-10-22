@@ -1,6 +1,5 @@
 ![ci badge](https://github.com/cohere-ai/cohere-python/actions/workflows/test.yaml/badge.svg)
 ![version badge](https://img.shields.io/pypi/v/cohere)
-![version badge](https://img.shields.io/pypi/v/cohere)
 ![license badge](https://img.shields.io/github/license/cohere-ai/cohere-python)
 
 # Cohere Python SDK
