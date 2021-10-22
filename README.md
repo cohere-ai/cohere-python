@@ -1,10 +1,14 @@
+![ci badge](https://github.com/cohere-ai/cohere-python/actions/workflows/test.yaml/badge.svg)
+![version badge](https://img.shields.io/pypi/v/cohere)
+![license badge](https://img.shields.io/github/license/cohere-ai/cohere-python)
+
 # Cohere Python SDK
 
-This package provides functionality developed to simplify interfacing with the [cohere.ai](https://cohere.ai) natural language API in Python 3.
+This package provides functionality developed to simplify interfacing with the [Cohere API](https://docs.cohere.ai/) in Python 3.
 
 ## Documentation
 
-See the [API's documentation](https://docs.cohere.ai/). 
+See the [API's documentation](https://docs.cohere.ai/#api-reference). 
 
 ## Installation
 
@@ -25,7 +29,7 @@ python setup.py install
 
 ## Quick Start
 
-To use this library, you must have an API key and specify it as a string when creating the `cohere.Client` object. API keys can be created through the [Cohere CLI](https://docs.cohere.ai/cli-key/) or [Playground](https://os.cohere.ai). This is a basic example of the creating the client and using the `generate` endpoint.
+To use this library, you must have an API key and specify it as a string when creating the `cohere.Client` object. API keys can be created through the [platform](https://os.cohere.ai). This is a basic example of the creating the client and using the `generate` endpoint.
 
 ```python
 import cohere
@@ -55,7 +59,7 @@ Cohere Endpoint | Function
 /likelihood | co.likelihood()
 
 ## Models
-To view an up-to-date list of available models please consult the [Cohere CLI](https://docs.cohere.ai/command/). To get started try out `baseline-shrimp` or `baseline-seal`.
+To view an up-to-date list of available models please consult the models section in the [platform](https://os.cohere.ai). To get started try out `baseline-shrimp` or `baseline-seal`.
 
 ## Responses
 All of the endpoint functions will return a Cohere object corresponding to the endpoint (e.g. for generation, it would be `Generation`). The responses can be found as instance variables of the object (e.g. generation would be `Generation.text`). The names of these instance variables and a detailed breakdown of the response body can be found in the [Cohere Docs](https://docs.cohere.ai/). Printing the Cohere response object itself will display an organized view of the instance variables.
