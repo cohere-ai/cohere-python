@@ -6,8 +6,6 @@ This package provides functionality developed to simplify interfacing with the [
 
 See the [API's documentation](https://docs.cohere.ai/). 
 
-Also see some code examples for the SDK [here](https://github.com/cohere-ai/cohere-python/blob/main/sanity-test.py).
-
 ## Installation
 
 The package can be installed with `pip`:
@@ -25,7 +23,7 @@ python setup.py install
 ### Requirements
 - Python 3.6+
 
-## Usage
+## Quick Start
 
 To use this library, you must have an API key and specify it as a string when creating the `cohere.Client` object. API keys can be created through the [Cohere CLI](https://docs.cohere.ai/cli-key/) or [Playground](https://os.cohere.ai). This is a basic example of the creating the client and using the `generate` endpoint.
 
@@ -44,8 +42,6 @@ prediction = co.generate(
 # print the predicted text          
 print('prediction: {}'.format(prediction.text))
 ```
-
-More usage examples can be found [here](https://github.com/cohere-ai/cohere-python/blob/main/sanity-test.py).
 
 ## Endpoints
 For a full breakdown of endpoints and arguments, please consult the [Cohere Docs](https://docs.cohere.ai/).
