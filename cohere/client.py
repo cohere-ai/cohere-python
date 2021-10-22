@@ -14,7 +14,6 @@ from cohere.embeddings import Embeddings
 from cohere.best_choices import BestChoices
 from cohere.likelihoods import Likelihoods
 
-
 class Client:
     def __init__(self, api_key: str) -> None:
         self.api_key = api_key
