@@ -91,12 +91,18 @@ class Client:
         }
         url = urljoin(self.api_url, model + "/" + endpoint)
         response = requests.request("POST", url, headers=headers, data=json_body)
-        res = json.loads(response.text)
-        if "message" in res.keys(): # has errors
+        try:
+            res = json.loads(response.text)
+        except:
             raise CohereError(
-                message=res["message"],
+                message=response.text,
                 http_status=response.status_code,
                 headers=response.headers)
+        if "message" in res.keys(): # has errors
+                raise CohereError(
+                    message=res["message"],
+                    http_status=response.status_code,
+                    headers=response.headers)
         return res
 
 # will be deprecated in the future
