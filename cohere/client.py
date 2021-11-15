@@ -15,10 +15,10 @@ from cohere.best_choices import BestChoices
 from cohere.likelihoods import Likelihoods
 
 class Client:
-    def __init__(self, api_key: str, cohere_version: str = '') -> None:
+    def __init__(self, api_key: str, version: str = '') -> None:
         self.api_key = api_key
         self.api_url = cohere.COHERE_API_URL
-        self.cohere_version = cohere_version
+        self.cohere_version = version
 
     def generate(
         self, 
