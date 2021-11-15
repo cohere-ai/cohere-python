@@ -4,8 +4,10 @@
 * [#34](https://github.com/cohere-ai/cohere-python/pull/34)
 API Updates
 	* Change generations to use `Generation.texts` as a list rather than `Generation.text` as a string
+	* Change token likelihoods of generations to use `Generation.token_likelihoods` as a list of list of dictionaries rather than as a list of dictionaries.
 	* Add support for multiple generations
 	* Add capability to use a specific API version
+
 Fully remove `CohereClient`
 * [#32](https://github.com/cohere-ai/cohere-python/pull/32)
 Handle different errors better
