@@ -26,7 +26,7 @@ class TestGenerate(unittest.TestCase):
             model='large',
             prompt='co:here',
             max_tokens=1)
-        self.assertIsInstance(prediction.text, str)
+        self.assertIsInstance(prediction.texts, list)
         self.assertIsNone(prediction.token_likelihoods)
         self.assertEqual(prediction.return_likelihoods, 'NONE')
 

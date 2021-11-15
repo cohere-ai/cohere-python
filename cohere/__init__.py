@@ -2,6 +2,7 @@ from .client import Client
 from .error import CohereError
 
 COHERE_API_URL = 'https://api.cohere.ai'
+COHERE_VERSION = '2021-11-15'
 GENERATE_URL = 'generate'
 SIMILARITY_URL = 'similarity'
 EMBED_URL = 'embed'
