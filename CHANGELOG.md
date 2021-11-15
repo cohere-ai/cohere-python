@@ -2,15 +2,14 @@
 
 ## 1.0.0 - 2021-11-15
 * [#34](https://github.com/cohere-ai/cohere-python/pull/34)
-API Updates
+API Updates and SDK QoL Improvements
 	* Change generations to use `Generation.texts` as a list rather than `Generation.text` as a string
 	* Change token likelihoods of generations to use `Generation.token_likelihoods` as a list of list of dictionaries rather than as a list of dictionaries.
 	* Add support for multiple generations
 	* Add capability to use a specific API version
-
-Fully remove `CohereClient`
+	* Fully remove `CohereClient`
 * [#32](https://github.com/cohere-ai/cohere-python/pull/32)
-Handle different errors better
+Handle different errors more safely
 
 ## 0.0.13 - 2021-08-31
 * [#26](https://github.com/cohere-ai/cohere-python/pull/26) Add Request Source
