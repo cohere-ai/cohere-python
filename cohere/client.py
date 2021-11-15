@@ -15,13 +15,10 @@ from cohere.best_choices import BestChoices
 from cohere.likelihoods import Likelihoods
 
 class Client:
-    def __init__(self, api_key: str, cohere_version: str) -> None:
+    def __init__(self, api_key: str, cohere_version: str = '') -> None:
         self.api_key = api_key
         self.api_url = cohere.COHERE_API_URL
-        if cohere_version is None:
-            self.cohere_version = cohere.COHERE_VERSION
-        else:
-            self.cohere_version = cohere_version
+        self.cohere_version = cohere_version
 
     def generate(
         self, 
@@ -55,7 +52,18 @@ class Client:
         if 'token_likelihoods' in response:
             token_likelihoods = response['token_likelihoods']
 
-        return Generation(response['generations'], token_likelihoods, return_likelihoods)
+        texts = []
+        token_likelihoods = []
+
+        for generation in response['generations']:
+            texts.append(generation['text'])
+            if 'token_likelihoods' in generation:
+                token_likelihoods.append(generation['token_likelihoods'])
+
+        if not token_likelihoods:
+            token_likelihoods = None
+
+        return Generation(texts, token_likelihoods, return_likelihoods)
 
     def similarity(self, model: str, anchor: str, targets: List[str]) -> Similarities:
         json_body = json.dumps({
@@ -93,8 +101,10 @@ class Client:
             'Authorization': 'BEARER {}'.format(self.api_key),
             'Content-Type': 'application/json',
             'Request-Source': 'python-sdk',
-            'Cohere-Version': self.COHERE_VERSION,
         }
+        if self.cohere_version != '':
+            headers['Cohere-Version'] = self.cohere_version
+
         url = urljoin(self.api_url, model + '/' + endpoint)
         response = requests.request('POST', url, headers=headers, data=json_body)
         try:
