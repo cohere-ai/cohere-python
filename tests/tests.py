@@ -45,7 +45,7 @@ class TestGenerate(unittest.TestCase):
             prompt='hi',
             max_tokens=1, 
             return_likelihoods='ALL')
-        self.assertEqual(len(prediction.token_likelihoods), 2)
+        self.assertEqual(len(prediction.token_likelihoods[0]), 2)
         self.assertEqual(prediction.return_likelihoods, 'ALL')
         
     def test_invalid_temp(self):
@@ -81,8 +81,8 @@ class TestEmbed(unittest.TestCase):
         self.assertEqual(len(prediction.embeddings), 2)
         self.assertIsInstance(prediction.embeddings[0], list)
         self.assertIsInstance(prediction.embeddings[1], list)
-        self.assertEqual(len(prediction.embeddings[0]), 768)
-        self.assertEqual(len(prediction.embeddings[1]), 768)
+        self.assertEqual(len(prediction.embeddings[0]), 1024)
+        self.assertEqual(len(prediction.embeddings[1]), 1024)
 
     def test_invalid_texts(self):
         with self.assertRaises(cohere.CohereError):
