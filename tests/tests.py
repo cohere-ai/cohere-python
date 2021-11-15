@@ -59,7 +59,7 @@ class TestGenerate(unittest.TestCase):
 class TestSimilarity(unittest.TestCase):
     def test_success(self):
         prediction = co.similarity(
-            model='medium',
+            model='small',
            	anchor='cohere ai',
             targets=['co:here', 'cohere'])
         self.assertEqual(len(prediction.similarities), 2)
@@ -69,14 +69,14 @@ class TestSimilarity(unittest.TestCase):
     def test_invalid_targets(self):
         with self.assertRaises(cohere.CohereError):
             co.similarity(
-                model='medium',
+                model='small',
                 anchor='cohere ai',
                 targets=[''])
 
 class TestEmbed(unittest.TestCase):
     def test_success(self):
         prediction = co.embed(
-            model='medium',
+            model='small',
             texts=['co:here', 'cohere'])
         self.assertEqual(len(prediction.embeddings), 2)
         self.assertIsInstance(prediction.embeddings[0], list)
@@ -87,7 +87,7 @@ class TestEmbed(unittest.TestCase):
     def test_invalid_texts(self):
         with self.assertRaises(cohere.CohereError):
             co.embed(
-                model='medium',
+                model='small',
                 texts=[''])
 
 class TestLikelihood(unittest.TestCase):
