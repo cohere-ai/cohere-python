@@ -53,7 +53,7 @@ To use the SDK with a specific API version, you can specify it when creating the
 ```python
 import cohere
 
-co = cohere.Client('YOUR_API_KEY', '2021-11-15')
+co = cohere.Client('YOUR_API_KEY', '2021-11-08')
 ```
 
 ## Endpoints
