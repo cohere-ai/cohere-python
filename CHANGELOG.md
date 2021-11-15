@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.0 - 2021-11-15
+* [#34](https://github.com/cohere-ai/cohere-python/pull/34)
+Change generations to use `Generation.texts` as a list rather than `Generation.text` as a string
+API Updates
+	* Add support for multiple generations
+	* Add capability to use a specific API version
+Fully remove `CohereClient`
+* [#32](https://github.com/cohere-ai/cohere-python/pull/32)
+Handle different errors better
+
 ## 0.0.13 - 2021-08-31
 * [#26](https://github.com/cohere-ai/cohere-python/pull/26) Add Request Source
 
