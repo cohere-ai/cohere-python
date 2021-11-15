@@ -39,8 +39,8 @@ co = cohere.Client('YOUR_API_KEY')
 
 # generate a prediction for a prompt 
 prediction = co.generate(
-            model="baseline-shrimp",
-            prompt="co:here",
+            model='baseline-shrimp',
+            prompt='co:here',
             max_tokens=10)
             
 # print the predicted text          
