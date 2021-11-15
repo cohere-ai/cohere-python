@@ -16,14 +16,14 @@ class TestModel(unittest.TestCase):
     def test_invalid_key(self):
         with self.assertRaises(cohere.CohereError):
             cohere.Client('invalid').generate(
-                model='baseline-shrimp',
+                model='large',
                 prompt='co:here',
                 max_tokens=1)
 
 class TestGenerate(unittest.TestCase):
     def test_success(self):
         prediction = co.generate(
-            model='baseline-shrimp',
+            model='large',
             prompt='co:here',
             max_tokens=1)
         self.assertIsInstance(prediction.text, str)
@@ -32,7 +32,7 @@ class TestGenerate(unittest.TestCase):
 
     def test_return_likelihoods_generation(self):
         prediction = co.generate(
-            model='baseline-shrimp',
+            model='large',
             prompt='co:here',
             max_tokens=1, 
             return_likelihoods='GENERATION')
@@ -41,7 +41,7 @@ class TestGenerate(unittest.TestCase):
 
     def test_return_likelihoods_all(self):
         prediction = co.generate(
-            model='baseline-shrimp',
+            model='large',
             prompt='hi',
             max_tokens=1, 
             return_likelihoods='ALL')
@@ -51,7 +51,7 @@ class TestGenerate(unittest.TestCase):
     def test_invalid_temp(self):
         with self.assertRaises(cohere.CohereError):
             co.generate(
-                model='baseline-shrimp',
+                model='large',
                 prompt='hi',
                 max_tokens=1, 
                 temperature=-1)
@@ -59,7 +59,7 @@ class TestGenerate(unittest.TestCase):
 class TestSimilarity(unittest.TestCase):
     def test_success(self):
         prediction = co.similarity(
-            model='baseline-shrimp',
+            model='medium',
            	anchor='cohere ai',
             targets=['co:here', 'cohere'])
         self.assertEqual(len(prediction.similarities), 2)
@@ -69,14 +69,14 @@ class TestSimilarity(unittest.TestCase):
     def test_invalid_targets(self):
         with self.assertRaises(cohere.CohereError):
             co.similarity(
-                model='baseline-shrimp',
+                model='medium',
                 anchor='cohere ai',
                 targets=[''])
 
 class TestEmbed(unittest.TestCase):
     def test_success(self):
         prediction = co.embed(
-            model='baseline-shrimp',
+            model='medium',
             texts=['co:here', 'cohere'])
         self.assertEqual(len(prediction.embeddings), 2)
         self.assertIsInstance(prediction.embeddings[0], list)
@@ -87,13 +87,13 @@ class TestEmbed(unittest.TestCase):
     def test_invalid_texts(self):
         with self.assertRaises(cohere.CohereError):
             co.embed(
-                model='baseline-shrimp',
+                model='medium',
                 texts=[''])
 
 class TestLikelihood(unittest.TestCase):
     def test_success(self):
         prediction = co.likelihood(
-            model='baseline-shrimp',
+            model='large',
             text='hi')
         self.assertIsInstance(prediction.likelihood, int)
         self.assertEqual(len(prediction.token_likelihoods), 1)
@@ -103,14 +103,14 @@ class TestLikelihood(unittest.TestCase):
     def test_invalid_text(self):
         with self.assertRaises(cohere.CohereError):
             co.likelihood(
-                model='baseline-shrimp',
+                model='large',
                 text='')
 
 
 class TestChooseBest(unittest.TestCase):
     def test_success(self):
         prediction = co.choose_best(
-            model='baseline-shark',
+            model='large',
             query='Carol picked up a book and walked to the kitchen. She set it down, picked up her glasses and left. This is in the kitchen now: ',
             options=['book', 'glasses', 'dog'],
             mode='APPEND_OPTION')
@@ -125,7 +125,7 @@ class TestChooseBest(unittest.TestCase):
     def test_invalid_text(self):
         with self.assertRaises(cohere.CohereError):
             co.likelihood(
-                model='baseline-shrimp',
+                model='large',
                 text='')
 
 if __name__ == '__main__':
