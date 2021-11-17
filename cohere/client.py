@@ -8,11 +8,11 @@ from requests import Response
 import cohere
 from cohere.error import CohereError
 
-from cohere.generation import Generation
+from cohere.generation import Generations, Generation
 from cohere.similarities import Similarities
 from cohere.embeddings import Embeddings
 from cohere.best_choices import BestChoices
-from cohere.likelihoods import Likelihoods
+from cohere.likelihoods import Likelihoods, TokenLikelihood
 
 class Client:
     def __init__(self, api_key: str, version: str = None) -> None:
@@ -51,22 +51,16 @@ class Client:
         })
         response = self.__request(json_body, cohere.GENERATE_URL, model)
 
-        token_likelihoods = None
-        if 'token_likelihoods' in response:
-            token_likelihoods = response['token_likelihoods']
-
-        texts = []
-        token_likelihoods = []
-
-        for generation in response['generations']:
-            texts.append(generation['text'])
-            if 'token_likelihoods' in generation:
-                token_likelihoods.append(generation['token_likelihoods'])
-
-        if not token_likelihoods:
+        generations = []
+        for gen in response['generations']: 
             token_likelihoods = None
-
-        return Generation(texts, token_likelihoods, return_likelihoods)
+            if 'token_likelihoods' in gen.keys(): 
+                token_likelihoods = []
+                for l in gen['token_likelihoods']: 
+                    likelihood = l['likelihood'] if 'likelihood' in l.keys() else None
+                    token_likelihoods.append(TokenLikelihood(l['token'], likelihood))
+            generations.append(Generation(gen['text'], token_likelihoods))
+        return Generations(generations, return_likelihoods)
 
     def similarity(self, model: str, anchor: str, targets: List[str]) -> Similarities:
         json_body = json.dumps({

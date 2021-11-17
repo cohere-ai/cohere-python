@@ -1,7 +1,7 @@
-from cohere.response import CohereResponse
+from cohere.response import CohereObject
 from typing import List
 
-class Similarities(CohereResponse):
+class Similarities(CohereObject):
     def __init__(self, similarities: List[float]) -> None:
         self.similarities = similarities
         self.iterator = iter(similarities)

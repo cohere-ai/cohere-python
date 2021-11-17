@@ -13,6 +13,19 @@ class TestModel(unittest.TestCase):
                 prompt='co:here',
                 max_tokens=1)
 
+    def test_no_version_works(self):
+        cohere.Client(API_KEY).generate(
+            model='small',
+            prompt='co:here',
+            max_tokens=1)
+
+    def test_invalid_version_fails(self):
+        with self.assertRaises(cohere.CohereError):
+            cohere.Client(API_KEY, 'fake').generate(
+                model='small',
+                prompt='co:here',
+                max_tokens=1)
+
     def test_invalid_key(self):
         with self.assertRaises(cohere.CohereError):
             cohere.Client('invalid').generate(
@@ -23,31 +36,32 @@ class TestModel(unittest.TestCase):
 class TestGenerate(unittest.TestCase):
     def test_success(self):
         prediction = co.generate(
-            model='large',
+            model='small',
             prompt='co:here',
             max_tokens=1)
-        self.assertIsInstance(prediction.texts, list)
-        self.assertIsNone(prediction.token_likelihoods)
+        self.assertIsInstance(prediction.generations[0].text, str)
+        self.assertIsNone(prediction.generations[0].token_likelihoods)
         self.assertEqual(prediction.return_likelihoods, 'NONE')
 
     def test_return_likelihoods_generation(self):
         prediction = co.generate(
-            model='large',
+            model='small',
             prompt='co:here',
             max_tokens=1, 
             return_likelihoods='GENERATION')
-        self.assertEqual(len(prediction.token_likelihoods), 1)
+        self.assertTrue(prediction.generations[0].token_likelihoods)
+        self.assertTrue(prediction.generations[0].token_likelihoods[0].token)
         self.assertEqual(prediction.return_likelihoods, 'GENERATION')
 
     def test_return_likelihoods_all(self):
         prediction = co.generate(
-            model='large',
+            model='small',
             prompt='hi',
             max_tokens=1, 
             return_likelihoods='ALL')
-        self.assertEqual(len(prediction.token_likelihoods[0]), 2)
+        self.assertEqual(len(prediction.generations[0].token_likelihoods), 2)
         self.assertEqual(prediction.return_likelihoods, 'ALL')
-        
+
     def test_invalid_temp(self):
         with self.assertRaises(cohere.CohereError):
             co.generate(
