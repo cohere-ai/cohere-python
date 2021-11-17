@@ -1,4 +1,4 @@
-class CohereResponse:
+class CohereObject():
     def __str__(self) -> str:
         contents = ''
         exclude_list = ['iterator']

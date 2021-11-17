@@ -44,7 +44,7 @@ prediction = co.generate(
             max_tokens=10)
             
 # print the predicted text          
-print('prediction: {}'.format(prediction.texts[0]))
+print('prediction: {}'.format(prediction.generations[0].text))
 ```
 
 ## Versioning

@@ -1,7 +1,7 @@
-from cohere.response import CohereResponse
+from cohere.response import CohereObject
 from typing import List
 
-class Embeddings(CohereResponse):
+class Embeddings(CohereObject):
     def __init__(self, embeddings: List[List[float]]) -> None:
         self.embeddings = embeddings
         self.iterator = iter(embeddings)
