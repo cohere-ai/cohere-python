@@ -45,7 +45,7 @@ class CohereClient:
         response = self.__request(json_body, cohere.SIMILARITY_URL, model)
         return Similarities(response["similarities"])
 
-    def embed(self, model: str, texts: List[str], truncate: str) -> Embeddings:
+    def embed(self, model: str, texts: List[str], truncate: str = 'none') -> Embeddings:
         json_body = json.dumps({
             "texts": texts,
             "truncate": truncate,
