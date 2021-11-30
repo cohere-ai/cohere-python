@@ -1,7 +1,7 @@
 # Changelog
 
 ## 1.0.2 - 2021 11-30
-* [#36](https://github.com/cohere-ai/cohere-python/pull/36)
+* [#38](https://github.com/cohere-ai/cohere-python/pull/38)
 	* Handle `truncate` parameter for Embed
 
 ## 1.0.1 - 2021-11-17
