@@ -1,6 +1,14 @@
-class Generation:
-    def __init__(self, text: str) -> None:
+from cohere.likelihoods import TokenLikelihood
+from cohere.response import CohereObject
+from typing import List
+
+
+class Generation(CohereObject):
+    def __init__(self, text: str, token_likelihoods: TokenLikelihood) -> None:
         self.text = text
-    
-    def __str__(self) -> str:
-        return self.text
+        self.token_likelihoods = token_likelihoods
+
+class Generations(CohereObject):
+    def __init__(self, generations: List[Generation], return_likelihoods: str) -> None:
+        self.generations = generations
+        self.return_likelihoods = return_likelihoods
