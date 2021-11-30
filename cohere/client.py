@@ -1,18 +1,17 @@
 import json
+from typing import List
 from urllib.parse import urljoin
 
-from typing import List
 import requests
 from requests import Response
 
 import cohere
-from cohere.error import CohereError
-
-from cohere.generation import Generations, Generation
-from cohere.similarities import Similarities
-from cohere.embeddings import Embeddings
 from cohere.best_choices import BestChoices
+from cohere.embeddings import Embeddings
+from cohere.error import CohereError
+from cohere.generation import Generations, Generation
 from cohere.likelihoods import Likelihoods, TokenLikelihood
+from cohere.similarities import Similarities
 
 class Client:
     def __init__(self, api_key: str, version: str = None) -> None:
@@ -70,9 +69,10 @@ class Client:
         response = self.__request(json_body, cohere.SIMILARITY_URL, model)
         return Similarities(response['similarities'])
 
-    def embed(self, model: str, texts: List[str]) -> Embeddings:
+    def embed(self, model: str, texts: List[str], truncate: str = 'NONE') -> Embeddings:
         json_body = json.dumps({
             'texts': texts,
+            'truncate': truncate,
         })
         response = self.__request(json_body, cohere.EMBED_URL, model)
         return Embeddings(response['embeddings'])

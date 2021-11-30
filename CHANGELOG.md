@@ -1,10 +1,15 @@
 # Changelog
 
-## 1.0.0 - 2021-11-15
+## 1.0.2 - 2021 11-30
+* [#38](https://github.com/cohere-ai/cohere-python/pull/38)
+	* Handle `truncate` parameter for Embed
+
+## 1.0.1 - 2021-11-17
+* [#36](https://github.com/cohere-ai/cohere-python/pull/36)
+Change generations to return `Generations`, which has as a list of `Generation` 
+	* Each `Generation` has a `text` and `token_likelihoods` field to store generations and token likelihoods respectively
 * [#34](https://github.com/cohere-ai/cohere-python/pull/34)
 API Updates and SDK QoL Improvements
-	* Change generations to use `Generation.texts` as a list rather than `Generation.text` as a string
-	* Change token likelihoods of generations to use `Generation.token_likelihoods` as a list of list of dictionaries rather than as a list of dictionaries.
 	* Add support for multiple generations
 	* Add capability to use a specific API version
 	* Fully remove `CohereClient`
