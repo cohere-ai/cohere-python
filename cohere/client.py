@@ -9,18 +9,9 @@ import cohere
 from cohere.best_choices import BestChoices
 from cohere.embeddings import Embeddings
 from cohere.error import CohereError
-<<<<<<< HEAD
-from cohere.generation import Generation
-from cohere.likelihoods import Likelihoods
-from cohere.similarities import Similarities
-=======
-
 from cohere.generation import Generations, Generation
-from cohere.similarities import Similarities
-from cohere.embeddings import Embeddings
-from cohere.best_choices import BestChoices
 from cohere.likelihoods import Likelihoods, TokenLikelihood
->>>>>>> main
+from cohere.similarities import Similarities
 
 class Client:
     def __init__(self, api_key: str, version: str = None) -> None:
