@@ -6,8 +6,8 @@
 
 ## 1.0.1 - 2021-11-17
 * [#36](https://github.com/cohere-ai/cohere-python/pull/36)
-	* Change generations to return `Generations`, which has as a list of `Generation` 
-		* Each `Generation` has a `text` and `token_likelihoods` field to store generations and token likelihoods respectively
+Change generations to return `Generations`, which has as a list of `Generation` 
+	* Each `Generation` has a `text` and `token_likelihoods` field to store generations and token likelihoods respectively
 * [#34](https://github.com/cohere-ai/cohere-python/pull/34)
 API Updates and SDK QoL Improvements
 	* Add support for multiple generations
