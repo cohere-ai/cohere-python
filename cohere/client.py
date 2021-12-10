@@ -1,16 +1,15 @@
 import json
+from typing import List
 from urllib.parse import urljoin
 
-from typing import List
 import requests
 from requests import Response
 
 import cohere
-from cohere.error import CohereError
-
-from cohere.generation import Generations, Generation
-from cohere.embeddings import Embeddings
 from cohere.best_choices import BestChoices
+from cohere.embeddings import Embeddings
+from cohere.error import CohereError
+from cohere.generation import Generations, Generation
 from cohere.likelihoods import Likelihoods, TokenLikelihood
 
 class Client:
@@ -61,9 +60,22 @@ class Client:
             generations.append(Generation(gen['text'], token_likelihoods))
         return Generations(generations, return_likelihoods)
 
+<<<<<<< HEAD
     def embed(self, model: str, texts: List[str]) -> Embeddings:
+=======
+    def similarity(self, model: str, anchor: str, targets: List[str]) -> Similarities:
+        json_body = json.dumps({
+            'anchor': anchor,
+            'targets': targets,
+        })
+        response = self.__request(json_body, cohere.SIMILARITY_URL, model)
+        return Similarities(response['similarities'])
+
+    def embed(self, model: str, texts: List[str], truncate: str = 'NONE') -> Embeddings:
+>>>>>>> main
         json_body = json.dumps({
             'texts': texts,
+            'truncate': truncate,
         })
         response = self.__request(json_body, cohere.EMBED_URL, model)
         return Embeddings(response['embeddings'])
