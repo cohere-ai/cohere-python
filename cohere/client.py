@@ -9,7 +9,6 @@ import cohere
 from cohere.error import CohereError
 
 from cohere.generation import Generations, Generation
-from cohere.similarities import Similarities
 from cohere.embeddings import Embeddings
 from cohere.best_choices import BestChoices
 from cohere.likelihoods import Likelihoods, TokenLikelihood
@@ -61,14 +60,6 @@ class Client:
                     token_likelihoods.append(TokenLikelihood(l['token'], likelihood))
             generations.append(Generation(gen['text'], token_likelihoods))
         return Generations(generations, return_likelihoods)
-
-    def similarity(self, model: str, anchor: str, targets: List[str]) -> Similarities:
-        json_body = json.dumps({
-            'anchor': anchor,
-            'targets': targets,
-        })
-        response = self.__request(json_body, cohere.SIMILARITY_URL, model)
-        return Similarities(response['similarities'])
 
     def embed(self, model: str, texts: List[str]) -> Embeddings:
         json_body = json.dumps({
