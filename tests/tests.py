@@ -70,23 +70,6 @@ class TestGenerate(unittest.TestCase):
                 max_tokens=1, 
                 temperature=-1)
 
-class TestSimilarity(unittest.TestCase):
-    def test_success(self):
-        prediction = co.similarity(
-            model='small',
-           	anchor='cohere ai',
-            targets=['co:here', 'cohere'])
-        self.assertEqual(len(prediction.similarities), 2)
-        self.assertIsInstance(prediction.similarities[0], float)
-        self.assertIsInstance(prediction.similarities[1], float)
-
-    def test_invalid_targets(self):
-        with self.assertRaises(cohere.CohereError):
-            co.similarity(
-                model='small',
-                anchor='cohere ai',
-                targets=[''])
-
 class TestEmbed(unittest.TestCase):
     def test_success(self):
         prediction = co.embed(
