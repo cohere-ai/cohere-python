@@ -131,7 +131,7 @@ class Client:
 
     def tokenize(self, model: str, text: str) -> Tokens:
         json_body = json.dumps({
-            'texts': text,
+            'text': text,
         })
         response = self.__request(json_body, cohere.TOKENIZE_URL, model)
         return Tokens(response['tokens'])
