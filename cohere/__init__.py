@@ -8,3 +8,6 @@ SIMILARITY_URL = 'similarity'
 EMBED_URL = 'embed'
 CHOOSE_BEST_URL = 'choose-best'
 LIKELIHOOD_URL = 'likelihood'
+
+CHECK_API_KEY_URL = 'check-api-key'
+TOKENIZE_URL = 'tokenize'
