@@ -25,7 +25,7 @@ class Client:
 
         try:
             res = self.check_api_key()
-            if res['status'] == 'false':
+            if res['valid'] == 'false':
                 raise CohereError("invalid api key")
         except CohereError as e:
             raise CohereError(
