@@ -28,7 +28,7 @@ class TestModel(unittest.TestCase):
 
     def test_invalid_key(self):
         with self.assertRaises(cohere.CohereError):
-            cohere.Client('invalid')
+            _ = cohere.Client('invalid')
 
 class TestGenerate(unittest.TestCase):
     def test_success(self):
@@ -127,7 +127,7 @@ class TestTokenize(unittest.TestCase):
         tokens = co.tokenize('large', 'tokenize me!')
         self.assertIsInstance(tokens.tokens, list)
         self.assertIsInstance(tokens.length, int)
-        self.assertListEqual(tokens.length, len(tokens))
+        self.assertEqual(tokens.length, len(tokens))
 
     def test_invalid_text(self):
         with self.assertRaises(cohere.CohereError):
