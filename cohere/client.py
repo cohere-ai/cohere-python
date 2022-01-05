@@ -1,5 +1,5 @@
 import json
-from typing import List
+from typing import List, Any
 from urllib.parse import urljoin
 
 import requests
@@ -9,8 +9,8 @@ import cohere
 from cohere.best_choices import BestChoices
 from cohere.embeddings import Embeddings
 from cohere.error import CohereError
-from cohere.generation import Generations, Generation
-from cohere.likelihoods import Likelihoods, TokenLikelihood
+from cohere.generation import Generations, Generation, TokenLikelihood
+from cohere.likelihoods import Likelihoods
 
 class Client:
     def __init__(self, api_key: str, version: str = None) -> None:
@@ -82,9 +82,18 @@ class Client:
             'text': text,
         })
         response = self.__request(json_body, cohere.LIKELIHOOD_URL, model)
-        return Likelihoods(response['likelihood'], response['token_likelihoods'])
 
-    def __request(self, json_body, endpoint, model) -> Response:
+        tokens = []
+        token_likelihoods = []
+        for token in response['tokens']:
+            tokens.append(token)
+
+        for token_likelihood in response['token_likelihoods']:
+            token_likelihoods.append(token_likelihood)
+
+        return Likelihoods(response['likelihood'], tokens, token_likelihoods)
+
+    def __request(self, json_body, endpoint, model) -> Any:
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
             'Content-Type': 'application/json',
