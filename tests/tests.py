@@ -51,6 +51,7 @@ class TestGenerate(unittest.TestCase):
             return_likelihoods='GENERATION')
         self.assertTrue(prediction.generations[0].token_likelihoods)
         self.assertTrue(prediction.generations[0].token_likelihoods[0].token)
+        self.assertIsNotNone(prediction.generations[0].likelihood)
         self.assertEqual(prediction.return_likelihoods, 'GENERATION')
 
     def test_return_likelihoods_all(self):
@@ -60,6 +61,7 @@ class TestGenerate(unittest.TestCase):
             max_tokens=1, 
             return_likelihoods='ALL')
         self.assertEqual(len(prediction.generations[0].token_likelihoods), 2)
+        self.assertIsNotNone(prediction.generations[0].likelihood)
         self.assertEqual(prediction.return_likelihoods, 'ALL')
 
     def test_invalid_temp(self):
@@ -86,23 +88,6 @@ class TestEmbed(unittest.TestCase):
             co.embed(
                 model='small',
                 texts=[''])
-
-class TestLikelihood(unittest.TestCase):
-    def test_success(self):
-        prediction = co.likelihood(
-            model='large',
-            text='hi')
-        self.assertIsInstance(prediction.likelihood, int)
-        self.assertEqual(len(prediction.token_likelihoods), 1)
-        self.assertIsInstance(prediction.token_likelihoods[0], dict)
-        self.assertIsInstance(prediction.token_likelihoods[0]['token'], str)
-
-    def test_invalid_text(self):
-        with self.assertRaises(cohere.CohereError):
-            co.likelihood(
-                model='large',
-                text='')
-
 
 class TestChooseBest(unittest.TestCase):
     def test_success(self):
