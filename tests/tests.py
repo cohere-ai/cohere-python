@@ -108,7 +108,7 @@ class TestChooseBest(unittest.TestCase):
         with self.assertRaises(cohere.CohereError):
             co.choose_best(
                 model='large',
-                text='',
+                query='the best book in the world is',
                 options=[],
                 mode='APPEND_OPTION')
 
