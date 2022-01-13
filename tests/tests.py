@@ -104,11 +104,13 @@ class TestChooseBest(unittest.TestCase):
         self.assertEqual(len(prediction.token_log_likelihoods), 3)
         self.assertIsInstance(prediction.token_log_likelihoods[0][0], float)
 
-    def test_invalid_text(self):
+    def test_empty_options(self):
         with self.assertRaises(cohere.CohereError):
-            co.likelihood(
+            co.choose_best(
                 model='large',
-                text='')
+                text='',
+                options=[],
+                mode='APPEND_OPTION')
 
 if __name__ == '__main__':
     unittest.main()
