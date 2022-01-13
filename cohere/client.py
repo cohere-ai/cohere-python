@@ -10,7 +10,6 @@ from cohere.best_choices import BestChoices
 from cohere.embeddings import Embeddings
 from cohere.error import CohereError
 from cohere.generation import Generations, Generation, TokenLikelihood
-from cohere.likelihoods import Likelihoods
 
 class Client:
     def __init__(self, api_key: str, version: str = None) -> None:
@@ -50,14 +49,18 @@ class Client:
         response = self.__request(json_body, cohere.GENERATE_URL, model)
 
         generations = []
-        for gen in response['generations']: 
+        for gen in response['generations']:
+            likelihood = None
             token_likelihoods = None
+            print(response)
+            if return_likelihoods == 'GENERATION' or return_likelihoods == 'ALL':
+                likelihood = gen['likelihood']
             if 'token_likelihoods' in gen.keys(): 
                 token_likelihoods = []
                 for l in gen['token_likelihoods']: 
                     likelihood = l['likelihood'] if 'likelihood' in l.keys() else None
                     token_likelihoods.append(TokenLikelihood(l['token'], likelihood))
-            generations.append(Generation(gen['text'], token_likelihoods))
+            generations.append(Generation(gen['text'], likelihood, token_likelihoods))
         return Generations(generations, return_likelihoods)
 
     def embed(self, model: str, texts: List[str], truncate: str = 'NONE') -> Embeddings:
@@ -76,22 +79,6 @@ class Client:
         })
         response = self.__request(json_body, cohere.CHOOSE_BEST_URL, model)
         return BestChoices(response['scores'], response['tokens'], response['token_log_likelihoods'], mode)
-
-    def likelihood(self, model: str, text: str) -> Likelihoods:
-        json_body = json.dumps({
-            'text': text,
-        })
-        response = self.__request(json_body, cohere.LIKELIHOOD_URL, model)
-
-        tokens = []
-        token_likelihoods = []
-        for token in response['tokens']:
-            tokens.append(token)
-
-        for token_likelihood in response['token_likelihoods']:
-            token_likelihoods.append(token_likelihood)
-
-        return Likelihoods(response['likelihood'], tokens, token_likelihoods)
 
     def __request(self, json_body, endpoint, model) -> Any:
         headers = {

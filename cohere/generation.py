@@ -1,4 +1,3 @@
-from cohere.likelihoods import TokenLikelihood
 from cohere.response import CohereObject
 from typing import List
 
@@ -8,8 +7,9 @@ class TokenLikelihood(CohereObject):
         self.likelihood = likelihood
 
 class Generation(CohereObject):
-    def __init__(self, text: str, token_likelihoods: TokenLikelihood) -> None:
+    def __init__(self, text: str, likelihood: float, token_likelihoods: TokenLikelihood) -> None:
         self.text = text
+        self.likelihood = likelihood
         self.token_likelihoods = token_likelihoods
 
 class Generations(CohereObject):
