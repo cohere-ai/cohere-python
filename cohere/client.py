@@ -52,7 +52,6 @@ class Client:
         for gen in response['generations']:
             likelihood = None
             token_likelihoods = None
-            print(response)
             if return_likelihoods == 'GENERATION' or return_likelihoods == 'ALL':
                 likelihood = gen['likelihood']
             if 'token_likelihoods' in gen.keys(): 
