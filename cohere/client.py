@@ -10,6 +10,7 @@ from cohere.best_choices import BestChoices
 from cohere.embeddings import Embeddings
 from cohere.error import CohereError
 from cohere.generation import Generations, Generation, TokenLikelihood
+from cohere.tokenize import Tokens
 
 class Client:
     def __init__(self, api_key: str, version: str = None) -> None:
@@ -19,6 +20,41 @@ class Client:
             self.cohere_version = cohere.COHERE_VERSION
         else:
             self.cohere_version = version
+
+        try:
+            res = self.check_api_key()
+            if res['valid'] == False:
+                raise CohereError("invalid api key")
+        except CohereError as e:
+            raise CohereError(
+                message=e.message,
+                http_status=e.http_status,
+                headers=e.headers)
+
+    def check_api_key(self) -> Response:
+        headers = {
+            'Authorization': 'BEARER {}'.format(self.api_key),
+            'Content-Type': 'application/json',
+            'Request-Source': 'python-sdk',
+        }
+        if self.cohere_version != '':
+            headers['Cohere-Version'] = self.cohere_version
+
+        url = urljoin(self.api_url, cohere.CHECK_API_KEY_URL)
+        response = requests.request('POST', url, headers=headers)
+        try:
+            res = json.loads(response.text)
+        except:
+            raise CohereError(
+                message=response.text,
+                http_status=response.status_code,
+                headers=response.headers)
+        if 'message' in res.keys(): # has errors
+                raise CohereError(
+                    message=res['message'],
+                    http_status=response.status_code,
+                    headers=response.headers)
+        return res
 
     def generate(
         self, 
@@ -78,6 +114,13 @@ class Client:
         })
         response = self.__request(json_body, cohere.CHOOSE_BEST_URL, model)
         return BestChoices(response['scores'], response['tokens'], response['token_log_likelihoods'], mode)
+
+    def tokenize(self, model: str, text: str) -> Tokens:
+        json_body = json.dumps({
+            'text': text,
+        })
+        response = self.__request(json_body, cohere.TOKENIZE_URL, model)
+        return Tokens(response['tokens'])
 
     def __request(self, json_body, endpoint, model) -> Any:
         headers = {
