@@ -1,5 +1,5 @@
 import json
-from typing import List
+from typing import List, Any
 from urllib.parse import urljoin
 
 import requests
@@ -9,8 +9,7 @@ import cohere
 from cohere.best_choices import BestChoices
 from cohere.embeddings import Embeddings
 from cohere.error import CohereError
-from cohere.generation import Generations, Generation
-from cohere.likelihoods import Likelihoods, TokenLikelihood
+from cohere.generation import Generations, Generation, TokenLikelihood
 from cohere.tokenize import Tokens
 
 class Client:
@@ -86,14 +85,17 @@ class Client:
         response = self.__request(json_body, cohere.GENERATE_URL, model)
 
         generations = []
-        for gen in response['generations']: 
+        for gen in response['generations']:
+            likelihood = None
             token_likelihoods = None
+            if return_likelihoods == 'GENERATION' or return_likelihoods == 'ALL':
+                likelihood = gen['likelihood']
             if 'token_likelihoods' in gen.keys(): 
                 token_likelihoods = []
                 for l in gen['token_likelihoods']: 
                     likelihood = l['likelihood'] if 'likelihood' in l.keys() else None
                     token_likelihoods.append(TokenLikelihood(l['token'], likelihood))
-            generations.append(Generation(gen['text'], token_likelihoods))
+            generations.append(Generation(gen['text'], likelihood, token_likelihoods))
         return Generations(generations, return_likelihoods)
 
     def embed(self, model: str, texts: List[str], truncate: str = 'NONE') -> Embeddings:
@@ -113,13 +115,6 @@ class Client:
         response = self.__request(json_body, cohere.CHOOSE_BEST_URL, model)
         return BestChoices(response['scores'], response['tokens'], response['token_log_likelihoods'], mode)
 
-    def likelihood(self, model: str, text: str) -> Likelihoods:
-        json_body = json.dumps({
-            'text': text,
-        })
-        response = self.__request(json_body, cohere.LIKELIHOOD_URL, model)
-        return Likelihoods(response['likelihood'], response['token_likelihoods'])
-
     def tokenize(self, model: str, text: str) -> Tokens:
         json_body = json.dumps({
             'text': text,
@@ -127,7 +122,7 @@ class Client:
         response = self.__request(json_body, cohere.TOKENIZE_URL, model)
         return Tokens(response['tokens'])
 
-    def __request(self, json_body, endpoint, model) -> Response:
+    def __request(self, json_body, endpoint, model) -> Any:
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
             'Content-Type': 'application/json',
