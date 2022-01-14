@@ -28,10 +28,7 @@ class TestModel(unittest.TestCase):
 
     def test_invalid_key(self):
         with self.assertRaises(cohere.CohereError):
-            cohere.Client('invalid').generate(
-                model='large',
-                prompt='co:here',
-                max_tokens=1)
+            _ = cohere.Client('invalid')
 
 class TestGenerate(unittest.TestCase):
     def test_success(self):
@@ -122,6 +119,19 @@ class TestChooseBest(unittest.TestCase):
     def test_invalid_text(self):
         with self.assertRaises(cohere.CohereError):
             co.likelihood(
+                model='large',
+                text='')
+
+class TestTokenize(unittest.TestCase):
+    def test_success(self):
+        tokens = co.tokenize('large', 'tokenize me!')
+        self.assertIsInstance(tokens.tokens, list)
+        self.assertIsInstance(tokens.length, int)
+        self.assertEqual(tokens.length, len(tokens))
+
+    def test_invalid_text(self):
+        with self.assertRaises(cohere.CohereError):
+            co.tokenize(
                 model='large',
                 text='')
 
