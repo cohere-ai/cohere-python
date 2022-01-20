@@ -314,14 +314,11 @@ extern long long int tokenizer_Encoder_Cache_Get(long long int handle);
 extern void tokenizer_Encoder_Cache_Set(long long int handle, long long int val);
 extern long long int tokenizer_Encoder_VocabSize_Get(long long int handle);
 extern void tokenizer_Encoder_VocabSize_Set(long long int handle, long long int val);
-extern long long int tokenizer_Encoder_BPE(long long int _handle, char* token);
-extern long long int tokenizer_Encoder_EncodeWords(long long int _handle, long long int words);
 extern long long int tokenizer_Encoder_Encode(long long int _handle, char* text);
 extern char* tokenizer_Encoder_Decode(long long int _handle, long long int tokens);
 extern long long int tokenizer_New(long long int encoder, long long int bpeMerges);
 extern long long int tokenizer_NewFromPrebuilt(char* name);
 extern long long int tokenizer_NewFromReaders(long long int encoderReader, long long int vocabReader);
-extern long long int tokenizer_WordSplit(char* s);
 
 #ifdef __cplusplus
 }

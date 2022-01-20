@@ -2774,50 +2774,6 @@ PyObject * _wrap__tokenizer_tokenizer_Encoder_VocabSize_Set(PyObject * PYBINDGEN
 
 
 PyObject *
-_wrap__tokenizer_tokenizer_Encoder_BPE(PyObject * PYBINDGEN_UNUSED(dummy), PyObject *args, PyObject *kwargs)
-{
-    PyObject *py_retval;
-    int64_t retval;
-    int64_t _handle;
-    char *token;
-    const char *keywords[] = {"_handle", "token", NULL};
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, (char *) "Ls", (char **) keywords, &_handle, &token)) {
-        return NULL;
-    }
-    retval = tokenizer_Encoder_BPE(_handle, token);
-    if (PyErr_Occurred()) {
-        return NULL;
-    }
-    py_retval = Py_BuildValue((char *) "L", retval);
-    return py_retval;
-}
-PyObject * _wrap__tokenizer_tokenizer_Encoder_BPE(PyObject * PYBINDGEN_UNUSED(dummy), PyObject *args, PyObject *kwargs);
-
-
-PyObject *
-_wrap__tokenizer_tokenizer_Encoder_EncodeWords(PyObject * PYBINDGEN_UNUSED(dummy), PyObject *args, PyObject *kwargs)
-{
-    PyObject *py_retval;
-    int64_t retval;
-    int64_t _handle;
-    int64_t words;
-    const char *keywords[] = {"_handle", "words", NULL};
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, (char *) "LL", (char **) keywords, &_handle, &words)) {
-        return NULL;
-    }
-    retval = tokenizer_Encoder_EncodeWords(_handle, words);
-    if (PyErr_Occurred()) {
-        return NULL;
-    }
-    py_retval = Py_BuildValue((char *) "L", retval);
-    return py_retval;
-}
-PyObject * _wrap__tokenizer_tokenizer_Encoder_EncodeWords(PyObject * PYBINDGEN_UNUSED(dummy), PyObject *args, PyObject *kwargs);
-
-
-PyObject *
 _wrap__tokenizer_tokenizer_Encoder_Encode(PyObject * PYBINDGEN_UNUSED(dummy), PyObject *args, PyObject *kwargs)
 {
     PyObject *py_retval;
@@ -2864,28 +2820,6 @@ PyObject * _wrap__tokenizer_tokenizer_Encoder_Decode(PyObject * PYBINDGEN_UNUSED
 
 
 PyObject *
-_wrap__tokenizer_tokenizer_New(PyObject * PYBINDGEN_UNUSED(dummy), PyObject *args, PyObject *kwargs)
-{
-    PyObject *py_retval;
-    int64_t retval;
-    int64_t encoder;
-    int64_t bpeMerges;
-    const char *keywords[] = {"encoder", "bpeMerges", NULL};
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, (char *) "LL", (char **) keywords, &encoder, &bpeMerges)) {
-        return NULL;
-    }
-    retval = tokenizer_New(encoder, bpeMerges);
-    if (PyErr_Occurred()) {
-        return NULL;
-    }
-    py_retval = Py_BuildValue((char *) "L", retval);
-    return py_retval;
-}
-PyObject * _wrap__tokenizer_tokenizer_New(PyObject * PYBINDGEN_UNUSED(dummy), PyObject *args, PyObject *kwargs);
-
-
-PyObject *
 _wrap__tokenizer_tokenizer_NewFromPrebuilt(PyObject * PYBINDGEN_UNUSED(dummy), PyObject *args, PyObject *kwargs)
 {
     PyObject *py_retval;
@@ -2929,24 +2863,25 @@ PyObject * _wrap__tokenizer_tokenizer_NewFromReaders(PyObject * PYBINDGEN_UNUSED
 
 
 PyObject *
-_wrap__tokenizer_tokenizer_WordSplit(PyObject * PYBINDGEN_UNUSED(dummy), PyObject *args, PyObject *kwargs)
+_wrap__tokenizer_tokenizer_New(PyObject * PYBINDGEN_UNUSED(dummy), PyObject *args, PyObject *kwargs)
 {
     PyObject *py_retval;
     int64_t retval;
-    char *s;
-    const char *keywords[] = {"s", NULL};
+    int64_t encoder;
+    int64_t bpeMerges;
+    const char *keywords[] = {"encoder", "bpeMerges", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, (char *) "s", (char **) keywords, &s)) {
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, (char *) "LL", (char **) keywords, &encoder, &bpeMerges)) {
         return NULL;
     }
-    retval = tokenizer_WordSplit(s);
+    retval = tokenizer_New(encoder, bpeMerges);
     if (PyErr_Occurred()) {
         return NULL;
     }
     py_retval = Py_BuildValue((char *) "L", retval);
     return py_retval;
 }
-PyObject * _wrap__tokenizer_tokenizer_WordSplit(PyObject * PYBINDGEN_UNUSED(dummy), PyObject *args, PyObject *kwargs);
+PyObject * _wrap__tokenizer_tokenizer_New(PyObject * PYBINDGEN_UNUSED(dummy), PyObject *args, PyObject *kwargs);
 
 static PyMethodDef _tokenizer_functions[] = {
     {(char *) "GoPyInit", (PyCFunction) _wrap__tokenizer_GoPyInit, METH_NOARGS, "GoPyInit()\n\n" },
@@ -3098,14 +3033,11 @@ static PyMethodDef _tokenizer_functions[] = {
     {(char *) "tokenizer_Encoder_Cache_Set", (PyCFunction) _wrap__tokenizer_tokenizer_Encoder_Cache_Set, METH_KEYWORDS|METH_VARARGS, "tokenizer_Encoder_Cache_Set(handle, val)\n\ntype: handle: int64_t\ntype: val: int64_t" },
     {(char *) "tokenizer_Encoder_VocabSize_Get", (PyCFunction) _wrap__tokenizer_tokenizer_Encoder_VocabSize_Get, METH_KEYWORDS|METH_VARARGS, "tokenizer_Encoder_VocabSize_Get(handle)\n\ntype: handle: int64_t" },
     {(char *) "tokenizer_Encoder_VocabSize_Set", (PyCFunction) _wrap__tokenizer_tokenizer_Encoder_VocabSize_Set, METH_KEYWORDS|METH_VARARGS, "tokenizer_Encoder_VocabSize_Set(handle, val)\n\ntype: handle: int64_t\ntype: val: int64_t" },
-    {(char *) "tokenizer_Encoder_BPE", (PyCFunction) _wrap__tokenizer_tokenizer_Encoder_BPE, METH_KEYWORDS|METH_VARARGS, "tokenizer_Encoder_BPE(_handle, token)\n\ntype: _handle: int64_t\ntype: token: char *" },
-    {(char *) "tokenizer_Encoder_EncodeWords", (PyCFunction) _wrap__tokenizer_tokenizer_Encoder_EncodeWords, METH_KEYWORDS|METH_VARARGS, "tokenizer_Encoder_EncodeWords(_handle, words)\n\ntype: _handle: int64_t\ntype: words: int64_t" },
     {(char *) "tokenizer_Encoder_Encode", (PyCFunction) _wrap__tokenizer_tokenizer_Encoder_Encode, METH_KEYWORDS|METH_VARARGS, "tokenizer_Encoder_Encode(_handle, text)\n\ntype: _handle: int64_t\ntype: text: char *" },
     {(char *) "tokenizer_Encoder_Decode", (PyCFunction) _wrap__tokenizer_tokenizer_Encoder_Decode, METH_KEYWORDS|METH_VARARGS, "tokenizer_Encoder_Decode(_handle, tokens)\n\ntype: _handle: int64_t\ntype: tokens: int64_t" },
-    {(char *) "tokenizer_New", (PyCFunction) _wrap__tokenizer_tokenizer_New, METH_KEYWORDS|METH_VARARGS, "tokenizer_New(encoder, bpeMerges)\n\ntype: encoder: int64_t\ntype: bpeMerges: int64_t" },
     {(char *) "tokenizer_NewFromPrebuilt", (PyCFunction) _wrap__tokenizer_tokenizer_NewFromPrebuilt, METH_KEYWORDS|METH_VARARGS, "tokenizer_NewFromPrebuilt(name)\n\ntype: name: char *" },
     {(char *) "tokenizer_NewFromReaders", (PyCFunction) _wrap__tokenizer_tokenizer_NewFromReaders, METH_KEYWORDS|METH_VARARGS, "tokenizer_NewFromReaders(encoderReader, vocabReader)\n\ntype: encoderReader: int64_t\ntype: vocabReader: int64_t" },
-    {(char *) "tokenizer_WordSplit", (PyCFunction) _wrap__tokenizer_tokenizer_WordSplit, METH_KEYWORDS|METH_VARARGS, "tokenizer_WordSplit(s)\n\ntype: s: char *" },
+    {(char *) "tokenizer_New", (PyCFunction) _wrap__tokenizer_tokenizer_New, METH_KEYWORDS|METH_VARARGS, "tokenizer_New(encoder, bpeMerges)\n\ntype: encoder: int64_t\ntype: bpeMerges: int64_t" },
     {NULL, NULL, 0, NULL}
 };
 #if PY_VERSION_HEX >= 0x03000000
