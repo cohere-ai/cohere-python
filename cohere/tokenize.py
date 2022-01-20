@@ -1,4 +1,4 @@
-from cohere.response import CohereObject
+from response import CohereObject
 from typing import List
 
 class Tokens(CohereObject):
