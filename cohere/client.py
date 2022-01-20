@@ -12,7 +12,7 @@ from cohere.error import CohereError
 from cohere.generation import Generations, Generation, TokenLikelihood
 from cohere.tokenize import Tokens
 
-from tokenizer import tokenizer
+from .tokenizer import tokenizer
 
 class Client:
     def __init__(self, api_key: str, version: str = None) -> None:
