@@ -167,10 +167,10 @@ extern void Slice_int_append(long long int handle, long long int _vl);
 // --- wrapping slice: []int16 ---
 extern long long int Slice_int16_CTor();
 extern GoInt Slice_int16_len(long long int handle);
-extern short int Slice_int16_elem(long long int handle, GoInt _idx);
+extern short Slice_int16_elem(long long int handle, GoInt _idx);
 extern long long int Slice_int16_subslice(long long int handle, GoInt _st, GoInt _ed);
-extern void Slice_int16_set(long long int handle, GoInt _idx, short int _vl);
-extern void Slice_int16_append(long long int handle, short int _vl);
+extern void Slice_int16_set(long long int handle, GoInt _idx, short _vl);
+extern void Slice_int16_append(long long int handle, short _vl);
 
 // --- wrapping slice: []int32 ---
 extern long long int Slice_int32_CTor();
@@ -223,10 +223,10 @@ extern void Slice_uint_append(long long int handle, long long unsigned int _vl);
 // --- wrapping slice: []uint16 ---
 extern long long int Slice_uint16_CTor();
 extern GoInt Slice_uint16_len(long long int handle);
-extern short unsigned int Slice_uint16_elem(long long int handle, GoInt _idx);
+extern unsigned short Slice_uint16_elem(long long int handle, GoInt _idx);
 extern long long int Slice_uint16_subslice(long long int handle, GoInt _st, GoInt _ed);
-extern void Slice_uint16_set(long long int handle, GoInt _idx, short unsigned int _vl);
-extern void Slice_uint16_append(long long int handle, short unsigned int _vl);
+extern void Slice_uint16_set(long long int handle, GoInt _idx, unsigned short _vl);
+extern void Slice_uint16_append(long long int handle, unsigned short _vl);
 
 // --- wrapping slice: []uint32 ---
 extern long long int Slice_uint32_CTor();
@@ -316,9 +316,9 @@ extern long long int tokenizer_Encoder_VocabSize_Get(long long int handle);
 extern void tokenizer_Encoder_VocabSize_Set(long long int handle, long long int val);
 extern long long int tokenizer_Encoder_Encode(long long int _handle, char* text);
 extern char* tokenizer_Encoder_Decode(long long int _handle, long long int tokens);
+extern long long int tokenizer_New(long long int encoder, long long int bpeMerges);
 extern long long int tokenizer_NewFromPrebuilt(char* name);
 extern long long int tokenizer_NewFromReaders(long long int encoderReader, long long int vocabReader);
-extern long long int tokenizer_New(long long int encoder, long long int bpeMerges);
 
 #ifdef __cplusplus
 }
