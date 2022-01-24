@@ -2,6 +2,8 @@ import json
 from typing import List, Any
 from urllib.parse import urljoin
 
+import platform
+
 import requests
 from requests import Response
 
