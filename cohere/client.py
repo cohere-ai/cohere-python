@@ -10,7 +10,8 @@ from cohere.best_choices import BestChoices
 from cohere.embeddings import Embeddings
 from cohere.error import CohereError
 from cohere.generation import Generations, Generation, TokenLikelihood
-from cohere.tokenize import Tokens
+from cohere.tokens import Tokens
+from tokenizer import tokenizer 
 
 class Client:
     def __init__(self, api_key: str, version: str = None) -> None:
@@ -116,6 +117,8 @@ class Client:
         return BestChoices(response['scores'], response['tokens'], response['token_log_likelihoods'], mode)
 
     def tokenize(self, model: str, text: str) -> Tokens:
+        webtexttokenizer = tokenizer.NewFromPrebuilt("coheretext-50k")
+        webtexttokenizer.Encode(text)
         json_body = json.dumps({
             'text': text,
         })
