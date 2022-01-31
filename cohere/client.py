@@ -16,6 +16,7 @@ class Client:
     def __init__(self, api_key: str, version: str = None) -> None:
         self.api_key = api_key
         self.api_url = cohere.COHERE_API_URL
+        self.batch_size = cohere.COHERE_BATCH_SIZE
         if version is None:
             self.cohere_version = cohere.COHERE_VERSION
         else:
@@ -99,12 +100,16 @@ class Client:
         return Generations(generations, return_likelihoods)
 
     def embed(self, model: str, texts: List[str], truncate: str = 'NONE') -> Embeddings:
-        json_body = json.dumps({
-            'texts': texts,
-            'truncate': truncate,
-        })
-        response = self.__request(json_body, cohere.EMBED_URL, model)
-        return Embeddings(response['embeddings'])
+        responses = []
+        for i in range(0, len(texts), self.batch_size):
+            text = texts[i:i+self.batch_size]
+            json_body = json.dumps({
+                'texts': text,
+                'truncate': truncate,
+            })
+            response = self.__request(json_body, cohere.EMBED_URL, model)
+            responses.extend(response['embeddings'])
+        return Embeddings(responses)
 
     def choose_best(self, model: str, query: str, options: List[str], mode:  str = '') -> BestChoices:
         json_body = json.dumps({

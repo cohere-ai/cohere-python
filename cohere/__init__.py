@@ -3,6 +3,7 @@ from .error import CohereError
 
 COHERE_API_URL = 'https://api.cohere.ai'
 COHERE_VERSION = '2021-11-08'
+COHERE_BATCH_SIZE = 5
 GENERATE_URL = 'generate'
 EMBED_URL = 'embed'
 CHOOSE_BEST_URL = 'choose-best'
