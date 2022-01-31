@@ -7,7 +7,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
       with:
-        python-version: '3.6'
+        python-version: '3.8'
     - env:
         CO_API_KEY: ${{ secrets.CO_API_PROD_KEY }}
       run: ls cohere/tokenizer && pip install requests && python -m unittest tests/tests.py
