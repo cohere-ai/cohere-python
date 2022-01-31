@@ -5,7 +5,7 @@ with open('README.md', 'r', encoding='utf-8') as fh:
 
 setuptools.setup(
     name='cohere',
-    version='1.1.1',
+    version='1.1.8',
     author='kipply',
     author_email='carol@cohere.ai',
     description='A Python library for the Cohere API',
@@ -16,6 +16,8 @@ setuptools.setup(
     install_requires=[
         'requests'
     ],
+    package_data={'': ['./cohere/tokenizer/*']},
+    include_package_data=True,
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',
