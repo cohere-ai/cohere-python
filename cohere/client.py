@@ -12,6 +12,13 @@ from cohere.error import CohereError
 from cohere.generation import Generations, Generation, TokenLikelihood
 from cohere.tokenize import Tokens
 
+use_go_tokenizer = False
+try:
+    from tokenizer import tokenizer
+    use_go_tokenizer = True
+except ImportError:
+    pass
+
 class Client:
     def __init__(self, api_key: str, version: str = None) -> None:
         self.api_key = api_key
@@ -116,11 +123,15 @@ class Client:
         return BestChoices(response['scores'], response['tokens'], response['token_log_likelihoods'], mode)
 
     def tokenize(self, model: str, text: str) -> Tokens:
-        json_body = json.dumps({
-            'text': text,
-        })
-        response = self.__request(json_body, cohere.TOKENIZE_URL, model)
-        return Tokens(response['tokens'])
+        if (use_go_tokenizer): 
+            i = 1
+            # TODO
+        else:
+            json_body = json.dumps({
+                'text': text,
+            })
+            response = self.__request(json_body, cohere.TOKENIZE_URL, model)
+            return Tokens(response['tokens'])
 
     def __request(self, json_body, endpoint, model) -> Any:
         headers = {
