@@ -80,7 +80,7 @@ class TestEmbed(unittest.TestCase):
         self.assertEqual(len(prediction.embeddings[0]), 1024)
         self.assertEqual(len(prediction.embeddings[1]), 1024)
     
-    def test_success_longer_multiple_batches(self):
+    def test_success_multiple_batches(self):
         prediction = co.embed(
             model='small',
             texts=['co:here', 'cohere', "embed", "python", "golang", "typescript", "rust?", "ai", "nlp","neural"])
@@ -88,6 +88,49 @@ class TestEmbed(unittest.TestCase):
         for embed in prediction.embeddings:
             self.assertIsInstance(embed, list)
             self.assertEqual(len(embed), 1024)
+
+    def test_success_longer_multiple_batches_unaligned_batch(self):
+        prediction = co.embed(
+            model='small',
+            texts=['co:here', 'cohere', "embed", "python", "golang", "typescript", "rust?", "ai", "nlp", "neural", "nets"])
+        self.assertEqual(len(prediction.embeddings), 11)
+        for embed in prediction.embeddings:
+            self.assertIsInstance(embed, list)
+            self.assertEqual(len(embed), 1024)
+
+    def test_success_longer_multiple_batches(self):
+        prediction = co.embed(
+            model='small',
+            texts=['co:here', 'cohere', "embed", "python", "golang"] * 200)
+        self.assertEqual(len(prediction.embeddings), 200*5)
+        for embed in prediction.embeddings:
+            self.assertIsInstance(embed, list)
+            self.assertEqual(len(embed), 1024)
+
+    def test_success_multiple_batches_in_order(self):
+        textAll = []
+
+        text1 = ['co:here', 'cohere', "embed", "python", "golang"]
+        prediction1 = co.embed(
+            model='small',
+            texts=text1)
+
+        text2 = ['co:here', 'cohere', "embed", "python", "golang"]
+        prediction2 = co.embed(
+            model='small',
+            texts=text2)
+
+        text3 = ['co:here', 'cohere', "embed", "python", "golang"]
+        prediction3 = co.embed(
+            model='small',
+            texts=text3)
+
+        textAll = [*text1,*text2,*text3]
+        predictionExpected = [*prediction1, *prediction2, *prediction3]
+
+        predictionAcutal = co.embed(model='small',texts=textAll)
+
+        self.assertListEqual(predictionExpected,list(predictionAcutal))
 
     def test_invalid_texts(self):
         with self.assertRaises(cohere.CohereError):
