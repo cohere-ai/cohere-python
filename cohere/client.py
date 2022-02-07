@@ -2,8 +2,12 @@ import json
 from typing import List, Any
 from urllib.parse import urljoin
 
+import math
+
 import requests
 from requests import Response
+
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import cohere
 from cohere.best_choices import BestChoices
@@ -13,9 +17,11 @@ from cohere.generation import Generations, Generation, TokenLikelihood
 from cohere.tokenize import Tokens
 
 class Client:
-    def __init__(self, api_key: str, version: str = None) -> None:
+    def __init__(self, api_key: str, version: str = None, num_workers: int = 8) -> None:
         self.api_key = api_key
         self.api_url = cohere.COHERE_API_URL
+        self.batch_size = cohere.COHERE_EMBED_BATCH_SIZE
+        self.num_workers = num_workers
         if version is None:
             self.cohere_version = cohere.COHERE_VERSION
         else:
@@ -99,12 +105,28 @@ class Client:
         return Generations(generations, return_likelihoods)
 
     def embed(self, model: str, texts: List[str], truncate: str = 'NONE') -> Embeddings:
-        json_body = json.dumps({
-            'texts': texts,
-            'truncate': truncate,
-        })
-        response = self.__request(json_body, cohere.EMBED_URL, model)
-        return Embeddings(response['embeddings'])
+        responses = []
+        json_bodys = []
+        request_futures = []
+        num_batch = int(math.ceil(len(texts)/self.batch_size))
+        embed_url_stacked = [cohere.EMBED_URL] * num_batch
+        model_stacked = [model] * num_batch
+
+        for i in range(0, len(texts), self.batch_size):
+            texts_batch = texts[i:i+self.batch_size]
+            json_bodys.append(json.dumps({
+                'texts': texts_batch,
+                'truncate': truncate,
+            }))
+
+        with ThreadPoolExecutor(max_workers=self.num_workers) as executor:
+            for i in executor.map(self.__request, json_bodys, embed_url_stacked, model_stacked):
+                request_futures.append(i)
+
+        for result in request_futures:
+            responses.extend(result['embeddings'])
+
+        return Embeddings(responses)
 
     def choose_best(self, model: str, query: str, options: List[str], mode:  str = '') -> BestChoices:
         json_body = json.dumps({
