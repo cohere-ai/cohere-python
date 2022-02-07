@@ -6,7 +6,7 @@ import random
 
 API_KEY = os.getenv('CO_API_KEY')
 assert type(API_KEY) != None
-co = cohere.Client(str(API_KEY),num_workers=2)
+co = cohere.Client(str(API_KEY))
 
 letters = string.ascii_lowercase
 
