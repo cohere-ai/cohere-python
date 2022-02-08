@@ -2,8 +2,8 @@ name: Python Release
 
 on:
   push:
-    tags:
-      - v*
+    # tags:
+    #   - v*
 
 env:
   PYPI_TOKEN: ${{ secrets.PYPI_TOKEN_DIST }}
