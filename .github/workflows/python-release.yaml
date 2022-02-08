@@ -167,9 +167,9 @@ jobs:
           pip install setuptools wheel pybindgen --ignore-installed --force-reinstall
       
       - name: Install Go dependencies
-          run: |
-            go get golang.org/x/tools/cmd/goimports
-            go get github.com/go-python/gopy
+        run: |
+          go get golang.org/x/tools/cmd/goimports
+          go get github.com/go-python/gopy
 
       - name: Generate gopy Files
         run: |
