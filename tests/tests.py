@@ -1,9 +1,33 @@
 import os
 import unittest
 import cohere
+import string
+import random
 
 API_KEY = os.getenv('CO_API_KEY')
-co = cohere.Client(API_KEY)
+assert type(API_KEY) != None
+co = cohere.Client(str(API_KEY))
+
+letters = string.ascii_lowercase
+
+def random_word():
+    return ''.join(random.choice(letters) for _ in range(10))
+
+def random_sentence(num_words):
+    sentence = ""
+
+    for _ in range(num_words):
+        sentence += random_word() + " "
+
+    return sentence
+
+def random_texts(num_texts, num_words_per_sentence = 50):
+    arr = []
+
+    for _ in range(num_texts):
+        arr.append(random_sentence(num_words_per_sentence))
+    
+    return arr
 
 class TestModel(unittest.TestCase):
     def test_invalid_model(self):
@@ -109,28 +133,19 @@ class TestEmbed(unittest.TestCase):
 
     def test_success_multiple_batches_in_order(self):
         textAll = []
+        predictionExpected = []
 
-        text1 = ['co:here', 'cohere', "embed", "python", "golang"]
-        prediction1 = co.embed(
-            model='small',
-            texts=text1)
+        for _ in range(100):
+            text_batch = random_texts(cohere.COHERE_EMBED_BATCH_SIZE)
+            prediction = co.embed(
+                model='small',
+                texts=text_batch)
+            textAll.extend(text_batch)
+            predictionExpected.extend(prediction)
 
-        text2 = ['co:here', 'cohere', "embed", "python", "golang"]
-        prediction2 = co.embed(
-            model='small',
-            texts=text2)
+        predictionActual = co.embed(model='small',texts=textAll)
 
-        text3 = ['co:here', 'cohere', "embed", "python", "golang"]
-        prediction3 = co.embed(
-            model='small',
-            texts=text3)
-
-        textAll = [*text1,*text2,*text3]
-        predictionExpected = [*prediction1, *prediction2, *prediction3]
-
-        predictionAcutal = co.embed(model='small',texts=textAll)
-
-        self.assertListEqual(predictionExpected,list(predictionAcutal))
+        self.assertListEqual(predictionExpected,list(predictionActual))
 
     def test_invalid_texts(self):
         with self.assertRaises(cohere.CohereError):
