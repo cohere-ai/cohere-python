@@ -7,7 +7,7 @@ import math
 import requests
 from requests import Response
 
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 
 import cohere
 from cohere.best_choices import BestChoices
@@ -75,7 +75,7 @@ class Client:
         presence_penalty: float = 0.0,
         stop_sequences: List[str] = None,
         return_likelihoods: str = 'NONE'
-    ) -> Generation:
+    ) -> Generations:
         json_body = json.dumps({
             'prompt': prompt,
             'num_generations': num_generations,
@@ -90,7 +90,7 @@ class Client:
         })
         response = self.__request(json_body, cohere.GENERATE_URL, model)
 
-        generations = []
+        generations: List[Generation] = []
         for gen in response['generations']:
             likelihood = None
             token_likelihoods = None
