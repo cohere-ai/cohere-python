@@ -2,6 +2,8 @@ name: Python Release
 
 on:
   push:
+    branches:
+      - *
     # tags:
     #   - v*
 
