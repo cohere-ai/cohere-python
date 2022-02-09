@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ex
 
-curl -O https://storage.googleapis.com/golang/go.1.17.6.linux-amd64.tar.gz
+curl -O https://storage.googleapis.com/golang/go1.17.6.linux-amd64.tar.gz
 file go1.17.6.linux-amd64.tar.gz
 tar -C /usr/local -xzf go1.17.6.linux-amd64.tar.gz
 
