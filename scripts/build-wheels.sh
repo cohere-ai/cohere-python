@@ -1,10 +1,7 @@
 #!/bin/bash
 set -ex
 
-pkexec apt-get update
-pkexec apt-get --reinstall install sudo
-sudo apt install wget
-wget -c https://go.dev/dl/go1.17.6.linux-amd64.tar.gz
+curl -O https://go.dev/dl/go1.17.6.linux-amd64.tar.gz
 tar -C /usr/local -xzf go1.17.6.linux-amd64.tar.gz
 
 export PATH=$PATH:/usr/local/go/bin
