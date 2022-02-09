@@ -14,14 +14,11 @@ for PYBIN in /opt/python/{cp36-cp36m,cp37-cp37m,cp38-cp38,cp39-cp39,cp310-cp310}
 
     go get golang.org/x/tools/cmd/goimports
     go get github.com/go-python/gopy
-
+    
+    gopy build -output=tokenizer -vm=python3 github.com/cohere-ai/tokenizer
     "${PYBIN}/python" setup.py bdist_wheel
 
     rm -rf build/*
-done
-
-for whl in dist/*.whl; do
-    auditwheel repair "$whl" -w dist/
 done
 
 # Keep only manylinux wheels
