@@ -16,8 +16,7 @@ for PYBIN in /opt/python/{cp36-cp36m,cp37-cp37m,cp38-cp38,cp39-cp39,cp310-cp310}
     go get github.com/go-python/gopy
     
     go mod init github.com/cohere-ai/tokenizer
-    go env
-    go get github.com/cohere-ai/tokenizer
+    go mod tidy
     ~/go/bin/gopy build -output=tokenizer -vm=python3 github.com/cohere-ai/tokenizer
     "${PYBIN}/python" setup.py bdist_wheel
 
