@@ -6,7 +6,7 @@ file go1.17.6.linux-amd64.tar.gz
 tar -C /usr/local -xzf go1.17.6.linux-amd64.tar.gz
 
 export PATH=$PATH:/usr/local/go/bin
-export GOPATH=/usr/local/go
+export GOPATH=$HOME/go
 
 for PYBIN in /opt/python/{cp36-cp36m,cp37-cp37m,cp38-cp38,cp39-cp39,cp310-cp310}/bin; do
     export PYTHON_SYS_EXECUTABLE="$PYBIN/python"
