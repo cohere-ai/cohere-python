@@ -7,6 +7,8 @@ tar -C /usr/local -xzf go1.17.6.linux-amd64.tar.gz
 
 export PATH=$PATH:/usr/local/go/bin
 export GOPATH=$HOME/go
+export GOBIN=$GOPATH/bin
+export PATH=$PATH:$GOBIN
 
 mkdir -p $GOPATH/src/github.com/cohere-ai
 cd $GOPATH/src/github.com/cohere-ai && git clone https://github.com/cohere-ai/tokenizer.git && cd /
