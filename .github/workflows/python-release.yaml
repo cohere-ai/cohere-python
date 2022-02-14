@@ -97,7 +97,7 @@ jobs:
       - uses: actions/checkout@v1
 
       - name: Install dependencies
-        run: yum install -y openssl-devel wget tar
+        run: yum install -y openssl-devel wget tar.x86_64
 
       - name: Install Python 3.6
         run: wget https://www.python.org/ftp/python/3.6.15/Python-3.6.15.tgz && \
@@ -218,7 +218,7 @@ jobs:
         shell: bash
         run: |
           pip install awscli
-          aws s3 sync "s3://tokenizers-releases/python/$DIST_DIR" ./dist
+          gsutil cp "gs://cohere-tokenizers-releases/python/$DIST_DIR" ./dist
 
       - name: Install dependencies
         run: |
