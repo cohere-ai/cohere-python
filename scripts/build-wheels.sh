@@ -8,7 +8,7 @@ tar -C /usr/local -xzf go1.17.6.linux-amd64.tar.gz
 curl -O https://www.python.org/ftp/python/3.6.15/Python-3.6.15.tgz && \
             tar xzf Python-3.6.15.tgz && \
             cd Python-3.6.15 && \
-            ./configure --enable-optimizations -fPIC && \
+            ./configure --enable-optimizations --enable-shared && \
             make altinstall \
             cd /
 
