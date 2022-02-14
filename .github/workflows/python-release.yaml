@@ -97,7 +97,7 @@ jobs:
       - uses: actions/checkout@v1
 
       - name: Install dependencies
-        run: yum install -y openssl-devel wget
+        run: yum install -y openssl-devel wget tar
 
       - name: Install Python 3.6
         run: wget https://www.python.org/ftp/python/3.6.15/Python-3.6.15.tgz && \
