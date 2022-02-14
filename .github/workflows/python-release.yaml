@@ -97,7 +97,7 @@ jobs:
       - uses: actions/checkout@v1
 
       - name: Install dependencies
-        run: yum install -y openssl-devel wget tar.x86_64
+        run: yum install -y openssl-devel
 
       - name: Build and audit wheels
         working-directory: ./

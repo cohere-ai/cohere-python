@@ -5,12 +5,14 @@ curl -O https://storage.googleapis.com/golang/go1.17.6.linux-amd64.tar.gz
 file go1.17.6.linux-amd64.tar.gz
 tar -C /usr/local -xzf go1.17.6.linux-amd64.tar.gz
 
-wget https://www.python.org/ftp/python/3.6.15/Python-3.6.15.tgz && \
+curl -O https://www.python.org/ftp/python/3.6.15/Python-3.6.15.tgz && \
             tar xzf Python-3.6.15.tgz && \
             cd Python-3.6.15 && \
             ./configure --enable-optimizations && \
-            make altinstall
-            
+            make altinstall \
+            cd /
+
+
 export PATH=$PATH:/usr/local/go/bin
 export GOPATH=$HOME/go
 export GOBIN=$GOPATH/bin
