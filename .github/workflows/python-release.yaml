@@ -10,6 +10,8 @@ on:
 env:
   PYPI_TOKEN: ${{ secrets.PYPI_TOKEN_DIST }}
   DIST_DIR: ${{ github.sha }}
+  SERVICE_ACCOUNT_NAME: ${{ secrets.TOKENIZER_SERVICE_ACCOUNT_NAME }}
+  SERVICE_ACCOUNT_KEY: ${{ secrets.TOKENIZER_SERVICE_ACCOUNT_KEY }}
 
 jobs:
 
@@ -207,12 +209,12 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v1
 
-      - name: Retrieve all wheels
-        shell: bash
-        run: |
-          wget -c https://storage.googleapis.com/pub/gsutil.tar.gz
-          tar xfz gsutil.tar.gz -C $HOME
-          $HOME/gsutil/gsutil cp -r ./dist "gs://cohere-tokenizer-releases/python/$DIST_DIR" ./dist
+      # - name: Retrieve all wheels
+      #   shell: bash
+      #   run: |
+      #     wget -c https://storage.googleapis.com/pub/gsutil.tar.gz
+      #     tar xfz gsutil.tar.gz -C $HOME
+      #     $HOME/gsutil/gsutil cp -r ./dist "gs://cohere-tokenizer-releases/python/$DIST_DIR" ./dist
 
       - name: Install dependencies
         run: |
@@ -226,4 +228,4 @@ jobs:
         working-directory: ./
         run: |
           pip install twine
-          python -m twine upload dist/* -u __token__ -p "$PYPI_TOKEN"
+          python -m twine upload --repository testpypi dist/* -u __token__ -p "$PYPI_TOKEN"

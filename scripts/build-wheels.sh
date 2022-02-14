@@ -45,7 +45,8 @@ done
 rm dist/*-linux_*
 
 # Upload wheels
-wget -c https://storage.googleapis.com/pub/gsutil.tar.gz
-tar xfz gsutil.tar.gz -C $HOME
-$HOME/gsutil/gsutil cp -r ./dist "gs://cohere-tokenizer-releases/python/$DIST_DIR" ./dist
+# gcloud auth activate-service-account $SERVICE_ACCOUNT_NAME $SERVICE_ACCOUNT_KEY
+# wget -c https://storage.googleapis.com/pub/gsutil.tar.gz
+# tar xfz gsutil.tar.gz -C $HOME
+# $HOME/gsutil/gsutil cp -r ./dist "gs://cohere-tokenizer-releases/python/$DIST_DIR" ./dist
 
