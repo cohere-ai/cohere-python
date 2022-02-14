@@ -18,7 +18,11 @@ for PYBIN in /opt/python/{cp36-cp36m,cp37-cp37m,cp38-cp38,cp39-cp39,cp310-cp310}
 
     go get golang.org/x/tools/cmd/goimports
     go get github.com/go-python/gopy
+    CURRENT_DIR=$(pwd)
+    cd $GOPATH/src/github.com/cohere-ai/tokenizer
     ~/go/bin/gopy build -output=tokenizer -vm=python3 github.com/cohere-ai/tokenizer
+    cp -a $GOPATH/src/github.com/cohere-ai/tokenizer/tokenizer $CURRENT_DIR/tokenizer
+    cd $CURRENT_DIR
     "${PYBIN}/python" setup.py bdist_wheel
 
     rm -rf build/*
