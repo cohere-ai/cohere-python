@@ -31,13 +31,13 @@ for PYBIN in /opt/python/{cp36-cp36m,cp37-cp37m,cp38-cp38,cp39-cp39,cp310-cp310}
     cd $GOPATH/src/github.com/cohere-ai/tokenizer
     ~/go/bin/gopy build -output=tokenizer -vm="${PYBIN}/python" github.com/cohere-ai/tokenizer
     cd tokenizer && make build
-    cp -a $GOPATH/src/github.com/cohere-ai/tokenizer/tokenizer $GITHUB_WORKSPACE/cohere-$PYBIN/tokenizer
+    cp -a $GOPATH/src/github.com/cohere-ai/tokenizer/tokenizer $GITHUB_WORKSPACE/cohere/tokenizer
     cd $GITHUB_WORKSPACE
     "${PYBIN}/python" setup.py bdist_wheel
 
     rm -rf $GOPATH/src/github.com/cohere-ai/tokenizer
-    rm -rf build/*
-
+    rm -rf dist/*
+    rm -rf $GITHUB_WORKSPACE/cohere/tokenizer
     echo "Finished building for Python $PYVER"
 done
 
@@ -45,5 +45,7 @@ done
 rm dist/*-linux_*
 
 # Upload wheels
-/opt/python/cp37-cp37m/bin/pip install -U awscli
-/opt/python/cp37-cp37m/bin/python -m sync --exact-timestamps ./dist "s3://tokenizers-releases/python/$DIST_DIR"
+wget -c https://storage.googleapis.com/pub/gsutil.tar.gz
+tar xfz gsutil.tar.gz -C $HOME
+$HOME/gsutil/gsutil cp -r ./dist "gs://cohere-tokenizer-releases/python/$DIST_DIR" ./dist
+
