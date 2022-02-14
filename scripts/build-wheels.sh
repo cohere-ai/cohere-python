@@ -5,7 +5,7 @@ curl -O https://storage.googleapis.com/golang/go1.17.6.linux-amd64.tar.gz
 file go1.17.6.linux-amd64.tar.gz
 tar -C /usr/local -xzf go1.17.6.linux-amd64.tar.gz
 
-for PYVER in {3.6.15}; do
+for PYVER in 3.6.15; do
     curl -O https://www.python.org/ftp/python/$PYVER/Python-$PYVER.tgz && \
                 tar xzf Python-$PYVER.tgz && \
                 cd Python-$PYVER && \
