@@ -37,6 +37,8 @@ for PYBIN in /opt/python/{cp36-cp36m,cp37-cp37m,cp38-cp38,cp39-cp39,cp310-cp310}
 
     rm -rf $GOPATH/src/github.com/cohere-ai/tokenizer
     rm -rf build/*
+
+    echo "Finished building for Python $PYVER"
 done
 
 # Keep only manylinux wheels
