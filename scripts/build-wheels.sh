@@ -41,9 +41,6 @@ for PYBIN in /opt/python/{cp36-cp36m,cp37-cp37m,cp38-cp38,cp39-cp39,cp310-cp310}
     echo "Finished building for Python $PYVER"
 done
 
-# Keep only manylinux wheels
-rm dist/*-linux_*
-
 # Upload wheels
 # gcloud auth activate-service-account $SERVICE_ACCOUNT_NAME $SERVICE_ACCOUNT_KEY
 # wget -c https://storage.googleapis.com/pub/gsutil.tar.gz
