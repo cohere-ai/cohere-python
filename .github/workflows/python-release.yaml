@@ -99,13 +99,6 @@ jobs:
       - name: Install dependencies
         run: yum install -y openssl-devel wget tar.x86_64
 
-      - name: Install Python 3.6
-        run: wget https://www.python.org/ftp/python/3.6.15/Python-3.6.15.tgz && \
-            tar xzf Python-3.6.15.tgz && \
-            cd Python-3.6.15 && \
-            ./configure --enable-optimizations && \
-            make altinstall
-
       - name: Build and audit wheels
         working-directory: ./
         run: sh ./scripts/build-wheels.sh
@@ -218,7 +211,7 @@ jobs:
         shell: bash
         run: |
           pip install awscli
-          gsutil cp "gs://cohere-tokenizers-releases/python/$DIST_DIR" ./dist
+          gsutil cp "gs://cohere-tokenizer-releases/python/$DIST_DIR" ./dist
 
       - name: Install dependencies
         run: |
