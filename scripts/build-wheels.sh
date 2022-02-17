@@ -38,6 +38,7 @@ for PYBIN in /opt/python/cp36-cp36m/bin; do
     cd $GITHUB_WORKSPACE
     ls
     ls cohere
+    ls cohere/tokenizer
     "${PYBIN}/python" setup.py bdist_wheel
 
     rm -rf $GOPATH/src/github.com/cohere-ai/tokenizer
