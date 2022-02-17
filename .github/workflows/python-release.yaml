@@ -106,7 +106,7 @@ jobs:
         run: yum install -y openssl-devel
       
       - name: Install Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x86
