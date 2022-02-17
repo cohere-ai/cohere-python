@@ -93,24 +93,15 @@ jobs:
 
   create_wheels_manylinux:
     runs-on: ubuntu-latest
-    strategy:
-      matrix: 
-        python-version: ['3.6.15', '3.7.12', '3.8.12', '3.9.10', '3.10.2']
-    name: Create wheels for manylinux2014
-    container: quay.io/pypa/manylinux2014_x86_64
+    name: Create wheels for manylinux2010
+    container: quay.io/pypa/manylinux2010_x86_64
     steps:
       # v1 is required when using manylinux2010
       - uses: actions/checkout@v1
 
       - name: Install dependencies
         run: yum install -y openssl-devel
-      
-      - name: Install Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
-          architecture: x64
-          
+
       - name: Build and audit wheels
         working-directory: ./
         run: sh ./scripts/build-wheels.sh
