@@ -39,7 +39,7 @@ for PYBIN in /opt/python/cp36-cp36m/bin; do
     "${PYBIN}/python" setup.py bdist_wheel
     rm -rf build/*
     rm -rf $GOPATH/src/github.com/cohere-ai/tokenizer
-    rm -rf $GITHUB_WORKSPACE/cohere/tokenizer
+    # rm -rf $GITHUB_WORKSPACE/cohere/tokenizer
 done
 
 # for whl in dist/*.whl; do
