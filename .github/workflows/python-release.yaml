@@ -96,8 +96,8 @@ jobs:
     strategy:
       matrix: 
         python-version: ['3.6', '3.7', '3.8', '3.9', '3.10']
-    name: Create wheels for manylinux2010
-    container: quay.io/pypa/manylinux2010_x86_64
+    name: Create wheels for manylinux2014
+    container: quay.io/pypa/manylinux2014_x86_64
     steps:
       # v1 is required when using manylinux2010
       - uses: actions/checkout@v1
