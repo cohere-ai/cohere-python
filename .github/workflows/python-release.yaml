@@ -99,12 +99,29 @@ jobs:
       # v1 is required when using manylinux2010
       - uses: actions/checkout@v1
 
+      - name: Install Python
+        uses: actions/setup-python@v1
+
       - name: Install dependencies
         run: yum install -y openssl-devel
 
       - name: Build and audit wheels
         working-directory: ./
         run: sh ./scripts/build-wheels.sh
+
+      - name: Install dependencies
+        run: |
+          pip install setuptools wheel
+
+      - name: Create source distribution
+        working-directory: ./
+        run: sh ./scripts/build-sdist.sh
+
+      - name: Upload to PyPi
+        working-directory: ./
+        run: |
+          pip install twine
+          python -m twine upload --repository testpypi dist/* -u "$PYPI_USERNAME" -p "$PYPI_PASSWORD"
   
   # create_wheels_windows_32bit:
   #   name: Create wheels for windows 32-bit
@@ -193,40 +210,40 @@ jobs:
   #         pip install awscli
   #         aws s3 sync --exact-timestamps ./bindings/python/dist "s3://tokenizers-releases/python/$DIST_DIR"
 
-  upload_package:
-    name: Upload package to PyPi
-    runs-on: ubuntu-latest
-    needs: 
-      - create_wheels_manylinux
-      # - create_wheels_manylinux_2014_ppc64le
-      # - create_wheels_manylinux_2014_aarch64
-      # - create_wheels_manylinux_2014_x390x
-      # - create_wheels_windows_32bit
-      # - create_wheels_others_64bit
+  # upload_package:
+  #   name: Upload package to PyPi
+  #   runs-on: ubuntu-latest
+  #   needs: 
+  #     - create_wheels_manylinux
+  #     # - create_wheels_manylinux_2014_ppc64le
+  #     # - create_wheels_manylinux_2014_aarch64
+  #     # - create_wheels_manylinux_2014_x390x
+  #     # - create_wheels_windows_32bit
+  #     # - create_wheels_others_64bit
 
-    steps:
-      - uses: actions/checkout@v1
+  #   steps:
+  #     - uses: actions/checkout@v1
 
-      - name: Install Python
-        uses: actions/setup-python@v1
+  #     - name: Install Python
+  #       uses: actions/setup-python@v1
 
-      # - name: Retrieve all wheels
-      #   shell: bash
-      #   run: |
-      #     wget -c https://storage.googleapis.com/pub/gsutil.tar.gz
-      #     tar xfz gsutil.tar.gz -C $HOME
-      #     $HOME/gsutil/gsutil cp -r ./dist "gs://cohere-tokenizer-releases/python/$DIST_DIR" ./dist
+  #     # - name: Retrieve all wheels
+  #     #   shell: bash
+  #     #   run: |
+  #     #     wget -c https://storage.googleapis.com/pub/gsutil.tar.gz
+  #     #     tar xfz gsutil.tar.gz -C $HOME
+  #     #     $HOME/gsutil/gsutil cp -r ./dist "gs://cohere-tokenizer-releases/python/$DIST_DIR" ./dist
 
-      - name: Install dependencies
-        run: |
-          pip install setuptools wheel
+  #     - name: Install dependencies
+  #       run: |
+  #         pip install setuptools wheel
 
-      - name: Create source distribution
-        working-directory: ./
-        run: sh ./scripts/build-sdist.sh
+  #     - name: Create source distribution
+  #       working-directory: ./
+  #       run: sh ./scripts/build-sdist.sh
 
-      - name: Upload to PyPi
-        working-directory: ./
-        run: |
-          pip install twine
-          python -m twine upload --repository testpypi dist/* -u "$PYPI_USERNAME" -p "$PYPI_PASSWORD"
+  #     - name: Upload to PyPi
+  #       working-directory: ./
+  #       run: |
+  #         pip install twine
+  #         python -m twine upload --repository testpypi dist/* -u "$PYPI_USERNAME" -p "$PYPI_PASSWORD"
