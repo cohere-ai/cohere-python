@@ -109,7 +109,7 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
-          architecture: x86
+          architecture: x64
           
       - name: Build and audit wheels
         working-directory: ./
