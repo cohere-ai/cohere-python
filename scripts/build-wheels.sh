@@ -36,15 +36,15 @@ for PYBIN in /opt/python/cp36-cp36m/bin; do
     ls
     cp -a $GOPATH/src/github.com/cohere-ai/tokenizer/tokenizer $GITHUB_WORKSPACE/cohere
     cd $GITHUB_WORKSPACE
-    "${PYBIN}/python" setup.py bdist_wheel --universal
+    "${PYBIN}/python" setup.py bdist_wheel
     rm -rf build/*
     rm -rf $GOPATH/src/github.com/cohere-ai/tokenizer
     rm -rf $GITHUB_WORKSPACE/cohere/tokenizer
 done
 
-for whl in dist/*.whl; do
-    auditwheel repair "$whl" -w dist/
-done
+# for whl in dist/*.whl; do
+#     auditwheel repair "$whl" -w dist/
+# done
 ls $GITHUB_WORKSPACE/dist
 # pip install setuptools wheel
 
