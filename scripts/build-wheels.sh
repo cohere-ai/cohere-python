@@ -21,7 +21,7 @@ export GOBIN=$GOPATH/bin
 export PATH=$PATH:$GOBIN
 
 mkdir -p $GOPATH/src/github.com/cohere-ai
-for PYBIN in /opt/python/{cp36-cp36m}/bin; do
+for PYBIN in /opt/python/cp36-cp36m/bin; do
 # for PYBIN in /opt/python/{cp36-cp36m,cp37-cp37m,cp38-cp38,cp39-cp39,cp310-cp310}/bin; do
     export PYTHON_SYS_EXECUTABLE="$PYBIN/python"
     cd $GOPATH/src/github.com/cohere-ai && git clone https://github.com/cohere-ai/tokenizer.git && cd $GITHUB_WORKSPACE
