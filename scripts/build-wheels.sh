@@ -36,11 +36,8 @@ for PYBIN in /opt/python/cp36-cp36m/bin; do
     ls
     cp -a $GOPATH/src/github.com/cohere-ai/tokenizer/tokenizer $GITHUB_WORKSPACE/cohere
     cd $GITHUB_WORKSPACE
-    ls
-    ls cohere
-    ls cohere/tokenizer
     "${PYBIN}/python" setup.py bdist_wheel
-
+    rm -rf build *.egg-info
     rm -rf $GOPATH/src/github.com/cohere-ai/tokenizer
     rm -rf $GITHUB_WORKSPACE/cohere/tokenizer
 done
