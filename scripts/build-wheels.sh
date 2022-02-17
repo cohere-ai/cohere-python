@@ -33,6 +33,7 @@ for PYBIN in /opt/python/cp36-cp36m/bin; do
     cd $GOPATH/src/github.com/cohere-ai/tokenizer
     ~/go/bin/gopy build -output=tokenizer -vm="${PYBIN}/python" github.com/cohere-ai/tokenizer
     cd tokenizer && make build
+    ls
     cp -a $GOPATH/src/github.com/cohere-ai/tokenizer/tokenizer $GITHUB_WORKSPACE/cohere/tokenizer
     cd $GITHUB_WORKSPACE
     "${PYBIN}/python" setup.py bdist_wheel
