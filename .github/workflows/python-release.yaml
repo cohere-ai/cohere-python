@@ -99,29 +99,12 @@ jobs:
       # v1 is required when using manylinux2010
       - uses: actions/checkout@v1
 
-      - name: Install Python
-        uses: actions/setup-python@v1
-
       - name: Install dependencies
         run: yum install -y openssl-devel
 
       - name: Build and audit wheels
         working-directory: ./
         run: sh ./scripts/build-wheels.sh
-
-      - name: Install dependencies
-        run: |
-          pip install setuptools wheel
-
-      - name: Create source distribution
-        working-directory: ./
-        run: sh ./scripts/build-sdist.sh
-
-      - name: Upload to PyPi
-        working-directory: ./
-        run: |
-          pip install twine
-          python -m twine upload --repository testpypi dist/* -u "$PYPI_USERNAME" -p "$PYPI_PASSWORD"
   
   # create_wheels_windows_32bit:
   #   name: Create wheels for windows 32-bit
