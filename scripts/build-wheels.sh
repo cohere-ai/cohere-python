@@ -42,9 +42,9 @@ for PYBIN in /opt/python/cp36-cp36m/bin; do
     # rm -rf $GITHUB_WORKSPACE/cohere/tokenizer
 done
 
-# for whl in dist/*.whl; do
-#     auditwheel repair "$whl" -w dist/
-# done
+for whl in dist/*.whl; do
+    auditwheel repair "$whl" -w dist/
+done
 
 # Upload wheels
 # gcloud auth activate-service-account "$SERVICE_ACCOUNT_NAME" $SERVICE_ACCOUNT_KEY
