@@ -45,11 +45,6 @@ done
 # for whl in dist/*.whl; do
 #     auditwheel repair "$whl" -w dist/
 # done
-ls $GITHUB_WORKSPACE/dist
-pip install setuptools wheel
-python setup.py sdist
-pip install twine
-python -m twine upload --repository testpypi dist/* -u "$PYPI_USERNAME" -p "$PYPI_PASSWORD"
 
 # Upload wheels
 # gcloud auth activate-service-account "$SERVICE_ACCOUNT_NAME" $SERVICE_ACCOUNT_KEY
