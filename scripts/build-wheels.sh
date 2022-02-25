@@ -42,6 +42,7 @@ for PYBIN in /opt/python/cp36-cp36m/bin; do
     # rm -rf $GITHUB_WORKSPACE/cohere/tokenizer
 done
 
+export LD_LIBRARY_PATH=/usr/local/lib
 for whl in dist/*.whl; do
     auditwheel repair "$whl" -w dist/
 done
