@@ -24,4 +24,10 @@ setuptools.setup(
         'Operating System :: OS Independent',
     ],
     python_requires='>=3.6',
+    ext_modules=[
+        setuptools.Extension(
+            name='./cohere/tokenizer',
+            sources=[]
+        )
+    ]
 )
