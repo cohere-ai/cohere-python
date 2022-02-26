@@ -3,6 +3,11 @@ import setuptools
 with open('README.md', 'r', encoding='utf-8') as fh:
     long_description = fh.read()
 
+class BinaryDistribution(Distribution):
+    """Distribution which always forces a binary package with platform name"""
+    def has_ext_modules(foo):
+        return True
+
 setuptools.setup(
     name='cohere',
     version='1.2.3',
@@ -24,10 +29,5 @@ setuptools.setup(
         'Operating System :: OS Independent',
     ],
     python_requires='>=3.6',
-    ext_modules=[
-        setuptools.Extension(
-            name='./cohere/tokenizer/',
-            sources=[]
-        )
-    ]
+    dist_class=BinaryDistribution
 )
