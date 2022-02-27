@@ -16,8 +16,9 @@ for PYVER in 3.6.15; do
 done
 
 python --version
-ls usr/local/go/bin
-python3 --version
+alias python=/usr/local/bin/python3.6.15
+source ~/.bashrc
+python --version
 # export PATH=$PATH:/usr/local/go/bin
 # export GOPATH=$HOME/go
 # export GOBIN=$GOPATH/bin
