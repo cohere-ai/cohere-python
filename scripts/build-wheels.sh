@@ -54,7 +54,7 @@ tar xfz google-cloud-sdk-374.0.0-linux-x86_64.tar.gz -C $HOME
 $HOME/google-cloud-sdk/install.sh
 # $HOME/google-cloud-sdk/bin/gcloud init
 # echo BREAKBREAKBREAKBREAKBREAK
-echo $SERVICE_ACCOUNT_KEY > key.json
+echo $SERVICE_ACCOUNT_KEY > key.json /dev/null 2>&1
 echo BREAKRBEAKRBEARBEKRABREAK
 cat key.json
 echo BREAKRBEAKRBEARBEKRABREAK
