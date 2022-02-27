@@ -1,5 +1,6 @@
 import setuptools
 from setuptools.command.install import install
+from setuptools.dist import Distribution
 
 with open('README.md', 'r', encoding='utf-8') as fh:
     long_description = fh.read()
@@ -19,6 +20,14 @@ class InstallPlatlib(install):
         install.finalize_options(self)
         if self.distribution.has_ext_modules():
             self.install_lib = self.install_platlib
+
+class BinaryDistribution(Distribution):
+
+  def is_pure(self) -> bool:
+    return False
+
+  def has_ext_modules(foo) -> bool:
+    return True
 
 setuptools.setup(
     name='cohere',
@@ -41,5 +50,6 @@ setuptools.setup(
         'Operating System :: OS Independent',
     ],
     python_requires='>=3.6',
+    distclass=BinaryDistribution,
     cmdclass={'bdist_wheel': bdist_wheel, 'install': InstallPlatlib}
 )
