@@ -204,7 +204,7 @@ jobs:
       # - create_wheels_others_64bit
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v1
 
       - name: Install Python
         uses: actions/setup-python@v1
