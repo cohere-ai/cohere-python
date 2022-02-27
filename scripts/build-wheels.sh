@@ -15,6 +15,7 @@ for PYVER in 3.6.15; do
                 cd /
 done
 
+python3.6.15 -V
 export PATH=$PATH:/usr/local/go/bin
 export GOPATH=$HOME/go
 export GOBIN=$GOPATH/bin
