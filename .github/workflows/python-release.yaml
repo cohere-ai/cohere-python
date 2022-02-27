@@ -99,6 +99,14 @@ jobs:
       # v1 is required when using manylinux2010
       - uses: actions/checkout@v1
         
+      - name: ✍️ auth
+        uses: google-github-actions/auth@v0
+        with:
+          credentials_json: SERVICE_ACCOUNT_KEY
+
+      - name: ⤵️ gcloud setup
+        uses: google-github-actions/setup-gcloud@v0
+      
       - name: Install dependencies
         run: yum install -y openssl-devel
 
