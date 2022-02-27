@@ -3,6 +3,7 @@ set -ex
 
 curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-374.0.0-linux-x86_64.tar.gz
 tar xfz google-cloud-sdk-374.0.0-linux-x86_64.tar.gz -C $HOME
+ls
 $HOME/google-cloud-sdk/install.sh
 $HOME/google-cloud-sdk/bin/gcloud init
 echo BREAKBREAKBREAKBREAKBREAK
