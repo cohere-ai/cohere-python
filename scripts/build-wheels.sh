@@ -15,51 +15,46 @@ for PYVER in 3.6.15; do
                 cd /
 done
 
-python --version
-alias python=/usr/local/bin/python3.6.15
-source ~/.bashrc
-python --version
-# export PATH=$PATH:/usr/local/go/bin
-# export GOPATH=$HOME/go
-# export GOBIN=$GOPATH/bin
-# export PATH=$PATH:$GOBIN
+export PATH=$PATH:/usr/local/go/bin
+export GOPATH=$HOME/go
+export GOBIN=$GOPATH/bin
+export PATH=$PATH:$GOBIN
 
-# mkdir -p $GOPATH/src/github.com/cohere-ai
-# for PYBIN in /opt/python/cp36-cp36m/bin; do
-# # for PYBIN in /opt/python/{cp36-cp36m,cp37-cp37m,cp38-cp38,cp39-cp39,cp310-cp310}/bin; do
-#     export PYTHON_SYS_EXECUTABLE="$PYBIN/python"
-#     cd $GOPATH/src/github.com/cohere-ai && git clone https://github.com/cohere-ai/tokenizer.git && cd $GITHUB_WORKSPACE
+mkdir -p $GOPATH/src/github.com/cohere-ai
+for PYBIN in /opt/python/cp36-cp36m/bin; do
+# for PYBIN in /opt/python/{cp36-cp36m,cp37-cp37m,cp38-cp38,cp39-cp39,cp310-cp310}/bin; do
+    export PYTHON_SYS_EXECUTABLE="$PYBIN/python"
+    cd $GOPATH/src/github.com/cohere-ai && git clone https://github.com/cohere-ai/tokenizer.git && cd $GITHUB_WORKSPACE
 
-#    "${PYBIN}/python" -m pip install pybindgen
+   "${PYBIN}/python" -m pip install pybindgen
 
-#     go get golang.org/x/tools/cmd/goimports
-#     go get github.com/go-python/gopy
-#     cd $GOPATH/src/github.com/cohere-ai/tokenizer
-#     ~/go/bin/gopy build -output=tokenizer -vm="${PYBIN}/python" github.com/cohere-ai/tokenizer
-#     cd tokenizer && make build
-#     ls
-#     cp -a $GOPATH/src/github.com/cohere-ai/tokenizer/tokenizer $GITHUB_WORKSPACE/cohere
-#     cd $GITHUB_WORKSPACE
-#     "${PYBIN}/python" setup.py bdist_wheel
-#     rm -rf build/*
-#     rm -rf $GOPATH/src/github.com/cohere-ai/tokenizer
-#     # rm -rf $GITHUB_WORKSPACE/cohere/tokenizer
-# done
+    go get golang.org/x/tools/cmd/goimports
+    go get github.com/go-python/gopy
+    cd $GOPATH/src/github.com/cohere-ai/tokenizer
+    ~/go/bin/gopy build -output=tokenizer -vm="${PYBIN}/python" github.com/cohere-ai/tokenizer
+    cd tokenizer && make build
+    ls
+    cp -a $GOPATH/src/github.com/cohere-ai/tokenizer/tokenizer $GITHUB_WORKSPACE/cohere
+    cd $GITHUB_WORKSPACE
+    "${PYBIN}/python" setup.py bdist_wheel
+    rm -rf build/*
+    rm -rf $GOPATH/src/github.com/cohere-ai/tokenizer
+    # rm -rf $GITHUB_WORKSPACE/cohere/tokenizer
+done
 
-# export LD_LIBRARY_PATH=$GITHUB_WORKSPACE/cohere/tokenizer
-# for whl in dist/*.whl; do
-#     auditwheel repair "$whl" -w dist/
-# done
+export LD_LIBRARY_PATH=$GITHUB_WORKSPACE/cohere/tokenizer
+for whl in dist/*.whl; do
+    auditwheel repair "$whl" -w dist/
+done
 
-# # Upload wheels
-# export CLOUDSDK_PYTHON="python3"
-# curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-374.0.0-linux-x86_64.tar.gz
-# tar xfz google-cloud-sdk-374.0.0-linux-x86_64.tar.gz -C $HOME
-# $HOME/google-cloud-sdk/install.sh
-# $HOME/google-cloud-sdk/bin/gcloud init
-# echo BREAKBREAKBREAKBREAKBREAK
-# $HOME/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$SERVICE_ACCOUNT_KEY
-# curl -O https://storage.googleapis.com/pub/gsutil.tar.gz
-# tar xfz gsutil.tar.gz -C $HOME
-# $HOME/gsutil/gsutil cp -r ./dist "gs://cohere-tokenizer-releases/python/$DIST_DIR"
-
+# Upload wheels
+export CLOUDSDK_PYTHON="python3.6.15"
+curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-374.0.0-linux-x86_64.tar.gz
+tar xfz google-cloud-sdk-374.0.0-linux-x86_64.tar.gz -C $HOME
+$HOME/google-cloud-sdk/install.sh
+$HOME/google-cloud-sdk/bin/gcloud init
+echo BREAKBREAKBREAKBREAKBREAK
+$HOME/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$SERVICE_ACCOUNT_KEY
+curl -O https://storage.googleapis.com/pub/gsutil.tar.gz
+tar xfz gsutil.tar.gz -C $HOME
+$HOME/gsutil/gsutil cp -r ./dist "gs://cohere-tokenizer-releases/python/$DIST_DIR"
