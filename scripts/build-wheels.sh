@@ -48,9 +48,13 @@ for whl in dist/*.whl; do
 done
 
 # Upload wheels
-# gcloud auth activate-service-account "$SERVICE_ACCOUNT_NAME" $SERVICE_ACCOUNT_KEY
-# wget -c https://storage.googleapis.com/pub/gsutil.tar.gz
-# tar xfz gsutil.tar.gz -C $HOME
-# $HOME/gsutil/
-# gsutil cp -r ./dist "gs://cohere-tokenizer-releases/python/$DIST_DIR" ./dist
+wget -c https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-374.0.0-linux-x86_64.tar.gz
+tar xfz google-cloud-sdk-374.0.0-linux-x86_64.tar.gz -C $HOME
+./google-cloud-sdk/install.sh
+./google-cloud-sdk/bin/gcloud init
+echo $SERVICE_ACCOUNT_KEY > key.json
+./google-cloud-sdk/bin/gcloud auth activate-service-account $SERVICE_ACCOUNT_NAME --key key.json
+wget -c https://storage.googleapis.com/pub/gsutil.tar.gz
+tar xfz gsutil.tar.gz -C $HOME
+$HOME/gsutil/gsutil cp -r ./dist "gs://cohere-tokenizer-releases/python/$DIST_DIR"
 
