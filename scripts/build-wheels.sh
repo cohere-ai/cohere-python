@@ -15,7 +15,6 @@ for PYVER in 3.6.15; do
                 cd /
 done
 
-python3.6.15 -V
 export PATH=$PATH:/usr/local/go/bin
 export GOPATH=$HOME/go
 export GOBIN=$GOPATH/bin
@@ -49,7 +48,7 @@ for whl in dist/*.whl; do
 done
 
 # Upload wheels
-export CLOUDSDK_PYTHON="python3.6.15"
+export CLOUDSDK_PYTHON="/opt/python/cp36-cp36m/bin/python"
 curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-374.0.0-linux-x86_64.tar.gz
 tar xfz google-cloud-sdk-374.0.0-linux-x86_64.tar.gz -C $HOME
 $HOME/google-cloud-sdk/install.sh
