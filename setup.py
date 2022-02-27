@@ -5,16 +5,6 @@ from setuptools.dist import Distribution
 with open('README.md', 'r', encoding='utf-8') as fh:
     long_description = fh.read()
 
-try:
-    from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
-    class bdist_wheel(_bdist_wheel):
-        def finalize_options(self):
-            _bdist_wheel.finalize_options(self)
-            self.root_is_pure = False
-except ImportError:
-    bdist_wheel = None
-
-
 class InstallPlatlib(install):
     def finalize_options(self):
         install.finalize_options(self)
@@ -22,7 +12,6 @@ class InstallPlatlib(install):
             self.install_lib = self.install_platlib
 
 class BinaryDistribution(Distribution):
-
   def is_pure(self) -> bool:
     return False
 
@@ -51,5 +40,5 @@ setuptools.setup(
     ],
     python_requires='>=3.6',
     distclass=BinaryDistribution,
-    cmdclass={'bdist_wheel': bdist_wheel, 'install': InstallPlatlib}
+    cmdclass={'install': InstallPlatlib}
 )
