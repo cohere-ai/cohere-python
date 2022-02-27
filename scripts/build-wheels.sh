@@ -52,5 +52,5 @@ done
 # wget -c https://storage.googleapis.com/pub/gsutil.tar.gz
 # tar xfz gsutil.tar.gz -C $HOME
 # $HOME/gsutil/
-gsutil cp -r ./dist "gs://cohere-tokenizer-releases/python/$DIST_DIR" ./dist
+# gsutil cp -r ./dist "gs://cohere-tokenizer-releases/python/$DIST_DIR" ./dist
 
