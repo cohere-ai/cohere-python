@@ -26,7 +26,7 @@ setuptools.setup(
     python_requires='>=3.6',
     ext_modules=[
         setuptools.Extension(
-            name='./cohere/tokenizer/*',
+            name='./cohere/tokenizer/',
             sources=[]
         )
     ]

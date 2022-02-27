@@ -4,21 +4,21 @@ set -ex
 curl -O https://storage.googleapis.com/golang/go1.17.6.linux-amd64.tar.gz
 file go1.17.6.linux-amd64.tar.gz
 tar -C /usr/local -xzf go1.17.6.linux-amd64.tar.gz
+gcc -v
+# for PYVER in 3.6.15; do
+# # for PYVER in 3.6.15 3.7.9 3.8.10 3.9.10 3.10.2; do
+#     curl -O https://www.python.org/ftp/python/$PYVER/Python-$PYVER.tgz && \
+#                 tar xzf Python-$PYVER.tgz && \
+#                 cd Python-$PYVER && \
+#                 ./configure --enable-optimizations --enable-shared && \
+#                 make altinstall && \
+#                 cd /
+# done
 
-for PYVER in 3.6.15; do
-# for PYVER in 3.6.15 3.7.9 3.8.10 3.9.10 3.10.2; do
-    curl -O https://www.python.org/ftp/python/$PYVER/Python-$PYVER.tgz && \
-                tar xzf Python-$PYVER.tgz && \
-                cd Python-$PYVER && \
-                ./configure --enable-optimizations --enable-shared && \
-                make altinstall && \
-                cd /
-done
-
-export PATH=$PATH:/usr/local/go/bin
-export GOPATH=$HOME/go
-export GOBIN=$GOPATH/bin
-export PATH=$PATH:$GOBIN
+# export PATH=$PATH:/usr/local/go/bin
+# export GOPATH=$HOME/go
+# export GOBIN=$GOPATH/bin
+# export PATH=$PATH:$GOBIN
 
 mkdir -p $GOPATH/src/github.com/cohere-ai
 for PYBIN in /opt/python/cp36-cp36m/bin; do
