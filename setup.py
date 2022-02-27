@@ -1,7 +1,24 @@
 import setuptools
+from setuptools.command.install import install
 
 with open('README.md', 'r', encoding='utf-8') as fh:
     long_description = fh.read()
+
+try:
+    from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
+    class bdist_wheel(_bdist_wheel):
+        def finalize_options(self):
+            _bdist_wheel.finalize_options(self)
+            self.root_is_pure = False
+except ImportError:
+    bdist_wheel = None
+
+
+class InstallPlatlib(install):
+    def finalize_options(self):
+        install.finalize_options(self)
+        if self.distribution.has_ext_modules():
+            self.install_lib = self.install_platlib
 
 setuptools.setup(
     name='cohere',
@@ -24,10 +41,5 @@ setuptools.setup(
         'Operating System :: OS Independent',
     ],
     python_requires='>=3.6',
-    ext_modules=[
-        setuptools.Extension(
-            name='cohere.tokenizer',
-            sources=[]
-        )
-    ]
+    cmdclass={'bdist_wheel': bdist_wheel, 'install': InstallPlatlib}
 )
