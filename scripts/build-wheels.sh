@@ -39,7 +39,7 @@ for PYBIN in /opt/python/cp36-cp36m/bin; do
     "${PYBIN}/python" setup.py bdist_wheel
     rm -rf build/*
     rm -rf $GOPATH/src/github.com/cohere-ai/tokenizer
-    # rm -rf $GITHUB_WORKSPACE/cohere/tokenizer
+    rm -rf $GITHUB_WORKSPACE/cohere/tokenizer
 done
 
 export LD_LIBRARY_PATH=$GITHUB_WORKSPACE/cohere/tokenizer
@@ -51,5 +51,6 @@ done
 # gcloud auth activate-service-account "$SERVICE_ACCOUNT_NAME" $SERVICE_ACCOUNT_KEY
 # wget -c https://storage.googleapis.com/pub/gsutil.tar.gz
 # tar xfz gsutil.tar.gz -C $HOME
-# $HOME/gsutil/gsutil cp -r ./dist "gs://cohere-tokenizer-releases/python/$DIST_DIR" ./dist
+# $HOME/gsutil/
+gsutil cp -r ./dist "gs://cohere-tokenizer-releases/python/$DIST_DIR" ./dist
 

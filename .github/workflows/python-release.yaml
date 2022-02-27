@@ -9,8 +9,6 @@ on:
 
 env:
   DIST_DIR: ${{ github.sha }}
-  SERVICE_ACCOUNT_NAME: ${{ secrets.TOKENIZER_SERVICE_ACCOUNT_NAME }}
-  SERVICE_ACCOUNT_KEY: ${{ secrets.TOKENIZER_SERVICE_ACCOUNT_KEY }}
   PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
   PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
 
@@ -98,7 +96,15 @@ jobs:
     steps:
       # v1 is required when using manylinux2010
       - uses: actions/checkout@v1
+      
+      - name: gcloud auth
+        uses: google-github-actions/auth@v0
+        with:
+          credentials_json: ${{ secrets.TOKENIZER_SERVICE_ACCOUNT_KEY }}
 
+      - name: gcloud setup
+        uses: google-github-actions/setup-gcloud@v0
+        
       - name: Install dependencies
         run: yum install -y openssl-devel
 
@@ -210,12 +216,9 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v1
 
-      # - name: Retrieve all wheels
-      #   shell: bash
-      #   run: |
-      #     wget -c https://storage.googleapis.com/pub/gsutil.tar.gz
-      #     tar xfz gsutil.tar.gz -C $HOME
-      #     $HOME/gsutil/gsutil cp -r ./dist "gs://cohere-tokenizer-releases/python/$DIST_DIR" ./dist
+      - name: Retrieve all wheels
+        run: |
+          gsutil cp -r "gs://cohere-tokenizer-releases/python/$DIST_DIR" ./dist
 
       - name: Install dependencies
         run: |
