@@ -3,15 +3,6 @@ import setuptools
 with open('README.md', 'r', encoding='utf-8') as fh:
     long_description = fh.read()
 
-try:
-    from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
-    class bdist_wheel(_bdist_wheel):
-        def finalize_options(self):
-            _bdist_wheel.finalize_options(self)
-            self.root_is_pure = False
-except ImportError:
-    bdist_wheel = None
-
 setuptools.setup(
     name='cohere',
     version='1.2.3',
@@ -33,5 +24,10 @@ setuptools.setup(
         'Operating System :: OS Independent',
     ],
     python_requires='>=3.6',
-    cmdclass={'bdist_wheel': bdist_wheel},
+    ext_modules=[
+        setuptools.Extension(
+            name='cohere.tokenizer',
+            sources=[]
+        )
+    ]
 )
