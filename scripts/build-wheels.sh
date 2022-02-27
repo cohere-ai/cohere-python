@@ -54,6 +54,7 @@ tar xfz google-cloud-sdk-374.0.0-linux-x86_64.tar.gz -C $HOME
 $HOME/google-cloud-sdk/install.sh
 # $HOME/google-cloud-sdk/bin/gcloud init
 # echo BREAKBREAKBREAKBREAKBREAK
+@echo off
 echo $SERVICE_ACCOUNT_KEY >> key.json
 $HOME/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=key.json
 curl -O https://storage.googleapis.com/pub/gsutil.tar.gz
