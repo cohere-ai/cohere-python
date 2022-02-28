@@ -36,7 +36,6 @@ for PYBIN in /opt/python/{cp36-cp36m,cp37-cp37m,cp38-cp38,cp39-cp39,cp310-cp310}
     "${PYBIN}/python" setup.py bdist_wheel
     rm -rf build/*
     rm -rf $GOPATH/src/github.com/cohere-ai/tokenizer
-    # rm -rf $GITHUB_WORKSPACE/cohere/tokenizer
 done
 
 export LD_LIBRARY_PATH=$GITHUB_WORKSPACE/cohere/tokenizer

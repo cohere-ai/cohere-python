@@ -4,8 +4,8 @@ on:
   push:
     branches:
      - "*"
-    # tags:
-    #   - v*
+    tags:
+      - v*
 
 env:
   DIST_DIR: ${{ github.sha }}
