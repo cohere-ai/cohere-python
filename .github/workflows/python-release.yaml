@@ -109,7 +109,7 @@ jobs:
 
       - name: ⤵️ gcloud setup
         uses: google-github-actions/setup-gcloud@v0
-        
+
       - name: Build and audit wheels
         working-directory: ./
         run: sh ./scripts/build-wheels.sh
@@ -227,7 +227,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v0
 
       - name: Retrieve all wheels
-        run: gsutil cp -r "gs://cohere-tokenizer-releases/python/$DIST_DIR" ./dist
+        run: gsutil cp -r "gs://cohere-tokenizer-releases/$DIST_DIR" ./dist
 
       - name: Install dependencies
         run: |

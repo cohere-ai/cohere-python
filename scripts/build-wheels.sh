@@ -48,17 +48,4 @@ for whl in dist/*.whl; do
 done
 
 # Upload wheels
-# export CLOUDSDK_PYTHON="/opt/python/cp36-cp36m/bin/python"
-# curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-374.0.0-linux-x86_64.tar.gz
-# tar xfz google-cloud-sdk-374.0.0-linux-x86_64.tar.gz -C $HOME
-# curl -O https://storage.googleapis.com/pub/gsutil.tar.gz
-# tar xfz gsutil.tar.gz -C $HOME
-# $HOME/google-cloud-sdk/install.sh
-# echo "$SERVICE_ACCOUNT_KEY" > key.json
-# mkdir $HOME/.config/gcloud/
-# cp key.json $HOME/.config/gcloud/application_default_credentials.json
-# $HOME/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=key.json --project="$GCLOUD_PROJECT_ID"
-# $HOME/google-cloud-sdk/bin/gcloud config list core/project
-# ln -s /opt/python/cp36-cp36m/bin/python /usr/bin/python3
-# $HOME/gsutil/
 gsutil cp -r ./dist "gs://cohere-tokenizer-releases/$DIST_DIR"
