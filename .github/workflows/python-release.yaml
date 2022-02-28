@@ -226,9 +226,6 @@ jobs:
       - name: ⤵️ gcloud setup
         uses: google-github-actions/setup-gcloud@v0
 
-      - name: Retrieve all wheels
-        run: gsutil cp -r "gs://cohere-tokenizer-releases/$DIST_DIR" ./dist
-
       - name: Install dependencies
         run: |
           pip install setuptools wheel
@@ -236,6 +233,9 @@ jobs:
       - name: Create source distribution
         working-directory: ./
         run: sh ./scripts/build-sdist.sh
+
+      - name: Retrieve all wheels
+        run: gsutil cp -r "gs://cohere-tokenizer-releases/$DIST_DIR" ./dist
 
       - name: Upload to PyPi
         working-directory: ./
