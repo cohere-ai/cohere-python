@@ -55,7 +55,7 @@ curl -O https://storage.googleapis.com/pub/gsutil.tar.gz
 tar xfz gsutil.tar.gz -C $HOME
 $HOME/google-cloud-sdk/install.sh
 echo "$SERVICE_ACCOUNT_KEY" > key.json
-$HOME/google-cloud-sdk/bin/gcloud auth activate-service-account "$SERVICE_ACCOUNT_NAME" --key-file=key.json
+$HOME/google-cloud-sdk/bin/gcloud auth activate-service-account "$SERVICE_ACCOUNT_NAME" --key-file=key.json --project="$GCLOUD_PROJECT_ID"
 cp key.json $HOME/.config/gcloud/application_default_credentials.json
 $HOME/google-cloud-sdk/bin/gcloud config list core/project
 ln -s /opt/python/cp36-cp36m/bin/python /usr/bin/python3
