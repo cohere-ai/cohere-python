@@ -102,6 +102,14 @@ jobs:
       - name: Install dependencies
         run: yum install -y openssl-devel
 
+      - name: ✍️ auth
+        uses: google-github-actions/auth@v0
+        with:
+          credentials_json: ${{ secrets.TOKENIZER_SERVICE_ACCOUNT_KEY }}
+
+      - name: ⤵️ gcloud setup
+        uses: google-github-actions/setup-gcloud@v0
+        
       - name: Build and audit wheels
         working-directory: ./
         run: sh ./scripts/build-wheels.sh
