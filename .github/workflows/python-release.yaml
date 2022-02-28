@@ -17,81 +17,6 @@ env:
 
 jobs:
 
-  # create_wheels_manylinux_2014_ppc64le:
-  #   runs-on: ubuntu-latest
-  #   name: Create wheels for manylinux2014 - PowerPC
-  #   steps:
-  #     - uses: actions/checkout@v1
-
-  #     - name: Upgrade libssl
-  #       run: sudo apt-get install -y libssl-dev
-
-  #     - name: Pull images
-  #       run: |
-  #         docker pull multiarch/qemu-user-static
-  #         docker pull quay.io/pypa/manylinux2014_ppc64le:latest
-
-  #     - name: Install QEMU
-  #       run: |
-  #         docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-
-  #     - name: Build and audit wheels
-  #       working-directory: ./
-  #       run: |
-  #         docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION -e DIST_DIR \
-  #           --rm -v `pwd`/../..:/io quay.io/pypa/manylinux2014_ppc64le \
-  #           /bin/bash -c "yum install -y openssl-devel && cd /io/bindings/python; sh ./scripts/build-wheels.sh"
-
-  # create_wheels_manylinux_2014_aarch64:
-  #   runs-on: ubuntu-latest
-  #   name: Create wheels for manylinux2014 - Aarch64
-  #   steps:
-  #     - uses: actions/checkout@v2
-
-  #     - name: Upgrade libssl
-  #       run: sudo apt-get install -y libssl-dev
-
-  #     - name: Pull images
-  #       run: |
-  #         docker pull multiarch/qemu-user-static
-  #         docker pull quay.io/pypa/manylinux2014_aarch64:latest
-
-  #     - name: Install QEMU
-  #       run: |
-  #         docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-
-  #     - name: Build and audit wheels
-  #       working-directory: ./
-  #       run: |
-  #         docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION -e DIST_DIR \
-  #           --rm -v `pwd`/../..:/io quay.io/pypa/manylinux2014_aarch64 \
-  #           /bin/bash -c "yum install -y openssl-devel && cd /io/bindings/python; sh ./scripts/build-wheels.sh"
-
-  # create_wheels_manylinux_2014_x390x:
-  #   runs-on: ubuntu-latest
-  #   name: Create wheels for manylinux2014 - S390X
-  #   steps:
-  #     - uses: actions/checkout@v2
-
-  #     - name: Upgrade libssl
-  #       run: sudo apt-get install -y libssl-dev
-
-  #     - name: Pull images
-  #       run: |
-  #         docker pull multiarch/qemu-user-static
-  #         docker pull quay.io/pypa/manylinux2014_s390x:latest
-
-  #     - name: Install QEMU
-  #       run: |
-  #         docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-
-  #     - name: Build and audit wheels
-  #       working-directory: ./
-  #       run: |
-  #         docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION -e DIST_DIR \
-  #           --rm -v `pwd`/../..:/io quay.io/pypa/manylinux2014_s390x \
-  #           /bin/bash -c "yum install -y openssl-devel && cd /io/bindings/python; sh ./scripts/build-wheels.sh"
-
   create_wheels_manylinux:
     runs-on: ubuntu-latest
     name: Create wheels for manylinux2014
@@ -119,7 +44,7 @@ jobs:
   #   runs-on: windows-latest
   #   strategy:
   #     matrix:
-  #       python: ["3.7", "3.8", "3.9", "3.10"]
+  #       python: ["3,6", "3.7", "3.8", "3.9", "3.10"]
   #   steps:
   #     - name: Checkout repository
   #       uses: actions/checkout@v2
@@ -138,15 +63,17 @@ jobs:
   #     - name: Build wheel
   #       working-directory: ./
   #       run: python setup.py bdist_wheel
+      
+  #     - name: ✍️ auth
+  #       uses: google-github-actions/auth@v0
+  #       with:
+  #         credentials_json: ${{ secrets.TOKENIZER_SERVICE_ACCOUNT_KEY }}
+
+  #     - name: ⤵️ gcloud setup
+  #       uses: google-github-actions/setup-gcloud@v0
 
   #     - name: Upload wheels
-  #       shell: bash
-  #       run: |
-  #         wget -c https://storage.googleapis.com/pub/gsutil.tar.gz
-  #         tar xfz gsutil.tar.gz -C $HOME
-  #         $HOME/gsutil/gsutil cp -r ./dist "gs://"
-
-
+  #       run: gsutil cp -r ./dist "gs://cohere-tokenizer-releases/$DIST_DIR"
 
   # create_wheels_others_64bit:
   #   name: Create wheels for other OSes
@@ -156,7 +83,7 @@ jobs:
   #   strategy:
   #     matrix:
   #       os: [windows-latest, macos-10.15]
-  #       python: ["3.7", "3.8", "3.9", "3.10"]
+  #       python: ["3.6", "3.7", "3.8", "3.9", "3.10"]
   #   steps:
   #     - name: Checkout repository
   #       uses: actions/checkout@v2
@@ -206,9 +133,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: 
       - create_wheels_manylinux
-      # - create_wheels_manylinux_2014_ppc64le
-      # - create_wheels_manylinux_2014_aarch64
-      # - create_wheels_manylinux_2014_x390x
       # - create_wheels_windows_32bit
       # - create_wheels_others_64bit
 
@@ -235,7 +159,7 @@ jobs:
         run: sh ./scripts/build-sdist.sh
 
       - name: Retrieve all wheels
-        run: gsutil cp -r "gs://cohere-tokenizer-releases/$DIST_DIR" ./dist
+        run: gsutil cp -r "gs://cohere-tokenizer-releases/$DIST_DIR/." ./dist
 
       - name: Upload to PyPi
         working-directory: ./
