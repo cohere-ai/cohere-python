@@ -53,15 +53,8 @@ curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-
 tar xfz google-cloud-sdk-374.0.0-linux-x86_64.tar.gz -C $HOME
 $HOME/google-cloud-sdk/install.sh
 echo "$SERVICE_ACCOUNT_KEY" > key.json
-cat key.json
-echo ---------------------------------
-echo $SERVICE_ACCOUNT_KEY > key1.json
-cat key1.json
-echo ---------------------------------
-echo ${{ SERVICE_ACCOUNT_KEY }} > key2.json 
-cat key2.json
-echo ---------------------------------
 $HOME/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=key.json
+gcloud config list
 curl -O https://storage.googleapis.com/pub/gsutil.tar.gz
 tar xfz gsutil.tar.gz -C $HOME
 ln -s /opt/python/cp36-cp36m/bin/python /usr/bin/python3
