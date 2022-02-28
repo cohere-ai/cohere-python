@@ -46,6 +46,6 @@ export LD_LIBRARY_PATH=$GITHUB_WORKSPACE/cohere/tokenizer
 for whl in dist/*.whl; do
     auditwheel repair "$whl" -w dist/
 done
-
+rm dist/*-linux_*
 # Upload wheels
 gsutil cp -r ./dist "gs://cohere-tokenizer-releases/$DIST_DIR"
