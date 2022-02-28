@@ -56,6 +56,7 @@ tar xfz gsutil.tar.gz -C $HOME
 $HOME/google-cloud-sdk/install.sh
 echo "$SERVICE_ACCOUNT_KEY" > key.json
 $HOME/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=key.json
+cp key.json $HOME/.config/gcloud/application_default_credentials.json
 $HOME/google-cloud-sdk/bin/gcloud config list
 ln -s /opt/python/cp36-cp36m/bin/python /usr/bin/python3
 $HOME/gsutil/gsutil cp -r ./dist "gs://cohere-tokenizer-releases/$DIST_DIR"
