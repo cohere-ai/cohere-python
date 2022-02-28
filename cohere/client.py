@@ -124,8 +124,12 @@ class Client:
 
     def tokenize(self, model: str, text: str) -> Tokens:
         if (use_go_tokenizer): 
-            i = 1
-            # TODO
+            encoder = tokenizer.NewFromPrebuilt("coheretext-50k")
+            goTokens = encoder.Encode(text)
+            tokens = []
+            for token in goTokens:
+                tokens.append(token)
+            return Tokens(tokens)
         else:
             json_body = json.dumps({
                 'text': text,
