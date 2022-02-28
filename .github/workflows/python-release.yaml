@@ -94,14 +94,13 @@ jobs:
 
   create_wheels_manylinux:
     runs-on: ubuntu-latest
-    name: Create wheels for manylinux2010
-    container: quay.io/pypa/manylinux2010_x86_64
+    name: Create wheels for manylinux2014
+    container: quay.io/pypa/manylinux2014_x86_64
     steps:
-      # v1 is required when using manylinux2010
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       
       - name: Install dependencies
-        run: yum clean all && yum update && yum install -y openssl-devel
+        run: yum install -y openssl-devel
 
       - name: Build and audit wheels
         working-directory: ./
