@@ -213,7 +213,7 @@ jobs:
       - name: ✍️ auth
         uses: google-github-actions/auth@v0
         with:
-          credentials_json: SERVICE_ACCOUNT_KEY
+          credentials_json: ${{ secrets.TOKENIZER_SERVICE_ACCOUNT_KEY }}
 
       - name: ⤵️ gcloud setup
         uses: google-github-actions/setup-gcloud@v0
