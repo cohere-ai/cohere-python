@@ -15,7 +15,7 @@ from cohere.embeddings import Embeddings
 from cohere.error import CohereError
 from cohere.generation import Generations, Generation, TokenLikelihood
 from cohere.tokenize import Tokens
-
+from cohere.classify import Classifications, Classification, LabelProbability
 use_go_tokenizer = False
 try:
     from tokenizer import tokenizer
@@ -143,6 +143,27 @@ class Client:
         })
         response = self.__request(json_body, cohere.CHOOSE_BEST_URL, model)
         return BestChoices(response['scores'], response['tokens'], response['token_log_likelihoods'], mode)
+
+    def classify(
+        self,
+        model: str,
+        texts: List[str],
+        examples: List[dict[str, str]] = List[None],
+        task: str = "",
+        prompt: str = ""
+    ) -> Classifications:
+        json_body = json.dumps({
+            'texts': texts,
+            'examples': examples,
+            'prompt': prompt,
+            'task': task,
+        })
+        response = self.__request(json_body, cohere.CLASSIFY_URL, model)
+
+        classifications: List[Classification] = []
+        for res in response['results']:
+            classifications.append(Classification(res['text'], res['prediction'], res['confidence']))
+        return Classification(classifications)
 
     def tokenize(self, model: str, text: str) -> Tokens:
         if (use_go_tokenizer): 

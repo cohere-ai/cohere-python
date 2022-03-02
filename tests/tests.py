@@ -176,6 +176,16 @@ class TestChooseBest(unittest.TestCase):
                 options=[],
                 mode='APPEND_OPTION')
 
+class TestClassify(unittest.TestCase):
+    def test_success(self):
+        classifications = co.classify('large', ["this restaurant is great!"], [{"this restaurant is bad": "negative"}, {"this place is amazing!": "positive"}])
+        self.assertIsInstance(classifications, list)
+        self.assertIsInstance(classifications[0].text, str)
+        self.assertIsInstance(classifications[0].prediction, str)
+        self.assertIsInstance(classifications[0].labelProbability, list)
+        self.assertIsInstance(classifications[0].labelProbability.probability, float)
+        self.assertEqual(len(classifications), 1)
+
 class TestTokenize(unittest.TestCase):
     def test_success(self):
         tokens = co.tokenize('large', 'tokenize me!')
