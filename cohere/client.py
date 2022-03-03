@@ -197,7 +197,10 @@ class Client:
         else:
             response = requests.request('POST', url, headers=headers, data=json_body)
         try:
-            res = json.loads(response.text)
+            if use_xhr_client:
+                res = json.loads(response)
+            else:
+                res = json.loads(response.text)
         except:
             raise CohereError(
                 message=response.text,
