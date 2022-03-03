@@ -62,7 +62,7 @@ class Client:
         if self.cohere_version != '':
             headers['Cohere-Version'] = self.cohere_version
 
-        url = urljoin(self.api_url, cohere.CHECK_APIs_KEY_URL)
+        url = urljoin(self.api_url, cohere.CHECK_API_KEY_URL)
         if use_xhr_client:
             response = self.__pyfetch(url, headers, None)
         else:
