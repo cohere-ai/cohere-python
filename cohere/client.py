@@ -1,4 +1,6 @@
+from email import header
 import json
+from locale import strcoll
 from typing import List, Any
 from urllib.parse import urljoin
 
@@ -15,6 +17,13 @@ from cohere.embeddings import Embeddings
 from cohere.error import CohereError
 from cohere.generation import Generations, Generation, TokenLikelihood
 from cohere.tokenize import Tokens
+
+use_xhr_client = False
+try:
+    from js import XMLHttpRequest
+    use_xhr_client = True
+except ImportError:
+    pass 
 
 use_go_tokenizer = False
 try:
@@ -53,10 +62,17 @@ class Client:
         if self.cohere_version != '':
             headers['Cohere-Version'] = self.cohere_version
 
-        url = urljoin(self.api_url, cohere.CHECK_API_KEY_URL)
-        response = requests.request('POST', url, headers=headers)
+        url = urljoin(self.api_url, cohere.CHECK_APIs_KEY_URL)
+        if use_xhr_client:
+            response = self.__pyfetch(url, headers, None)
+        else:
+            response = requests.request('POST', url, headers=headers)
+        
         try:
-            res = json.loads(response.text)
+            if use_xhr_client:
+                res = json.loads(response)
+            else:
+                res = json.loads(response.text)
         except:
             raise CohereError(
                 message=response.text,
@@ -159,6 +175,15 @@ class Client:
             response = self.__request(json_body, cohere.TOKENIZE_URL, model)
             return Tokens(response['tokens'])
 
+
+    def __pyfetch(self, url, headers, json_body) -> Response:
+        req = XMLHttpRequest.new()
+        req.open("POST", url, False)
+        for key, value in headers.items():
+            req.setRequestHeader(key, value)
+        req.send(json_body)
+        return req.response
+    
     def __request(self, json_body, endpoint, model) -> Any:
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
@@ -169,7 +194,10 @@ class Client:
             headers['Cohere-Version'] = self.cohere_version
 
         url = urljoin(self.api_url, model + '/' + endpoint)
-        response = requests.request('POST', url, headers=headers, data=json_body)
+        if use_xhr_client:
+            response = self.__pyfetch(url, headers, json_body)
+        else:
+            response = requests.request('POST', url, headers=headers, data=json_body)
         try:
             res = json.loads(response.text)
         except:
