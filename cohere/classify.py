@@ -1,4 +1,3 @@
-from tkinter import Label
 from cohere.response import CohereObject
 from typing import List
 
@@ -23,3 +22,9 @@ class Classifications(CohereObject):
 
     def __next__(self) -> next:
         return next(self.iterator)
+
+class ClassifyExample(CohereObject):
+    def __init__(self, text: str, label: str) -> None:
+        self.text = text
+        self.label = label
+

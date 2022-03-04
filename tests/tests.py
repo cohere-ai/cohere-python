@@ -3,9 +3,11 @@ import unittest
 import cohere
 import string
 import random
+from cohere.classify import ClassifyExample
 
 API_KEY = os.getenv('CO_API_KEY')
 assert type(API_KEY) != None
+cohere.COHERE_API_URL = 'https://stg.api.cohere.ai'
 co = cohere.Client(str(API_KEY))
 
 letters = string.ascii_lowercase
@@ -177,18 +179,26 @@ class TestChooseBest(unittest.TestCase):
                 mode='APPEND_OPTION')
 
 class TestClassify(unittest.TestCase):
-    def test_success(self):
-        classifications = co.classify('large', ["this restaurant is great!"], [{"this restaurant is bad": "negative"}, {"this place is amazing!": "positive"}])
+    def test_successful_classify(self):
+        classifications = co.classify('smallo', ["this restaurant is great!"], [ClassifyExample("this restaurant is bad", "negative"), ClassifyExample("this place is amazing!", "positive")])
         self.assertIsInstance(classifications, list)
         self.assertIsInstance(classifications[0].text, str)
         self.assertIsInstance(classifications[0].prediction, str)
         self.assertIsInstance(classifications[0].labelProbability, list)
         self.assertIsInstance(classifications[0].labelProbability.probability, float)
+        self.assertIsInstance(classifications[0].labelProbability.label, str)
         self.assertEqual(len(classifications), 1)
+
+    def test_empty_inputs_classify(self):
+        with self.assertRaises(cohere.CohereError):
+            classifications = co.classify(
+                'smallo', [], 
+                [ClassifyExample("apple", "fruit"), ClassifyExample("red", "colour"), ClassifyExample("banana", "fruit"), ClassifyExample("blue", "colour")])
+
 
 class TestTokenize(unittest.TestCase):
     def test_success(self):
-        tokens = co.tokenize('large', 'tokenize me!')
+        tokens = co.tokenize('medium', 'tokenize me!')
         self.assertIsInstance(tokens.tokens, list)
         self.assertIsInstance(tokens.length, int)
         self.assertEqual(tokens.length, len(tokens))
@@ -196,7 +206,7 @@ class TestTokenize(unittest.TestCase):
     def test_invalid_text(self):
         with self.assertRaises(cohere.CohereError):
             co.tokenize(
-                model='large',
+                model='medium',
                 text='')
 
 if __name__ == '__main__':

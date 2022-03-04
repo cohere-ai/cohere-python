@@ -15,7 +15,7 @@ from cohere.embeddings import Embeddings
 from cohere.error import CohereError
 from cohere.generation import Generations, Generation, TokenLikelihood
 from cohere.tokenize import Tokens
-from cohere.classify import Classifications, Classification, LabelProbability
+from cohere.classify import Classifications, Classification, ClassifyExample
 use_go_tokenizer = False
 try:
     from tokenizer import tokenizer
@@ -147,21 +147,22 @@ class Client:
     def classify(
         self,
         model: str,
-        texts: List[str],
-        examples: List[dict[str, str]] = List[None],
-        task: str = "",
-        prompt: str = ""
+        inputs: List[str],
+        examples: List[ClassifyExample] = List[None],
+        taskDescription: str = "",
+        outputIndicator: str = ""
     ) -> Classifications:
         json_body = json.dumps({
-            'texts': texts,
+            'texts': inputs,
             'examples': examples,
-            'prompt': prompt,
-            'task': task,
+            'task': taskDescription,
+            'prompt': outputIndicator,
         })
         response = self.__request(json_body, cohere.CLASSIFY_URL, model)
 
         classifications: List[Classification] = []
         for res in response['results']:
+            # add label confidence object creation logic --> add to classifications array
             classifications.append(Classification(res['text'], res['prediction'], res['confidence']))
         return Classification(classifications)
 
