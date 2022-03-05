@@ -15,7 +15,6 @@ from cohere.embeddings import Embeddings
 from cohere.error import CohereError
 from cohere.generation import Generations, Generation, TokenLikelihood
 from cohere.tokens import Tokens
-from cohere.tokenizer import tokenizer
 
 use_go_tokenizer = False
 try:
