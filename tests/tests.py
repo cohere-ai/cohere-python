@@ -3,7 +3,7 @@ import unittest
 import cohere
 import string
 import random
-from cohere.classify import ClassifyExample
+from cohere.classify import Example
 
 API_KEY = os.getenv('CO_API_KEY')
 assert type(API_KEY) != None
@@ -179,7 +179,7 @@ class TestChooseBest(unittest.TestCase):
 
 class TestClassify(unittest.TestCase):
     def test_success(self):
-        prediction = co.classify('medium', ["this restaurant is great!"], [ClassifyExample("this restaurant is bad", "negative"), ClassifyExample("this place is amazing!", "positive")])
+        prediction = co.classify('medium', ["this restaurant is great!"], [Example("this restaurant is bad", "negative"), Example("this place is amazing!", "positive")])
         self.assertIsInstance(prediction.classifications, list)
         self.assertIsInstance(prediction.classifications[0].input, str)
         self.assertIsInstance(prediction.classifications[0].prediction, str)
@@ -192,16 +192,16 @@ class TestClassify(unittest.TestCase):
         with self.assertRaises(cohere.CohereError):
             classifications = co.classify(
                 'medium', [], 
-                [ClassifyExample("apple", "fruit"), ClassifyExample("red", "colour"), ClassifyExample("banana", "fruit"), ClassifyExample("blue", "colour")])
+                [Example("apple", "fruit"), Example("red", "colour"), Example("banana", "fruit"), Example("blue", "colour")])
 
     def test_success_multi_input(self):
-        prediction = co.classify('medium', ["this restaurant is great!", "this restaurant is bad"], [ClassifyExample("this restaurant is bad", "negative"), ClassifyExample("this place is amazing!", "positive")])
+        prediction = co.classify('medium', ["this restaurant is great!", "this restaurant is bad"], [Example("this restaurant is bad", "negative"), Example("this place is amazing!", "positive")])
         self.assertEqual(prediction.classifications[0].prediction, "positive")
         self.assertEqual(prediction.classifications[1].prediction, "negative")
         self.assertEqual(len(prediction.classifications), 2)
 
     def test_success_all_fields(self):
-        prediction = co.classify('medium', ["this restaurant is great!", "this restaurant is bad"], [ClassifyExample("this restaurant is bad", "negative"), ClassifyExample("this place is amazing!", "positive")], "this is a classifier to determine if a restaurant review is positive or negative", "This review is")
+        prediction = co.classify('medium', ["this restaurant is great!", "this restaurant is bad"], [Example("this restaurant is bad", "negative"), Example("this place is amazing!", "positive")], "this is a classifier to determine if a restaurant review is positive or negative", "This review is")
         self.assertEqual(prediction.classifications[0].prediction, "positive")
         self.assertEqual(prediction.classifications[1].prediction, "negative")
 

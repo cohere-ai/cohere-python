@@ -15,7 +15,7 @@ from cohere.embeddings import Embeddings
 from cohere.error import CohereError
 from cohere.generation import Generations, Generation, TokenLikelihood
 from cohere.tokenize import Tokens
-from cohere.classify import Classifications, Classification, ClassifyExample, Confidence
+from cohere.classify import Classifications, Classification, Example, Confidence
 use_go_tokenizer = False
 try:
     from tokenizer import tokenizer
@@ -148,7 +148,7 @@ class Client:
         self,
         model: str,
         inputs: List[str],
-        examples: List[ClassifyExample],
+        examples: List[Example],
         taskDescription: str = "",
         outputIndicator: str = ""
     ) -> Classifications:

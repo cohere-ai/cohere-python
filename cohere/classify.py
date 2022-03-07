@@ -27,7 +27,7 @@ class Classifications(CohereObject):
     def __len__(self) -> int:
         return len(self.classifications)
 
-class ClassifyExample(CohereObject):
+class Example(CohereObject):
     def __init__(self, text: str, label: str) -> None:
         self.text = text
         self.label = label
