@@ -148,11 +148,15 @@ class Client:
         self,
         model: str,
         inputs: List[str],
-        examples: List[ClassifyExample] = List[None],
+        examples: List[ClassifyExample],
         taskDescription: str = "",
         outputIndicator: str = ""
     ) -> Classifications:
-        examples_dicts = [ex._asdict() for ex in examples]
+        examples_dicts: list[dict[str, str]] = []
+        for example in examples:
+            example_dict = {"text": example.text, "label": example.label}
+            examples_dicts.append(example_dict)
+
         json_body = json.dumps({
             'inputs': inputs,
             'examples': examples_dicts,

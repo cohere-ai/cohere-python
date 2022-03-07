@@ -24,5 +24,10 @@ class Classifications(CohereObject):
     def __next__(self) -> next:
         return next(self.iterator)
 
-ClassifyExample = namedtuple('ClassifyExample', ['text', 'label'])
+    def __len__(self) -> int:
+        return len(self.classifications)
 
+class ClassifyExample(CohereObject):
+    def __init__(self, text: str, label: str) -> None:
+        self.text = text
+        self.label = label

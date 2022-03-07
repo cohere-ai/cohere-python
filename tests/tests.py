@@ -7,7 +7,6 @@ from cohere.classify import ClassifyExample
 
 API_KEY = os.getenv('CO_API_KEY')
 assert type(API_KEY) != None
-cohere.COHERE_API_URL = 'https://api.cohere.ai'
 co = cohere.Client(str(API_KEY))
 
 letters = string.ascii_lowercase
@@ -179,7 +178,7 @@ class TestChooseBest(unittest.TestCase):
                 mode='APPEND_OPTION')
 
 class TestClassify(unittest.TestCase):
-    def test_successful_classify(self):
+    def test_success(self):
         prediction = co.classify('medium', ["this restaurant is great!"], [ClassifyExample("this restaurant is bad", "negative"), ClassifyExample("this place is amazing!", "positive")])
         self.assertIsInstance(prediction.classifications, list)
         self.assertIsInstance(prediction.classifications[0].input, str)
@@ -189,18 +188,19 @@ class TestClassify(unittest.TestCase):
         self.assertEqual(len(prediction.classifications), 1)
         self.assertEqual(prediction.classifications[0].prediction, "positive")
 
-    def test_empty_inputs_classify(self):
+    def test_empty_inputs(self):
         with self.assertRaises(cohere.CohereError):
             classifications = co.classify(
                 'medium', [], 
                 [ClassifyExample("apple", "fruit"), ClassifyExample("red", "colour"), ClassifyExample("banana", "fruit"), ClassifyExample("blue", "colour")])
 
-    def test_successful_classify_multi_input(self):
+    def test_success_multi_input(self):
         prediction = co.classify('medium', ["this restaurant is great!", "this restaurant is bad"], [ClassifyExample("this restaurant is bad", "negative"), ClassifyExample("this place is amazing!", "positive")])
         self.assertEqual(prediction.classifications[0].prediction, "positive")
         self.assertEqual(prediction.classifications[1].prediction, "negative")
+        self.assertEqual(len(prediction.classifications), 2)
 
-    def test_successful_classify_all_fields(self):
+    def test_success_all_fields(self):
         prediction = co.classify('medium', ["this restaurant is great!", "this restaurant is bad"], [ClassifyExample("this restaurant is bad", "negative"), ClassifyExample("this place is amazing!", "positive")], "this is a classifier to determine if a restaurant review is positive or negative", "This review is")
         self.assertEqual(prediction.classifications[0].prediction, "positive")
         self.assertEqual(prediction.classifications[1].prediction, "negative")
