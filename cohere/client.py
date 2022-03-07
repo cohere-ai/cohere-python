@@ -167,7 +167,7 @@ class Client:
 
         classifications = []
 
-        for res in response['results']:
+        for res in response['classifications']:
             for i in range(len(res['confidences'])):
                 confidenceObj = Confidence(res['confidences'][i]['option'], res['confidences'][i]['confidence'])
             Classification(res['input'], res['prediction'], confidenceObj)
