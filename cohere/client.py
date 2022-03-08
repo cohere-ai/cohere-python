@@ -32,6 +32,7 @@ except ImportError:
 
 class Client:
     def __init__(self, api_key: str, version: str = None, num_workers: int = 8) -> None:
+        print(use_xhr_client)
         self.api_key = api_key
         self.api_url = cohere.COHERE_API_URL
         self.batch_size = cohere.COHERE_EMBED_BATCH_SIZE
@@ -63,24 +64,22 @@ class Client:
         url = urljoin(self.api_url, cohere.CHECK_API_KEY_URL)
         if use_xhr_client:
             response = self.__pyfetch(url, headers, None)
+            return response
         else:
             response = requests.request('POST', url, headers=headers)
         
         try:
-            if use_xhr_client:
-                res = json.loads(response)
-            else:
-                res = json.loads(response.text)
+            res = json.loads(response.text)
         except:
             raise CohereError(
                 message=response.text,
                 http_status=response.status_code,
                 headers=response.headers)
         if 'message' in res.keys(): # has errors
-                raise CohereError(
-                    message=res['message'],
-                    http_status=response.status_code,
-                    headers=response.headers)
+            raise CohereError(
+                message=res['message'],
+                http_status=response.status_code,
+                headers=response.headers)
         return res
 
     def generate(
@@ -140,12 +139,16 @@ class Client:
                 'truncate': truncate,
             }))
 
-        with ThreadPoolExecutor(max_workers=self.num_workers) as executor:
-            for i in executor.map(self.__request, json_bodys, embed_url_stacked, model_stacked):
-                request_futures.append(i)
-
-        for result in request_futures:
-            responses.extend(result['embeddings'])
+        if use_xhr_client:
+            for json_body in json_bodys:
+                response = self.__request(json_body, cohere.EMBED_URL, model)
+                responses.append(response['embeddings'])
+        else:
+            with ThreadPoolExecutor(max_workers=self.num_workers) as executor:
+                for i in executor.map(self.__request, json_bodys, embed_url_stacked, model_stacked):
+                    request_futures.append(i)
+            for result in request_futures:
+                responses.extend(result['embeddings'])
 
         return Embeddings(responses)
 
@@ -179,8 +182,20 @@ class Client:
         req.open("POST", url, False)
         for key, value in headers.items():
             req.setRequestHeader(key, value)
-        req.send(json_body)
-        return req.response
+        try:
+            req.send(json_body)
+        except:
+            raise CohereError(
+                message=req.responseText,
+                http_status=req.status,
+                headers=req.getAllResponseHeaders())
+        res = json.loads(req.response)
+        if 'message' in res.keys():
+            raise CohereError(
+                message=res['message'],
+                http_status=req.status,
+                headers=req.getAllResponseHeaders())
+        return res
     
     def __request(self, json_body, endpoint, model) -> Any:
         headers = {
@@ -194,21 +209,19 @@ class Client:
         url = urljoin(self.api_url, model + '/' + endpoint)
         if use_xhr_client:
             response = self.__pyfetch(url, headers, json_body)
+            return response
         else:
             response = requests.request('POST', url, headers=headers, data=json_body)
-        try:
-            if use_xhr_client:
-                res = json.loads(response)
-            else:
+            try:
                 res = json.loads(response.text)
-        except:
-            raise CohereError(
-                message=response.text,
-                http_status=response.status_code,
-                headers=response.headers)
-        if 'message' in res.keys(): # has errors
+            except:
                 raise CohereError(
-                    message=res['message'],
+                    message=response.text,
                     http_status=response.status_code,
                     headers=response.headers)
+            if 'message' in res.keys(): # has errors
+                    raise CohereError(
+                        message=res['message'],
+                        http_status=response.status_code,
+                        headers=response.headers)
         return res
