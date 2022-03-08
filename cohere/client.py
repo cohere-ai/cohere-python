@@ -32,7 +32,6 @@ except ImportError:
 
 class Client:
     def __init__(self, api_key: str, version: str = None, num_workers: int = 8) -> None:
-        print(use_xhr_client)
         self.api_key = api_key
         self.api_url = cohere.COHERE_API_URL
         self.batch_size = cohere.COHERE_EMBED_BATCH_SIZE
