@@ -15,6 +15,7 @@ from cohere.embeddings import Embeddings
 from cohere.error import CohereError
 from cohere.generation import Generations, Generation, TokenLikelihood
 from cohere.tokenize import Tokens
+from cohere.classify import Classifications, Classification, Example, Confidence
 
 use_xhr_client = False
 try:
@@ -159,6 +160,37 @@ class Client:
         })
         response = self.__request(json_body, cohere.CHOOSE_BEST_URL, model)
         return BestChoices(response['scores'], response['tokens'], response['token_log_likelihoods'], mode)
+
+    def classify(
+        self,
+        model: str,
+        inputs: List[str],
+        examples: List[Example],
+        taskDescription: str = "",
+        outputIndicator: str = ""
+    ) -> Classifications:
+        examples_dicts: list[dict[str, str]] = []
+        for example in examples:
+            example_dict = {"text": example.text, "label": example.label}
+            examples_dicts.append(example_dict)
+
+        json_body = json.dumps({
+            'inputs': inputs,
+            'examples': examples_dicts,
+            'taskDescription': taskDescription,
+            'outputIndicator': outputIndicator,
+        })
+        response = self.__request(json_body, cohere.CLASSIFY_URL, model)
+
+        classifications = []
+
+        for res in response['classifications']:
+            for i in range(len(res['confidences'])):
+                confidenceObj = Confidence(res['confidences'][i]['option'], res['confidences'][i]['confidence'])
+            Classification(res['input'], res['prediction'], confidenceObj)
+            classifications.append(Classification(res['input'], res['prediction'], confidenceObj))
+
+        return Classifications(classifications)
 
     def tokenize(self, model: str, text: str) -> Tokens:
         if (use_go_tokenizer): 
