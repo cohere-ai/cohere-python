@@ -179,31 +179,39 @@ class TestChooseBest(unittest.TestCase):
 
 class TestClassify(unittest.TestCase):
     def test_success(self):
-        prediction = co.classify('medium', ["this restaurant is great!"], [Example("this restaurant is bad", "negative"), Example("this place is amazing!", "positive")])
+        prediction = co.classify('medium', ["purple"], 
+        [Example("apple", "fruit"), Example("banana", "fruit"), Example("cherry", "fruit"), Example("watermelon", "fruit"), Example("kiwi", "fruit"), 
+        Example("red", "color"), Example("blue", "color"), Example("green", "color"), Example("yellow", "color"), Example("magenta", "color")])
         self.assertIsInstance(prediction.classifications, list)
         self.assertIsInstance(prediction.classifications[0].input, str)
         self.assertIsInstance(prediction.classifications[0].prediction, str)
         self.assertIsInstance(prediction.classifications[0].confidence.confidence, float)
         self.assertIsInstance(prediction.classifications[0].confidence.label, str)
         self.assertEqual(len(prediction.classifications), 1)
-        self.assertEqual(prediction.classifications[0].prediction, "positive")
+        self.assertEqual(prediction.classifications[0].prediction, "color")
 
     def test_empty_inputs(self):
         with self.assertRaises(cohere.CohereError):
             classifications = co.classify(
                 'medium', [], 
-                [Example("apple", "fruit"), Example("red", "colour"), Example("banana", "fruit"), Example("blue", "colour")])
+                [Example("apple", "fruit"), Example("banana", "fruit"), Example("cherry", "fruit"), Example("watermelon", "fruit"), Example("kiwi", "fruit"), 
+                Example("red", "color"), Example("blue", "color"), Example("green", "color"), Example("yellow", "color"), Example("magenta", "color")])
 
     def test_success_multi_input(self):
-        prediction = co.classify('medium', ["this restaurant is great!", "this restaurant is bad"], [Example("this restaurant is bad", "negative"), Example("this place is amazing!", "positive")])
-        self.assertEqual(prediction.classifications[0].prediction, "positive")
-        self.assertEqual(prediction.classifications[1].prediction, "negative")
+        prediction = co.classify('medium', ["purple", "mango"]
+        [Example("apple", "fruit"), Example("banana", "fruit"), Example("cherry", "fruit"), Example("watermelon", "fruit"), Example("kiwi", "fruit"), 
+        Example("red", "color"), Example("blue", "color"), Example("green", "color"), Example("yellow", "color"), Example("magenta", "color")])
+        self.assertEqual(prediction.classifications[0].prediction, "color")
+        self.assertEqual(prediction.classifications[1].prediction, "fruit")
         self.assertEqual(len(prediction.classifications), 2)
 
     def test_success_all_fields(self):
-        prediction = co.classify('medium', ["this restaurant is great!", "this restaurant is bad"], [Example("this restaurant is bad", "negative"), Example("this place is amazing!", "positive")], "this is a classifier to determine if a restaurant review is positive or negative", "This review is")
-        self.assertEqual(prediction.classifications[0].prediction, "positive")
-        self.assertEqual(prediction.classifications[1].prediction, "negative")
+        prediction = co.classify('medium', ["mango", "purple"]
+        [Example("apple", "fruit"), Example("banana", "fruit"), Example("cherry", "fruit"), Example("watermelon", "fruit"), Example("kiwi", "fruit"), 
+        Example("red", "color"), Example("blue", "color"), Example("green", "color"), Example("yellow", "color"), Example("magenta", "color")], 
+        "this is a classifier to determine if a word is a fruit of a color", "This is a")
+        self.assertEqual(prediction.classifications[0].prediction, "fruit")
+        self.assertEqual(prediction.classifications[1].prediction, "color")
 
 
 class TestTokenize(unittest.TestCase):
