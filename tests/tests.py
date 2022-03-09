@@ -198,7 +198,7 @@ class TestClassify(unittest.TestCase):
                 Example("red", "color"), Example("blue", "color"), Example("green", "color"), Example("yellow", "color"), Example("magenta", "color")])
 
     def test_success_multi_input(self):
-        prediction = co.classify('medium', ["purple", "mango"]
+        prediction = co.classify('medium', ["purple", "mango"],
         [Example("apple", "fruit"), Example("banana", "fruit"), Example("cherry", "fruit"), Example("watermelon", "fruit"), Example("kiwi", "fruit"), 
         Example("red", "color"), Example("blue", "color"), Example("green", "color"), Example("yellow", "color"), Example("magenta", "color")])
         self.assertEqual(prediction.classifications[0].prediction, "color")
@@ -206,7 +206,7 @@ class TestClassify(unittest.TestCase):
         self.assertEqual(len(prediction.classifications), 2)
 
     def test_success_all_fields(self):
-        prediction = co.classify('medium', ["mango", "purple"]
+        prediction = co.classify('medium', ["mango", "purple"],
         [Example("apple", "fruit"), Example("banana", "fruit"), Example("cherry", "fruit"), Example("watermelon", "fruit"), Example("kiwi", "fruit"), 
         Example("red", "color"), Example("blue", "color"), Example("green", "color"), Example("yellow", "color"), Example("magenta", "color")], 
         "this is a classifier to determine if a word is a fruit of a color", "This is a")
