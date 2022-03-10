@@ -7,7 +7,7 @@ COHERE_EMBED_BATCH_SIZE = 5
 GENERATE_URL = 'generate'
 EMBED_URL = 'embed'
 CHOOSE_BEST_URL = 'choose-best'
-LIKELIHOOD_URL = 'likelihood'
+CLASSIFY_URL = 'classify'
 
 CHECK_API_KEY_URL = 'check-api-key'
 TOKENIZE_URL = 'tokenize'
