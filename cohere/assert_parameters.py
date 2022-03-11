@@ -27,6 +27,8 @@ def assert_list_parameter (expected_type: Union[type, tuple], name: str, input: 
             message = f"{base_error} but found a {unexpected_type} at index {index}. See {reference_link} for more details."
         )
 
+    return input
+
 def get_base_error (expected_type: Union[type, tuple], name: str) -> str:
     base_error = ""
     if hasattr(expected_type, '__name__'):
