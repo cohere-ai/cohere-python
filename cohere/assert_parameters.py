@@ -2,7 +2,7 @@ import string
 from cohere.error import CohereError
 from typing import Any, Union
 
-def assert_parameter (expected_type: Union[type, tuple[type]], name: str, input: Any, endpoint: str):
+def assert_parameter (expected_type: Union[type, tuple], name: str, input: Any, endpoint: str):
     base_error = get_base_error(expected_type, name)
     
     reference_link = f"https://docs.cohere.ai/{endpoint}-reference/"
@@ -11,7 +11,7 @@ def assert_parameter (expected_type: Union[type, tuple[type]], name: str, input:
     if not isinstance(input, expected_type):
         raise error
 
-def assert_list_parameter (expected_type: Union[type, tuple[type]], name: str, input: Any, endpoint: str):
+def assert_list_parameter (expected_type: Union[type, tuple], name: str, input: Any, endpoint: str):
     if isinstance(input, expected_type):
         return [input]
     
@@ -27,7 +27,7 @@ def assert_list_parameter (expected_type: Union[type, tuple[type]], name: str, i
             message = f"{base_error} but found a {unexpected_type} at index {index}. See {reference_link} for more details."
         )
 
-def get_base_error (expected_type: Union[type, tuple[type]], name: str) -> str:
+def get_base_error (expected_type: Union[type, tuple], name: str) -> str:
     base_error = ""
     if hasattr(expected_type, '__name__'):
         return f"the {name} parameter is expected to be a {expected_type.__name__},"
@@ -36,3 +36,4 @@ def get_base_error (expected_type: Union[type, tuple[type]], name: str) -> str:
         for my_type in expected_type[1:]:
             expected_types += " or a " + my_type.__name__ 
         return f"the {name} parameter is expected to be a {expected_types},"
+    
