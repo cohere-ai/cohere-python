@@ -16,6 +16,8 @@ from cohere.error import CohereError
 from cohere.generation import Generations, Generation, TokenLikelihood
 from cohere.tokenize import Tokens
 from cohere.classify import Classifications, Classification, Example, Confidence
+from cohere.assert_parameters import assert_parameter, assert_list_parameter
+from typing import Union
 
 use_xhr_client = False
 try:
@@ -93,9 +95,21 @@ class Client:
         p: float = 0.75,
         frequency_penalty: float = 0.0,
         presence_penalty: float = 0.0,
-        stop_sequences: List[str] = None,
+        stop_sequences: List[str] = [],
         return_likelihoods: str = 'NONE'
     ) -> Generations:
+        assert_parameter(str, "model", model, "generate")
+        assert_parameter(str, "prompt", prompt, "generate")
+        assert_parameter(int, "num_generations", num_generations, "generate")
+        assert_parameter(int, "max_tokens", max_tokens, "generate")
+        assert_parameter((float, int), "temperature", temperature, "generate")
+        assert_parameter(int, "k", k, "generate")
+        assert_parameter((float, int), "p", p, "generate")
+        assert_parameter((float, int), "frequency_penalty", frequency_penalty, "generate")
+        assert_parameter((float, int), "presence_penalty", presence_penalty, "generate")
+        stop_sequences = assert_list_parameter(str, "stop_sequences", stop_sequences, "generate")
+        assert_parameter(str, "return_likelihoods", return_likelihoods, "generate")
+
         json_body = json.dumps({
             'prompt': prompt,
             'num_generations': num_generations,
@@ -124,7 +138,11 @@ class Client:
             generations.append(Generation(gen['text'], likelihood, token_likelihoods))
         return Generations(generations, return_likelihoods)
 
-    def embed(self, model: str, texts: List[str], truncate: str = 'NONE') -> Embeddings:
+    def embed(self, model: str, texts: Union[str, List[str]], truncate: str = 'NONE') -> Embeddings:
+        assert_parameter(str, "model", model, "embed")
+        texts = assert_list_parameter(str, "texts", texts, "embed")
+        assert_parameter(str, "truncate", truncate, "embed")
+
         responses = []
         json_bodys = []
         request_futures = []
@@ -153,6 +171,11 @@ class Client:
         return Embeddings(responses)
 
     def choose_best(self, model: str, query: str, options: List[str], mode:  str = '') -> BestChoices:
+        assert_parameter(str, "model", model, "classify")
+        assert_parameter(str, "query", query, "classify")
+        texts = assert_list_parameter(str, "options", options, "classify")
+        assert_parameter(str, "mode", mode, "classify")
+
         json_body = json.dumps({
             'query': query,
             'options': options,
@@ -169,6 +192,12 @@ class Client:
         taskDescription: str = "",
         outputIndicator: str = ""
     ) -> Classifications:
+        assert_parameter(str, "model", model, "classify")
+        inputs = assert_list_parameter(str, "inputs", inputs, "classify")
+        examples = assert_list_parameter(Example, "examples", examples, "classify")
+        assert_parameter(str, "taskDescription", taskDescription, "classify")
+        assert_parameter(str, "outputIndicator", outputIndicator, "classify")
+        
         examples_dicts: list[dict[str, str]] = []
         for example in examples:
             example_dict = {"text": example.text, "label": example.label}
