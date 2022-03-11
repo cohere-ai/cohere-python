@@ -32,10 +32,10 @@ def assert_list_parameter (expected_type: Union[type, tuple], name: str, input: 
 def get_base_error (expected_type: Union[type, tuple], name: str) -> str:
     base_error = ""
     if hasattr(expected_type, '__name__'):
-        return f"the {name} parameter is expected to be a {expected_type.__name__},"
+        return f"the {name} parameter is expected to be a list of {expected_type.__name__},"
     else:
         expected_types = expected_type[0].__name__
         for my_type in expected_type[1:]:
             expected_types += " or a " + my_type.__name__ 
         return f"the {name} parameter is expected to be a {expected_types},"
-    
+
