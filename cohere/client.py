@@ -212,10 +212,10 @@ class Client:
         response = self.__request(json_body, cohere.CLASSIFY_URL, model)
 
         classifications = []
-
         for res in response['classifications']:
+            confidenceObj = []
             for i in range(len(res['confidences'])):
-                confidenceObj = Confidence(res['confidences'][i]['option'], res['confidences'][i]['confidence'])
+                confidenceObj.append(Confidence(res['confidences'][i]['option'], res['confidences'][i]['confidence']))
             Classification(res['input'], res['prediction'], confidenceObj)
             classifications.append(Classification(res['input'], res['prediction'], confidenceObj))
 
