@@ -3,7 +3,9 @@ import unittest
 import cohere
 import string
 import random
+from typing import List
 from cohere.classify import Example
+from cohere.assert_parameters import assert_parameter, assert_list_parameter
 
 API_KEY = os.getenv('CO_API_KEY')
 assert type(API_KEY) != None
@@ -30,6 +32,51 @@ def random_texts(num_texts, num_words_per_sentence = 50):
     
     return arr
 
+validStr = "test"
+validStrList = ["test", "hello", "cohere"]
+validEx = Example("a", "b")
+validExList = [Example("a", "b"), Example("apple", "fruit"), Example("this movie is great", "positive")]
+
+def exampleFunction(stringParam: str, listParam: List[str], exampleParam: Example, exampleList: List[Example]):
+    exampleList = assert_list_parameter(Example, "exampleList", exampleList, "endpoint")
+    listParam = assert_list_parameter(str, "listParam", listParam, "endpoint")
+    assert_parameter(str, "stringParam", stringParam, "endpoint")
+    assert_parameter(Example, "exampleParam", exampleParam, "endpoint")
+    return [stringParam, listParam, exampleParam, exampleList]
+
+class TestAssertParameters(unittest.TestCase):
+    def test_valid_basic(self):
+        returningParameters = exampleFunction(validStr, validStrList, validEx, validExList)
+        self.assertEqual(returningParameters, [validStr, validStrList, validEx, validExList])
+    def test_invalid_basic_type(self):
+        with self.assertRaises(cohere.CohereError):
+            exampleFunction(3, validEx, validEx, validExList)
+
+    def test_invalid_basic_list_1(self):
+        with self.assertRaises(cohere.CohereError):
+            exampleFunction(validStr, ["hello", 3, Example("a", "b")], validEx, validExList)
+
+    def test_invalid_basic_list_2(self):
+        with self.assertRaises(cohere.CohereError):
+            exampleFunction(validStr, 3, validEx, validExList)
+    
+    def test_valid_basic_list(self):
+        returningParameters = exampleFunction(validStr, "test", validEx, validExList)
+        self.assertEqual(returningParameters, [validStr, ["test"], validEx, validExList])
+
+    def test_invalid_object_list(self):
+        with self.assertRaises(cohere.CohereError):
+            exampleFunction(validStr, validStrList, validEx, [Example("hi", "hello"), "yes", "no"])
+
+    def test_invalid_object(self):
+        with self.assertRaises(cohere.CohereError):
+            exampleFunction(validStr, validStrList, 0, validExList)
+    
+    def test_valid_object_list(self):
+        returningParameters = exampleFunction(validStr, validStrList, validEx, Example("test", "should be valid"))
+        self.assertEqual(returningParameters[3][0].text, "test")
+        self.assertEqual(returningParameters[3][0].label, "should be valid")
+        
 class TestModel(unittest.TestCase):
     def test_invalid_model(self):
         with self.assertRaises(cohere.CohereError):
