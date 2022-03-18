@@ -134,19 +134,19 @@ class TestEmbed(unittest.TestCase):
 
     def test_success_multiple_batches_in_order(self):
         textAll = []
-        predictionExpected = []
+        predictionsExpected = []
 
-        for _ in range(100):
+        for _ in range(3):
             text_batch = random_texts(cohere.COHERE_EMBED_BATCH_SIZE)
             prediction = co.embed(
                 model='small',
                 texts=text_batch)
             textAll.extend(text_batch)
-            predictionExpected.extend(prediction)
-
-        predictionActual = co.embed(model='small',texts=textAll)
-
-        self.assertListEqual(predictionExpected,list(predictionActual))
+            predictionsExpected.extend(prediction)
+        predictionsActual = co.embed(model='small',texts=textAll)
+        for predictionExpected, predictionActual in zip(predictionsExpected, list(predictionsActual)):
+            for elementExpected, elementAcutal in zip (predictionExpected, predictionActual):
+                self.assertAlmostEqual(elementExpected, elementAcutal, places=1)
 
     def test_invalid_texts(self):
         with self.assertRaises(cohere.CohereError):
@@ -185,8 +185,10 @@ class TestClassify(unittest.TestCase):
         self.assertIsInstance(prediction.classifications, list)
         self.assertIsInstance(prediction.classifications[0].input, str)
         self.assertIsInstance(prediction.classifications[0].prediction, str)
-        self.assertIsInstance(prediction.classifications[0].confidence.confidence, float)
-        self.assertIsInstance(prediction.classifications[0].confidence.label, str)
+        self.assertIsInstance(prediction.classifications[0].confidence[0].confidence, float)
+        self.assertIsInstance(prediction.classifications[0].confidence[0].label, str)
+        self.assertIsInstance(prediction.classifications[0].confidence[1].confidence, float)
+        self.assertIsInstance(prediction.classifications[0].confidence[1].label, str)
         self.assertEqual(len(prediction.classifications), 1)
         self.assertEqual(prediction.classifications[0].prediction, "color")
 
