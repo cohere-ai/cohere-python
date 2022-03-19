@@ -4,6 +4,7 @@ import cohere
 import string
 import random
 from cohere.classify import Example
+from cohere.extract import Extract, ExtractEntity, ExtractExample
 
 API_KEY = os.getenv('CO_API_KEY')
 assert type(API_KEY) != None
@@ -216,6 +217,42 @@ class TestClassify(unittest.TestCase):
         self.assertEqual(prediction.classifications[1].prediction, "color")
 
 
+class TestExtract(unittest.TestCase):
+    def test_success(self):
+        extract = Extract(
+                examples=[ExtractExample(
+                    text="hello my name is John, and I like to play ping pong", 
+                    entities=[ExtractEntity(type="Name", value="John")])],
+                texts=["hello Roberta, how are you doing today?"])
+
+        extractions = co.extract(
+            'small', extract)
+
+        self.assertIsInstance(extractions, list)
+        self.assertIsInstance(extractions[0].text, str)
+        self.assertIsInstance(extractions[0].entities, list)
+        self.assertEqual(extractions[0].entities[0].type, "Name")
+        self.assertEqual(extractions[0].entities[0].value, "Roberta")
+
+    def test_empty_text(self):
+        with self.assertRaises(cohere.CohereError):
+            extract = co.extract(
+                'small', Extract(
+                    examples=[ExtractExample(
+                        text="hello my name is John, and I like to play ping pong", 
+                        entities=[ExtractEntity(type="Name", value="John")])],
+                    texts=[""]))
+    
+    def test_empty_entities(self):
+        with self.assertRaises(cohere.CohereError):
+            extract = co.extract(
+                'small', Extract(
+                    examples=[ExtractExample(
+                        text="hello my name is John, and I like to play ping pong", 
+                        entities=[])],
+                    texts=["hello Roberta, how are you doing today?"]))
+
+    
 class TestTokenize(unittest.TestCase):
     def test_success(self):
         tokens = co.tokenize('medium', 'tokenize me!')

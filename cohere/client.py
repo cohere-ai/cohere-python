@@ -16,6 +16,7 @@ from cohere.error import CohereError
 from cohere.generation import Generations, Generation, TokenLikelihood
 from cohere.tokenize import Tokens
 from cohere.classify import Classifications, Classification, Example, Confidence
+from cohere.extract import Extract, ExtractEntity, ExtractExample, Extraction
 
 use_xhr_client = False
 try:
@@ -191,6 +192,26 @@ class Client:
             classifications.append(Classification(res['input'], res['prediction'], confidenceObj))
 
         return Classifications(classifications)
+
+
+    def extract(
+        self,
+        model: str,
+        extract: Extract,
+    ) -> List[Extraction]:
+        
+        response = self.__request(extract.toJSON(), cohere.EXTRACT_URL, model)
+        extractions = []
+
+        for res in response['results']:
+            extraction = Extraction(**res)
+            extraction.entities = []
+            for entity in res['entities']:
+                extraction.entities.append(ExtractEntity(**entity))
+
+            extractions.append(extraction)
+
+        return extractions
 
     def tokenize(self, model: str, text: str) -> Tokens:
         if (use_go_tokenizer): 
