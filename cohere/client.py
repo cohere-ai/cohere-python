@@ -14,7 +14,7 @@ from cohere.best_choices import BestChoices
 from cohere.embeddings import Embeddings
 from cohere.error import CohereError
 from cohere.generation import Generations, Generation, TokenLikelihood
-from cohere.tokenize import Tokens
+from cohere.tokens import Tokens
 from cohere.classify import Classifications, Classification, Example, Confidence
 
 use_xhr_client = False
