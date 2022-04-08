@@ -4,7 +4,7 @@ import cohere
 import string
 import random
 from cohere.classify import Example
-from cohere.extract import Extract, ExtractEntity, ExtractExample
+from cohere.extract import ExtractEntity, ExtractExample
 
 API_KEY = os.getenv('CO_API_KEY')
 assert type(API_KEY) != None
@@ -180,15 +180,15 @@ class TestChooseBest(unittest.TestCase):
 
 class TestClassify(unittest.TestCase):
     def test_success(self):
-        prediction = co.classify('medium', ["purple"], 
+        prediction = co.classify('small', ["purple"], 
         [Example("apple", "fruit"), Example("banana", "fruit"), Example("cherry", "fruit"), Example("watermelon", "fruit"), Example("kiwi", "fruit"), 
         Example("red", "color"), Example("blue", "color"), Example("green", "color"), Example("yellow", "color"), Example("magenta", "color")])
         self.assertIsInstance(prediction.classifications, list)
         self.assertIsInstance(prediction.classifications[0].input, str)
         self.assertIsInstance(prediction.classifications[0].prediction, str)
-        self.assertIsInstance(prediction.classifications[0].confidence[0].confidence, float)
+        self.assertIsInstance(prediction.classifications[0].confidence[0].confidence, (float, int))
         self.assertIsInstance(prediction.classifications[0].confidence[0].label, str)
-        self.assertIsInstance(prediction.classifications[0].confidence[1].confidence, float)
+        self.assertIsInstance(prediction.classifications[0].confidence[1].confidence, (float, int))
         self.assertIsInstance(prediction.classifications[0].confidence[1].label, str)
         self.assertEqual(len(prediction.classifications), 1)
         self.assertEqual(prediction.classifications[0].prediction, "color")
@@ -219,14 +219,12 @@ class TestClassify(unittest.TestCase):
 
 class TestExtract(unittest.TestCase):
     def test_success(self):
-        extract = Extract(
-                examples=[ExtractExample(
-                    text="hello my name is John, and I like to play ping pong", 
-                    entities=[ExtractEntity(type="Name", value="John")])],
-                texts=["hello Roberta, how are you doing today?"])
+        examples=[ExtractExample(
+            text="hello my name is John, and I like to play ping pong", 
+            entities=[ExtractEntity(type="Name", value="John")])]
+        texts=["hello Roberta, how are you doing today?"]
 
-        extractions = co.extract(
-            'small', extract)
+        extractions = co.extract('small', examples, texts)
 
         self.assertIsInstance(extractions, list)
         self.assertIsInstance(extractions[0].text, str)
@@ -237,20 +235,113 @@ class TestExtract(unittest.TestCase):
     def test_empty_text(self):
         with self.assertRaises(cohere.CohereError):
             extract = co.extract(
-                'small', Extract(
-                    examples=[ExtractExample(
-                        text="hello my name is John, and I like to play ping pong", 
-                        entities=[ExtractEntity(type="Name", value="John")])],
-                    texts=[""]))
+                'small', examples=[ExtractExample(
+                    text="hello my name is John, and I like to play ping pong", 
+                    entities=[ExtractEntity(type="Name", value="John")])],
+                    texts=[""])
     
     def test_empty_entities(self):
         with self.assertRaises(cohere.CohereError):
             extract = co.extract(
-                'small', Extract(
-                    examples=[ExtractExample(
+                'large', examples=[ExtractExample(
                         text="hello my name is John, and I like to play ping pong", 
                         entities=[])],
-                    texts=["hello Roberta, how are you doing today?"]))
+                    texts=["hello Roberta, how are you doing today?"])
+
+    def test_varying_amount_of_entities(self):
+        examples=[
+            ExtractExample(
+                text="the bananas are red", 
+                entities=[ExtractEntity(type="fruit", value="bananas"), ExtractEntity(type="color", value="red")]),
+            ExtractExample(
+                text="i love the color blue",
+                entities=[ExtractEntity(type="color", value="blue")]),
+            ExtractExample(
+                text="i love apples",
+                entities=[ExtractEntity(type="fruit", value="apple")]),    
+            ExtractExample(
+                text="purple is my favorite color",
+                entities=[ExtractEntity(type="color", value="purple")]),
+            ExtractExample(
+                text="wow, that apple is green?",
+                entities=[ExtractEntity(type="fruit", value="apple"), ExtractEntity(type="color", value="green")])]
+        texts=["i love bananas", "my favorite color is yellow", "i love green apples"]
+
+        extractions = co.extract('medium', examples, texts)
+
+        self.assertIsInstance(extractions, list)
+        self.assertIsInstance(extractions[0].text, str)
+        self.assertIsInstance(extractions[1].text, str)
+        self.assertIsInstance(extractions[2].text, str)
+        self.assertIsInstance(extractions[0].entities, list)
+        self.assertIsInstance(extractions[1].entities, list)
+        self.assertIsInstance(extractions[2].entities, list)
+        self.assertEqual(extractions[0].entities[0].type, "fruit")
+        self.assertEqual(extractions[0].entities[0].value, "bananas")
+        self.assertEqual(extractions[1].entities[0].type, "color")
+        self.assertEqual(extractions[1].entities[0].value, "yellow")
+        self.assertEqual(extractions[2].entities[0].type, "fruit")
+        self.assertEqual(extractions[2].entities[0].value, "apple")
+        self.assertEqual(extractions[2].entities[1].type, "color")
+        self.assertEqual(extractions[2].entities[1].value, "green")
+    
+    def test_many_examples_and_multiple_texts(self):
+        examples=[
+            ExtractExample(
+                text="hello my name is John, and I like to play ping pong", 
+                entities=[ExtractEntity(type="Name", value="John"), ExtractEntity(type="Game", value="ping pong")]),
+            ExtractExample(
+                text="greetings, I'm Roberta and I like to play golf",
+                entities=[ExtractEntity(type="Name", value="Roberta"), ExtractEntity(type="Game", value="golf")]),
+            ExtractExample(
+                text="let me introduce myself, my name is Tina and I like to play baseball",
+                entities=[ExtractEntity(type="Name", value="Tina"), ExtractEntity(type="Game", value="baseball")])]
+        texts=["hi, my name is Charlie and I like to play basketball", "hello, I'm Olivia and I like to play soccer"]
+
+        extractions = co.extract('medium', examples, texts)
+
+        self.assertEqual(len(extractions), 2)
+        self.assertIsInstance(extractions, list)
+        self.assertIsInstance(extractions[0].text, str)
+        self.assertIsInstance(extractions[1].text, str)
+        self.assertIsInstance(extractions[0].entities, list)
+        self.assertIsInstance(extractions[1].entities, list)
+        self.assertEqual(extractions[0].entities[0].type, "Name")
+        self.assertEqual(extractions[0].entities[0].value, "Charlie")
+        self.assertEqual(extractions[0].entities[1].type, "Game")
+        self.assertEqual(extractions[0].entities[1].value, "basketball")
+        self.assertEqual(extractions[1].entities[0].type, "Name")
+        self.assertEqual(extractions[1].entities[0].value, "Olivia")
+        self.assertEqual(extractions[1].entities[1].type, "Game")
+        self.assertEqual(extractions[1].entities[1].value, "soccer")
+
+    def test_no_entities(self):
+        examples=[
+            ExtractExample(
+                text="hello my name is John, and I like to play ping pong", 
+                entities=[ExtractEntity(type="Name", value="John"), ExtractEntity(type="Game", value="ping pong")]),
+            ExtractExample(
+                text="greetings, I'm Roberta and I like to play golf",
+                entities=[ExtractEntity(type="Name", value="Roberta"), ExtractEntity(type="Game", value="golf")]),
+            ExtractExample(
+                text="let me introduce myself, my name is Tina and I like to play baseball",
+                entities=[ExtractEntity(type="Name", value="Tina"), ExtractEntity(type="Game", value="baseball")])]
+        texts=["hi, my name is Charlie and I like to play basketball", "hello!"]
+
+        extractions = co.extract('medium', examples, texts)
+
+        self.assertEqual(len(extractions), 2)
+        self.assertIsInstance(extractions, list)
+        self.assertIsInstance(extractions[0].text, str)
+        self.assertIsInstance(extractions[1].text, str)
+        self.assertIsInstance(extractions[0].entities, list)
+        self.assertIsInstance(extractions[1].entities, list)
+        self.assertEqual(extractions[0].entities[0].type, "Name")
+        self.assertEqual(extractions[0].entities[0].value, "Charlie")
+        self.assertEqual(extractions[0].entities[1].type, "Game")
+        self.assertEqual(extractions[0].entities[1].value, "basketball")
+        self.assertEqual(len(extractions[1].entities), 0)
+
 
     
 class TestTokenize(unittest.TestCase):

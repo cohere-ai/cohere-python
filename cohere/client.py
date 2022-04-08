@@ -16,7 +16,7 @@ from cohere.error import CohereError
 from cohere.generation import Generations, Generation, TokenLikelihood
 from cohere.tokenize import Tokens
 from cohere.classify import Classifications, Classification, Example, Confidence
-from cohere.extract import Extract, ExtractEntity, ExtractExample, Extraction
+from cohere.extract import ExtractEntity, ExtractExample, Extraction
 
 use_xhr_client = False
 try:
@@ -197,10 +197,14 @@ class Client:
     def extract(
         self,
         model: str,
-        extract: Extract,
+        examples: List[ExtractExample],
+        texts: List[str]
     ) -> List[Extraction]:
-        
-        response = self.__request(extract.toJSON(), cohere.EXTRACT_URL, model)
+        json_body = json.dumps({
+            'texts': texts,
+            'examples': [ex.toDict() for ex in examples],
+        })
+        response = self.__request(json_body, cohere.EXTRACT_URL, model)
         extractions = []
 
         for res in response['results']:
