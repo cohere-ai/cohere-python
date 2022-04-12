@@ -1,5 +1,4 @@
 import json
-import re
 from typing import List, Any
 from urllib.parse import urljoin
 
