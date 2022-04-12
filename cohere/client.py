@@ -32,12 +32,12 @@ except ImportError:
     pass
 
 class Client:
-    def __init__(self, api_key: str, version: str = None, num_workers: int = 8, proxies: dict = None) -> None:
+    def __init__(self, api_key: str, version: str = None, num_workers: int = 8, **kwargs) -> None:
         self.api_key = api_key
         self.api_url = cohere.COHERE_API_URL
         self.batch_size = cohere.COHERE_EMBED_BATCH_SIZE
         self.num_workers = num_workers
-        self.proxies = proxies
+        self.kwargs = kwargs
         if version is None:
             self.cohere_version = cohere.COHERE_VERSION
         else:
@@ -243,7 +243,7 @@ class Client:
             response = self.__pyfetch(url, headers, json_body)
             return response
         else:
-            response = requests.request('POST', url, headers=headers, data=json_body, proxies=self.proxies)
+            response = requests.request('POST', url, headers=headers, data=json_body, **self.kwargs)
             try:
                 res = json.loads(response.text)
             except:
