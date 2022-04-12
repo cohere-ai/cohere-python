@@ -1,4 +1,5 @@
 import json
+import re
 from typing import List, Any
 from urllib.parse import urljoin
 
@@ -32,12 +33,12 @@ except ImportError:
     pass
 
 class Client:
-    def __init__(self, api_key: str, version: str = None, num_workers: int = 8, **kwargs) -> None:
+    def __init__(self, api_key: str, version: str = None, num_workers: int = 8, **request_kwargs: dict) -> None:
         self.api_key = api_key
         self.api_url = cohere.COHERE_API_URL
         self.batch_size = cohere.COHERE_EMBED_BATCH_SIZE
         self.num_workers = num_workers
-        self.kwargs = kwargs
+        self.request_kwargs = request_kwargs
         if version is None:
             self.cohere_version = cohere.COHERE_VERSION
         else:
@@ -67,7 +68,7 @@ class Client:
             response = self.__pyfetch(url, headers, None)
             return response
         else:
-            response = requests.request('POST', url, headers=headers)
+            response = requests.request('POST', url, headers=headers, **self.request_kwargs)
         
         try:
             res = json.loads(response.text)
@@ -95,7 +96,8 @@ class Client:
         frequency_penalty: float = 0.0,
         presence_penalty: float = 0.0,
         stop_sequences: List[str] = None,
-        return_likelihoods: str = 'NONE'
+        return_likelihoods: str = 'NONE',
+        **request_kwargs: dict
     ) -> Generations:
         json_body = json.dumps({
             'prompt': prompt,
@@ -109,7 +111,7 @@ class Client:
             'stop_sequences': stop_sequences,
             'return_likelihoods': return_likelihoods,
         })
-        response = self.__request(json_body, cohere.GENERATE_URL, model)
+        response = self.__request(json_body, cohere.GENERATE_URL, model, request_kwargs=request_kwargs)
 
         generations: List[Generation] = []
         for gen in response['generations']:
@@ -125,7 +127,7 @@ class Client:
             generations.append(Generation(gen['text'], likelihood, token_likelihoods))
         return Generations(generations, return_likelihoods)
 
-    def embed(self, model: str, texts: List[str], truncate: str = 'NONE') -> Embeddings:
+    def embed(self, model: str, texts: List[str], truncate: str = 'NONE', **request_kwargs: dict) -> Embeddings:
         responses = []
         json_bodys = []
         request_futures = []
@@ -146,20 +148,20 @@ class Client:
                 responses.append(response['embeddings'])
         else:
             with ThreadPoolExecutor(max_workers=self.num_workers) as executor:
-                for i in executor.map(self.__request, json_bodys, embed_url_stacked, model_stacked):
+                for i in executor.map(self.__request, json_bodys, embed_url_stacked, model_stacked, request_kwargs):
                     request_futures.append(i)
             for result in request_futures:
                 responses.extend(result['embeddings'])
 
         return Embeddings(responses)
 
-    def choose_best(self, model: str, query: str, options: List[str], mode:  str = '') -> BestChoices:
+    def choose_best(self, model: str, query: str, options: List[str], mode: str = '', **request_kwargs: dict) -> BestChoices:
         json_body = json.dumps({
             'query': query,
             'options': options,
             'mode': mode,
         })
-        response = self.__request(json_body, cohere.CHOOSE_BEST_URL, model)
+        response = self.__request(json_body, cohere.CHOOSE_BEST_URL, model, request_kwargs=request_kwargs)
         return BestChoices(response['scores'], response['tokens'], response['token_log_likelihoods'], mode)
 
     def classify(
@@ -168,7 +170,8 @@ class Client:
         inputs: List[str],
         examples: List[Example],
         taskDescription: str = "",
-        outputIndicator: str = ""
+        outputIndicator: str = "",
+        **request_kwargs: dict
     ) -> Classifications:
         examples_dicts: list[dict[str, str]] = []
         for example in examples:
@@ -181,7 +184,7 @@ class Client:
             'taskDescription': taskDescription,
             'outputIndicator': outputIndicator,
         })
-        response = self.__request(json_body, cohere.CLASSIFY_URL, model)
+        response = self.__request(json_body, cohere.CLASSIFY_URL, model, request_kwargs=request_kwargs)
 
         classifications = []
         for res in response['classifications']:
@@ -193,7 +196,7 @@ class Client:
 
         return Classifications(classifications)
 
-    def tokenize(self, model: str, text: str) -> Tokens:
+    def tokenize(self, model: str, text: str, **request_kwargs: dict) -> Tokens:
         if (use_go_tokenizer): 
             encoder = tokenizer.NewFromPrebuilt("coheretext-50k")
             goTokens = encoder.Encode(text)
@@ -205,7 +208,7 @@ class Client:
             json_body = json.dumps({
                 'text': text,
             })
-            response = self.__request(json_body, cohere.TOKENIZE_URL, model)
+            response = self.__request(json_body, cohere.TOKENIZE_URL, model, request_kwargs=request_kwargs)
             return Tokens(response['tokens'])
 
 
@@ -229,7 +232,7 @@ class Client:
                 headers=req.getAllResponseHeaders())
         return res
     
-    def __request(self, json_body, endpoint, model) -> Any:
+    def __request(self, json_body, endpoint, model, request_kwargs) -> Any:
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
             'Content-Type': 'application/json',
@@ -243,7 +246,11 @@ class Client:
             response = self.__pyfetch(url, headers, json_body)
             return response
         else:
-            response = requests.request('POST', url, headers=headers, data=json_body, **self.kwargs)
+            use_request_kwargs = self.request_kwargs
+            if request_kwargs:
+                use_request_kwargs = request_kwargs
+                
+            response = requests.request('POST', url, headers=headers, data=json_body, **use_request_kwargs)
             try:
                 res = json.loads(response.text)
             except:
