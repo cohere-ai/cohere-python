@@ -2,8 +2,8 @@ name: Python Release
 
 on:
   push:
-    tags:
-      - v*
+    paths:
+      - "setup.py"
 
 env:
   DIST_DIR: ${{ github.sha }}
