@@ -32,12 +32,12 @@ except ImportError:
     pass
 
 class Client:
-    def __init__(self, api_key: str, version: str = None, num_workers: int = 8, **request_kwargs: dict) -> None:
+    def __init__(self, api_key: str, version: str = None, num_workers: int = 8, request_dict: dict = {}) -> None:
         self.api_key = api_key
         self.api_url = cohere.COHERE_API_URL
         self.batch_size = cohere.COHERE_EMBED_BATCH_SIZE
         self.num_workers = num_workers
-        self.request_kwargs = request_kwargs
+        self.request_dict = request_dict
         if version is None:
             self.cohere_version = cohere.COHERE_VERSION
         else:
@@ -67,7 +67,7 @@ class Client:
             response = self.__pyfetch(url, headers, None)
             return response
         else:
-            response = requests.request('POST', url, headers=headers, **self.request_kwargs)
+            response = requests.request('POST', url, headers=headers)
         
         try:
             res = json.loads(response.text)
@@ -96,7 +96,6 @@ class Client:
         presence_penalty: float = 0.0,
         stop_sequences: List[str] = None,
         return_likelihoods: str = 'NONE',
-        **request_kwargs: dict
     ) -> Generations:
         json_body = json.dumps({
             'prompt': prompt,
@@ -110,7 +109,7 @@ class Client:
             'stop_sequences': stop_sequences,
             'return_likelihoods': return_likelihoods,
         })
-        response = self.__request(json_body, cohere.GENERATE_URL, model, request_kwargs=request_kwargs)
+        response = self.__request(json_body, cohere.GENERATE_URL, model)
 
         generations: List[Generation] = []
         for gen in response['generations']:
@@ -126,7 +125,7 @@ class Client:
             generations.append(Generation(gen['text'], likelihood, token_likelihoods))
         return Generations(generations, return_likelihoods)
 
-    def embed(self, model: str, texts: List[str], truncate: str = 'NONE', **request_kwargs: dict) -> Embeddings:
+    def embed(self, model: str, texts: List[str], truncate: str = 'NONE') -> Embeddings:
         responses = []
         json_bodys = []
         request_futures = []
@@ -140,27 +139,26 @@ class Client:
                 'texts': texts_batch,
                 'truncate': truncate,
             }))
-
         if use_xhr_client:
             for json_body in json_bodys:
                 response = self.__request(json_body, cohere.EMBED_URL, model)
                 responses.append(response['embeddings'])
         else:
             with ThreadPoolExecutor(max_workers=self.num_workers) as executor:
-                for i in executor.map(self.__request, json_bodys, embed_url_stacked, model_stacked, request_kwargs):
+                for i in executor.map(self.__request, json_bodys, embed_url_stacked, model_stacked):
                     request_futures.append(i)
             for result in request_futures:
                 responses.extend(result['embeddings'])
 
         return Embeddings(responses)
 
-    def choose_best(self, model: str, query: str, options: List[str], mode: str = '', **request_kwargs: dict) -> BestChoices:
+    def choose_best(self, model: str, query: str, options: List[str], mode: str = '') -> BestChoices:
         json_body = json.dumps({
             'query': query,
             'options': options,
             'mode': mode,
         })
-        response = self.__request(json_body, cohere.CHOOSE_BEST_URL, model, request_kwargs=request_kwargs)
+        response = self.__request(json_body, cohere.CHOOSE_BEST_URL, model)
         return BestChoices(response['scores'], response['tokens'], response['token_log_likelihoods'], mode)
 
     def classify(
@@ -169,8 +167,7 @@ class Client:
         inputs: List[str],
         examples: List[Example],
         taskDescription: str = "",
-        outputIndicator: str = "",
-        **request_kwargs: dict
+        outputIndicator: str = ""
     ) -> Classifications:
         examples_dicts: list[dict[str, str]] = []
         for example in examples:
@@ -183,7 +180,7 @@ class Client:
             'taskDescription': taskDescription,
             'outputIndicator': outputIndicator,
         })
-        response = self.__request(json_body, cohere.CLASSIFY_URL, model, request_kwargs=request_kwargs)
+        response = self.__request(json_body, cohere.CLASSIFY_URL, model)
 
         classifications = []
         for res in response['classifications']:
@@ -195,7 +192,7 @@ class Client:
 
         return Classifications(classifications)
 
-    def tokenize(self, model: str, text: str, **request_kwargs: dict) -> Tokens:
+    def tokenize(self, model: str, text: str) -> Tokens:
         if (use_go_tokenizer): 
             encoder = tokenizer.NewFromPrebuilt("coheretext-50k")
             goTokens = encoder.Encode(text)
@@ -207,7 +204,7 @@ class Client:
             json_body = json.dumps({
                 'text': text,
             })
-            response = self.__request(json_body, cohere.TOKENIZE_URL, model, request_kwargs=request_kwargs)
+            response = self.__request(json_body, cohere.TOKENIZE_URL, model)
             return Tokens(response['tokens'])
 
 
@@ -231,7 +228,8 @@ class Client:
                 headers=req.getAllResponseHeaders())
         return res
     
-    def __request(self, json_body, endpoint, model, request_kwargs) -> Any:
+    def __request(self, json_body, endpoint, model) -> Any:
+        print(self.request_dict)
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
             'Content-Type': 'application/json',
@@ -245,11 +243,7 @@ class Client:
             response = self.__pyfetch(url, headers, json_body)
             return response
         else:
-            use_request_kwargs = self.request_kwargs
-            if request_kwargs:
-                use_request_kwargs = request_kwargs
-                
-            response = requests.request('POST', url, headers=headers, data=json_body, **use_request_kwargs)
+            response = requests.request('POST', url, headers=headers, data=json_body, **self.request_dict)
             try:
                 res = json.loads(response.text)
             except:
