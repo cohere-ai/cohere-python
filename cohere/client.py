@@ -95,7 +95,7 @@ class Client:
         frequency_penalty: float = 0.0,
         presence_penalty: float = 0.0,
         stop_sequences: List[str] = None,
-        return_likelihoods: str = 'NONE',
+        return_likelihoods: str = 'NONE'
     ) -> Generations:
         json_body = json.dumps({
             'prompt': prompt,
