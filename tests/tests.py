@@ -185,10 +185,9 @@ class TestClassify(unittest.TestCase):
         self.assertIsInstance(prediction.classifications, list)
         self.assertIsInstance(prediction.classifications[0].input, str)
         self.assertIsInstance(prediction.classifications[0].prediction, str)
-
-        self.assertIsInstance(prediction.classifications[0].confidence[0].confidence, int)
+        self.assertIsInstance(prediction.classifications[0].confidence[0].confidence, (int, float))
         self.assertIsInstance(prediction.classifications[0].confidence[0].label, str)
-        self.assertIsInstance(prediction.classifications[0].confidence[1].confidence, int)
+        self.assertIsInstance(prediction.classifications[0].confidence[1].confidence, (int, float))
         self.assertIsInstance(prediction.classifications[0].confidence[1].label, str)
         self.assertEqual(len(prediction.classifications), 1)
         self.assertEqual(prediction.classifications[0].prediction, "color")
