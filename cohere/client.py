@@ -229,7 +229,6 @@ class Client:
         return res
     
     def __request(self, json_body, endpoint, model) -> Any:
-        print(self.request_dict)
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
             'Content-Type': 'application/json',
