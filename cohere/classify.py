@@ -3,9 +3,9 @@ from typing import List
 from collections import namedtuple
 
 class Confidence(CohereObject): 
-    def __init__(self, label: str, confidence: float) -> None:
+    def __init__(self, label: str, value: float) -> None:
         self.label = label
-        self.confidence = confidence
+        self.value = value
 
 class Classification(CohereObject):
     def __init__(self, input: str, prediction: str, confidence: Confidence) -> None:

@@ -186,7 +186,7 @@ class Client:
         for res in response['classifications']:
             confidenceObj = []
             for i in range(len(res['confidences'])):
-                confidenceObj.append(Confidence(res['confidences'][i]['option'], res['confidences'][i]['confidence']))
+                confidenceObj.append(Confidence(res['confidences'][i]['label'], res['confidences'][i]['value']))
             Classification(res['input'], res['prediction'], confidenceObj)
             classifications.append(Classification(res['input'], res['prediction'], confidenceObj))
 
