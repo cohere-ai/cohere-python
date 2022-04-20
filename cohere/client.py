@@ -24,11 +24,11 @@ try:
     from js import XMLHttpRequest
     use_xhr_client = True
 except ImportError:
-    pass 
+    pass
 
 use_go_tokenizer = False
 try:
-    from tokenizer import tokenizer
+    from cohere.tokenizer import tokenizer
     use_go_tokenizer = True
 except ImportError:
     pass
@@ -69,7 +69,7 @@ class Client:
             return response
         else:
             response = requests.request('POST', url, headers=headers)
-        
+
         try:
             res = json.loads(response.text)
         except:
@@ -85,13 +85,13 @@ class Client:
         return res
 
     def generate(
-        self, 
-        model: str, 
+        self,
+        model: str,
         prompt: str,
-        num_generations: int = 1, 
-        max_tokens: int = 20, 
-        temperature: float = 1.0, 
-        k: int = 0, 
+        num_generations: int = 1,
+        max_tokens: int = 20,
+        temperature: float = 1.0,
+        k: int = 0,
         p: float = 0.75,
         frequency_penalty: float = 0.0,
         presence_penalty: float = 0.0,
@@ -130,9 +130,9 @@ class Client:
             token_likelihoods = None
             if return_likelihoods == 'GENERATION' or return_likelihoods == 'ALL':
                 likelihood = gen['likelihood']
-            if 'token_likelihoods' in gen.keys(): 
+            if 'token_likelihoods' in gen.keys():
                 token_likelihoods = []
-                for l in gen['token_likelihoods']: 
+                for l in gen['token_likelihoods']:
                     token_likelihood = l['likelihood'] if 'likelihood' in l.keys() else None
                     token_likelihoods.append(TokenLikelihood(l['token'], token_likelihood))
             generations.append(Generation(gen['text'], likelihood, token_likelihoods))
@@ -222,7 +222,7 @@ class Client:
         return Classifications(classifications)
 
     def tokenize(self, model: str, text: str) -> Tokens:
-        if (use_go_tokenizer): 
+        if (use_go_tokenizer):
             encoder = tokenizer.NewFromPrebuilt("coheretext-50k")
             goTokens = encoder.Encode(text)
             tokens = []
@@ -256,7 +256,7 @@ class Client:
                 http_status=req.status,
                 headers=req.getAllResponseHeaders())
         return res
-    
+
     def __request(self, json_body, endpoint, model) -> Any:
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
