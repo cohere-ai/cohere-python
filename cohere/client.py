@@ -32,11 +32,12 @@ except ImportError:
     pass
 
 class Client:
-    def __init__(self, api_key: str, version: str = None, num_workers: int = 8) -> None:
+    def __init__(self, api_key: str, version: str = None, num_workers: int = 8, request_dict: dict = {}) -> None:
         self.api_key = api_key
         self.api_url = cohere.COHERE_API_URL
         self.batch_size = cohere.COHERE_EMBED_BATCH_SIZE
         self.num_workers = num_workers
+        self.request_dict = request_dict
         if version is None:
             self.cohere_version = cohere.COHERE_VERSION
         else:
@@ -138,7 +139,6 @@ class Client:
                 'texts': texts_batch,
                 'truncate': truncate,
             }))
-
         if use_xhr_client:
             for json_body in json_bodys:
                 response = self.__request(json_body, cohere.EMBED_URL, model)
@@ -152,7 +152,7 @@ class Client:
 
         return Embeddings(responses)
 
-    def choose_best(self, model: str, query: str, options: List[str], mode:  str = '') -> BestChoices:
+    def choose_best(self, model: str, query: str, options: List[str], mode: str = '') -> BestChoices:
         json_body = json.dumps({
             'query': query,
             'options': options,
@@ -242,7 +242,7 @@ class Client:
             response = self.__pyfetch(url, headers, json_body)
             return response
         else:
-            response = requests.request('POST', url, headers=headers, data=json_body)
+            response = requests.request('POST', url, headers=headers, data=json_body, **self.request_dict)
             try:
                 res = json.loads(response.text)
             except:
