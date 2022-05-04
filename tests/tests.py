@@ -154,29 +154,6 @@ class TestEmbed(unittest.TestCase):
                 model='small',
                 texts=[''])
 
-class TestChooseBest(unittest.TestCase):
-    def test_success(self):
-        prediction = co.choose_best(
-            model='large',
-            query='Carol picked up a book and walked to the kitchen. She set it down, picked up her glasses and left. This is in the kitchen now: ',
-            options=['book', 'glasses', 'dog'],
-            mode='APPEND_OPTION')
-        self.assertEqual(len(prediction.scores), 3)
-        self.assertIsInstance(prediction.scores[0], float)
-        self.assertEqual(len(prediction.tokens), 3)
-        self.assertIsInstance(prediction.tokens[0], list)
-        self.assertIsInstance(prediction.tokens[0][0], str)
-        self.assertEqual(len(prediction.token_log_likelihoods), 3)
-        self.assertIsInstance(prediction.token_log_likelihoods[0][0], float)
-
-    def test_empty_options(self):
-        with self.assertRaises(cohere.CohereError):
-            co.choose_best(
-                model='large',
-                query='the best book in the world is',
-                options=[],
-                mode='APPEND_OPTION')
-
 class TestClassify(unittest.TestCase):
     def test_success(self):
         prediction = co.classify('medium', ["purple"],
