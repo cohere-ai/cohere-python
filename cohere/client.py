@@ -10,7 +10,6 @@ from requests import Response
 from concurrent.futures import ThreadPoolExecutor
 
 import cohere
-from cohere.best_choices import BestChoices
 from cohere.embeddings import Embeddings
 from cohere.error import CohereError
 from cohere.generation import Generations, Generation, TokenLikelihood
@@ -151,15 +150,6 @@ class Client:
                 responses.extend(result['embeddings'])
 
         return Embeddings(responses)
-
-    def choose_best(self, model: str, query: str, options: List[str], mode: str = '') -> BestChoices:
-        json_body = json.dumps({
-            'query': query,
-            'options': options,
-            'mode': mode,
-        })
-        response = self.__request(json_body, cohere.CHOOSE_BEST_URL, model)
-        return BestChoices(response['scores'], response['tokens'], response['token_log_likelihoods'], mode)
 
     def classify(
         self,

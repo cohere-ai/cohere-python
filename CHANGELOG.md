@@ -1,6 +1,9 @@
 # Changelog
 
-## 1.0.2 - 2021 11-30
+## 1.3.6 - 2022-05-05
+* [#71](https://github.com/cohere-ai/cohere-python/pull/71) Sunset Choose Best
+
+## 1.0.2 - 2021-11-30
 * [#38](https://github.com/cohere-ai/cohere-python/pull/38)
 	* Handle `truncate` parameter for Embed
 
