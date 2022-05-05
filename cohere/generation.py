@@ -1,5 +1,7 @@
-from cohere.response import CohereObject
+from concurrent.futures import Future
 from typing import List
+
+from cohere.response import AsyncAttribute, CohereObject
 
 
 class TokenLikelihood(CohereObject):
@@ -24,10 +26,14 @@ class Generations(CohereObject):
                  return_likelihoods: str) -> None:
         self.generations = generations
         self.return_likelihoods = return_likelihoods
-        self.iterator = iter(generations)
+        self._iterator = None
 
     def __iter__(self) -> iter:
-        return self.iterator
+        if self._iterator is None:
+            self._iterator = iter(self.generations)
+        return self._iterator
 
     def __next__(self) -> next:
-        return next(self.iterator)
+        if self._iterator is None:
+            self._iterator = iter(self.generations)
+        return next(self._iterator)
