@@ -155,7 +155,7 @@ class Client:
         self,
         model: str,
         inputs: List[str],
-        examples: List[Example],
+        examples: List[Example] = [],
         taskDescription: str = "",
         outputIndicator: str = ""
     ) -> Classifications:
