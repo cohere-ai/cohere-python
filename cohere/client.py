@@ -10,7 +10,6 @@ from requests import Response
 from concurrent.futures import ThreadPoolExecutor
 
 import cohere
-from cohere.best_choices import BestChoices
 from cohere.embeddings import Embeddings
 from cohere.error import CohereError
 from cohere.generation import Generations, Generation, TokenLikelihood
@@ -23,21 +22,22 @@ try:
     from js import XMLHttpRequest
     use_xhr_client = True
 except ImportError:
-    pass 
+    pass
 
 use_go_tokenizer = False
 try:
-    from tokenizer import tokenizer
+    from cohere.tokenizer import tokenizer
     use_go_tokenizer = True
 except ImportError:
     pass
 
 class Client:
-    def __init__(self, api_key: str, version: str = None, num_workers: int = 8) -> None:
+    def __init__(self, api_key: str, version: str = None, num_workers: int = 8, request_dict: dict = {}) -> None:
         self.api_key = api_key
         self.api_url = cohere.COHERE_API_URL
         self.batch_size = cohere.COHERE_EMBED_BATCH_SIZE
         self.num_workers = num_workers
+        self.request_dict = request_dict
         if version is None:
             self.cohere_version = cohere.COHERE_VERSION
         else:
@@ -68,7 +68,7 @@ class Client:
             return response
         else:
             response = requests.request('POST', url, headers=headers)
-        
+
         try:
             res = json.loads(response.text)
         except:
@@ -84,13 +84,13 @@ class Client:
         return res
 
     def generate(
-        self, 
-        model: str, 
+        self,
+        model: str,
         prompt: str,
-        num_generations: int = 1, 
-        max_tokens: int = 20, 
-        temperature: float = 1.0, 
-        k: int = 0, 
+        num_generations: int = 1,
+        max_tokens: int = 20,
+        temperature: float = 1.0,
+        k: int = 0,
         p: float = 0.75,
         frequency_penalty: float = 0.0,
         presence_penalty: float = 0.0,
@@ -117,9 +117,9 @@ class Client:
             token_likelihoods = None
             if return_likelihoods == 'GENERATION' or return_likelihoods == 'ALL':
                 likelihood = gen['likelihood']
-            if 'token_likelihoods' in gen.keys(): 
+            if 'token_likelihoods' in gen.keys():
                 token_likelihoods = []
-                for l in gen['token_likelihoods']: 
+                for l in gen['token_likelihoods']:
                     token_likelihood = l['likelihood'] if 'likelihood' in l.keys() else None
                     token_likelihoods.append(TokenLikelihood(l['token'], token_likelihood))
             generations.append(Generation(gen['text'], likelihood, token_likelihoods))
@@ -139,7 +139,6 @@ class Client:
                 'texts': texts_batch,
                 'truncate': truncate,
             }))
-
         if use_xhr_client:
             for json_body in json_bodys:
                 response = self.__request(json_body, cohere.EMBED_URL, model)
@@ -152,15 +151,6 @@ class Client:
                 responses.extend(result['embeddings'])
 
         return Embeddings(responses)
-
-    def choose_best(self, model: str, query: str, options: List[str], mode:  str = '') -> BestChoices:
-        json_body = json.dumps({
-            'query': query,
-            'options': options,
-            'mode': mode,
-        })
-        response = self.__request(json_body, cohere.CHOOSE_BEST_URL, model)
-        return BestChoices(response['scores'], response['tokens'], response['token_log_likelihoods'], mode)
 
     def classify(
         self,
@@ -218,7 +208,7 @@ class Client:
         return extractions
 
     def tokenize(self, model: str, text: str) -> Tokens:
-        if (use_go_tokenizer): 
+        if (use_go_tokenizer):
             encoder = tokenizer.NewFromPrebuilt("coheretext-50k")
             goTokens = encoder.Encode(text)
             tokens = []
@@ -252,7 +242,7 @@ class Client:
                 http_status=req.status,
                 headers=req.getAllResponseHeaders())
         return res
-    
+
     def __request(self, json_body, endpoint, model) -> Any:
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
@@ -267,7 +257,7 @@ class Client:
             response = self.__pyfetch(url, headers, json_body)
             return response
         else:
-            response = requests.request('POST', url, headers=headers, data=json_body)
+            response = requests.request('POST', url, headers=headers, data=json_body, **self.request_dict)
             try:
                 res = json.loads(response.text)
             except:

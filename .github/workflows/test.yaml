@@ -4,10 +4,10 @@ jobs:
   run_tests:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-      with:
-        python-version: '3.6'
-    - env:
-        CO_API_KEY: ${{ secrets.CO_API_PROD_KEY }}
-      run: pip install requests && python -m unittest tests/tests.py
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.6"
+      - env:
+          CO_API_KEY: ${{ secrets.CO_API_PROD_KEY }}
+        run: pip install requests && python -m unittest tests/tests.py

@@ -28,7 +28,7 @@ def random_texts(num_texts, num_words_per_sentence = 50):
 
     for _ in range(num_texts):
         arr.append(random_sentence(num_words_per_sentence))
-    
+
     return arr
 
 class TestModel(unittest.TestCase):
@@ -70,7 +70,7 @@ class TestGenerate(unittest.TestCase):
         prediction = co.generate(
             model='small',
             prompt='co:here',
-            max_tokens=1, 
+            max_tokens=1,
             return_likelihoods='GENERATION')
         self.assertTrue(prediction.generations[0].token_likelihoods)
         self.assertTrue(prediction.generations[0].token_likelihoods[0].token)
@@ -81,7 +81,7 @@ class TestGenerate(unittest.TestCase):
         prediction = co.generate(
             model='small',
             prompt='hi',
-            max_tokens=1, 
+            max_tokens=1,
             return_likelihoods='ALL')
         self.assertEqual(len(prediction.generations[0].token_likelihoods), 2)
         self.assertIsNotNone(prediction.generations[0].likelihood)
@@ -92,7 +92,7 @@ class TestGenerate(unittest.TestCase):
             co.generate(
                 model='large',
                 prompt='hi',
-                max_tokens=1, 
+                max_tokens=1,
                 temperature=-1)
 
 class TestEmbed(unittest.TestCase):
@@ -105,7 +105,7 @@ class TestEmbed(unittest.TestCase):
         self.assertIsInstance(prediction.embeddings[1], list)
         self.assertEqual(len(prediction.embeddings[0]), 1024)
         self.assertEqual(len(prediction.embeddings[1]), 1024)
-    
+
     def test_success_multiple_batches(self):
         prediction = co.embed(
             model='small',
@@ -155,40 +155,17 @@ class TestEmbed(unittest.TestCase):
                 model='small',
                 texts=[''])
 
-class TestChooseBest(unittest.TestCase):
-    def test_success(self):
-        prediction = co.choose_best(
-            model='large',
-            query='Carol picked up a book and walked to the kitchen. She set it down, picked up her glasses and left. This is in the kitchen now: ',
-            options=['book', 'glasses', 'dog'],
-            mode='APPEND_OPTION')
-        self.assertEqual(len(prediction.scores), 3)
-        self.assertIsInstance(prediction.scores[0], float)
-        self.assertEqual(len(prediction.tokens), 3)
-        self.assertIsInstance(prediction.tokens[0], list)
-        self.assertIsInstance(prediction.tokens[0][0], str)
-        self.assertEqual(len(prediction.token_log_likelihoods), 3)
-        self.assertIsInstance(prediction.token_log_likelihoods[0][0], float)
-
-    def test_empty_options(self):
-        with self.assertRaises(cohere.CohereError):
-            co.choose_best(
-                model='large',
-                query='the best book in the world is',
-                options=[],
-                mode='APPEND_OPTION')
-
 class TestClassify(unittest.TestCase):
     def test_success(self):
-        prediction = co.classify('small', ["purple"], 
-        [Example("apple", "fruit"), Example("banana", "fruit"), Example("cherry", "fruit"), Example("watermelon", "fruit"), Example("kiwi", "fruit"), 
+        prediction = co.classify('medium', ["purple"],
+        [Example("apple", "fruit"), Example("banana", "fruit"), Example("cherry", "fruit"), Example("watermelon", "fruit"), Example("kiwi", "fruit"),
         Example("red", "color"), Example("blue", "color"), Example("green", "color"), Example("yellow", "color"), Example("magenta", "color")])
         self.assertIsInstance(prediction.classifications, list)
         self.assertIsInstance(prediction.classifications[0].input, str)
         self.assertIsInstance(prediction.classifications[0].prediction, str)
-        self.assertIsInstance(prediction.classifications[0].confidence[0].confidence, (float, int))
+        self.assertIsInstance(prediction.classifications[0].confidence[0].confidence, (int, float))
         self.assertIsInstance(prediction.classifications[0].confidence[0].label, str)
-        self.assertIsInstance(prediction.classifications[0].confidence[1].confidence, (float, int))
+        self.assertIsInstance(prediction.classifications[0].confidence[1].confidence, (int, float))
         self.assertIsInstance(prediction.classifications[0].confidence[1].label, str)
         self.assertEqual(len(prediction.classifications), 1)
         self.assertEqual(prediction.classifications[0].prediction, "color")
@@ -196,13 +173,13 @@ class TestClassify(unittest.TestCase):
     def test_empty_inputs(self):
         with self.assertRaises(cohere.CohereError):
             classifications = co.classify(
-                'medium', [], 
-                [Example("apple", "fruit"), Example("banana", "fruit"), Example("cherry", "fruit"), Example("watermelon", "fruit"), Example("kiwi", "fruit"), 
+                'medium', [],
+                [Example("apple", "fruit"), Example("banana", "fruit"), Example("cherry", "fruit"), Example("watermelon", "fruit"), Example("kiwi", "fruit"),
                 Example("red", "color"), Example("blue", "color"), Example("green", "color"), Example("yellow", "color"), Example("magenta", "color")])
 
     def test_success_multi_input(self):
         prediction = co.classify('medium', ["purple", "mango"],
-        [Example("apple", "fruit"), Example("banana", "fruit"), Example("cherry", "fruit"), Example("watermelon", "fruit"), Example("kiwi", "fruit"), 
+        [Example("apple", "fruit"), Example("banana", "fruit"), Example("cherry", "fruit"), Example("watermelon", "fruit"), Example("kiwi", "fruit"),
         Example("red", "color"), Example("blue", "color"), Example("green", "color"), Example("yellow", "color"), Example("magenta", "color")])
         self.assertEqual(prediction.classifications[0].prediction, "color")
         self.assertEqual(prediction.classifications[1].prediction, "fruit")
@@ -210,8 +187,8 @@ class TestClassify(unittest.TestCase):
 
     def test_success_all_fields(self):
         prediction = co.classify('medium', ["mango", "purple"],
-        [Example("apple", "fruit"), Example("banana", "fruit"), Example("cherry", "fruit"), Example("watermelon", "fruit"), Example("kiwi", "fruit"), 
-        Example("red", "color"), Example("blue", "color"), Example("green", "color"), Example("yellow", "color"), Example("magenta", "color")], 
+        [Example("apple", "fruit"), Example("banana", "fruit"), Example("cherry", "fruit"), Example("watermelon", "fruit"), Example("kiwi", "fruit"),
+        Example("red", "color"), Example("blue", "color"), Example("green", "color"), Example("yellow", "color"), Example("magenta", "color")],
         "this is a classifier to determine if a word is a fruit of a color", "This is a")
         self.assertEqual(prediction.classifications[0].prediction, "fruit")
         self.assertEqual(prediction.classifications[1].prediction, "color")
