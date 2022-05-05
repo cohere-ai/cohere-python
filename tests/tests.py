@@ -306,7 +306,6 @@ class TestExtract(unittest.TestCase):
         self.assertEqual(len(extractions[1].entities), 0)
 
 
-    
 class TestTokenize(unittest.TestCase):
     def test_success(self):
         tokens = co.tokenize('medium', 'tokenize me!')

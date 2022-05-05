@@ -183,7 +183,6 @@ class Client:
 
         return Classifications(classifications)
 
-
     def extract(
         self,
         model: str,
@@ -221,7 +220,6 @@ class Client:
             })
             response = self.__request(json_body, cohere.TOKENIZE_URL, model)
             return Tokens(response['tokens'])
-
 
     def __pyfetch(self, url, headers, json_body) -> Response:
         req = XMLHttpRequest.new()
