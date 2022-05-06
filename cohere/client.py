@@ -253,5 +253,5 @@ class Client:
                     message=res["message"],
                     http_status=response.status_code,
                     headers=response.headers)
-        a = 'blah'
+
         return res
