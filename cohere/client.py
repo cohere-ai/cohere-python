@@ -45,8 +45,8 @@ class Client:
 
         try:
             res = self.check_api_key()
-            if not res["valid"]:
-                raise CohereError("invalid api key")
+            if not res['valid']:
+                raise CohereError('invalid api key')
         except CohereError as e:
             raise CohereError(
                 message=e.message,
@@ -55,19 +55,19 @@ class Client:
 
     def check_api_key(self) -> Response:
         headers = {
-            "Authorization": "BEARER {}".format(self.api_key),
-            "Content-Type": "application/json",
-            "Request-Source": "python-sdk",
+            'Authorization': 'BEARER {}'.format(self.api_key),
+            'Content-Type': 'application/json',
+            'Request-Source': 'python-sdk',
         }
-        if self.cohere_version != "":
-            headers["Cohere-Version"] = self.cohere_version
+        if self.cohere_version != '':
+            headers['Cohere-Version'] = self.cohere_version
 
         url = urljoin(self.api_url, cohere.CHECK_API_KEY_URL)
         if use_xhr_client:
             response = self.__pyfetch(url, headers, None)
             return response
         else:
-            response = requests.request("POST", url, headers=headers)
+            response = requests.request('POST', url, headers=headers)
 
         try:
             res = json.loads(response.text)
@@ -76,9 +76,9 @@ class Client:
                 message=response.text,
                 http_status=response.status_code,
                 headers=response.headers)
-        if "message" in res.keys():  # has errors
+        if 'message' in res.keys():  # has errors
             raise CohereError(
-                message=res["message"],
+                message=res['message'],
                 http_status=response.status_code,
                 headers=response.headers)
         return res
@@ -95,39 +95,39 @@ class Client:
         frequency_penalty: float = 0.0,
         presence_penalty: float = 0.0,
         stop_sequences: List[str] = None,
-        return_likelihoods: str = "NONE"
+        return_likelihoods: str = 'NONE'
     ) -> Generations:
         json_body = json.dumps({
-            "prompt": prompt,
-            "num_generations": num_generations,
-            "max_tokens": max_tokens,
-            "temperature": temperature,
-            "k": k,
-            "p": p,
-            "frequency_penalty": frequency_penalty,
-            "presence_penalty": presence_penalty,
-            "stop_sequences": stop_sequences,
-            "return_likelihoods": return_likelihoods,
+            'prompt': prompt,
+            'num_generations': num_generations,
+            'max_tokens': max_tokens,
+            'temperature': temperature,
+            'k': k,
+            'p': p,
+            'frequency_penalty': frequency_penalty,
+            'presence_penalty': presence_penalty,
+            'stop_sequences': stop_sequences,
+            'return_likelihoods': return_likelihoods,
         })
         response = self.__request(json_body, cohere.GENERATE_URL, model)
 
         generations: List[Generation] = []
-        for gen in response["generations"]:
+        for gen in response['generations']:
             likelihood = None
             token_likelihoods = None
-            if return_likelihoods == "GENERATION" or return_likelihoods == "ALL":
-                likelihood = gen["likelihood"]
-            if "token_likelihoods" in gen.keys():
+            if return_likelihoods == 'GENERATION' or return_likelihoods == 'ALL':
+                likelihood = gen['likelihood']
+            if 'token_likelihoods' in gen.keys():
                 token_likelihoods = []
-                for likelihoods in gen["token_likelihoods"]:
-                    token_likelihood = likelihoods["likelihood"] if "likelihood" in likelihoods.keys() else None
+                for likelihoods in gen['token_likelihoods']:
+                    token_likelihood = likelihoods['likelihood'] if 'likelihood' in likelihoods.keys() else None
                     token_likelihoods.append(
-                        TokenLikelihood(likelihoods["token"], token_likelihood))
+                        TokenLikelihood(likelihoods['token'], token_likelihood))
             generations.append(Generation(
-                gen["text"], likelihood, token_likelihoods))
+                gen['text'], likelihood, token_likelihoods))
         return Generations(generations, return_likelihoods)
 
-    def embed(self, model: str, texts: List[str], truncate: str = "NONE") -> Embeddings:
+    def embed(self, model: str, texts: List[str], truncate: str = 'NONE') -> Embeddings:
         responses = []
         json_bodys = []
         request_futures = []
@@ -138,19 +138,19 @@ class Client:
         for i in range(0, len(texts), self.batch_size):
             texts_batch = texts[i:i+self.batch_size]
             json_bodys.append(json.dumps({
-                "texts": texts_batch,
-                "truncate": truncate,
+                'texts': texts_batch,
+                'truncate': truncate,
             }))
         if use_xhr_client:
             for json_body in json_bodys:
                 response = self.__request(json_body, cohere.EMBED_URL, model)
-                responses.append(response["embeddings"])
+                responses.append(response['embeddings'])
         else:
             with ThreadPoolExecutor(max_workers=self.num_workers) as executor:
                 for i in executor.map(self.__request, json_bodys, embed_url_stacked, model_stacked):
                     request_futures.append(i)
             for result in request_futures:
-                responses.extend(result["embeddings"])
+                responses.extend(result['embeddings'])
 
         return Embeddings(responses)
 
@@ -159,38 +159,38 @@ class Client:
         model: str,
         inputs: List[str],
         examples: List[Example] = [],
-        taskDescription: str = "",
-        outputIndicator: str = ""
+        taskDescription: str = '',
+        outputIndicator: str = ''
     ) -> Classifications:
         examples_dicts: list[dict[str, str]] = []
         for example in examples:
-            example_dict = {"text": example.text, "label": example.label}
+            example_dict = {'text': example.text, 'label': example.label}
             examples_dicts.append(example_dict)
 
         json_body = json.dumps({
-            "inputs": inputs,
-            "examples": examples_dicts,
-            "taskDescription": taskDescription,
-            "outputIndicator": outputIndicator,
+            'inputs': inputs,
+            'examples': examples_dicts,
+            'taskDescription': taskDescription,
+            'outputIndicator': outputIndicator,
         })
         response = self.__request(json_body, cohere.CLASSIFY_URL, model)
 
         classifications = []
-        for res in response["classifications"]:
+        for res in response['classifications']:
             confidenceObj = []
-            for i in range(len(res["confidences"])):
+            for i in range(len(res['confidences'])):
                 confidenceObj.append(Confidence(
-                    res["confidences"][i]["option"],
-                    res["confidences"][i]["confidence"]))
-            Classification(res["input"], res["prediction"], confidenceObj)
+                    res['confidences'][i]['option'],
+                    res['confidences'][i]['confidence']))
+            Classification(res['input'], res['prediction'], confidenceObj)
             classifications.append(Classification(
-                res["input"], res["prediction"], confidenceObj))
+                res['input'], res['prediction'], confidenceObj))
 
         return Classifications(classifications)
 
     def tokenize(self, model: str, text: str) -> Tokens:
         if (use_go_tokenizer):
-            encoder = tokenizer.NewFromPrebuilt("coheretext-50k")
+            encoder = tokenizer.NewFromPrebuilt('coheretext-50k')
             goTokens = encoder.Encode(text)
             tokens = []
             for token in goTokens:
@@ -198,14 +198,14 @@ class Client:
             return Tokens(tokens)
         else:
             json_body = json.dumps({
-                "text": text,
+                'text': text,
             })
             response = self.__request(json_body, cohere.TOKENIZE_URL, model)
-            return Tokens(response["tokens"])
+            return Tokens(response['tokens'])
 
     def __pyfetch(self, url, headers, json_body) -> Response:
         req = XMLHttpRequest.new()
-        req.open("POST", url, False)
+        req.open('POST', url, False)
         for key, value in headers.items():
             req.setRequestHeader(key, value)
         try:
@@ -216,28 +216,28 @@ class Client:
                 http_status=req.status,
                 headers=req.getAllResponseHeaders())
         res = json.loads(req.response)
-        if "message" in res.keys():
+        if 'message' in res.keys():
             raise CohereError(
-                message=res["message"],
+                message=res['message'],
                 http_status=req.status,
                 headers=req.getAllResponseHeaders())
         return res
 
     def __request(self, json_body, endpoint, model) -> Any:
         headers = {
-            "Authorization": "BEARER {}".format(self.api_key),
-            "Content-Type": "application/json",
-            "Request-Source": "python-sdk",
+            'Authorization': 'BEARER {}'.format(self.api_key),
+            'Content-Type': 'application/json',
+            'Request-Source': 'python-sdk',
         }
-        if self.cohere_version != "":
-            headers["Cohere-Version"] = self.cohere_version
+        if self.cohere_version != '':
+            headers['Cohere-Version'] = self.cohere_version
 
-        url = urljoin(self.api_url, model + "/" + endpoint)
+        url = urljoin(self.api_url, model + '/' + endpoint)
         if use_xhr_client:
             response = self.__pyfetch(url, headers, json_body)
             return response
         else:
-            response = requests.request("POST", url,
+            response = requests.request('POST', url,
                                         headers=headers,
                                         data=json_body,
                                         **self.request_dict)
@@ -248,9 +248,9 @@ class Client:
                     message=response.text,
                     http_status=response.status_code,
                     headers=response.headers)
-            if "message" in res.keys():  # has errors
+            if 'message' in res.keys():  # has errors
                 raise CohereError(
-                    message=res["message"],
+                    message=res['message'],
                     http_status=response.status_code,
                     headers=response.headers)
 

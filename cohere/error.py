@@ -12,11 +12,11 @@ class CohereError(Exception):
         self.headers = headers or {}
 
     def __str__(self) -> str:
-        msg = self.message or "<empty message>"
+        msg = self.message or '<empty message>'
         return msg
 
     def __repr__(self) -> str:
-        return "%s(message=%r, http_status=%r)" % (
+        return '%s(message=%r, http_status=%r)' % (
             self.__class__.__name__,
             self.message,
             self.http_status,
