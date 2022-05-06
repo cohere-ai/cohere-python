@@ -5,14 +5,16 @@ import string
 import random
 from cohere.classify import Example
 
-API_KEY = os.getenv('CO_API_KEY')
-assert type(API_KEY) != None
+API_KEY = os.getenv("CO_API_KEY")
+assert type(API_KEY)
 co = cohere.Client(str(API_KEY))
 
 letters = string.ascii_lowercase
 
+
 def random_word():
-    return ''.join(random.choice(letters) for _ in range(10))
+    return "".join(random.choice(letters) for _ in range(10))
+
 
 def random_sentence(num_words):
     sentence = ""
@@ -22,7 +24,8 @@ def random_sentence(num_words):
 
     return sentence
 
-def random_texts(num_texts, num_words_per_sentence = 50):
+
+def random_texts(num_texts, num_words_per_sentence=50):
     arr = []
 
     for _ in range(num_texts):
@@ -30,75 +33,78 @@ def random_texts(num_texts, num_words_per_sentence = 50):
 
     return arr
 
+
 class TestModel(unittest.TestCase):
     def test_invalid_model(self):
         with self.assertRaises(cohere.CohereError):
             co.generate(
-                model='this-better-not-exist',
-                prompt='co:here',
+                model="this-better-not-exist",
+                prompt="co:here",
                 max_tokens=1)
 
     def test_no_version_works(self):
         cohere.Client(API_KEY).generate(
-            model='small',
-            prompt='co:here',
+            model="small",
+            prompt="co:here",
             max_tokens=1)
 
     def test_invalid_version_fails(self):
         with self.assertRaises(cohere.CohereError):
-            cohere.Client(API_KEY, 'fake').generate(
-                model='small',
-                prompt='co:here',
+            cohere.Client(API_KEY, "fake").generate(
+                model="small",
+                prompt="co:here",
                 max_tokens=1)
 
     def test_invalid_key(self):
         with self.assertRaises(cohere.CohereError):
-            _ = cohere.Client('invalid')
+            _ = cohere.Client("invalid")
+
 
 class TestGenerate(unittest.TestCase):
     def test_success(self):
         prediction = co.generate(
-            model='small',
-            prompt='co:here',
+            model="small",
+            prompt="co:here",
             max_tokens=1)
         self.assertIsInstance(prediction.generations[0].text, str)
         self.assertIsNone(prediction.generations[0].token_likelihoods)
-        self.assertEqual(prediction.return_likelihoods, 'NONE')
+        self.assertEqual(prediction.return_likelihoods, "NONE")
 
     def test_return_likelihoods_generation(self):
         prediction = co.generate(
-            model='small',
-            prompt='co:here',
+            model="small",
+            prompt="co:here",
             max_tokens=1,
-            return_likelihoods='GENERATION')
+            return_likelihoods="GENERATION")
         self.assertTrue(prediction.generations[0].token_likelihoods)
         self.assertTrue(prediction.generations[0].token_likelihoods[0].token)
         self.assertIsNotNone(prediction.generations[0].likelihood)
-        self.assertEqual(prediction.return_likelihoods, 'GENERATION')
+        self.assertEqual(prediction.return_likelihoods, "GENERATION")
 
     def test_return_likelihoods_all(self):
         prediction = co.generate(
-            model='small',
-            prompt='hi',
+            model="small",
+            prompt="hi",
             max_tokens=1,
-            return_likelihoods='ALL')
+            return_likelihoods="ALL")
         self.assertEqual(len(prediction.generations[0].token_likelihoods), 2)
         self.assertIsNotNone(prediction.generations[0].likelihood)
-        self.assertEqual(prediction.return_likelihoods, 'ALL')
+        self.assertEqual(prediction.return_likelihoods, "ALL")
 
     def test_invalid_temp(self):
         with self.assertRaises(cohere.CohereError):
             co.generate(
-                model='large',
-                prompt='hi',
+                model="large",
+                prompt="hi",
                 max_tokens=1,
                 temperature=-1)
+
 
 class TestEmbed(unittest.TestCase):
     def test_success(self):
         prediction = co.embed(
-            model='small',
-            texts=['co:here', 'cohere'])
+            model="small",
+            texts=["co:here", "cohere"])
         self.assertEqual(len(prediction.embeddings), 2)
         self.assertIsInstance(prediction.embeddings[0], list)
         self.assertIsInstance(prediction.embeddings[1], list)
@@ -107,8 +113,8 @@ class TestEmbed(unittest.TestCase):
 
     def test_success_multiple_batches(self):
         prediction = co.embed(
-            model='small',
-            texts=['co:here', 'cohere', "embed", "python", "golang", "typescript", "rust?", "ai", "nlp","neural"])
+            model="small",
+            texts=["co:here", "cohere", "embed", "python", "golang", "typescript", "rust?", "ai", "nlp", "neural"])
         self.assertEqual(len(prediction.embeddings), 10)
         for embed in prediction.embeddings:
             self.assertIsInstance(embed, list)
@@ -116,8 +122,11 @@ class TestEmbed(unittest.TestCase):
 
     def test_success_longer_multiple_batches_unaligned_batch(self):
         prediction = co.embed(
-            model='small',
-            texts=['co:here', 'cohere', "embed", "python", "golang", "typescript", "rust?", "ai", "nlp", "neural", "nets"])
+            model="small",
+            texts=[
+                "co:here", "cohere", "embed", "python", "golang",
+                "typescript", "rust?",  "ai",  "nlp", "neural", "nets"
+            ])
         self.assertEqual(len(prediction.embeddings), 11)
         for embed in prediction.embeddings:
             self.assertIsInstance(embed, list)
@@ -125,8 +134,8 @@ class TestEmbed(unittest.TestCase):
 
     def test_success_longer_multiple_batches(self):
         prediction = co.embed(
-            model='small',
-            texts=['co:here', 'cohere', "embed", "python", "golang"] * 200)
+            model="small",
+            texts=["co:here", "cohere", "embed", "python", "golang"] * 200)
         self.assertEqual(len(prediction.embeddings), 200*5)
         for embed in prediction.embeddings:
             self.assertIsInstance(embed, list)
@@ -139,26 +148,36 @@ class TestEmbed(unittest.TestCase):
         for _ in range(3):
             text_batch = random_texts(cohere.COHERE_EMBED_BATCH_SIZE)
             prediction = co.embed(
-                model='small',
+                model="small",
                 texts=text_batch)
             textAll.extend(text_batch)
             predictionsExpected.extend(prediction)
-        predictionsActual = co.embed(model='small',texts=textAll)
+        predictionsActual = co.embed(model="small", texts=textAll)
         for predictionExpected, predictionActual in zip(predictionsExpected, list(predictionsActual)):
-            for elementExpected, elementAcutal in zip (predictionExpected, predictionActual):
+            for elementExpected, elementAcutal in zip(predictionExpected, predictionActual):
                 self.assertAlmostEqual(elementExpected, elementAcutal, places=1)
 
     def test_invalid_texts(self):
         with self.assertRaises(cohere.CohereError):
             co.embed(
-                model='small',
-                texts=[''])
+                model="small",
+                texts=[""])
+
 
 class TestClassify(unittest.TestCase):
     def test_success(self):
-        prediction = co.classify('medium', ["purple"],
-        [Example("apple", "fruit"), Example("banana", "fruit"), Example("cherry", "fruit"), Example("watermelon", "fruit"), Example("kiwi", "fruit"),
-        Example("red", "color"), Example("blue", "color"), Example("green", "color"), Example("yellow", "color"), Example("magenta", "color")])
+        prediction = co.classify("medium", ["purple"], [
+            Example("apple", "fruit"),
+            Example("banana", "fruit"),
+            Example("cherry", "fruit"),
+            Example("watermelon", "fruit"),
+            Example("kiwi", "fruit"),
+            Example("red", "color"),
+            Example("blue", "color"),
+            Example("green", "color"),
+            Example("yellow", "color"),
+            Example("magenta", "color")
+        ])
         self.assertIsInstance(prediction.classifications, list)
         self.assertIsInstance(prediction.classifications[0].input, str)
         self.assertIsInstance(prediction.classifications[0].prediction, str)
@@ -171,31 +190,60 @@ class TestClassify(unittest.TestCase):
 
     def test_empty_inputs(self):
         with self.assertRaises(cohere.CohereError):
-            classifications = co.classify(
-                'medium', [],
-                [Example("apple", "fruit"), Example("banana", "fruit"), Example("cherry", "fruit"), Example("watermelon", "fruit"), Example("kiwi", "fruit"),
-                Example("red", "color"), Example("blue", "color"), Example("green", "color"), Example("yellow", "color"), Example("magenta", "color")])
+            co.classify(
+                "medium", [], [
+
+                    Example("apple", "fruit"),
+                    Example("banana", "fruit"),
+                    Example("cherry", "fruit"),
+                    Example("watermelon", "fruit"),
+                    Example("kiwi", "fruit"),
+
+                    Example("red", "color"),
+                    Example("blue", "color"),
+                    Example("green", "color"),
+                    Example("yellow", "color"),
+                    Example("magenta", "color")])
 
     def test_success_multi_input(self):
-        prediction = co.classify('medium', ["purple", "mango"],
-        [Example("apple", "fruit"), Example("banana", "fruit"), Example("cherry", "fruit"), Example("watermelon", "fruit"), Example("kiwi", "fruit"),
-        Example("red", "color"), Example("blue", "color"), Example("green", "color"), Example("yellow", "color"), Example("magenta", "color")])
+        prediction = co.classify("medium", ["purple", "mango"], [
+            Example("apple", "fruit"),
+            Example("banana", "fruit"),
+            Example("cherry", "fruit"),
+            Example("watermelon", "fruit"),
+            Example("kiwi", "fruit"),
+
+            Example("red", "color"),
+            Example("blue", "color"),
+            Example("green", "color"),
+            Example("yellow", "color"),
+            Example("magenta", "color")])
         self.assertEqual(prediction.classifications[0].prediction, "color")
         self.assertEqual(prediction.classifications[1].prediction, "fruit")
         self.assertEqual(len(prediction.classifications), 2)
 
     def test_success_all_fields(self):
-        prediction = co.classify('medium', ["mango", "purple"],
-        [Example("apple", "fruit"), Example("banana", "fruit"), Example("cherry", "fruit"), Example("watermelon", "fruit"), Example("kiwi", "fruit"),
-        Example("red", "color"), Example("blue", "color"), Example("green", "color"), Example("yellow", "color"), Example("magenta", "color")],
-        "this is a classifier to determine if a word is a fruit of a color", "This is a")
+        prediction = co.classify("medium", ["mango", "purple"],
+                                 [
+                                     Example("apple", "fruit"),
+            Example("banana", "fruit"),
+            Example("cherry", "fruit"),
+            Example("watermelon", "fruit"),
+            Example("kiwi", "fruit"),
+
+            Example("red", "color"),
+            Example("blue", "color"),
+            Example("green", "color"),
+            Example("yellow", "color"),
+            Example("magenta", "color")],
+            "this is a classifier to determine if a word is a fruit of a color", "This is a")
         self.assertEqual(prediction.classifications[0].prediction, "fruit")
         self.assertEqual(prediction.classifications[1].prediction, "color")
 
 
 class TestTokenize(unittest.TestCase):
     def test_success(self):
-        tokens = co.tokenize('medium', 'tokenize me!')
+        tokens = co.tokenize("medium", "tokenize me!")
         self.assertIsInstance(tokens.tokens, list)
         self.assertIsInstance(tokens.length, int)
         self.assertEqual(tokens.length, len(tokens))
@@ -203,8 +251,9 @@ class TestTokenize(unittest.TestCase):
     def test_invalid_text(self):
         with self.assertRaises(cohere.CohereError):
             co.tokenize(
-                model='medium',
-                text='')
+                model="medium",
+                text="")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
