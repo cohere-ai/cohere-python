@@ -223,9 +223,8 @@ class TestClassify(unittest.TestCase):
         self.assertEqual(len(prediction.classifications), 2)
 
     def test_success_all_fields(self):
-        prediction = co.classify('medium', ['mango', 'purple'],
-                                 [
-                                     Example('apple', 'fruit'),
+        prediction = co.classify('medium', ['mango', 'purple'], [
+            Example('apple', 'fruit'),
             Example('banana', 'fruit'),
             Example('cherry', 'fruit'),
             Example('watermelon', 'fruit'),
@@ -235,8 +234,8 @@ class TestClassify(unittest.TestCase):
             Example('blue', 'color'),
             Example('green', 'color'),
             Example('yellow', 'color'),
-            Example('magenta', 'color')],
-            'this is a classifier to determine if a word is a fruit of a color', 'This is a')
+            Example('magenta', 'color')
+        ], 'this is a classifier to determine if a word is a fruit of a color', 'This is a')
         self.assertEqual(prediction.classifications[0].prediction, 'fruit')
         self.assertEqual(prediction.classifications[1].prediction, 'color')
 
@@ -250,9 +249,7 @@ class TestTokenize(unittest.TestCase):
 
     def test_invalid_text(self):
         with self.assertRaises(cohere.CohereError):
-            co.tokenize(
-                model='medium',
-                text='')
+            co.tokenize(model='medium', text='')
 
 
 if __name__ == '__main__':
