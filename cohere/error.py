@@ -16,7 +16,7 @@ class CohereError(Exception):
         return msg
 
     def __repr__(self) -> str:
-        return '%s(message=%r, http_status=%r, request_id=%r)' % (
+        return '%s(message=%r, http_status=%r)' % (
             self.__class__.__name__,
             self.message,
             self.http_status,

@@ -5,18 +5,21 @@ from setuptools.dist import Distribution
 with open('README.md', 'r', encoding='utf-8') as fh:
     long_description = fh.read()
 
+
 class InstallPlatlib(install):
     def finalize_options(self):
         install.finalize_options(self)
         if self.distribution.has_ext_modules():
             self.install_lib = self.install_platlib
 
-class BinaryDistribution(Distribution):
-  def is_pure(self) -> bool:
-    return False
 
-  def has_ext_modules(foo) -> bool:
-    return True
+class BinaryDistribution(Distribution):
+    def is_pure(self) -> bool:
+        return False
+
+    def has_ext_modules(foo) -> bool:
+        return True
+
 
 setuptools.setup(
     name='cohere',
