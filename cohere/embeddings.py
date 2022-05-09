@@ -9,7 +9,7 @@ class Embeddings(CohereObject):
         self.iterator = iter(embeddings)
 
     def __iter__(self) -> iter:
-        # delete this comment
+        # delete this comment2
         return self.iterator
 
     def __next__(self) -> next:
