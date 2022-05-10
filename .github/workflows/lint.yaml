@@ -1,22 +1,26 @@
-name: lint
-on: push
+name: Lint
+
+on:
+  push:
+    paths:
+      - '**.py'
+
 jobs:
-  lint:
+  flake8:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: ricardochaves/python-lint@v1.4.0
+      - name: Setup Python
+        uses: actions/setup-python@v1
         with:
-          python-root-list: "python_alelo tests"
-          use-pylint: false
-          use-pycodestyle: false
-          use-flake8: false
-          use-black: false
-          use-mypy: false
-          use-isort: false
-          extra-pylint-options: ""
-          extra-pycodestyle-options: ""
-          extra-flake8-options: ""
-          extra-black-options: ""
-          extra-mypy-options: ""
-          extra-isort-options: ""
+          python-version: 3.9.12
+          architecture: x64
+      - name: Checkout the code
+        uses: actions/checkout@v3
+      - name: Install flake8
+        run: pip install flake8
+      - name: Run flake8
+        uses: suo/flake8-github-action@releases/v1
+        with:
+          checkName: 'flake8'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

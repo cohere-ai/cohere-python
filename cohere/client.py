@@ -31,6 +31,7 @@ try:
 except ImportError:
     pass
 
+
 class Client:
     def __init__(self, api_key: str, version: str = None, num_workers: int = 8, request_dict: dict = {}) -> None:
         self.api_key = api_key
@@ -45,8 +46,8 @@ class Client:
 
         try:
             res = self.check_api_key()
-            if res['valid'] == False:
-                raise CohereError("invalid api key")
+            if not res['valid']:
+                raise CohereError('invalid api key')
         except CohereError as e:
             raise CohereError(
                 message=e.message,
@@ -71,12 +72,12 @@ class Client:
 
         try:
             res = json.loads(response.text)
-        except:
+        except Exception:
             raise CohereError(
                 message=response.text,
                 http_status=response.status_code,
                 headers=response.headers)
-        if 'message' in res.keys(): # has errors
+        if 'message' in res.keys():  # has errors
             raise CohereError(
                 message=res['message'],
                 http_status=response.status_code,
@@ -119,10 +120,12 @@ class Client:
                 likelihood = gen['likelihood']
             if 'token_likelihoods' in gen.keys():
                 token_likelihoods = []
-                for l in gen['token_likelihoods']:
-                    token_likelihood = l['likelihood'] if 'likelihood' in l.keys() else None
-                    token_likelihoods.append(TokenLikelihood(l['token'], token_likelihood))
-            generations.append(Generation(gen['text'], likelihood, token_likelihoods))
+                for likelihoods in gen['token_likelihoods']:
+                    token_likelihood = likelihoods['likelihood'] if 'likelihood' in likelihoods.keys() else None
+                    token_likelihoods.append(
+                        TokenLikelihood(likelihoods['token'], token_likelihood))
+            generations.append(Generation(
+                gen['text'], likelihood, token_likelihoods))
         return Generations(generations, return_likelihoods)
 
     def embed(self, model: str, texts: List[str], truncate: str = 'NONE') -> Embeddings:
@@ -156,13 +159,13 @@ class Client:
         self,
         model: str,
         inputs: List[str],
-        examples: List[Example],
-        taskDescription: str = "",
-        outputIndicator: str = ""
+        examples: List[Example] = [],
+        taskDescription: str = '',
+        outputIndicator: str = ''
     ) -> Classifications:
         examples_dicts: list[dict[str, str]] = []
         for example in examples:
-            example_dict = {"text": example.text, "label": example.label}
+            example_dict = {'text': example.text, 'label': example.label}
             examples_dicts.append(example_dict)
 
         json_body = json.dumps({
@@ -177,9 +180,12 @@ class Client:
         for res in response['classifications']:
             confidenceObj = []
             for i in range(len(res['confidences'])):
-                confidenceObj.append(Confidence(res['confidences'][i]['option'], res['confidences'][i]['confidence']))
+                confidenceObj.append(Confidence(
+                    res['confidences'][i]['option'],
+                    res['confidences'][i]['confidence']))
             Classification(res['input'], res['prediction'], confidenceObj)
-            classifications.append(Classification(res['input'], res['prediction'], confidenceObj))
+            classifications.append(Classification(
+                res['input'], res['prediction'], confidenceObj))
 
         return Classifications(classifications)
 
@@ -208,7 +214,7 @@ class Client:
 
     def tokenize(self, model: str, text: str) -> Tokens:
         if (use_go_tokenizer):
-            encoder = tokenizer.NewFromPrebuilt("coheretext-50k")
+            encoder = tokenizer.NewFromPrebuilt('coheretext-50k')
             goTokens = encoder.Encode(text)
             tokens = []
             for token in goTokens:
@@ -223,12 +229,12 @@ class Client:
 
     def __pyfetch(self, url, headers, json_body) -> Response:
         req = XMLHttpRequest.new()
-        req.open("POST", url, False)
+        req.open('POST', url, False)
         for key, value in headers.items():
             req.setRequestHeader(key, value)
         try:
             req.send(json_body)
-        except:
+        except Exception:
             raise CohereError(
                 message=req.responseText,
                 http_status=req.status,
@@ -255,17 +261,21 @@ class Client:
             response = self.__pyfetch(url, headers, json_body)
             return response
         else:
-            response = requests.request('POST', url, headers=headers, data=json_body, **self.request_dict)
+            response = requests.request('POST', url,
+                                        headers=headers,
+                                        data=json_body,
+                                        **self.request_dict)
             try:
                 res = json.loads(response.text)
-            except:
+            except Exception:
                 raise CohereError(
                     message=response.text,
                     http_status=response.status_code,
                     headers=response.headers)
-            if 'message' in res.keys(): # has errors
-                    raise CohereError(
-                        message=res['message'],
-                        http_status=response.status_code,
-                        headers=response.headers)
+            if 'message' in res.keys():  # has errors
+                raise CohereError(
+                    message=res['message'],
+                    http_status=response.status_code,
+                    headers=response.headers)
+
         return res

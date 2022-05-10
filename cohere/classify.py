@@ -1,17 +1,20 @@
 from cohere.response import CohereObject
 from typing import List
-from collections import namedtuple
 
-class Confidence(CohereObject): 
+
+class Confidence(CohereObject):
     def __init__(self, label: str, confidence: float) -> None:
         self.label = label
         self.confidence = confidence
 
+
 class Classification(CohereObject):
-    def __init__(self, input: str, prediction: str, confidence: Confidence) -> None:
+    def __init__(self, input: str,
+                 prediction: str, confidence: Confidence) -> None:
         self.input = input
         self.prediction = prediction
         self.confidence = confidence
+
 
 class Classifications(CohereObject):
     def __init__(self, classifications: List[Classification]) -> None:
@@ -26,6 +29,7 @@ class Classifications(CohereObject):
 
     def __len__(self) -> int:
         return len(self.classifications)
+
 
 class Example(CohereObject):
     def __init__(self, text: str, label: str) -> None:
