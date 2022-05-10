@@ -1,7 +1,6 @@
-import json
 from cohere.response import CohereObject
-from typing import Any, List
-from json import JSONEncoder
+from typing import List
+
 
 class ExtractEntity:
     def __init__(self, type: str, value: str) -> None:
@@ -11,19 +10,22 @@ class ExtractEntity:
     def toDict(self):
         return {"type": self.type, "value": self.value}
 
-class ExtractExample: 
+
+class ExtractExample:
     def __init__(self, text: str, entities: List[ExtractEntity]) -> None:
         self.text = text
         self.entities = entities
-    
+
     def toDict(self):
         return {"text": self.text, "entities": [entity.toDict() for entity in self.entities]}
 
-class Extraction: 
+
+class Extraction:
     def __init__(self, id: str, text: str, entities: List[ExtractEntity]) -> None:
         self.id = id
         self.text = text
         self.entities = entities
+
 
 class Extractions(CohereObject):
     def __init__(self, extractions: List[Extraction]) -> None:

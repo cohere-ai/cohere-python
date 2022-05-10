@@ -193,7 +193,6 @@ class TestClassify(unittest.TestCase):
         with self.assertRaises(cohere.CohereError):
             co.classify(
                 'medium', [], [
-
                     Example('apple', 'fruit'),
                     Example('banana', 'fruit'),
                     Example('cherry', 'fruit'),
@@ -243,10 +242,10 @@ class TestClassify(unittest.TestCase):
 
 class TestExtract(unittest.TestCase):
     def test_success(self):
-        examples=[ExtractExample(
-            text="hello my name is John, and I like to play ping pong", 
+        examples = [ExtractExample(
+            text="hello my name is John, and I like to play ping pong",
             entities=[ExtractEntity(type="Name", value="John")])]
-        texts=["hello Roberta, how are you doing today?"]
+        texts = ["hello Roberta, how are you doing today?"]
 
         extractions = co.extract('small', examples, texts)
 
@@ -258,38 +257,38 @@ class TestExtract(unittest.TestCase):
 
     def test_empty_text(self):
         with self.assertRaises(cohere.CohereError):
-            extract = co.extract(
+            co.extract(
                 'small', examples=[ExtractExample(
-                    text="hello my name is John, and I like to play ping pong", 
+                    text="hello my name is John, and I like to play ping pong",
                     entities=[ExtractEntity(type="Name", value="John")])],
-                    texts=[""])
-    
+                texts=[""])
+
     def test_empty_entities(self):
         with self.assertRaises(cohere.CohereError):
-            extract = co.extract(
+            co.extract(
                 'large', examples=[ExtractExample(
-                        text="hello my name is John, and I like to play ping pong", 
-                        entities=[])],
-                    texts=["hello Roberta, how are you doing today?"])
+                    text="hello my name is John, and I like to play ping pong",
+                    entities=[])],
+                texts=["hello Roberta, how are you doing today?"])
 
     def test_varying_amount_of_entities(self):
-        examples=[
+        examples = [
             ExtractExample(
-                text="the bananas are red", 
+                text="the bananas are red",
                 entities=[ExtractEntity(type="fruit", value="bananas"), ExtractEntity(type="color", value="red")]),
             ExtractExample(
                 text="i love the color blue",
                 entities=[ExtractEntity(type="color", value="blue")]),
             ExtractExample(
                 text="i love apples",
-                entities=[ExtractEntity(type="fruit", value="apple")]),    
+                entities=[ExtractEntity(type="fruit", value="apple")]),
             ExtractExample(
                 text="purple is my favorite color",
                 entities=[ExtractEntity(type="color", value="purple")]),
             ExtractExample(
                 text="wow, that apple is green?",
                 entities=[ExtractEntity(type="fruit", value="apple"), ExtractEntity(type="color", value="green")])]
-        texts=["i love bananas", "my favorite color is yellow", "i love green apples"]
+        texts = ["i love bananas", "my favorite color is yellow", "i love green apples"]
 
         extractions = co.extract('medium', examples, texts)
 
@@ -303,11 +302,11 @@ class TestExtract(unittest.TestCase):
         self.assertEqual(len(extractions[0].entities), 1)
         self.assertEqual(len(extractions[1].entities), 1)
         self.assertEqual(len(extractions[2].entities), 2)
-    
+
     def test_many_examples_and_multiple_texts(self):
-        examples=[
+        examples = [
             ExtractExample(
-                text="hello my name is John, and I like to play ping pong", 
+                text="hello my name is John, and I like to play ping pong",
                 entities=[ExtractEntity(type="Name", value="John"), ExtractEntity(type="Game", value="ping pong")]),
             ExtractExample(
                 text="greetings, I'm Roberta and I like to play golf",
@@ -315,7 +314,7 @@ class TestExtract(unittest.TestCase):
             ExtractExample(
                 text="let me introduce myself, my name is Tina and I like to play baseball",
                 entities=[ExtractEntity(type="Name", value="Tina"), ExtractEntity(type="Game", value="baseball")])]
-        texts=["hi, my name is Charlie and I like to play basketball", "hello, I'm Olivia and I like to play soccer"]
+        texts = ["hi, my name is Charlie and I like to play basketball", "hello, I'm Olivia and I like to play soccer"]
 
         extractions = co.extract('medium', examples, texts)
 
@@ -329,9 +328,9 @@ class TestExtract(unittest.TestCase):
         self.assertEqual(len(extractions[1].entities), 2)
 
     def test_no_entities(self):
-        examples=[
+        examples = [
             ExtractExample(
-                text="hello my name is John, and I like to play ping pong", 
+                text="hello my name is John, and I like to play ping pong",
                 entities=[ExtractEntity(type="Name", value="John"), ExtractEntity(type="Game", value="ping pong")]),
             ExtractExample(
                 text="greetings, I'm Roberta and I like to play golf",
@@ -339,7 +338,7 @@ class TestExtract(unittest.TestCase):
             ExtractExample(
                 text="let me introduce myself, my name is Tina and I like to play baseball",
                 entities=[ExtractEntity(type="Name", value="Tina"), ExtractEntity(type="Game", value="baseball")])]
-        texts=["hi, my name is Charlie and I like to play basketball", "hello!"]
+        texts = ["hi, my name is Charlie and I like to play basketball", "hello!"]
 
         extractions = co.extract('medium', examples, texts)
 
