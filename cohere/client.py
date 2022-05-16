@@ -15,7 +15,7 @@ from cohere.error import CohereError
 from cohere.generation import Generations, Generation, TokenLikelihood
 from cohere.tokenize import Tokens
 from cohere.classify import Classifications, Classification, Example as ClassifyExample, Confidence
-from cohere.extract import Entity, Example as ExtractExample, Extraction
+from cohere.extract import Entity, Example as ExtractExample, Extraction, Extractions
 
 use_xhr_client = False
 try:
@@ -194,7 +194,7 @@ class Client:
         model: str,
         examples: List[ExtractExample],
         texts: List[str]
-    ) -> List[Extraction]:
+    ) -> Extractions:
         json_body = json.dumps({
             'texts': texts,
             'examples': [ex.toDict() for ex in examples],
@@ -210,7 +210,7 @@ class Client:
 
             extractions.append(extraction)
 
-        return extractions
+        return Extractions(extractions)
 
     def tokenize(self, model: str, text: str) -> Tokens:
         if (use_go_tokenizer):

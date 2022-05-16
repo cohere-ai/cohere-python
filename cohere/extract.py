@@ -1,3 +1,4 @@
+from cohere.response import CohereObject
 from typing import List
 
 
@@ -64,3 +65,23 @@ class Extraction:
 
     def toDict(self) -> dict:
         return {"id": self.id, "text": self.text, "entities": [entity.toDict() for entity in self.entities]}
+
+
+class Extractions(CohereObject):
+    '''
+    Represents the main response of calling the Extract API. An Extractions is iterable and
+    contains a list of of Extraction objects, one per text input.
+    '''
+
+    def __init__(self, extractions: List[Extraction]) -> None:
+        self.extractions = extractions
+        self.iterator = iter(extractions)
+
+    def __iter__(self) -> iter:
+        return self.iterator
+
+    def __next__(self) -> next:
+        return next(self.iterator)
+
+    def __len__(self) -> int:
+        return len(self.extractions)
