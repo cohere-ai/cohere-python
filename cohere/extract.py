@@ -85,3 +85,6 @@ class Extractions(CohereObject):
 
     def __len__(self) -> int:
         return len(self.extractions)
+
+    def __getitem__(self, index: int) -> Extraction:
+        return self.extractions[index]

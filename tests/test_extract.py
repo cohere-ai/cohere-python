@@ -1,6 +1,6 @@
 import unittest
 import cohere
-from cohere.extract import Example, Entity
+from cohere.extract import Example, Entity, Extractions
 from utils import get_api_key
 
 co = cohere.Client(get_api_key())
@@ -15,7 +15,7 @@ class TestExtract(unittest.TestCase):
 
         extractions = co.extract('small', examples, texts)
 
-        self.assertIsInstance(extractions, list)
+        self.assertIsInstance(extractions, Extractions)
         self.assertIsInstance(extractions[0].text, str)
         self.assertIsInstance(extractions[0].entities, list)
         self.assertEqual(extractions[0].entities[0].type, "Name")
@@ -58,7 +58,7 @@ class TestExtract(unittest.TestCase):
 
         extractions = co.extract('medium', examples, texts)
 
-        self.assertIsInstance(extractions, list)
+        self.assertIsInstance(extractions, Extractions)
         self.assertIsInstance(extractions[0].text, str)
         self.assertIsInstance(extractions[1].text, str)
         self.assertIsInstance(extractions[2].text, str)
@@ -85,7 +85,7 @@ class TestExtract(unittest.TestCase):
         extractions = co.extract('medium', examples, texts)
 
         self.assertEqual(len(extractions), 2)
-        self.assertIsInstance(extractions, list)
+        self.assertIsInstance(extractions, Extractions)
         self.assertIsInstance(extractions[0].text, str)
         self.assertIsInstance(extractions[1].text, str)
         self.assertIsInstance(extractions[0].entities, list)
@@ -109,7 +109,7 @@ class TestExtract(unittest.TestCase):
         extractions = co.extract('medium', examples, texts)
 
         self.assertEqual(len(extractions), 2)
-        self.assertIsInstance(extractions, list)
+        self.assertIsInstance(extractions, Extractions)
         self.assertIsInstance(extractions[0].text, str)
         self.assertIsInstance(extractions[1].text, str)
         self.assertIsInstance(extractions[0].entities, list)
