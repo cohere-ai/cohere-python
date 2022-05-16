@@ -14,7 +14,7 @@ from cohere.embeddings import Embeddings
 from cohere.error import CohereError
 from cohere.generation import Generations, Generation, TokenLikelihood
 from cohere.tokenize import Tokens
-from cohere.classify import Classifications, Classification, Example, Confidence
+from cohere.classify import Classifications, Classification, Example as ClassifyExample, Confidence
 from cohere.extract import Entity, Example as ExtractExample, Extraction
 
 use_xhr_client = False
@@ -159,7 +159,7 @@ class Client:
         self,
         model: str,
         inputs: List[str],
-        examples: List[Example] = [],
+        examples: List[ClassifyExample] = [],
         taskDescription: str = '',
         outputIndicator: str = ''
     ) -> Classifications:
