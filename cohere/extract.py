@@ -2,9 +2,9 @@ from cohere.response import CohereObject
 from typing import List
 
 
-class ExtractEntity:
+class Entity:
     '''
-    ExtractEntity represents a single entity extracted from a text. An entity has a
+    Entity represents a single extracted entity from a text. An entity has a
     type and a value. For the text "I am a plumber", an extracted entity could be
     of type "profession" with the value "plumber".
     '''
@@ -20,18 +20,18 @@ class ExtractEntity:
         return f"{self.type}: {self.value}"
 
 
-class ExtractExample:
+class Example:
     '''
-    ExtractExample represents one of the examples provided to the model. An example
-    contains the text of the example and a list of entities extracted from the text.
+    Example represents a sample extraction from a text, to be provided to the model. An Example
+    contains the input text and a list of entities extracted from the text.
 
-    >>> example = ExtractExample("I am a plumber", [ExtractEntity("profession", "plumber")])
-    >>> example = ExtractExample("Joe is a teacher", [
-            ExtractEntity("name", "Joe"), ExtractEntity("profession", "teacher")
+    >>> example = Example("I am a plumber", [Entity("profession", "plumber")])
+    >>> example = Example("Joe is a teacher", [
+            Entity("name", "Joe"), Entity("profession", "teacher")
         ])
     '''
 
-    def __init__(self, text: str, entities: List[ExtractEntity]) -> None:
+    def __init__(self, text: str, entities: List[Entity]) -> None:
         self.text = text
         self.entities = entities
 
@@ -49,7 +49,7 @@ class Extraction:
     extraction.
     '''
 
-    def __init__(self, id: str, text: str, entities: List[ExtractEntity]) -> None:
+    def __init__(self, id: str, text: str, entities: List[Entity]) -> None:
         self.id = id
         self.text = text
         self.entities = entities

@@ -15,7 +15,7 @@ from cohere.error import CohereError
 from cohere.generation import Generations, Generation, TokenLikelihood
 from cohere.tokenize import Tokens
 from cohere.classify import Classifications, Classification, Example, Confidence
-from cohere.extract import ExtractEntity, ExtractExample, Extraction
+from cohere.extract import Entity, Example as ExtractExample, Extraction
 
 use_xhr_client = False
 try:
@@ -206,7 +206,7 @@ class Client:
             extraction = Extraction(**res)
             extraction.entities = []
             for entity in res['entities']:
-                extraction.entities.append(ExtractEntity(**entity))
+                extraction.entities.append(Entity(**entity))
 
             extractions.append(extraction)
 

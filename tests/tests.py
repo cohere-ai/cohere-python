@@ -4,7 +4,7 @@ import cohere
 import string
 import random
 from cohere.classify import Example
-from cohere.extract import ExtractEntity, ExtractExample
+from cohere.extract import Entity, Example as ExtractExample
 
 API_KEY = os.getenv('CO_API_KEY')
 assert type(API_KEY)
@@ -244,7 +244,7 @@ class TestExtract(unittest.TestCase):
     def test_success(self):
         examples = [ExtractExample(
             text="hello my name is John, and I like to play ping pong",
-            entities=[ExtractEntity(type="Name", value="John")])]
+            entities=[Entity(type="Name", value="John")])]
         texts = ["hello Roberta, how are you doing today?"]
 
         extractions = co.extract('small', examples, texts)
@@ -260,7 +260,7 @@ class TestExtract(unittest.TestCase):
             co.extract(
                 'small', examples=[ExtractExample(
                     text="hello my name is John, and I like to play ping pong",
-                    entities=[ExtractEntity(type="Name", value="John")])],
+                    entities=[Entity(type="Name", value="John")])],
                 texts=[""])
 
     def test_empty_entities(self):
@@ -275,19 +275,19 @@ class TestExtract(unittest.TestCase):
         examples = [
             ExtractExample(
                 text="the bananas are red",
-                entities=[ExtractEntity(type="fruit", value="bananas"), ExtractEntity(type="color", value="red")]),
+                entities=[Entity(type="fruit", value="bananas"), Entity(type="color", value="red")]),
             ExtractExample(
                 text="i love the color blue",
-                entities=[ExtractEntity(type="color", value="blue")]),
+                entities=[Entity(type="color", value="blue")]),
             ExtractExample(
                 text="i love apples",
-                entities=[ExtractEntity(type="fruit", value="apple")]),
+                entities=[Entity(type="fruit", value="apple")]),
             ExtractExample(
                 text="purple is my favorite color",
-                entities=[ExtractEntity(type="color", value="purple")]),
+                entities=[Entity(type="color", value="purple")]),
             ExtractExample(
                 text="wow, that apple is green?",
-                entities=[ExtractEntity(type="fruit", value="apple"), ExtractEntity(type="color", value="green")])]
+                entities=[Entity(type="fruit", value="apple"), Entity(type="color", value="green")])]
         texts = ["i love bananas", "my favorite color is yellow", "i love green apples"]
 
         extractions = co.extract('medium', examples, texts)
@@ -307,13 +307,13 @@ class TestExtract(unittest.TestCase):
         examples = [
             ExtractExample(
                 text="hello my name is John, and I like to play ping pong",
-                entities=[ExtractEntity(type="Name", value="John"), ExtractEntity(type="Game", value="ping pong")]),
+                entities=[Entity(type="Name", value="John"), Entity(type="Game", value="ping pong")]),
             ExtractExample(
                 text="greetings, I'm Roberta and I like to play golf",
-                entities=[ExtractEntity(type="Name", value="Roberta"), ExtractEntity(type="Game", value="golf")]),
+                entities=[Entity(type="Name", value="Roberta"), Entity(type="Game", value="golf")]),
             ExtractExample(
                 text="let me introduce myself, my name is Tina and I like to play baseball",
-                entities=[ExtractEntity(type="Name", value="Tina"), ExtractEntity(type="Game", value="baseball")])]
+                entities=[Entity(type="Name", value="Tina"), Entity(type="Game", value="baseball")])]
         texts = ["hi, my name is Charlie and I like to play basketball", "hello, I'm Olivia and I like to play soccer"]
 
         extractions = co.extract('medium', examples, texts)
@@ -331,13 +331,13 @@ class TestExtract(unittest.TestCase):
         examples = [
             ExtractExample(
                 text="hello my name is John, and I like to play ping pong",
-                entities=[ExtractEntity(type="Name", value="John"), ExtractEntity(type="Game", value="ping pong")]),
+                entities=[Entity(type="Name", value="John"), Entity(type="Game", value="ping pong")]),
             ExtractExample(
                 text="greetings, I'm Roberta and I like to play golf",
-                entities=[ExtractEntity(type="Name", value="Roberta"), ExtractEntity(type="Game", value="golf")]),
+                entities=[Entity(type="Name", value="Roberta"), Entity(type="Game", value="golf")]),
             ExtractExample(
                 text="let me introduce myself, my name is Tina and I like to play baseball",
-                entities=[ExtractEntity(type="Name", value="Tina"), ExtractEntity(type="Game", value="baseball")])]
+                entities=[Entity(type="Name", value="Tina"), Entity(type="Game", value="baseball")])]
         texts = ["hi, my name is Charlie and I like to play basketball", "hello!"]
 
         extractions = co.extract('medium', examples, texts)
