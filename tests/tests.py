@@ -239,6 +239,33 @@ class TestClassify(unittest.TestCase):
         self.assertEqual(prediction.classifications[0].prediction, 'fruit')
         self.assertEqual(prediction.classifications[1].prediction, 'color')
 
+    def test_string_repr(self):
+        prediction = co.classify('medium', ['purple'], [
+            Example('apple', 'fruit'),
+            Example('banana', 'fruit'),
+            Example('cherry', 'fruit'),
+            Example('watermelon', 'fruit'),
+            Example('kiwi', 'fruit'),
+            Example('red', 'color'),
+            Example('blue', 'color'),
+            Example('green', 'color'),
+            Example('yellow', 'color'),
+            Example('magenta', 'color')
+        ])
+        self.assertEqual(repr(prediction), '''cohere.Classifications {
+\tclassifications: [cohere.Classification {
+\tinput: purple
+\tprediction: color
+\tconfidence: [cohere.Confidence {
+\tlabel: fruit
+\tconfidence: 0
+}, cohere.Confidence {
+\tlabel: color
+\tconfidence: 1
+}]
+}]
+}''')
+
 
 class TestTokenize(unittest.TestCase):
     def test_success(self):
