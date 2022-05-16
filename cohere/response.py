@@ -1,5 +1,5 @@
 class CohereObject():
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         contents = ''
         exclude_list = ['iterator']
 
