@@ -36,7 +36,6 @@ class TestClassify(unittest.TestCase):
         with self.assertRaises(cohere.CohereError):
             co.classify(
                 'medium', [], [
-
                     Example('apple', 'fruit'),
                     Example('banana', 'fruit'),
                     Example('cherry', 'fruit'),
