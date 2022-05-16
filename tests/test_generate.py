@@ -1,10 +1,9 @@
-import os
 import unittest
 import cohere
+from utils import get_api_key
 
-API_KEY = os.getenv('CO_API_KEY')
-assert type(API_KEY)
-co = cohere.Client(str(API_KEY))
+API_KEY = get_api_key()
+co = cohere.Client(API_KEY)
 
 
 class TestGenerate(unittest.TestCase):

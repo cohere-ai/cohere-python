@@ -1,11 +1,9 @@
 
-import os
 import unittest
 import cohere
+from utils import get_api_key
 
-API_KEY = os.getenv('CO_API_KEY')
-assert type(API_KEY)
-co = cohere.Client(str(API_KEY))
+co = cohere.Client(get_api_key())
 
 
 class TestTokenize(unittest.TestCase):
@@ -18,7 +16,3 @@ class TestTokenize(unittest.TestCase):
     def test_invalid_text(self):
         with self.assertRaises(cohere.CohereError):
             co.tokenize(model='medium', text='')
-
-
-if __name__ == '__main__':
-    unittest.main()

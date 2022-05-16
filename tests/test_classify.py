@@ -1,11 +1,9 @@
-import os
 import unittest
 import cohere
 from cohere.classify import Example
+from utils import get_api_key
 
-API_KEY = os.getenv('CO_API_KEY')
-assert type(API_KEY)
-co = cohere.Client(str(API_KEY))
+co = cohere.Client(get_api_key())
 
 
 class TestClassify(unittest.TestCase):
