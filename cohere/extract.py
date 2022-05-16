@@ -1,4 +1,3 @@
-from cohere.response import CohereObject
 from typing import List
 
 
@@ -18,6 +17,9 @@ class Entity:
 
     def __str__(self) -> str:
         return f"{self.type}: {self.value}"
+
+    def __repr__(self) -> str:
+        return str(self.toDict())
 
 
 class Example:
@@ -39,12 +41,15 @@ class Example:
         return {"text": self.text, "entities": [entity.toDict() for entity in self.entities]}
 
     def __str__(self) -> str:
-        return f"{self.text}\n\t{self.entities}"
+        return f"{self.text} -> {self.entities}"
+
+    def __repr__(self) -> str:
+        return str(self.toDict())
 
 
 class Extraction:
     '''
-    Represents the results of extracting entities from a single text input. An extraction
+    Represents the result of extracting entities from a single text input. An extraction
     contains the text input, the list of entities extracted from the text, and the id of the
     extraction.
     '''
@@ -54,28 +59,8 @@ class Extraction:
         self.text = text
         self.entities = entities
 
-    def __str__(self) -> str:
-        return f"{self.id}: {self.text}\n\t{self.entities}"
+    def __repr__(self) -> str:
+        return str(self.toDict())
 
-
-class Extractions(CohereObject):
-    '''
-    Represents the return value of calling the Extract API. An Extractions object contains
-    a list of of Extraction objects, one per text input.
-    '''
-
-    def __init__(self, extractions: List[Extraction]) -> None:
-        self.extractions = extractions
-        self.iterator = iter(extractions)
-
-    def __iter__(self) -> iter:
-        return self.iterator
-
-    def __next__(self) -> next:
-        return next(self.iterator)
-
-    def __len__(self) -> int:
-        return len(self.extractions)
-
-    def __str__(self) -> str:
-        return f"{self.extractions}"
+    def toDict(self) -> dict:
+        return {"id": self.id, "text": self.text, "entities": [entity.toDict() for entity in self.entities]}
