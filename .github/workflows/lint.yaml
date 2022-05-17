@@ -1,11 +1,6 @@
 name: Lint
 
-on:
-  push:
-    paths:
-      - "**/*.py"
-      - ".github/workflows/lint.yaml"
-      - ".flake8"
+on: push
 
 jobs:
   flake8:
