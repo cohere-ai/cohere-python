@@ -1,9 +1,6 @@
 name: Lint
 
-on:
-  push:
-    paths:
-      - '**.py'
+on: push
 
 jobs:
   flake8:
@@ -21,6 +18,6 @@ jobs:
       - name: Run flake8
         uses: suo/flake8-github-action@releases/v1
         with:
-          checkName: 'flake8'
+          checkName: "flake8"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
