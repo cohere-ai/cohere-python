@@ -1,4 +1,3 @@
-
 import unittest
 import cohere
 from utils import get_api_key
