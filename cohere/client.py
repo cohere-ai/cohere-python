@@ -14,7 +14,8 @@ from cohere.embeddings import Embeddings
 from cohere.error import CohereError
 from cohere.generation import Generations, Generation, TokenLikelihood
 from cohere.tokenize import Tokens
-from cohere.classify import Classifications, Classification, Example, Confidence
+from cohere.classify import Classifications, Classification, Example as ClassifyExample, Confidence
+from cohere.extract import Entity, Example as ExtractExample, Extraction, Extractions
 
 use_xhr_client = False
 try:
@@ -158,7 +159,7 @@ class Client:
         self,
         model: str,
         inputs: List[str],
-        examples: List[Example] = [],
+        examples: List[ClassifyExample] = [],
         taskDescription: str = '',
         outputIndicator: str = ''
     ) -> Classifications:
@@ -187,6 +188,35 @@ class Client:
                 res['input'], res['prediction'], confidenceObj))
 
         return Classifications(classifications)
+
+    def unstable_extract(
+        self,
+        model: str,
+        examples: List[ExtractExample],
+        texts: List[str]
+    ) -> Extractions:
+        '''
+        Makes a request to the Cohere API to extract entities from a list of texts.
+        Takes in a list of cohere.extract.Example objects to specify the entities to extract.
+        Returns an cohere.extract.Extractions object containing extractions per text.
+        '''
+
+        json_body = json.dumps({
+            'texts': texts,
+            'examples': [ex.toDict() for ex in examples],
+        })
+        response = self.__request(json_body, cohere.EXTRACT_URL, model)
+        extractions = []
+
+        for res in response['results']:
+            extraction = Extraction(**res)
+            extraction.entities = []
+            for entity in res['entities']:
+                extraction.entities.append(Entity(**entity))
+
+            extractions.append(extraction)
+
+        return Extractions(extractions)
 
     def tokenize(self, model: str, text: str) -> Tokens:
         if (use_go_tokenizer):
