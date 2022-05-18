@@ -22,6 +22,9 @@ class Entity:
     def __repr__(self) -> str:
         return str(self.toDict())
 
+    def __eq__(self, other) -> bool:
+        return self.type == other.type and self.value == other.value
+
 
 class Example:
     '''

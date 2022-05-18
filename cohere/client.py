@@ -189,7 +189,7 @@ class Client:
 
         return Classifications(classifications)
 
-    def extract(
+    def unstable_extract(
         self,
         model: str,
         examples: List[ExtractExample],

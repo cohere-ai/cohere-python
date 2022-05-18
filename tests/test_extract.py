@@ -13,7 +13,7 @@ class TestExtract(unittest.TestCase):
             entities=[Entity(type="Name", value="John")])]
         texts = ["hello Roberta, how are you doing today?"]
 
-        extractions = co.extract('small', examples, texts)
+        extractions = co.unstable_extract('small', examples, texts)
 
         self.assertIsInstance(extractions, Extractions)
         self.assertIsInstance(extractions[0].text, str)
@@ -23,7 +23,7 @@ class TestExtract(unittest.TestCase):
 
     def test_empty_text(self):
         with self.assertRaises(cohere.CohereError):
-            co.extract(
+            co.unstable_extract(
                 'small', examples=[Example(
                     text="hello my name is John, and I like to play ping pong",
                     entities=[Entity(type="Name", value="John")])],
@@ -31,7 +31,7 @@ class TestExtract(unittest.TestCase):
 
     def test_empty_entities(self):
         with self.assertRaises(cohere.CohereError):
-            co.extract(
+            co.unstable_extract(
                 'large', examples=[Example(
                     text="hello my name is John, and I like to play ping pong",
                     entities=[])],
@@ -54,9 +54,9 @@ class TestExtract(unittest.TestCase):
             Example(
                 text="wow, that apple is green?",
                 entities=[Entity(type="fruit", value="apple"), Entity(type="color", value="green")])]
-        texts = ["i love bananas", "my favorite color is yellow", "i love green apples"]
+        texts = ["Jimmy ate my banana", "my favorite color is yellow", "green apple is my favorite fruit"]
 
-        extractions = co.extract('medium', examples, texts)
+        extractions = co.unstable_extract('medium', examples, texts)
 
         self.assertIsInstance(extractions, Extractions)
         self.assertIsInstance(extractions[0].text, str)
@@ -65,9 +65,16 @@ class TestExtract(unittest.TestCase):
         self.assertIsInstance(extractions[0].entities, list)
         self.assertIsInstance(extractions[1].entities, list)
         self.assertIsInstance(extractions[2].entities, list)
+
         self.assertEqual(len(extractions[0].entities), 1)
+        self.assertIn(Entity(type="fruit", value="banana"), extractions[0].entities)
+
         self.assertEqual(len(extractions[1].entities), 1)
+        self.assertIn(Entity(type="color", value="yellow"), extractions[1].entities)
+
         self.assertEqual(len(extractions[2].entities), 2)
+        self.assertIn(Entity(type="color", value="green"), extractions[2].entities)
+        self.assertIn(Entity(type="fruit", value="apple"), extractions[2].entities)
 
     def test_many_examples_and_multiple_texts(self):
         examples = [
@@ -82,7 +89,7 @@ class TestExtract(unittest.TestCase):
                 entities=[Entity(type="Name", value="Tina"), Entity(type="Game", value="baseball")])]
         texts = ["hi, my name is Charlie and I like to play basketball", "hello, I'm Olivia and I like to play soccer"]
 
-        extractions = co.extract('medium', examples, texts)
+        extractions = co.unstable_extract('medium', examples, texts)
 
         self.assertEqual(len(extractions), 2)
         self.assertIsInstance(extractions, Extractions)
@@ -106,13 +113,13 @@ class TestExtract(unittest.TestCase):
                 entities=[Entity(type="Name", value="Tina"), Entity(type="Game", value="baseball")])]
         texts = ["hi, my name is Charlie and I like to play basketball", "hello!"]
 
-        extractions = co.extract('medium', examples, texts)
+        extractions = co.unstable_extract('medium', examples, texts)
 
         self.assertEqual(len(extractions), 2)
         self.assertIsInstance(extractions, Extractions)
-        self.assertIsInstance(extractions[0].text, str)
-        self.assertIsInstance(extractions[1].text, str)
-        self.assertIsInstance(extractions[0].entities, list)
-        self.assertIsInstance(extractions[1].entities, list)
+
         self.assertEqual(len(extractions[0].entities), 2)
+        self.assertIn(Entity(type="Name", value="Charlie"), extractions[0].entities)
+        self.assertIn(Entity(type="Game", value="basketball"), extractions[0].entities)
+
         self.assertEqual(len(extractions[1].entities), 0)
