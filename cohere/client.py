@@ -195,6 +195,12 @@ class Client:
         examples: List[ExtractExample],
         texts: List[str]
     ) -> Extractions:
+        '''
+        Makes a request to the Cohere API to extract entities from a list of texts.
+        Takes in a list of cohere.extract.Example objects to specify the entities to extract.
+        Returns an cohere.extract.Extractions object containing extractions per text.
+        '''
+
         json_body = json.dumps({
             'texts': texts,
             'examples': [ex.toDict() for ex in examples],
