@@ -100,7 +100,7 @@ class Client:
         return_likelihoods: str = 'NONE'
     ) -> Generations:
         '''
-        Makes a call to the Cohere Generate API to create realistic text 
+        Makes a call to the Cohere Generate API to create realistic text
         conditioned on the given input. Docs: https://docs.cohere.ai/generate-reference. Learn
         more about tokens here
 
