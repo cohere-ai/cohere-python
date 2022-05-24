@@ -99,6 +99,30 @@ class Client:
         stop_sequences: List[str] = None,
         return_likelihoods: str = 'NONE'
     ) -> Generations:
+        '''
+        Makes a call to the Cohere Generate API to create realistic text 
+        conditioned on the given input. Docs: https://docs.cohere.ai/generate-reference. Learn
+        more about tokens here
+
+        :param model: The id of the model to use for generation. (EG: 'small', 'medium', 'large')
+        :param prompt: The prompt to use for generation. See https://docs.cohere.ai/prompt-engineering-wiki
+        :param num_generations: The number of resulting texts the api should generate.
+        :param max_tokens: (Optional) The number of tokens to predict per generation. Defaults to 20.
+        :param temperature: (Optional) The temperature to use for sampling.
+        :param k: (Optional) Value between 0-500. If provided, ensures only the top k most likely tokens are considered.
+        :param p: (Optional) Value between 0-1. If provided, ensures that only the most likely tokens, with total
+        | probability mass of p, are considered
+        :param language: (Optional) One of en|pt|sp|fr|de to specify the language of the prompt. English by default.
+        :param frequency_penalty: (Optional) Value between 0-1. Used to reduce repetitiveness of generated tokens.
+        | Penalty is applied to previously present tokens, proportional to how many times they have already appeared
+        | in the prompt or prior generation
+        :param presence_penalty: (Optional) Value between 0-1. Used to reduce the presence of generated tokens.
+        | Penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies
+        :param stop_sequences: (Optional) Generation will be cut at the end of the first stop sequence that appears
+        | in the output.
+        :param return_likelihoods: (Optional) One of GENERATION|ALL|NONE to specify how and if the token likelihoods
+        | are returned. Defaults to NONE.
+        '''
         json_body = json.dumps({
             'prompt': prompt,
             'num_generations': num_generations,
