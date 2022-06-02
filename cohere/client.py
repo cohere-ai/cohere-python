@@ -93,7 +93,7 @@ class Client:
         temperature: float = 1.0,
         k: int = 0,
         p: float = 0.75,
-        language: str = 'en',
+        language: str = '',
         frequency_penalty: float = 0.0,
         presence_penalty: float = 0.0,
         stop_sequences: List[str] = None,
@@ -112,7 +112,8 @@ class Client:
         :param k: (Optional) Value between 0-500. If provided, ensures only the top k most likely tokens are considered.
         :param p: (Optional) Value between 0-1. If provided, ensures that only the most likely tokens, with total
         | probability mass of p, are considered
-        :param language: (Optional) One of en|pt|sp|fr|de to specify the language of the prompt. English by default.
+        :param language: (Optional) Language code (eg: "fr" for French) to specify the language of the generated text.
+        | Support for languages varies between models. By default, the language is set to English.
         :param frequency_penalty: (Optional) Value between 0-1. Used to reduce repetitiveness of generated tokens.
         | Penalty is applied to previously present tokens, proportional to how many times they have already appeared
         | in the prompt or prior generation
