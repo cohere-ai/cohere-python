@@ -93,16 +93,17 @@ class TestClassify(unittest.TestCase):
             Example('yellow', 'color'),
             Example('magenta', 'color')
         ])
+        confidences = prediction.classifications[0].confidence
         self.assertEqual(repr(prediction), '''cohere.Classifications {
 \tclassifications: [cohere.Classification {
 \tinput: purple
 \tprediction: color
 \tconfidence: [cohere.Confidence {
 \tlabel: fruit
-\tconfidence: 0
+\tconfidence: {}
 }, cohere.Confidence {
 \tlabel: color
-\tconfidence: 1
+\tconfidence: {}
 }]
 }]
-}''')
+}'''.format(confidences[0].confidence, confidences[1].confidence))
