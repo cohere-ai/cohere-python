@@ -24,8 +24,8 @@ class BinaryDistribution(Distribution):
 setuptools.setup(
     name='cohere',
     version='1.3.10',
-    author='kipply',
-    author_email='carol@cohere.ai',
+    author='1vn',
+    author_email='ivan@cohere.ai',
     description='A Python library for the Cohere API',
     long_description=long_description,
     long_description_content_type='text/markdown',
