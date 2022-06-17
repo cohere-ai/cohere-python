@@ -33,7 +33,14 @@ except ImportError:
 
 
 class Client:
-    def __init__(self, api_key: str, version: str = None, num_workers: int = 8, request_dict: dict = {}) -> None:
+    def __init__(
+        self,
+        api_key: str,
+        version: str = None,
+        num_workers: int = 8,
+        request_dict: dict = {},
+        check_api_key: bool = True
+    ) -> None:
         self.api_key = api_key
         self.api_url = cohere.COHERE_API_URL
         self.batch_size = cohere.COHERE_EMBED_BATCH_SIZE
@@ -44,15 +51,16 @@ class Client:
         else:
             self.cohere_version = version
 
-        try:
-            res = self.check_api_key()
-            if not res['valid']:
-                raise CohereError('invalid api key')
-        except CohereError as e:
-            raise CohereError(
-                message=e.message,
-                http_status=e.http_status,
-                headers=e.headers)
+        if check_api_key:
+            try:
+                res = self.check_api_key()
+                if not res['valid']:
+                    raise CohereError('invalid api key')
+            except CohereError as e:
+                raise CohereError(
+                    message=e.message,
+                    http_status=e.http_status,
+                    headers=e.headers)
 
     def check_api_key(self) -> Response:
         headers = {
