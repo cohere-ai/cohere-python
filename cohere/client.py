@@ -2,7 +2,7 @@ import json
 import math
 import sys
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, List
+from typing import Any, List, Dict
 from urllib.parse import urljoin
 
 import requests
@@ -93,7 +93,8 @@ class Client:
         presence_penalty: float = 0.0,
         stop_sequences: List[str] = None,
         return_likelihoods: str = 'NONE',
-        truncate: str = None
+        truncate: str = None,
+        logit_bias: Dict[int, float] = {}
     ) -> Generations:
         json_body = json.dumps({
             'model': model,
@@ -109,6 +110,7 @@ class Client:
             'stop_sequences': stop_sequences,
             'return_likelihoods': return_likelihoods,
             'truncate': truncate,
+            'logit_bias': logit_bias,
         })
         response = self.__request(json_body, cohere.GENERATE_URL)
 
