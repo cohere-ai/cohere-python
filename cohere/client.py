@@ -94,8 +94,8 @@ class Client:
 
     def generate(
         self,
-        model: str,
         prompt: str,
+        model: str = None,
         num_generations: int = 1,
         max_tokens: int = 20,
         temperature: float = 1.0,
@@ -107,6 +107,7 @@ class Client:
         return_likelihoods: str = 'NONE'
     ) -> Generations:
         json_body = json.dumps({
+            'model': model,
             'prompt': prompt,
             'num_generations': num_generations,
             'max_tokens': max_tokens,
@@ -118,7 +119,7 @@ class Client:
             'stop_sequences': stop_sequences,
             'return_likelihoods': return_likelihoods,
         })
-        response = self.__request(json_body, cohere.GENERATE_URL, model)
+        response = self.__request(json_body, cohere.GENERATE_URL)
 
         generations: List[Generation] = []
         for gen in response['generations']:
@@ -136,27 +137,27 @@ class Client:
                 gen['text'], likelihood, token_likelihoods))
         return Generations(generations, return_likelihoods)
 
-    def embed(self, model: str, texts: List[str], truncate: str = 'NONE') -> Embeddings:
+    def embed(self, texts: List[str], model: str = None, truncate: str = 'NONE') -> Embeddings:
         responses = []
         json_bodys = []
         request_futures = []
         num_batch = int(math.ceil(len(texts)/self.batch_size))
         embed_url_stacked = [cohere.EMBED_URL] * num_batch
-        model_stacked = [model] * num_batch
 
         for i in range(0, len(texts), self.batch_size):
             texts_batch = texts[i:i+self.batch_size]
             json_bodys.append(json.dumps({
+                'model': model,
                 'texts': texts_batch,
                 'truncate': truncate,
             }))
         if use_xhr_client:
             for json_body in json_bodys:
-                response = self.__request(json_body, cohere.EMBED_URL, model)
+                response = self.__request(json_body, cohere.EMBED_URL)
                 responses.append(response['embeddings'])
         else:
             with ThreadPoolExecutor(max_workers=self.num_workers) as executor:
-                for i in executor.map(self.__request, json_bodys, embed_url_stacked, model_stacked):
+                for i in executor.map(self.__request, json_bodys, embed_url_stacked):
                     request_futures.append(i)
             for result in request_futures:
                 responses.extend(result['embeddings'])
@@ -165,8 +166,8 @@ class Client:
 
     def classify(
         self,
-        model: str,
         inputs: List[str],
+        model: str = None,
         examples: List[ClassifyExample] = [],
         taskDescription: str = '',
         outputIndicator: str = ''
@@ -177,12 +178,13 @@ class Client:
             examples_dicts.append(example_dict)
 
         json_body = json.dumps({
+            'model': model,
             'inputs': inputs,
             'examples': examples_dicts,
             'taskDescription': taskDescription,
             'outputIndicator': outputIndicator,
         })
-        response = self.__request(json_body, cohere.CLASSIFY_URL, model)
+        response = self.__request(json_body, cohere.CLASSIFY_URL)
 
         classifications = []
         for res in response['classifications']:
@@ -199,7 +201,6 @@ class Client:
 
     def unstable_extract(
         self,
-        model: str,
         examples: List[ExtractExample],
         texts: List[str]
     ) -> Extractions:
@@ -213,7 +214,7 @@ class Client:
             'texts': texts,
             'examples': [ex.toDict() for ex in examples],
         })
-        response = self.__request(json_body, cohere.EXTRACT_URL, model)
+        response = self.__request(json_body, cohere.EXTRACT_URL)
         extractions = []
 
         for res in response['results']:
@@ -226,7 +227,7 @@ class Client:
 
         return Extractions(extractions)
 
-    def tokenize(self, model: str, text: str) -> Tokens:
+    def tokenize(self, text: str) -> Tokens:
         if (use_go_tokenizer):
             encoder = tokenizer.NewFromPrebuilt('coheretext-50k')
             goTokens = encoder.Encode(text)
@@ -238,7 +239,7 @@ class Client:
             json_body = json.dumps({
                 'text': text,
             })
-            response = self.__request(json_body, cohere.TOKENIZE_URL, model)
+            response = self.__request(json_body, cohere.TOKENIZE_URL)
             return Tokens(response['tokens'])
 
     def __pyfetch(self, url, headers, json_body) -> Response:
@@ -261,7 +262,7 @@ class Client:
                 headers=req.getAllResponseHeaders())
         return res
 
-    def __request(self, json_body, endpoint, model) -> Any:
+    def __request(self, json_body, endpoint) -> Any:
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
             'Content-Type': 'application/json',
@@ -270,7 +271,7 @@ class Client:
         if self.cohere_version != '':
             headers['Cohere-Version'] = self.cohere_version
 
-        url = urljoin(self.api_url, model + '/' + endpoint)
+        url = urljoin(self.api_url, endpoint)
         if use_xhr_client:
             response = self.__pyfetch(url, headers, json_body)
             return response
