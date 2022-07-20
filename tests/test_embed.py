@@ -40,6 +40,13 @@ class TestEmbed(unittest.TestCase):
         self.assertEqual(len(prediction.embeddings[0]), 1024)
         self.assertEqual(len(prediction.embeddings[1]), 1024)
 
+    def test_default_model(self):
+        prediction = co.embed(
+            texts=['co:here', 'cohere'])
+        self.assertEqual(len(prediction.embeddings), 2)
+        self.assertIsInstance(prediction.embeddings[0], list)
+        self.assertIsInstance(prediction.embeddings[1], list)
+
     def test_success_multiple_batches(self):
         prediction = co.embed(
             model='small',

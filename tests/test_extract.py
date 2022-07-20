@@ -13,7 +13,7 @@ class TestExtract(unittest.TestCase):
             entities=[Entity(type="Name", value="John")])]
         texts = ["hello Roberta, how are you doing today?"]
 
-        extractions = co.unstable_extract('small', examples, texts)
+        extractions = co.unstable_extract(examples, texts)
 
         self.assertIsInstance(extractions, Extractions)
         self.assertIsInstance(extractions[0].text, str)
@@ -24,7 +24,7 @@ class TestExtract(unittest.TestCase):
     def test_empty_text(self):
         with self.assertRaises(cohere.CohereError):
             co.unstable_extract(
-                'small', examples=[Example(
+                examples=[Example(
                     text="hello my name is John, and I like to play ping pong",
                     entities=[Entity(type="Name", value="John")])],
                 texts=[""])
@@ -32,7 +32,7 @@ class TestExtract(unittest.TestCase):
     def test_empty_entities(self):
         with self.assertRaises(cohere.CohereError):
             co.unstable_extract(
-                'large', examples=[Example(
+                examples=[Example(
                     text="hello my name is John, and I like to play ping pong",
                     entities=[])],
                 texts=["hello Roberta, how are you doing today?"])
@@ -56,7 +56,7 @@ class TestExtract(unittest.TestCase):
                 entities=[Entity(type="fruit", value="apple"), Entity(type="color", value="green")])]
         texts = ["Jimmy ate my banana", "my favorite color is yellow", "green apple is my favorite fruit"]
 
-        extractions = co.unstable_extract('medium', examples, texts)
+        extractions = co.unstable_extract(examples, texts)
 
         self.assertIsInstance(extractions, Extractions)
         self.assertIsInstance(extractions[0].text, str)
@@ -89,7 +89,7 @@ class TestExtract(unittest.TestCase):
                 entities=[Entity(type="Name", value="Tina"), Entity(type="Game", value="baseball")])]
         texts = ["hi, my name is Charlie and I like to play basketball", "hello, I'm Olivia and I like to play soccer"]
 
-        extractions = co.unstable_extract('medium', examples, texts)
+        extractions = co.unstable_extract(examples, texts)
 
         self.assertEqual(len(extractions), 2)
         self.assertIsInstance(extractions, Extractions)
@@ -113,7 +113,7 @@ class TestExtract(unittest.TestCase):
                 entities=[Entity(type="Name", value="Tina"), Entity(type="Game", value="baseball")])]
         texts = ["hi, my name is Charlie and I like to play basketball", "hello!"]
 
-        extractions = co.unstable_extract('medium', examples, texts)
+        extractions = co.unstable_extract(examples, texts)
 
         self.assertEqual(len(extractions), 2)
         self.assertIsInstance(extractions, Extractions)
