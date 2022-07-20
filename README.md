@@ -66,7 +66,7 @@ Cohere Endpoint | Function
 /classify | co.classify()
 
 ## Models
-To view an up-to-date list of available models please consult the models section in the [platform](https://os.cohere.ai). To get started omit `model` from requests to use the default model sizes.
+When you call Cohere's APIs we decide on a good default model for your use-case behind the scenes. The default model is great to get you started, but in production environments we recommend that you specify the model size yourself via the `model` parameter. Learn more about the available models here(https://os.cohere.ai)
 
 ## Responses
 All of the endpoint functions will return a Cohere object corresponding to the endpoint (e.g. for generation, it would be `Generation`). The responses can be found as instance variables of the object (e.g. generation would be `Generation.text`). The names of these instance variables and a detailed breakdown of the response body can be found in the [Cohere Docs](https://docs.cohere.ai/). Printing the Cohere response object itself will display an organized view of the instance variables.
