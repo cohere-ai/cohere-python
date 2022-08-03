@@ -87,7 +87,7 @@ class TestClassify(unittest.TestCase):
                 Example('yellow', 'color'),
                 Example('magenta', 'color')
             ],
-            taskDescription='this is a classifier to determine if a word is a fruit of a color',
-            outputIndicator='This is a')
+            task_description='this is a classifier to determine if a word is a fruit of a color',
+            output_indicator='This is a')
         self.assertEqual(prediction.classifications[0].prediction, 'fruit')
         self.assertEqual(prediction.classifications[1].prediction, 'color')
