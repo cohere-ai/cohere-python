@@ -16,6 +16,7 @@ from cohere.generation import Generations, Generation, TokenLikelihood
 from cohere.tokenize import Tokens
 from cohere.classify import Classifications, Classification, Example as ClassifyExample, Confidence
 from cohere.extract import Entity, Example as ExtractExample, Extraction, Extractions
+from cohere.moderate import Moderations, Moderation
 
 use_xhr_client = False
 try:
@@ -198,6 +199,25 @@ class Client:
                 res['input'], res['prediction'], confidenceObj))
 
         return Classifications(classifications)
+
+    def moderate(
+        self,
+        inputs: List[str],
+        model: str = None
+    ) -> Moderations:
+        json_body = json.dumps({
+            'model': model,
+            'inputs': inputs,
+        })
+        response = self.__request(json_body, cohere.MODERATE_URL)
+
+        moderations = []
+        for res in response['results']:
+            moderations.append(
+                Moderation(res['benign'], res['profanity'], res['hate_speech'], res['violence'], res['self_harm'],
+                           res['sexual'], res['sexual_non_consensual'], res['spam'], res['information_hazard']))
+
+        return Moderations(moderations=moderations)
 
     def unstable_extract(
         self,
