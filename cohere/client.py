@@ -25,13 +25,6 @@ try:
 except ImportError:
     pass
 
-use_go_tokenizer = False
-try:
-    from cohere.tokenizer import tokenizer
-    use_go_tokenizer = True
-except ImportError:
-    pass
-
 
 class Client:
     def __init__(
@@ -248,19 +241,11 @@ class Client:
         return Extractions(extractions)
 
     def tokenize(self, text: str) -> Tokens:
-        if (use_go_tokenizer):
-            encoder = tokenizer.NewFromPrebuilt('coheretext-50k')
-            goTokens = encoder.Encode(text)
-            tokens = []
-            for token in goTokens:
-                tokens.append(token)
-            return Tokens(tokens)
-        else:
-            json_body = json.dumps({
-                'text': text,
-            })
-            response = self.__request(json_body, cohere.TOKENIZE_URL)
-            return Tokens(response['tokens'])
+        json_body = json.dumps({
+            'text': text,
+        })
+        response = self.__request(json_body, cohere.TOKENIZE_URL)
+        return Tokens(response['tokens'])
 
     def __pyfetch(self, url, headers, json_body) -> Response:
         req = XMLHttpRequest.new()

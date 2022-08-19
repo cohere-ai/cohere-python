@@ -34,7 +34,6 @@ setuptools.setup(
     install_requires=[
         'requests'
     ],
-    package_data={'': ['./cohere/tokenizer/*']},
     include_package_data=True,
     classifiers=[
         'Programming Language :: Python :: 3',
