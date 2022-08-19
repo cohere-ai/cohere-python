@@ -23,7 +23,7 @@ class BinaryDistribution(Distribution):
 
 setuptools.setup(
     name='cohere',
-    version='2.1.0',
+    version='2.2.0',
     author='1vn',
     author_email='ivan@cohere.ai',
     description='A Python library for the Cohere API',
@@ -34,7 +34,6 @@ setuptools.setup(
     install_requires=[
         'requests'
     ],
-    package_data={'': ['./cohere/tokenizer/*']},
     include_package_data=True,
     classifiers=[
         'Programming Language :: Python :: 3',
