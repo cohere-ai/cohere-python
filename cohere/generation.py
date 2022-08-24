@@ -12,7 +12,7 @@ class Generation(CohereObject):
     def __init__(self,
                  text: str,
                  likelihood: float,
-                 token_likelihoods: TokenLikelihood) -> None:
+                 token_likelihoods: List[TokenLikelihood]) -> None:
         self.text = text
         self.likelihood = likelihood
         self.token_likelihoods = token_likelihoods
