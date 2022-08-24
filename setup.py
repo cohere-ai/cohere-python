@@ -7,6 +7,7 @@ with open('README.md', 'r', encoding='utf-8') as fh:
 
 
 class InstallPlatlib(install):
+
     def finalize_options(self):
         install.finalize_options(self)
         if self.distribution.has_ext_modules():
@@ -14,6 +15,7 @@ class InstallPlatlib(install):
 
 
 class BinaryDistribution(Distribution):
+
     def is_pure(self) -> bool:
         return False
 
@@ -21,26 +23,22 @@ class BinaryDistribution(Distribution):
         return True
 
 
-setuptools.setup(
-    name='cohere',
-    version='2.2.0',
-    author='1vn',
-    author_email='ivan@cohere.ai',
-    description='A Python library for the Cohere API',
-    long_description=long_description,
-    long_description_content_type='text/markdown',
-    url='https://github.com/cohere-ai/cohere-python',
-    packages=setuptools.find_packages(),
-    install_requires=[
-        'requests'
-    ],
-    include_package_data=True,
-    classifiers=[
-        'Programming Language :: Python :: 3',
-        'License :: OSI Approved :: MIT License',
-        'Operating System :: OS Independent',
-    ],
-    python_requires='>=3.6',
-    distclass=BinaryDistribution,
-    cmdclass={'install': InstallPlatlib}
-)
+setuptools.setup(name='cohere',
+                 version='2.2.1',
+                 author='1vn',
+                 author_email='ivan@cohere.ai',
+                 description='A Python library for the Cohere API',
+                 long_description=long_description,
+                 long_description_content_type='text/markdown',
+                 url='https://github.com/cohere-ai/cohere-python',
+                 packages=setuptools.find_packages(),
+                 install_requires=['requests'],
+                 include_package_data=True,
+                 classifiers=[
+                     'Programming Language :: Python :: 3',
+                     'License :: OSI Approved :: MIT License',
+                     'Operating System :: OS Independent',
+                 ],
+                 python_requires='>=3.6',
+                 distclass=BinaryDistribution,
+                 cmdclass={'install': InstallPlatlib})
