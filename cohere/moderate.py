@@ -5,9 +5,8 @@ from cohere.response import CohereObject
 
 class Moderation(CohereObject):
 
-    def __init__(self, benign: float, profanity: float, hate_speech: float, violence: float, self_harm: float,
-                 sexual: float, sexual_non_consensual: float, spam: float, information_hazard: float) -> None:
-        self.benign = benign
+    def __init__(self, profanity: float, hate_speech: float, violence: float, self_harm: float, sexual: float,
+                 sexual_non_consensual: float, spam: float) -> None:
         self.profanity = profanity
         self.hate_speech = hate_speech
         self.violence = violence
@@ -15,7 +14,6 @@ class Moderation(CohereObject):
         self.sexual = sexual
         self.sexual_non_consensual = sexual_non_consensual
         self.spam = spam
-        self.information_hazard = information_hazard
 
 
 class Moderations(CohereObject):
