@@ -1,22 +1,23 @@
 import json
-from typing import List, Any
-from urllib.parse import urljoin
-
 import math
+from concurrent.futures import ThreadPoolExecutor
+from typing import Any, List
+from urllib.parse import urljoin
 
 import requests
 from requests import Response
 
-from concurrent.futures import ThreadPoolExecutor
-
 import cohere
+from cohere.classify import Classification, Classifications, Confidence
+from cohere.classify import Example as ClassifyExample
 from cohere.embeddings import Embeddings
 from cohere.error import CohereError
-from cohere.generation import Generations, Generation, TokenLikelihood
+from cohere.extract import Entity
+from cohere.extract import Example as ExtractExample
+from cohere.extract import Extraction, Extractions
+from cohere.generation import Generation, Generations, TokenLikelihood
+from cohere.moderate import Moderation, Moderations
 from cohere.tokenize import Tokens
-from cohere.classify import Classifications, Classification, Example as ClassifyExample, Confidence
-from cohere.extract import Entity, Example as ExtractExample, Extraction, Extractions
-from cohere.moderate import Moderations, Moderation
 
 use_xhr_client = False
 try:
@@ -207,8 +208,8 @@ class Client:
         moderations = []
         for res in response['results']:
             moderations.append(
-                Moderation(res['benign'], res['profanity'], res['hate_speech'], res['violence'], res['self_harm'],
-                           res['sexual'], res['sexual_non_consensual'], res['spam'], res['information_hazard']))
+                Moderation(res['profanity'], res['hate_speech'], res['violence'], res['self_harm'],
+                           res['sexual'], res['sexual_non_consensual'], res['spam']))
 
         return Moderations(moderations=moderations)
 
