@@ -250,7 +250,7 @@ class Client:
 
     def __print_warning_msg(self, response: Response):
         if 'X-API-Warning' in response.headers:
-            print("\033[93mWarning : {}\n\033[0m".format(response.headers['X-API-Warning']))
+            print("\033[93mWarning: {}\n\033[0m".format(response.headers['X-API-Warning']))
 
     def __pyfetch(self, url, headers, json_body) -> Response:
         req = XMLHttpRequest.new()
