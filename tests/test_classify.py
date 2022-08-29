@@ -91,3 +91,7 @@ class TestClassify(unittest.TestCase):
             outputIndicator='This is a')
         self.assertEqual(prediction.classifications[0].prediction, 'fruit')
         self.assertEqual(prediction.classifications[1].prediction, 'color')
+
+    def test_preset_success(self):
+        prediction = co.classify(preset='PLACEHOLDER-PRESET')
+        self.assertIsInstance(prediction.classifications, list)

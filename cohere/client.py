@@ -90,9 +90,10 @@ class Client:
 
     def generate(
         self,
-        prompt: str,
+        prompt: str = None,
         model: str = None,
-        num_generations: int = 1,
+        preset: str = None,
+        num_generations: int = None,
         max_tokens: int = 20,
         temperature: float = 1.0,
         k: int = 0,
@@ -105,6 +106,7 @@ class Client:
         json_body = json.dumps({
             'model': model,
             'prompt': prompt,
+            'preset': preset,
             'num_generations': num_generations,
             'max_tokens': max_tokens,
             'temperature': temperature,
@@ -162,8 +164,9 @@ class Client:
 
     def classify(
         self,
-        inputs: List[str],
+        inputs: List[str] = [],
         model: str = None,
+        preset: str = None,
         examples: List[ClassifyExample] = [],
         taskDescription: str = '',
         outputIndicator: str = ''
@@ -175,6 +178,7 @@ class Client:
 
         json_body = json.dumps({
             'model': model,
+            'preset': preset,
             'inputs': inputs,
             'examples': examples_dicts,
             'taskDescription': taskDescription,
