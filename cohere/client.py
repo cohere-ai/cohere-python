@@ -1,5 +1,6 @@
 import json
 import math
+import sys
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, List
 from urllib.parse import urljoin
@@ -226,6 +227,10 @@ class Client:
         response = self.__request(json_body, cohere.TOKENIZE_URL)
         return Tokens(response['tokens'])
 
+    def __print_warning_msg(self, response: Response):
+        if 'X-API-Warning' in response.headers:
+            print("\033[93mWarning: {}\n\033[0m".format(response.headers['X-API-Warning']), file=sys.stderr)
+
     def __pyfetch(self, url, headers, json_body) -> Response:
         req = XMLHttpRequest.new()
         req.open('POST', url, False)
@@ -252,6 +257,7 @@ class Client:
         url = urljoin(self.api_url, endpoint)
         if use_xhr_client:
             response = self.__pyfetch(url, headers, json_body)
+            self.__print_warning_msg(response)
             return response
         else:
             response = requests.request('POST', url, headers=headers, data=json_body, **self.request_dict)
@@ -261,5 +267,6 @@ class Client:
                 raise CohereError(message=response.text, http_status=response.status_code, headers=response.headers)
             if 'message' in res.keys():  # has errors
                 raise CohereError(message=res['message'], http_status=response.status_code, headers=response.headers)
+            self.__print_warning_msg(response)
 
         return res
