@@ -90,7 +90,7 @@ class Client:
                  presence_penalty: float = 0.0,
                  stop_sequences: List[str] = None,
                  return_likelihoods: str = 'NONE',
-                 truncate: str = none) -> Generations:
+                 truncate: str = None) -> Generations:
         json_body = json.dumps({
             'model': model,
             'prompt': prompt,
@@ -154,7 +154,7 @@ class Client:
                  examples: List[ClassifyExample] = [],
                  taskDescription: str = '',
                  outputIndicator: str = '',
-                 truncate: str = 'NONE') -> Classifications:
+                 truncate: str = None) -> Classifications:
         examples_dicts: list[dict[str, str]] = []
         for example in examples:
             example_dict = {'text': example.text, 'label': example.label}
