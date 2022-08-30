@@ -89,7 +89,7 @@ class Client:
                  presence_penalty: float = 0.0,
                  stop_sequences: List[str] = None,
                  return_likelihoods: str = 'NONE',
-                 truncate: str = 'NONE') -> Generations:
+                 truncate: str = none) -> Generations:
         json_body = json.dumps({
             'model': model,
             'prompt': prompt,
