@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.2.4
+* [#92](https://github.com/cohere-ai/cohere-python/pull/92) 
+    * Handle `truncate` parameter for Classify and Generate
 ## 1.3.6 - 2022-05-05
 * [#71](https://github.com/cohere-ai/cohere-python/pull/71) Sunset Choose Best
 
