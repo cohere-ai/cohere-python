@@ -9,7 +9,7 @@ import requests
 from requests import Response
 
 import cohere
-from cohere.classify import Classification, Classifications, Confidence
+from cohere.classify import Classification, Classifications, LabelPrediction
 from cohere.classify import Example as ClassifyExample
 from cohere.embeddings import Embeddings
 from cohere.error import CohereError
@@ -172,13 +172,12 @@ class Client:
 
         classifications = []
         for res in response['classifications']:
-            confidenceObj = []
-            for i in range(len(res['confidences'])):
-                confidenceObj.append(Confidence(res['confidences'][i]['option'], res['confidences'][i]['confidence']))
-            Classification(res['input'], res['prediction'], confidenceObj)
-            classifications.append(Classification(res['input'], res['prediction'], confidenceObj))
+            labels = {}
+            for k, v in res['labels'].items():
+                labels[k] = LabelPrediction(confidence=v['confidence'])
+            classifications.append(Classification(res['input'], res['prediction'], labels))
 
-        return Classifications(classifications)
+        return Classifications(classifications = classifications)
 
     def moderate(self, inputs: List[str], model: str = None, truncate: str = 'NONE') -> Moderations:
         json_body = json.dumps({

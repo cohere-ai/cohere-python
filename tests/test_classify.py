@@ -1,6 +1,6 @@
 import unittest
 import cohere
-from cohere.classify import Example
+from cohere.classify import Example, LabelPrediction
 from utils import get_api_key
 
 co = cohere.Client(get_api_key())
@@ -24,13 +24,12 @@ class TestClassify(unittest.TestCase):
                 Example('magenta', 'color')])
         self.assertIsInstance(prediction.classifications, list)
         self.assertIsInstance(prediction.classifications[0].input, str)
-        self.assertIsInstance(prediction.classifications[0].prediction, str)
-        self.assertIsInstance(prediction.classifications[0].confidence[0].confidence, (int, float))
-        self.assertIsInstance(prediction.classifications[0].confidence[0].label, str)
-        self.assertIsInstance(prediction.classifications[0].confidence[1].confidence, (int, float))
-        self.assertIsInstance(prediction.classifications[0].confidence[1].label, str)
+        self.assertIsInstance(prediction.classifications[0].prediction, dict)
+        self.assertIsInstance(prediction.classifications[0].labels, dict)
+        self.assertIsInstance(prediction.classifications[0].labels['fruit'].confidence, float)
+        self.assertIsInstance(prediction.classifications[0].labels['fruit'], LabelPrediction)
         self.assertEqual(len(prediction.classifications), 1)
-        self.assertEqual(prediction.classifications[0].prediction, 'color')
+        self.assertEqual(prediction.classifications[0].prediction_label, 'color')
 
     def test_empty_inputs(self):
         with self.assertRaises(cohere.CohereError):
@@ -66,8 +65,8 @@ class TestClassify(unittest.TestCase):
                 Example('green', 'color'),
                 Example('yellow', 'color'),
                 Example('magenta', 'color')])
-        self.assertEqual(prediction.classifications[0].prediction, 'color')
-        self.assertEqual(prediction.classifications[1].prediction, 'fruit')
+        self.assertEqual(prediction.classifications[0].prediction_label, 'color')
+        self.assertEqual(prediction.classifications[1].prediction_label, 'fruit')
         self.assertEqual(len(prediction.classifications), 2)
 
     def test_success_all_fields(self):
@@ -89,5 +88,5 @@ class TestClassify(unittest.TestCase):
             ],
             taskDescription='this is a classifier to determine if a word is a fruit of a color',
             outputIndicator='This is a')
-        self.assertEqual(prediction.classifications[0].prediction, 'fruit')
-        self.assertEqual(prediction.classifications[1].prediction, 'color')
+        self.assertEqual(prediction.classifications[0].prediction_label, 'fruit')
+        self.assertEqual(prediction.classifications[1].prediction_label, 'color')
