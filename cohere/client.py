@@ -19,6 +19,7 @@ from cohere.extract import Extraction, Extractions
 from cohere.generation import Generation, Generations, TokenLikelihood
 from cohere.moderate import Moderation, Moderations
 from cohere.tokenize import Tokens
+from cohere.detokenize import Detokenization
 
 use_xhr_client = False
 try:
@@ -226,6 +227,13 @@ class Client:
         })
         response = self.__request(json_body, cohere.TOKENIZE_URL)
         return Tokens(response['tokens'])
+
+    def detokenize(self, tokens: List[int]) -> Detokenization:
+        json_body = json.dumps({
+            'tokens': tokens,
+        })
+        response = self.__request(json_body, cohere.DETOKENIZE_URL)
+        return Detokenization(response['text'])
 
     def __print_warning_msg(self, response: Response):
         if 'X-API-Warning' in response.headers:
