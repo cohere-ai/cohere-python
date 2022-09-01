@@ -12,3 +12,4 @@ MODERATE_URL= 'moderate'
 
 CHECK_API_KEY_URL = 'check-api-key'
 TOKENIZE_URL = 'tokenize'
+DETOKENIZE_URL = 'detokenize'
