@@ -1,8 +1,17 @@
 # Changelog
 
+## 2.3.0
+* [#92](https://github.com/cohere-ai/cohere-python/pull/92) 
+	* The default value for the `max_tokens` parameter in Generate is now set on the backend
+
+## 2.2.5
+* [#95](https://github.com/cohere-ai/cohere-python/pull/95) 
+    * Introduce Detokenize for converting a list of tokens to a string 
+
 ## 2.2.4
 * [#92](https://github.com/cohere-ai/cohere-python/pull/92) 
     * Handle `truncate` parameter for Classify and Generate
+
 ## 1.3.6 - 2022-05-05
 * [#71](https://github.com/cohere-ai/cohere-python/pull/71) Sunset Choose Best
 

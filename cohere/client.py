@@ -83,7 +83,7 @@ class Client:
                  prompt: str,
                  model: str = None,
                  num_generations: int = 1,
-                 max_tokens: int = 20,
+                 max_tokens: int = None,
                  temperature: float = 1.0,
                  k: int = 0,
                  p: float = 0.75,
