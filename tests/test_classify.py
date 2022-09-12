@@ -93,5 +93,5 @@ class TestClassify(unittest.TestCase):
         self.assertEqual(prediction.classifications[1].prediction, 'color')
 
     def test_preset_success(self):
-        prediction = co.classify(preset='PLACEHOLDER-PRESET')
+        prediction = co.classify(preset='SDK-TESTS-PRESET-rfa6h3')
         self.assertIsInstance(prediction.classifications, list)

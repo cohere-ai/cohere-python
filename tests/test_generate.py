@@ -70,5 +70,5 @@ class TestGenerate(unittest.TestCase):
             _ = cohere.Client('invalid')
 
     def test_preset_success(self):
-        prediction = co.generate(preset='PLACEHOLDER-PRESET')
+        prediction = co.generate(preset='SDK-TESTS-PRESET-cq2r57')
         self.assertIsInstance(prediction.generations[0].text, str)
