@@ -9,7 +9,7 @@ import requests
 from requests import Response
 
 import cohere
-from cohere.classify import Classification, Classifications, Confidence
+from cohere.classify import Classification, Classifications, Confidence, LabelPrediction
 from cohere.classify import Example as ClassifyExample
 from cohere.embeddings import Embeddings
 from cohere.error import CohereError
@@ -181,11 +181,13 @@ class Client:
 
         classifications = []
         for res in response['classifications']:
+            labelObj = {}
             confidenceObj = []
             for i in range(len(res['confidences'])):
                 confidenceObj.append(Confidence(res['confidences'][i]['option'], res['confidences'][i]['confidence']))
-            Classification(res['input'], res['prediction'], confidenceObj)
-            classifications.append(Classification(res['input'], res['prediction'], confidenceObj))
+            for label, prediction in res['labels'].items():
+                labelObj[label] = LabelPrediction(prediction['confidence'])
+            classifications.append(Classification(res['input'], res['prediction'], confidenceObj, labelObj))
 
         return Classifications(classifications)
 
