@@ -79,22 +79,26 @@ class Client:
             raise CohereError(message=res['message'], http_status=response.status_code, headers=response.headers)
         return res
 
-    def generate(self,
-                 prompt: str,
-                 model: str = None,
-                 num_generations: int = 1,
-                 max_tokens: int = 20,
-                 temperature: float = 1.0,
-                 k: int = 0,
-                 p: float = 0.75,
-                 frequency_penalty: float = 0.0,
-                 presence_penalty: float = 0.0,
-                 stop_sequences: List[str] = None,
-                 return_likelihoods: str = 'NONE',
-                 truncate: str = None) -> Generations:
+    def generate(
+        self,
+        prompt: str = None,
+        model: str = None,
+        preset: str = None,
+        num_generations: int = 1,
+        max_tokens: int = 20,
+        temperature: float = 1.0,
+        k: int = 0,
+        p: float = 0.75,
+        frequency_penalty: float = 0.0,
+        presence_penalty: float = 0.0,
+        stop_sequences: List[str] = None,
+        return_likelihoods: str = 'NONE',
+        truncate: str = None
+    ) -> Generations:
         json_body = json.dumps({
             'model': model,
             'prompt': prompt,
+            'preset': preset,
             'num_generations': num_generations,
             'max_tokens': max_tokens,
             'temperature': temperature,
@@ -149,13 +153,16 @@ class Client:
 
         return Embeddings(responses)
 
-    def classify(self,
-                 inputs: List[str],
-                 model: str = None,
-                 examples: List[ClassifyExample] = [],
-                 taskDescription: str = '',
-                 outputIndicator: str = '',
-                 truncate: str = None) -> Classifications:
+    def classify(
+        self,
+        inputs: List[str] = [],
+        model: str = None,
+        preset: str = None,
+        examples: List[ClassifyExample] = [],
+        taskDescription: str = '',
+        outputIndicator: str = '',
+        truncate: str = None
+    ) -> Classifications:
         examples_dicts: list[dict[str, str]] = []
         for example in examples:
             example_dict = {'text': example.text, 'label': example.label}
@@ -163,6 +170,7 @@ class Client:
 
         json_body = json.dumps({
             'model': model,
+            'preset': preset,
             'inputs': inputs,
             'examples': examples_dicts,
             'taskDescription': taskDescription,
