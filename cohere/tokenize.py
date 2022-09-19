@@ -3,8 +3,9 @@ from typing import List
 
 
 class Tokens(CohereObject):
-    def __init__(self, tokens: List[int]) -> None:
+    def __init__(self, tokens: List[int], token_strings: List[str]) -> None:
         self.tokens = tokens
+        self.token_strings = token_strings
         self.iterator = iter(tokens)
         self.length = len(tokens)
 
