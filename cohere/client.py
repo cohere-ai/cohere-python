@@ -236,7 +236,7 @@ class Client:
             'text': text,
         })
         response = self.__request(json_body, cohere.TOKENIZE_URL)
-        return Tokens(response['tokens'])
+        return Tokens(response['tokens'], response['token_strings'])
 
     def detokenize(self, tokens: List[int]) -> Detokenization:
         json_body = json.dumps({
