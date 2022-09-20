@@ -18,6 +18,7 @@ from cohere.extract import Example as ExtractExample
 from cohere.extract import Extraction, Extractions
 from cohere.generation import Generation, Generations, TokenLikelihood
 from cohere.moderate import Moderation, Moderations
+from cohere.summarize import Summary
 from cohere.tokenize import Tokens
 from cohere.detokenize import Detokenization
 
@@ -230,6 +231,13 @@ class Client:
             extractions.append(extraction)
 
         return Extractions(extractions)
+
+    def summarize(self, text: str) -> Summary:
+        json_body = json.dumps({
+            'text': text,
+        })
+        response = self.__request(json_body, cohere.SUMMARIZE_URL)
+        return Summary(response['summary'])
 
     def tokenize(self, text: str) -> Tokens:
         json_body = json.dumps({

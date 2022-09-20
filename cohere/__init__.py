@@ -9,6 +9,7 @@ EMBED_URL = 'embed'
 CLASSIFY_URL = 'classify'
 EXTRACT_URL = 'extract'
 MODERATE_URL= 'moderate'
+SUMMARIZE_URL = 'summarize'
 
 CHECK_API_KEY_URL = 'check-api-key'
 TOKENIZE_URL = 'tokenize'
