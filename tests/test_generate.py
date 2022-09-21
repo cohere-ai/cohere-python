@@ -72,3 +72,13 @@ class TestGenerate(unittest.TestCase):
     def test_preset_success(self):
         prediction = co.generate(preset='SDK-TESTS-PRESET-cq2r57')
         self.assertIsInstance(prediction.generations[0].text, str)
+
+    def test_logit_bias(self):
+        prediction = co.generate(
+            model='small',
+            prompt='co:here',
+            logit_bias={11: -5.5},
+            max_tokens=1)
+        self.assertIsInstance(prediction.generations[0].text, str)
+        self.assertIsNone(prediction.generations[0].token_likelihoods)
+        self.assertEqual(prediction.return_likelihoods, 'NONE')
