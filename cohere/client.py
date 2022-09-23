@@ -232,7 +232,7 @@ class Client:
 
         return Extractions(extractions)
 
-    def summarize(self, text: str, length: str, useBaseline: bool) -> Summary:
+    def summarize(self, text: str, length: str = "normal", useBaseline: bool = False) -> Summary:
         json_body = json.dumps({
             'text': text,
             'length': length,
