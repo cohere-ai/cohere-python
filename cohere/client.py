@@ -232,12 +232,14 @@ class Client:
 
         return Extractions(extractions)
 
-    def summarize(self, text: str) -> Summary:
+    def summarize(self, text: str, length: str, useBaseline: bool) -> Summary:
         json_body = json.dumps({
             'text': text,
+            'length': length,
+            'useBaseline': useBaseline,
         })
         response = self.__request(json_body, cohere.SUMMARIZE_URL)
-        return Summary(response['summary'])
+        return Summary(response['summary'], response['ratio'])
 
     def tokenize(self, text: str) -> Tokens:
         json_body = json.dumps({
