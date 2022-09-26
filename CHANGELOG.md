@@ -1,8 +1,12 @@
 # Changelog
 
-## 2.3.0
-* [#92](https://github.com/cohere-ai/cohere-python/pull/92) 
-	* The default value for the `max_tokens` parameter in Generate is now set on the backend
+## 2.5.0
+* [#96](https://github.com/cohere-ai/cohere-python/pull/96)
+    * The default `max_tokens` value is now configured on the backend
+
+## 2.4.2
+* [#102](https://github.com/cohere-ai/cohere-python/pull/102) 
+    * Generate Parameter now accepts `logit_bias` as a parameter
 
 ## 2.2.5
 * [#95](https://github.com/cohere-ai/cohere-python/pull/95) 
