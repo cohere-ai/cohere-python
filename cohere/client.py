@@ -2,14 +2,14 @@ import json
 import math
 import sys
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, List
+from typing import Any, List, Dict
 from urllib.parse import urljoin
 
 import requests
 from requests import Response
 
 import cohere
-from cohere.classify import Classification, Classifications, Confidence
+from cohere.classify import Classification, Classifications, Confidence, LabelPrediction
 from cohere.classify import Example as ClassifyExample
 from cohere.embeddings import Embeddings
 from cohere.error import CohereError
@@ -79,22 +79,27 @@ class Client:
             raise CohereError(message=res['message'], http_status=response.status_code, headers=response.headers)
         return res
 
-    def generate(self,
-                 prompt: str,
-                 model: str = None,
-                 num_generations: int = 1,
-                 max_tokens: int = None,
-                 temperature: float = 1.0,
-                 k: int = 0,
-                 p: float = 0.75,
-                 frequency_penalty: float = 0.0,
-                 presence_penalty: float = 0.0,
-                 stop_sequences: List[str] = None,
-                 return_likelihoods: str = 'NONE',
-                 truncate: str = None) -> Generations:
+    def generate(
+        self,
+        prompt: str = None,
+        model: str = None,
+        preset: str = None,
+        num_generations: int = 1,
+        max_tokens: int = None,
+        temperature: float = 1.0,
+        k: int = 0,
+        p: float = 0.75,
+        frequency_penalty: float = 0.0,
+        presence_penalty: float = 0.0,
+        stop_sequences: List[str] = None,
+        return_likelihoods: str = 'NONE',
+        truncate: str = None,
+        logit_bias: Dict[int, float] = {}
+    ) -> Generations:
         json_body = json.dumps({
             'model': model,
             'prompt': prompt,
+            'preset': preset,
             'num_generations': num_generations,
             'max_tokens': max_tokens,
             'temperature': temperature,
@@ -105,6 +110,7 @@ class Client:
             'stop_sequences': stop_sequences,
             'return_likelihoods': return_likelihoods,
             'truncate': truncate,
+            'logit_bias': logit_bias,
         })
         response = self.__request(json_body, cohere.GENERATE_URL)
 
@@ -149,13 +155,16 @@ class Client:
 
         return Embeddings(responses)
 
-    def classify(self,
-                 inputs: List[str],
-                 model: str = None,
-                 examples: List[ClassifyExample] = [],
-                 taskDescription: str = '',
-                 outputIndicator: str = '',
-                 truncate: str = None) -> Classifications:
+    def classify(
+        self,
+        inputs: List[str] = [],
+        model: str = None,
+        preset: str = None,
+        examples: List[ClassifyExample] = [],
+        taskDescription: str = '',
+        outputIndicator: str = '',
+        truncate: str = None
+    ) -> Classifications:
         examples_dicts: list[dict[str, str]] = []
         for example in examples:
             example_dict = {'text': example.text, 'label': example.label}
@@ -163,6 +172,7 @@ class Client:
 
         json_body = json.dumps({
             'model': model,
+            'preset': preset,
             'inputs': inputs,
             'examples': examples_dicts,
             'taskDescription': taskDescription,
@@ -173,11 +183,13 @@ class Client:
 
         classifications = []
         for res in response['classifications']:
+            labelObj = {}
             confidenceObj = []
             for i in range(len(res['confidences'])):
                 confidenceObj.append(Confidence(res['confidences'][i]['option'], res['confidences'][i]['confidence']))
-            Classification(res['input'], res['prediction'], confidenceObj)
-            classifications.append(Classification(res['input'], res['prediction'], confidenceObj))
+            for label, prediction in res['labels'].items():
+                labelObj[label] = LabelPrediction(prediction['confidence'])
+            classifications.append(Classification(res['input'], res['prediction'], confidenceObj, labelObj))
 
         return Classifications(classifications)
 
@@ -226,7 +238,7 @@ class Client:
             'text': text,
         })
         response = self.__request(json_body, cohere.TOKENIZE_URL)
-        return Tokens(response['tokens'])
+        return Tokens(response['tokens'], response['token_strings'])
 
     def detokenize(self, tokens: List[int]) -> Detokenization:
         json_body = json.dumps({

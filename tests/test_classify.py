@@ -29,6 +29,8 @@ class TestClassify(unittest.TestCase):
         self.assertIsInstance(prediction.classifications[0].confidence[0].label, str)
         self.assertIsInstance(prediction.classifications[0].confidence[1].confidence, (int, float))
         self.assertIsInstance(prediction.classifications[0].confidence[1].label, str)
+        self.assertIsInstance(prediction.classifications[0].labels['color'].confidence, (int, float))
+        self.assertEqual(len(prediction.classifications[0].labels), 2)
         self.assertEqual(len(prediction.classifications), 1)
         self.assertEqual(prediction.classifications[0].prediction, 'color')
 
@@ -91,3 +93,7 @@ class TestClassify(unittest.TestCase):
             outputIndicator='This is a')
         self.assertEqual(prediction.classifications[0].prediction, 'fruit')
         self.assertEqual(prediction.classifications[1].prediction, 'color')
+
+    def test_preset_success(self):
+        prediction = co.classify(preset='SDK-TESTS-PRESET-rfa6h3')
+        self.assertIsInstance(prediction.classifications, list)
