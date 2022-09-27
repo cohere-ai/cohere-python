@@ -232,11 +232,28 @@ class Client:
 
         return Extractions(extractions)
 
-    def summarize(self, text: str, length: str = "normal", useBaseline: bool = False) -> Summary:
+    def summarize(
+        self, 
+        text: str, 
+        length: str = "normal", 
+        useBaseline: bool = False,
+        max_tokens: int = 120,
+        temperature: float = 1.0,
+        k: int = 1,
+        p: float = 1,
+        frequency_penalty: float = 0.0,
+        presence_penalty: float = 0.0
+    ) -> Summary:
         json_body = json.dumps({
             'text': text,
             'length': length,
             'useBaseline': useBaseline,
+            'max_tokens': max_tokens,
+            'temperature': temperature,
+            'k': k,
+            'p': p,
+            'frequency_penalty': frequency_penalty,
+            'presence_penalty': presence_penalty,
         })
         response = self.__request(json_body, cohere.SUMMARIZE_URL)
         return Summary(response['summary'], response['ratio'])
