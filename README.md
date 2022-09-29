@@ -64,6 +64,8 @@ Cohere Endpoint | Function
 /generate  | co.generate()
 /embed | co.embed()
 /classify | co.classify()
+/tokenize  | co.tokenize()
+/detokenize | co.detokenize()
 
 ## Models
 When you call Cohere's APIs we decide on a good default model for your use-case behind the scenes. The default model is great to get you started, but in production environments we recommend that you specify the model size yourself via the `model` parameter. Learn more about the available models here(https://os.cohere.ai)
