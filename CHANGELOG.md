@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.5.1
+## 2.6.0
 * [#104](https://github.com/cohere-ai/cohere-python/pull/96)
     * Remove experimental `moderate` api
 
