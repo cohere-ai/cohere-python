@@ -1,10 +1,15 @@
+import os
 import json
 import math
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, List, Dict
 from urllib.parse import urljoin
+from multiprocessing.pool import ThreadPool
+from typing import Any, Dict, List
 
+from tqdm import tqdm
+from pyrate_limiter import Duration, Limiter, MemoryListBucket, RequestRate
 import requests
 from requests import Response
 
@@ -27,6 +32,27 @@ try:
     use_xhr_client = True
 except ImportError:
     pass
+
+minute_rate = RequestRate(10000, Duration.MINUTE)
+limiter = Limiter(minute_rate, bucket_class=MemoryListBucket)
+NUM_THREADS = 2 * os.cpu_count()  # 2 threads per cpu core is standard
+N_MAX_EMBED_RETRIES = 5
+
+
+def _batchify(prompts):
+    batch_size = math.ceil(len(prompts)/NUM_THREADS)
+    return [
+        prompts[i:i+batch_size] for i in range(0, len(prompts), batch_size)
+    ]
+
+def _multi_threaded_loop(prompts, shared_kwargs, method):
+    outputs = []
+    with ThreadPool(NUM_THREADS) as pool:
+        for batch_prompts in tqdm(_batchify(prompts), 'Generating Responses: '):
+            inputs = [dict(prompt=p, **shared_kwargs) for p in batch_prompts]
+            output = list(pool.imap(method, inputs))
+            outputs.append(output)
+    return outputs
 
 
 class Client:
@@ -54,6 +80,18 @@ class Client:
                     raise CohereError('invalid api key')
             except CohereError as e:
                 raise CohereError(message=e.message, http_status=e.http_status, headers=e.headers)
+
+        for method in [self.generate]:
+
+            @limiter.ratelimit("cohere", delay=True)
+            def method_call(kwargs):
+                return method(**kwargs)
+
+            def batch_request(prompts, **kwargs):
+                all_results = _multi_threaded_loop(prompts, kwargs, method_call)
+                return sum(all_results, [])
+
+            setattr(self, method.__name__ + '_batch', batch_request)
 
     def check_api_key(self) -> Response:
         headers = {
@@ -126,7 +164,7 @@ class Client:
                     token_likelihood = likelihoods['likelihood'] if 'likelihood' in likelihoods.keys() else None
                     token_likelihoods.append(TokenLikelihood(likelihoods['token'], token_likelihood))
             generations.append(Generation(gen['text'], likelihood, token_likelihoods))
-        return Generations(generations, return_likelihoods)
+        return Generations(prompt, generations, return_likelihoods)
 
     def embed(self, texts: List[str], model: str = None, truncate: str = 'NONE') -> Embeddings:
         responses = []

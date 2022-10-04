@@ -20,8 +20,10 @@ class Generation(CohereObject):
 
 class Generations(CohereObject):
     def __init__(self,
+                 prompt: str,
                  generations: List[Generation],
                  return_likelihoods: str) -> None:
+        self.prompt = prompt
         self.generations = generations
         self.return_likelihoods = return_likelihoods
         self.iterator = iter(generations)
