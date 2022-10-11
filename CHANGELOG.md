@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.6.0
+* [#104](https://github.com/cohere-ai/cohere-python/pull/96)
+    * Remove experimental `moderate` api
+
 ## 2.5.0
 * [#96](https://github.com/cohere-ai/cohere-python/pull/96)
     * The default `max_tokens` value is now configured on the backend

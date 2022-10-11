@@ -17,7 +17,6 @@ from cohere.extract import Entity
 from cohere.extract import Example as ExtractExample
 from cohere.extract import Extraction, Extractions
 from cohere.generation import Generation, Generations, TokenLikelihood
-from cohere.moderate import Moderation, Moderations
 from cohere.tokenize import Tokens
 from cohere.detokenize import Detokenization
 
@@ -192,22 +191,6 @@ class Client:
             classifications.append(Classification(res['input'], res['prediction'], confidenceObj, labelObj))
 
         return Classifications(classifications)
-
-    def moderate(self, inputs: List[str], model: str = None, truncate: str = 'NONE') -> Moderations:
-        json_body = json.dumps({
-            'model': model,
-            'inputs': inputs,
-            'truncate': truncate,
-        })
-        response = self.__request(json_body, cohere.MODERATE_URL)
-
-        moderations = []
-        for res in response['results']:
-            moderations.append(
-                Moderation(res['profanity'], res['hate_speech'], res['violence'], res['self_harm'], res['sexual'],
-                           res['sexual_non_consensual'], res['spam']))
-
-        return Moderations(moderations=moderations)
 
     def unstable_extract(self, examples: List[ExtractExample], texts: List[str]) -> Extractions:
         '''
