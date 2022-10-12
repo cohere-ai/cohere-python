@@ -160,8 +160,6 @@ class Client:
         model: str = None,
         preset: str = None,
         examples: List[ClassifyExample] = [],
-        taskDescription: str = '',
-        outputIndicator: str = '',
         truncate: str = None
     ) -> Classifications:
         examples_dicts: list[dict[str, str]] = []
@@ -174,8 +172,6 @@ class Client:
             'preset': preset,
             'inputs': inputs,
             'examples': examples_dicts,
-            'taskDescription': taskDescription,
-            'outputIndicator': outputIndicator,
             'truncate': truncate,
         })
         response = self.__request(json_body, cohere.CLASSIFY_URL)

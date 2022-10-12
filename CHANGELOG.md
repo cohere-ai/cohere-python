@@ -1,7 +1,12 @@
 # Changelog
 
+
+## 2.6.1
+* [#105](https://github.com/cohere-ai/cohere-python/pull/105)
+    * Remove deprecated options from classify
+
 ## 2.6.0
-* [#104](https://github.com/cohere-ai/cohere-python/pull/96)
+* [#104](https://github.com/cohere-ai/cohere-python/pull/104)
     * Remove experimental `moderate` api
 
 ## 2.5.0
