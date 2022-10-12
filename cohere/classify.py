@@ -41,3 +41,4 @@ class Example(CohereObject):
     def __init__(self, text: str, label: str) -> None:
         self.text = text
         self.label = label
+
