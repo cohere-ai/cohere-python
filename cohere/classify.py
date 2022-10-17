@@ -15,7 +15,7 @@ class LabelPrediction(CohereObject):
 
 class Classification(CohereObject):
     def __init__(self, input: str,
-                 prediction: str, confidence: List[Confidence], labels: Dict[str, LabelPrediction]) -> None:
+                 prediction: str, confidence: float, labels: Dict[str, LabelPrediction]) -> None:
         self.input = input
         self.prediction = prediction
         self.confidence = confidence
