@@ -26,7 +26,9 @@ class Generation(CohereObject):
 class Generations(CohereObject):
     def __init__(self,
                  response: Optional[Dict[str, Any]] = None,
-                 return_likelihoods: Optional[str] = None, *,  _future: Optional[Future] = None) -> None:
+                 return_likelihoods: Optional[str] = None,
+                 *,
+                 _future: Optional[Future] = None) -> None:
         self.generations: Union[AsyncAttribute, List[Generation]] = None
         if _future is not None:
             self._init_from_future(_future)
