@@ -18,7 +18,7 @@ from cohere.error import CohereError
 from cohere.extract import Entity
 from cohere.extract import Example as ExtractExample
 from cohere.extract import Extraction, Extractions
-from cohere.generation import Generation, Generations, TokenLikelihood
+from cohere.generation import Generations
 from cohere.tokenize import Tokens
 
 use_xhr_client = False
