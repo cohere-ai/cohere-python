@@ -1,5 +1,6 @@
-from cohere.response import CohereObject
 from typing import List
+
+from cohere.response import CohereObject
 
 
 class Embeddings(CohereObject):

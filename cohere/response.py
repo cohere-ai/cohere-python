@@ -1,22 +1,30 @@
 from concurrent.futures import Future, ThreadPoolExecutor
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, Iterator
 from xmlrpc.client import Boolean
 
 
 class AsyncAttribute():
-    def __init__(self, async_request: Future, getter: Callable[Any, Any]) -> None:
+    def __init__(self, async_request: Future, getter: Callable[..., Any]) -> None:
         self._request = async_request
         self._getter = getter
 
-    def is_resolved() -> Boolean:
+    def __len__(self):
+        return len(self.resolve())
+
+    def __iter_(self) -> Iterator:
+        return iter(self.resolve())
+
+    def __repr__(self):
+        return repr(self.resolve())
+
+    def __str__(self):
+        return str(self.resolve())
+
+    def is_resolved(self) -> Boolean:
         return self._request.done()
 
-    def resolve() -> Any:
+    def resolve(self) -> Any:
         return self._getter(self._request.result())
-
-    def value() -> Any:
-        return self.resolve()
-
 
 
 class CohereObject():
@@ -24,9 +32,6 @@ class CohereObject():
     def __getattribute__(self, name: str) -> Any:
         attr = super().__getattribute__(name)
         if isinstance(attr, AsyncAttribute):
-            if attr.is_resolved():
-                return attr.value()
-            
             return attr.resolve()
         else:
             return attr
