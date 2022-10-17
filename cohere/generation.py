@@ -5,16 +5,15 @@ from cohere.response import AsyncAttribute, CohereObject
 
 
 class TokenLikelihood(CohereObject):
+
     def __init__(self, token: str, likelihood: float) -> None:
         self.token = token
         self.likelihood = likelihood
 
 
 class Generation(CohereObject):
-    def __init__(self,
-                 text: str,
-                 likelihood: float,
-                 token_likelihoods: List[TokenLikelihood]) -> None:
+
+    def __init__(self, text: str, likelihood: float, token_likelihoods: List[TokenLikelihood]) -> None:
         self.text = text
         self.likelihood = likelihood
         self.token_likelihoods = token_likelihoods
@@ -24,6 +23,7 @@ class Generation(CohereObject):
 
 
 class Generations(CohereObject):
+
     def __init__(self,
                  response: Optional[Dict[str, Any]] = None,
                  return_likelihoods: Optional[str] = None,

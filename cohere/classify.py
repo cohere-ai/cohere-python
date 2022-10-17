@@ -3,19 +3,22 @@ from typing import List, Dict
 
 
 class Confidence(CohereObject):
+
     def __init__(self, label: str, confidence: float) -> None:
         self.label = label
         self.confidence = confidence
 
 
 class LabelPrediction(CohereObject):
+
     def __init__(self, confidence: float) -> None:
         self.confidence = confidence
 
 
 class Classification(CohereObject):
-    def __init__(self, input: str,
-                 prediction: str, confidence: List[Confidence], labels: Dict[str, LabelPrediction]) -> None:
+
+    def __init__(self, input: str, prediction: str, confidence: List[Confidence],
+                 labels: Dict[str, LabelPrediction]) -> None:
         self.input = input
         self.prediction = prediction
         self.confidence = confidence
@@ -23,6 +26,7 @@ class Classification(CohereObject):
 
 
 class Classifications(CohereObject):
+
     def __init__(self, classifications: List[Classification]) -> None:
         self.classifications = classifications
         self.iterator = iter(classifications)
@@ -38,6 +42,7 @@ class Classifications(CohereObject):
 
 
 class Example(CohereObject):
+
     def __init__(self, text: str, label: str) -> None:
         self.text = text
         self.label = label

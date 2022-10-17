@@ -5,7 +5,12 @@ from cohere.response import AsyncAttribute, CohereObject
 
 
 class Tokens(CohereObject):
-    def __init__(self, tokens: Optional[List[int]] = None, token_strings: Optional[List[str]] = None, *, _future: Optional[Future] = None) -> None:
+
+    def __init__(self,
+                 tokens: Optional[List[int]] = None,
+                 token_strings: Optional[List[str]] = None,
+                 *,
+                 _future: Optional[Future] = None) -> None:
         if _future is not None:
             self._init_from_future(_future)
         else:

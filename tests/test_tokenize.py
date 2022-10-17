@@ -6,6 +6,7 @@ co = cohere.Client(get_api_key())
 
 
 class TestTokenize(unittest.TestCase):
+
     def test_success(self):
         tokens = co.tokenize('tokenize me!')
         self.assertIsInstance(tokens.tokens, list)

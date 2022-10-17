@@ -1,9 +1,10 @@
-from concurrent.futures import Future, ThreadPoolExecutor
-from typing import Any, Callable, Dict, Iterator
+from concurrent.futures import Future
+from typing import Any, Callable, Iterator
 from xmlrpc.client import Boolean
 
 
 class AsyncAttribute():
+
     def __init__(self, async_request: Future, getter: Callable[..., Any]) -> None:
         self._request = async_request
         self._getter = getter

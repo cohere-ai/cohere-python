@@ -84,26 +84,26 @@ class Client:
         generations: List[Generations] = []
         for prompt in prompts:
             kwargs["prompt"] = prompt
-            generations.append(Generations(return_likelihoods=kwargs.get("return_likelihoods", None), _future=self._executor.submit(self.generate, **kwargs)))
+            generations.append(
+                Generations(return_likelihoods=kwargs.get("return_likelihoods", None),
+                            _future=self._executor.submit(self.generate, **kwargs)))
         return generations
 
-    def generate(
-        self,
-        prompt: str = None,
-        model: str = None,
-        preset: str = None,
-        num_generations: int = 1,
-        max_tokens: int = None,
-        temperature: float = 1.0,
-        k: int = 0,
-        p: float = 0.75,
-        frequency_penalty: float = 0.0,
-        presence_penalty: float = 0.0,
-        stop_sequences: List[str] = None,
-        return_likelihoods: str = 'NONE',
-        truncate: str = None,
-        logit_bias: Dict[int, float] = {}
-    ) -> Generations:
+    def generate(self,
+                 prompt: str = None,
+                 model: str = None,
+                 preset: str = None,
+                 num_generations: int = 1,
+                 max_tokens: int = None,
+                 temperature: float = 1.0,
+                 k: int = 0,
+                 p: float = 0.75,
+                 frequency_penalty: float = 0.0,
+                 presence_penalty: float = 0.0,
+                 stop_sequences: List[str] = None,
+                 return_likelihoods: str = 'NONE',
+                 truncate: str = None,
+                 logit_bias: Dict[int, float] = {}) -> Generations:
         json_body = json.dumps({
             'model': model,
             'prompt': prompt,
@@ -149,14 +149,12 @@ class Client:
 
         return Embeddings(responses)
 
-    def classify(
-        self,
-        inputs: List[str] = [],
-        model: str = None,
-        preset: str = None,
-        examples: List[ClassifyExample] = [],
-        truncate: str = None
-    ) -> Classifications:
+    def classify(self,
+                 inputs: List[str] = [],
+                 model: str = None,
+                 preset: str = None,
+                 examples: List[ClassifyExample] = [],
+                 truncate: str = None) -> Classifications:
         examples_dicts: list[dict[str, str]] = []
         for example in examples:
             example_dict = {'text': example.text, 'label': example.label}
