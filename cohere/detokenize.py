@@ -15,3 +15,6 @@ class Detokenization(CohereObject):
 
     def _init_from_future(self, future: Future):
         self.text = AsyncAttribute(future, lambda x: x['text'])
+
+    def __str__(self) -> str:
+        return self.text

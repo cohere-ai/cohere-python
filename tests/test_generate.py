@@ -1,5 +1,7 @@
 import unittest
+
 import cohere
+
 from utils import get_api_key
 
 API_KEY = get_api_key()
@@ -13,6 +15,14 @@ class TestGenerate(unittest.TestCase):
         self.assertIsInstance(prediction.generations[0].text, str)
         self.assertIsNone(prediction.generations[0].token_likelihoods)
         self.assertEqual(prediction.return_likelihoods, 'NONE')
+
+    def test_success_batched(self):
+        _batch_size = 10
+        predictions = co.batch_generate(model='small', prompts=['co:here'] * _batch_size, max_tokens=1)
+        for prediction in predictions:
+            self.assertIsInstance(prediction.generations[0].text, str)
+            self.assertIsNone(prediction.generations[0].token_likelihoods)
+            self.assertEqual(prediction.return_likelihoods, 'NONE')
 
     def test_return_likelihoods_generation(self):
         prediction = co.generate(model='small', prompt='co:here', max_tokens=1, return_likelihoods='GENERATION')
@@ -40,7 +50,7 @@ class TestGenerate(unittest.TestCase):
 
     def test_invalid_version_fails(self):
         with self.assertRaises(cohere.CohereError):
-            cohere.Client(API_KEY, 'fake').generate(model='small', prompt='co:here', max_tokens=1)
+            _ = cohere.Client(API_KEY, 'fake').generate(model='small', prompt='co:here', max_tokens=1).generations
 
     def test_invalid_key(self):
         with self.assertRaises(cohere.CohereError):
