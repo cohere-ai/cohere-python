@@ -39,14 +39,14 @@ class TestGenerate(unittest.TestCase):
 
     def test_invalid_temp(self):
         with self.assertRaises(cohere.CohereError):
-            co.generate(model='large', prompt='hi', max_tokens=1, temperature=-1)
+            co.generate(model='large', prompt='hi', max_tokens=1, temperature=-1).generations
 
     def test_invalid_model(self):
         with self.assertRaises(cohere.CohereError):
-            co.generate(model='this-better-not-exist', prompt='co:here', max_tokens=1)
+            co.generate(model='this-better-not-exist', prompt='co:here', max_tokens=1).generations
 
     def test_no_version_works(self):
-        cohere.Client(API_KEY).generate(model='small', prompt='co:here', max_tokens=1)
+        cohere.Client(API_KEY).generate(model='small', prompt='co:here', max_tokens=1).generations
 
     def test_invalid_version_fails(self):
         with self.assertRaises(cohere.CohereError):
