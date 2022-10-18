@@ -84,9 +84,7 @@ class Client:
         generations: List[Generations] = []
         for prompt in prompts:
             kwargs["prompt"] = prompt
-            generations.append(
-                Generations(return_likelihoods=kwargs.get("return_likelihoods", None),
-                            _future=self._executor.submit(self.generate, **kwargs)))
+            generations.append(self.generate(**kwargs))
         return generations
 
     def generate(self,
@@ -206,24 +204,22 @@ class Client:
         return Extractions(extractions)
 
     def batch_tokenize(self, texts: List[str]) -> List[Tokens]:
-        return [Tokens(self._executor.submit(self.tokenize, t)) for t in texts]
+        return [self.tokenize(t) for t in texts]
 
     def tokenize(self, text: str) -> Tokens:
         json_body = json.dumps({
             'text': text,
         })
-        response = self.__request(json_body, cohere.TOKENIZE_URL)
-        return Tokens(tokens=response['tokens'], token_strings=response['token_strings'])
+        return Tokens(_future=self._executor.submit(self.__request, json_body, cohere.TOKENIZE_URL))
 
     def batch_detokenize(self, list_of_tokens: List[List[int]]) -> List[Detokenization]:
-        return [Detokenization(self._executor.submit(self.detokenize, t)) for t in list_of_tokens]
+        return [self.detokenize(t) for t in list_of_tokens]
 
     def detokenize(self, tokens: List[int]) -> Detokenization:
         json_body = json.dumps({
             'tokens': tokens,
         })
-        response = self.__request(json_body, cohere.DETOKENIZE_URL)
-        return Detokenization(text=response['text'])
+        return Detokenization(_future=self._executor.submit(self.__request, json_body, cohere.DETOKENIZE_URL))
 
     def __print_warning_msg(self, response: Response):
         if 'X-API-Warning' in response.headers:

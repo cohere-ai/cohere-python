@@ -25,17 +25,17 @@ class Generation(CohereObject):
 class Generations(CohereObject):
 
     def __init__(self,
+                 return_likelihoods: str,
                  response: Optional[Dict[str, Any]] = None,
-                 return_likelihoods: Optional[str] = None,
                  *,
                  _future: Optional[Future] = None) -> None:
         self.generations: Union[AsyncAttribute, List[Generation]] = None
+        self.return_likelihoods = return_likelihoods
         if _future is not None:
             self._init_from_future(_future)
         else:
             assert response is not None
             self.generations = self._generations(response)
-            self.return_likelihoods = return_likelihoods
         self._iterator = None
 
     def _init_from_future(self, future: Future):
@@ -45,6 +45,7 @@ class Generations(CohereObject):
         generations: List[Generation] = []
         for gen in response['generations']:
             likelihood = None
+            token_likelihoods = None
             if self.return_likelihoods == 'GENERATION' or self.return_likelihoods == 'ALL':
                 likelihood = gen['likelihood']
             if 'token_likelihoods' in gen.keys():
