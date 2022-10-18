@@ -1,17 +1,15 @@
 from concurrent.futures import Future
-from typing import Any, Dict, Iterator, List, Optional, Union
+from typing import Any, Dict, Iterator, List, NamedTuple, Optional, Union
 
 from cohere.response import AsyncAttribute, CohereObject
 
-
-class TokenLikelihood(CohereObject):
-
-    def __init__(self, token: str, likelihood: float) -> None:
-        self.token = token
-        self.likelihood = likelihood
+TokenLikelihood = NamedTuple("TokenLikelihood", [("token", str), ("likelihood", float)])
 
 
-class Generation(CohereObject):
+class Generation(CohereObject, str):
+
+    def __new__(cls, text: str, *_, **__):
+        return str.__new__(cls, text)
 
     def __init__(self, text: str, likelihood: float, token_likelihoods: List[TokenLikelihood]) -> None:
         self.text = text
