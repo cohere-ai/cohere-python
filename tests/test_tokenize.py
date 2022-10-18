@@ -1,5 +1,7 @@
 import unittest
+
 import cohere
+
 from utils import get_api_key
 
 co = cohere.Client(get_api_key())
@@ -17,4 +19,4 @@ class TestTokenize(unittest.TestCase):
 
     def test_invalid_text(self):
         with self.assertRaises(cohere.CohereError):
-            co.tokenize(text='')
+            str(co.tokenize(text=''))

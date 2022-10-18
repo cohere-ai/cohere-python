@@ -19,6 +19,10 @@ class Tokens(CohereObject):
             self.tokens = tokens
             self.token_strings = token_strings
 
+    @property
+    def length(self):
+        return len(self)
+
     def _init_from_future(self, future: Future):
         self.tokens = AsyncAttribute(future, lambda x: x['tokens'])
         self.token_strings = AsyncAttribute(future, lambda x: x['token_strings'])
