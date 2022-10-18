@@ -40,7 +40,6 @@ class Generations(CohereObject):
         else:
             assert response is not None
             self.generations = self._generations(response)
-        self._iterator = None
 
     def _init_from_future(self, future: Future):
         self.generations = AsyncAttribute(future, self._generations)
@@ -65,14 +64,7 @@ class Generations(CohereObject):
         return str(self.generations)
 
     def __iter__(self) -> Iterator:
-        if self._iterator is None:
-            self._iterator = iter(self.generations)
-        return self._iterator
-
-    def __next__(self) -> Generation:
-        if self._iterator is None:
-            self._iterator = iter(self.generations)
-        return next(self._iterator)
+        return iter(self.generations)
 
     def __getitem__(self, key) -> Generation:
         return self.generations[key]

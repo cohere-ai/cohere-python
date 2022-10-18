@@ -24,7 +24,6 @@ class Classifications(CohereObject):
 
     def __init__(self, classifications: List[Classification]) -> None:
         self.classifications = classifications
-        self.iterator = None
 
     def __repr__(self) -> str:
         return self.classifications.__repr__()
@@ -33,12 +32,7 @@ class Classifications(CohereObject):
         return self.classifications.__str__()
 
     def __iter__(self) -> iter:
-        if self.iterator is None:
-            self.iterator = iter(self.classifications)
-        return self.iterator
-
-    def __next__(self) -> next:
-        return next(self.iterator)
+        return iter(self.classifications)
 
     def __len__(self) -> int:
         return len(self.classifications)

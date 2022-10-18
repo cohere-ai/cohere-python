@@ -18,18 +18,10 @@ class Tokens(CohereObject):
             assert token_strings is not None
             self.tokens = tokens
             self.token_strings = token_strings
-        self.iterator = iter(self.tokens)
-        self.length = len(self.tokens)
 
     def _init_from_future(self, future: Future):
         self.tokens = AsyncAttribute(future, lambda x: x['tokens'])
         self.token_strings = AsyncAttribute(future, lambda x: x['token_strings'])
 
-    def __iter__(self) -> Iterator:
-        return self.iterator
-
-    def __next__(self) -> next:
-        return next(self.iterator)
-
     def __len__(self) -> int:
-        return self.length
+        return len(self.tokens)
