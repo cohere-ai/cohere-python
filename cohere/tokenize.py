@@ -1,5 +1,5 @@
 from concurrent.futures import Future
-from typing import Iterator, List, Optional
+from typing import List, Optional
 
 from cohere.response import AsyncAttribute, CohereObject
 
