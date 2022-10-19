@@ -49,7 +49,7 @@ class Generations(CohereObject):
         for gen in response['generations']:
             likelihood = None
             token_likelihoods = None
-            if self.return_likelihoods == 'GENERATION' or self.return_likelihoods == 'ALL':
+            if self.return_likelihoods in ['GENERATION', 'ALL']:
                 likelihood = gen['likelihood']
             if 'token_likelihoods' in gen.keys():
                 token_likelihoods = []
