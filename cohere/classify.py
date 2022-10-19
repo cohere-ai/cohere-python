@@ -2,12 +2,6 @@ from cohere.response import CohereObject
 from typing import List, Dict
 
 
-class Confidence(CohereObject):
-    def __init__(self, label: str, confidence: float) -> None:
-        self.label = label
-        self.confidence = confidence
-
-
 class LabelPrediction(CohereObject):
     def __init__(self, confidence: float) -> None:
         self.confidence = confidence
@@ -15,7 +9,7 @@ class LabelPrediction(CohereObject):
 
 class Classification(CohereObject):
     def __init__(self, input: str,
-                 prediction: str, confidence: List[Confidence], labels: Dict[str, LabelPrediction]) -> None:
+                 prediction: str, confidence: float, labels: Dict[str, LabelPrediction]) -> None:
         self.input = input
         self.prediction = prediction
         self.confidence = confidence

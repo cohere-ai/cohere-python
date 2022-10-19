@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.7.0
+* [#110](https://github.com/cohere-ai/cohere-python/pull/110)
+    * Classification.confidence is now a float instead of a list
 
 ## 2.6.1
 * [#105](https://github.com/cohere-ai/cohere-python/pull/105)
