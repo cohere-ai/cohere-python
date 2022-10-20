@@ -2,23 +2,24 @@ import json
 import math
 import sys
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, List, Dict
+from typing import Any, Dict, List
 from urllib.parse import urljoin
 
 import requests
 from requests import Response
 
 import cohere
-from cohere.classify import Classification, Classifications, LabelPrediction
+from cohere.classify import Classification, Classifications
 from cohere.classify import Example as ClassifyExample
+from cohere.classify import LabelPrediction
+from cohere.detokenize import Detokenization
 from cohere.embeddings import Embeddings
 from cohere.error import CohereError
 from cohere.extract import Entity
 from cohere.extract import Example as ExtractExample
 from cohere.extract import Extraction, Extractions
-from cohere.generation import Generation, Generations, TokenLikelihood
+from cohere.generation import Generations
 from cohere.tokenize import Tokens
-from cohere.detokenize import Detokenization
 
 use_xhr_client = False
 try:
@@ -33,12 +34,13 @@ class Client:
     def __init__(self,
                  api_key: str,
                  version: str = None,
-                 num_workers: int = 8,
+                 num_workers: int = 64,
                  request_dict: dict = {},
                  check_api_key: bool = True) -> None:
         self.api_key = api_key
         self.api_url = cohere.COHERE_API_URL
         self.batch_size = cohere.COHERE_EMBED_BATCH_SIZE
+        self._executor = ThreadPoolExecutor(num_workers)
         self.num_workers = num_workers
         self.request_dict = request_dict
         if version is None:
@@ -78,23 +80,28 @@ class Client:
             raise CohereError(message=res['message'], http_status=response.status_code, headers=response.headers)
         return res
 
-    def generate(
-        self,
-        prompt: str = None,
-        model: str = None,
-        preset: str = None,
-        num_generations: int = 1,
-        max_tokens: int = None,
-        temperature: float = 1.0,
-        k: int = 0,
-        p: float = 0.75,
-        frequency_penalty: float = 0.0,
-        presence_penalty: float = 0.0,
-        stop_sequences: List[str] = None,
-        return_likelihoods: str = 'NONE',
-        truncate: str = None,
-        logit_bias: Dict[int, float] = {}
-    ) -> Generations:
+    def batch_generate(self, prompts: List[str], **kwargs) -> List[Generations]:
+        generations: List[Generations] = []
+        for prompt in prompts:
+            kwargs["prompt"] = prompt
+            generations.append(self.generate(**kwargs))
+        return generations
+
+    def generate(self,
+                 prompt: str = None,
+                 model: str = None,
+                 preset: str = None,
+                 num_generations: int = 1,
+                 max_tokens: int = None,
+                 temperature: float = 1.0,
+                 k: int = 0,
+                 p: float = 0.75,
+                 frequency_penalty: float = 0.0,
+                 presence_penalty: float = 0.0,
+                 stop_sequences: List[str] = None,
+                 return_likelihoods: str = 'NONE',
+                 truncate: str = None,
+                 logit_bias: Dict[int, float] = {}) -> Generations:
         json_body = json.dumps({
             'model': model,
             'prompt': prompt,
@@ -111,21 +118,8 @@ class Client:
             'truncate': truncate,
             'logit_bias': logit_bias,
         })
-        response = self.__request(json_body, cohere.GENERATE_URL)
-
-        generations: List[Generation] = []
-        for gen in response['generations']:
-            likelihood = None
-            token_likelihoods = None
-            if return_likelihoods == 'GENERATION' or return_likelihoods == 'ALL':
-                likelihood = gen['likelihood']
-            if 'token_likelihoods' in gen.keys():
-                token_likelihoods = []
-                for likelihoods in gen['token_likelihoods']:
-                    token_likelihood = likelihoods['likelihood'] if 'likelihood' in likelihoods.keys() else None
-                    token_likelihoods.append(TokenLikelihood(likelihoods['token'], token_likelihood))
-            generations.append(Generation(gen['text'], likelihood, token_likelihoods))
-        return Generations(generations, return_likelihoods)
+        response = self._executor.submit(self.__request, json_body, cohere.GENERATE_URL)
+        return Generations(return_likelihoods=return_likelihoods, _future=response)
 
     def embed(self, texts: List[str], model: str = None, truncate: str = 'NONE') -> Embeddings:
         responses = []
@@ -146,22 +140,19 @@ class Client:
                 response = self.__request(json_body, cohere.EMBED_URL)
                 responses.append(response['embeddings'])
         else:
-            with ThreadPoolExecutor(max_workers=self.num_workers) as executor:
-                for i in executor.map(self.__request, json_bodys, embed_url_stacked):
-                    request_futures.append(i)
+            for i in self._executor.map(self.__request, json_bodys, embed_url_stacked):
+                request_futures.append(i)
             for result in request_futures:
                 responses.extend(result['embeddings'])
 
         return Embeddings(responses)
 
-    def classify(
-        self,
-        inputs: List[str] = [],
-        model: str = None,
-        preset: str = None,
-        examples: List[ClassifyExample] = [],
-        truncate: str = None
-    ) -> Classifications:
+    def classify(self,
+                 inputs: List[str] = [],
+                 model: str = None,
+                 preset: str = None,
+                 examples: List[ClassifyExample] = [],
+                 truncate: str = None) -> Classifications:
         examples_dicts: list[dict[str, str]] = []
         for example in examples:
             example_dict = {'text': example.text, 'label': example.label}
@@ -209,19 +200,23 @@ class Client:
 
         return Extractions(extractions)
 
+    def batch_tokenize(self, texts: List[str]) -> List[Tokens]:
+        return [self.tokenize(t) for t in texts]
+
     def tokenize(self, text: str) -> Tokens:
         json_body = json.dumps({
             'text': text,
         })
-        response = self.__request(json_body, cohere.TOKENIZE_URL)
-        return Tokens(response['tokens'], response['token_strings'])
+        return Tokens(_future=self._executor.submit(self.__request, json_body, cohere.TOKENIZE_URL))
+
+    def batch_detokenize(self, list_of_tokens: List[List[int]]) -> List[Detokenization]:
+        return [self.detokenize(t) for t in list_of_tokens]
 
     def detokenize(self, tokens: List[int]) -> Detokenization:
         json_body = json.dumps({
             'tokens': tokens,
         })
-        response = self.__request(json_body, cohere.DETOKENIZE_URL)
-        return Detokenization(response['text'])
+        return Detokenization(_future=self._executor.submit(self.__request, json_body, cohere.DETOKENIZE_URL))
 
     def __print_warning_msg(self, response: Response):
         if 'X-API-Warning' in response.headers:

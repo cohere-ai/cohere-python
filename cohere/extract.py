@@ -1,5 +1,6 @@
-from cohere.response import CohereObject
 from typing import List
+
+from cohere.response import CohereObject
 
 
 class Entity:
@@ -89,5 +90,5 @@ class Extractions(CohereObject):
     def __len__(self) -> int:
         return len(self.extractions)
 
-    def __getitem__(self, index: int) -> Extraction:
+    def __getitem__(self, index) -> Extraction:
         return self.extractions[index]

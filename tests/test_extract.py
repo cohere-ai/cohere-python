@@ -5,7 +5,6 @@
 
 # co = cohere.Client(get_api_key())
 
-
 # class TestExtract(unittest.TestCase):
 #     def test_success(self):
 #         examples = [Example(
