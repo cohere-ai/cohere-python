@@ -9,7 +9,7 @@ import requests
 from requests import Response
 
 import cohere
-from cohere.classify import Classification, Classifications, LabelPrediction
+from cohere.classify import Classification, Classifications
 from cohere.classify import Example as ClassifyExample
 from cohere.classify import LabelPrediction
 from cohere.detokenize import Detokenization
