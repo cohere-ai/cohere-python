@@ -30,10 +30,9 @@ def random_texts(num_texts, num_words_per_sentence=50):
 
 
 class TestEmbed(unittest.TestCase):
+
     def test_success(self):
-        prediction = co.embed(
-            model='small',
-            texts=['co:here', 'cohere'])
+        prediction = co.embed(model='small', texts=['co:here', 'cohere'])
         self.assertEqual(len(prediction.embeddings), 2)
         self.assertIsInstance(prediction.embeddings[0], list)
         self.assertIsInstance(prediction.embeddings[1], list)
@@ -41,8 +40,7 @@ class TestEmbed(unittest.TestCase):
         self.assertEqual(len(prediction.embeddings[1]), 1024)
 
     def test_default_model(self):
-        prediction = co.embed(
-            texts=['co:here', 'cohere'])
+        prediction = co.embed(texts=['co:here', 'cohere'])
         self.assertEqual(len(prediction.embeddings), 2)
         self.assertIsInstance(prediction.embeddings[0], list)
         self.assertIsInstance(prediction.embeddings[1], list)
@@ -57,22 +55,19 @@ class TestEmbed(unittest.TestCase):
             self.assertEqual(len(embed), 1024)
 
     def test_success_longer_multiple_batches_unaligned_batch(self):
-        prediction = co.embed(
-            model='small',
-            texts=[
-                'co:here', 'cohere', 'embed', 'python', 'golang',
-                'typescript', 'rust?',  'ai',  'nlp', 'neural', 'nets'
-            ])
+        prediction = co.embed(model='small',
+                              texts=[
+                                  'co:here', 'cohere', 'embed', 'python', 'golang', 'typescript', 'rust?', 'ai', 'nlp',
+                                  'neural', 'nets'
+                              ])
         self.assertEqual(len(prediction.embeddings), 11)
         for embed in prediction.embeddings:
             self.assertIsInstance(embed, list)
             self.assertEqual(len(embed), 1024)
 
     def test_success_longer_multiple_batches(self):
-        prediction = co.embed(
-            model='small',
-            texts=['co:here', 'cohere', 'embed', 'python', 'golang'] * 200)
-        self.assertEqual(len(prediction.embeddings), 200*5)
+        prediction = co.embed(model='small', texts=['co:here', 'cohere', 'embed', 'python', 'golang'] * 200)
+        self.assertEqual(len(prediction.embeddings), 200 * 5)
         for embed in prediction.embeddings:
             self.assertIsInstance(embed, list)
             self.assertEqual(len(embed), 1024)
@@ -83,9 +78,7 @@ class TestEmbed(unittest.TestCase):
 
         for _ in range(3):
             text_batch = random_texts(cohere.COHERE_EMBED_BATCH_SIZE)
-            prediction = co.embed(
-                model='small',
-                texts=text_batch)
+            prediction = co.embed(model='small', texts=text_batch)
             textAll.extend(text_batch)
             predictionsExpected.extend(prediction)
         predictionsActual = co.embed(model='small', texts=textAll)
@@ -95,6 +88,4 @@ class TestEmbed(unittest.TestCase):
 
     def test_invalid_texts(self):
         with self.assertRaises(cohere.CohereError):
-            co.embed(
-                model='small',
-                texts=[''])
+            co.embed(model='small', texts=[''])
