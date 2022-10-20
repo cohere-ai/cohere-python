@@ -37,5 +37,5 @@ class Classifications(CohereObject):
     def __len__(self) -> int:
         return len(self.classifications)
 
-    def __getitem__(self, key) -> Classification:
-        return self.classifications[key]
+    def __getitem__(self, index) -> Classification:
+        return self.classifications[index]
