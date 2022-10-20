@@ -22,8 +22,8 @@ class Generation(CohereObject, str):
     def __len__(self) -> int:
         return len(self.text)
 
-    def __getitem__(self, key):
-        return self.text[key]
+    def __getitem__(self, index) -> str:
+        return self.text[index]
 
 
 class Generations(CohereObject):
@@ -66,5 +66,5 @@ class Generations(CohereObject):
     def __iter__(self) -> Iterator:
         return iter(self.generations)
 
-    def __getitem__(self, key) -> Generation:
-        return self.generations[key]
+    def __getitem__(self, index) -> Generation:
+        return self.generations[index]
