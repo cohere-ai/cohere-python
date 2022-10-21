@@ -18,15 +18,6 @@ class Generation(CohereObject, str):
         self.likelihood = likelihood
         self.token_likelihoods = token_likelihoods
 
-    def __str__(self) -> str:
-        return str(self.text)
-
-    def __len__(self) -> int:
-        return len(self.text)
-
-    def __getitem__(self, index) -> str:
-        return self.text[index]
-
 
 class Generations(CohereObject):
 
