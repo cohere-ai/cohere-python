@@ -1,6 +1,10 @@
 from concurrent.futures import Future
+from subprocess import call
 from typing import Any, Callable, Iterator
 from xmlrpc.client import Boolean
+
+from cohere.client import Client
+from cohere.feedback import Feedback
 
 
 class AsyncAttribute():
@@ -30,6 +34,10 @@ class AsyncAttribute():
 
 class CohereObject():
 
+    def __init__(self, client: Client = None, call_id: int = None) -> None:
+        self.client = client
+        self.call_id = call_id
+
     def __getattribute__(self, name: str) -> Any:
         attr = super().__getattribute__(name)
         if isinstance(attr, AsyncAttribute):
@@ -47,3 +55,6 @@ class CohereObject():
 
         output = f'cohere.{type(self).__name__} {{\n{contents}}}'
         return output
+
+    def feedback(self, feedback: str) -> Feedback:
+        return self.client.feedback(call_id=self.call_id, feedback=feedback)
