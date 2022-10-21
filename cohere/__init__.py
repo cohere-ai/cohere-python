@@ -8,6 +8,7 @@ GENERATE_URL = 'generate'
 EMBED_URL = 'embed'
 CLASSIFY_URL = 'classify'
 DETECT_LANG_URL = 'detect-language'
+FEEDBACK_URL = 'feedback'
 
 CHECK_API_KEY_URL = 'check-api-key'
 TOKENIZE_URL = 'tokenize'

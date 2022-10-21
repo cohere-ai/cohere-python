@@ -1,7 +1,9 @@
 import json
 import sys
 from concurrent.futures import ThreadPoolExecutor
+from http import client
 from typing import Any, Dict, List
+from urllib import request
 from urllib.parse import urljoin
 
 import requests
@@ -120,7 +122,7 @@ class Client:
             'logit_bias': logit_bias,
         }
         response = self._executor.submit(self.__request, cohere.GENERATE_URL, json=json_body)
-        return Generations(return_likelihoods=return_likelihoods, _future=response)
+        return Generations(return_likelihoods=return_likelihoods, _future=response, client=self)
 
     def embed(self, texts: List[str], model: str = None, truncate: str = 'NONE') -> Embeddings:
         responses = []
@@ -169,7 +171,13 @@ class Client:
             labelObj = {}
             for label, prediction in res['labels'].items():
                 labelObj[label] = LabelPrediction(prediction['confidence'])
-            classifications.append(Classification(res['input'], res['prediction'], res['confidence'], labelObj))
+            classifications.append(
+                Classification(res['input'],
+                               res['prediction'],
+                               res['confidence'],
+                               labelObj,
+                               client=self,
+                               call_id=response["id"]))
 
         return Classifications(classifications)
 
@@ -196,6 +204,13 @@ class Client:
         for result in response["results"]:
             results.append(Language(result["language_code"], result["language_name"]))
         return DetectLanguageResponse(results)
+
+    def feedback(self, call_id: int, feedback: str):
+        json_body = json.dumps({
+            'call_id': call_id,
+            'feedback': feedback,
+        })
+        return Feedback(_future=self._executor.submit(self.__request, json_body, cohere.FEEDBACK_URL))
 
     def __print_warning_msg(self, response: Response):
         if 'X-API-Warning' in response.headers:

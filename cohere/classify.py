@@ -1,5 +1,6 @@
 from typing import Dict, List, NamedTuple
 
+from cohere.client import Client
 from cohere.response import CohereObject
 
 LabelPrediction = NamedTuple("LabelPrediction", [("confidence", float)])
@@ -8,7 +9,9 @@ Example = NamedTuple("Example", [("text", str), ("label", str)])
 
 class Classification(CohereObject):
 
-    def __init__(self, input: str, prediction: str, confidence: float, labels: Dict[str, LabelPrediction]) -> None:
+    def __init__(self, input: str, prediction: str, confidence: float, labels: Dict[str, LabelPrediction], *args,
+                 **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self.input = input
         self.prediction = prediction
         self.confidence = confidence

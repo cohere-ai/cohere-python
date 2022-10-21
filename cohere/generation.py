@@ -1,6 +1,7 @@
 from concurrent.futures import Future
 from typing import Any, Dict, Iterator, List, NamedTuple, Optional, Union
 
+from cohere import client
 from cohere.response import AsyncAttribute, CohereObject
 
 TokenLikelihood = NamedTuple("TokenLikelihood", [("token", str), ("likelihood", float)])
@@ -11,7 +12,8 @@ class Generation(CohereObject, str):
     def __new__(cls, text: str, *_, **__):
         return str.__new__(cls, text)
 
-    def __init__(self, text: str, likelihood: float, token_likelihoods: List[TokenLikelihood]) -> None:
+    def __init__(self, text: str, likelihood: float, token_likelihoods: List[TokenLikelihood], *args, **kwargs) -> None:
+        super(CohereObject, self).__init__(*args, **kwargs)
         self.text = text
         self.likelihood = likelihood
         self.token_likelihoods = token_likelihoods
@@ -32,7 +34,9 @@ class Generations(CohereObject):
                  return_likelihoods: str,
                  response: Optional[Dict[str, Any]] = None,
                  *,
-                 _future: Optional[Future] = None) -> None:
+                 _future: Optional[Future] = None,
+                 **kwargs) -> None:
+        super().__init__(**kwargs)
         self.generations: Union[AsyncAttribute, List[Generation]] = None
         self.return_likelihoods = return_likelihoods
         if _future is not None:
@@ -56,7 +60,8 @@ class Generations(CohereObject):
                 for likelihoods in gen['token_likelihoods']:
                     token_likelihood = likelihoods['likelihood'] if 'likelihood' in likelihoods.keys() else None
                     token_likelihoods.append(TokenLikelihood(likelihoods['token'], token_likelihood))
-            generations.append(Generation(gen['text'], likelihood, token_likelihoods))
+            generations.append(
+                Generation(gen['text'], likelihood, token_likelihoods, client=self.client, call_id=response["id"]))
 
         return generations
 
