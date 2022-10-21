@@ -3,7 +3,6 @@ from subprocess import call
 from typing import Any, Callable, Iterator
 from xmlrpc.client import Boolean
 
-from cohere.client import Client
 from cohere.feedback import Feedback
 
 
@@ -34,7 +33,7 @@ class AsyncAttribute():
 
 class CohereObject():
 
-    def __init__(self, client: Client = None, call_id: int = None) -> None:
+    def __init__(self, client=None, call_id: int = None) -> None:
         self.client = client
         self.call_id = call_id
 

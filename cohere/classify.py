@@ -1,6 +1,5 @@
 from typing import Dict, List, NamedTuple
 
-from cohere.client import Client
 from cohere.response import CohereObject
 
 LabelPrediction = NamedTuple("LabelPrediction", [("confidence", float)])
