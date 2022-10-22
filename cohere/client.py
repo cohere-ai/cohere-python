@@ -3,6 +3,7 @@ import math
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from http import client
+from subprocess import call
 from typing import Any, Dict, List
 from urllib import request
 from urllib.parse import urljoin
@@ -20,6 +21,7 @@ from cohere.error import CohereError
 from cohere.extract import Entity
 from cohere.extract import Example as ExtractExample
 from cohere.extract import Extraction, Extractions
+from cohere.feedback import Feedback
 from cohere.generation import Generations
 from cohere.tokenize import Tokens
 
@@ -228,10 +230,11 @@ class Client:
 
     def feedback(self, call_id: int, feedback: str):
         json_body = json.dumps({
-            'call_id': call_id,
+            'id': call_id,
             'feedback': feedback,
         })
-        return Feedback(_future=self._executor.submit(self.__request, json_body, cohere.FEEDBACK_URL))
+        self.__request(json_body, cohere.FEEDBACK_URL)
+        return Feedback(call_id=call_id, feedback=feedback)
 
     def __print_warning_msg(self, response: Response):
         if 'X-API-Warning' in response.headers:
