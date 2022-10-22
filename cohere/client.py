@@ -2,10 +2,7 @@ import json
 import math
 import sys
 from concurrent.futures import ThreadPoolExecutor
-from http import client
-from subprocess import call
 from typing import Any, Dict, List
-from urllib import request
 from urllib.parse import urljoin
 
 import requests
