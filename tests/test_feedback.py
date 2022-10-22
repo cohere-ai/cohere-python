@@ -15,5 +15,3 @@ class TestFeedback(unittest.TestCase):
         generations = co.generate(model='small', prompt='co:here', max_tokens=1)
         feedback = generations[0].feedback("this is a test")
         self.assertIsInstance(feedback, Feedback)
-        self.assertIsNone(prediction.generations[0].token_likelihoods)
-        self.assertEqual(generations[0].call_id, feedback.call_id)
