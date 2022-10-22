@@ -1,5 +1,4 @@
 from concurrent.futures import Future
-from subprocess import call
 from typing import Any, Callable, Iterator
 from xmlrpc.client import Boolean
 
