@@ -1,8 +1,12 @@
-import unittest
+import json
 import random
 import string
-import cohere
+import unittest
+import unittest.mock
+
 from utils import get_api_key
+
+import cohere
 
 co = cohere.Client(get_api_key())
 
@@ -89,3 +93,22 @@ class TestEmbed(unittest.TestCase):
     def test_invalid_texts(self):
         with self.assertRaises(cohere.CohereError):
             co.embed(model='small', texts=[''])
+
+    def test_embeddings_match_texts(self):
+
+        def request_mock(json_body, endpoint):
+            embeddings = {
+                'a': [0],
+                'b': [1],
+                'c': [2],
+                'bb': [3],
+                'ccc': [4],
+            }
+
+            return {
+                'embeddings': [embeddings[text] for text in json.loads(json_body)['texts']],
+            }
+
+        with unittest.mock.patch.object(co, '_Client__request', side_effect=request_mock):
+            prediction = co.embed(model='small', texts=['ccc', 'bb', 'c', 'a', 'b', 'c'])
+            self.assertEqual(prediction.embeddings, [[4], [3], [2], [0], [1], [2]])

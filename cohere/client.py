@@ -9,6 +9,7 @@ import requests
 from requests import Response
 
 import cohere
+import cohere.utils as utils
 from cohere.classify import Classification, Classifications
 from cohere.classify import Example as ClassifyExample
 from cohere.classify import LabelPrediction
@@ -122,6 +123,8 @@ class Client:
         return Generations(return_likelihoods=return_likelihoods, _future=response)
 
     def embed(self, texts: List[str], model: str = None, truncate: str = 'NONE') -> Embeddings:
+        texts, indices = utils.sort_with_indices(texts, key=lambda x: len(x))
+
         responses = []
         json_bodys = []
         request_futures = []
@@ -145,6 +148,7 @@ class Client:
             for result in request_futures:
                 responses.extend(result['embeddings'])
 
+        responses = utils.restore_order(responses, indices)
         return Embeddings(responses)
 
     def classify(self,
