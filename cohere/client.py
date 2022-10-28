@@ -89,6 +89,7 @@ class Client:
 
     def generate(self,
                  prompt: str = None,
+                 prompt_vars: object = {},
                  model: str = None,
                  preset: str = None,
                  num_generations: int = 1,
@@ -105,6 +106,7 @@ class Client:
         json_body = json.dumps({
             'model': model,
             'prompt': prompt,
+            'prompt_vars': prompt_vars,
             'preset': preset,
             'num_generations': num_generations,
             'max_tokens': max_tokens,
