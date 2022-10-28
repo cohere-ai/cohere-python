@@ -19,6 +19,7 @@ from cohere.extract import Example as ExtractExample
 from cohere.extract import Extraction, Extractions
 from cohere.generation import Generations
 from cohere.tokenize import Tokens
+from cohere.whisper import Whispers
 
 use_xhr_client = False
 try:
@@ -211,6 +212,10 @@ class Client:
         json_body = {'tokens': tokens}
         return Detokenization(_future=self._executor.submit(self.__request, cohere.DETOKENIZE_URL, json=json_body))
 
+    def whisper(self, file_paths) -> Whispers:
+        response = self.__file_request(file_paths, cohere.WHISPER_URL)
+        return Whispers(response['texts'])
+
     def __print_warning_msg(self, response: Response):
         if 'X-API-Warning' in response.headers:
             print("\033[93mWarning: {}\n\033[0m".format(response.headers['X-API-Warning']), file=sys.stderr)
@@ -253,4 +258,30 @@ class Client:
                 raise CohereError(message=res['message'], http_status=response.status_code, headers=response.headers)
             self.__print_warning_msg(response)
 
+        return res
+
+    def __file_request(self, file_paths: List[str], endpoint) -> Any:
+        headers = {
+            'Authorization': 'BEARER {}'.format(self.api_key),
+            'Content-Type': 'application/json',
+            'Request-Source': 'python-sdk',
+        }
+        if self.cohere_version != '':
+            headers['Cohere-Version'] = self.cohere_version
+
+        url = urljoin(self.api_url, endpoint)
+
+        files = {}
+        for i, file_path in enumerate(file_paths):
+            key = 'file' + str(i)
+            files[key] = open(file_path, 'rb')
+
+        response = requests.request('POST', url, headers=headers, files=files, **self.request_dict)
+        try:
+            res = json.loads(response.text)
+        except Exception:
+            raise CohereError(message=response.text, http_status=response.status_code, headers=response.headers)
+        if 'message' in res.keys():  # has errors
+            raise CohereError(message=res['message'], http_status=response.status_code, headers=response.headers)
+        self.__print_warning_msg(response)
         return res
