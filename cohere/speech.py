@@ -3,7 +3,7 @@ from typing import Iterator, List
 from cohere.response import CohereObject
 
 
-class Whispers(CohereObject):
+class Transcripts(CohereObject):
 
     def __init__(self, texts: List[str]) -> None:
         self.texts = texts

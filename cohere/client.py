@@ -19,7 +19,7 @@ from cohere.extract import Example as ExtractExample
 from cohere.extract import Extraction, Extractions
 from cohere.generation import Generations
 from cohere.tokenize import Tokens
-from cohere.whisper import Whispers
+from cohere.speech import Transcripts
 
 use_xhr_client = False
 try:
@@ -212,9 +212,9 @@ class Client:
         json_body = {'tokens': tokens}
         return Detokenization(_future=self._executor.submit(self.__request, cohere.DETOKENIZE_URL, json=json_body))
 
-    def whisper(self, file_paths: List[str]) -> Whispers:
-        response = self.__file_request(file_paths, cohere.WHISPER_URL)
-        return Whispers(response['texts'])
+    def speech(self, file_paths: List[str]) -> Transcripts:
+        response = self.__request_with_files(file_paths, cohere.SPEECH_URL)
+        return Transcripts(response['texts'])
 
     def __print_warning_msg(self, response: Response):
         if 'X-API-Warning' in response.headers:
@@ -260,7 +260,7 @@ class Client:
 
         return res
 
-    def __file_request(self, file_paths: List[str], endpoint) -> Any:
+    def __request_with_files(self, file_paths: List[str], endpoint) -> Any:
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
             'Request-Source': 'python-sdk',
