@@ -212,7 +212,7 @@ class Client:
         json_body = {'tokens': tokens}
         return Detokenization(_future=self._executor.submit(self.__request, cohere.DETOKENIZE_URL, json=json_body))
 
-    def whisper(self, file_paths) -> Whispers:
+    def whisper(self, file_paths: List[str]) -> Whispers:
         response = self.__file_request(file_paths, cohere.WHISPER_URL)
         return Whispers(response['texts'])
 
@@ -263,7 +263,6 @@ class Client:
     def __file_request(self, file_paths: List[str], endpoint) -> Any:
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
-            'Content-Type': 'application/json',
             'Request-Source': 'python-sdk',
         }
         if self.cohere_version != '':
