@@ -19,6 +19,7 @@ from cohere.extract import Example as ExtractExample
 from cohere.extract import Extraction, Extractions
 from cohere.generation import Generations
 from cohere.tokenize import Tokens
+from cohere.image import Images
 
 use_xhr_client = False
 try:
@@ -210,6 +211,13 @@ class Client:
     def detokenize(self, tokens: List[int]) -> Detokenization:
         json_body = {'tokens': tokens}
         return Detokenization(_future=self._executor.submit(self.__request, cohere.DETOKENIZE_URL, json=json_body))
+
+    def image(self, prompt: str) -> Images:
+        json_body = json.dumps({
+            'prompt': prompt,
+        })
+        response = self.__request(json_body, cohere.IMAGE_URL)
+        return Images(response['image'])
 
     def __print_warning_msg(self, response: Response):
         if 'X-API-Warning' in response.headers:
