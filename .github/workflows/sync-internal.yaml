@@ -4,8 +4,7 @@ on:
   push:
     branches:
       - main
-      
-      
+
 jobs:
   git-sync:
     runs-on: ubuntu-latest
