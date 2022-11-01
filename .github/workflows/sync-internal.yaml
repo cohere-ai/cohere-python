@@ -8,8 +8,9 @@ jobs:
       - name: git-sync
         uses: wei/git-sync@v3
         with:
-          source_repo: "cohere-ai/cohere-python"
+          source_repo: "git@github.com:cohere-ai/cohere-python"
           source_branch: "main"
-          destination_repo: "cohere-ai/cohere-python-internal"
+          destination_repo: "git@github.com:cohere-ai/cohere-python-internal"
           destination_branch: "main"
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          
