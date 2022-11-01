@@ -1,6 +1,11 @@
 name: sync-internal
 
-on: push
+on: 
+  push:
+    branches:
+      - main
+      
+      
 jobs:
   git-sync:
     runs-on: ubuntu-latest
@@ -13,4 +18,4 @@ jobs:
           destination_repo: "git@github.com:cohere-ai/cohere-python-internal"
           destination_branch: "main"
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
-          
+
