@@ -13,9 +13,9 @@ jobs:
       - name: git-sync
         uses: wei/git-sync@v3
         with:
-          source_repo: "https://cohere-ci:${{ GH_PAT }}@github.com/cohere-ai/cohere-python.git"
+          source_repo: "https://cohere-ci:${{ secrets.GH_PAT }}@github.com/cohere-ai/cohere-python.git"
           source_branch: "main"
-          destination_repo: "https://cohere-ci:${{ GH_PAT }}@github.com/cohere-ai/cohere-python-internal.git"
+          destination_repo: "https://cohere-ci:${{ secrets.GH_PAT }}@github.com/cohere-ai/cohere-python-internal.git"
           destination_branch: "main"
       - uses: actions/checkout@v3
         with:
