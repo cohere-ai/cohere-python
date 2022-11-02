@@ -24,8 +24,8 @@ jobs:
           token: ${{ secrets.GH_PAT }}
       - name: setup git config
         run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "<>"
+          git config user.name "cohere-ci"
+          git config user.email "cohere-ci-github@cohere.com"
       - name: remove README and github actions
         run: |
           rm -rf .github/ README.md
