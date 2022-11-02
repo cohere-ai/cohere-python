@@ -17,7 +17,8 @@ jobs:
           source_branch: "main"
           destination_repo: "git@github.com:cohere-ai/cohere-python-internal"
           destination_branch: "main"
-          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source_ssh_private_key: ${{ secrets.DEPLOY_KEY }}
+          destination_ssh_private_key: ${{ secrets.PRIVATE_REPO_DEPLOY_KEY }}
       - uses: actions/checkout@v3
         with:
           repository: cohere-ai/cohere-python-internal
