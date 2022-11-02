@@ -30,7 +30,8 @@ jobs:
       - name: remove README and github actions
         run: |
           rm -rf .github/ README.md
-          git checkout origin/overrides -- .github/ README.md
+          git fetch origin overrides:overrides 
+          git checkout overrides -- .github/ README.md
           git add .
           git commit -m "Apply README and Github Actions"
       - run: git push origin main
