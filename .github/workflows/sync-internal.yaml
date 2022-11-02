@@ -13,12 +13,10 @@ jobs:
       - name: git-sync
         uses: wei/git-sync@v3
         with:
-          source_repo: "git@github.com:cohere-ai/cohere-python"
+          source_repo: "https://cohere-ci:${{ GH_PAT }}@github.com/cohere-ai/cohere-python.git"
           source_branch: "main"
-          destination_repo: "git@github.com:cohere-ai/cohere-python-internal"
+          destination_repo: "https://cohere-ci:${{ GH_PAT }}@github.com/cohere-ai/cohere-python-internal.git"
           destination_branch: "main"
-          source_ssh_private_key: ${{ secrets.DEPLOY_KEY }}
-          destination_ssh_private_key: ${{ secrets.PRIVATE_REPO_DEPLOY_KEY }}
       - uses: actions/checkout@v3
         with:
           repository: cohere-ai/cohere-python-internal
