@@ -135,7 +135,7 @@ class Client:
             })
         if use_xhr_client:
             for json_body in json_bodys:
-                response = self.__request(cohere.EMBED_URL, json=json_bodys)
+                response = self.__request(cohere.EMBED_URL, json=json_body)
                 responses.append(response['embeddings'])
         else:
             for result in self._executor.map(lambda json_body: self.__request(cohere.EMBED_URL, json=json_body),
