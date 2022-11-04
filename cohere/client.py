@@ -5,6 +5,7 @@ from typing import Any, Dict, List
 from urllib.parse import urljoin
 
 import requests
+import sseclient
 from requests import Response
 
 import cohere
@@ -17,7 +18,7 @@ from cohere.error import CohereError
 from cohere.extract import Entity
 from cohere.extract import Example as ExtractExample
 from cohere.extract import Extraction, Extractions
-from cohere.generation import Generations
+from cohere.generation import Generations, Generation
 from cohere.tokenize import Tokens
 
 use_xhr_client = False
@@ -101,7 +102,8 @@ class Client:
                  stop_sequences: List[str] = None,
                  return_likelihoods: str = 'NONE',
                  truncate: str = None,
-                 logit_bias: Dict[int, float] = {}) -> Generations:
+                 logit_bias: Dict[int, float] = {},
+                 stream: bool = False) -> Generations:
         json_body = {
             'model': model,
             'prompt': prompt,
@@ -118,10 +120,20 @@ class Client:
             'return_likelihoods': return_likelihoods,
             'truncate': truncate,
             'logit_bias': logit_bias,
+            'stream': stream
         }
         response = self._executor.submit(self.__request, cohere.GENERATE_URL, json=json_body)
-        return Generations(return_likelihoods=return_likelihoods, _future=response)
-
+        if not stream:
+            return Generations(return_likelihoods=return_likelihoods, _future=response)
+        else: 
+            client = sseclient.SSEClient(response.result())
+            for event in client.events():
+                gen = json.loads(event.data)
+                likelihood = None
+                if 'likelihood' in gen.keys():
+                    likelihood = gen['likelihood']
+                yield Generation(gen["text"], likelihood, None)
+            
     def embed(self, texts: List[str], model: str = None, truncate: str = 'NONE') -> Embeddings:
         responses = []
         json_bodys = []
@@ -235,11 +247,20 @@ class Client:
             'Content-Type': 'application/json',
             'Request-Source': 'python-sdk',
         }
+
         if self.cohere_version != '':
             headers['Cohere-Version'] = self.cohere_version
 
         url = urljoin(self.api_url, endpoint)
-        if use_xhr_client:
+        if json["stream"]:
+            headers.update({
+                'Content-Type': 'text/event-stream',
+                'Connection': 'keep-alive',
+                'Accept': 'text/event-stream'})
+            url = "http://localhost:8050/shrimpftt/generate"
+            response = requests.post(url, headers=headers, json=json, stream=True)
+            return response
+        elif use_xhr_client:
             response = self.__pyfetch(url, headers, json.dumps(json))
             self.__print_warning_msg(response)
             return response
