@@ -252,7 +252,7 @@ class Client:
             headers['Cohere-Version'] = self.cohere_version
 
         url = urljoin(self.api_url, endpoint)
-        if json["stream"]:
+        if 'stream' in json.keys() and json['stream']:
             headers.update({
                 'Content-Type': 'text/event-stream',
                 'Connection': 'keep-alive',
