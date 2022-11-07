@@ -1,7 +1,7 @@
 import json
 import sys
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Dict, Generator, List
+from typing import Any, Dict, Generator, List, Union
 from urllib.parse import urljoin
 
 import requests, sseclient
@@ -102,7 +102,7 @@ class Client:
                  return_likelihoods: str = 'NONE',
                  truncate: str = None,
                  logit_bias: Dict[int, float] = {},
-                 stream: bool = False) -> Generations | GenerationStream:
+                 stream: bool = False) -> Union[Generations, GenerationStream]:
         json_body = {
             'model': model,
             'prompt': prompt,
