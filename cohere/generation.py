@@ -79,6 +79,7 @@ class GenerationStream(CohereObject):
                  response: Optional[Dict[str, Any]] = None,
                  *,
                  _future: Optional[Future] = None) -> None:
+        self.curr_generation = None
         self.return_likelihoods = return_likelihoods
         self.client = None
         if _future is not None:
@@ -93,4 +94,8 @@ class GenerationStream(CohereObject):
             likelihood = None
             if self.return_likelihoods in ['GENERATION', 'ALL'] and 'likelihood' in gen.keys():
                 likelihood = gen['likelihood']
-            yield Generation(gen["text"], likelihood, None)
+            self.curr_generation = Generation(gen["text"], likelihood, None)
+            yield self.curr_generation
+
+    def response(self):
+        return self.curr_generation
