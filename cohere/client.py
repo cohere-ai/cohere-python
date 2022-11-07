@@ -102,7 +102,7 @@ class Client:
                  return_likelihoods: str = 'NONE',
                  truncate: str = None,
                  logit_bias: Dict[int, float] = {},
-                 stream: bool = False) -> Generations | Generator[Generations, None, None]:
+                 stream: bool = False) -> Generations | GenerationStream:
         json_body = {
             'model': model,
             'prompt': prompt,
@@ -126,13 +126,6 @@ class Client:
             return Generations(return_likelihoods=return_likelihoods, _future=response)
         else:
             return GenerationStream(return_likelihoods=return_likelihoods, _future=response)
-            # client = sseclient.SSEClient(response.result())
-            # for event in client.events():
-            #     gen = json.loads(event.data)
-            #     likelihood = None
-            #     if 'likelihood' in gen.keys():
-            #         likelihood = gen['likelihood']
-            #     yield Generation(gen["text"], likelihood, None)
             
     def embed(self, texts: List[str], model: str = None, truncate: str = 'NONE') -> Embeddings:
         responses = []
