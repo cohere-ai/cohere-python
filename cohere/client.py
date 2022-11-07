@@ -122,10 +122,10 @@ class Client:
             'stream': stream
         }
         response = self._executor.submit(self.__request, cohere.GENERATE_URL, json=json_body)
-        if not stream:
-            return Generations(return_likelihoods=return_likelihoods, _future=response)
-        else:
+        if stream:
             return GenerationStream(return_likelihoods=return_likelihoods, _future=response)
+        else:
+            return Generations(return_likelihoods=return_likelihoods, _future=response)
 
     def embed(self, texts: List[str], model: str = None, truncate: str = 'NONE') -> Embeddings:
         responses = []
@@ -246,12 +246,10 @@ class Client:
 
         url = urljoin(self.api_url, endpoint)
         if 'stream' in json.keys() and json['stream']:
-            print("use stream")
             headers.update({
                 'Content-Type': 'text/event-stream',
                 'Connection': 'keep-alive',
                 'Accept': 'text/event-stream'})
-            url = "http://localhost:8050/shrimpftt/generate"
             response = requests.post(url, headers=headers, json=json, stream=True)
             return response
         elif use_xhr_client:
