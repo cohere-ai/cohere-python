@@ -1,10 +1,10 @@
 import json
 import sys
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Dict, Generator, List, Union
+from typing import Any, Dict, List, Union
 from urllib.parse import urljoin
 
-import requests, sseclient
+import requests
 from requests import Response
 
 import cohere
@@ -17,7 +17,7 @@ from cohere.error import CohereError
 from cohere.extract import Entity
 from cohere.extract import Example as ExtractExample
 from cohere.extract import Extraction, Extractions
-from cohere.generation import GenerationStream, Generations, Generation
+from cohere.generation import GenerationStream, Generations
 from cohere.tokenize import Tokens
 
 use_xhr_client = False
@@ -126,7 +126,7 @@ class Client:
             return Generations(return_likelihoods=return_likelihoods, _future=response)
         else:
             return GenerationStream(return_likelihoods=return_likelihoods, _future=response)
-            
+
     def embed(self, texts: List[str], model: str = None, truncate: str = 'NONE') -> Embeddings:
         responses = []
         json_bodys = []
@@ -267,5 +267,4 @@ class Client:
             if 'message' in res:  # has errors
                 raise CohereError(message=res['message'], http_status=response.status_code, headers=response.headers)
             self.__print_warning_msg(response)
-
         return res
