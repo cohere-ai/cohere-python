@@ -1,11 +1,10 @@
 import json
 import sys
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Dict, List
+from typing import Any, Dict, Generator, List
 from urllib.parse import urljoin
 
-import requests
-import sseclient
+import requests, sseclient
 from requests import Response
 
 import cohere
@@ -18,7 +17,7 @@ from cohere.error import CohereError
 from cohere.extract import Entity
 from cohere.extract import Example as ExtractExample
 from cohere.extract import Extraction, Extractions
-from cohere.generation import Generations, Generation
+from cohere.generation import GenerationStream, Generations, Generation
 from cohere.tokenize import Tokens
 
 use_xhr_client = False
@@ -103,7 +102,7 @@ class Client:
                  return_likelihoods: str = 'NONE',
                  truncate: str = None,
                  logit_bias: Dict[int, float] = {},
-                 stream: bool = False) -> Generations:
+                 stream: bool = False) -> Generations | Generator[Generations, None, None]:
         json_body = {
             'model': model,
             'prompt': prompt,
@@ -125,14 +124,15 @@ class Client:
         response = self._executor.submit(self.__request, cohere.GENERATE_URL, json=json_body)
         if not stream:
             return Generations(return_likelihoods=return_likelihoods, _future=response)
-        else: 
-            client = sseclient.SSEClient(response.result())
-            for event in client.events():
-                gen = json.loads(event.data)
-                likelihood = None
-                if 'likelihood' in gen.keys():
-                    likelihood = gen['likelihood']
-                yield Generation(gen["text"], likelihood, None)
+        else:
+            return GenerationStream(return_likelihoods=return_likelihoods, _future=response)
+            # client = sseclient.SSEClient(response.result())
+            # for event in client.events():
+            #     gen = json.loads(event.data)
+            #     likelihood = None
+            #     if 'likelihood' in gen.keys():
+            #         likelihood = gen['likelihood']
+            #     yield Generation(gen["text"], likelihood, None)
             
     def embed(self, texts: List[str], model: str = None, truncate: str = 'NONE') -> Embeddings:
         responses = []
@@ -253,6 +253,7 @@ class Client:
 
         url = urljoin(self.api_url, endpoint)
         if 'stream' in json.keys() and json['stream']:
+            print("use stream")
             headers.update({
                 'Content-Type': 'text/event-stream',
                 'Connection': 'keep-alive',

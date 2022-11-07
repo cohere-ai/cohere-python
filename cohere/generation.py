@@ -1,3 +1,4 @@
+import sseclient, json
 from concurrent.futures import Future
 from typing import Any, Dict, Iterator, List, NamedTuple, Optional, Union
 
@@ -68,3 +69,26 @@ class Generations(CohereObject):
 
     def __getitem__(self, index) -> Generation:
         return self.generations[index]
+
+class GenerationStream(CohereObject):
+
+    def __init__(self,
+                return_likelihoods: str,
+                response: Optional[Dict[str, Any]] = None,
+                *,
+                _future: Optional[Future] = None) -> None:
+        self.return_likelihoods = return_likelihoods
+        self.client = None
+        if _future is not None:
+            self.client = sseclient.SSEClient(_future.result())
+        else:
+            assert response is not None
+            self.client = sseclient.SSEClient(response)
+    
+    def stream(self):
+        for event in self.client.events():
+            gen = json.loads(event.data)
+            likelihood = None
+            if self.return_likelihoods in ['GENERATION', 'ALL'] and 'likelihood' in gen.keys():
+                likelihood = gen['likelihood']
+            yield Generation(gen["text"], likelihood, None)
