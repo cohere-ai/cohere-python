@@ -8,7 +8,7 @@ GENERATE_URL = 'generate'
 EMBED_URL = 'embed'
 CLASSIFY_URL = 'classify'
 EXTRACT_URL = 'extract'
-IMAGE_URL = 'image'
+PAINT_URL = 'paint'
 
 CHECK_API_KEY_URL = 'check-api-key'
 TOKENIZE_URL = 'tokenize'

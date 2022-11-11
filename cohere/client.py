@@ -19,7 +19,7 @@ from cohere.extract import Example as ExtractExample
 from cohere.extract import Extraction, Extractions
 from cohere.generation import Generations
 from cohere.tokenize import Tokens
-from cohere.image import Images
+from cohere.paint import Images
 
 use_xhr_client = False
 try:
@@ -212,7 +212,7 @@ class Client:
         json_body = {'tokens': tokens}
         return Detokenization(_future=self._executor.submit(self.__request, cohere.DETOKENIZE_URL, json=json_body))
 
-    def image(self, prompt: str) -> Images:
+    def paint(self, prompt: str) -> Images:
         json_body = json.dumps({
             'prompt': prompt,
         })
