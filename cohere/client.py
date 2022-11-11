@@ -19,7 +19,7 @@ from cohere.extract import Example as ExtractExample
 from cohere.extract import Extraction, Extractions
 from cohere.generation import Generations
 from cohere.tokenize import Tokens
-from cohere.speech import Transcripts
+from cohere.transcribe import Transcripts
 
 use_xhr_client = False
 try:
@@ -212,8 +212,8 @@ class Client:
         json_body = {'tokens': tokens}
         return Detokenization(_future=self._executor.submit(self.__request, cohere.DETOKENIZE_URL, json=json_body))
 
-    def speech(self, file_paths: List[str]) -> Transcripts:
-        response = self.__request_with_files(file_paths, cohere.SPEECH_URL)
+    def transcribe(self, file_paths: List[str]) -> Transcripts:
+        response = self.__request_with_files(file_paths, cohere.TRANSCRIBE_URL)
         return Transcripts(response['texts'])
 
     def __print_warning_msg(self, response: Response):

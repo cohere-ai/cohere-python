@@ -8,7 +8,7 @@ GENERATE_URL = 'generate'
 EMBED_URL = 'embed'
 CLASSIFY_URL = 'classify'
 EXTRACT_URL = 'extract'
-SPEECH_URL = 'whisper/speech'
+TRANSCRIBE_URL = 'whisper/transcribe'
 
 CHECK_API_KEY_URL = 'check-api-key'
 TOKENIZE_URL = 'tokenize'
