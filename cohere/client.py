@@ -102,7 +102,8 @@ class Client:
                  return_likelihoods: str = 'NONE',
                  truncate: str = None,
                  logit_bias: Dict[int, float] = {},
-                 stream: bool = False) -> Union[Generations, GenerationStream]:
+                 stream: bool = False,
+                 chunk_size: int = 1) -> Union[Generations, GenerationStream]:
         json_body = {
             'model': model,
             'prompt': prompt,
@@ -119,7 +120,8 @@ class Client:
             'return_likelihoods': return_likelihoods,
             'truncate': truncate,
             'logit_bias': logit_bias,
-            'stream': stream
+            'stream': stream,
+            'chunk_size': chunk_size
         }
         response = self._executor.submit(self.__request, cohere.GENERATE_URL, json=json_body)
         if stream:
