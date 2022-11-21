@@ -14,9 +14,6 @@ from cohere.classify import LabelPrediction
 from cohere.detokenize import Detokenization
 from cohere.embeddings import Embeddings
 from cohere.error import CohereError
-from cohere.extract import Entity
-from cohere.extract import Example as ExtractExample
-from cohere.extract import Extraction, Extractions
 from cohere.generation import Generations
 from cohere.tokenize import Tokens
 
@@ -172,30 +169,6 @@ class Client:
             classifications.append(Classification(res['input'], res['prediction'], res['confidence'], labelObj))
 
         return Classifications(classifications)
-
-    def unstable_extract(self, examples: List[ExtractExample], texts: List[str]) -> Extractions:
-        '''
-        Makes a request to the Cohere API to extract entities from a list of texts.
-        Takes in a list of cohere.extract.Example objects to specify the entities to extract.
-        Returns an cohere.extract.Extractions object containing extractions per text.
-        '''
-
-        json_body = {
-            'texts': texts,
-            'examples': [ex.toDict() for ex in examples],
-        }
-        response = self.__request(cohere.EXTRACT_URL, json=json_body)
-        extractions = []
-
-        for res in response['results']:
-            extraction = Extraction(**res)
-            extraction.entities = []
-            for entity in res['entities']:
-                extraction.entities.append(Entity(**entity))
-
-            extractions.append(extraction)
-
-        return Extractions(extractions)
 
     def batch_tokenize(self, texts: List[str]) -> List[Tokens]:
         return [self.tokenize(t) for t in texts]
