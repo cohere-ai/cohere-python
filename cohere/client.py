@@ -96,7 +96,7 @@ class Client:
                  frequency_penalty: float = None,
                  presence_penalty: float = None,
                  stop_sequences: List[str] = None,
-                 return_likelihoods: str = None
+                 return_likelihoods: str = None,
                  truncate: str = None,
                  logit_bias: Dict[int, float] = {}) -> Generations:
         json_body = {
