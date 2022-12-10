@@ -79,10 +79,11 @@ class AsyncClient(BaseClient):
             assert self.session
             await self.session.close()
 
-    async def _request(self, uri: str, **kwargs):
+    async def _request(self, endpoint: str, **kwargs):
         headers = self._headers
+        uri = urljoin(self.api_url, endpoint)
         kwargs.update(**self.request_dict)
-        async with self.session.post(uri, headers=headers,  **kwargs) as response:
+        async with self.session.post(uri, headers=headers, **kwargs) as response:
             self.response = response
             return await self._handle_response(response)
 
@@ -101,24 +102,21 @@ class AsyncClient(BaseClient):
             raise CohereError(f'Invalid Response: {txt}')
 
     async def check_api_key(self) -> dict[str, Any]:
-        url = urljoin(self.api_url, cohere.CHECK_API_KEY_URL)
-        return await self._request(url)
+        return await self._request(cohere.CHECK_API_KEY_URL)
 
     async def generate(self, **kwargs) -> Generations:
-        url = urljoin(self.api_url, cohere.GENERATE_URL)
-        response = await self._request(url, json=kwargs)
+        response = await self._request(cohere.GENERATE_URL, json=kwargs)
 
     async def embed(
         self, texts: list[str], model: str = None, truncate: str = 'NONE'
     ) -> Embeddings:
-        url = urljoin(self.api_url, cohere.EMBED_URL)
-        corutines = []
+        coros = []
         for i in range(0, len(texts), self.batch_size):
             texts_batch = texts[i:i + self.batch_size]
             data = {
                 'model': model, 'texts': texts_batch, 'truncate': truncate}
-            corutines.append(self._request(url, json=data))
-        responses = await asyncio.gather(*corutines)
+            coros.append(self._request(cohere.EMBED_URL, json=data))
+        responses = await asyncio.gather(*coros)
         embeddings = []
         for response in responses:
             embeddings.extend(response['embeddings'])
@@ -142,8 +140,7 @@ class AsyncClient(BaseClient):
             'examples': examples_dicts,
             'truncate': truncate,
         }
-        url = urljoin(self.api_url, cohere.CLASSIFY_URL)
-        response = await self._request(url, json=body)
+        response = await self._request(cohere.CLASSIFY_URL, json=body)
         classifications = []
         for res in response['classifications']:
             labels = {}
@@ -158,8 +155,7 @@ class AsyncClient(BaseClient):
         return await asyncio.gather(*coros)
 
     async def tokenize(self, text: str) -> Tokens:
-        url = urljoin(self.api_url, cohere.TOKENIZE_URL)
-        tokens = await self._request(url, json={'text': text})
+        tokens = await self._request(cohere.TOKENIZE_URL, json={'text': text})
         return Tokens(**tokens)
 
     async def batch_detokenize(
@@ -168,6 +164,5 @@ class AsyncClient(BaseClient):
         return await asyncio.gather(*coros)
 
     async def detokenize(self, tokens: list[int]) -> Detokenization:
-        url = urljoin(self.api_url, cohere.DETOKENIZE_URL)
-        detokens = await self._request(url, json={'tokens': tokens})
+        detokens = await self._request(cohere.DETOKENIZE_URL, json={'tokens': tokens})
         return Detokenization(**detokens)
