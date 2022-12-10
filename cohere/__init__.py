@@ -1,3 +1,4 @@
+from .async_client import AsyncClient
 from .client import Client
 from .error import CohereError
 
