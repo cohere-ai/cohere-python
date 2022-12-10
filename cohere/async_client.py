@@ -47,7 +47,7 @@ class AsyncClient(BaseClient):
     def __init__(
         self, api_key: str, version: Optional[str] = None,
         num_workers: int = 64, request_dict: Optional[dict[str, str]] = {},
-        check_api_key: bool = False, loop=None):
+        check_api_key: bool = True, loop=None):
 
         self.loop = loop or asyncio.get_event_loop()
         super().__init__(
