@@ -12,10 +12,9 @@ class TestAsyncDetokenize(unittest.IsolatedAsyncioTestCase):
     async def asyncTearDown(self):
         await self._co.close_connection()
 
-
     async def test_success(self):
-        text = await self._co.detokenize([10104, 12221, 974, 514, 34]).text
-        self.assertEqual(text, "detokenize me!")
+        response = await self._co.detokenize([10104, 12221, 974, 514, 34])
+        self.assertEqual(response.text, "detokenize me!")
 
     async def test_success_batched(self):
         _batch_size = 10
@@ -27,5 +26,5 @@ class TestAsyncDetokenize(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(results, ["detokenize me!"] * _batch_size)
 
     async def test_empty_tokens(self):
-        text = await self._co.detokenize([]).text
-        self.assertEqual(text, "")
+        response = await self._co.detokenize([])
+        self.assertEqual(response.text, "")

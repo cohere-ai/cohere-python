@@ -57,16 +57,19 @@ class AsyncClient(BaseClient):
     async def create(
         cls, api_key: str, version: Optional[str] = None,
         num_workers: int = 64, request_dict: Optional[dict[str, str]] = {},
-        check_api_key: bool = False, loop=None):
+        check_api_key: bool = True, loop=None):
         self = cls(
             api_key, version, num_workers, request_dict, check_api_key, loop)
         if check_api_key:
             try:
-                await self.check_api_key()
+                response = await self.check_api_key()
+                if not response['valid']:
+                    await self.close_connection()
+                    raise CohereError('invalid api key')
                 return self
-            except Exception:
+            except Exception as error:
                 await self.close_connection()
-                raise
+                raise CohereError from error
         return self
 
     def _init_session(self) -> aiohttp.ClientSession:
@@ -104,8 +107,18 @@ class AsyncClient(BaseClient):
     async def check_api_key(self) -> dict[str, Any]:
         return await self._request(cohere.CHECK_API_KEY_URL)
 
+    async def batch_generate(self, prompts: list[str], **kwargs
+        ) -> list[Generations]:
+        coros = []
+        for prompt in prompts:
+            kwargs['prompt'] = prompt
+            coros.append(self.generate(**kwargs))
+        return await asyncio.gather(*coros)
+
     async def generate(self, **kwargs) -> Generations:
+        return_likelihoods = kwargs.get('return_likelihoods')
         response = await self._request(cohere.GENERATE_URL, json=kwargs)
+        return Generations(return_likelihoods, response)
 
     async def embed(
         self, texts: list[str], model: str = None, truncate: str = 'NONE'

@@ -6,7 +6,7 @@ import cohere
 API_KEY = get_api_key()
 
 
-class TestGenerate(unittest.TestCase):
+class TestAsyncGenerate(unittest.IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self):
         self._co = await cohere.AsyncClient.create(API_KEY)
@@ -51,22 +51,18 @@ class TestGenerate(unittest.TestCase):
         with self.assertRaises(cohere.CohereError):
             await self._co.generate(
                 model='large', prompt='hi', max_tokens=1, temperature=-1
-            ).generations
+            )
 
     async def test_invalid_model(self):
         with self.assertRaises(cohere.CohereError):
             await self._co.generate(
                 model='this-better-not-exist', prompt='co:here', max_tokens=1
-            ).generations
-
-    async def test_no_version_works(self):
-        await cohere.AsyncClient(API_KEY).generate(
-            model='small', prompt='co:here', max_tokens=1).generations
+            )
 
     async def test_invalid_version_fails(self):
+        cl = await cohere.AsyncClient.create(API_KEY, 'fake')
         with self.assertRaises(cohere.CohereError):
-            _ = await cohere.AsyncClient.create(API_KEY, 'fake').generate(
-                model='small', prompt='co:here', max_tokens=1).generations
+            await cl.generate(model='small', prompt='co:here', max_tokens=1)
 
     async def test_invalid_key(self):
         with self.assertRaises(cohere.CohereError):
