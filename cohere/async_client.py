@@ -42,7 +42,7 @@ class BaseClient:
 
 
 class AsyncClient(BaseClient):
-    """Implements async cendpoints for cehere service."""
+    """Implements async endpoints for cohere service."""
 
     def __init__(
         self, api_key: str, version: Optional[str] = None,
@@ -55,6 +55,7 @@ class AsyncClient(BaseClient):
 
     @classmethod
     async def create(
+        """Creates client and check if api key is valid."""
         cls, api_key: str, version: Optional[str] = None,
         num_workers: int = 64, request_dict: Optional[dict[str, str]] = {},
         check_api_key: bool = True, loop=None):
@@ -83,6 +84,7 @@ class AsyncClient(BaseClient):
             await self.session.close()
 
     async def _request(self, endpoint: str, **kwargs):
+        """Sends async request and handles response."""
         headers = self._headers
         uri = urljoin(self.api_url, endpoint)
         kwargs.update(**self.request_dict)
@@ -123,6 +125,7 @@ class AsyncClient(BaseClient):
     async def embed(
         self, texts: list[str], model: str = None, truncate: str = 'NONE'
     ) -> Embeddings:
+        """Extracts embeddings for given text prompts."""
         coros = []
         for i in range(0, len(texts), self.batch_size):
             texts_batch = texts[i:i + self.batch_size]
@@ -142,6 +145,7 @@ class AsyncClient(BaseClient):
         preset: str = None,
         examples: list[ClassifyExample] = [],
         truncate: str = None) -> Classifications:
+        """Classifies input texts based on given examples."""
         examples_dicts: list[dict[str, str]] = []
         for example in examples:
             example_dict = {'text': example.text, 'label': example.label}
