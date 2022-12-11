@@ -55,10 +55,10 @@ class AsyncClient(BaseClient):
 
     @classmethod
     async def create(
-        """Creates client and check if api key is valid."""
         cls, api_key: str, version: Optional[str] = None,
         num_workers: int = 64, request_dict: Optional[dict[str, str]] = {},
         check_api_key: bool = True, loop=None):
+        """Creates client and check if api key is valid."""
         self = cls(
             api_key, version, num_workers, request_dict, check_api_key, loop)
         if check_api_key:
