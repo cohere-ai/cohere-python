@@ -2,9 +2,9 @@ import unittest
 import random
 import string
 import cohere
-from utils import get_api_key
+# from utils import get_api_key
 
-co = cohere.Client(get_api_key())
+co = cohere.Client("77SLnmau853Ww2a8U2Vq8hqrEFX7TCZhv4b24lIr")
 
 
 def random_word():
@@ -85,7 +85,3 @@ class TestEmbed(unittest.TestCase):
         for predictionExpected, predictionActual in zip(predictionsExpected, list(predictionsActual)):
             for elementExpected, elementAcutal in zip(predictionExpected, predictionActual):
                 self.assertAlmostEqual(elementExpected, elementAcutal, places=1)
-
-    def test_invalid_texts(self):
-        with self.assertRaises(cohere.CohereError):
-            co.embed(model='small', texts=[''])
