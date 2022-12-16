@@ -8,7 +8,7 @@ This package provides functionality developed to simplify interfacing with the [
 
 ## Documentation
 
-See the [API's documentation](https://docs.cohere.ai/#api-reference).
+See the [API documentation](https://docs.cohere.ai/reference/about).
 
 ## Installation
 
