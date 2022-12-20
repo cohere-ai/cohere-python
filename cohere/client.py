@@ -16,6 +16,7 @@ from cohere.embeddings import Embeddings
 from cohere.error import CohereError
 from cohere.generation import Generations
 from cohere.tokenize import Tokens
+from cohere.detectlang import Language, DetectLanguageResponse
 
 use_xhr_client = False
 try:
@@ -183,6 +184,16 @@ class Client:
     def detokenize(self, tokens: List[int]) -> Detokenization:
         json_body = {'tokens': tokens}
         return Detokenization(_future=self._executor.submit(self.__request, cohere.DETOKENIZE_URL, json=json_body))
+
+    def detect_language(self, texts: List[str]) -> List[Language]:
+        json_body = {
+            "texts": texts,
+        }
+        response = self.__request(cohere.DETECT_LANG_URL, json=json_body)
+        results = []
+        for result in response["results"]:
+            results.append(Language(result["language_code"], result["language_name"], result["confidence"]))
+        return DetectLanguageResponse(results)
 
     def __print_warning_msg(self, response: Response):
         if 'X-API-Warning' in response.headers:
