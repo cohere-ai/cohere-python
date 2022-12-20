@@ -5,6 +5,11 @@
 - [#126](https://github.com/cohere-ai/cohere-python/pull/126)
   - Add new `co.detect_language` api
 
+# 3.0.1
+
+- [#125](https://github.com/cohere-ai/cohere-python/pull/123)
+  - Improve the Classify response string representation
+
 # 3.0.0
 
 - [#125](https://github.com/cohere-ai/cohere-python/pull/125)
