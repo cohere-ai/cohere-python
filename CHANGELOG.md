@@ -1,19 +1,24 @@
 # Changelog
 
+# 3.1.0
+
+- [#126](https://github.com/cohere-ai/cohere-python/pull/126)
+  - Add new `co.detect_language` api
+
 # 3.0.0
 
 - [#125](https://github.com/cohere-ai/cohere-python/pull/125)
-  - Removes the deprecated "confidences" field from the classify response
+  - Remove the deprecated "confidences" field from the classify response
 
 ## 2.9.0
 
 - [#120](https://github.com/cohere-ai/cohere-python/pull/120)
-  - Removes experimental Extract API from the SDK
+  - Remove experimental Extract API from the SDK
 
 ## 2.8.0
 
 - [#112](https://github.com/cohere-ai/cohere-python/pull/112)
-  - Adds support for `prompt_vars` parameter for co.Generate
+  - Add support for `prompt_vars` parameter for co.Generate
 
 ## 2.7.0
 
