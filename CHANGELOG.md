@@ -1,5 +1,10 @@
 # Changelog
 
+# 3.0.0
+
+- [#125](https://github.com/cohere-ai/cohere-python/pull/125)
+  - Removes the deprecated "confidences" field from the classify response
+
 ## 2.9.0
 
 - [#120](https://github.com/cohere-ai/cohere-python/pull/120)
