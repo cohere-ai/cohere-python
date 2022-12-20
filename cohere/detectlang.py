@@ -1,4 +1,5 @@
 from cohere.response import CohereObject
+from typing import List
 
 
 class Language(CohereObject):
@@ -17,5 +18,5 @@ class Language(CohereObject):
 
 class DetectLanguageResponse:
 
-    def __init__(self, results: list[Language]):
+    def __init__(self, results: List[Language]):
         self.results = results
