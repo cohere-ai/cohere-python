@@ -62,13 +62,14 @@ co = cohere.Client('YOUR_API_KEY', '2022-12-06')
 
 For a full breakdown of endpoints and arguments, please consult the [Cohere Docs](https://docs.cohere.ai/).
 
-| Cohere Endpoint | Function        |
-| --------------- | --------------- |
-| /generate       | co.generate()   |
-| /embed          | co.embed()      |
-| /classify       | co.classify()   |
-| /tokenize       | co.tokenize()   |
-| /detokenize     | co.detokenize() |
+| Cohere Endpoint  | Function             |
+| ---------------- | -------------------- |
+| /generate        | co.generate()        |
+| /embed           | co.embed()           |
+| /classify        | co.classify()        |
+| /tokenize        | co.tokenize()        |
+| /detokenize      | co.detokenize()      |
+| /detect-language | co.detect_language() |
 
 ## Models
 
