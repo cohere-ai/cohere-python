@@ -1,6 +1,6 @@
 # Changelog
 
-# 3.1.0
+# 3.1.1
 
 - [#126](https://github.com/cohere-ai/cohere-python/pull/126)
   - Add new `co.detect_language` api
