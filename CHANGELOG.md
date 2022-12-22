@@ -2,6 +2,11 @@
 
 # 3.1.1
 
+- [#129](https://github.com/cohere-ai/cohere-python/pull/129)
+  - Add support for `end_sequences` param in Generate API
+
+# 3.1.0
+
 - [#126](https://github.com/cohere-ai/cohere-python/pull/126)
   - Add new `co.detect_language` api
 
