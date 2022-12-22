@@ -1,6 +1,6 @@
 # Changelog
 
-# 3.1.2
+# 3.1.3
 
 - [#129](https://github.com/cohere-ai/cohere-python/pull/129)
   - Add support for `end_sequences` param in Generate API
