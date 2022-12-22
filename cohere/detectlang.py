@@ -4,16 +4,12 @@ from typing import List
 
 class Language(CohereObject):
 
-    def __init__(self, code: str, name: str, confidence: float):
+    def __init__(self, code: str, name: str):
         self.language_code = code
         self.language_name = name
-        self.confidence = confidence
 
     def __repr__(self) -> str:
-        return (
-            f"Language<language_code: \"{self.language_code}\", "
-            f"language_name: \"{self.language_name}\", confidence: {self.confidence}>"
-        )
+        return f"Language<language_code: \"{self.language_code}\", language_name: \"{self.language_name}\">"
 
 
 class DetectLanguageResponse:

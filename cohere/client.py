@@ -194,7 +194,7 @@ class Client:
         response = self.__request(cohere.DETECT_LANG_URL, json=json_body)
         results = []
         for result in response["results"]:
-            results.append(Language(result["language_code"], result["language_name"], result["confidence"]))
+            results.append(Language(result["language_code"], result["language_name"]))
         return DetectLanguageResponse(results)
 
     def __print_warning_msg(self, response: Response):
