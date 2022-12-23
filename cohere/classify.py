@@ -15,10 +15,11 @@ class Classification(CohereObject):
         self.labels = labels
 
     def __repr__(self) -> str:
+        input = self.input
         prediction = self.prediction
         confidence = self.confidence
         labels = self.labels
-        return f"Classification<prediction: \"{prediction}\", confidence: {confidence}, labels: {labels}>"
+        return f"Classification<input: \"{input}\", prediction: \"{prediction}\", confidence: {confidence}, labels: {labels}>"
 
 
 class Classifications(CohereObject):
