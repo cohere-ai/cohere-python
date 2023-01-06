@@ -14,7 +14,7 @@ class TestGenerate(unittest.TestCase):
         prediction = co.generate(model='small', prompt='co:here', max_tokens=1)
         self.assertIsInstance(prediction.generations[0].text, str)
         self.assertIsNone(prediction.generations[0].token_likelihoods)
-        self.assertEqual(prediction.return_likelihoods, 'NONE')
+        self.assertEqual(prediction.return_likelihoods, None)
 
     def test_success_batched(self):
         _batch_size = 10
@@ -22,7 +22,7 @@ class TestGenerate(unittest.TestCase):
         for prediction in predictions:
             self.assertIsInstance(prediction.generations[0].text, str)
             self.assertIsNone(prediction.generations[0].token_likelihoods)
-            self.assertEqual(prediction.return_likelihoods, 'NONE')
+            self.assertEqual(prediction.return_likelihoods, None)
 
     def test_return_likelihoods_generation(self):
         prediction = co.generate(model='small', prompt='co:here', max_tokens=1, return_likelihoods='GENERATION')
@@ -64,4 +64,8 @@ class TestGenerate(unittest.TestCase):
         prediction = co.generate(model='small', prompt='co:here', logit_bias={11: -5.5}, max_tokens=1)
         self.assertIsInstance(prediction.generations[0].text, str)
         self.assertIsNone(prediction.generations[0].token_likelihoods)
-        self.assertEqual(prediction.return_likelihoods, 'NONE')
+        self.assertEqual(prediction.return_likelihoods, None)
+
+    def test_prompt_vars(self):
+        prediction = co.generate(prompt='Hello {{ name }}', prompt_vars={'name': 'Aidan'})
+        self.assertIsInstance(prediction.generations[0].text, str)

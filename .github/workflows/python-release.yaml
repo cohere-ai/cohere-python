@@ -1,6 +1,7 @@
 name: Python Release
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -21,7 +22,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Install Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
 
       - name: Install dependencies
         run: |

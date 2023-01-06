@@ -1,5 +1,4 @@
 import json
-import math
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List
@@ -12,12 +11,10 @@ import cohere
 from cohere.classify import Classification, Classifications
 from cohere.classify import Example as ClassifyExample
 from cohere.classify import LabelPrediction
+from cohere.detectlang import DetectLanguageResponse, Language
 from cohere.detokenize import Detokenization
 from cohere.embeddings import Embeddings
 from cohere.error import CohereError
-from cohere.extract import Entity
-from cohere.extract import Example as ExtractExample
-from cohere.extract import Extraction, Extractions
 from cohere.feedback import Feedback
 from cohere.generation import Generations
 from cohere.tokenize import Tokens
@@ -90,22 +87,25 @@ class Client:
 
     def generate(self,
                  prompt: str = None,
+                 prompt_vars: object = {},
                  model: str = None,
                  preset: str = None,
-                 num_generations: int = 1,
+                 num_generations: int = None,
                  max_tokens: int = None,
-                 temperature: float = 1.0,
-                 k: int = 0,
-                 p: float = 0.75,
-                 frequency_penalty: float = 0.0,
-                 presence_penalty: float = 0.0,
+                 temperature: float = None,
+                 k: int = None,
+                 p: float = None,
+                 frequency_penalty: float = None,
+                 presence_penalty: float = None,
+                 end_sequences: List[str] = None,
                  stop_sequences: List[str] = None,
-                 return_likelihoods: str = 'NONE',
+                 return_likelihoods: str = None,
                  truncate: str = None,
                  logit_bias: Dict[int, float] = {}) -> Generations:
-        json_body = json.dumps({
+        json_body = {
             'model': model,
             'prompt': prompt,
+            'prompt_vars': prompt_vars,
             'preset': preset,
             'num_generations': num_generations,
             'max_tokens': max_tokens,
@@ -114,36 +114,33 @@ class Client:
             'p': p,
             'frequency_penalty': frequency_penalty,
             'presence_penalty': presence_penalty,
+            'end_sequences': end_sequences,
             'stop_sequences': stop_sequences,
             'return_likelihoods': return_likelihoods,
             'truncate': truncate,
             'logit_bias': logit_bias,
-        })
-        response = self._executor.submit(self.__request, json_body, cohere.GENERATE_URL)
+        }
+        response = self._executor.submit(self.__request, cohere.GENERATE_URL, json=json_body)
         return Generations(return_likelihoods=return_likelihoods, _future=response, client=self)
 
     def embed(self, texts: List[str], model: str = None, truncate: str = 'NONE') -> Embeddings:
         responses = []
         json_bodys = []
-        request_futures = []
-        num_batch = int(math.ceil(len(texts) / self.batch_size))
-        embed_url_stacked = [cohere.EMBED_URL] * num_batch
 
         for i in range(0, len(texts), self.batch_size):
             texts_batch = texts[i:i + self.batch_size]
-            json_bodys.append(json.dumps({
+            json_bodys.append({
                 'model': model,
                 'texts': texts_batch,
                 'truncate': truncate,
-            }))
+            })
         if use_xhr_client:
             for json_body in json_bodys:
-                response = self.__request(json_body, cohere.EMBED_URL)
+                response = self.__request(cohere.EMBED_URL, json=json_body)
                 responses.append(response['embeddings'])
         else:
-            for i in self._executor.map(self.__request, json_bodys, embed_url_stacked):
-                request_futures.append(i)
-            for result in request_futures:
+            for result in self._executor.map(lambda json_body: self.__request(cohere.EMBED_URL, json=json_body),
+                                             json_bodys):
                 responses.extend(result['embeddings'])
 
         return Embeddings(responses)
@@ -159,14 +156,14 @@ class Client:
             example_dict = {'text': example.text, 'label': example.label}
             examples_dicts.append(example_dict)
 
-        json_body = json.dumps({
+        json_body = {
             'model': model,
             'preset': preset,
             'inputs': inputs,
             'examples': examples_dicts,
             'truncate': truncate,
-        })
-        response = self.__request(json_body, cohere.CLASSIFY_URL)
+        }
+        response = self.__request(cohere.CLASSIFY_URL, json=json_body)
 
         classifications = []
         for res in response['classifications']:
@@ -183,47 +180,29 @@ class Client:
 
         return Classifications(classifications)
 
-    def unstable_extract(self, examples: List[ExtractExample], texts: List[str]) -> Extractions:
-        '''
-        Makes a request to the Cohere API to extract entities from a list of texts.
-        Takes in a list of cohere.extract.Example objects to specify the entities to extract.
-        Returns an cohere.extract.Extractions object containing extractions per text.
-        '''
-
-        json_body = json.dumps({
-            'texts': texts,
-            'examples': [ex.toDict() for ex in examples],
-        })
-        response = self.__request(json_body, cohere.EXTRACT_URL)
-        extractions = []
-
-        for res in response['results']:
-            extraction = Extraction(**res)
-            extraction.entities = []
-            for entity in res['entities']:
-                extraction.entities.append(Entity(**entity))
-
-            extractions.append(extraction)
-
-        return Extractions(extractions)
-
     def batch_tokenize(self, texts: List[str]) -> List[Tokens]:
         return [self.tokenize(t) for t in texts]
 
     def tokenize(self, text: str) -> Tokens:
-        json_body = json.dumps({
-            'text': text,
-        })
-        return Tokens(_future=self._executor.submit(self.__request, json_body, cohere.TOKENIZE_URL))
+        json_body = {'text': text}
+        return Tokens(_future=self._executor.submit(self.__request, cohere.TOKENIZE_URL, json=json_body))
 
     def batch_detokenize(self, list_of_tokens: List[List[int]]) -> List[Detokenization]:
         return [self.detokenize(t) for t in list_of_tokens]
 
     def detokenize(self, tokens: List[int]) -> Detokenization:
-        json_body = json.dumps({
-            'tokens': tokens,
-        })
-        return Detokenization(_future=self._executor.submit(self.__request, json_body, cohere.DETOKENIZE_URL))
+        json_body = {'tokens': tokens}
+        return Detokenization(_future=self._executor.submit(self.__request, cohere.DETOKENIZE_URL, json=json_body))
+
+    def detect_language(self, texts: List[str]) -> List[Language]:
+        json_body = {
+            "texts": texts,
+        }
+        response = self.__request(cohere.DETECT_LANG_URL, json=json_body)
+        results = []
+        for result in response["results"]:
+            results.append(Language(result["language_code"], result["language_name"], result["confidence"]))
+        return DetectLanguageResponse(results)
 
     def feedback(self, call_id: int, feedback: str):
         json_body = json.dumps({
@@ -251,7 +230,7 @@ class Client:
             raise CohereError(message=res['message'], http_status=req.status, headers=req.getAllResponseHeaders())
         return res
 
-    def __request(self, json_body, endpoint) -> Any:
+    def __request(self, endpoint, json=None) -> Any:
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
             'Content-Type': 'application/json',
@@ -262,16 +241,16 @@ class Client:
 
         url = urljoin(self.api_url, endpoint)
         if use_xhr_client:
-            response = self.__pyfetch(url, headers, json_body)
+            response = self.__pyfetch(url, headers, json.dumps(json))
             self.__print_warning_msg(response)
             return response
         else:
-            response = requests.request('POST', url, headers=headers, data=json_body, **self.request_dict)
+            response = requests.request('POST', url, headers=headers, json=json, **self.request_dict)
             try:
-                res = json.loads(response.text)
+                res = response.json()
             except Exception:
                 raise CohereError(message=response.text, http_status=response.status_code, headers=response.headers)
-            if 'message' in res.keys():  # has errors
+            if 'message' in res:  # has errors
                 raise CohereError(message=res['message'], http_status=response.status_code, headers=response.headers)
             self.__print_warning_msg(response)
 
