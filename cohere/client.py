@@ -176,7 +176,7 @@ class Client:
                                res['confidence'],
                                labelObj,
                                client=self,
-                               call_id=response["id"]))
+                               call_id=res["id"]))
 
         return Classifications(classifications)
 
