@@ -171,12 +171,7 @@ class Client:
             for label, prediction in res['labels'].items():
                 labelObj[label] = LabelPrediction(prediction['confidence'])
             classifications.append(
-                Classification(res['input'],
-                               res['prediction'],
-                               res['confidence'],
-                               labelObj,
-                               client=self,
-                               call_id=res["id"]))
+                Classification(res['input'], res['prediction'], res['confidence'], labelObj, client=self, id=res["id"]))
 
         return Classifications(classifications)
 
@@ -201,16 +196,17 @@ class Client:
         response = self.__request(cohere.DETECT_LANG_URL, json=json_body)
         results = []
         for result in response["results"]:
-            results.append(Language(result["language_code"], result["language_name"], result["confidence"]))
+            results.append(Language(result["language_code"], result["language_name"]))
         return DetectLanguageResponse(results)
 
-    def feedback(self, call_id: int, feedback: str):
+    def feedback(self, id: str, feedback: str, accepted: bool):
         json_body = json.dumps({
-            'id': call_id,
+            'id': id,
             'feedback': feedback,
+            'accepted': accepted,
         })
-        self.__request(json_body, cohere.FEEDBACK_URL)
-        return Feedback(call_id=call_id, feedback=feedback)
+        self.__request(cohere.FEEDBACK_URL, json_body)
+        return Feedback(id=id, feedback=feedback, accepted=accepted)
 
     def __print_warning_msg(self, response: Response):
         if 'X-API-Warning' in response.headers:

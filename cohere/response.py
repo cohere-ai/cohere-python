@@ -32,9 +32,9 @@ class AsyncAttribute():
 
 class CohereObject():
 
-    def __init__(self, client=None, call_id: int = None) -> None:
+    def __init__(self, client=None, id: str = None) -> None:
         self.client = client
-        self.call_id = call_id
+        self.id = id
 
     def __getattribute__(self, name: str) -> Any:
         attr = super().__getattribute__(name)
@@ -54,5 +54,5 @@ class CohereObject():
         output = f'cohere.{type(self).__name__} {{\n{contents}}}'
         return output
 
-    def feedback(self, feedback: str) -> Feedback:
-        return self.client.feedback(call_id=self.call_id, feedback=feedback)
+    def feedback(self, feedback: str, accepted: bool) -> Feedback:
+        return self.client.feedback(id=self.id, feedback=feedback, accepted=accepted)
