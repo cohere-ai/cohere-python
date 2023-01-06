@@ -51,7 +51,7 @@ class Generations(CohereObject):
                     token_likelihood = likelihoods['likelihood'] if 'likelihood' in likelihoods.keys() else None
                     token_likelihoods.append(TokenLikelihood(likelihoods['token'], token_likelihood))
             generations.append(
-                Generation(gen['text'], likelihood, token_likelihoods, client=self.client, call_id=response["id"]))
+                Generation(gen['text'], likelihood, token_likelihoods, client=self.client, call_id=gen["id"]))
 
         return generations
 
