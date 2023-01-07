@@ -1,3 +1,3 @@
 from typing import NamedTuple
 
-Feedback = NamedTuple("Feedback", [("id", int), ("feedback", str), ("accepted", bool)])
+Feedback = NamedTuple("Feedback", [("id", str), ("feedback", str), ("accepted", bool)])
