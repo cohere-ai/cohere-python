@@ -8,6 +8,7 @@ import requests
 from requests import Response
 
 import cohere
+from cohere.chat import Chat
 from cohere.classify import Classification, Classifications
 from cohere.classify import Example as ClassifyExample
 from cohere.classify import LabelPrediction
@@ -122,6 +123,15 @@ class Client:
         }
         response = self._executor.submit(self.__request, cohere.GENERATE_URL, json=json_body)
         return Generations(return_likelihoods=return_likelihoods, _future=response, client=self)
+
+    def chat(self, query: str, session_id: str = "", persona: str = "cohere") -> Chat:
+        json_body = {
+            'query': query,
+            'session_id': session_id,
+            'persona': persona,
+        }
+        response = self._executor.submit(self.__request, cohere.CHAT_URL, json=json_body)
+        return Chat(query=query, persona=persona, _future=response, client=self)
 
     def embed(self, texts: List[str], model: str = None, truncate: str = 'NONE') -> Embeddings:
         responses = []

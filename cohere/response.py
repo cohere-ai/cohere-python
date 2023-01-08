@@ -6,10 +6,18 @@ from cohere.feedback import Feedback
 
 
 class AsyncAttribute():
+    """An attribute of an object that is lazily fetched.
+
+    `async_request` is a Future object that is expected to resolve to an object that will be consumed by `getter`.
+    `getter` is a function that recieves the result of `async_request` and processes it into the desired attribute.
+
+    `getter` is only called once and its result is cached.
+    """
 
     def __init__(self, async_request: Future, getter: Callable[..., Any]) -> None:
         self._request = async_request
         self._getter = getter
+        self._resolved = False
 
     def __len__(self):
         return len(self.resolve())
@@ -27,7 +35,11 @@ class AsyncAttribute():
         return self._request.done()
 
     def resolve(self) -> Any:
-        return self._getter(self._request.result())
+        if "_result" in self.__dict__:
+            return self._result
+
+        self._result = self._getter(self._request.result())
+        return self._result
 
 
 class CohereObject():
