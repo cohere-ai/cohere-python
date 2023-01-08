@@ -10,8 +10,7 @@ class Language(CohereObject):
         self.language_name = name
 
     def __repr__(self) -> str:
-        return (f"Language<language_code: \"{self.language_code}\", "
-                f"language_name: \"{self.language_name}\">")
+        return f"Language<language_code: \"{self.language_code}\", language_name: \"{self.language_name}\">"
 
 
 class DetectLanguageResponse:
