@@ -38,7 +38,6 @@ class TestChat(unittest.TestCase):
     def test_manual_session_id(self):
         max_num_tries = 5
         prediction = co.chat("Hi my name is Rui")
-        print(prediction.reply)
 
         for _ in range(max_num_tries):
             # manually pick the chat back up using the session_id
