@@ -12,13 +12,13 @@ from cohere.chat import Chat
 from cohere.classify import Classification, Classifications
 from cohere.classify import Example as ClassifyExample
 from cohere.classify import LabelPrediction
+from cohere.detectlang import DetectLanguageResponse, Language
 from cohere.detokenize import Detokenization
 from cohere.embeddings import Embeddings
 from cohere.error import CohereError
 from cohere.feedback import Feedback
 from cohere.generation import Generations
 from cohere.tokenize import Tokens
-from cohere.detectlang import Language, DetectLanguageResponse
 
 use_xhr_client = False
 try:
@@ -210,11 +210,11 @@ class Client:
         return DetectLanguageResponse(results)
 
     def feedback(self, id: str, feedback: str, accepted: bool):
-        json_body = json.dumps({
+        json_body = {
             'id': id,
             'feedback': feedback,
             'accepted': accepted,
-        })
+        }
         self.__request(cohere.FEEDBACK_URL, json_body)
         return Feedback(id=id, feedback=feedback, accepted=accepted)
 
