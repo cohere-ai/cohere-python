@@ -11,19 +11,11 @@ class Generation(CohereObject, str):
     def __new__(cls, text: str, *_, **__):
         return str.__new__(cls, text)
 
-    def __init__(self, text: str, likelihood: float, token_likelihoods: List[TokenLikelihood]) -> None:
+    def __init__(self, text: str, likelihood: float, token_likelihoods: List[TokenLikelihood], *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self.text = text
         self.likelihood = likelihood
         self.token_likelihoods = token_likelihoods
-
-    def __str__(self) -> str:
-        return str(self.text)
-
-    def __len__(self) -> int:
-        return len(self.text)
-
-    def __getitem__(self, index) -> str:
-        return self.text[index]
 
 
 class Generations(CohereObject):
@@ -32,7 +24,9 @@ class Generations(CohereObject):
                  return_likelihoods: str,
                  response: Optional[Dict[str, Any]] = None,
                  *,
-                 _future: Optional[Future] = None) -> None:
+                 _future: Optional[Future] = None,
+                 **kwargs) -> None:
+        super().__init__(**kwargs)
         self.generations: Union[AsyncAttribute, List[Generation]] = None
         self.return_likelihoods = return_likelihoods
         if _future is not None:
@@ -56,7 +50,7 @@ class Generations(CohereObject):
                 for likelihoods in gen['token_likelihoods']:
                     token_likelihood = likelihoods['likelihood'] if 'likelihood' in likelihoods.keys() else None
                     token_likelihoods.append(TokenLikelihood(likelihoods['token'], token_likelihood))
-            generations.append(Generation(gen['text'], likelihood, token_likelihoods))
+            generations.append(Generation(gen['text'], likelihood, token_likelihoods, client=self.client, id=gen["id"]))
 
         return generations
 
