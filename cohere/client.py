@@ -200,11 +200,11 @@ class Client:
         return DetectLanguageResponse(results)
 
     def feedback(self, id: str, feedback: str, accepted: bool):
-        json_body = json.dumps({
+        json_body = {
             'id': id,
             'feedback': feedback,
             'accepted': accepted,
-        })
+        }
         self.__request(cohere.FEEDBACK_URL, json_body)
         return Feedback(id=id, feedback=feedback, accepted=accepted)
 
