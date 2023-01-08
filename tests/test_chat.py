@@ -1,8 +1,8 @@
 import unittest
 
-import cohere
-
 from utils import get_api_key
+
+import cohere
 
 API_KEY = get_api_key()
 co = cohere.Client(API_KEY)
@@ -27,7 +27,7 @@ class TestChat(unittest.TestCase):
 
     def test_invalid_persona(self):
         with self.assertRaises(cohere.CohereError):
-            _ = co.chat("Yo what up?", persona="NOT_A_VALID_PERSONA")
+            co.chat("Yo what up?", persona="NOT_A_VALID_PERSONA").reply
 
     def test_valid_persona(self):
         prediction = co.chat("Yo what up?", persona="wizard")
@@ -45,7 +45,6 @@ class TestChat(unittest.TestCase):
             # check that it still has access to information I gave it
             # this is a brittle test, not sure how to improve
             prediction = co.chat("Good to meet you. What's my name?", session_id=prediction.session_id)
-            print(prediction.reply)
             test = "rui" in prediction.reply.lower()
             if test:
                 break
