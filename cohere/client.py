@@ -16,6 +16,7 @@ from cohere.embeddings import Embeddings
 from cohere.error import CohereError
 from cohere.generation import Generations
 from cohere.tokenize import Tokens
+from cohere.bulkembed import EmbedJob
 
 use_xhr_client = False
 try:
@@ -184,6 +185,22 @@ class Client:
         json_body = {'tokens': tokens}
         return Detokenization(_future=self._executor.submit(self.__request, cohere.DETOKENIZE_URL, json=json_body))
 
+    def bulk_embed(self, input_file_url: str, text_field: str = None, model: str = None) -> EmbedJob:
+        json_body = {
+            'input_file_url': input_file_url,
+            'text_field': text_field,
+            'model': model,
+        }
+        response = self.__request(cohere.BULK_EMBED_URL, json_body)
+        return self.get_bulk_embed(response["job_id"])
+
+    def get_bulk_embed(self, id: str) -> EmbedJob:
+        response = self.__request(f'{cohere.BULK_EMBED_URL}/{id}', method='GET')
+        output_urls = []
+        if "output_urls" in response:
+            output_urls = response["output_urls"]
+        return EmbedJob(response["job_id"], response["status"], response["created_at"], response["input_url"], output_urls, response["model"], response["truncate"], response["percent_complete"])
+
     def __print_warning_msg(self, response: Response):
         if 'X-API-Warning' in response.headers:
             print("\033[93mWarning: {}\n\033[0m".format(response.headers['X-API-Warning']), file=sys.stderr)
@@ -202,7 +219,7 @@ class Client:
             raise CohereError(message=res['message'], http_status=req.status, headers=req.getAllResponseHeaders())
         return res
 
-    def __request(self, endpoint, json=None) -> Any:
+    def __request(self, endpoint, json=None, method='POST') -> Any:
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
             'Content-Type': 'application/json',
@@ -217,7 +234,7 @@ class Client:
             self.__print_warning_msg(response)
             return response
         else:
-            response = requests.request('POST', url, headers=headers, json=json, **self.request_dict)
+            response = requests.request(method, url, headers=headers, json=json, **self.request_dict)
             try:
                 res = response.json()
             except Exception:
