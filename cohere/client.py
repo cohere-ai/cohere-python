@@ -35,13 +35,28 @@ class Client:
                  version: str = None,
                  num_workers: int = 64,
                  request_dict: dict = {},
-                 check_api_key: bool = True) -> None:
+                 check_api_key: bool = True,
+                 client_name: str = None) -> None:
+        """
+        Initialize the client.
+        Args:
+           * api_key (str): Your API key.
+           * version (str): API version to use. Will use cohere.COHERE_VERSION by default.
+           * num_workers (int): Maximal number of threads for parallelized calls.
+           * request_dict (dict): Additional parameters for calls to requests.post
+           * check_api_key (bool): Whether to check the api key for validity on initialization.
+           * client_name (str): A string to identify your application for analytics purposes.
+        """
         self.api_key = api_key
         self.api_url = cohere.COHERE_API_URL
         self.batch_size = cohere.COHERE_EMBED_BATCH_SIZE
         self._executor = ThreadPoolExecutor(num_workers)
         self.num_workers = num_workers
         self.request_dict = request_dict
+        self.request_source = 'python-sdk'
+        if client_name:
+            self.request_source += ":" + client_name
+
         if version is None:
             self.cohere_version = cohere.COHERE_VERSION
         else:
@@ -240,7 +255,7 @@ class Client:
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
             'Content-Type': 'application/json',
-            'Request-Source': 'python-sdk',
+            'Request-Source': self.request_source,
         }
         if self.cohere_version != '':
             headers['Cohere-Version'] = self.cohere_version
