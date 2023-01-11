@@ -45,7 +45,7 @@ class Client:
            * num_workers (int): Maximal number of threads for parallelized calls.
            * request_dict (dict): Additional parameters for calls to requests.post
            * check_api_key (bool): Whether to check the api key for validity on initialization.
-           * client_name (str): A string to identify your application for analytics purposes.
+           * client_name (str): A string to identify your application for internal analytics purposes.
         """
         self.api_key = api_key
         self.api_url = cohere.COHERE_API_URL
