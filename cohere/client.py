@@ -187,7 +187,10 @@ class Client:
         return Detokenization(_future=self._executor.submit(self.__request, cohere.DETOKENIZE_URL, json=json_body))
 
     def wait_for(self, job: EmbedJob):
-        while job.status != "complete" or "failed":
+        while True:
+            if job.status == 'complete' or job.status == 'failed':
+                break
+
             time.sleep(30)
             job = self.get_bulk_embed(job.job_id)
             print(job)
