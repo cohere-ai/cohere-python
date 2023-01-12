@@ -1,9 +1,11 @@
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, Future
 from typing import List
 import tempfile
 import os
 import requests
 import shutil
+import time
+from tqdm import tqdm
 
 from cohere.response import AsyncAttribute, CohereObject
 from cohere.error import CohereError
@@ -22,23 +24,29 @@ class EmbedJob(CohereObject):
         self.percent_complete = percent_complete
 
     def __repr__(self) -> str:
+        if self.percent_complete > 0:
+            return f'EmbedJob<id: {self.job_id}, status: {self.status} : {self.percent_complete}%>'
         return f'EmbedJob<id: {self.job_id}, status: {self.status}>'
 
     def __download_file(self, url):
-        r = requests.get(url)
+        response = requests.get(url, stream=True)
         temp = tempfile.NamedTemporaryFile(delete=True)
-        temp.write(r.content)
+        with tqdm.wrapattr(open(os.devnull, "wb"), "write", miniters=1, total=int(response.headers.get('content-length', 0))) as fout:
+            for chunk in response.iter_content(chunk_size=4096):
+                fout.write(chunk)
+                temp.write(chunk)
         temp.seek(0)
         return temp
 
     def download_output(self, output_file=""):
-        if output_file == "":
-            output_file = f"{self.job_id}.jsonl"
         if self.status != 'complete':
             raise CohereError('job must be complete to download')
+        if output_file == "":
+            output_file = f"{self.job_id}.jsonl"
         with ThreadPoolExecutor() as exector:
             with open(output_file,'wb') as output:
                 for temp_file in exector.map(self.__download_file, self.output_urls):
-                    shutil.copyfileobj(temp_file, output)
-                    temp_file.close()
-
+                    try:
+                        shutil.copyfileobj(temp_file, output)
+                    finally:
+                        temp_file.close()

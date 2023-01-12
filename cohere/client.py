@@ -3,6 +3,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List
 from urllib.parse import urljoin
+import time
 
 import requests
 from requests import Response
@@ -185,6 +186,13 @@ class Client:
         json_body = {'tokens': tokens}
         return Detokenization(_future=self._executor.submit(self.__request, cohere.DETOKENIZE_URL, json=json_body))
 
+    def wait_for(self, job: EmbedJob):
+        while job.status != "complete" or "failed":
+            time.sleep(30)
+            job = self.get_bulk_embed(job.job_id)
+            print(job)
+        return job
+    
     def bulk_embed(self, input_file_url: str, text_field: str = None, model: str = None) -> EmbedJob:
         json_body = {
             'input_file_url': input_file_url,
