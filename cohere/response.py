@@ -57,7 +57,7 @@ class CohereObject():
 
     def __repr__(self) -> str:
         contents = ''
-        exclude_list = ['iterator']
+        exclude_list = ['iterator', 'client']
 
         for k in self.__dict__.keys():
             if k not in exclude_list:
@@ -66,5 +66,5 @@ class CohereObject():
         output = f'cohere.{type(self).__name__} {{\n{contents}}}'
         return output
 
-    def feedback(self, feedback: str, accepted: bool) -> Feedback:
-        return self.client.feedback(id=self.id, feedback=feedback, accepted=accepted)
+    def feedback(self, feedback: str, good_generation: bool) -> Feedback:
+        return self.client.feedback(id=self.id, feedback=feedback, good_generation=good_generation)

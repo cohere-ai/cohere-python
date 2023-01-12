@@ -224,14 +224,14 @@ class Client:
             results.append(Language(result["language_code"], result["language_name"]))
         return DetectLanguageResponse(results)
 
-    def feedback(self, id: str, feedback: str, accepted: bool):
+    def feedback(self, id: str, feedback: str, good_generation: bool):
         json_body = {
             'id': id,
             'feedback': feedback,
-            'accepted': accepted,
+            'accepted': good_generation,
         }
         self.__request(cohere.FEEDBACK_URL, json_body)
-        return Feedback(id=id, feedback=feedback, accepted=accepted)
+        return Feedback(id=id, feedback=feedback, good_generation=good_generation)
 
     def __print_warning_msg(self, response: Response):
         if 'X-API-Warning' in response.headers:

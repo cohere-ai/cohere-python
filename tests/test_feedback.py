@@ -13,5 +13,5 @@ class TestFeedback(unittest.TestCase):
 
     def test_success(self):
         generations = co.generate(model='small', prompt='co:here', max_tokens=1)
-        feedback = generations[0].feedback("this is a test", accepted=True)
+        feedback = generations[0].feedback("this is a test", good_generation=True)
         self.assertIsInstance(feedback, Feedback)
