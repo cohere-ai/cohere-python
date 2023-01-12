@@ -66,5 +66,21 @@ class CohereObject():
         output = f'cohere.{type(self).__name__} {{\n{contents}}}'
         return output
 
-    def feedback(self, feedback: str, good_generation: bool) -> Feedback:
+    def feedback(self, good_generation: bool, feedback: str = "") -> Feedback:
+        """Give feedback on a response from the Cohere API to improve the model.
+
+        Can be used programmatically like so:
+        ```
+        generations = co.generate(f"Write me a polite email responding to the one below:\n{email}\n\nResponse:")
+        if user_accepted_suggestion:
+            generations[0].feedback(good_generation=True)
+        ```
+
+        Args:
+            good_generation (bool): a boolean indicator as to whether the generation was good (True) or bad (False).
+            feedback (str): an optional natural language description of the specific feedback about this generation.
+
+        Returns:
+            Feedback: a Feedback object
+        """
         return self.client.feedback(id=self.id, feedback=feedback, good_generation=good_generation)
