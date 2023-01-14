@@ -12,6 +12,6 @@ co = cohere.Client(API_KEY)
 class TestFeedback(unittest.TestCase):
 
     def test_success(self):
-        generations = co.generate(model='small', prompt='co:here', max_tokens=1)
+        generations = co.generate(model='medium', prompt='co:here', max_tokens=1)
         feedback = generations[0].feedback(good_generation=True, feedback="this is a test")
         self.assertIsInstance(feedback, Feedback)
