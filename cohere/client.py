@@ -224,19 +224,29 @@ class Client:
             results.append(Language(result["language_code"], result["language_name"]))
         return DetectLanguageResponse(results)
 
-    def feedback(self, id: str, good_generation: bool, feedback: str = "") -> Feedback:
+    def feedback(self, id: str, good_response: bool, desired_response: str = "", feedback: str = "") -> Feedback:
         """Give feedback on a response from the Cohere API to improve the model.
 
         Can be used programmatically like so:
+
+        Example: a user accepts a model's suggestion in an assisted writing setting
         ```
         generations = co.generate(f"Write me a polite email responding to the one below:\n{email}\n\nResponse:")
         if user_accepted_suggestion:
             generations[0].feedback(good_generation=True)
         ```
 
+        Example: the user edits the model's suggestion
+        ```
+        generations = co.generate(f"Write me a polite email responding to the one below:\n{email}\n\nResponse:")
+        if user_edits_suggestion:
+            generations[0].feedback(good_generation=False, desired_response=user_edited_response)
+        ```
+
         Args:
             id (str): the `id` associated with a generation from the Cohere API
             good_generation (bool): a boolean indicator as to whether the generation was good (True) or bad (False).
+            desired_response (str): an optional string of the response expected. To be used when a mistake has been made or a better response exists.
             feedback (str): an optional natural language description of the specific feedback about this generation.
 
         Returns:
@@ -245,11 +255,12 @@ class Client:
 
         json_body = {
             'id': id,
+            'accepted': good_response,
+            'desired_response': desired_response,
             'feedback': feedback,
-            'accepted': good_generation,
         }
         self.__request(cohere.FEEDBACK_URL, json_body)
-        return Feedback(id=id, feedback=feedback, good_generation=good_generation)
+        return Feedback(id=id, good_response=good_response, desired_response=desired_response, feedback=feedback)
 
     def __print_warning_msg(self, response: Response):
         if 'X-API-Warning' in response.headers:

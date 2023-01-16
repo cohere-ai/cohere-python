@@ -2,11 +2,21 @@
 
 Can be used programmatically like so:
 
-    generations = co.generate(f"Write me a polite email responding to the one below:\n{email}\n\nResponse:")
-    if user_accepted_suggestion:
-        generations[0].feedback(good_generation=True)
+Example: a user accepts a model's suggestion in an assisted writing setting
+```
+generations = co.generate(f"Write me a polite email responding to the one below:\n{email}\n\nResponse:")
+if user_accepted_suggestion:
+    generations[0].feedback(good_generation=True)
+```
+
+Example: the user edits the model's suggestion
+```
+generations = co.generate(f"Write me a polite email responding to the one below:\n{email}\n\nResponse:")
+if user_edits_suggestion:
+    generations[0].feedback(good_generation=False, desired_response=user_edited_response)
+```
 """
 
 from typing import NamedTuple
 
-Feedback = NamedTuple("Feedback", [("id", str), ("feedback", str), ("good_generation", bool)])
+Feedback = NamedTuple("Feedback", [("id", str), ("good_response", bool), ("desired_response", str), ("feedback", str)])
