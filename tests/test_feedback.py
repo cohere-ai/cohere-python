@@ -23,7 +23,5 @@ class TestFeedback(unittest.TestCase):
 
     def test_desired_response(self):
         generations = co.generate(model='medium', prompt='echo "this is what I expected"', max_tokens=1)
-        feedback = generations[0].feedback(good_response=False,
-                                           desired_response="this is what I expected",
-                                           feedback="this is a test")
+        feedback = generations[0].feedback(good_response=False, desired_response="this is what I expected")
         self.assertIsInstance(feedback, Feedback)
