@@ -246,7 +246,8 @@ class Client:
         Args:
             id (str): the `id` associated with a generation from the Cohere API
             good_generation (bool): a boolean indicator as to whether the generation was good (True) or bad (False).
-            desired_response (str): an optional string of the response expected. To be used when a mistake has been made or a better response exists.
+            desired_response (str): an optional string of the response expected. To be used when a mistake has been
+            made or a better response exists.
             feedback (str): an optional natural language description of the specific feedback about this generation.
 
         Returns:
@@ -255,7 +256,7 @@ class Client:
 
         json_body = {
             'id': id,
-            'accepted': good_response,
+            'good_response': good_response,
             'desired_response': desired_response,
             'feedback': feedback,
         }
