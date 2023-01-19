@@ -9,7 +9,7 @@ co = cohere.Client(get_api_key())
 class TestClassify(unittest.TestCase):
 
     def test_success(self):
-        prediction = co.classify(model='medium',
+        prediction = co.classify(model='small',
                                  inputs=['purple'],
                                  examples=[
                                      Example('apple', 'fruit'),
@@ -34,7 +34,7 @@ class TestClassify(unittest.TestCase):
 
     def test_empty_inputs(self):
         with self.assertRaises(cohere.CohereError):
-            co.classify(model='medium',
+            co.classify(model='small',
                         inputs=[],
                         examples=[
                             Example('apple', 'fruit'),
@@ -50,7 +50,7 @@ class TestClassify(unittest.TestCase):
                         ])
 
     def test_success_multi_input(self):
-        prediction = co.classify(model='medium',
+        prediction = co.classify(model='small',
                                  inputs=['purple', 'mango'],
                                  examples=[
                                      Example('apple', 'fruit'),
@@ -69,7 +69,7 @@ class TestClassify(unittest.TestCase):
         self.assertEqual(len(prediction.classifications), 2)
 
     def test_success_all_fields(self):
-        prediction = co.classify(model='medium',
+        prediction = co.classify(model='small',
                                  inputs=['mango', 'purple'],
                                  examples=[
                                      Example('apple', 'fruit'),
