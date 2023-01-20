@@ -1,7 +1,7 @@
 import json
 import sys
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 from urllib.parse import urljoin
 
 import requests
@@ -22,6 +22,7 @@ from cohere.feedback import Feedback
 from cohere.generation import Generations
 from cohere.tokenize import Tokens
 from cohere.summarize import SummarizeResponse
+from cohere.rerank import Reranking
 
 use_xhr_client = False
 try:
@@ -308,7 +309,6 @@ class Client:
         Returns:
             Feedback: a Feedback object
         """
-
         json_body = {
             'id': id,
             'good_response': good_response,
@@ -317,6 +317,38 @@ class Client:
         }
         self.__request(cohere.FEEDBACK_URL, json_body)
         return Feedback(id=id, good_response=good_response, desired_response=desired_response, feedback=feedback)
+
+    def rerank(self,
+               query: str,
+               documents: Union[List[str], List[Dict[str, Any]]],
+               top_n: int = None) -> Reranking:
+        """Returns an ordered list of documents ordered by their relevance to the provided query
+
+        Args:
+            query (str): The search query
+            documents (list[str], list[dict]): The documents to rerank
+            top_n (int): (optional) The number of results to return, defaults to returning all results
+        """
+        parsed_docs = []
+        for doc in documents:
+            if isinstance(doc, str):
+                parsed_docs.append({'text': doc})
+            elif isinstance(doc, dict) and 'text' in doc:
+                parsed_docs.append(doc)
+            else:
+                raise CohereError(
+                    message='invalid format for documents, must be a list of strings or dicts with a "text" key')
+
+        json_body = {
+            "query": query,
+            "documents": parsed_docs,
+            "top_n": top_n,
+            "return_documents": False
+        }
+        reranking = Reranking(self.__request(cohere.RERANK_URL, json=json_body))
+        for rank in reranking.results:
+            rank.document = parsed_docs[rank.index]
+        return reranking
 
     def __print_warning_msg(self, response: Response):
         if 'X-API-Warning' in response.headers:
