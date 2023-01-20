@@ -139,11 +139,12 @@ class Client:
         response = self._executor.submit(self.__request, cohere.GENERATE_URL, json=json_body)
         return Generations(return_likelihoods=return_likelihoods, _future=response, client=self)
 
-    def chat(self, query: str, session_id: str = "", persona: str = "cohere") -> Chat:
+    def chat(self, query: str, session_id: str = "", persona: str = "cohere", model: str = None) -> Chat:
         json_body = {
             'query': query,
             'session_id': session_id,
             'persona': persona,
+            'model': model,
         }
         response = self._executor.submit(self.__request, cohere.CHAT_URL, json=json_body)
         return Chat(query=query, persona=persona, _future=response, client=self)
