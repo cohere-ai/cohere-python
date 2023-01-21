@@ -57,7 +57,7 @@ class TestGenerate(unittest.TestCase):
             _ = cohere.Client('invalid')
 
     def test_preset_success(self):
-        prediction = co.generate(preset='SDK-TESTS-PRESET-qfnlwh')
+        prediction = co.generate(preset='SDK-PRESET-TEST-t94jfm')
         self.assertIsInstance(prediction.generations[0].text, str)
 
     def test_logit_bias(self):
