@@ -32,7 +32,7 @@ setuptools.setup(name='cohere',
                  long_description_content_type='text/markdown',
                  url='https://github.com/cohere-ai/cohere-python',
                  packages=setuptools.find_packages(),
-                 install_requires=['requests'],
+                 install_requires=['requests==2.28.1'],
                  include_package_data=True,
                  classifiers=[
                      'Programming Language :: Python :: 3',
