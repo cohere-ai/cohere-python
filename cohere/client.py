@@ -6,7 +6,6 @@ from urllib.parse import urljoin
 
 import requests
 from requests import Response
-from requests.adapters import HTTPAdapter, Retry
 
 import cohere
 from cohere.chat import Chat
@@ -37,8 +36,7 @@ class Client:
                  num_workers: int = 64,
                  request_dict: dict = {},
                  check_api_key: bool = True,
-                 client_name: str = None,
-                 max_retries: int = 3) -> None:
+                 client_name: str = None) -> None:
         """
         Initialize the client.
         Args:
@@ -56,7 +54,6 @@ class Client:
         self.num_workers = num_workers
         self.request_dict = request_dict
         self.request_source = 'python-sdk'
-        self.max_retries = max_retries
         if client_name:
             self.request_source += ":" + client_name
 
@@ -269,17 +266,7 @@ class Client:
             self.__print_warning_msg(response)
             return response
         else:
-            session = requests.Session()
-            retries = Retry(
-                total=self.max_retries,
-                backoff_factor=0.5,
-                allowed_methods=['POST', 'GET'],
-                status_forcelist=[429, 500, 502, 503, 504]
-            )
-            session.mount('https://', HTTPAdapter(max_retries=retries))
-            session.mount('http://', HTTPAdapter(max_retries=retries))
-
-            response = session.request('POST', url, headers=headers, json=json, **self.request_dict)
+            response = requests.request('POST', url, headers=headers, json=json, **self.request_dict)
             try:
                 res = response.json()
             except Exception:
