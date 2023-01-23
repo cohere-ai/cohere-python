@@ -216,7 +216,7 @@ class Client:
         json_body = json.dumps({
             'prompt': prompt,
         })
-        response = self.__request(json_body, cohere.IMAGE_URL)
+        response = self.__request(json_body, cohere.PAINT_URL)
         return Images(response['image'])
 
     def __print_warning_msg(self, response: Response):
