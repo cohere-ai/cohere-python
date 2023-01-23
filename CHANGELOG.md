@@ -1,7 +1,7 @@
 # Changelog
 
 # 3.2.6
-- [#]
+- [#138](https://github.com/cohere-ai/cohere-python/pull/138)
   - Add `model` to the chat endpoint's parameters
 
 # 3.1.3
