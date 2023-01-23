@@ -49,3 +49,13 @@ class TestChat(unittest.TestCase):
                 break
         else:
             self.fail()
+
+    def test_valid_model(self):
+        prediction = co.chat("Yo what up?", model="medium")
+        self.assertIsInstance(prediction.reply, str)
+        self.assertIsInstance(prediction.session_id, str)
+        self.assertEqual(prediction.persona, "cohere")
+
+    def test_invalid_model(self):
+        with self.assertRaises(cohere.CohereError):
+            co.chat("Yo what up?", model="NOT_A_VALID_MODEL").reply
