@@ -213,10 +213,7 @@ class Client:
         return Detokenization(_future=self._executor.submit(self.__request, cohere.DETOKENIZE_URL, json=json_body))
 
     def paint(self, prompt: str) -> Images:
-        json_body = json.dumps({
-            'prompt': prompt,
-        })
-        response = self.__request(json_body, cohere.PAINT_URL)
+        response = self.__request(cohere.PAINT_URL, json={ 'prompt': prompt })
         return Images(response['image'])
 
     def __print_warning_msg(self, response: Response):
