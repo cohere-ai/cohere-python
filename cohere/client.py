@@ -6,6 +6,7 @@ from urllib.parse import urljoin
 
 import requests
 from requests import Response
+from requests.adapters import HTTPAdapter, Retry
 
 import cohere
 from cohere.chat import Chat
@@ -36,7 +37,8 @@ class Client:
                  num_workers: int = 64,
                  request_dict: dict = {},
                  check_api_key: bool = True,
-                 client_name: str = None) -> None:
+                 client_name: str = None,
+                 max_retries: int = 3) -> None:
         """
         Initialize the client.
         Args:
@@ -54,6 +56,7 @@ class Client:
         self.num_workers = num_workers
         self.request_dict = request_dict
         self.request_source = 'python-sdk'
+        self.max_retries = max_retries
         if client_name:
             self.request_source += ":" + client_name
 
@@ -225,14 +228,44 @@ class Client:
             results.append(Language(result["language_code"], result["language_name"]))
         return DetectLanguageResponse(results)
 
-    def feedback(self, id: str, feedback: str, accepted: bool):
+    def feedback(self, id: str, good_response: bool, desired_response: str = "", feedback: str = "") -> Feedback:
+        """Give feedback on a response from the Cohere API to improve the model.
+
+        Can be used programmatically like so:
+
+        Example: a user accepts a model's suggestion in an assisted writing setting
+        ```
+        generations = co.generate(f"Write me a polite email responding to the one below:\n{email}\n\nResponse:")
+        if user_accepted_suggestion:
+            generations[0].feedback(good_response=True)
+        ```
+
+        Example: the user edits the model's suggestion
+        ```
+        generations = co.generate(f"Write me a polite email responding to the one below:\n{email}\n\nResponse:")
+        if user_edits_suggestion:
+            generations[0].feedback(good_response=False, desired_response=user_edited_response)
+        ```
+
+        Args:
+            id (str): the `id` associated with a generation from the Cohere API
+            good_response (bool): a boolean indicator as to whether the generation was good (True) or bad (False).
+            desired_response (str): an optional string of the response expected. To be used when a mistake has been
+            made or a better response exists.
+            feedback (str): an optional natural language description of the specific feedback about this generation.
+
+        Returns:
+            Feedback: a Feedback object
+        """
+
         json_body = {
             'id': id,
+            'good_response': good_response,
+            'desired_response': desired_response,
             'feedback': feedback,
-            'accepted': accepted,
         }
         self.__request(cohere.FEEDBACK_URL, json_body)
-        return Feedback(id=id, feedback=feedback, accepted=accepted)
+        return Feedback(id=id, good_response=good_response, desired_response=desired_response, feedback=feedback)
 
     def __print_warning_msg(self, response: Response):
         if 'X-API-Warning' in response.headers:
@@ -267,7 +300,17 @@ class Client:
             self.__print_warning_msg(response)
             return response
         else:
-            response = requests.request('POST', url, headers=headers, json=json, **self.request_dict)
+            session = requests.Session()
+            retries = Retry(
+                total=self.max_retries,
+                backoff_factor=0.5,
+                allowed_methods=['POST', 'GET'],
+                status_forcelist=[429, 500, 502, 503, 504]
+            )
+            session.mount('https://', HTTPAdapter(max_retries=retries))
+            session.mount('http://', HTTPAdapter(max_retries=retries))
+
+            response = session.request('POST', url, headers=headers, json=json, **self.request_dict)
             try:
                 res = response.json()
             except Exception:
