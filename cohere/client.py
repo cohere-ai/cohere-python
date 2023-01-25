@@ -6,7 +6,8 @@ from urllib.parse import urljoin
 
 import requests
 from requests import Response
-from requests.adapters import HTTPAdapter, Retry
+from requests.adapters import HTTPAdapter
+from urllib3 import Retry
 
 import cohere
 from cohere.chat import Chat
