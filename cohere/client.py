@@ -301,23 +301,25 @@ class Client:
             self.__print_warning_msg(response)
             return response
         else:
-            session = requests.Session()
-            retries = Retry(
-                total=self.max_retries,
-                backoff_factor=0.5,
-                allowed_methods=['POST', 'GET'],
-                status_forcelist=[429, 500, 502, 503, 504]
-            )
-            session.mount('https://', HTTPAdapter(max_retries=retries))
-            session.mount('http://', HTTPAdapter(max_retries=retries))
+            with requests.Session() as session:
+                retries = Retry(
+                    total=self.max_retries,
+                    backoff_factor=0.5,
+                    allowed_methods=['POST', 'GET'],
+                    status_forcelist=[429, 500, 502, 503, 504]
+                )
+                session.mount('https://', HTTPAdapter(max_retries=retries))
+                session.mount('http://', HTTPAdapter(max_retries=retries))
 
-            response = session.request('POST', url, headers=headers, json=json, **self.request_dict)
-            try:
-                res = response.json()
-            except Exception:
-                raise CohereError(message=response.text, http_status=response.status_code, headers=response.headers)
-            if 'message' in res:  # has errors
-                raise CohereError(message=res['message'], http_status=response.status_code, headers=response.headers)
-            self.__print_warning_msg(response)
+                response = session.request('POST', url, headers=headers, json=json, **self.request_dict)
+                try:
+                    res = response.json()
+                except Exception:
+                    raise CohereError(
+                        message=response.text, http_status=response.status_code, headers=response.headers)
+                if 'message' in res:  # has errors
+                    raise CohereError(
+                        message=res['message'], http_status=response.status_code, headers=response.headers)
+                self.__print_warning_msg(response)
 
         return res
