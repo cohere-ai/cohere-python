@@ -39,7 +39,7 @@ class TestGenerate(unittest.TestCase):
 
     def test_invalid_temp(self):
         with self.assertRaises(cohere.CohereError):
-            co.generate(model='large', prompt='hi', max_tokens=1, temperature=-1).generations
+            co.generate(model='medium', prompt='hi', max_tokens=1, temperature=-1).generations
 
     def test_invalid_model(self):
         with self.assertRaises(cohere.CohereError):
