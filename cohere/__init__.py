@@ -10,6 +10,7 @@ DETECT_LANG_URL = 'detect-language'
 EMBED_URL = 'embed'
 FEEDBACK_URL = 'feedback'
 GENERATE_URL = 'generate'
+SUMMARIZE_URL = 'summarize'
 
 CHECK_API_KEY_URL = 'check-api-key'
 TOKENIZE_URL = 'tokenize'
