@@ -21,6 +21,7 @@ from cohere.error import CohereError
 from cohere.feedback import Feedback
 from cohere.generation import Generations
 from cohere.tokenize import Tokens
+from cohere.summarize import SummarizeResponse
 
 use_xhr_client = False
 try:
@@ -204,6 +205,55 @@ class Client:
                 Classification(res['input'], res['prediction'], res['confidence'], labelObj, client=self, id=res["id"]))
 
         return Classifications(classifications)
+
+    def summarize(self, text: str, model: str = None, length: str = None, format: str = None, temperature: float = None,
+                  additional_instruction: str = None) -> SummarizeResponse:
+        """Return a generated summary of the specified length for the provided text.
+
+        Args:
+            text (str): Text to summarize.
+            model (str): (Optional) ID of the model.
+            length (str): (Optional) One of {"short", "medium", "long"}, defaults to "medium". \
+                Controls the length of the summary.
+            format (str): (Optional) One of {"paragraph", "bullets"}, defaults to "bullets". \
+                Controls the format of the summary.
+            temperature (float): Ranges from 0 to 5. Controls the randomness of the output. \
+                Lower values tend to generate more “predictable” output, while higher values \
+                tend to generate more “creative” output. The sweet spot is typically between 0 and 1.
+            additional_instruction (str): (Optional) Modifier for the underlying prompt, must \
+                complete the sentence "Generate a summary _".
+
+        Example:
+        ```
+        res = co.summarize(text="Stock market report for today...")
+        print(res.summary)
+        ```
+
+        Example:
+        ```
+        res = co.summarize(
+            text="Stock market report for today...",
+            model="summarize-xlarge",
+            length="long",
+            format="bullets",
+            temperature=0.9,
+            additional_instruction="focusing on the highest performing stocks")
+        print(res.summary)
+        ```
+        """
+        json_body = {
+            'model': model,
+            'text': text,
+            'length': length,
+            'format': format,
+            'temperature': temperature,
+            'additional_instruction': additional_instruction,
+        }
+        # remove None values from the dict
+        json_body = {k: v for k, v in json_body.items() if v is not None}
+        response = self.__request(cohere.SUMMARIZE_URL, json=json_body)
+
+        return SummarizeResponse(id=response["id"], summary=response["summary"])
 
     def batch_tokenize(self, texts: List[str]) -> List[Tokens]:
         return [self.tokenize(t) for t in texts]
