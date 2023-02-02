@@ -20,8 +20,8 @@ from cohere.embeddings import Embeddings
 from cohere.error import CohereError
 from cohere.feedback import Feedback
 from cohere.generation import Generations
-from cohere.tokenize import Tokens
 from cohere.summarize import SummarizeResponse
+from cohere.tokenize import Tokens
 
 use_xhr_client = False
 try:
@@ -122,7 +122,9 @@ class Client:
                  stop_sequences: List[str] = None,
                  return_likelihoods: str = None,
                  truncate: str = None,
-                 logit_bias: Dict[int, float] = {}) -> Generations:
+                 logit_bias: Dict[int, float] = {},
+                 grounding_template: str = None,
+                 grounded_texts: List[str] = None) -> Generations:
         json_body = {
             'model': model,
             'prompt': prompt,
@@ -140,6 +142,8 @@ class Client:
             'return_likelihoods': return_likelihoods,
             'truncate': truncate,
             'logit_bias': logit_bias,
+            'grounding_template': grounding_template,
+            'grounded_texts': grounded_texts,
         }
         response = self._executor.submit(self.__request, cohere.GENERATE_URL, json=json_body)
         return Generations(return_likelihoods=return_likelihoods, _future=response, client=self)
@@ -206,7 +210,12 @@ class Client:
 
         return Classifications(classifications)
 
-    def summarize(self, text: str, model: str = None, length: str = None, format: str = None, temperature: float = None,
+    def summarize(self,
+                  text: str,
+                  model: str = None,
+                  length: str = None,
+                  format: str = None,
+                  temperature: float = None,
                   additional_instruction: str = None) -> SummarizeResponse:
         """Return a generated summary of the specified length for the provided text.
 
@@ -352,12 +361,10 @@ class Client:
             return response
         else:
             with requests.Session() as session:
-                retries = Retry(
-                    total=self.max_retries,
-                    backoff_factor=0.5,
-                    allowed_methods=['POST', 'GET'],
-                    status_forcelist=[429, 500, 502, 503, 504]
-                )
+                retries = Retry(total=self.max_retries,
+                                backoff_factor=0.5,
+                                allowed_methods=['POST', 'GET'],
+                                status_forcelist=[429, 500, 502, 503, 504])
                 session.mount('https://', HTTPAdapter(max_retries=retries))
                 session.mount('http://', HTTPAdapter(max_retries=retries))
 
@@ -365,11 +372,11 @@ class Client:
                 try:
                     res = response.json()
                 except Exception:
-                    raise CohereError(
-                        message=response.text, http_status=response.status_code, headers=response.headers)
+                    raise CohereError(message=response.text, http_status=response.status_code, headers=response.headers)
                 if 'message' in res:  # has errors
-                    raise CohereError(
-                        message=res['message'], http_status=response.status_code, headers=response.headers)
+                    raise CohereError(message=res['message'],
+                                      http_status=response.status_code,
+                                      headers=response.headers)
                 self.__print_warning_msg(response)
 
         return res

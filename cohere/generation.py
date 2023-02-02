@@ -11,11 +11,13 @@ class Generation(CohereObject, str):
     def __new__(cls, text: str, *_, **__):
         return str.__new__(cls, text)
 
-    def __init__(self, text: str, likelihood: float, token_likelihoods: List[TokenLikelihood], *args, **kwargs) -> None:
+    def __init__(self, text: str, likelihood: float, token_likelihoods: List[TokenLikelihood], ground_text: str, *args,
+                 **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.text = text
         self.likelihood = likelihood
         self.token_likelihoods = token_likelihoods
+        self.ground_text = ground_text
 
 
 class Generations(CohereObject):
@@ -50,7 +52,13 @@ class Generations(CohereObject):
                 for likelihoods in gen['token_likelihoods']:
                     token_likelihood = likelihoods['likelihood'] if 'likelihood' in likelihoods.keys() else None
                     token_likelihoods.append(TokenLikelihood(likelihoods['token'], token_likelihood))
-            generations.append(Generation(gen['text'], likelihood, token_likelihoods, client=self.client, id=gen["id"]))
+            generations.append(
+                Generation(gen['text'],
+                           likelihood,
+                           token_likelihoods,
+                           gen['ground_text'],
+                           client=self.client,
+                           id=gen["id"]))
 
         return generations
 

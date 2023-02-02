@@ -1,8 +1,8 @@
 import unittest
 
-import cohere
-
 from utils import get_api_key
+
+import cohere
 
 API_KEY = get_api_key()
 co = cohere.Client(API_KEY)
@@ -68,4 +68,10 @@ class TestGenerate(unittest.TestCase):
 
     def test_prompt_vars(self):
         prediction = co.generate(prompt='Hello {{ name }}', prompt_vars={'name': 'Aidan'})
+        self.assertIsInstance(prediction.generations[0].text, str)
+
+    def test_grounded_texts(self):
+        prediction = co.generate(prompt='what animal do you like?',
+                                 grounded_texts=["cat", "house", "bread"],
+                                 grounding_template="I like {{ grounded_text }}")
         self.assertIsInstance(prediction.generations[0].text, str)
