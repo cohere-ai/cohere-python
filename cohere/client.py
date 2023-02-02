@@ -124,7 +124,7 @@ class Client:
                  truncate: str = None,
                  logit_bias: Dict[int, float] = {},
                  grounding_template: str = None,
-                 grounded_texts: List[str] = None) -> Generations:
+                 ground_texts: List[str] = None) -> Generations:
         json_body = {
             'model': model,
             'prompt': prompt,
@@ -143,7 +143,7 @@ class Client:
             'truncate': truncate,
             'logit_bias': logit_bias,
             'grounding_template': grounding_template,
-            'grounded_texts': grounded_texts,
+            'ground_texts': ground_texts,
         }
         response = self._executor.submit(self.__request, cohere.GENERATE_URL, json=json_body)
         return Generations(return_likelihoods=return_likelihoods, _future=response, client=self)

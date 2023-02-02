@@ -72,6 +72,6 @@ class TestGenerate(unittest.TestCase):
 
     def test_grounded_texts(self):
         prediction = co.generate(prompt='what animal do you like?',
-                                 grounded_texts=["cat", "house", "bread"],
-                                 grounding_template="I like {{ grounded_text }}\n{{prompt}}")
+                                 ground_texts=["cat", "house", "bread"],
+                                 grounding_template="I like {{ ground_text }}\n{{prompt}}")
         self.assertIsInstance(prediction.generations[0].text, str)
