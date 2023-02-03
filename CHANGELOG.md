@@ -5,7 +5,7 @@
 - [#146](https://github.com/cohere-ai/cohere-python/pull/146)
   - Add new experimental `co.rerank` api 
 - [#150](https://github.com/cohere-ai/cohere-python/pull/150)
-  - Add `abstractiveness` param for co.summarize
+  - Add `abstractiveness` param for `co.summarize`
  
 # 3.2
 
