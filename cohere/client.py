@@ -208,7 +208,7 @@ class Client:
         return Classifications(classifications)
 
     def summarize(self, text: str, model: str = None, length: str = None, format: str = None, temperature: float = None,
-                  additional_instruction: str = None) -> SummarizeResponse:
+                  additional_instruction: str = None, abstractiveness: str = None) -> SummarizeResponse:
         """Return a generated summary of the specified length for the provided text.
 
         Args:
@@ -218,6 +218,10 @@ class Client:
                 Controls the length of the summary.
             format (str): (Optional) One of {"paragraph", "bullets"}, defaults to "bullets". \
                 Controls the format of the summary.
+            abstractiveness (str) One of {"high", "medium", "low"}, defaults to "high". \
+                Controls how close to the original text the summary is. "Low" abstractiveness \
+                summaries will lean towards reusing sentences verbatim, while "high" abstractiveness \
+                summaries will tend to paraphrase more. 
             temperature (float): Ranges from 0 to 5. Controls the randomness of the output. \
                 Lower values tend to generate more “predictable” output, while higher values \
                 tend to generate more “creative” output. The sweet spot is typically between 0 and 1.
