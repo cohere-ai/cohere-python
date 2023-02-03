@@ -221,7 +221,7 @@ class Client:
             abstractiveness (str) One of {"high", "medium", "low"}, defaults to "high". \
                 Controls how close to the original text the summary is. "Low" abstractiveness \
                 summaries will lean towards reusing sentences verbatim, while "high" abstractiveness \
-                summaries will tend to paraphrase more. 
+                summaries will tend to paraphrase more.
             temperature (float): Ranges from 0 to 5. Controls the randomness of the output. \
                 Lower values tend to generate more “predictable” output, while higher values \
                 tend to generate more “creative” output. The sweet spot is typically between 0 and 1.
