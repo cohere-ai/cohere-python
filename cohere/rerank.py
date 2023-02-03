@@ -36,7 +36,7 @@ class Reranking(CohereObject):
     def __init__(self,
                  response: Optional[Dict[str, Any]] = None,
                  **kwargs) -> None:
-        super().__init__(**kwargs)
+        super().__init__(**kwargs, id=response.get('id'))
         assert response is not None
         self.results = self._results(response)
 
