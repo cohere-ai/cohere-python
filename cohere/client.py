@@ -253,6 +253,7 @@ class Client:
             'format': format,
             'temperature': temperature,
             'additional_instruction': additional_instruction,
+            'abstractiveness': abstractiveness
         }
         # remove None values from the dict
         json_body = {k: v for k, v in json_body.items() if v is not None}
