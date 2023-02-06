@@ -4,6 +4,30 @@ from cohere.response import AsyncAttribute, CohereObject
 
 
 class Chat(CohereObject):
+    """
+    A chat object.
+
+    Attributes:
+        query (str): The query text.
+        persona (str): The persona name.
+        reply (str): The reply text.
+        session_id (str): The session ID.
+
+    Methods:
+        respond(response: str) -> Chat: Respond to the chat.
+
+    Example:
+        >>> chat = client.chat(query="Hello", persona="Alice")
+        >>> chat.reply
+        "Hello, how are you?"
+        >>> chat.session_id
+        "1234567890"
+        >>> chat = chat.respond("I'm fine, thanks.")
+        >>> chat.reply
+        "That's good to hear."
+        >>> chat.session_id
+        "1234567890"
+    """
 
     def __init__(self,
                  query: str,
