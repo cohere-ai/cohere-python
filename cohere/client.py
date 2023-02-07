@@ -155,7 +155,7 @@ class Client:
         response = self._executor.submit(self.__request, cohere.CHAT_URL, json=json_body)
         return Chat(query=query, persona=persona, _future=response, client=self)
 
-    def embed(self, texts: List[str], model: str = None, truncate: str = 'NONE') -> Embeddings:
+    def embed(self, texts: List[str], model: str = None, truncate: str = None) -> Embeddings:
         responses = []
         json_bodys = []
 
