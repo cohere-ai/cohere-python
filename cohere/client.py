@@ -216,7 +216,7 @@ class Client:
             model (str): (Optional) ID of the model.
             length (str): (Optional) One of {"short", "medium", "long"}, defaults to "medium". \
                 Controls the length of the summary.
-            format (str): (Optional) One of {"paragraph", "bullets"}, defaults to "bullets". \
+            format (str): (Optional) One of {"paragraph", "bullets"}, defaults to "paragraph". \
                 Controls the format of the summary.
             abstractiveness (str) One of {"high", "medium", "low"}, defaults to "high". \
                 Controls how close to the original text the summary is. "Low" abstractiveness \
