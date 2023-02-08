@@ -59,3 +59,15 @@ class TestChat(unittest.TestCase):
     def test_invalid_model(self):
         with self.assertRaises(cohere.CohereError):
             co.chat("Yo what up?", model="NOT_A_VALID_MODEL").reply
+
+    def test_return_chatlog(self):
+        prediction = co.chat("Yo what up?", return_chatlog=True)
+        self.assertIsInstance(prediction.reply, str)
+        self.assertIsInstance(prediction.session_id, str)
+        self.assertIsNotNone(prediction.chatlog)
+    
+    def test_return_chatlog_false(self):
+        prediction = co.chat("Yo what up?", return_chatlog=False)
+        self.assertIsInstance(prediction.reply, str)
+        self.assertIsInstance(prediction.session_id, str)
+        self.assertIsNone(prediction.chatlog)
