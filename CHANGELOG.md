@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.4
+- [#154](https://github.com/cohere-ai/cohere-python/pull/154)
+  - Add support for `return_chatlog` parameter for co.Chat
+
 # 3.3
 
 - [#146](https://github.com/cohere-ai/cohere-python/pull/146)
