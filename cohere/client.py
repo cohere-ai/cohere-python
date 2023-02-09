@@ -151,6 +151,34 @@ class Client:
              persona: str = "cohere",
              model: str = None,
              return_chatlog: bool = False) -> Chat:
+        """Returns a Chat object with the query reply.
+
+        Args:
+            query (str): The query to send to the chatbot.
+            session_id (str): (Optional) The session id to continue the conversation.
+            persona (str): (Optional) The persona to use.
+            model (str): (Optional) The model to use for generating the next reply.
+            return_chatlog (bool): (Optional) Whether to return the chatlog.
+
+        Example:
+        ```
+        res = co.chat(query="Hey! How are you doing today?")
+        print(res.reply)
+        print(res.session_id)
+        ```
+
+        Example:
+        ```
+        res = co.chat(
+            query="Hey! How are you doing today?",
+            session_id="1234",
+            persona="fortune",
+            model="command-xlarge",
+            return_chatlog=True)
+        print(res.reply)
+        print(res.chatlog)
+        ```
+        """
         json_body = {
             'query': query,
             'session_id': session_id,
