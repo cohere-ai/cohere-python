@@ -145,15 +145,49 @@ class Client:
         response = self._executor.submit(self.__request, cohere.GENERATE_URL, json=json_body)
         return Generations(return_likelihoods=return_likelihoods, _future=response, client=self)
 
-    def chat(self, query: str, session_id: str = "", persona: str = "cohere", model: str = None) -> Chat:
+    def chat(self,
+             query: str,
+             session_id: str = "",
+             persona: str = "cohere",
+             model: str = None,
+             return_chatlog: bool = False) -> Chat:
+        """Returns a Chat object with the query reply.
+
+        Args:
+            query (str): The query to send to the chatbot.
+            session_id (str): (Optional) The session id to continue the conversation.
+            persona (str): (Optional) The persona to use.
+            model (str): (Optional) The model to use for generating the next reply.
+            return_chatlog (bool): (Optional) Whether to return the chatlog.
+
+        Example:
+        ```
+        res = co.chat(query="Hey! How are you doing today?")
+        print(res.reply)
+        print(res.session_id)
+        ```
+
+        Example:
+        ```
+        res = co.chat(
+            query="Hey! How are you doing today?",
+            session_id="1234",
+            persona="fortune",
+            model="command-xlarge",
+            return_chatlog=True)
+        print(res.reply)
+        print(res.chatlog)
+        ```
+        """
         json_body = {
             'query': query,
             'session_id': session_id,
             'persona': persona,
             'model': model,
+            'return_chatlog': return_chatlog,
         }
         response = self._executor.submit(self.__request, cohere.CHAT_URL, json=json_body)
-        return Chat(query=query, persona=persona, _future=response, client=self)
+        return Chat(query=query, persona=persona, _future=response, client=self, return_chatlog=return_chatlog)
 
     def embed(self, texts: List[str], model: str = None, truncate: str = None) -> Embeddings:
         responses = []
