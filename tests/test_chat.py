@@ -65,9 +65,12 @@ class TestChat(unittest.TestCase):
         self.assertIsInstance(prediction.reply, str)
         self.assertIsInstance(prediction.session_id, str)
         self.assertIsNotNone(prediction.chatlog)
-    
+        self.assertGreaterEqual(len(prediction.chatlog), len(prediction.reply))
+
     def test_return_chatlog_false(self):
         prediction = co.chat("Yo what up?", return_chatlog=False)
         self.assertIsInstance(prediction.reply, str)
         self.assertIsInstance(prediction.session_id, str)
-        self.assertIsNone(prediction.chatlog)
+
+        with self.assertRaises(AttributeError):
+            prediction.chatlog
