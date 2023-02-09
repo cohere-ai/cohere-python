@@ -1,8 +1,8 @@
 # Changelog
 
 # 3.5
-- 
- - Add support for `return_prompt` parameter for co.Chat
+- [#155](https://github.com/cohere-ai/cohere-python/pull/155)
+  - Add support for `return_prompt` parameter for co.Chat
 
 # 3.4
 - [#154](https://github.com/cohere-ai/cohere-python/pull/154)
