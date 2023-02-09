@@ -74,3 +74,18 @@ class TestChat(unittest.TestCase):
 
         with self.assertRaises(AttributeError):
             prediction.chatlog
+
+    def test_return_prompt(self):
+        prediction = co.chat("Yo what up?", return_prompt=True)
+        self.assertIsInstance(prediction.reply, str)
+        self.assertIsInstance(prediction.session_id, str)
+        self.assertIsNotNone(prediction.prompt)
+        self.assertGreaterEqual(len(prediction.prompt), len(prediction.reply))
+
+    def test_return_prompt_false(self):
+        prediction = co.chat("Yo what up?", return_prompt=False)
+        self.assertIsInstance(prediction.reply, str)
+        self.assertIsInstance(prediction.session_id, str)
+
+        with self.assertRaises(AttributeError):
+            prediction.prompt
