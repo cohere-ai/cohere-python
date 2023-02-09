@@ -145,7 +145,12 @@ class Client:
         response = self._executor.submit(self.__request, cohere.GENERATE_URL, json=json_body)
         return Generations(return_likelihoods=return_likelihoods, _future=response, client=self)
 
-    def chat(self, query: str, session_id: str = "", persona: str = "cohere", model: str = None, return_chatlog: bool = None) -> Chat:
+    def chat(self,
+             query: str,
+             session_id: str = "",
+             persona: str = "cohere",
+             model: str = None,
+             return_chatlog: bool = False) -> Chat:
         json_body = {
             'query': query,
             'session_id': session_id,
@@ -154,7 +159,7 @@ class Client:
             'return_chatlog': return_chatlog,
         }
         response = self._executor.submit(self.__request, cohere.CHAT_URL, json=json_body)
-        return Chat(query=query, persona=persona, _future=response, client=self)
+        return Chat(query=query, persona=persona, _future=response, client=self, return_chatlog=return_chatlog)
 
     def embed(self, texts: List[str], model: str = None, truncate: str = None) -> Embeddings:
         responses = []
