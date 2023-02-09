@@ -150,7 +150,8 @@ class Client:
              session_id: str = "",
              persona: str = "cohere",
              model: str = None,
-             return_chatlog: bool = False) -> Chat:
+             return_chatlog: bool = False,
+             return_prompt: bool = False) -> Chat:
         """Returns a Chat object with the query reply.
 
         Args:
@@ -159,6 +160,7 @@ class Client:
             persona (str): (Optional) The persona to use.
             model (str): (Optional) The model to use for generating the next reply.
             return_chatlog (bool): (Optional) Whether to return the chatlog.
+            return_prompt (bool): (Optional) Whether to return the prompt.
 
         Example:
         ```
@@ -174,9 +176,11 @@ class Client:
             session_id="1234",
             persona="fortune",
             model="command-xlarge",
-            return_chatlog=True)
+            return_chatlog=True,
+            return_prompt=True,)
         print(res.reply)
         print(res.chatlog)
+        print(res.prompt)
         ```
         """
         json_body = {
@@ -185,9 +189,17 @@ class Client:
             'persona': persona,
             'model': model,
             'return_chatlog': return_chatlog,
+            'return_prompt': return_prompt,
         }
         response = self._executor.submit(self.__request, cohere.CHAT_URL, json=json_body)
-        return Chat(query=query, persona=persona, _future=response, client=self, return_chatlog=return_chatlog)
+        return Chat(
+                    query=query,
+                    persona=persona,
+                    _future=response,
+                    client=self,
+                    return_chatlog=return_chatlog,
+                    return_prompt=return_prompt
+                )
 
     def embed(self, texts: List[str], model: str = None, truncate: str = None) -> Embeddings:
         responses = []
