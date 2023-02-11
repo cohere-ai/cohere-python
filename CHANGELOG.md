@@ -1,34 +1,34 @@
 # Changelog
 
-# 3.4
+## 3.4
 - [#154](https://github.com/cohere-ai/cohere-python/pull/154)
   - Add support for `return_chatlog` parameter for co.Chat
 
-# 3.3
+## 3.3
 
 - [#146](https://github.com/cohere-ai/cohere-python/pull/146)
   - Add new experimental `co.rerank` api 
 - [#150](https://github.com/cohere-ai/cohere-python/pull/150)
   - Add `abstractiveness` param for `co.summarize`
  
-# 3.2
+## 3.2
 
 - [#138](https://github.com/cohere-ai/cohere-python/pull/138)
   - Add `model` to the chat endpoint's parameters
 - [#145](https://github.com/cohere-ai/cohere-python/pull/145)
   - Add new experimental `co.summarize` API
 
-# 3.1
+## 3.1
 
 - [#129](https://github.com/cohere-ai/cohere-python/pull/129)
   - Add support for `end_sequences` param in Generate API
 
-# 3.1
+## 3.1
 
 - [#126](https://github.com/cohere-ai/cohere-python/pull/126)
   - Add new `co.detect_language` api
 
-# 3.0
+## 3.0
 
 - [#125](https://github.com/cohere-ai/cohere-python/pull/123)
   - Improve the Classify response string representation
