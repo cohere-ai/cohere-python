@@ -1,7 +1,7 @@
 # Changelog
 
 ## 3.5
-- []
+- [#157](https://github.com/cohere-ai/cohere-python/pull/157)
   - Add support for `chatlog_override` parameter for co.Chat
 
 ## 3.4
