@@ -1,8 +1,8 @@
 # Changelog
 
-## 3.4
+## 3.5
 
-- [#155](https://github.com/cohere-ai/cohere-python/pull/155)
+- [#156](https://github.com/cohere-ai/cohere-python/pull/156)
   - Replace `abstractiveness` param with `extractiveness`
   - Rename `additional_instruction` param to `additional_command`
 
