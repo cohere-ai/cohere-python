@@ -242,7 +242,7 @@ class Client:
         return Classifications(classifications)
 
     def summarize(self, text: str, model: str = None, length: str = None, format: str = None, temperature: float = None,
-                  additional_instruction: str = None, abstractiveness: str = None) -> SummarizeResponse:
+                  additional_command: str = None, extractiveness: str = None) -> SummarizeResponse:
         """Return a generated summary of the specified length for the provided text.
 
         Args:
@@ -252,14 +252,14 @@ class Client:
                 Controls the length of the summary.
             format (str): (Optional) One of {"paragraph", "bullets"}, defaults to "paragraph". \
                 Controls the format of the summary.
-            abstractiveness (str) One of {"high", "medium", "low"}, defaults to "high". \
-                Controls how close to the original text the summary is. "Low" abstractiveness \
-                summaries will lean towards reusing sentences verbatim, while "high" abstractiveness \
+            extractiveness (str) One of {"high", "medium", "low"}, defaults to "high". \
+                Controls how close to the original text the summary is. "High" extractiveness \
+                summaries will lean towards reusing sentences verbatim, while "low" extractiveness \
                 summaries will tend to paraphrase more.
             temperature (float): Ranges from 0 to 5. Controls the randomness of the output. \
                 Lower values tend to generate more “predictable” output, while higher values \
                 tend to generate more “creative” output. The sweet spot is typically between 0 and 1.
-            additional_instruction (str): (Optional) Modifier for the underlying prompt, must \
+            additional_command (str): (Optional) Modifier for the underlying prompt, must \
                 complete the sentence "Generate a summary _".
 
         Example:
@@ -276,7 +276,7 @@ class Client:
             length="long",
             format="bullets",
             temperature=0.9,
-            additional_instruction="focusing on the highest performing stocks")
+            additional_command="focusing on the highest performing stocks")
         print(res.summary)
         ```
         """
@@ -286,8 +286,8 @@ class Client:
             'length': length,
             'format': format,
             'temperature': temperature,
-            'additional_instruction': additional_instruction,
-            'abstractiveness': abstractiveness,
+            'additional_command': additional_command,
+            'extractiveness': extractiveness,
         }
         # remove None values from the dict
         json_body = {k: v for k, v in json_body.items() if v is not None}
