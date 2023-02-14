@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.6
+- [#158](https://github.com/cohere-ai/cohere-python/pull/158)
+  - Add support for `preamble_override` parameter for co.Chat
+  - Add support for `return_prompt` parameter for co.Chat
+  
 ## 3.5
 - [#157](https://github.com/cohere-ai/cohere-python/pull/157)
   - Add support for `chatlog_override` parameter for co.Chat
