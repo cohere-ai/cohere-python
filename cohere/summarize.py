@@ -18,7 +18,7 @@ res = co.summarize(
     length="long",
     format="bullets",
     temperature=0.3,
-    additional_instruction="focusing on the highest performing stocks")
+    additional_command="focusing on the highest performing stocks")
 print(res.summary)
 ```
 """

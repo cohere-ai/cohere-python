@@ -1,20 +1,28 @@
 # Changelog
 
+## 3.6
+
+- [#156](https://github.com/cohere-ai/cohere-python/pull/156)
+  - Replace `abstractiveness` param with `extractiveness` in co.Summarize
+  - Rename `additional_instruction` param to `additional_command` in co.Summarize
+
 ## 3.5
+
 - [#157](https://github.com/cohere-ai/cohere-python/pull/157)
   - Add support for `chatlog_override` parameter for co.Chat
 
 ## 3.4
+
 - [#154](https://github.com/cohere-ai/cohere-python/pull/154)
   - Add support for `return_chatlog` parameter for co.Chat
 
 ## 3.3
 
 - [#146](https://github.com/cohere-ai/cohere-python/pull/146)
-  - Add new experimental `co.rerank` api 
+  - Add new experimental `co.rerank` api
 - [#150](https://github.com/cohere-ai/cohere-python/pull/150)
   - Add `abstractiveness` param for `co.summarize`
- 
+
 ## 3.2
 
 - [#138](https://github.com/cohere-ai/cohere-python/pull/138)
