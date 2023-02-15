@@ -150,7 +150,8 @@ class Client:
              session_id: str = "",
              persona: str = "cohere",
              model: str = None,
-             return_chatlog: bool = False) -> Chat:
+             return_chatlog: bool = False,
+             chatlog_override: List[Dict[str, str]] = None) -> Chat:
         """Returns a Chat object with the query reply.
 
         Args:
@@ -159,6 +160,7 @@ class Client:
             persona (str): (Optional) The persona to use.
             model (str): (Optional) The model to use for generating the next reply.
             return_chatlog (bool): (Optional) Whether to return the chatlog.
+            chatlog_override (List[Dict[str, str]]): (Optional) A list of chatlog entries to override the chatlog.
 
         Example:
         ```
@@ -178,16 +180,51 @@ class Client:
         print(res.reply)
         print(res.chatlog)
         ```
+
+                Example:
+        ```
+        res = co.chat(
+            query="What about you?",
+            session_id="1234",
+            chatlog_override=[
+                {'Bot': 'Hey!'},
+                {'User': 'I am doing great!'},
+                {'Bot': 'That is great to hear!'},
+            ],
+            return_chatlog=True)
+        print(res.reply)
+        print(res.chatlog)
+        ```
         """
+        if chatlog_override is not None:
+            self._validate_chatlog_override(chatlog_override)
+
         json_body = {
             'query': query,
             'session_id': session_id,
             'persona': persona,
             'model': model,
             'return_chatlog': return_chatlog,
+            'chatlog_override': chatlog_override,
         }
         response = self._executor.submit(self.__request, cohere.CHAT_URL, json=json_body)
         return Chat(query=query, persona=persona, _future=response, client=self, return_chatlog=return_chatlog)
+
+    def _validate_chatlog_override(self, chatlog_override: List[Dict[str, str]]) -> None:
+        if not isinstance(chatlog_override, list):
+            raise CohereError(
+                        message='chatlog_override is not a list, but it must be a list of dicts'
+                    )
+
+        for entry in chatlog_override:
+            if not isinstance(entry, dict):
+                raise CohereError(
+                    message='chatlog_override must be a list of dicts, but it cointains a non-dict element'
+                )
+            if len(entry) != 1:
+                raise CohereError(
+                    message='chatlog_override must be a list of dicts, each mapping the agent to the message.'
+                )
 
     def embed(self, texts: List[str], model: str = None, truncate: str = None) -> Embeddings:
         responses = []
