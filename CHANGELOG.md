@@ -1,10 +1,13 @@
 # Changelog
 
-## 3.5
+## 3.6
 
 - [#156](https://github.com/cohere-ai/cohere-python/pull/156)
-  - Replace `abstractiveness` param with `extractiveness`
-  - Rename `additional_instruction` param to `additional_command`
+  - Replace `abstractiveness` param with `extractiveness` in co.Summarize
+  - Rename `additional_instruction` param to `additional_command` in co.Summarize
+
+## 3.5
+
 - [#157](https://github.com/cohere-ai/cohere-python/pull/157)
   - Add support for `chatlog_override` parameter for co.Chat
 
