@@ -2,6 +2,7 @@
 dev*.ipynb
 .DS_Store
 .vscode
+cohere.egg-info/
 
 # standard python ignore
 # Byte-compiled / optimized / DLL files
