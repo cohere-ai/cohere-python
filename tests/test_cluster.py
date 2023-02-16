@@ -10,7 +10,7 @@ class TestClient(unittest.TestCase):
 
     def test_cluster_job(self):
         co = cohere.Client(get_api_key(), client_name='test')
-        create_res = co.create_cluster_job("gs://cohere-dev-central-2/cluster_tests/all_datasets/supportrends.jsonl")
+        create_res = co.create_cluster_job("gs://cohere-dev-central-2/cluster_tests/all_datasets/reddit.jsonl")
         job = co.get_cluster_job(create_res.job_id)
         start = time.time()
 
