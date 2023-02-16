@@ -145,3 +145,11 @@ class TestChat(unittest.TestCase):
     def test_invalid_preamble_override(self):
         with self.assertRaises(cohere.CohereError):
             co.chat("Yo what up?", preamble_override=123).reply
+
+    def test_username_override(self):
+        username = "CustomUser"
+        prediction = co.chat("Yo what up?", username=username, return_chatlog=True)
+        self.assertIsInstance(prediction.reply, str)
+        self.assertIsInstance(prediction.session_id, str)
+        chatlog_starts_with_username = prediction.chatlog.strip().startswith(username)
+        self.assertTrue(chatlog_starts_with_username)
