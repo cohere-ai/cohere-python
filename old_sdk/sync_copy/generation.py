@@ -21,7 +21,7 @@ class Generation(CohereObject, str):
 class Generations(CohereObject):
 
     def __init__(self,
-                 return_likelihoods: str,
+                 return_likelihoods: Optional[str],
                  response: Optional[Dict[str, Any]] = None,
                  *,
                  _future: Optional[Future] = None,
