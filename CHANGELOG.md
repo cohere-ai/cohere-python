@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.0
+
+- ...
+
+
 ## 3.6
 
 - [#156](https://github.com/cohere-ai/cohere-python/pull/156)

@@ -9,20 +9,17 @@ from requests import Response
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
+from cohere.responses.chat import Chat
+from cohere.responses.classify import Example as ClassifyExample
+from cohere.responses.classify import LabelPrediction
+from cohere.responses.detectlang import DetectLanguageResponse, Language
+from cohere.responses import Detokenization, Tokens,Classification, Classifications,Generations
+from cohere.responses.embeddings import Embeddings
+from cohere.error import CohereError,CohereAPIError,CohereConnectionError
+from cohere.responses.feedback import Feedback
+from cohere.responses.summarize import SummarizeResponse
+from cohere.responses.rerank import Reranking
 import cohere
-from cohere.chat import Chat
-from cohere.classify import Classification, Classifications
-from cohere.classify import Example as ClassifyExample
-from cohere.classify import LabelPrediction
-from cohere.detectlang import DetectLanguageResponse, Language
-from cohere.detokenize import Detokenization
-from cohere.embeddings import Embeddings
-from cohere.error import CohereError
-from cohere.feedback import Feedback
-from cohere.generation import Generations
-from cohere.tokenize import Tokens
-from cohere.summarize import SummarizeResponse
-from cohere.rerank import Reranking
 
 use_xhr_client = False
 try:
@@ -69,12 +66,9 @@ class Client:
             self.cohere_version = version
 
         if check_api_key:
-            try:
-                res = self.check_api_key()
-                if not res['valid']:
-                    raise CohereError('invalid api key')
-            except CohereError as e:
-                raise CohereError(message=e.message, http_status=e.http_status, headers=e.headers)
+            res = self.check_api_key()
+            if not res['valid']:
+                raise CohereError('invalid api key')
 
     def check_api_key(self) -> Response:
         headers = {
@@ -95,9 +89,9 @@ class Client:
         try:
             res = json.loads(response.text)
         except Exception:
-            raise CohereError(message=response.text, http_status=response.status_code, headers=response.headers)
+            raise CohereAPIError.from_response(response)
         if 'message' in res.keys():  # has errors
-            raise CohereError(message=res['message'], http_status=response.status_code, headers=response.headers)
+            raise CohereAPIError(message=res['message'], http_status=response.status_code, headers=response.headers)
         return res
 
     def batch_generate(self, prompts: List[str], **kwargs) -> List[Generations]:
@@ -438,10 +432,10 @@ class Client:
         try:
             req.send(json_body)
         except Exception:
-            raise CohereError(message=req.responseText, http_status=req.status, headers=req.getAllResponseHeaders())
+            raise CohereAPIError(message=req.responseText, http_status=req.status, headers=req.getAllResponseHeaders())
         res = json.loads(req.response)
         if 'message' in res.keys():
-            raise CohereError(message=res['message'], http_status=req.status, headers=req.getAllResponseHeaders())
+            raise CohereAPIError(message=res['message'], http_status=req.status, headers=req.getAllResponseHeaders())
         return res
 
     def __request(self, endpoint, json=None) -> Any:
@@ -473,10 +467,10 @@ class Client:
                 try:
                     res = response.json()
                 except Exception:
-                    raise CohereError(
+                    raise CohereAPIError(
                         message=response.text, http_status=response.status_code, headers=response.headers)
                 if 'message' in res:  # has errors
-                    raise CohereError(
+                    raise CohereAPIError(
                         message=res['message'], http_status=response.status_code, headers=response.headers)
                 self.__print_warning_msg(response)
 

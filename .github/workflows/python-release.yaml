@@ -30,7 +30,7 @@ jobs:
 
       - name: Create source distribution
         working-directory: ./
-        run: sh ./scripts/build-sdist.sh
+        run: poetry build
 
       - name: Upload to PyPi
         working-directory: ./

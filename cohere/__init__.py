@@ -1,5 +1,6 @@
-from .client import Client
-from .error import CohereError
+from cohere.client import Client
+from cohere.client_async import AsyncClient
+from cohere.error import CohereError, CohereAPIError,CohereConnectionError
 
 COHERE_API_URL = 'https://api.cohere.ai'
 COHERE_VERSION = '2022-12-06'
