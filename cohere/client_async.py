@@ -168,7 +168,7 @@ class AsyncClient:
         responses = await self._batch_requests(self.GENERATE_URL, requests)
         #TODO: no batching?
         results = [
-            response if isinstance(response,Exception) else        Generations(return_likelihoods=return_likelihoods, response=response, client=self)
+            response if isinstance(response,Exception) else        Generations(return_likelihoods=return_likelihoods, response=response)
         
          for response in responses]
         return results[0] if single_item else BatchedGenerations(results)

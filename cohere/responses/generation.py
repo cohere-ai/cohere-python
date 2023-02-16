@@ -1,7 +1,7 @@
 from concurrent.futures import Future
 from typing import Any, Dict, Iterator, List, NamedTuple, Optional, Union
 
-from cohere.responses.base import AsyncAttribute, CohereObject, _df_html
+from cohere.responses.base import CohereObject, _df_html
 import html
 from collections import UserList
 from dataclasses import asdict, dataclass
@@ -80,20 +80,10 @@ class Generations(CohereObject):
     def __init__(self,
                  return_likelihoods: str,
                  response: Optional[Dict[str, Any]] = None,
-                 *,
-                 _future: Optional[Future] = None,
                  **kwargs) -> None:
         super().__init__(**kwargs)
-        self.generations: Union[AsyncAttribute, List[Generation]] = None
         self.return_likelihoods = return_likelihoods
-        if _future is not None:
-            self._init_from_future(_future)
-        else:
-            assert response is not None
-            self.generations = self._generations(response)
-
-    def _init_from_future(self, future: Future):
-        self.generations = AsyncAttribute(future, self._generations)
+        self.generations = self._generations(response)
 
     def _generations(self, response: Dict[str, Any]) -> List[Generation]:
         generations: List[Generation] = []
@@ -107,7 +97,7 @@ class Generations(CohereObject):
                 for likelihoods in gen['token_likelihoods']:
                     token_likelihood = likelihoods['likelihood'] if 'likelihood' in likelihoods.keys() else None
                     token_likelihoods.append(TokenLikelihood(likelihoods['token'], token_likelihood))
-            generations.append(Generation(gen['text'], likelihood, token_likelihoods, prompt= response.get("prompt"), client=self.client, id=gen["id"]))
+            generations.append(Generation(gen['text'], likelihood, token_likelihoods, prompt= response.get("prompt"), id=gen["id"]))
 
         return generations
 

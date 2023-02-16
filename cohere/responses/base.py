@@ -67,8 +67,7 @@ class AsyncAttribute():
 
 class CohereObject():
 
-    def __init__(self, client=None, id: str = None) -> None:
-        self.client = client
+    def __init__(self, id: str = None) -> None:
         self.id = id
 
     def __getattribute__(self, name: str) -> Any:
@@ -80,7 +79,7 @@ class CohereObject():
 
     def __repr__(self) -> str:
         contents = ''
-        exclude_list = ['iterator', 'client']
+        exclude_list = ['iterator']
 
         for k in self.__dict__.keys():
             if k not in exclude_list:
@@ -94,37 +93,3 @@ class CohereObject():
             return self.visualize()
         except (ImportError, AttributeError, NotImplementedError):  # no pandas or no visualize method
             return None  # ipython will use repr()
-
-
-    def feedback(self, good_response: bool, desired_response: str = "", feedback: str = "") -> Feedback:
-        """Give feedback on a response from the Cohere API to improve the model.
-
-        Can be used programmatically like so:
-
-        Example: a user accepts a model's suggestion in an assisted writing setting
-        ```
-        generations = co.generate(f"Write me a polite email responding to the one below:\n{email}\n\nResponse:")
-        if user_accepted_suggestion:
-            generations[0].feedback(good_response=True)
-        ```
-
-        Example: the user edits the model's suggestion
-        ```
-        generations = co.generate(f"Write me a polite email responding to the one below:\n{email}\n\nResponse:")
-        if user_edits_suggestion:
-            generations[0].feedback(good_response=False, desired_response=user_edited_response)
-        ```
-
-        Args:
-            good_response (bool): a boolean indicator as to whether the generation was good (True) or bad (False).
-            desired_response (str): an optional string of the response expected. To be used when a mistake has been
-            made or a better response exists.
-            feedback (str): an optional natural language description of the specific feedback about this generation.
-
-        Returns:
-            Feedback: a Feedback object
-        """
-        return self.client.feedback(id=self.id,
-                                    good_response=good_response,
-                                    desired_response=desired_response,
-                                    feedback=feedback)

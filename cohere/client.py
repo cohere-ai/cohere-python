@@ -21,14 +21,6 @@ from cohere.responses.summarize import SummarizeResponse
 from cohere.responses.rerank import Reranking
 import cohere
 
-use_xhr_client = False
-try:
-    from js import XMLHttpRequest
-    use_xhr_client = True
-except ImportError:
-    pass
-
-
 class CheckAPIKeyResponse(TypedDict):
     valid: bool
 
@@ -84,10 +76,7 @@ class Client:
             headers['Cohere-Version'] = self.cohere_version
 
         url = urljoin(self.api_url, cohere.CHECK_API_KEY_URL)
-        if use_xhr_client:
-            response = self.__pyfetch(url, headers, None)
-        else:
-            response = requests.request('POST', url, headers=headers)
+        response = requests.request('POST', url, headers=headers)
 
         try:
             res = jsonlib.loads(response.text)
@@ -139,8 +128,8 @@ class Client:
             'truncate': truncate,
             'logit_bias': logit_bias,
         }
-        response = self._executor.submit(self.__request, cohere.GENERATE_URL, json=json_body)
-        return Generations(return_likelihoods=return_likelihoods, _future=response, client=self)
+        response = self.__request(cohere.GENERATE_URL, json=json_body)
+        return Generations(return_likelihoods=return_likelihoods, response=response)
 
     def chat(self,
              query: str,
@@ -204,8 +193,8 @@ class Client:
             'return_chatlog': return_chatlog,
             'chatlog_override': chatlog_override,
         }
-        response = self._executor.submit(self.__request, cohere.CHAT_URL, json=json_body)
-        return Chat(query=query, persona=persona, _future=response, client=self, return_chatlog=return_chatlog)
+        response = self.__request(cohere.CHAT_URL, json=json_body)
+        return Chat(query=query, persona=persona, response=response, return_chatlog=return_chatlog)
 
     def _validate_chatlog_override(self, chatlog_override: List[Dict[str, str]]) -> None:
         if not isinstance(chatlog_override, list):
@@ -230,14 +219,9 @@ class Client:
                 'texts': texts_batch,
                 'truncate': truncate,
             })
-        if use_xhr_client:
-            for json_body in json_bodys:
-                response = self.__request(cohere.EMBED_URL, json=json_body)
-                responses.append(response['embeddings'])
-        else:
-            for result in self._executor.map(lambda json_body: self.__request(cohere.EMBED_URL, json=json_body),
-                                             json_bodys):
-                responses.extend(result['embeddings'])
+        for result in self._executor.map(lambda json_body: self.__request(cohere.EMBED_URL, json=json_body),
+                                            json_bodys):
+            responses.extend(result['embeddings'])
 
         return Embeddings(responses)
 
@@ -267,7 +251,7 @@ class Client:
             for label, prediction in res['labels'].items():
                 labelObj[label] = LabelPrediction(prediction['confidence'])
             classifications.append(
-                Classification(res['input'], res['prediction'], res['confidence'], labelObj, client=self, id=res["id"]))
+                Classification(res['input'], res['prediction'], res['confidence'], labelObj, id=res["id"]))
 
         return Classifications(classifications)
 
@@ -338,14 +322,16 @@ class Client:
 
     def tokenize(self, text: str) -> Tokens:
         json_body = {'text': text}
-        return Tokens(_future=self._executor.submit(self.__request, cohere.TOKENIZE_URL, json=json_body))
+        res = self.__request(cohere.TOKENIZE_URL, json=json_body)
+        return Tokens(tokens=res['tokens'], token_strings=res['token_strings'])
 
     def batch_detokenize(self, list_of_tokens: List[List[int]]) -> List[Detokenization]:
         return [self.detokenize(t) for t in list_of_tokens]
 
     def detokenize(self, tokens: List[int]) -> Detokenization:
         json_body = {'tokens': tokens}
-        return Detokenization(_future=self._executor.submit(self.__request, cohere.DETOKENIZE_URL, json=json_body))
+        res = self.__request(cohere.DETOKENIZE_URL, json=json_body)
+        return Detokenization(text=res['text'])
 
     def detect_language(self, texts: List[str]) -> DetectLanguageResponse:
         json_body = {
@@ -431,20 +417,6 @@ class Client:
         if 'X-API-Warning' in response.headers:
             print("\033[93mWarning: {}\n\033[0m".format(response.headers['X-API-Warning']), file=sys.stderr)
 
-    def __pyfetch(self, url, headers, json_body) -> Response:
-        req = XMLHttpRequest.new()
-        req.open('POST', url, False)
-        for key, value in headers.items():
-            req.setRequestHeader(key, value)
-        try:
-            req.send(json_body)
-        except Exception:
-            raise CohereAPIError(message=req.responseText, http_status=req.status, headers=req.getAllResponseHeaders())
-        res = jsonlib.loads(req.response)
-        if 'message' in res.keys():
-            raise CohereAPIError(message=res['message'], http_status=req.status, headers=req.getAllResponseHeaders())
-        return res
-
     def __request(self, endpoint, json=None) -> Any:
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
@@ -455,36 +427,31 @@ class Client:
             headers['Cohere-Version'] = self.cohere_version
 
         url = urljoin(self.api_url, endpoint)
-        if use_xhr_client:
-            response = self.__pyfetch(url, headers, jsonlib.dumps(json))
-            self.__print_warning_msg(response)
-            return response
-        else:
-            with requests.Session() as session:
-                retries = Retry(
-                    total=self.max_retries,
-                    backoff_factor=0.5,
-                    allowed_methods=['POST', 'GET'],
-                    status_forcelist=[429, 500, 502, 503, 504],
-                )
-                session.mount('https://', HTTPAdapter(max_retries=retries))
-                session.mount('http://', HTTPAdapter(max_retries=retries))
+        with requests.Session() as session:
+            retries = Retry(
+                total=self.max_retries,
+                backoff_factor=0.5,
+                allowed_methods=['POST', 'GET'],
+                status_forcelist=[429, 500, 502, 503, 504],
+            )
+            session.mount('https://', HTTPAdapter(max_retries=retries))
+            session.mount('http://', HTTPAdapter(max_retries=retries))
 
-                response = session.request('POST', url, headers=headers, json=json, **self.request_dict)
-                try:
-                    res = response.json()
-                except Exception:
-                    raise CohereAPIError(
-                        message=response.text,
-                        http_status=response.status_code,
-                        headers=response.headers,
-                    )
-                if 'message' in res:  # has errors
-                    raise CohereAPIError(
-                        message=res['message'],
-                        http_status=response.status_code,
-                        headers=response.headers,
-                    )
-                self.__print_warning_msg(response)
+            response = session.request('POST', url, headers=headers, json=json, **self.request_dict)
+            try:
+                res = response.json()
+            except Exception:
+                raise CohereAPIError(
+                    message=response.text,
+                    http_status=response.status_code,
+                    headers=response.headers,
+                )
+            if 'message' in res:  # has errors
+                raise CohereAPIError(
+                    message=res['message'],
+                    http_status=response.status_code,
+                    headers=response.headers,
+                )
+            self.__print_warning_msg(response)
 
         return res
