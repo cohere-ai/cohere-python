@@ -220,7 +220,7 @@ class Client:
         for entry in chatlog_override:
             if not isinstance(entry, dict):
                 raise CohereError(
-                    message='chatlog_override must be a list of dicts, but it cointains a non-dict element')
+                    message='chatlog_override must be a list of dicts, but it contains a non-dict element')
             if len(entry) != 1:
                 raise CohereError(
                     message='chatlog_override must be a list of dicts, each mapping the agent to the message.')
