@@ -1,7 +1,7 @@
-import json
+import json as jsonlib
 import sys
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, TypedDict, Union
 from urllib.parse import urljoin
 
 import requests
@@ -20,9 +20,9 @@ from cohere.embeddings import Embeddings
 from cohere.error import CohereError
 from cohere.feedback import Feedback
 from cohere.generation import Generations
-from cohere.tokenize import Tokens
-from cohere.summarize import SummarizeResponse
 from cohere.rerank import Reranking
+from cohere.summarize import SummarizeResponse
+from cohere.tokenize import Tokens
 
 use_xhr_client = False
 try:
@@ -32,15 +32,19 @@ except ImportError:
     pass
 
 
+class CheckAPIKeyResponse(TypedDict):
+    valid: bool
+
+
 class Client:
 
     def __init__(self,
                  api_key: str,
-                 version: str = None,
+                 version: Optional[str] = None,
                  num_workers: int = 64,
                  request_dict: dict = {},
                  check_api_key: bool = True,
-                 client_name: str = None,
+                 client_name: Optional[str] = None,
                  max_retries: int = 3) -> None:
         """
         Initialize the client.
@@ -76,7 +80,7 @@ class Client:
             except CohereError as e:
                 raise CohereError(message=e.message, http_status=e.http_status, headers=e.headers)
 
-    def check_api_key(self) -> Response:
+    def check_api_key(self) -> CheckAPIKeyResponse:
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
             'Content-Type': 'application/json',
@@ -88,12 +92,11 @@ class Client:
         url = urljoin(self.api_url, cohere.CHECK_API_KEY_URL)
         if use_xhr_client:
             response = self.__pyfetch(url, headers, None)
-            return response
         else:
             response = requests.request('POST', url, headers=headers)
 
         try:
-            res = json.loads(response.text)
+            res = jsonlib.loads(response.text)
         except Exception:
             raise CohereError(message=response.text, http_status=response.status_code, headers=response.headers)
         if 'message' in res.keys():  # has errors
@@ -108,21 +111,21 @@ class Client:
         return generations
 
     def generate(self,
-                 prompt: str = None,
+                 prompt: Optional[str] = None,
                  prompt_vars: object = {},
-                 model: str = None,
-                 preset: str = None,
-                 num_generations: int = None,
-                 max_tokens: int = None,
-                 temperature: float = None,
-                 k: int = None,
-                 p: float = None,
-                 frequency_penalty: float = None,
-                 presence_penalty: float = None,
-                 end_sequences: List[str] = None,
-                 stop_sequences: List[str] = None,
-                 return_likelihoods: str = None,
-                 truncate: str = None,
+                 model: Optional[str] = None,
+                 preset: Optional[str] = None,
+                 num_generations: Optional[int] = None,
+                 max_tokens: Optional[int] = None,
+                 temperature: Optional[float] = None,
+                 k: Optional[int] = None,
+                 p: Optional[float] = None,
+                 frequency_penalty: Optional[float] = None,
+                 presence_penalty: Optional[float] = None,
+                 end_sequences: Optional[List[str]] = None,
+                 stop_sequences: Optional[List[str]] = None,
+                 return_likelihoods: Optional[str] = None,
+                 truncate: Optional[str] = None,
                  logit_bias: Dict[int, float] = {}) -> Generations:
         json_body = {
             'model': model,
@@ -149,7 +152,7 @@ class Client:
              query: str,
              session_id: str = "",
              persona: str = "cohere",
-             model: str = None,
+             model: Optional[str] = None,
              return_chatlog: bool = False,
              return_prompt: bool = False,
              chatlog_override: List[Dict[str, str]] = None,
@@ -241,21 +244,17 @@ class Client:
 
     def _validate_chatlog_override(self, chatlog_override: List[Dict[str, str]]) -> None:
         if not isinstance(chatlog_override, list):
-            raise CohereError(
-                        message='chatlog_override is not a list, but it must be a list of dicts'
-                    )
+            raise CohereError(message='chatlog_override is not a list, but it must be a list of dicts')
 
         for entry in chatlog_override:
             if not isinstance(entry, dict):
                 raise CohereError(
-                    message='chatlog_override must be a list of dicts, but it cointains a non-dict element'
-                )
+                    message='chatlog_override must be a list of dicts, but it cointains a non-dict element')
             if len(entry) != 1:
                 raise CohereError(
-                    message='chatlog_override must be a list of dicts, each mapping the agent to the message.'
-                )
+                    message='chatlog_override must be a list of dicts, each mapping the agent to the message.')
 
-    def embed(self, texts: List[str], model: str = None, truncate: str = None) -> Embeddings:
+    def embed(self, texts: List[str], model: Optional[str] = None, truncate: Optional[str] = None) -> Embeddings:
         responses = []
         json_bodys = []
 
@@ -279,10 +278,10 @@ class Client:
 
     def classify(self,
                  inputs: List[str] = [],
-                 model: str = None,
-                 preset: str = None,
+                 model: Optional[str] = None,
+                 preset: Optional[str] = None,
                  examples: List[ClassifyExample] = [],
-                 truncate: str = None) -> Classifications:
+                 truncate: Optional[str] = None) -> Classifications:
         examples_dicts: list[dict[str, str]] = []
         for example in examples:
             example_dict = {'text': example.text, 'label': example.label}
@@ -307,8 +306,16 @@ class Client:
 
         return Classifications(classifications)
 
-    def summarize(self, text: str, model: str = None, length: str = None, format: str = None, temperature: float = None,
-                  additional_instruction: str = None, abstractiveness: str = None) -> SummarizeResponse:
+    def summarize(
+        self,
+        text: str,
+        model: Optional[str] = None,
+        length: Optional[str] = None,
+        format: Optional[str] = None,
+        temperature: Optional[float] = None,
+        additional_command: Optional[str] = None,
+        extractiveness: Optional[str] = None,
+    ) -> SummarizeResponse:
         """Return a generated summary of the specified length for the provided text.
 
         Args:
@@ -318,14 +325,14 @@ class Client:
                 Controls the length of the summary.
             format (str): (Optional) One of {"paragraph", "bullets"}, defaults to "paragraph". \
                 Controls the format of the summary.
-            abstractiveness (str) One of {"high", "medium", "low"}, defaults to "high". \
-                Controls how close to the original text the summary is. "Low" abstractiveness \
-                summaries will lean towards reusing sentences verbatim, while "high" abstractiveness \
+            extractiveness (str) One of {"high", "medium", "low"}, defaults to "high". \
+                Controls how close to the original text the summary is. "High" extractiveness \
+                summaries will lean towards reusing sentences verbatim, while "low" extractiveness \
                 summaries will tend to paraphrase more.
             temperature (float): Ranges from 0 to 5. Controls the randomness of the output. \
                 Lower values tend to generate more “predictable” output, while higher values \
                 tend to generate more “creative” output. The sweet spot is typically between 0 and 1.
-            additional_instruction (str): (Optional) Modifier for the underlying prompt, must \
+            additional_command (str): (Optional) Modifier for the underlying prompt, must \
                 complete the sentence "Generate a summary _".
 
         Example:
@@ -342,7 +349,7 @@ class Client:
             length="long",
             format="bullets",
             temperature=0.9,
-            additional_instruction="focusing on the highest performing stocks")
+            additional_command="focusing on the highest performing stocks")
         print(res.summary)
         ```
         """
@@ -352,8 +359,8 @@ class Client:
             'length': length,
             'format': format,
             'temperature': temperature,
-            'additional_instruction': additional_instruction,
-            'abstractiveness': abstractiveness,
+            'additional_command': additional_command,
+            'extractiveness': extractiveness,
         }
         # remove None values from the dict
         json_body = {k: v for k, v in json_body.items() if v is not None}
@@ -375,7 +382,7 @@ class Client:
         json_body = {'tokens': tokens}
         return Detokenization(_future=self._executor.submit(self.__request, cohere.DETOKENIZE_URL, json=json_body))
 
-    def detect_language(self, texts: List[str]) -> List[Language]:
+    def detect_language(self, texts: List[str]) -> DetectLanguageResponse:
         json_body = {
             "texts": texts,
         }
@@ -426,7 +433,7 @@ class Client:
     def rerank(self,
                query: str,
                documents: Union[List[str], List[Dict[str, Any]]],
-               top_n: int = None) -> Reranking:
+               top_n: Optional[int] = None) -> Reranking:
         """Returns an ordered list of documents ordered by their relevance to the provided query
 
         Args:
@@ -448,7 +455,7 @@ class Client:
             "query": query,
             "documents": parsed_docs,
             "top_n": top_n,
-            "return_documents": False
+            "return_documents": False,
         }
         reranking = Reranking(self.__request(cohere.RERANK_URL, json=json_body))
         for rank in reranking.results:
@@ -468,7 +475,7 @@ class Client:
             req.send(json_body)
         except Exception:
             raise CohereError(message=req.responseText, http_status=req.status, headers=req.getAllResponseHeaders())
-        res = json.loads(req.response)
+        res = jsonlib.loads(req.response)
         if 'message' in res.keys():
             raise CohereError(message=res['message'], http_status=req.status, headers=req.getAllResponseHeaders())
         return res
@@ -484,7 +491,7 @@ class Client:
 
         url = urljoin(self.api_url, endpoint)
         if use_xhr_client:
-            response = self.__pyfetch(url, headers, json.dumps(json))
+            response = self.__pyfetch(url, headers, jsonlib.dumps(json))
             self.__print_warning_msg(response)
             return response
         else:
@@ -493,7 +500,7 @@ class Client:
                     total=self.max_retries,
                     backoff_factor=0.5,
                     allowed_methods=['POST', 'GET'],
-                    status_forcelist=[429, 500, 502, 503, 504]
+                    status_forcelist=[429, 500, 502, 503, 504],
                 )
                 session.mount('https://', HTTPAdapter(max_retries=retries))
                 session.mount('http://', HTTPAdapter(max_retries=retries))
@@ -503,10 +510,16 @@ class Client:
                     res = response.json()
                 except Exception:
                     raise CohereError(
-                        message=response.text, http_status=response.status_code, headers=response.headers)
+                        message=response.text,
+                        http_status=response.status_code,
+                        headers=response.headers,
+                    )
                 if 'message' in res:  # has errors
                     raise CohereError(
-                        message=res['message'], http_status=response.status_code, headers=response.headers)
+                        message=res['message'],
+                        http_status=response.status_code,
+                        headers=response.headers,
+                    )
                 self.__print_warning_msg(response)
 
         return res
