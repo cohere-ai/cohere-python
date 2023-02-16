@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "cohere"
+version = "4.0.0"
+description = ""
+authors = ["Cohere"]
+readme = "README.md"
+
+[tool.black]
+line-length = 120
+target_version = ['py38']
+include = '\.py$'
+
+[tool.isort]
+profile = "black"
+skip_glob = '^((?!py$).)*$' # python files
+
+[tool.poetry.dependencies]
+python = "^3.7, <3.11"
+# Minimize conflicts by allowing older versions within the major version
+urllib3 = "^1.26"
+aiohttp = "^3.0"
+backoff = "^2.0"
+numpy = "^1.0"
+pandas = "^1.0" # only used in jupyter
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.2.0"
+pytest-asyncio = "^0.20.2"
+black = "^22.10.0"
+isort = "^5.10.1"
+pre-commit = "^2.20.0"
+autoflake = "^1.7.8"
+Sphinx = "^5.0"
+sphinx-rtd-theme = "^1.2.0"
+
+[build-system]
+requires = ["poetry>=1.0"]
+build-backend = "poetry.core.masonry.api"

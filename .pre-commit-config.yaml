@@ -1,0 +1,18 @@
+repos:
+- repo: https://github.com/floatingpurr/sync_with_poetry
+  rev: 0.4.0
+  hooks:
+    - id: sync_with_poetry
+- repo: https://github.com/pycqa/autoflake
+  rev: 'v1.7.8'
+  hooks:
+    - id: autoflake
+      args: ['--in-place', '--remove-all-unused-imports','--expand-star-imports','--ignore-init-module-imports']
+- repo: https://github.com/pycqa/isort
+  rev: 5.12.0
+  hooks:
+    - id: isort
+- repo: https://github.com/psf/black
+  rev: 22.12.0
+  hooks:
+    - id: black
