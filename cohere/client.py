@@ -521,3 +521,19 @@ class Client:
 
         response = self.__request(os.path.join(cohere.CLUSTER_JOBS_URL, job_id), method='GET')
         return GetClusterJobResponse(**response)
+
+    def get_cluster_jobs(self) -> List[GetClusterJobResponse]:
+        """List clustering jobs.
+
+        Returns:
+            List[GetClusterJobResponse]: Clustering jobs created.
+        """
+
+        response = self.__request(cohere.CLUSTER_JOBS_URL, method='GET')
+        return [
+            GetClusterJobResponse(
+                status=r['status'],
+                output_clusters_url=r['output_clusters_url'],
+                output_outliers_url=r['output_outliers_url'],
+            ) for r in response['jobs']
+        ]
