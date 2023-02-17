@@ -9,7 +9,7 @@ import cohere
 class TestClient(unittest.TestCase):
 
     def test_cluster_job(self):
-        co = cohere.Client(get_api_key(), client_name='test')
+        co = self.create_co()
         create_res = co.create_cluster_job(
             "gs://cohere-dev-central-2/cluster_tests/all_datasets/reddit_500.jsonl",
             min_cluster_size=3,
@@ -31,8 +31,11 @@ class TestClient(unittest.TestCase):
         # assert job.clusters
 
     def test_list_jobs(self):
-        co = cohere.Client(get_api_key(), client_name='test')
+        co = self.create_co()
         jobs = co.get_cluster_jobs()
         assert len(jobs) > 0
         for job in jobs:
             assert job.job_id
+
+    def create_co(self) -> cohere.Client:
+        return cohere.Client(get_api_key(), check_api_key=False, client_name='test')
