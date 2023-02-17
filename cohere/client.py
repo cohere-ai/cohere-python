@@ -1,6 +1,7 @@
 import json as jsonlib
 import os
 import sys
+import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List, Optional, TypedDict, Union
 from urllib.parse import urljoin
@@ -510,7 +511,7 @@ class Client:
         }
 
         response = self.__request(cohere.CLUSTER_JOBS_URL, json=json_body)
-        return CreateClusterJobResponse(**response)
+        return CreateClusterJobResponse(job_id=response['job_id'])
 
     def get_cluster_job(
         self,
@@ -520,4 +521,21 @@ class Client:
             raise ValueError('"job_id" is empty')
 
         response = self.__request(os.path.join(cohere.CLUSTER_JOBS_URL, job_id), method='GET')
-        return GetClusterJobResponse(**response)
+        return GetClusterJobResponse(
+            status=response['status'],
+            output_clusters_url=response['output_clusters_url'],
+            output_outliers_url=response['output_outliers_url'],
+        )
+
+    def poll_cluster_job(self, job_id: str, timeout: float = 0, interval: float = 10) -> GetClusterJobResponse:
+        start_time = time.time()
+        job = self.get_cluster_job(job_id)
+
+        while job.status == 'processing':
+            if timeout > 0 and time.time() - start_time > timeout:
+                raise TimeoutError(f'poll_cluster_job timed out after {timeout} seconds')
+
+            time.sleep(interval)
+            job = self.get_cluster_job(job_id)
+
+        return job

@@ -5,13 +5,15 @@ from utils import get_api_key
 
 import cohere
 
+INPUT_FILE = "gs://cohere-dev-central-2/cluster_tests/all_datasets/reddit_500.jsonl"
+
 
 class TestClient(unittest.TestCase):
 
     def test_cluster_job(self):
         co = cohere.Client(get_api_key(), client_name='test')
         create_res = co.create_cluster_job(
-            "gs://cohere-dev-central-2/cluster_tests/all_datasets/reddit_500.jsonl",
+            INPUT_FILE,
             min_cluster_size=3,
             threshold=0.5,
         )
@@ -26,3 +28,30 @@ class TestClient(unittest.TestCase):
 
         assert job.status == 'complete'
         assert job.output_clusters_url is not None
+        assert job.output_outliers_url is not None
+
+    def test_poll_succeeds(self):
+        co = cohere.Client(get_api_key(), client_name='test')
+        create_res = co.create_cluster_job(
+            INPUT_FILE,
+            min_cluster_size=3,
+            threshold=0.5,
+        )
+
+        job = co.poll_cluster_job(create_res.job_id, timeout=60, interval=5)
+        assert job.status == 'complete'
+        assert job.output_clusters_url is not None
+        assert job.output_outliers_url is not None
+
+    def test_poll_times_out(self):
+        co = cohere.Client(get_api_key(), client_name='test')
+        create_res = co.create_cluster_job(
+            INPUT_FILE,
+            min_cluster_size=3,
+            threshold=0.5,
+        )
+
+        def poll():
+            co.poll_cluster_job(create_res.job_id, timeout=5, interval=2)
+
+        self.assertRaises(TimeoutError, poll)
