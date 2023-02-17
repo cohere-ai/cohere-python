@@ -1,4 +1,5 @@
 import json as jsonlib
+import os
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List, Optional, TypedDict, Union
@@ -20,6 +21,31 @@ from cohere.responses.feedback import Feedback
 from cohere.responses.summarize import SummarizeResponse
 from cohere.responses.rerank import Reranking
 import cohere
+<<<<<<< HEAD
+=======
+from cohere.chat import Chat
+from cohere.classify import Classification, Classifications
+from cohere.classify import Example as ClassifyExample
+from cohere.classify import LabelPrediction
+from cohere.cluster import CreateClusterJobResponse, GetClusterJobResponse
+from cohere.detectlang import DetectLanguageResponse, Language
+from cohere.detokenize import Detokenization
+from cohere.embeddings import Embeddings
+from cohere.error import CohereError
+from cohere.feedback import Feedback
+from cohere.generation import Generations
+from cohere.rerank import Reranking
+from cohere.summarize import SummarizeResponse
+from cohere.tokenize import Tokens
+
+use_xhr_client = False
+try:
+    from js import XMLHttpRequest
+    use_xhr_client = True
+except ImportError:
+    pass
+
+>>>>>>> e98f214d13042c984225537f9279680abc14d448
 
 class CheckAPIKeyResponse(TypedDict):
     valid: bool
@@ -417,7 +443,7 @@ class Client:
         if 'X-API-Warning' in response.headers:
             print("\033[93mWarning: {}\n\033[0m".format(response.headers['X-API-Warning']), file=sys.stderr)
 
-    def __request(self, endpoint, json=None) -> Any:
+    def __request(self, endpoint, json=None, method='POST') -> Any:
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
             'Content-Type': 'application/json',
@@ -437,7 +463,7 @@ class Client:
             session.mount('https://', HTTPAdapter(max_retries=retries))
             session.mount('http://', HTTPAdapter(max_retries=retries))
 
-            response = session.request('POST', url, headers=headers, json=json, **self.request_dict)
+            response = session.request(method, url, headers=headers, json=json, **self.request_dict)
             try:
                 res = response.json()
             except Exception:
@@ -455,3 +481,28 @@ class Client:
             self.__print_warning_msg(response)
 
         return res
+
+    def create_cluster_job(
+        self,
+        embeddings_url: str,
+        threshold: Optional[float] = None,
+        min_cluster_size: Optional[int] = None,
+    ) -> CreateClusterJobResponse:
+        json_body = {
+            "embeddings_url": embeddings_url,
+            "threshold": threshold,
+            "min_cluster_size": min_cluster_size,
+        }
+
+        response = self.__request(cohere.CLUSTER_JOBS_URL, json=json_body)
+        return CreateClusterJobResponse(**response)
+
+    def get_cluster_job(
+        self,
+        job_id: str,
+    ) -> GetClusterJobResponse:
+        if not job_id.strip():
+            raise ValueError('"job_id" is empty')
+
+        response = self.__request(os.path.join(cohere.CLUSTER_JOBS_URL, job_id), method='GET')
+        return GetClusterJobResponse(**response)

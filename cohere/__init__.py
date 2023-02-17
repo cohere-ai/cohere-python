@@ -17,3 +17,5 @@ RERANK_URL = 'rerank'
 CHECK_API_KEY_URL = 'check-api-key'
 TOKENIZE_URL = 'tokenize'
 DETOKENIZE_URL = 'detokenize'
+
+CLUSTER_JOBS_URL = 'cluster-jobs'
