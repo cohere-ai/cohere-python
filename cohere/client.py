@@ -508,7 +508,7 @@ class Client:
 
         Args:
             embeddings_url (str): File with embeddings to cluster.
-            threshold (Optional[float], optional): TODO. Defaults to None.
+            threshold (Optional[float], optional): Similarity threshold above which two texts are deemed to belong in the same cluster. Defaults to None.
             min_cluster_size (Optional[int], optional): Minimum number of elements in a cluster. Defaults to None.
 
         Returns:
