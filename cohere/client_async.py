@@ -1,181 +1,314 @@
 import asyncio
+import json as jsonlib
 import os
-from typing import Dict, List, Tuple, Union
-from urllib.parse import urljoin
-
-import numpy as np
-
-from cohere.logging import logger
-from cohere.responses import (
-    BatchedGenerations,
-    BatchedTokens,
-    Embedding,
-    Embeddings,
-    Generations,
-    Tokens,
-)
-import asyncio
-import json
 import time
 from collections import defaultdict
-from typing import Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from urllib.parse import urljoin
 
 import aiohttp
 import backoff
+import numpy as np
 
+import cohere
+from cohere.client import CheckAPIKeyResponse, Client
 from cohere.error import CohereAPIError, CohereConnectionError, CohereError
-from cohere.logging import dummy_logger
+from cohere.logging import logger
+from cohere.responses import (
+    Chat,
+    Classification,
+    Classifications,
+    DetectLanguageResponse,
+    Detokenization,
+    Embeddings,
+    Feedback,
+    Generations,
+    LabelPrediction,
+    Language,
+    Reranking,
+    SummarizeResponse,
+    Tokens,
+)
+from cohere.responses.cluster import CreateClusterJobResponse,GetClusterJobResponse
+from cohere.responses.classify import Example as ClassifyExample
 from cohere.utils import np_json_dumps
 
 JSON = Union[Dict, List]
 
 
-def _ensure_list(items: Union[List, str]) -> Tuple[List[str], bool]:
-    """Returns  a list of strings, and a bool indicating if it was a single item"""
-    if isinstance(items, str):
-        return [items], True
-    else:
-        return list(items), False
+class AsyncClient(Client):
+    """AsyncClient
+    
+    This client provides an asyncio/aiohttp interface.
+    Using this client is recommended when you are making highly parallel request,
+    or when calling the Cohere API from a server such as FastAPI.
 
-
-class AsyncClient:
-    COHERE_VERSION = "2021-11-08"
-    EMBED_BATCH_SIZE = 16
-
-    CHECK_API_KEY_URL = "check-api-key"
-    TOKENIZE_URL = "tokenize"
-    DETOKENIZE_URL = "detokenize"
-    GENERATE_URL = "generate"
-    EMBED_URL = "embed"
+    The methods here are typically identical to those in the main `Client`, with an extra argument 
+    `return_exceptions` for the batch* methods, which is passed to asyncio.gather"""
 
     def __init__(
         self,
-        api_key: str = None,
-        max_concurrent_requests: int = 16,
-        max_retries: int = 5,
-        timeout: int = 120,
-        return_exceptions: bool = False,
-        api_url: str = None,
-        client_name: str = None,
+        api_key: str,
+        version: Optional[str] = None,
+        num_workers: int = 16,
+        request_dict: dict = {},
+        check_api_key: bool = False,
+        client_name: Optional[str] = None,
+        max_retries: int = 3,
+        timeout=120,
     ) -> None:
-        """
-        Args:
-            api_key (str): your API key. Automatically taken from the CO_API_KEY environment variable if ommitted.
-            max_concurrent_requests (int): maximum number of concurrent requests, shared between all calls to the client
-            max_retries (int): maximum number of times to retry failing requests
-            timeout (int): timeout for requests, including retries
-            return_exceptions (bool): all calls with return CohereError object on exceptions, rather than raise. This is particularly useful for batched generations.
-            api_url (str): override the api URL. Mainly for internal use.
-            client_name (str): A string to identify your application for internal analytics purposes.
-        """
-        self.api_url = api_url or "https://api.cohere.ai"
         self.api_key = api_key or os.getenv("CO_API_KEY")
-        self.request_source = "python-aio-sdk"
-        if client_name is not None:
+        self.api_url = cohere.COHERE_API_URL
+        self.batch_size = cohere.COHERE_EMBED_BATCH_SIZE
+        self.num_workers = num_workers
+        self.request_dict = request_dict
+        self.request_source = "python-sdk"
+        self.max_retries = max_retries
+        if client_name:
             self.request_source += ":" + client_name
-        self._backend = AIOHTTPBackend(logger, max_concurrent_requests, max_retries, timeout)
-        self.return_exceptions = return_exceptions
+        self.cohere_version = version or cohere.COHERE_VERSION
+        self._need_to_check_api_key = check_api_key  # TODO: check in __enter__
+        self._backend = AIOHTTPBackend(logger, num_workers, max_retries, timeout)
 
-    async def _api_request(self, path, json=None, headers=None):
+    async def __request(self, path, json=None, method="POST") -> JSON:
         headers = {
             "Authorization": f"BEARER {self.api_key}",
             "Request-Source": self.request_source,
-            "Cohere-Version": self.COHERE_VERSION,
+            "Cohere-Version": self.cohere_version,
         }
-        return await self._backend.request(urljoin(self.api_url, path), json, headers=headers)
-
-    async def _batch_requests(self, path, jsons):  # NB: just raises first exception that occurs
-        return await asyncio.gather(
-            *(self._api_request(path, json) for json in jsons), return_exceptions=self.return_exceptions
-        )
+        return await self._backend.request(urljoin(self.api_url, path), json, method,headers)
 
     async def close(self):
         return await self._backend.close()
 
     # API methods
-    async def check_api_key(self) -> bool:
-        return (await self._api_request(self.CHECK_API_KEY_URL))["valid"]
+    async def check_api_key(self) -> CheckAPIKeyResponse:
+        return await self.__request(self.CHECK_API_KEY_URL)
 
-    async def embed(
-        self, texts: Union[str, List[str]], model: str = None, truncate: str = "NONE"
-    ) -> Union[Embedding, Embeddings]:
-        texts, single_item = _ensure_list(texts)
-        requests = [
-            dict(texts=texts[i : i + self.EMBED_BATCH_SIZE], model=model, truncate=truncate)
-            for i in range(0, len(texts), self.EMBED_BATCH_SIZE)
-        ]
-        responses = await self._batch_requests(self.EMBED_URL, requests)
-        embeddings = Embeddings([e for res in responses for e in res["embeddings"]])  # concatenate results
-        return embeddings[0] if single_item else embeddings
-
-    async def tokenize(self, texts: Union[str, List[str]]) -> Union[Tokens, BatchedTokens]:
-        texts, single_item = _ensure_list(texts)
-        requests = [dict(text=text) for text in texts]
-        responses = await self._batch_requests(self.TOKENIZE_URL, requests)
-        tokens = [Tokens(tokens=r["tokens"], token_strings=r["token_strings"]) for r in responses]
-        return tokens[0] if single_item else BatchedTokens(tokens)
-
-    async def detokenize(self, items: Union[List[int], List[List[int]]]) -> Union[str, List[str]]:
-        if not items or not isinstance(items[0], (list, np.ndarray)):
-            items = [items]
-            single_item = True
-        else:
-            single_item = False
-        requests = [dict(tokens=tokens) for tokens in items]
-        responses = await self._batch_requests(self.DETOKENIZE_URL, requests)
-        detokenizations = [r["text"] for r in responses]
-        return detokenizations[0] if single_item else detokenizations
+    async def batch_generate(self, prompts: List[str], return_exceptions=False, **kwargs) -> List[Generations]:
+        """return_exceptions is passed to asyncio.gather"""
+        return await asyncio.gather(
+            *[self.generate(prompt, **kwargs) for prompt in prompts], return_exceptions=return_exceptions
+        )
 
     async def generate(
         self,
-        prompt: Union[str, List[str]] = None,
-        model: str = None,
-        preset: str = None,
-        max_tokens: int = 10,  # api default is undocumented, but higher
-        num_generations: int = 1,
-        return_likelihoods: Union[str, bool] = None,
-        prompt_vars: Dict[str, str] = None,
-        **kwargs,
-    ) -> Union[Generations, BatchedGenerations]:
-        """Generate endpoint.
-        See https://docs.cohere.ai/reference/generate for advanced arguments
+        prompt: Optional[str] = None,
+        prompt_vars: object = {},
+        model: Optional[str] = None,
+        preset: Optional[str] = None,
+        num_generations: Optional[int] = None,
+        max_tokens: Optional[int] = None,
+        temperature: Optional[float] = None,
+        k: Optional[int] = None,
+        p: Optional[float] = None,
+        frequency_penalty: Optional[float] = None,
+        presence_penalty: Optional[float] = None,
+        end_sequences: Optional[List[str]] = None,
+        stop_sequences: Optional[List[str]] = None,
+        return_likelihoods: Optional[str] = None,
+        truncate: Optional[str] = None,
+        logit_bias: Dict[int, float] = {},
+    ) -> Generations:
+        json_body = {
+            "model": model,
+            "prompt": prompt,
+            "prompt_vars": prompt_vars,
+            "preset": preset,
+            "num_generations": num_generations,
+            "max_tokens": max_tokens,
+            "temperature": temperature,
+            "k": k,
+            "p": p,
+            "frequency_penalty": frequency_penalty,
+            "presence_penalty": presence_penalty,
+            "end_sequences": end_sequences,
+            "stop_sequences": stop_sequences,
+            "return_likelihoods": return_likelihoods,
+            "truncate": truncate,
+            "logit_bias": logit_bias,
+        }
+        response = await self.__request(cohere.GENERATE_URL, json_body)
+        return Generations(return_likelihoods=return_likelihoods, response=response)
+
+    async def chat(
+        self,
+        query: str,
+        session_id: str = "",
+        persona: str = "cohere",
+        model: Optional[str] = None,
+        return_chatlog: bool = False,
+        chatlog_override: Optional[List[Dict[str, str]]] = None,
+    ) -> Chat:
+
+        if chatlog_override is not None:
+            self._validate_chatlog_override(chatlog_override)
+
+        json_body = {
+            "query": query,
+            "session_id": session_id,
+            "persona": persona,
+            "model": model,
+            "return_chatlog": return_chatlog,
+            "chatlog_override": chatlog_override,
+        }
+        response = await self.__request(cohere.CHAT_URL, json=json_body)
+        return Chat(query=query, persona=persona, response=response, return_chatlog=return_chatlog)
+
+    async def embed(self, texts: List[str], model: Optional[str] = None, truncate: Optional[str] = None) -> Embeddings:
+        json_bodys = [
+            dict(texts=texts[i : i + cohere.COHERE_EMBED_BATCH_SIZE], model=model, truncate=truncate)
+            for i in range(0, len(texts), cohere.COHERE_EMBED_BATCH_SIZE)
+        ]
+        responses = await asyncio.gather(*[self.__request(cohere.EMBED_URL, json) for json in json_bodys])
+        embeddings = Embeddings([e for res in responses for e in res["embeddings"]])  # concatenate results
+        return embeddings
+
+    async def classify(
+        self,
+        inputs: List[str] = [],
+        model: Optional[str] = None,
+        preset: Optional[str] = None,
+        examples: List[ClassifyExample] = [],
+        truncate: Optional[str] = None,
+    ) -> Classifications:
+        examples_dicts = [{"text": example.text, "label": example.label} for example in examples]
+
+        json_body = {
+            "model": model,
+            "preset": preset,
+            "inputs": inputs,
+            "examples": examples_dicts,
+            "truncate": truncate,
+        }
+        response = await self.__request(cohere.CLASSIFY_URL, json=json_body)
+        classifications = []
+        for res in response["classifications"]:
+            labelObj = {}
+            for label, prediction in res["labels"].items():
+                labelObj[label] = LabelPrediction(prediction["confidence"])
+            classifications.append(
+                Classification(res["input"], res["prediction"], res["confidence"], labelObj, id=res["id"])
+            )
+
+        return Classifications(classifications)
+
+    async def summarize(
+        self,
+        text: str,
+        model: Optional[str] = None,
+        length: Optional[str] = None,
+        format: Optional[str] = None,
+        temperature: Optional[float] = None,
+        additional_command: Optional[str] = None,
+        extractiveness: Optional[str] = None,
+    ) -> SummarizeResponse:
+        json_body = {
+            "model": model,
+            "text": text,
+            "length": length,
+            "format": format,
+            "temperature": temperature,
+            "additional_command": additional_command,
+            "extractiveness": extractiveness,
+        }
+        # remove None values from the dict
+        json_body = {k: v for k, v in json_body.items() if v is not None}
+        response = await self.__request(cohere.SUMMARIZE_URL, json=json_body)
+        return SummarizeResponse(id=response["id"], summary=response["summary"])
+
+    async def batch_tokenize(self, texts: List[str], return_exceptions=False) -> List[Tokens]:
+        return await asyncio.gather(*[self.tokenize(t) for t in texts], return_exceptions=return_exceptions)
+
+    async def tokenize(self, text: str) -> Tokens:
+        json_body = {"text": text}
+        res = await self.__request(cohere.TOKENIZE_URL, json_body)
+        return Tokens(tokens=res["tokens"], token_strings=res["token_strings"])
+
+    async def batch_detokenize(self, list_of_tokens: List[List[int]], return_exceptions=False) -> List[Detokenization]:
+        return await asyncio.gather(*[self.detokenize(t) for t in list_of_tokens], return_exceptions=return_exceptions)
+
+    async def detokenize(self, tokens: List[int]) -> Detokenization:
+        json_body = {"tokens": tokens}
+        res = await self.__request(cohere.DETOKENIZE_URL, json_body)
+        return Detokenization(text=res["text"])
+
+    async def detect_language(self, texts: List[str]) -> DetectLanguageResponse:
+        json_body = {
+            "texts": texts,
+        }
+        response = await self.__request(cohere.DETECT_LANG_URL, json=json_body)
+        results = []
+        for result in response["results"]:
+            results.append(Language(result["language_code"], result["language_name"]))
+        return DetectLanguageResponse(results)
+
+    async def feedback(self, id: str, good_response: bool, desired_response: str = "", feedback: str = "") -> Feedback:
+        json_body = {
+            "id": id,
+            "good_response": good_response,
+            "desired_response": desired_response,
+            "feedback": feedback,
+        }
+        await self.__request(cohere.FEEDBACK_URL, json_body)
+        return Feedback(id=id, good_response=good_response, desired_response=desired_response, feedback=feedback)
+
+    async def rerank(
+        self, query: str, documents: Union[List[str], List[Dict[str, Any]]], top_n: Optional[int] = None
+    ) -> Reranking:
+        """Returns an ordered list of documents ordered by their relevance to the provided query
+
         Args:
-            * prompt (str): either a single prompt, or a list of them
-            * return_likelihoods (str): One of GENERATION|ALL|NONE to specify how and if the token likelihoods are returned with the response.
-                  Defaults to "NONE" for num_generations=1, or "GENERATION" otherwise, to ensure generations can be sorted by likelihood.
-                  True/False are aliases for "GENERATION" and "NONE", respectively.
-        Returns:
-            * a Generations object, which functions as a list Generation objects
-            * if multiple prompts are given, a list of the above
+            query (str): The search query
+            documents (list[str], list[dict]): The documents to rerank
+            top_n (int): (optional) The number of results to return, defaults to returning all results
+        """
+        parsed_docs = []
+        for doc in documents:
+            if isinstance(doc, str):
+                parsed_docs.append({"text": doc})
+            elif isinstance(doc, dict) and "text" in doc:
+                parsed_docs.append(doc)
+            else:
+                raise CohereError(
+                    message='invalid format for documents, must be a list of strings or dicts with a "text" key'
+                )
 
-        """  # TODO: doc/bool truncate?
-        if return_likelihoods is None:
-            return_likelihoods = "GENERATION" if num_generations > 1 else "NONE"
-        elif isinstance(return_likelihoods, bool):
-            return_likelihoods = "GENERATION" if return_likelihoods else "NONE"
+        json_body = {
+            "query": query,
+            "documents": parsed_docs,
+            "top_n": top_n,
+            "return_documents": False,
+        }
+        reranking = Reranking(await self.__request(cohere.RERANK_URL, json=json_body))
+        for rank in reranking.results:
+            rank.document = parsed_docs[rank.index]
+        return reranking
 
-        prompts, single_item = _ensure_list(prompt)
-        options = dict(
-            model=model,
-            preset=preset,
-            max_tokens=max_tokens,
-            num_generations=num_generations,
-            return_likelihoods=return_likelihoods,
-            prompt_vars=prompt_vars,
-            **kwargs,
-        )
-        requests = [{"prompt": prompt, **options} for prompt in prompts]
-        responses = await self._batch_requests(self.GENERATE_URL, requests)
-        #TODO: no batching?
-        results = [
-            response if isinstance(response,Exception) else        Generations(return_likelihoods=return_likelihoods, response=response)
-        
-         for response in responses]
-        return results[0] if single_item else BatchedGenerations(results)
+    async def create_cluster_job(
+        self,
+        embeddings_url: str,
+        threshold: Optional[float] = None,
+        min_cluster_size: Optional[int] = None,
+    ) -> CreateClusterJobResponse:
+        json_body = {
+            "embeddings_url": embeddings_url,
+            "threshold": threshold,
+            "min_cluster_size": min_cluster_size,
+        }
 
-    async def command(self, prompt, model="command-xlarge-20221108", max_tokens=250, *args, **kwargs):
-        return await self.generate(prompt, model=model, max_tokens=max_tokens, *args, **kwargs)
+        response = await self.__request(cohere.CLUSTER_JOBS_URL, json=json_body)
+        return CreateClusterJobResponse(**response)
 
+    async def get_cluster_job(
+        self,
+        job_id: str,
+    ) -> GetClusterJobResponse:
+        if not job_id.strip():
+            raise ValueError('"job_id" is empty')
+
+        response = await self.__request(os.path.join(cohere.CLUSTER_JOBS_URL, job_id), method='GET')
+        return GetClusterJobResponse(**response)
 
 
 
@@ -186,8 +319,8 @@ class AIOHTTPBackend:
     RETRY_STATUS_CODES = [429, 500, 502, 503, 504]
     SLEEP_AFTER_FAILURE = defaultdict(lambda: 0.25, {429: 1})
 
-    def __init__(self, logger=None, max_concurrent_requests: int = 64, max_retries: int = 5, timeout: int = 120):
-        self.logger = logger or dummy_logger
+    def __init__(self, logger, max_concurrent_requests: int = 64, max_retries: int = 5, timeout: int = 120):
+        self.logger = logger
         self.timeout = timeout
         self.max_retries = max_retries
         self.max_concurrent_requests = max_concurrent_requests
@@ -214,17 +347,17 @@ class AIOHTTPBackend:
 
         return make_request_fn
 
-    async def request(self, url, json_payload=None, method: str = "post", headers=None, session=None, **kwargs) -> JSON:
+    async def request(self, url, json=None, method: str = "post", headers=None, session=None, **kwargs) -> JSON:
         headers = {
             "Content-Type": "application/json",
             **(headers or {}),
         }
         session = session or await self.session()
-        self.logger.debug(f"Making request to {url} with content {json_payload}")
+        self.logger.debug(f"Making request to {url} with content {json}")
 
         request_start = time.time()
         try:
-            response = await self._requester(session, method, url, headers=headers, json=json_payload, **kwargs)
+            response = await self._requester(session, method, url, headers=headers, json=json, **kwargs)
         except aiohttp.ClientConnectionError as e:  # ensure the SDK user does not have to deal with knowing aiohttp
             self.logger.debug(f"Fatal connection error after {time.time()-request_start:.1f}s: {e}")
             raise CohereConnectionError(str(e)) from e
@@ -243,7 +376,7 @@ class AIOHTTPBackend:
 
         try:
             json_response = await response.json()
-        except json.decoder.JSONDecodeError:  # CohereError will capture status
+        except jsonlib.decoder.JSONDecodeError:  # CohereError will capture status
             raise CohereAPIError.from_response(response, message=f"Failed to decode json body: {await response.text()}")
         self.logger.debug(
             f"Received response with status {response.status} after {time.time()-request_start:.1f}s : {json_response}"

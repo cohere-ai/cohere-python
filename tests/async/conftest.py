@@ -17,21 +17,13 @@ def event_loop():  # TODO: intermittent event loop closed thing
 
 
 @pytest_asyncio.fixture
-async def client() -> AsyncClient:
+async def async_client() -> AsyncClient:
     api_key = os.getenv("CO_API_KEY")
     assert api_key, "CO_API_KEY environment variable not set"
     client = AsyncClient(api_key, client_name="unittest")
     yield client
     await client.close()
 
-
-@pytest_asyncio.fixture
-async def client_retex() -> AsyncClient:
-    api_key = os.getenv("CO_API_KEY")
-    assert api_key, "CO_API_KEY environment variable not set"
-    client = AsyncClient(api_key, return_exceptions=True, client_name="unittest")
-    yield client
-    await client.close()
 
 
 def random_word(length=10):

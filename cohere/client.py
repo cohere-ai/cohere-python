@@ -20,32 +20,8 @@ from cohere.error import CohereError,CohereAPIError,CohereConnectionError
 from cohere.responses.feedback import Feedback
 from cohere.responses.summarize import SummarizeResponse
 from cohere.responses.rerank import Reranking
+from cohere.responses.cluster import CreateClusterJobResponse,GetClusterJobResponse
 import cohere
-<<<<<<< HEAD
-=======
-from cohere.chat import Chat
-from cohere.classify import Classification, Classifications
-from cohere.classify import Example as ClassifyExample
-from cohere.classify import LabelPrediction
-from cohere.cluster import CreateClusterJobResponse, GetClusterJobResponse
-from cohere.detectlang import DetectLanguageResponse, Language
-from cohere.detokenize import Detokenization
-from cohere.embeddings import Embeddings
-from cohere.error import CohereError
-from cohere.feedback import Feedback
-from cohere.generation import Generations
-from cohere.rerank import Reranking
-from cohere.summarize import SummarizeResponse
-from cohere.tokenize import Tokens
-
-use_xhr_client = False
-try:
-    from js import XMLHttpRequest
-    use_xhr_client = True
-except ImportError:
-    pass
-
->>>>>>> e98f214d13042c984225537f9279680abc14d448
 
 class CheckAPIKeyResponse(TypedDict):
     valid: bool
@@ -60,7 +36,8 @@ class Client:
                  request_dict: dict = {},
                  check_api_key: bool = True,
                  client_name: Optional[str] = None,
-                 max_retries: int = 3) -> None:
+                 max_retries: int = 3,
+                 timeout:int =120) -> None:
         """
         Initialize the client.
         Args:
@@ -70,8 +47,10 @@ class Client:
            * request_dict (dict): Additional parameters for calls to requests.post
            * check_api_key (bool): Whether to check the api key for validity on initialization.
            * client_name (str): A string to identify your application for internal analytics purposes.
+           * max_retries (int): maximal number of retries for requests.
+           * timeout (int): request timeout in seconds.
         """
-        self.api_key = api_key
+        self.api_key = api_key or os.getenv("CO_API_KEY")
         self.api_url = cohere.COHERE_API_URL
         self.batch_size = cohere.COHERE_EMBED_BATCH_SIZE
         self._executor = ThreadPoolExecutor(num_workers)
@@ -79,6 +58,7 @@ class Client:
         self.request_dict = request_dict
         self.request_source = 'python-sdk'
         self.max_retries = max_retries
+        self.timeout = timeout
         if client_name:
             self.request_source += ":" + client_name
 
@@ -93,6 +73,7 @@ class Client:
                 raise CohereError('invalid api key')
 
     def check_api_key(self) -> CheckAPIKeyResponse:
+        """Checks the api key. Happens automatically in Client initialization, but not in AsyncClient"""
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
             'Content-Type': 'application/json',
@@ -113,6 +94,7 @@ class Client:
         return res
 
     def batch_generate(self, prompts: List[str], **kwargs) -> List[Generations]:
+        """a batched version of generate"""
         generations: List[Generations] = []
         for prompt in prompts:
             kwargs["prompt"] = prompt
@@ -136,6 +118,14 @@ class Client:
                  return_likelihoods: Optional[str] = None,
                  truncate: Optional[str] = None,
                  logit_bias: Dict[int, float] = {}) -> Generations:
+        """Generate endpoint.
+        See https://docs.cohere.ai/reference/generate for advanced arguments
+        Args:
+            * prompt (str): either a single prompt, or a list of them
+            * return_likelihoods (str): One of GENERATION|ALL|NONE to specify how and if the token likelihoods are returned with the response.
+        Returns:
+            * a Generations object
+        """
         json_body = {
             'model': model,
             'prompt': prompt,
@@ -235,6 +225,7 @@ class Client:
                     message='chatlog_override must be a list of dicts, each mapping the agent to the message.')
 
     def embed(self, texts: List[str], model: Optional[str] = None, truncate: Optional[str] = None) -> Embeddings:
+        """https://docs.cohere.ai/reference/embed"""
         responses = []
         json_bodys = []
 
@@ -257,6 +248,7 @@ class Client:
                  preset: Optional[str] = None,
                  examples: List[ClassifyExample] = [],
                  truncate: Optional[str] = None) -> Classifications:
+        """https://docs.cohere.ai/reference/classify"""
         examples_dicts: list[dict[str, str]] = []
         for example in examples:
             example_dict = {'text': example.text, 'label': example.label}
@@ -344,22 +336,27 @@ class Client:
         return SummarizeResponse(id=response["id"], summary=response["summary"])
 
     def batch_tokenize(self, texts: List[str]) -> List[Tokens]:
+        """A batched version of tokenize"""
         return [self.tokenize(t) for t in texts]
 
     def tokenize(self, text: str) -> Tokens:
+        """https://docs.cohere.ai/reference/tokenize"""
         json_body = {'text': text}
         res = self.__request(cohere.TOKENIZE_URL, json=json_body)
         return Tokens(tokens=res['tokens'], token_strings=res['token_strings'])
 
     def batch_detokenize(self, list_of_tokens: List[List[int]]) -> List[Detokenization]:
+        """A batched version of detokenize"""
         return [self.detokenize(t) for t in list_of_tokens]
 
     def detokenize(self, tokens: List[int]) -> Detokenization:
+        """https://docs.cohere.ai/reference/detokenize-1"""
         json_body = {'tokens': tokens}
         res = self.__request(cohere.DETOKENIZE_URL, json=json_body)
         return Detokenization(text=res['text'])
 
     def detect_language(self, texts: List[str]) -> DetectLanguageResponse:
+        """https://docs.cohere.ai/reference/detect-language-1"""
         json_body = {
             "texts": texts,
         }
@@ -488,6 +485,7 @@ class Client:
         threshold: Optional[float] = None,
         min_cluster_size: Optional[int] = None,
     ) -> CreateClusterJobResponse:
+        """TODO: doc"""
         json_body = {
             "embeddings_url": embeddings_url,
             "threshold": threshold,
@@ -501,6 +499,7 @@ class Client:
         self,
         job_id: str,
     ) -> GetClusterJobResponse:
+        """TODO: doc"""
         if not job_id.strip():
             raise ValueError('"job_id" is empty')
 

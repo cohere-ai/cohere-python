@@ -1,6 +1,6 @@
 from typing import Optional
 
-from cohere.response import CohereObject
+from cohere.responses.base import CohereObject
 
 
 class CreateClusterJobResponse(CohereObject):

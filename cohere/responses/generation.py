@@ -135,22 +135,3 @@ class Generations(CohereObject):
         """Returns the prompt used as input"""
         return self[0].prompt  # should all be the same
 
-class BatchedGenerations(UserList, CohereObject):
-    """Acts a list of Generations object"""
-
-    # nice jupyter output
-    def visualize(self, **kwargs) -> str:
-        import pandas as pd
-
-        records = [
-            {"prompt #": i, "generation #": gi, **gen._visualize_helper()}
-            for i, items in enumerate(self)
-            for gi, gen in enumerate(items if isinstance(items, Generations) else [items])  # items=Exception possible
-        ]
-        with pd.option_context("display.max_colwidth", 250):
-            df = pd.DataFrame(records)
-            if df["generation #"].nunique() == 1:
-                df = df.drop("generation #", axis=1).set_index(["prompt #"], drop=True)
-            else:
-                df = df.set_index(["prompt #", "generation #"], drop=True)
-            return _df_html(df, **kwargs)

@@ -32,19 +32,6 @@ class Tokens(CohereObject):
         return len(self.tokens)
 
 
-class BatchedTokens(UserList, CohereObject):
-    """Acts a list of Tokens object"""
-
-    # nice jupyter output
-    def visualize(self, **kwargs) -> str:
-        import pandas as pd
-
-        df = pd.DataFrame.from_dict(
-            {f"[{i}].{f}": getattr(t, f) for i, t in enumerate(self) for f in ["token_strings", "tokens"]},
-            orient="index",
-        )
-        return _df_html(df.fillna(""), style={"font-size": "90%"})
-
 
 class Detokenization(CohereObject):
 
