@@ -556,14 +556,14 @@ class Client:
     def poll_cluster_job(
         self,
         job_id: str,
-        timeout: float = 0,
+        timeout: Optional[float] = None,
         interval: float = 10,
     ) -> GetClusterJobResponse:
         """Poll clustering job results.
 
         Args:
             job_id (str): Clustering job id.
-            timeout (float, optional): Poll timeout in seconds. Defaults to 0.
+            timeout (Optional[float], optional): Poll timeout in seconds, if None - there is no limit to the wait time. Defaults to None.
             interval (float, optional): Poll interval in seconds. Defaults to 10.
 
         Raises:
@@ -577,7 +577,7 @@ class Client:
         job = self.get_cluster_job(job_id)
 
         while job.status == 'processing':
-            if timeout > 0 and time.time() - start_time > timeout:
+            if timeout is not None and time.time() - start_time > timeout:
                 raise TimeoutError(f'poll_cluster_job timed out after {timeout} seconds')
 
             time.sleep(interval)

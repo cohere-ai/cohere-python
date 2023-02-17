@@ -22,7 +22,12 @@ class GetClusterJobResponse(CohereObject):
 
 class PollFn(Protocol):
 
-    def __call__(self, job_id: str, timeout: float = 0, interval: float = 10) -> GetClusterJobResponse:
+    def __call__(
+        self,
+        job_id: str,
+        timeout: Optional[float] = None,
+        interval: float = 10,
+    ) -> GetClusterJobResponse:
         ...
 
 
@@ -35,13 +40,13 @@ class CreateClusterJobResponse(CohereObject):
 
     def poll(
         self,
-        timeout: float = 0,
+        timeout: Optional[float] = None,
         interval: float = 10,
     ) -> GetClusterJobResponse:
         """Poll clustering job results.
 
         Args:
-            timeout (float, optional): Poll timeout in seconds. Defaults to 0.
+            timeout (Optional[float], optional): Poll timeout in seconds, if None - there is no limit to the wait time. Defaults to None.
             interval (float, optional): Poll interval in seconds. Defaults to 10.
 
         Raises:
