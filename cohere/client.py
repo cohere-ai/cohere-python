@@ -553,7 +553,12 @@ class Client:
             output_outliers_url=response['output_outliers_url'],
         )
 
-    def poll_cluster_job(self, job_id: str, timeout: float = 0, interval: float = 10) -> GetClusterJobResponse:
+    def poll_cluster_job(
+        self,
+        job_id: str,
+        timeout: float = 0,
+        interval: float = 10,
+    ) -> GetClusterJobResponse:
         """Poll clustering job results.
 
         Args:

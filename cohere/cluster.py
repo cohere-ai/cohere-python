@@ -33,7 +33,11 @@ class CreateClusterJobResponse(CohereObject):
         self.job_id = job_id
         self._poll_fn = poll_fn
 
-    def poll(self, timeout: float = 0, interval: float = 10) -> GetClusterJobResponse:
+    def poll(
+        self,
+        timeout: float = 0,
+        interval: float = 10,
+    ) -> GetClusterJobResponse:
         """Poll clustering job results.
 
         Args:
