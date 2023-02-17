@@ -534,7 +534,7 @@ class Client:
         """Get clustering job results.
 
         Args:
-            job_id (str): Clustering job id. 
+            job_id (str): Clustering job id.
 
         Raises:
             ValueError: "job_id" is empty
@@ -557,7 +557,7 @@ class Client:
         """Poll clustering job results.
 
         Args:
-            job_id (str): Clustering job id. 
+            job_id (str): Clustering job id.
             timeout (float, optional): Poll timeout in seconds. Defaults to 0.
             interval (float, optional): Poll interval in seconds. Defaults to 10.
 
