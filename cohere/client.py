@@ -510,7 +510,7 @@ class Client:
         }
 
         response = self.__request(cohere.CLUSTER_JOBS_URL, json=json_body)
-        return CreateClusterJobResponse(**response)
+        return CreateClusterJobResponse(job_id=response['job_id'])
 
     def get_cluster_job(
         self,
@@ -520,7 +520,13 @@ class Client:
             raise ValueError('"job_id" is empty')
 
         response = self.__request(os.path.join(cohere.CLUSTER_JOBS_URL, job_id), method='GET')
-        return GetClusterJobResponse(**response)
+        return GetClusterJobResponse(
+            job_id=response['job_id'],
+            status=response['status'],
+            output_clusters_url=response['output_clusters_url'],
+            output_outliers_url=response['output_outliers_url'],
+            clusters=response['clusters'],
+        )
 
     def get_cluster_jobs(self) -> List[GetClusterJobResponse]:
         """List clustering jobs.
@@ -532,8 +538,10 @@ class Client:
         response = self.__request(cohere.CLUSTER_JOBS_URL, method='GET')
         return [
             GetClusterJobResponse(
+                job_id=r['job_id'],
                 status=r['status'],
                 output_clusters_url=r['output_clusters_url'],
                 output_outliers_url=r['output_outliers_url'],
+                clusters=r['clusters'],
             ) for r in response['jobs']
         ]
