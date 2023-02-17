@@ -26,3 +26,8 @@ class TestClient(unittest.TestCase):
 
         assert job.status == 'complete'
         assert job.output_clusters_url is not None
+
+    def test_list_jobs(self):
+        co = cohere.Client(get_api_key(), client_name='test')
+        jobs = co.get_cluster_jobs()
+        assert len(jobs) > 0
