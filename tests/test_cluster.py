@@ -55,3 +55,29 @@ class TestClient(unittest.TestCase):
             co.poll_cluster_job(create_res.job_id, timeout=5, interval=2)
 
         self.assertRaises(TimeoutError, poll)
+
+    def test_handler_poll_succeeds(self):
+        co = cohere.Client(get_api_key(), client_name='test')
+        create_res = co.create_cluster_job(
+            INPUT_FILE,
+            min_cluster_size=3,
+            threshold=0.5,
+        )
+
+        job = create_res.poll(timeout=60, interval=5)
+        assert job.status == 'complete'
+        assert job.output_clusters_url is not None
+        assert job.output_outliers_url is not None
+
+    def test_handler_poll_times_out(self):
+        co = cohere.Client(get_api_key(), client_name='test')
+        create_res = co.create_cluster_job(
+            INPUT_FILE,
+            min_cluster_size=3,
+            threshold=0.5,
+        )
+
+        def poll():
+            create_res.poll(timeout=5, interval=2)
+
+        self.assertRaises(TimeoutError, poll)
