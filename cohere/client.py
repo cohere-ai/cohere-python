@@ -15,7 +15,7 @@ from cohere.chat import Chat
 from cohere.classify import Classification, Classifications
 from cohere.classify import Example as ClassifyExample
 from cohere.classify import LabelPrediction
-from cohere.cluster import CreateClusterJobResponse, GetClusterJobResponse
+from cohere.cluster import (CreateClusterJobResponse, GetClusterJobResponse, build_cluster_job_response)
 from cohere.detectlang import DetectLanguageResponse, Language
 from cohere.detokenize import Detokenization
 from cohere.embeddings import Embeddings
@@ -520,13 +520,7 @@ class Client:
             raise ValueError('"job_id" is empty')
 
         response = self.__request(os.path.join(cohere.CLUSTER_JOBS_URL, job_id), method='GET')
-        return GetClusterJobResponse(
-            job_id=response['job_id'],
-            status=response['status'],
-            output_clusters_url=response['output_clusters_url'],
-            output_outliers_url=response['output_outliers_url'],
-            clusters=response['clusters'],
-        )
+        return build_cluster_job_response(response)
 
     def get_cluster_jobs(self) -> List[GetClusterJobResponse]:
         """List clustering jobs.
@@ -536,12 +530,4 @@ class Client:
         """
 
         response = self.__request(cohere.CLUSTER_JOBS_URL, method='GET')
-        return [
-            GetClusterJobResponse(
-                job_id=r['job_id'],
-                status=r['status'],
-                output_clusters_url=r['output_clusters_url'],
-                output_outliers_url=r['output_outliers_url'],
-                clusters=r['clusters'],
-            ) for r in response['jobs']
-        ]
+        return [build_cluster_job_response(r) for r in response['jobs']]
