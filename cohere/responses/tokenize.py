@@ -31,6 +31,11 @@ class Tokens(CohereObject):
     def __len__(self) -> int:
         return len(self.tokens)
 
+    def visualize(self, **kwargs):
+        import pandas as pd
+
+        df = pd.DataFrame.from_dict({"token_strings": self.token_strings, "tokens": self.tokens}, orient="index")
+        return _df_html(df.fillna(""), style={"font-size": "90%"})
 
 
 class Detokenization(CohereObject):

@@ -49,7 +49,7 @@ class AsyncClient(Client):
 
     def __init__(
         self,
-        api_key: str,
+        api_key: str = None,
         version: Optional[str] = None,
         num_workers: int = 16,
         request_dict: dict = {},
@@ -84,7 +84,7 @@ class AsyncClient(Client):
 
     # API methods
     async def check_api_key(self) -> CheckAPIKeyResponse:
-        return await self.__request(self.CHECK_API_KEY_URL)
+        return await self.__request(cohere.CHECK_API_KEY_URL)
 
     async def batch_generate(self, prompts: List[str], return_exceptions=False, **kwargs) -> List[Generations]:
         """return_exceptions is passed to asyncio.gather"""

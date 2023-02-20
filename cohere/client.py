@@ -28,9 +28,20 @@ class CheckAPIKeyResponse(TypedDict):
 
 
 class Client:
+    """Cohere Client
 
+    Args:
+        api_key (str): Your API key.
+        version (str): API version to use. Will use cohere.COHERE_VERSION by default.
+        num_workers (int): Maximal number of threads for parallelized calls.
+        request_dict (dict): Additional parameters for calls to requests.post
+        check_api_key (bool): Whether to check the api key for validity on initialization.
+        client_name (str): A string to identify your application for internal analytics purposes.
+        max_retries (int): maximal number of retries for requests.
+        timeout (int): request timeout in seconds.
+    """
     def __init__(self,
-                 api_key: str,
+                 api_key: str = None,
                  version: Optional[str] = None,
                  num_workers: int = 64,
                  request_dict: dict = {},
@@ -38,18 +49,6 @@ class Client:
                  client_name: Optional[str] = None,
                  max_retries: int = 3,
                  timeout:int =120) -> None:
-        """
-        Initialize the client.
-        Args:
-           * api_key (str): Your API key.
-           * version (str): API version to use. Will use cohere.COHERE_VERSION by default.
-           * num_workers (int): Maximal number of threads for parallelized calls.
-           * request_dict (dict): Additional parameters for calls to requests.post
-           * check_api_key (bool): Whether to check the api key for validity on initialization.
-           * client_name (str): A string to identify your application for internal analytics purposes.
-           * max_retries (int): maximal number of retries for requests.
-           * timeout (int): request timeout in seconds.
-        """
         self.api_key = api_key or os.getenv("CO_API_KEY")
         self.api_url = cohere.COHERE_API_URL
         self.batch_size = cohere.COHERE_EMBED_BATCH_SIZE
@@ -73,7 +72,9 @@ class Client:
                 raise CohereError('invalid api key')
 
     def check_api_key(self) -> CheckAPIKeyResponse:
-        """Checks the api key. Happens automatically in Client initialization, but not in AsyncClient"""
+        """Checks the api key.
+        Happens automatically in Client initialization, but not in AsyncClient
+        """
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
             'Content-Type': 'application/json',
@@ -94,7 +95,7 @@ class Client:
         return res
 
     def batch_generate(self, prompts: List[str], **kwargs) -> List[Generations]:
-        """a batched version of generate"""
+        """A batched version of generate."""
         return [self.generate(prompt=prompt, **kwargs) for prompt in prompts]
 
     def generate(self,
@@ -116,17 +117,18 @@ class Client:
                  logit_bias: Dict[int, float] = {}) -> Generations:
         """Generate endpoint.
         See https://docs.cohere.ai/reference/generate for advanced arguments
+
         Args:
-            * prompt (str): either a single prompt, or a list of them
-            * model (str): (Optional) The model to use for generating the next reply.
-            * return_likelihoods (str): (Optional) One of GENERATION|ALL|NONE to specify how and if the token likelihoods are returned with the response.
-            * preset (str): (Optional) The ID of a custom playground preset.
-            * num_generations (int): (Optional) The number of generations that will be returned, defaults to 1.
-            * max_tokens (int): (Optional) The number of tokens to predict per generation, defaults to 20.
-            * temperature (float): (Optional) The degree of randomness in generations from 0.0 to 5.0, lower is less random.
-            * truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
+            prompt (str): either a single prompt, or a list of them
+            model (str): (Optional) The model to use for generating the next reply.
+            return_likelihoods (str): (Optional) One of GENERATION|ALL|NONE to specify how and if the token likelihoods are returned with the response.
+            preset (str): (Optional) The ID of a custom playground preset.
+            num_generations (int): (Optional) The number of generations that will be returned, defaults to 1.
+            max_tokens (int): (Optional) The number of tokens to predict per generation, defaults to 20.
+            temperature (float): (Optional) The degree of randomness in generations from 0.0 to 5.0, lower is less random.
+            truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
         Returns:
-            * a Generations object
+            a Generations object
         """
         json_body = {
             'model': model,
@@ -166,39 +168,34 @@ class Client:
             return_chatlog (bool): (Optional) Whether to return the chatlog.
             chatlog_override (List[Dict[str, str]]): (Optional) A list of chatlog entries to override the chatlog.
 
-        Example:
-        ```
-        res = co.chat(query="Hey! How are you doing today?")
-        print(res.reply)
-        print(res.session_id)
-        ```
+        Examples:
+            A simple chat messsage:
+                >>> res = co.chat(query="Hey! How are you doing today?")
+                >>> print(res.reply)
+                >>> print(res.session_id)
 
-        Example:
-        ```
-        res = co.chat(
-            query="Hey! How are you doing today?",
-            session_id="1234",
-            persona="fortune",
-            model="command-xlarge",
-            return_chatlog=True)
-        print(res.reply)
-        print(res.chatlog)
-        ```
+            Continuing a session using a specific model:
+                >>> res = co.chat(
+                >>>     query="Hey! How are you doing today?",
+                >>>     session_id="1234",
+                >>>     persona="fortune",
+                >>>     model="command-xlarge",
+                >>>     return_chatlog=True)
+                >>> print(res.reply)
+                >>> print(res.chatlog)
 
-                Example:
-        ```
-        res = co.chat(
-            query="What about you?",
-            session_id="1234",
-            chatlog_override=[
-                {'Bot': 'Hey!'},
-                {'User': 'I am doing great!'},
-                {'Bot': 'That is great to hear!'},
-            ],
-            return_chatlog=True)
-        print(res.reply)
-        print(res.chatlog)
-        ```
+            Overriding a chat log:
+                >>> res = co.chat(
+                >>>     query="What about you?",
+                >>>     session_id="1234",
+                >>>     chatlog_override=[
+                >>>         {'Bot': 'Hey!'},
+                >>>         {'User': 'I am doing great!'},
+                >>>         {'Bot': 'That is great to hear!'},
+                >>>     ],
+                >>>     return_chatlog=True)
+                >>> print(res.reply)
+                >>> print(res.chatlog)
         """
         if chatlog_override is not None:
             self._validate_chatlog_override(chatlog_override)
@@ -317,23 +314,20 @@ class Client:
             additional_command (str): (Optional) Modifier for the underlying prompt, must \
                 complete the sentence "Generate a summary _".
 
-        Example:
-        ```
-        res = co.summarize(text="Stock market report for today...")
-        print(res.summary)
-        ```
+        Examples:
+            Summarize a text:
+                >>> res = co.summarize(text="Stock market report for today...")
+                >>> print(res.summary)
 
-        Example:
-        ```
-        res = co.summarize(
-            text="Stock market report for today...",
-            model="summarize-xlarge",
-            length="long",
-            format="bullets",
-            temperature=0.9,
-            additional_command="focusing on the highest performing stocks")
-        print(res.summary)
-        ```
+            Summarize a text with a specific model and prompt:
+                >>> res = co.summarize(
+                >>>     text="Stock market report for today...",
+                >>>     model="summarize-xlarge",
+                >>>     length="long",
+                >>>     format="bullets",
+                >>>     temperature=0.9,
+                >>>     additional_command="focusing on the highest performing stocks")
+                >>> print(res.summary)
         """
         json_body = {
             'model': model,
@@ -355,7 +349,7 @@ class Client:
         return [self.tokenize(t) for t in texts]
 
     def tokenize(self, text: str) -> Tokens:
-        """Return a Tokens object of the provied text, see https://docs.cohere.ai/reference/tokenize for advanced usage.
+        """Return a Tokens object of the provided text, see https://docs.cohere.ai/reference/tokenize for advanced usage.
 
         Args:
             text (str): Text to summarize.
@@ -369,7 +363,7 @@ class Client:
         return [self.detokenize(t) for t in list_of_tokens]
 
     def detokenize(self, tokens: List[int]) -> Detokenization:
-        """Return a Detokenization object of the provied tokens, see https://docs.cohere.ai/reference/detokenize-1 for advanced usage.
+        """Return a Detokenization object of the provided tokens, see https://docs.cohere.ai/reference/detokenize-1 for advanced usage.
         
         Args:
             tokens (List[int]): A list of tokens to convert to strings
@@ -379,7 +373,7 @@ class Client:
         return Detokenization(text=res['text'])
 
     def detect_language(self, texts: List[str]) -> DetectLanguageResponse:
-        """Return a DetectLanguageResponse object of the provied texts, see https://docs.cohere.ai/reference/detect-language-1 for advanced usage.
+        """Return a DetectLanguageResponse object of the provided texts, see https://docs.cohere.ai/reference/detect-language-1 for advanced usage.
         
         Args:
             texts (List[str]): A list of strings to identify by language
@@ -396,22 +390,6 @@ class Client:
     def feedback(self, id: str, good_response: bool, desired_response: str = "", feedback: str = "") -> Feedback:
         """Give feedback on a response from the Cohere API to improve the model.
 
-        Can be used programmatically like so:
-
-        Example: a user accepts a model's suggestion in an assisted writing setting
-        ```
-        generations = co.generate(f"Write me a polite email responding to the one below:\n{email}\n\nResponse:")
-        if user_accepted_suggestion:
-            generations[0].feedback(good_response=True)
-        ```
-
-        Example: the user edits the model's suggestion
-        ```
-        generations = co.generate(f"Write me a polite email responding to the one below:\n{email}\n\nResponse:")
-        if user_edits_suggestion:
-            generations[0].feedback(good_response=False, desired_response=user_edited_response)
-        ```
-
         Args:
             id (str): the `id` associated with a generation from the Cohere API
             good_response (bool): a boolean indicator as to whether the generation was good (True) or bad (False).
@@ -421,6 +399,19 @@ class Client:
 
         Returns:
             Feedback: a Feedback object
+
+
+        Examples:
+            A user accepts a model's suggestion in an assisted writing setting:
+                >>> generations = co.generate(f"Write me a polite email responding to the one below: {email}. Response:")
+                >>> if user_accepted_suggestion:
+                >>>     generations[0].feedback(good_response=True)
+
+            The user edits the model's suggestion:
+                >>> generations = co.generate(f"Write me a polite email responding to the one below: {email}. Response:")
+                >>> if user_edits_suggestion:
+                >>>     generations[0].feedback(good_response=False, desired_response=user_edited_response)
+
         """
         json_body = {
             'id': id,

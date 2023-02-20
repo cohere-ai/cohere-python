@@ -3,6 +3,7 @@ from typing import Dict
 
 
 class CohereError(Exception):
+    """Base Exception class, returned when nothing more specific applies"""
 
     def __init__(
         self,

@@ -2,8 +2,11 @@
 
 ## 4.0
 
-- ...
-
+- Add AsyncClient
+- Default value of API key from environment variable `CO_API_KEY`.
+- Feedback endpoint moved to client(s).
+- Documentation expanded and built using sphinx.
+- Format using black and isort
 
 ## 3.6
 

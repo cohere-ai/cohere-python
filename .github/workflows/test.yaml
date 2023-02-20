@@ -1,11 +1,35 @@
-name: ci
-on: push
+name: CI Tests
+
+on: pull_request
 jobs:
-  run_tests:
+  build:
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.7", "3.10"] # assume min and max are sufficient
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v4
+    - uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        pip install poetry==1.2.2
+        poetry install
+
+    - name: Run tests
       - env:
-          CO_API_KEY: ${{ secrets.CO_API_PROD_KEY }}
-        run: pip install requests && python -m unittest discover tests
+          CO_API_KEY: ${{ secrets.CO_API_PROD_KEY }}    
+      run: poetry run python -m pytest -v -s tests
+
+    - name: Build package
+      run: poetry build
+
+    - name: Build docs
+      run: cd docs && poetry run make clean html

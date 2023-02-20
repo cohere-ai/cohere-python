@@ -8,7 +8,12 @@ This package provides functionality developed to simplify interfacing with the [
 
 ## Documentation
 
-See the [API documentation](https://docs.cohere.ai/reference/about).
+* See the [API documentation](https://docs.cohere.ai/reference/about).
+
+* Build SDK documentation locally using `cd docs; make clean html`.
+  * Hosted documentation: coming soon.
+
+* See the [examples](examples/) directory for examples, including some additional functionality for visualizations in Jupyter notebook.
 
 ## Installation
 
@@ -21,7 +26,7 @@ pip install --upgrade cohere
 Install from source:
 
 ```bash
-python setup.py install
+pip install .
 ```
 
 ### Requirements
