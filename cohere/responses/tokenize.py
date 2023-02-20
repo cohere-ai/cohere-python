@@ -35,9 +35,12 @@ class Tokens(CohereObject):
 
 class Detokenization(CohereObject):
 
-    def __init__(self, text: Optional[str] = None, *, _future: Optional[Future] = None) -> None:
+    def __init__(self, text: Optional[str] = None) -> None:
         assert text is not None
         self.text = text
 
     def __str__(self) -> str:
         return self.text
+
+    def __eq__(self, __o: object) -> bool:
+        return self.text == __o.text

@@ -19,7 +19,7 @@ class Chat(CohereObject):
         self.session_id = self._session_id(response)
 
         if return_chatlog:
-            self.chatlog = self._chatlog
+            self.chatlog = self._chatlog(response)
 
     def _reply(self, response: Dict[str, Any]) -> str:
         return response['reply']

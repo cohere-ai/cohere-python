@@ -95,11 +95,7 @@ class Client:
 
     def batch_generate(self, prompts: List[str], **kwargs) -> List[Generations]:
         """a batched version of generate"""
-        generations: List[Generations] = []
-        for prompt in prompts:
-            kwargs["prompt"] = prompt
-            generations.append(self.generate(**kwargs))
-        return generations
+        return [self.generate(prompt=prompt, **kwargs) for prompt in prompts]
 
     def generate(self,
                  prompt: Optional[str] = None,
@@ -122,7 +118,13 @@ class Client:
         See https://docs.cohere.ai/reference/generate for advanced arguments
         Args:
             * prompt (str): either a single prompt, or a list of them
-            * return_likelihoods (str): One of GENERATION|ALL|NONE to specify how and if the token likelihoods are returned with the response.
+            * model (str): (Optional) The model to use for generating the next reply.
+            * return_likelihoods (str): (Optional) One of GENERATION|ALL|NONE to specify how and if the token likelihoods are returned with the response.
+            * preset (str): (Optional) The ID of a custom playground preset.
+            * num_generations (int): (Optional) The number of generations that will be returned, defaults to 1.
+            * max_tokens (int): (Optional) The number of tokens to predict per generation, defaults to 20.
+            * temperature (float): (Optional) The degree of randomness in generations from 0.0 to 5.0, lower is less random.
+            * truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
         Returns:
             * a Generations object
         """
@@ -145,7 +147,7 @@ class Client:
             'logit_bias': logit_bias,
         }
         response = self.__request(cohere.GENERATE_URL, json=json_body)
-        return Generations(return_likelihoods=return_likelihoods, response=response)
+        return Generations(return_likelihoods=return_likelihoods, response=response, client=self)
 
     def chat(self,
              query: str,
@@ -210,7 +212,7 @@ class Client:
             'chatlog_override': chatlog_override,
         }
         response = self.__request(cohere.CHAT_URL, json=json_body)
-        return Chat(query=query, persona=persona, response=response, return_chatlog=return_chatlog)
+        return Chat(query=query, persona=persona, response=response, return_chatlog=return_chatlog, client=self)
 
     def _validate_chatlog_override(self, chatlog_override: List[Dict[str, str]]) -> None:
         if not isinstance(chatlog_override, list):
@@ -225,7 +227,13 @@ class Client:
                     message='chatlog_override must be a list of dicts, each mapping the agent to the message.')
 
     def embed(self, texts: List[str], model: Optional[str] = None, truncate: Optional[str] = None) -> Embeddings:
-        """https://docs.cohere.ai/reference/embed"""
+        """Returns an Embeddings object of the texts provided, see https://docs.cohere.ai/reference/embed for advances usage.
+
+        Args:
+            text (List[str]): A list of strings to embed.
+            model (str): (Optional) The model to use for embeddings the text.
+            truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
+        """
         responses = []
         json_bodys = []
 
@@ -248,7 +256,14 @@ class Client:
                  preset: Optional[str] = None,
                  examples: List[ClassifyExample] = [],
                  truncate: Optional[str] = None) -> Classifications:
-        """https://docs.cohere.ai/reference/classify"""
+        """Returns a Classifications object of the inputs provided, see https://docs.cohere.ai/reference/classify for advances usage.
+
+        Args:
+            inputs (List[str]): A list of strings to classify.
+            model (str): (Optional) The model to use for classifing the inputs.
+            examples (List[ClassifyExample]): A list of ClassifyExample objects containing a text and its associated label.
+            truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
+        """
         examples_dicts: list[dict[str, str]] = []
         for example in examples:
             example_dict = {'text': example.text, 'label': example.label}
@@ -340,7 +355,11 @@ class Client:
         return [self.tokenize(t) for t in texts]
 
     def tokenize(self, text: str) -> Tokens:
-        """https://docs.cohere.ai/reference/tokenize"""
+        """Return a Tokens object of the provied text, see https://docs.cohere.ai/reference/tokenize for advanced usage.
+
+        Args:
+            text (str): Text to summarize.
+        """
         json_body = {'text': text}
         res = self.__request(cohere.TOKENIZE_URL, json=json_body)
         return Tokens(tokens=res['tokens'], token_strings=res['token_strings'])
@@ -350,13 +369,21 @@ class Client:
         return [self.detokenize(t) for t in list_of_tokens]
 
     def detokenize(self, tokens: List[int]) -> Detokenization:
-        """https://docs.cohere.ai/reference/detokenize-1"""
+        """Return a Detokenization object of the provied tokens, see https://docs.cohere.ai/reference/detokenize-1 for advanced usage.
+        
+        Args:
+            tokens (List[int]): A list of tokens to convert to strings
+        """
         json_body = {'tokens': tokens}
         res = self.__request(cohere.DETOKENIZE_URL, json=json_body)
         return Detokenization(text=res['text'])
 
     def detect_language(self, texts: List[str]) -> DetectLanguageResponse:
-        """https://docs.cohere.ai/reference/detect-language-1"""
+        """Return a DetectLanguageResponse object of the provied texts, see https://docs.cohere.ai/reference/detect-language-1 for advanced usage.
+        
+        Args:
+            texts (List[str]): A list of strings to identify by language
+        """
         json_body = {
             "texts": texts,
         }
@@ -504,4 +531,4 @@ class Client:
             raise ValueError('"job_id" is empty')
 
         response = self.__request(os.path.join(cohere.CLUSTER_JOBS_URL, job_id), method='GET')
-        return GetClusterJobResponse(**response)
+        return GetClusterJobResponse(job_id=response['job_id'], status=response['status'], output_clusters_url=response['output_clusters_url'], output_outliers_url=response['output_outliers_url'])

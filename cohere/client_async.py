@@ -14,6 +14,7 @@ import cohere
 from cohere.client import CheckAPIKeyResponse, Client
 from cohere.error import CohereAPIError, CohereConnectionError, CohereError
 from cohere.logging import logger
+from cohere.responses.base import CohereObject
 from cohere.responses import (
     Chat,
     Classification,
@@ -129,7 +130,7 @@ class AsyncClient(Client):
             "logit_bias": logit_bias,
         }
         response = await self.__request(cohere.GENERATE_URL, json_body)
-        return Generations(return_likelihoods=return_likelihoods, response=response)
+        return Generations(return_likelihoods=return_likelihoods, response=response, client=self)
 
     async def chat(
         self,
@@ -153,7 +154,7 @@ class AsyncClient(Client):
             "chatlog_override": chatlog_override,
         }
         response = await self.__request(cohere.CHAT_URL, json=json_body)
-        return Chat(query=query, persona=persona, response=response, return_chatlog=return_chatlog)
+        return Chat(query=query, persona=persona, response=response, return_chatlog=return_chatlog, client=self)
 
     async def embed(self, texts: List[str], model: Optional[str] = None, truncate: Optional[str] = None) -> Embeddings:
         json_bodys = [
@@ -308,7 +309,7 @@ class AsyncClient(Client):
             raise ValueError('"job_id" is empty')
 
         response = await self.__request(os.path.join(cohere.CLUSTER_JOBS_URL, job_id), method='GET')
-        return GetClusterJobResponse(**response)
+        return GetClusterJobResponse(job_id=response['job_id'], status=response['status'], output_clusters_url=response['output_clusters_url'], output_outliers_url=response['output_outliers_url'])
 
 
 
