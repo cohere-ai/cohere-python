@@ -23,9 +23,11 @@ jobs:
         pip install poetry==1.2.2
         poetry install
 
+    # TODO: run pre-commit hook as test
+
     - name: Run tests
-      - env:
-          CO_API_KEY: ${{ secrets.CO_API_PROD_KEY }}    
+      env:
+        CO_API_KEY: ${{ secrets.CO_API_PROD_KEY }}    
       run: poetry run python -m pytest -v -s tests
 
     - name: Build package

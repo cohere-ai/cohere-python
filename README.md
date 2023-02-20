@@ -13,7 +13,7 @@ This package provides functionality developed to simplify interfacing with the [
 * Build SDK documentation locally using `cd docs; make clean html`.
   * Hosted documentation: coming soon.
 
-* See the [examples](examples/) directory for examples, including some additional functionality for visualizations in Jupyter notebook.
+* See the [examples](examples/) directory for examples, including  some additional functionality for visualizations in Jupyter notebook.
 
 ## Installation
 
