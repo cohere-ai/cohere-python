@@ -1,6 +1,6 @@
 from typing import NamedTuple
 
-SummarizeResponse = NamedTuple("SummarizeResponse", [("id", str), ("summary", float)])
+SummarizeResponse = NamedTuple("SummarizeResponse", [("id", str), ("summary", str)])
 SummarizeResponse.__doc__ = """
 Returned by co.summarize, which generates a summary of the specified length for the provided text.
 
