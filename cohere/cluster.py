@@ -43,7 +43,7 @@ class CreateClusterJobResponse(CohereObject):
             TimeoutError: wait timed out
 
         Returns:
-            GetClusterJobResponse: Clustering job results.
+            ClusterJobResult: Clustering job result.
         """
 
         return self._wait_fn(job_id=self.job_id, timeout=timeout, interval=interval)

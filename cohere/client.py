@@ -537,7 +537,7 @@ class Client:
             ValueError: "job_id" is empty
 
         Returns:
-            GetClusterJobResponse: Clustering job results.
+            ClusterJobResult: Clustering job result.
         """
 
         if not job_id.strip():
@@ -568,7 +568,7 @@ class Client:
             TimeoutError: wait timed out
 
         Returns:
-            GetClusterJobResponse: Clustering job results.
+            ClusterJobResult: Clustering job result.
         """
 
         start_time = time.time()
