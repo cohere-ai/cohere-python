@@ -3,7 +3,7 @@ from typing import Optional
 from cohere.response import CohereObject
 
 
-class GetClusterJobResponse(CohereObject):
+class ClusterJobResult(CohereObject):
     status: str
     output_clusters_url: Optional[str]
     output_outliers_url: Optional[str]
@@ -31,7 +31,7 @@ class CreateClusterJobResponse(CohereObject):
         self,
         timeout: Optional[float] = None,
         interval: float = 10,
-    ) -> GetClusterJobResponse:
+    ) -> ClusterJobResult:
         """Poll clustering job results.
 
         Args:
