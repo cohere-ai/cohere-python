@@ -32,7 +32,7 @@ class TestClient(unittest.TestCase):
     def test_get_job(self):
         co = self.create_co()
         jobs = co.get_cluster_jobs()
-        job = co.get_cluster_job(jobs[0].id)
+        job = co.get_cluster_job(jobs[0].job_id)
         assert job.job_id
 
     def test_list_jobs(self):
