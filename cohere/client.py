@@ -556,7 +556,7 @@ class Client:
         timeout: Optional[float] = None,
         interval: float = 10,
     ) -> ClusterJobResult:
-        """Wait for clustering job results.
+        """Wait for clustering job result.
 
         Args:
             job_id (str): Clustering job id.
