@@ -129,7 +129,7 @@ class AsyncClient(Client):
             "logit_bias": logit_bias,
         }
         response = await self.__request(cohere.GENERATE_URL, json_body)
-        return Generations(return_likelihoods=return_likelihoods, response=response, client=self)
+        return Generations(return_likelihoods=return_likelihoods, response=response)
 
     async def chat(
         self,
@@ -153,7 +153,7 @@ class AsyncClient(Client):
             "chatlog_override": chatlog_override,
         }
         response = await self.__request(cohere.CHAT_URL, json=json_body)
-        return Chat(query=query, persona=persona, response=response, return_chatlog=return_chatlog, client=self)
+        return Chat(query=query, persona=persona, response=response, return_chatlog=return_chatlog)
 
     async def embed(self, texts: List[str], model: Optional[str] = None, truncate: Optional[str] = None) -> Embeddings:
         json_bodys = [

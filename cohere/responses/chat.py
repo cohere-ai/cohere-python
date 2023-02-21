@@ -30,5 +30,3 @@ class Chat(CohereObject):
     def _chatlog(self, response: Dict[str, Any]) -> str:
         return response['chatlog']
 
-    def respond(self, response: str) -> "Chat":
-        return self.client.chat(query=response, session_id=self.session_id, persona=self.persona)

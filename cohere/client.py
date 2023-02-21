@@ -145,7 +145,7 @@ class Client:
             'logit_bias': logit_bias,
         }
         response = self.__request(cohere.GENERATE_URL, json=json_body)
-        return Generations(return_likelihoods=return_likelihoods, response=response, client=self)
+        return Generations(return_likelihoods=return_likelihoods, response=response)
 
     def chat(self,
              query: str,
@@ -205,7 +205,7 @@ class Client:
             'chatlog_override': chatlog_override,
         }
         response = self.__request(cohere.CHAT_URL, json=json_body)
-        return Chat(query=query, persona=persona, response=response, return_chatlog=return_chatlog, client=self)
+        return Chat(query=query, persona=persona, response=response, return_chatlog=return_chatlog)
 
     def _validate_chatlog_override(self, chatlog_override: List[Dict[str, str]]) -> None:
         if not isinstance(chatlog_override, list):
