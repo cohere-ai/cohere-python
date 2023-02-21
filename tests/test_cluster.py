@@ -1,7 +1,7 @@
 import time
 import unittest
 
-from utils import get_api_key
+from utils import get_api_key, in_ci
 
 import cohere
 
@@ -30,6 +30,7 @@ class TestClient(unittest.TestCase):
         assert job.output_clusters_url is not None
         assert job.output_outliers_url is not None
 
+    @unittest.skipIf(in_ci(), "can sometimes fail due to duration variation")
     def test_wait_succeeds(self):
         co = cohere.Client(get_api_key(), client_name='test')
         create_res = co.create_cluster_job(
@@ -56,6 +57,7 @@ class TestClient(unittest.TestCase):
 
         self.assertRaises(TimeoutError, wait)
 
+    @unittest.skipIf(in_ci(), "can sometimes fail due to duration variation")
     def test_handler_wait_succeeds(self):
         co = cohere.Client(get_api_key(), client_name='test')
         create_res = co.create_cluster_job(
