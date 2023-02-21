@@ -40,7 +40,7 @@ class TestClient(unittest.TestCase):
             threshold=0.5,
         )
 
-        job = co.wait_cluster_job(create_res.job_id, timeout=60, interval=5)
+        job = co.wait_for_cluster_job(create_res.job_id, timeout=60, interval=5)
         assert job.status == 'complete'
         assert job.output_clusters_url is not None
         assert job.output_outliers_url is not None
@@ -54,7 +54,7 @@ class TestClient(unittest.TestCase):
         )
 
         def wait():
-            co.wait_cluster_job(create_res.job_id, timeout=5, interval=2)
+            co.wait_for_cluster_job(create_res.job_id, timeout=5, interval=2)
 
         self.assertRaises(TimeoutError, wait)
 

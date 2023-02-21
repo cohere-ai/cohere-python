@@ -521,7 +521,7 @@ class Client:
         response = self.__request(cohere.CLUSTER_JOBS_URL, json=json_body)
         return CreateClusterJobResponse(
             job_id=response['job_id'],
-            wait_fn=self.wait_cluster_job,
+            wait_fn=self.wait_for_cluster_job,
         )
 
     def get_cluster_job(
@@ -550,7 +550,7 @@ class Client:
             output_outliers_url=response['output_outliers_url'],
         )
 
-    def wait_cluster_job(
+    def wait_for_cluster_job(
         self,
         job_id: str,
         timeout: Optional[float] = None,
@@ -576,7 +576,7 @@ class Client:
 
         while job.status == 'processing':
             if timeout is not None and time.time() - start_time > timeout:
-                raise TimeoutError(f'wait_cluster_job timed out after {timeout} seconds')
+                raise TimeoutError(f'wait_for_cluster_job timed out after {timeout} seconds')
 
             time.sleep(interval)
             job = self.get_cluster_job(job_id)
