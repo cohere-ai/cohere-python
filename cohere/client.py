@@ -521,7 +521,7 @@ class Client:
         response = self.__request(cohere.CLUSTER_JOBS_URL, json=json_body)
         return CreateClusterJobResponse(
             job_id=response['job_id'],
-            poll_fn=self.poll_cluster_job,
+            wait_fn=self.wait_cluster_job,
         )
 
     def get_cluster_job(
@@ -550,22 +550,22 @@ class Client:
             output_outliers_url=response['output_outliers_url'],
         )
 
-    def poll_cluster_job(
+    def wait_cluster_job(
         self,
         job_id: str,
         timeout: Optional[float] = None,
         interval: float = 10,
     ) -> ClusterJobResult:
-        """Poll clustering job results.
+        """Wait for clustering job results.
 
         Args:
             job_id (str): Clustering job id.
-            timeout (Optional[float], optional): Poll timeout in seconds, if None - there is no limit to the wait time.
+            timeout (Optional[float], optional): Wait timeout in seconds, if None - there is no limit to the wait time.
                 Defaults to None.
-            interval (float, optional): Poll interval in seconds. Defaults to 10.
+            interval (float, optional): Wait poll interval in seconds. Defaults to 10.
 
         Raises:
-            TimeoutError: poll timed out
+            TimeoutError: wait timed out
 
         Returns:
             GetClusterJobResponse: Clustering job results.
@@ -576,7 +576,7 @@ class Client:
 
         while job.status == 'processing':
             if timeout is not None and time.time() - start_time > timeout:
-                raise TimeoutError(f'poll_cluster_job timed out after {timeout} seconds')
+                raise TimeoutError(f'wait_cluster_job timed out after {timeout} seconds')
 
             time.sleep(interval)
             job = self.get_cluster_job(job_id)

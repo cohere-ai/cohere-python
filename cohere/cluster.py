@@ -23,27 +23,27 @@ class ClusterJobResult(CohereObject):
 class CreateClusterJobResponse(CohereObject):
     job_id: str
 
-    def __init__(self, job_id: str, poll_fn):
+    def __init__(self, job_id: str, wait_fn):
         self.job_id = job_id
-        self._poll_fn = poll_fn
+        self._wait_fn = wait_fn
 
-    def poll(
+    def wait(
         self,
         timeout: Optional[float] = None,
         interval: float = 10,
     ) -> ClusterJobResult:
-        """Poll clustering job results.
+        """Wait for clustering job result.
 
         Args:
-            timeout (Optional[float], optional): Poll timeout in seconds, if None - there is no limit to the wait time.
+            timeout (Optional[float], optional): Wait timeout in seconds, if None - there is no limit to the wait time.
                 Defaults to None.
-            interval (float, optional): Poll interval in seconds. Defaults to 10.
+            interval (float, optional): Wait poll interval in seconds. Defaults to 10.
 
         Raises:
-            TimeoutError: poll timed out
+            TimeoutError: Wait timed out
 
         Returns:
             GetClusterJobResponse: Clustering job results.
         """
 
-        return self._poll_fn(job_id=self.job_id, timeout=timeout, interval=interval)
+        return self._wait_fn(job_id=self.job_id, timeout=timeout, interval=interval)
