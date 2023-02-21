@@ -504,7 +504,7 @@ class Client:
 
         Args:
             embeddings_url (str): File with embeddings to cluster.
-            threshold (Optional[float], optional): Similarity threshold above which two texts are deemed to belong in 
+            threshold (Optional[float], optional): Similarity threshold above which two texts are deemed to belong in
                 the same cluster. Defaults to None.
             min_cluster_size (Optional[int], optional): Minimum number of elements in a cluster. Defaults to None.
 
@@ -560,7 +560,7 @@ class Client:
 
         Args:
             job_id (str): Clustering job id.
-            timeout (Optional[float], optional): Poll timeout in seconds, if None - there is no limit to the wait time. 
+            timeout (Optional[float], optional): Poll timeout in seconds, if None - there is no limit to the wait time.
                 Defaults to None.
             interval (float, optional): Poll interval in seconds. Defaults to 10.
 
