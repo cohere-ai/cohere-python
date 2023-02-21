@@ -29,6 +29,12 @@ class TestClient(unittest.TestCase):
         assert job.output_clusters_url
         assert job.output_outliers_url
 
+    def test_get_job(self):
+        co = self.create_co()
+        jobs = co.get_cluster_jobs()
+        job = co.get_cluster_job(jobs[0].id)
+        assert job.job_id
+
     def test_list_jobs(self):
         co = self.create_co()
         jobs = co.get_cluster_jobs()
