@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Dict
+from typing import Any, Dict, List, Optional
 
 from cohere.response import CohereObject
 
@@ -23,6 +23,16 @@ class Cluster(CohereObject):
         self.description = description
         self.size = size
         self.sample_elements = sample_elements
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'Cluster':
+        return cls(
+            id=data['id'],
+            keywords=data['keywords'],
+            description=data['description'],
+            size=data['size'],
+            sample_elements=data['sample_elements'],
+        )
 
 
 class ClusterJobResult(CohereObject):
@@ -52,6 +62,21 @@ class ClusterJobResult(CohereObject):
         self.output_outliers_url = output_outliers_url
         self.clusters = clusters
 
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'ClusterJobResult':
+        if data.get('clusters') is None:
+            clusters = None
+        else:
+            clusters = [Cluster.from_dict(c) for c in data['clusters']]
+
+        return ClusterJobResult(
+            job_id=data['job_id'],
+            status=data['status'],
+            output_clusters_url=data['output_clusters_url'],
+            output_outliers_url=data['output_outliers_url'],
+            clusters=clusters,
+        )
+
 
 class CreateClusterJobResponse(CohereObject):
     job_id: str
@@ -59,6 +84,13 @@ class CreateClusterJobResponse(CohereObject):
     def __init__(self, job_id: str, wait_fn):
         self.job_id = job_id
         self._wait_fn = wait_fn
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any], wait_fn) -> 'CreateClusterJobResponse':
+        return cls(
+            job_id=data['job_id'],
+            wait_fn=wait_fn,
+        )
 
     def wait(
         self,
@@ -80,26 +112,3 @@ class CreateClusterJobResponse(CohereObject):
         """
 
         return self._wait_fn(job_id=self.job_id, timeout=timeout, interval=interval)
-
-
-def build_cluster_job_response(response: Dict[str, Any]) -> ClusterJobResult:
-    if response.get('clusters') is None:
-        clusters = None
-    else:
-        clusters = [
-            Cluster(
-                id=c['id'],
-                keywords=c['keywords'],
-                description=c['description'],
-                size=c['size'],
-                sample_elements=c['sample_elements'],
-            ) for c in response['clusters']
-        ]
-
-    return ClusterJobResult(
-        job_id=response['job_id'],
-        status=response['status'],
-        output_clusters_url=response['output_clusters_url'],
-        output_outliers_url=response['output_outliers_url'],
-        clusters=clusters,
-    )
