@@ -8,5 +8,5 @@ def get_api_key() -> str:
 
 
 def in_ci() -> bool:
-    ci = os.getenv('CI')
-    return ci == 'true'
+    ci = os.getenv('CI', '')
+    return ci.lower() in ['true', '1']
