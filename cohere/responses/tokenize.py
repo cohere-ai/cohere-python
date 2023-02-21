@@ -11,8 +11,6 @@ from collections import UserList
 from dataclasses import asdict, dataclass
 from typing import Dict, List, Optional, Union
 
-import numpy as np
-
 
 class Tokens(CohereObject):
 

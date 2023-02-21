@@ -8,10 +8,9 @@ from urllib.parse import urljoin
 
 import aiohttp
 import backoff
-import numpy as np
 
 import cohere
-from cohere.client import CheckAPIKeyResponse, Client
+from cohere.client import Client
 from cohere.error import CohereAPIError, CohereConnectionError, CohereError
 from cohere.logging import logger
 from cohere.responses.base import CohereObject
@@ -83,7 +82,7 @@ class AsyncClient(Client):
         return await self._backend.close()
 
     # API methods
-    async def check_api_key(self) -> CheckAPIKeyResponse:
+    async def check_api_key(self) -> Dict[str, bool]:
         return await self.__request(cohere.CHECK_API_KEY_URL)
 
     async def batch_generate(self, prompts: List[str], return_exceptions=False, **kwargs) -> List[Generations]:
@@ -309,7 +308,11 @@ class AsyncClient(Client):
             raise ValueError('"job_id" is empty')
 
         response = await self.__request(os.path.join(cohere.CLUSTER_JOBS_URL, job_id), method='GET')
-        return GetClusterJobResponse(job_id=response['job_id'], status=response['status'], output_clusters_url=response['output_clusters_url'], output_outliers_url=response['output_outliers_url'])
+        return GetClusterJobResponse(
+            status=response['status'],
+            output_clusters_url=response['output_clusters_url'],
+            output_outliers_url=response['output_outliers_url'],
+        )
 
 
 

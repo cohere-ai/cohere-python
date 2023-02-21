@@ -20,8 +20,9 @@ async def test_single_generate(async_client):
     assert prediction[0].prompt == "co:here"
     # test repr
     assert prediction[0].visualize_token_likelihoods() is None
-    assert isinstance(prediction[0]._repr_html_(), str)  # Generation
-    assert isinstance(prediction._repr_html_(), str)  # Generations repr
+    # pandas is optional
+    # assert isinstance(prediction[0]._repr_html_(), str)  # Generation
+    # assert isinstance(prediction._repr_html_(), str)  # Generations repr
 
 
 @pytest.mark.asyncio
@@ -30,7 +31,8 @@ async def test_return_likelihoods_generation(async_client):
         model=TEST_MODEL, prompt="co:here", max_tokens=1, return_likelihoods="GENERATION"
     )
     assert prediction[0].token_likelihoods[0].token
-    assert "<span" in prediction[0].visualize_token_likelihoods(display=False)
+    # pandas is optional
+    # assert "<span" in prediction[0].visualize_token_likelihoods(display=False)
     prediction = await async_client.generate(model=TEST_MODEL, prompt="co:here", max_tokens=1, return_likelihoods="ALL")
     assert prediction[0].token_likelihoods[0].token
     predictions = await async_client.generate(model=TEST_MODEL, prompt="Hello,", max_tokens=3, num_generations=5)
