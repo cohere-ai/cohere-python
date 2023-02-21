@@ -205,7 +205,7 @@ class Client:
             'chatlog_override': chatlog_override,
         }
         response = self.__request(cohere.CHAT_URL, json=json_body)
-        return Chat(query=query, persona=persona, response=response, return_chatlog=return_chatlog)
+        return Chat(query=query, persona=persona, response=response, return_chatlog=return_chatlog, client=self)
 
     def _validate_chatlog_override(self, chatlog_override: List[Dict[str, str]]) -> None:
         if not isinstance(chatlog_override, list):

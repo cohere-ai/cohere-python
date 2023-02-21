@@ -14,8 +14,8 @@ from cohere.client import Client
 from cohere.error import CohereAPIError, CohereConnectionError, CohereError
 from cohere.logging import logger
 from cohere.responses.base import CohereObject
+from cohere.responses.chat import AsyncChat
 from cohere.responses import (
-    Chat,
     Classification,
     Classifications,
     DetectLanguageResponse,
@@ -139,7 +139,7 @@ class AsyncClient(Client):
         model: Optional[str] = None,
         return_chatlog: bool = False,
         chatlog_override: Optional[List[Dict[str, str]]] = None,
-    ) -> Chat:
+    ) -> AsyncChat:
 
         if chatlog_override is not None:
             self._validate_chatlog_override(chatlog_override)
@@ -153,7 +153,7 @@ class AsyncClient(Client):
             "chatlog_override": chatlog_override,
         }
         response = await self.__request(cohere.CHAT_URL, json=json_body)
-        return Chat(query=query, persona=persona, response=response, return_chatlog=return_chatlog)
+        return AsyncChat(query=query, persona=persona, response=response, return_chatlog=return_chatlog, client=self)
 
     async def embed(self, texts: List[str], model: Optional[str] = None, truncate: Optional[str] = None) -> Embeddings:
         json_bodys = [

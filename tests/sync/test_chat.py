@@ -16,6 +16,15 @@ class TestChat(unittest.TestCase):
         self.assertIsInstance(prediction.session_id, str)
         self.assertEqual(prediction.persona, "cohere")
 
+    def test_multi_replies(self):
+        num_replies = 3
+        prediction = co.chat("Yo what up?")
+        for _ in range(num_replies):
+            prediction = prediction.respond("oh that's cool")
+            self.assertIsInstance(prediction.reply, str)
+            self.assertIsInstance(prediction.session_id, str)
+            self.assertEqual(prediction.persona, "cohere")
+
     def test_invalid_persona(self):
         with self.assertRaises(cohere.CohereError):
             co.chat("Yo what up?", persona="NOT_A_VALID_PERSONA").reply

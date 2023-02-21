@@ -22,6 +22,12 @@ def test_consistency_and_docs():
     for name, func in client_methods.items():
         assert func.__doc__ is not None, f"Missing documentation for Client.{name}"
         if not name.startswith('batch_'): # these have return_exceptions
-            assert inspect.signature(func) == inspect.signature(async_client_methods[name])
+            client_signature = inspect.signature(func) 
+            async_signature = inspect.signature(async_client_methods[name])
+            if client_signature.return_annotation != async_signature.return_annotation: # some methods return a separate async class
+                assert "Async" + client_signature.return_annotation.__name__ == async_signature.return_annotation.__name__
+                assert client_signature.parameters == async_signature.parameters
+            else:
+                assert client_signature == async_signature
     
 
