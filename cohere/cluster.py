@@ -1,4 +1,4 @@
-from typing import Optional, Protocol
+from typing import Optional
 
 from cohere.response import CohereObject
 
@@ -20,21 +20,10 @@ class GetClusterJobResponse(CohereObject):
         self.output_outliers_url = output_outliers_url
 
 
-class PollFn(Protocol):
-
-    def __call__(
-        self,
-        job_id: str,
-        timeout: Optional[float] = None,
-        interval: float = 10,
-    ) -> GetClusterJobResponse:
-        ...
-
-
 class CreateClusterJobResponse(CohereObject):
     job_id: str
 
-    def __init__(self, job_id: str, poll_fn: PollFn):
+    def __init__(self, job_id: str, poll_fn):
         self.job_id = job_id
         self._poll_fn = poll_fn
 
