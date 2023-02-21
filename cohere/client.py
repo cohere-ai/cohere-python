@@ -2,7 +2,7 @@ import json as jsonlib
 import os
 import sys
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Dict, List, Optional, TypedDict, Union
+from typing import Any, Dict, List, Optional, Union
 from urllib.parse import urljoin
 
 import requests
@@ -32,10 +32,6 @@ try:
     use_xhr_client = True
 except ImportError:
     pass
-
-
-class CheckAPIKeyResponse(TypedDict):
-    valid: bool
 
 
 class Client:
@@ -82,7 +78,7 @@ class Client:
             except CohereError as e:
                 raise CohereError(message=e.message, http_status=e.http_status, headers=e.headers)
 
-    def check_api_key(self) -> CheckAPIKeyResponse:
+    def check_api_key(self) -> Dict[str, bool]:
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
             'Content-Type': 'application/json',
