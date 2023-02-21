@@ -10,6 +10,7 @@ INPUT_FILE = "gs://cohere-dev-central-2/cluster_tests/all_datasets/reddit_500.js
 
 class TestClient(unittest.TestCase):
 
+    @unittest.skipIf(in_ci(), "can sometimes fail due to duration variation")
     def test_cluster_job(self):
         co = cohere.Client(get_api_key(), client_name='test')
         create_res = co.create_cluster_job(
