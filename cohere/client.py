@@ -499,6 +499,18 @@ class Client:
         threshold: Optional[float] = None,
         min_cluster_size: Optional[int] = None,
     ) -> CreateClusterJobResponse:
+        """Create clustering job.
+
+        Args:
+            embeddings_url (str): File with embeddings to cluster.
+            threshold (Optional[float], optional): Similarity threshold above which two texts are deemed to belong in
+                the same cluster. Defaults to None.
+            min_cluster_size (Optional[int], optional): Minimum number of elements in a cluster. Defaults to None.
+
+        Returns:
+            CreateClusterJobResponse: Created clustering job handler
+        """
+
         json_body = {
             "embeddings_url": embeddings_url,
             "threshold": threshold,
@@ -506,12 +518,27 @@ class Client:
         }
 
         response = self.__request(cohere.CLUSTER_JOBS_URL, json=json_body)
-        return CreateClusterJobResponse(job_id=response['job_id'])
+        return CreateClusterJobResponse(
+            job_id=response['job_id'],
+            wait_fn=self.wait_for_cluster_job,
+        )
 
     def get_cluster_job(
         self,
         job_id: str,
-    ) -> GetClusterJobResponse:
+    ) -> ClusterJobResult:
+        """Get clustering job results.
+
+        Args:
+            job_id (str): Clustering job id.
+
+        Raises:
+            ValueError: "job_id" is empty
+
+        Returns:
+            ClusterJobResult: Clustering job result.
+        """
+
         if not job_id.strip():
             raise ValueError('"job_id" is empty')
 
