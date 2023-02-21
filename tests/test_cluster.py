@@ -28,7 +28,6 @@ class TestClient(unittest.TestCase):
         assert job.status == 'complete'
         assert job.output_clusters_url
         assert job.output_outliers_url
-        # assert job.clusters
 
     def test_list_jobs(self):
         co = self.create_co()
