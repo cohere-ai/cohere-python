@@ -2,7 +2,7 @@ import json as jsonlib
 import os
 import sys
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Dict, List, Optional, TypedDict, Union
+from typing import Any, Dict, List, Optional, Union
 from urllib.parse import urljoin
 
 import requests
@@ -32,10 +32,6 @@ try:
     use_xhr_client = True
 except ImportError:
     pass
-
-
-class CheckAPIKeyResponse(TypedDict):
-    valid: bool
 
 
 class Client:
@@ -82,7 +78,7 @@ class Client:
             except CohereError as e:
                 raise CohereError(message=e.message, http_status=e.http_status, headers=e.headers)
 
-    def check_api_key(self) -> CheckAPIKeyResponse:
+    def check_api_key(self) -> Dict[str, bool]:
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
             'Content-Type': 'application/json',
@@ -510,7 +506,7 @@ class Client:
         }
 
         response = self.__request(cohere.CLUSTER_JOBS_URL, json=json_body)
-        return CreateClusterJobResponse(**response)
+        return CreateClusterJobResponse(job_id=response['job_id'])
 
     def get_cluster_job(
         self,
@@ -520,4 +516,8 @@ class Client:
             raise ValueError('"job_id" is empty')
 
         response = self.__request(os.path.join(cohere.CLUSTER_JOBS_URL, job_id), method='GET')
-        return GetClusterJobResponse(**response)
+        return GetClusterJobResponse(
+            status=response['status'],
+            output_clusters_url=response['output_clusters_url'],
+            output_outliers_url=response['output_outliers_url'],
+        )
