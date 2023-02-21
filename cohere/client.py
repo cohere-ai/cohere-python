@@ -16,7 +16,7 @@ from cohere.chat import Chat
 from cohere.classify import Classification, Classifications
 from cohere.classify import Example as ClassifyExample
 from cohere.classify import LabelPrediction
-from cohere.cluster import CreateClusterJobResponse, ClusterJobResult, build_cluster_job_response
+from cohere.cluster import ClusterJobResult, CreateClusterJobResponse, build_cluster_job_response
 from cohere.detectlang import DetectLanguageResponse, Language
 from cohere.detokenize import Detokenization
 from cohere.embeddings import Embeddings
@@ -546,7 +546,7 @@ class Client:
         response = self.__request(os.path.join(cohere.CLUSTER_JOBS_URL, job_id), method='GET')
         return build_cluster_job_response(response)
 
-    def get_cluster_jobs(self) -> List[ClusterJobResult]:
+    def list_cluster_jobs(self) -> List[ClusterJobResult]:
         """List clustering jobs.
 
         Returns:

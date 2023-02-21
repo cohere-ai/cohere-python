@@ -32,13 +32,13 @@ class TestClient(unittest.TestCase):
 
     def test_get_cluster_job(self):
         co = self.create_co()
-        jobs = co.get_cluster_jobs()
+        jobs = co.list_cluster_jobs()
         job = co.get_cluster_job(jobs[0].job_id)
         self.check_job_result(job)
 
-    def test_get_cluster_jobs(self):
+    def test_list_cluster_jobs(self):
         co = self.create_co()
-        jobs = co.get_cluster_jobs()
+        jobs = co.list_cluster_jobs()
         assert len(jobs) > 0
         for job in jobs:
             self.check_job_result(job, completed=False)
