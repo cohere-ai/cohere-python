@@ -35,7 +35,7 @@ class CreateClusterJobResponse(CohereObject):
         """Poll clustering job results.
 
         Args:
-            timeout (Optional[float], optional): Poll timeout in seconds, if None - there is no limit to the wait time. 
+            timeout (Optional[float], optional): Poll timeout in seconds, if None - there is no limit to the wait time.
                 Defaults to None.
             interval (float, optional): Poll interval in seconds. Defaults to 10.
 
