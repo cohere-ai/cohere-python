@@ -1,6 +1,7 @@
 import json as jsonlib
 import os
 import sys
+import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List, Optional, Union
 from urllib.parse import urljoin
@@ -15,7 +16,7 @@ from cohere.chat import Chat
 from cohere.classify import Classification, Classifications
 from cohere.classify import Example as ClassifyExample
 from cohere.classify import LabelPrediction
-from cohere.cluster import (CreateClusterJobResponse, GetClusterJobResponse, build_cluster_job_response)
+from cohere.cluster import CreateClusterJobResponse, ClusterJobResult, build_cluster_job_response
 from cohere.detectlang import DetectLanguageResponse, Language
 from cohere.detokenize import Detokenization
 from cohere.embeddings import Embeddings
@@ -545,12 +546,45 @@ class Client:
         response = self.__request(os.path.join(cohere.CLUSTER_JOBS_URL, job_id), method='GET')
         return build_cluster_job_response(response)
 
-    def get_cluster_jobs(self) -> List[GetClusterJobResponse]:
+    def get_cluster_jobs(self) -> List[ClusterJobResult]:
         """List clustering jobs.
 
         Returns:
-            List[GetClusterJobResponse]: Clustering jobs created.
+            List[ClusterJobResult]: Clustering jobs created.
         """
 
         response = self.__request(cohere.CLUSTER_JOBS_URL, method='GET')
         return [build_cluster_job_response(r) for r in response['jobs']]
+
+    def wait_for_cluster_job(
+        self,
+        job_id: str,
+        timeout: Optional[float] = None,
+        interval: float = 10,
+    ) -> ClusterJobResult:
+        """Wait for clustering job result.
+
+        Args:
+            job_id (str): Clustering job id.
+            timeout (Optional[float], optional): Wait timeout in seconds, if None - there is no limit to the wait time.
+                Defaults to None.
+            interval (float, optional): Wait poll interval in seconds. Defaults to 10.
+
+        Raises:
+            TimeoutError: wait timed out
+
+        Returns:
+            ClusterJobResult: Clustering job result.
+        """
+
+        start_time = time.time()
+        job = self.get_cluster_job(job_id)
+
+        while job.status == 'processing':
+            if timeout is not None and time.time() - start_time > timeout:
+                raise TimeoutError(f'wait_for_cluster_job timed out after {timeout} seconds')
+
+            time.sleep(interval)
+            job = self.get_cluster_job(job_id)
+
+        return job

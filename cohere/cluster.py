@@ -1,13 +1,6 @@
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Dict
 
 from cohere.response import CohereObject
-
-
-class CreateClusterJobResponse(CohereObject):
-    job_id: str
-
-    def __init__(self, job_id: str):
-        self.job_id = job_id
 
 
 class Cluster(CohereObject):
@@ -32,7 +25,7 @@ class Cluster(CohereObject):
         self.sample_elements = sample_elements
 
 
-class GetClusterJobResponse(CohereObject):
+class ClusterJobResult(CohereObject):
     job_id: str
     status: str
     output_clusters_url: Optional[str]
@@ -60,7 +53,36 @@ class GetClusterJobResponse(CohereObject):
         self.clusters = clusters
 
 
-def build_cluster_job_response(response: Any) -> GetClusterJobResponse:
+class CreateClusterJobResponse(CohereObject):
+    job_id: str
+
+    def __init__(self, job_id: str, wait_fn):
+        self.job_id = job_id
+        self._wait_fn = wait_fn
+
+    def wait(
+        self,
+        timeout: Optional[float] = None,
+        interval: float = 10,
+    ) -> ClusterJobResult:
+        """Wait for clustering job result.
+
+        Args:
+            timeout (Optional[float], optional): Wait timeout in seconds, if None - there is no limit to the wait time.
+                Defaults to None.
+            interval (float, optional): Wait poll interval in seconds. Defaults to 10.
+
+        Raises:
+            TimeoutError: wait timed out
+
+        Returns:
+            ClusterJobResult: Clustering job result.
+        """
+
+        return self._wait_fn(job_id=self.job_id, timeout=timeout, interval=interval)
+
+
+def build_cluster_job_response(response: Dict[str, Any]) -> ClusterJobResult:
     if response.get('clusters') is None:
         clusters = None
     else:
@@ -74,7 +96,7 @@ def build_cluster_job_response(response: Any) -> GetClusterJobResponse:
             ) for c in response['clusters']
         ]
 
-    return GetClusterJobResponse(
+    return ClusterJobResult(
         job_id=response['job_id'],
         status=response['status'],
         output_clusters_url=response['output_clusters_url'],
