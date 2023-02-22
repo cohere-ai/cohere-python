@@ -2,11 +2,13 @@
 
 ## 4.0
 
-- Add AsyncClient
-- Default value of API key from environment variable `CO_API_KEY`.
-- Feedback endpoint moved to client(s).
-- Documentation expanded and built using sphinx.
-- Format using black and isort
+- [#160](https://github.com/cohere-ai/cohere-python/pull/160)
+  - Add AsyncClient
+  - Default value of API key from environment variable `CO_API_KEY`.
+  - Feedback endpoint moved from CohereObject to Client/AsyncClient.
+  - Generations is now a UserList, and initialized from responses using `from_dict`.
+  - Documentation expanded and built using sphinx.
+  - Use Poetry, and format using black and isort, include pre-commit hooks.
 
 ## 3.6
 

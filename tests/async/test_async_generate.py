@@ -11,10 +11,8 @@ VERBOTEN = "Nazi Germany was the German state between 1933 and 1945, when Adolf 
 async def test_single_generate(async_client):
     prediction = await async_client.generate(model=TEST_MODEL, prompt="co:here", max_tokens=1)
     assert isinstance(prediction, Generations)
-    assert isinstance(prediction.text, str)
-    assert str(prediction[0]) == prediction.text
-    #assert str(prediction) == prediction.text
-    assert prediction[0][:5] == prediction.text[:5]
+    assert isinstance(prediction[0].text, str)
+    assert str(prediction[0]) == prediction[0].text
     assert prediction[0].likelihood is None
     assert prediction.prompt == "co:here"
     assert prediction[0].prompt == "co:here"
@@ -35,7 +33,7 @@ async def test_return_likelihoods_generation(async_client):
     # assert "<span" in prediction[0].visualize_token_likelihoods(display=False)
     prediction = await async_client.generate(model=TEST_MODEL, prompt="co:here", max_tokens=1, return_likelihoods="ALL")
     assert prediction[0].token_likelihoods[0].token
-    predictions = await async_client.generate(model=TEST_MODEL, prompt="Hello,", max_tokens=3, num_generations=5)
+    #predictions = await async_client.generate(model=TEST_MODEL, prompt="Hello,", max_tokens=3, num_generations=5)
     #assert sorted(predictions, key=lambda p: -p.likelihood) == predictions  # they should be in order of likelihood
 
 

@@ -129,7 +129,7 @@ class AsyncClient(Client):
             "logit_bias": logit_bias,
         }
         response = await self.__request(cohere.GENERATE_URL, json_body)
-        return Generations(return_likelihoods=return_likelihoods, response=response)
+        return Generations.from_dict(response=response,return_likelihoods=return_likelihoods)
 
     async def chat(
         self,
