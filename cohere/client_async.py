@@ -14,8 +14,8 @@ from cohere.client import Client
 from cohere.error import CohereAPIError, CohereConnectionError, CohereError
 from cohere.logging import logger
 from cohere.responses.base import CohereObject
+from cohere.responses.chat import AsyncChat
 from cohere.responses import (
-    Chat,
     Classification,
     Classifications,
     DetectLanguageResponse,
@@ -29,7 +29,11 @@ from cohere.responses import (
     SummarizeResponse,
     Tokens,
 )
+<<<<<<< HEAD
 from cohere.responses.cluster import CreateClusterJobResponseAsync,ClusterJobResult
+=======
+from cohere.responses.cluster import AsyncCreateClusterJobResponse, ClusterJobResult
+>>>>>>> 5ebdf4a23aeb3089045c8dfd316e103b62e4823f
 from cohere.responses.classify import Example as ClassifyExample
 from cohere.utils import np_json_dumps
 
@@ -129,7 +133,7 @@ class AsyncClient(Client):
             "logit_bias": logit_bias,
         }
         response = await self.__request(cohere.GENERATE_URL, json_body)
-        return Generations(return_likelihoods=return_likelihoods, response=response, client=self)
+        return Generations(return_likelihoods=return_likelihoods, response=response)
 
     async def chat(
         self,
@@ -139,7 +143,7 @@ class AsyncClient(Client):
         model: Optional[str] = None,
         return_chatlog: bool = False,
         chatlog_override: Optional[List[Dict[str, str]]] = None,
-    ) -> Chat:
+    ) -> AsyncChat:
 
         if chatlog_override is not None:
             self._validate_chatlog_override(chatlog_override)
@@ -153,7 +157,7 @@ class AsyncClient(Client):
             "chatlog_override": chatlog_override,
         }
         response = await self.__request(cohere.CHAT_URL, json=json_body)
-        return Chat(query=query, persona=persona, response=response, return_chatlog=return_chatlog, client=self)
+        return AsyncChat(query=query, persona=persona, response=response, return_chatlog=return_chatlog, client=self)
 
     async def embed(self, texts: List[str], model: Optional[str] = None, truncate: Optional[str] = None) -> Embeddings:
         json_bodys = [
@@ -290,15 +294,14 @@ class AsyncClient(Client):
         embeddings_url: str,
         threshold: Optional[float] = None,
         min_cluster_size: Optional[int] = None,
-    ) -> CreateClusterJobResponseAsync:
+    ) -> AsyncCreateClusterJobResponse:
         json_body = {
             "embeddings_url": embeddings_url,
             "threshold": threshold,
             "min_cluster_size": min_cluster_size,
         }
-
         response = await self.__request(cohere.CLUSTER_JOBS_URL, json=json_body)
-        return CreateClusterJobResponseAsync(
+        return AsyncCreateClusterJobResponse(
             job_id=response['job_id'],
             wait_fn=self.wait_for_cluster_job,
         )
@@ -317,6 +320,23 @@ class AsyncClient(Client):
             output_outliers_url=response['output_outliers_url'],
         )
 
+    async def wait_for_cluster_job(
+        self,
+        job_id: str,
+        timeout: Optional[float] = None,
+        interval: float = 10,
+    ) -> ClusterJobResult:
+        start_time = time.time()
+        job = await self.get_cluster_job(job_id)
+
+        while job.status == 'processing':
+            if timeout is not None and time.time() - start_time > timeout:
+                raise TimeoutError(f'wait_for_cluster_job timed out after {timeout} seconds')
+
+            await asyncio.sleep(interval)
+            job = await self.get_cluster_job(job_id)
+
+        return job
 
     async def wait_for_cluster_job(
         self,

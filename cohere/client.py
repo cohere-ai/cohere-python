@@ -21,7 +21,7 @@ from cohere.error import CohereError,CohereAPIError,CohereConnectionError
 from cohere.responses.feedback import Feedback
 from cohere.responses.summarize import SummarizeResponse
 from cohere.responses.rerank import Reranking
-from cohere.responses.cluster import CreateClusterJobResponse,ClusterJobResult
+from cohere.responses.cluster import CreateClusterJobResponse, ClusterJobResult
 import cohere
 
 class Client:
@@ -146,7 +146,7 @@ class Client:
             'logit_bias': logit_bias,
         }
         response = self.__request(cohere.GENERATE_URL, json=json_body)
-        return Generations(return_likelihoods=return_likelihoods, response=response, client=self)
+        return Generations(return_likelihoods=return_likelihoods, response=response)
 
     def chat(self,
              query: str,

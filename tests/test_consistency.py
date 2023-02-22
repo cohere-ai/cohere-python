@@ -5,7 +5,6 @@ import inspect
 
 
 EXPECTED_EXTRA_ASYNC = {'close'}
-EXPECTED_DIFFERENT_RETURN_TYPE = {'create_cluster_job'}
 
 def test_consistency_and_docs():
     # Get a list of all non-private functions in the Client class
@@ -22,9 +21,13 @@ def test_consistency_and_docs():
 
     for name, func in client_methods.items():
         assert func.__doc__ is not None, f"Missing documentation for Client.{name}"
-        if name in EXPECTED_DIFFERENT_RETURN_TYPE: # async vs sync job type
-            assert inspect.signature(func).parameters == inspect.signature(async_client_methods[name]).parameters
-        elif not name.startswith('batch_'): # these have return_exceptions
-            assert inspect.signature(func) == inspect.signature(async_client_methods[name])
+        if not name.startswith('batch_'): # these have return_exceptions
+            client_signature = inspect.signature(func) 
+            async_signature = inspect.signature(async_client_methods[name])
+            if client_signature.return_annotation != async_signature.return_annotation: # some methods return a separate async class
+                assert "Async" + client_signature.return_annotation.__name__ == async_signature.return_annotation.__name__
+                assert client_signature.parameters == async_signature.parameters
+            else:
+                assert client_signature == async_signature
     
 
