@@ -4,6 +4,7 @@ import unittest
 from utils import get_api_key, in_ci
 
 import cohere
+from cohere.cluster import ClusterJobResult
 
 INPUT_FILE = "gs://cohere-dev-central-2/cluster_tests/all_datasets/reddit_500.jsonl"
 
@@ -11,8 +12,8 @@ INPUT_FILE = "gs://cohere-dev-central-2/cluster_tests/all_datasets/reddit_500.js
 class TestClient(unittest.TestCase):
 
     @unittest.skipIf(in_ci(), "can sometimes fail due to duration variation")
-    def test_cluster_job(self):
-        co = cohere.Client(get_api_key(), client_name='test')
+    def test_create_cluster_job(self):
+        co = self.create_co()
         create_res = co.create_cluster_job(
             INPUT_FILE,
             min_cluster_size=3,
@@ -27,13 +28,24 @@ class TestClient(unittest.TestCase):
             time.sleep(5)
             job = co.get_cluster_job(create_res.job_id)
 
-        assert job.status == 'complete'
-        assert job.output_clusters_url is not None
-        assert job.output_outliers_url is not None
+        self.check_job_result(job)
+
+    def test_get_cluster_job(self):
+        co = self.create_co()
+        jobs = co.list_cluster_jobs()
+        job = co.get_cluster_job(jobs[0].job_id)
+        self.check_job_result(job)
+
+    def test_list_cluster_jobs(self):
+        co = self.create_co()
+        jobs = co.list_cluster_jobs()
+        assert len(jobs) > 0
+        for job in jobs:
+            self.check_job_result(job, completed=False)
 
     @unittest.skipIf(in_ci(), "can sometimes fail due to duration variation")
-    def test_wait_succeeds(self):
-        co = cohere.Client(get_api_key(), client_name='test')
+    def test_wait_for_cluster_job_succeeds(self):
+        co = self.create_co()
         create_res = co.create_cluster_job(
             INPUT_FILE,
             min_cluster_size=3,
@@ -41,12 +53,10 @@ class TestClient(unittest.TestCase):
         )
 
         job = co.wait_for_cluster_job(create_res.job_id, timeout=60, interval=5)
-        assert job.status == 'complete'
-        assert job.output_clusters_url is not None
-        assert job.output_outliers_url is not None
+        self.check_job_result(job)
 
-    def test_wait_times_out(self):
-        co = cohere.Client(get_api_key(), client_name='test')
+    def test_wait_for_cluster_job_times_out(self):
+        co = self.create_co()
         create_res = co.create_cluster_job(
             INPUT_FILE,
             min_cluster_size=3,
@@ -59,8 +69,8 @@ class TestClient(unittest.TestCase):
         self.assertRaises(TimeoutError, wait)
 
     @unittest.skipIf(in_ci(), "can sometimes fail due to duration variation")
-    def test_handler_wait_succeeds(self):
-        co = cohere.Client(get_api_key(), client_name='test')
+    def test_job_wait_method_succeeds(self):
+        co = self.create_co()
         create_res = co.create_cluster_job(
             INPUT_FILE,
             min_cluster_size=3,
@@ -68,12 +78,10 @@ class TestClient(unittest.TestCase):
         )
 
         job = create_res.wait(timeout=60, interval=5)
-        assert job.status == 'complete'
-        assert job.output_clusters_url is not None
-        assert job.output_outliers_url is not None
+        self.check_job_result(job)
 
-    def test_handler_wait_times_out(self):
-        co = cohere.Client(get_api_key(), client_name='test')
+    def test_job_wait_method_times_out(self):
+        co = self.create_co()
         create_res = co.create_cluster_job(
             INPUT_FILE,
             min_cluster_size=3,
@@ -84,3 +92,16 @@ class TestClient(unittest.TestCase):
             create_res.wait(timeout=5, interval=2)
 
         self.assertRaises(TimeoutError, wait)
+
+    def create_co(self) -> cohere.Client:
+        return cohere.Client(get_api_key(), check_api_key=False, client_name='test')
+
+    def check_job_result(self, job: ClusterJobResult, completed: bool = True):
+        assert job.job_id
+        assert job.status
+
+        if completed:
+            assert job.status == 'complete'
+            assert job.output_clusters_url
+            assert job.output_outliers_url
+            assert job.clusters

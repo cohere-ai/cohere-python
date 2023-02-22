@@ -16,7 +16,7 @@ from cohere.chat import Chat
 from cohere.classify import Classification, Classifications
 from cohere.classify import Example as ClassifyExample
 from cohere.classify import LabelPrediction
-from cohere.cluster import CreateClusterJobResponse, ClusterJobResult
+from cohere.cluster import ClusterJobResult, CreateClusterJobResponse
 from cohere.detectlang import DetectLanguageResponse, Language
 from cohere.detokenize import Detokenization
 from cohere.embeddings import Embeddings
@@ -519,8 +519,8 @@ class Client:
         }
 
         response = self.__request(cohere.CLUSTER_JOBS_URL, json=json_body)
-        return CreateClusterJobResponse(
-            job_id=response['job_id'],
+        return CreateClusterJobResponse.from_dict(
+            response,
             wait_fn=self.wait_for_cluster_job,
         )
 
@@ -544,11 +544,17 @@ class Client:
             raise ValueError('"job_id" is empty')
 
         response = self.__request(os.path.join(cohere.CLUSTER_JOBS_URL, job_id), method='GET')
-        return ClusterJobResult(
-            status=response['status'],
-            output_clusters_url=response['output_clusters_url'],
-            output_outliers_url=response['output_outliers_url'],
-        )
+        return ClusterJobResult.from_dict(response)
+
+    def list_cluster_jobs(self) -> List[ClusterJobResult]:
+        """List clustering jobs.
+
+        Returns:
+            List[ClusterJobResult]: Clustering jobs created.
+        """
+
+        response = self.__request(cohere.CLUSTER_JOBS_URL, method='GET')
+        return [ClusterJobResult.from_dict(r) for r in response['jobs']]
 
     def wait_for_cluster_job(
         self,
