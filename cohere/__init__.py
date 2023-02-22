@@ -2,7 +2,7 @@ from .client import Client
 from .error import CohereError
 
 COHERE_API_URL = 'https://api.cohere.ai'
-COHERE_VERSION = '2022-12-06'
+COHERE_VERSION = 'v1'
 COHERE_EMBED_BATCH_SIZE = 96
 CHAT_URL = 'chat'
 CLASSIFY_URL = 'classify'

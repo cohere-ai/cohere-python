@@ -48,10 +48,6 @@ class TestGenerate(unittest.TestCase):
     def test_no_version_works(self):
         cohere.Client(API_KEY).generate(model='medium', prompt='co:here', max_tokens=1).generations
 
-    def test_invalid_version_fails(self):
-        with self.assertRaises(cohere.CohereError):
-            _ = cohere.Client(API_KEY, 'fake').generate(model='medium', prompt='co:here', max_tokens=1).generations
-
     def test_invalid_key(self):
         with self.assertRaises(cohere.CohereError):
             _ = cohere.Client('invalid')

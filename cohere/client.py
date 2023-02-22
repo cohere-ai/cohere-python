@@ -4,7 +4,7 @@ import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List, Optional, Union
-from urllib.parse import urljoin
+from posixpath import join as posixJoin
 
 import requests
 from requests import Response
@@ -39,7 +39,6 @@ class Client:
 
     def __init__(self,
                  api_key: str,
-                 version: Optional[str] = None,
                  num_workers: int = 64,
                  request_dict: dict = {},
                  check_api_key: bool = True,
@@ -63,13 +62,9 @@ class Client:
         self.request_dict = request_dict
         self.request_source = 'python-sdk'
         self.max_retries = max_retries
+        self.cohere_version = cohere.COHERE_VERSION
         if client_name:
             self.request_source += ":" + client_name
-
-        if version is None:
-            self.cohere_version = cohere.COHERE_VERSION
-        else:
-            self.cohere_version = version
 
         if check_api_key:
             try:
@@ -85,10 +80,8 @@ class Client:
             'Content-Type': 'application/json',
             'Request-Source': 'python-sdk',
         }
-        if self.cohere_version != '':
-            headers['Cohere-Version'] = self.cohere_version
 
-        url = urljoin(self.api_url, cohere.CHECK_API_KEY_URL)
+        url = posixJoin(self.api_url, cohere.CHECK_API_KEY_URL)
         if use_xhr_client:
             response = self.__pyfetch(url, headers, None)
         else:
@@ -456,10 +449,9 @@ class Client:
             'Content-Type': 'application/json',
             'Request-Source': self.request_source,
         }
-        if self.cohere_version != '':
-            headers['Cohere-Version'] = self.cohere_version
 
-        url = urljoin(self.api_url, endpoint)
+        url = posixJoin(self.api_url, self.cohere_version, endpoint)
+
         if use_xhr_client:
             response = self.__pyfetch(url, headers, jsonlib.dumps(json), method=method)
             self.__print_warning_msg(response)

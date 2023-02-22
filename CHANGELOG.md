@@ -1,5 +1,8 @@
 # Changelog
 
+## 5.0
+- []
+  - Removed ability to override API version
 ## 3.7
 
 - [#164](https://github.com/cohere-ai/cohere-python/pull/164)
