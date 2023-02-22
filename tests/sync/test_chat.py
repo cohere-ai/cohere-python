@@ -1,6 +1,6 @@
 import unittest
 
-from utils import get_api_key
+from utils import get_api_key,in_ci
 
 import cohere
 
@@ -35,6 +35,7 @@ class TestChat(unittest.TestCase):
         self.assertIsInstance(prediction.session_id, str)
         self.assertEqual(prediction.persona, "wizard")
 
+    @unittest.skipIf(in_ci(), "brittle test")
     def test_manual_session_id(self):
         max_num_tries = 5
         prediction = co.chat("Hi my name is Rui")

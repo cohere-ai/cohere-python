@@ -74,22 +74,20 @@ class Generation(CohereObject, str):
             return _df_html(pd.DataFrame([self._visualize_helper()]), **kwargs)
 
 
-class Generations(CohereObject):
+class Generations(UserList, CohereObject):
 
-    def __init__(self,
-                 return_likelihoods: str,
-                 response: Optional[Dict[str, Any]] = None,
-                 **kwargs) -> None:
-        super().__init__(**kwargs)
-        self.return_likelihoods = return_likelihoods
-        self.generations = self._generations(response)
+    def __init__(self,generations,
+                 return_likelihoods: str) -> None:
+        super().__init__(generations)
+        self.return_likelihoods = return_likelihoods        
 
-    def _generations(self, response: Dict[str, Any]) -> List[Generation]:
+    @classmethod
+    def from_dict(cls, response: Dict[str, Any], return_likelihoods: bool) -> List[Generation]:
         generations: List[Generation] = []
         for gen in response['generations']:
             likelihood = None
             token_likelihoods = None
-            if self.return_likelihoods in ['GENERATION', 'ALL']:
+            if return_likelihoods in ['GENERATION', 'ALL']:
                 likelihood = gen['likelihood']
             if 'token_likelihoods' in gen.keys():
                 token_likelihoods = []
@@ -98,16 +96,11 @@ class Generations(CohereObject):
                     token_likelihoods.append(TokenLikelihood(likelihoods['token'], token_likelihood))
             generations.append(Generation(gen['text'], likelihood, token_likelihoods, prompt= response.get("prompt"), id=gen["id"]))
 
-        return generations
+        return cls(generations,return_likelihoods)
 
-    def __str__(self) -> str:
-        return str(self.generations)
-
-    def __iter__(self) -> Iterator:
-        return iter(self.generations)
-
-    def __getitem__(self, index) -> Generation:
-        return self.generations[index]
+    @property
+    def generations(self) -> List[Generation]:  # backward compatibility
+        return self.data
 
     # nice jupyter output
     def visualize(self, **kwargs) -> str:
@@ -115,17 +108,6 @@ class Generations(CohereObject):
 
         with pd.option_context("display.max_colwidth", 250):
             return _df_html(pd.DataFrame([g._visualize_helper() for g in self]), **kwargs)
-
-    # TODO: keep?
-    @property
-    def texts(self) -> str:
-        """Returns the generated texts in order of highest likelihood (if we know this) or any order otherwise"""
-        return [g.text for g in self.generations]
-
-    @property
-    def text(self) -> str:
-        """Returns the generated text with the highest likelihood (if we know this), or the first otherwise"""
-        return self.texts[0]
 
     @property
     def prompt(self) -> str:
