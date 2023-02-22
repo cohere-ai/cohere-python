@@ -7,5 +7,5 @@ from cohere.responses.detectlang import DetectLanguageResponse,Language
 from cohere.responses.rerank import RerankDocument,Reranking,RerankResult
 from cohere.responses.summarize import SummarizeResponse
 from cohere.responses.feedback import Feedback
-
+from cohere.responses.cluster import ClusterJobResult,CreateClusterJobResponse,AsyncCreateClusterJobResponse
  

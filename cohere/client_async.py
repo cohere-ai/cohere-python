@@ -27,9 +27,8 @@ from cohere.responses import (
     Language,
     Reranking,
     SummarizeResponse,
-    Tokens,
+    Tokens,AsyncCreateClusterJobResponse, ClusterJobResult
 )
-from cohere.responses.cluster import AsyncCreateClusterJobResponse, ClusterJobResult
 from cohere.responses.classify import Example as ClassifyExample
 from cohere.utils import np_json_dumps
 

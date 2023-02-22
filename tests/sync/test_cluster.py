@@ -4,7 +4,7 @@ import unittest
 from utils import get_api_key, in_ci
 
 import cohere
-from cohere.cluster import ClusterJobResult
+from cohere.responses import ClusterJobResult
 
 INPUT_FILE = "gs://cohere-dev-central-2/cluster_tests/all_datasets/reddit_500.jsonl"
 
