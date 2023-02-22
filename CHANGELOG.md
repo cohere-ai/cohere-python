@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.7
+
+- [#164](https://github.com/cohere-ai/cohere-python/pull/164)
+  - Add clustering methods: 
+    - `co.create_cluster_job`  
+    - `co.get_cluster_job`
+    - `co.list_cluster_jobs`
+    - `co.wait_for_cluster_job`
+
 ## 3.6
 
 - [#156](https://github.com/cohere-ai/cohere-python/pull/156)
