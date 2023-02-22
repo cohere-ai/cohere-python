@@ -1,23 +1,81 @@
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 from cohere.responses.base import CohereObject
 
 
+class Cluster(CohereObject):
+    id: str
+    keywords: List[str]
+    description: str
+    size: int
+    sample_elements: List[str]
+
+    def __init__(
+        self,
+        id: str,
+        keywords: List[str],
+        description: str,
+        size: int,
+        sample_elements: List[str],
+    ) -> None:
+        self.id = id
+        self.keywords = keywords
+        self.description = description
+        self.size = size
+        self.sample_elements = sample_elements
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'Cluster':
+        return cls(
+            id=data['id'],
+            keywords=data['keywords'],
+            description=data['description'],
+            size=data['size'],
+            sample_elements=data['sample_elements'],
+        )
+
+
 class ClusterJobResult(CohereObject):
+    job_id: str
     status: str
     output_clusters_url: Optional[str]
     output_outliers_url: Optional[str]
+    clusters: Optional[List[Cluster]]
 
-    def __init__(self, status: str, output_clusters_url: Optional[str], output_outliers_url: Optional[str]):
+    def __init__(
+        self,
+        job_id: str,
+        status: str,
+        output_clusters_url: Optional[str],
+        output_outliers_url: Optional[str],
+        clusters: Optional[List[Cluster]],
+    ):
         # convert empty string to `None`
         if not output_clusters_url:
             output_clusters_url = None
         if not output_outliers_url:
             output_outliers_url = None
 
+        self.job_id = job_id
         self.status = status
         self.output_clusters_url = output_clusters_url
         self.output_outliers_url = output_outliers_url
+        self.clusters = clusters
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'ClusterJobResult':
+        if data.get('clusters') is None:
+            clusters = None
+        else:
+            clusters = [Cluster.from_dict(c) for c in data['clusters']]
+
+        return ClusterJobResult(
+            job_id=data['job_id'],
+            status=data['status'],
+            output_clusters_url=data['output_clusters_url'],
+            output_outliers_url=data['output_outliers_url'],
+            clusters=clusters,
+        )
 
 
 class CreateClusterJobResponse(CohereObject):
@@ -26,6 +84,13 @@ class CreateClusterJobResponse(CohereObject):
     def __init__(self, job_id: str, wait_fn):
         self.job_id = job_id
         self._wait_fn = wait_fn
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any], wait_fn) -> 'CreateClusterJobResponse':
+        return cls(
+            job_id=data['job_id'],
+            wait_fn=wait_fn,
+        )
 
     def wait(
         self,
@@ -50,6 +115,12 @@ class CreateClusterJobResponse(CohereObject):
 
 
 class AsyncCreateClusterJobResponse(CreateClusterJobResponse):
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any], wait_fn) -> 'AsyncCreateClusterJobResponse':
+        return cls(
+            job_id=data['job_id'],
+            wait_fn=wait_fn,
+        )
 
     async def wait(
         self,

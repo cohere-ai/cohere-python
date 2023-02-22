@@ -2,12 +2,13 @@ import pytest
 import asyncio
 import time
 from cohere import AsyncClient
+from cohere.responses.cluster import ClusterJobResult
 
 INPUT_FILE = "gs://cohere-dev-central-2/cluster_tests/all_datasets/reddit_500.jsonl"
 
 
 @pytest.mark.asyncio
-async def test_async_cluster_job(async_client: AsyncClient):
+async def test_async_create_cluster_job(async_client: AsyncClient):
     create_res = await async_client.create_cluster_job(
         INPUT_FILE,
         min_cluster_size=3,
@@ -22,12 +23,23 @@ async def test_async_cluster_job(async_client: AsyncClient):
         await asyncio.sleep(5)
         job = await async_client.get_cluster_job(create_res.job_id)
 
-    assert job.status == 'complete'
-    assert job.output_clusters_url is not None
-    assert job.output_outliers_url is not None
+    check_job_result(job)
 
 @pytest.mark.asyncio
-async def test_wait_succeeds(async_client: AsyncClient):
+async def test_async_get_cluster_job(async_client: AsyncClient):
+    jobs = await async_client.list_cluster_jobs()
+    job = await async_client.get_cluster_job(jobs[0].job_id)
+    check_job_result(job)
+
+@pytest.mark.asyncio
+async def test_async_list_cluster_jobs(async_client: AsyncClient):
+    jobs = await async_client.list_cluster_jobs()
+    assert len(jobs) > 0
+    for job in jobs:
+        check_job_result(job, completed=False)
+
+@pytest.mark.asyncio
+async def test_async_wait_for_cluster_job_succeeds(async_client: AsyncClient):
     create_res = await async_client.create_cluster_job(
         INPUT_FILE,
         min_cluster_size=3,
@@ -35,12 +47,10 @@ async def test_wait_succeeds(async_client: AsyncClient):
     )
 
     job = await async_client.wait_for_cluster_job(create_res.job_id, timeout=60, interval=5)
-    assert job.status == 'complete'
-    assert job.output_clusters_url is not None
-    assert job.output_outliers_url is not None
+    check_job_result(job)
 
 @pytest.mark.asyncio
-async def test_wait_times_out(async_client: AsyncClient):
+async def test_async_wait_for_cluster_job_times_out(async_client: AsyncClient):
     create_res = await async_client.create_cluster_job(
         INPUT_FILE,
         min_cluster_size=3,
@@ -51,7 +61,7 @@ async def test_wait_times_out(async_client: AsyncClient):
         await async_client.wait_for_cluster_job(create_res.job_id, timeout=5, interval=2)
 
 @pytest.mark.asyncio
-async def test_handler_wait_succeeds(async_client: AsyncClient):
+async def test_async_job_wait_method_succeeds(async_client: AsyncClient):
     create_res = await async_client.create_cluster_job(
         INPUT_FILE,
         min_cluster_size=3,
@@ -59,12 +69,10 @@ async def test_handler_wait_succeeds(async_client: AsyncClient):
     )
 
     job = await create_res.wait(timeout=60, interval=5)
-    assert job.status == 'complete'
-    assert job.output_clusters_url is not None
-    assert job.output_outliers_url is not None
+    check_job_result(job)
 
 @pytest.mark.asyncio
-async def test_handler_wait_times_out(async_client: AsyncClient):
+async def test_async_job_wait_method_times_out(async_client: AsyncClient):
     create_res = await async_client.create_cluster_job(
         INPUT_FILE,
         min_cluster_size=3,
@@ -73,3 +81,14 @@ async def test_handler_wait_times_out(async_client: AsyncClient):
 
     with pytest.raises(TimeoutError):
         await create_res.wait(timeout=5, interval=2)
+
+
+def check_job_result(job: ClusterJobResult, completed: bool = True):
+    assert job.job_id
+    assert job.status
+
+    if completed:
+        assert job.status == 'complete'
+        assert job.output_clusters_url
+        assert job.output_outliers_url
+        assert job.clusters

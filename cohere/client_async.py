@@ -291,14 +291,26 @@ class AsyncClient(Client):
         threshold: Optional[float] = None,
         min_cluster_size: Optional[int] = None,
     ) -> AsyncCreateClusterJobResponse:
+        """Create clustering job.
+
+        Args:
+            embeddings_url (str): File with embeddings to cluster.
+            threshold (Optional[float], optional): Similarity threshold above which two texts are deemed to belong in
+                the same cluster. Defaults to None.
+            min_cluster_size (Optional[int], optional): Minimum number of elements in a cluster. Defaults to None.
+
+        Returns:
+            CreateClusterJobResponse: Created clustering job handler
+        """
+
         json_body = {
             "embeddings_url": embeddings_url,
             "threshold": threshold,
             "min_cluster_size": min_cluster_size,
         }
         response = await self.__request(cohere.CLUSTER_JOBS_URL, json=json_body)
-        return AsyncCreateClusterJobResponse(
-            job_id=response['job_id'],
+        return AsyncCreateClusterJobResponse.from_dict(
+            response,
             wait_fn=self.wait_for_cluster_job,
         )
 
@@ -306,15 +318,33 @@ class AsyncClient(Client):
         self,
         job_id: str,
     ) -> ClusterJobResult:
+        """Get clustering job results.
+
+        Args:
+            job_id (str): Clustering job id.
+
+        Raises:
+            ValueError: "job_id" is empty
+
+        Returns:
+            ClusterJobResult: Clustering job result.
+        """
+
         if not job_id.strip():
             raise ValueError('"job_id" is empty')
 
         response = await self.__request(os.path.join(cohere.CLUSTER_JOBS_URL, job_id), method='GET')
-        return ClusterJobResult(
-            status=response['status'],
-            output_clusters_url=response['output_clusters_url'],
-            output_outliers_url=response['output_outliers_url'],
-        )
+        return ClusterJobResult.from_dict(response)
+
+    async def list_cluster_jobs(self) -> List[ClusterJobResult]:
+        """List clustering jobs.
+
+        Returns:
+            List[ClusterJobResult]: Clustering jobs created.
+        """
+
+        response = await self.__request(cohere.CLUSTER_JOBS_URL, method='GET')
+        return [ClusterJobResult.from_dict(r) for r in response['jobs']]
 
     async def wait_for_cluster_job(
         self,
@@ -322,6 +352,21 @@ class AsyncClient(Client):
         timeout: Optional[float] = None,
         interval: float = 10,
     ) -> ClusterJobResult:
+        """Wait for clustering job result.
+
+        Args:
+            job_id (str): Clustering job id.
+            timeout (Optional[float], optional): Wait timeout in seconds, if None - there is no limit to the wait time.
+                Defaults to None.
+            interval (float, optional): Wait poll interval in seconds. Defaults to 10.
+
+        Raises:
+            TimeoutError: wait timed out
+
+        Returns:
+            ClusterJobResult: Clustering job result.
+        """
+
         start_time = time.time()
         job = await self.get_cluster_job(job_id)
 
@@ -330,24 +375,6 @@ class AsyncClient(Client):
                 raise TimeoutError(f'wait_for_cluster_job timed out after {timeout} seconds')
 
             await asyncio.sleep(interval)
-            job = await self.get_cluster_job(job_id)
-
-        return job
-
-    async def wait_for_cluster_job(
-        self,
-        job_id: str,
-        timeout: Optional[float] = None,
-        interval: float = 10,
-    ) -> ClusterJobResult:
-        start_time = time.time()
-        job = await self.get_cluster_job(job_id)
-
-        while job.status == 'processing':
-            if timeout is not None and time.time() - start_time > timeout:
-                raise TimeoutError(f'wait_for_cluster_job timed out after {timeout} seconds')
-
-            asyncio.sleep(interval)
             job = await self.get_cluster_job(job_id)
 
         return job
