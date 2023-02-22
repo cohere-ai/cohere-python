@@ -347,7 +347,7 @@ class AsyncClient(Client):
             if timeout is not None and time.time() - start_time > timeout:
                 raise TimeoutError(f'wait_for_cluster_job timed out after {timeout} seconds')
 
-            asyncio.sleep(interval)
+            await asyncio.sleep(interval)
             job = await self.get_cluster_job(job_id)
 
         return job
