@@ -20,7 +20,7 @@ from cohere.error import CohereError,CohereAPIError,CohereConnectionError
 from cohere.responses.feedback import Feedback
 from cohere.responses.summarize import SummarizeResponse
 from cohere.responses.rerank import Reranking
-from cohere.responses.cluster import CreateClusterJobResponse,GetClusterJobResponse
+from cohere.responses.cluster import CreateClusterJobResponse, ClusterJobResult
 import cohere
 
 class Client:
@@ -512,13 +512,13 @@ class Client:
     def get_cluster_job(
         self,
         job_id: str,
-    ) -> GetClusterJobResponse:
+    ) -> ClusterJobResult:
         """TODO: doc"""
         if not job_id.strip():
             raise ValueError('"job_id" is empty')
 
         response = self.__request(os.path.join(cohere.CLUSTER_JOBS_URL, job_id), method='GET')
-        return GetClusterJobResponse(
+        return ClusterJobResult(
             status=response['status'],
             output_clusters_url=response['output_clusters_url'],
             output_outliers_url=response['output_outliers_url'],
