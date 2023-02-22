@@ -20,10 +20,6 @@ class ClusterJobResult(CohereObject):
         self.output_outliers_url = output_outliers_url
 
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 5ebdf4a23aeb3089045c8dfd316e103b62e4823f
 class CreateClusterJobResponse(CohereObject):
     job_id: str
 
@@ -52,20 +48,14 @@ class CreateClusterJobResponse(CohereObject):
 
         return self._wait_fn(job_id=self.job_id, timeout=timeout, interval=interval)
 
-<<<<<<< HEAD
-class CreateClusterJobResponseAsync(CreateClusterJobResponse):
-=======
 
 class AsyncCreateClusterJobResponse(CreateClusterJobResponse):
 
->>>>>>> 5ebdf4a23aeb3089045c8dfd316e103b62e4823f
     async def wait(
         self,
         timeout: Optional[float] = None,
         interval: float = 10,
     ) -> ClusterJobResult:
-<<<<<<< HEAD
-=======
         """Wait for clustering job result.
 
         Args:
@@ -80,5 +70,4 @@ class AsyncCreateClusterJobResponse(CreateClusterJobResponse):
             ClusterJobResult: Clustering job result.
         """
 
->>>>>>> 5ebdf4a23aeb3089045c8dfd316e103b62e4823f
         return await self._wait_fn(job_id=self.job_id, timeout=timeout, interval=interval)

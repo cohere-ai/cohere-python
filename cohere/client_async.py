@@ -29,11 +29,7 @@ from cohere.responses import (
     SummarizeResponse,
     Tokens,
 )
-<<<<<<< HEAD
-from cohere.responses.cluster import CreateClusterJobResponseAsync,ClusterJobResult
-=======
 from cohere.responses.cluster import AsyncCreateClusterJobResponse, ClusterJobResult
->>>>>>> 5ebdf4a23aeb3089045c8dfd316e103b62e4823f
 from cohere.responses.classify import Example as ClassifyExample
 from cohere.utils import np_json_dumps
 
