@@ -29,7 +29,7 @@ from cohere.responses import (
     SummarizeResponse,
     Tokens,
 )
-from cohere.responses.cluster import CreateClusterJobResponse,GetClusterJobResponse
+from cohere.responses.cluster import CreateClusterJobResponseAsync,ClusterJobResult
 from cohere.responses.classify import Example as ClassifyExample
 from cohere.utils import np_json_dumps
 
@@ -290,7 +290,7 @@ class AsyncClient(Client):
         embeddings_url: str,
         threshold: Optional[float] = None,
         min_cluster_size: Optional[int] = None,
-    ) -> CreateClusterJobResponse:
+    ) -> CreateClusterJobResponseAsync:
         json_body = {
             "embeddings_url": embeddings_url,
             "threshold": threshold,
@@ -298,21 +298,43 @@ class AsyncClient(Client):
         }
 
         response = await self.__request(cohere.CLUSTER_JOBS_URL, json=json_body)
-        return CreateClusterJobResponse(**response)
+        return CreateClusterJobResponseAsync(
+            job_id=response['job_id'],
+            wait_fn=self.wait_for_cluster_job,
+        )
 
     async def get_cluster_job(
         self,
         job_id: str,
-    ) -> GetClusterJobResponse:
+    ) -> ClusterJobResult:
         if not job_id.strip():
             raise ValueError('"job_id" is empty')
 
         response = await self.__request(os.path.join(cohere.CLUSTER_JOBS_URL, job_id), method='GET')
-        return GetClusterJobResponse(
+        return ClusterJobResult(
             status=response['status'],
             output_clusters_url=response['output_clusters_url'],
             output_outliers_url=response['output_outliers_url'],
         )
+
+
+    async def wait_for_cluster_job(
+        self,
+        job_id: str,
+        timeout: Optional[float] = None,
+        interval: float = 10,
+    ) -> ClusterJobResult:
+        start_time = time.time()
+        job = await self.get_cluster_job(job_id)
+
+        while job.status == 'processing':
+            if timeout is not None and time.time() - start_time > timeout:
+                raise TimeoutError(f'wait_for_cluster_job timed out after {timeout} seconds')
+
+            asyncio.sleep(interval)
+            job = await self.get_cluster_job(job_id)
+
+        return job
 
 
 
