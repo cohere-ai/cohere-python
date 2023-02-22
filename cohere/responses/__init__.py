@@ -1,5 +1,5 @@
 from cohere.responses.embeddings import Embedding,Embeddings
-from cohere.responses.generation import Generation, Generations
+from cohere.responses.generation import Generation, Generations, StreamingGenerations
 from cohere.responses.tokenize import Tokens, Detokenization
 from cohere.responses.classify import Classification,Classifications,LabelPrediction
 from cohere.responses.chat import Chat

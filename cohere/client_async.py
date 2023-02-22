@@ -26,7 +26,7 @@ from cohere.responses import (
     LabelPrediction,
     Language,
     Reranking,
-    SummarizeResponse,
+    SummarizeResponse,StreamingGenerations,
     Tokens,AsyncCreateClusterJobResponse, ClusterJobResult
 )
 from cohere.responses.classify import Example as ClassifyExample
@@ -69,13 +69,13 @@ class AsyncClient(Client):
         self._need_to_check_api_key = check_api_key  # TODO: check in __enter__
         self._backend = AIOHTTPBackend(logger, num_workers, max_retries, timeout)
 
-    async def __request(self, path, json=None, method="POST") -> JSON:
+    async def __request(self, path, json=None, method="POST", stream=False) -> JSON:
         headers = {
             "Authorization": f"BEARER {self.api_key}",
             "Request-Source": self.request_source,
             "Cohere-Version": self.cohere_version,
         }
-        return await self._backend.request(urljoin(self.api_url, path), json, method,headers)
+        return await self._backend.request(urljoin(self.api_url, path), json, method, headers, stream=stream)
 
     async def close(self):
         return await self._backend.close()
@@ -108,7 +108,7 @@ class AsyncClient(Client):
         return_likelihoods: Optional[str] = None,
         truncate: Optional[str] = None,
         logit_bias: Dict[int, float] = {},
-    ) -> Generations:
+        stream: bool = False) -> Union[Generations,StreamingGenerations]:
         json_body = {
             "model": model,
             "prompt": prompt,
@@ -127,8 +127,13 @@ class AsyncClient(Client):
             "truncate": truncate,
             "logit_bias": logit_bias,
         }
-        response = await self.__request(cohere.GENERATE_URL, json_body)
-        return Generations.from_dict(response=response,return_likelihoods=return_likelihoods)
+        if stream:
+            json_body['stream'] = True
+        response = await self.__request(cohere.GENERATE_URL, json=json_body, stream=stream)
+        if stream:
+            return StreamingGenerations(response) 
+        else:
+            return Generations.from_dict(response=response,return_likelihoods=return_likelihoods)
 
     async def chat(
         self,
@@ -415,7 +420,7 @@ class AIOHTTPBackend:
 
         return make_request_fn
 
-    async def request(self, url, json=None, method: str = "post", headers=None, session=None, **kwargs) -> JSON:
+    async def request(self, url, json=None, method: str = "post", headers=None, session=None, stream=False, **kwargs) -> JSON:
         headers = {
             "Content-Type": "application/json",
             **(headers or {}),
@@ -441,6 +446,9 @@ class AIOHTTPBackend:
 
         if "X-API-Warning" in response.headers:
             self.logger.warning(response.headers["X-API-Warning"])
+
+        if stream: # no special flags needed, just don't parse the json
+            return response
 
         try:
             json_response = await response.json()

@@ -15,7 +15,7 @@ from cohere.responses.chat import Chat
 from cohere.responses.classify import Example as ClassifyExample
 from cohere.responses.classify import LabelPrediction
 from cohere.responses.detectlang import DetectLanguageResponse, Language
-from cohere.responses import Detokenization, Tokens,Classification, Classifications,Generations
+from cohere.responses import Detokenization, Tokens,Classification, Classifications,Generations, StreamingGenerations
 from cohere.responses.embeddings import Embeddings
 from cohere.error import CohereError,CohereAPIError,CohereConnectionError
 from cohere.responses.feedback import Feedback
@@ -111,7 +111,8 @@ class Client:
                  stop_sequences: Optional[List[str]] = None,
                  return_likelihoods: Optional[str] = None,
                  truncate: Optional[str] = None,
-                 logit_bias: Dict[int, float] = {}) -> Generations:
+                 logit_bias: Dict[int, float] = {},
+                 stream: bool = False) -> Union[Generations,StreamingGenerations]:
         """Generate endpoint.
         See https://docs.cohere.ai/reference/generate for advanced arguments
 
@@ -123,9 +124,10 @@ class Client:
             num_generations (int): (Optional) The number of generations that will be returned, defaults to 1.
             max_tokens (int): (Optional) The number of tokens to predict per generation, defaults to 20.
             temperature (float): (Optional) The degree of randomness in generations from 0.0 to 5.0, lower is less random.
-            truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
+            truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.\
+            stream ()
         Returns:
-            a Generations object
+            a Generations object if stream=False, or a StreamingGenerations object if stream=True
         """
         json_body = {
             'model': model,
@@ -145,8 +147,13 @@ class Client:
             'truncate': truncate,
             'logit_bias': logit_bias,
         }
-        response = self.__request(cohere.GENERATE_URL, json=json_body)
-        return Generations.from_dict(response=response,return_likelihoods=return_likelihoods)
+        if stream:
+            json_body['stream'] = True
+        response = self.__request(cohere.GENERATE_URL, json=json_body, stream=stream)
+        if stream:
+            return StreamingGenerations(response) 
+        else:
+            return Generations.from_dict(response=response,return_likelihoods=return_likelihoods)
 
     def chat(self,
              query: str,
@@ -455,7 +462,7 @@ class Client:
         if 'X-API-Warning' in response.headers:
             print("\033[93mWarning: {}\n\033[0m".format(response.headers['X-API-Warning']), file=sys.stderr)
 
-    def __request(self, endpoint, json=None, method='POST') -> Any:
+    def __request(self, endpoint, json=None, method='POST', stream=False) -> Any:
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
             'Content-Type': 'application/json',
@@ -474,6 +481,9 @@ class Client:
             )
             session.mount('https://', HTTPAdapter(max_retries=retries))
             session.mount('http://', HTTPAdapter(max_retries=retries))
+
+            if stream:
+                return session.request(method, url, headers=headers, json=json, **self.request_dict, stream=True)
 
             response = session.request(method, url, headers=headers, json=json, **self.request_dict)
             try:

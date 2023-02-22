@@ -5,8 +5,9 @@ from cohere.responses.base import CohereObject, _df_html
 import html
 from collections import UserList
 from dataclasses import asdict, dataclass
-from typing import Dict, List, Optional, Union
-
+from typing import Dict, List, Optional, Union, Generator
+import json
+import requests
 
 TokenLikelihood = NamedTuple("TokenLikelihood", [("token", str), ("likelihood", float)])
 
@@ -114,3 +115,22 @@ class Generations(UserList, CohereObject):
         """Returns the prompt used as input"""
         return self[0].prompt  # should all be the same
 
+
+StreamingTokenLikelihood = NamedTuple("TokenLikelihood", [("index", int), ("token", str), ("likelihood", float)])
+
+
+class StreamingGenerations(CohereObject):
+
+    def __init__(self, response):
+        self.response = response
+
+    def __iter__(self) -> Generator[StreamingTokenLikelihood, None, None]:
+        if not isinstance(self.response, requests.Response):
+            raise ValueError("For AsyncClient, use `async for` to iterate through the `StreamingGenerations`")
+
+        for line in self.response.iter_lines():
+            yield StreamingTokenLikelihood(**json.loads(line))
+
+    async def __aiter__(self) -> Generator[StreamingTokenLikelihood, None, None]:
+        async for line in self.response.content:
+            yield StreamingTokenLikelihood(**json.loads(line))
