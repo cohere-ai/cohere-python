@@ -32,7 +32,7 @@ async def test_async_create_cluster_job(async_client: AsyncClient):
 async def test_async_get_cluster_job(async_client: AsyncClient):
     jobs = await async_client.list_cluster_jobs()
     job = await async_client.get_cluster_job(jobs[0].job_id)
-    check_job_result(job)
+    check_job_result(job, completed=False)
 
 @pytest.mark.asyncio
 async def test_async_list_cluster_jobs(async_client: AsyncClient):

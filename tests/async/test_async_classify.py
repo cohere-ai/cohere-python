@@ -2,7 +2,7 @@ import pytest
 from cohere.responses.classify import Example
 
 @pytest.mark.asyncio
-async def test_summarize(async_client):
+async def test_async_classify(async_client):
     prediction = await async_client.classify(model='small',
                                 inputs=['purple'],
                                 examples=[

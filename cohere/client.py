@@ -158,7 +158,10 @@ class Client:
              persona: str = "cohere",
              model: Optional[str] = None,
              return_chatlog: bool = False,
-             chatlog_override: Optional[List[Dict[str, str]]] = None) -> Chat:
+             return_prompt: bool = False,
+             chatlog_override: List[Dict[str, str]] = None,
+             preamble_override: str = None,
+             username: str = None) -> Chat:
         """Returns a Chat object with the query reply.
 
         Args:
@@ -167,14 +170,16 @@ class Client:
             persona (str): (Optional) The persona to use.
             model (str): (Optional) The model to use for generating the next reply.
             return_chatlog (bool): (Optional) Whether to return the chatlog.
+            return_prompt (bool): (Optional) Whether to return the prompt.
             chatlog_override (List[Dict[str, str]]): (Optional) A list of chatlog entries to override the chatlog.
+            preamble_override (str): (Optional) A string to override the preamble.
+            username (str): (Optional) A string to override the username.
 
         Examples:
             A simple chat messsage:
                 >>> res = co.chat(query="Hey! How are you doing today?")
                 >>> print(res.reply)
                 >>> print(res.session_id)
-
             Continuing a session using a specific model:
                 >>> res = co.chat(
                 >>>     query="Hey! How are you doing today?",
@@ -184,7 +189,6 @@ class Client:
                 >>>     return_chatlog=True)
                 >>> print(res.reply)
                 >>> print(res.chatlog)
-
             Overriding a chat log:
                 >>> res = co.chat(
                 >>>     query="What about you?",
@@ -207,10 +211,18 @@ class Client:
             'persona': persona,
             'model': model,
             'return_chatlog': return_chatlog,
+            'return_prompt': return_prompt,
             'chatlog_override': chatlog_override,
+            'preamble_override': preamble_override,
+            'username': username,
         }
         response = self.__request(cohere.CHAT_URL, json=json_body)
-        return Chat(query=query, persona=persona, response=response, return_chatlog=return_chatlog, client=self)
+        return Chat.from_dict(
+                    response,   
+                    query=query,
+                    persona=persona,
+                    client=self
+                )
 
     def _validate_chatlog_override(self, chatlog_override: List[Dict[str, str]]) -> None:
         if not isinstance(chatlog_override, list):
