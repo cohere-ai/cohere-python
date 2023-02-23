@@ -1,7 +1,9 @@
 import json as jsonlib
+import os
 import sys
+import time
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Dict, List, Optional, TypedDict, Union
+from typing import Any, Dict, List, Optional, Union
 from urllib.parse import urljoin
 
 import requests
@@ -14,6 +16,7 @@ from cohere.chat import Chat
 from cohere.classify import Classification, Classifications
 from cohere.classify import Example as ClassifyExample
 from cohere.classify import LabelPrediction
+from cohere.cluster import ClusterJobResult, CreateClusterJobResponse
 from cohere.detectlang import DetectLanguageResponse, Language
 from cohere.detokenize import Detokenization
 from cohere.embeddings import Embeddings
@@ -30,10 +33,6 @@ try:
     use_xhr_client = True
 except ImportError:
     pass
-
-
-class CheckAPIKeyResponse(TypedDict):
-    valid: bool
 
 
 class Client:
@@ -80,7 +79,7 @@ class Client:
             except CohereError as e:
                 raise CohereError(message=e.message, http_status=e.http_status, headers=e.headers)
 
-    def check_api_key(self) -> CheckAPIKeyResponse:
+    def check_api_key(self) -> Dict[str, bool]:
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
             'Content-Type': 'application/json',
@@ -249,7 +248,7 @@ class Client:
         for entry in chatlog_override:
             if not isinstance(entry, dict):
                 raise CohereError(
-                    message='chatlog_override must be a list of dicts, but it cointains a non-dict element')
+                    message='chatlog_override must be a list of dicts, but it contains a non-dict element')
             if len(entry) != 1:
                 raise CohereError(
                     message='chatlog_override must be a list of dicts, each mapping the agent to the message.')
@@ -466,9 +465,9 @@ class Client:
         if 'X-API-Warning' in response.headers:
             print("\033[93mWarning: {}\n\033[0m".format(response.headers['X-API-Warning']), file=sys.stderr)
 
-    def __pyfetch(self, url, headers, json_body) -> Response:
+    def __pyfetch(self, url, headers, json_body, method='POST') -> Response:
         req = XMLHttpRequest.new()
-        req.open('POST', url, False)
+        req.open(method, url, False)
         for key, value in headers.items():
             req.setRequestHeader(key, value)
         try:
@@ -480,7 +479,7 @@ class Client:
             raise CohereError(message=res['message'], http_status=req.status, headers=req.getAllResponseHeaders())
         return res
 
-    def __request(self, endpoint, json=None) -> Any:
+    def __request(self, endpoint, json=None, method='POST') -> Any:
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
             'Content-Type': 'application/json',
@@ -491,7 +490,7 @@ class Client:
 
         url = urljoin(self.api_url, endpoint)
         if use_xhr_client:
-            response = self.__pyfetch(url, headers, jsonlib.dumps(json))
+            response = self.__pyfetch(url, headers, jsonlib.dumps(json), method=method)
             self.__print_warning_msg(response)
             return response
         else:
@@ -505,7 +504,7 @@ class Client:
                 session.mount('https://', HTTPAdapter(max_retries=retries))
                 session.mount('http://', HTTPAdapter(max_retries=retries))
 
-                response = session.request('POST', url, headers=headers, json=json, **self.request_dict)
+                response = session.request(method, url, headers=headers, json=json, **self.request_dict)
                 try:
                     res = response.json()
                 except Exception:
@@ -523,3 +522,98 @@ class Client:
                 self.__print_warning_msg(response)
 
         return res
+
+    def create_cluster_job(
+        self,
+        embeddings_url: str,
+        threshold: Optional[float] = None,
+        min_cluster_size: Optional[int] = None,
+    ) -> CreateClusterJobResponse:
+        """Create clustering job.
+
+        Args:
+            embeddings_url (str): File with embeddings to cluster.
+            threshold (Optional[float], optional): Similarity threshold above which two texts are deemed to belong in
+                the same cluster. Defaults to None.
+            min_cluster_size (Optional[int], optional): Minimum number of elements in a cluster. Defaults to None.
+
+        Returns:
+            CreateClusterJobResponse: Created clustering job handler
+        """
+
+        json_body = {
+            "embeddings_url": embeddings_url,
+            "threshold": threshold,
+            "min_cluster_size": min_cluster_size,
+        }
+
+        response = self.__request(cohere.CLUSTER_JOBS_URL, json=json_body)
+        return CreateClusterJobResponse.from_dict(
+            response,
+            wait_fn=self.wait_for_cluster_job,
+        )
+
+    def get_cluster_job(
+        self,
+        job_id: str,
+    ) -> ClusterJobResult:
+        """Get clustering job results.
+
+        Args:
+            job_id (str): Clustering job id.
+
+        Raises:
+            ValueError: "job_id" is empty
+
+        Returns:
+            ClusterJobResult: Clustering job result.
+        """
+
+        if not job_id.strip():
+            raise ValueError('"job_id" is empty')
+
+        response = self.__request(os.path.join(cohere.CLUSTER_JOBS_URL, job_id), method='GET')
+        return ClusterJobResult.from_dict(response)
+
+    def list_cluster_jobs(self) -> List[ClusterJobResult]:
+        """List clustering jobs.
+
+        Returns:
+            List[ClusterJobResult]: Clustering jobs created.
+        """
+
+        response = self.__request(cohere.CLUSTER_JOBS_URL, method='GET')
+        return [ClusterJobResult.from_dict(r) for r in response['jobs']]
+
+    def wait_for_cluster_job(
+        self,
+        job_id: str,
+        timeout: Optional[float] = None,
+        interval: float = 10,
+    ) -> ClusterJobResult:
+        """Wait for clustering job result.
+
+        Args:
+            job_id (str): Clustering job id.
+            timeout (Optional[float], optional): Wait timeout in seconds, if None - there is no limit to the wait time.
+                Defaults to None.
+            interval (float, optional): Wait poll interval in seconds. Defaults to 10.
+
+        Raises:
+            TimeoutError: wait timed out
+
+        Returns:
+            ClusterJobResult: Clustering job result.
+        """
+
+        start_time = time.time()
+        job = self.get_cluster_job(job_id)
+
+        while job.status == 'processing':
+            if timeout is not None and time.time() - start_time > timeout:
+                raise TimeoutError(f'wait_for_cluster_job timed out after {timeout} seconds')
+
+            time.sleep(interval)
+            job = self.get_cluster_job(job_id)
+
+        return job

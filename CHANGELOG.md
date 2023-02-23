@@ -1,10 +1,19 @@
 # Changelog
 
-## 3.7
+## 3.8
 - [#158](https://github.com/cohere-ai/cohere-python/pull/158)
-  - Add support for `preamble_override` parameter for co.Chat
-  - Add support for `return_prompt` parameter for co.Chat
-  - Add support for `username` parameter for co.Chat
+  - Add support for co.Chat parameters:
+    - `preamble_override`
+    - `return_prompt`
+    - `username`
+
+## 3.7
+- [#164](https://github.com/cohere-ai/cohere-python/pull/164)
+  - Add clustering methods: 
+    - `co.create_cluster_job`  
+    - `co.get_cluster_job`
+    - `co.list_cluster_jobs`
+    - `co.wait_for_cluster_job`
 
 ## 3.6
 - [#156](https://github.com/cohere-ai/cohere-python/pull/156)
