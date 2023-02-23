@@ -5,6 +5,8 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List, Optional, Union
 from urllib.parse import urljoin
+from concurrent import futures
+from itertools import repeat
 
 import requests
 from requests import Response
@@ -93,7 +95,9 @@ class Client:
 
     def batch_generate(self, prompts: List[str], **kwargs) -> List[Generations]:
         """A batched version of generate."""
-        return [self.generate(prompt=prompt, **kwargs) for prompt in prompts]
+        with futures.ThreadPoolExecutor(max_workers=self.num_workers) as executor:
+            res = executor.map(lambda prompt: self.generate(prompt=prompt, **kwargs), prompts)
+        return list(res)
 
     def generate(self,
                  prompt: Optional[str] = None,
@@ -343,7 +347,9 @@ class Client:
 
     def batch_tokenize(self, texts: List[str]) -> List[Tokens]:
         """A batched version of tokenize"""
-        return [self.tokenize(t) for t in texts]
+        with futures.ThreadPoolExecutor(max_workers=self.num_workers) as executor:
+            res = executor.map(self.tokenize, texts)
+        return list(res)
 
     def tokenize(self, text: str) -> Tokens:
         """Return a Tokens object of the provided text, see https://docs.cohere.ai/reference/tokenize for advanced usage.
@@ -357,7 +363,9 @@ class Client:
 
     def batch_detokenize(self, list_of_tokens: List[List[int]]) -> List[Detokenization]:
         """A batched version of detokenize"""
-        return [self.detokenize(t) for t in list_of_tokens]
+        with futures.ThreadPoolExecutor(max_workers=self.num_workers) as executor:
+            res = executor.map(self.detokenize, list_of_tokens)
+        return list(res)
 
     def detokenize(self, tokens: List[int]) -> Detokenization:
         """Return a Detokenization object of the provided tokens, see https://docs.cohere.ai/reference/detokenize-1 for advanced usage.
