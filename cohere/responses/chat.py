@@ -35,9 +35,12 @@ class Chat(CohereObject):
         )
 
     def respond(self, response: str) -> "Chat":
-        return self.client.chat(query=response, session_id=self.session_id, persona=self.persona)
+        return self.client.chat(query=response, session_id=self.session_id, persona=self.persona,
+                                return_chatlog = self.chatlog is not None, return_prompt = self.prompt is not None)
 
 
 class AsyncChat(Chat):
     async def respond(self, response: str) -> "AsyncChat":
-        return await self.client.chat(query=response, session_id=self.session_id, persona=self.persona)
+        return await self.client.chat(query=response, session_id=self.session_id, persona=self.persona,
+                                     return_chatlog = self.chatlog is not None, return_prompt = self.prompt is not None)
+
