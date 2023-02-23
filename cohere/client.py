@@ -6,7 +6,6 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List, Optional, Union
 from urllib.parse import urljoin
 from concurrent import futures
-from itertools import repeat
 
 import requests
 from requests import Response
