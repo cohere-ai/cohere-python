@@ -132,7 +132,7 @@ uvloop = ["uvloop (>=0.15.2)"]
 name = "certifi"
 version = "2022.12.7"
 description = "Python package for providing Mozilla's CA Bundle."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -472,7 +472,7 @@ python-versions = ">=3.6"
 name = "requests"
 version = "2.28.2"
 description = "Python HTTP for Humans."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7, <4"
 
@@ -720,7 +720,7 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7, <3.11"
-content-hash = "b4790d99da76a0225dd112a8599f95258ff88c6d51a4db9fab21abc5467ff6b5"
+content-hash = "145b466839742e9b687b3e21f73135f8ddace4999887deab0a58db5e73814eaa"
 
 [metadata.files]
 aiohttp = [
