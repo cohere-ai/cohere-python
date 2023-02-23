@@ -153,7 +153,10 @@ class Client:
              persona: str = "cohere",
              model: Optional[str] = None,
              return_chatlog: bool = False,
-             chatlog_override: Optional[List[Dict[str, str]]] = None) -> Chat:
+             return_prompt: bool = False,
+             chatlog_override: List[Dict[str, str]] = None,
+             preamble_override: str = None,
+             username: str = None) -> Chat:
         """Returns a Chat object with the query reply.
 
         Args:
@@ -162,7 +165,10 @@ class Client:
             persona (str): (Optional) The persona to use.
             model (str): (Optional) The model to use for generating the next reply.
             return_chatlog (bool): (Optional) Whether to return the chatlog.
+            return_prompt (bool): (Optional) Whether to return the prompt.
             chatlog_override (List[Dict[str, str]]): (Optional) A list of chatlog entries to override the chatlog.
+            preamble_override (str): (Optional) A string to override the preamble.
+            username (str): (Optional) A string to override the username.
 
         Example:
         ```
@@ -178,25 +184,38 @@ class Client:
             session_id="1234",
             persona="fortune",
             model="command-xlarge",
-            return_chatlog=True)
+            return_chatlog=True,
+            return_prompt=True)
         print(res.reply)
         print(res.chatlog)
+        print(res.prompt)
         ```
 
-                Example:
+        Example:
         ```
         res = co.chat(
             query="What about you?",
             session_id="1234",
             chatlog_override=[
                 {'Bot': 'Hey!'},
-                {'User': 'I am doing great!'},
+                {'CustomUser': 'I am doing great!'},
                 {'Bot': 'That is great to hear!'},
             ],
+            username="CustomUser",
             return_chatlog=True)
         print(res.reply)
         print(res.chatlog)
         ```
+
+        Example:
+        ```
+        res = co.chat(
+            query="What about you?",
+            preamble_override="You are a dog who mostly barks",
+            return_chatlog=True)
+            )
+        print(res.reply)
+        print(res.chatlog)
         """
         if chatlog_override is not None:
             self._validate_chatlog_override(chatlog_override)
@@ -207,10 +226,20 @@ class Client:
             'persona': persona,
             'model': model,
             'return_chatlog': return_chatlog,
+            'return_prompt': return_prompt,
             'chatlog_override': chatlog_override,
+            'preamble_override': preamble_override,
+            'username': username,
         }
         response = self._executor.submit(self.__request, cohere.CHAT_URL, json=json_body)
-        return Chat(query=query, persona=persona, _future=response, client=self, return_chatlog=return_chatlog)
+        return Chat(
+                    query=query,
+                    persona=persona,
+                    _future=response,
+                    client=self,
+                    return_chatlog=return_chatlog,
+                    return_prompt=return_prompt
+                )
 
     def _validate_chatlog_override(self, chatlog_override: List[Dict[str, str]]) -> None:
         if not isinstance(chatlog_override, list):
