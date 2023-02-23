@@ -6,9 +6,19 @@
   - Add AsyncClient
   - Default value of API key from environment variable `CO_API_KEY`.
   - Feedback endpoint moved from CohereObject to Client/AsyncClient.
+  - Lazy initialization using futures removed.
   - Generations is now a UserList, and initialized from responses using `from_dict`.
+  - Chat objects are initialized using `from_dict`. Optional attributes are now `None` rather than missing.
   - Documentation expanded and built using sphinx.
   - Use Poetry, and format using black and isort, include pre-commit hooks.
+
+## 3.8
+
+- [#158](https://github.com/cohere-ai/cohere-python/pull/158)
+  - Add support for co.Chat parameters:
+    - `preamble_override`
+    - `return_prompt`
+    - `username`
 
 ## 3.7
 

@@ -73,8 +73,7 @@ class TestChat(unittest.TestCase):
         self.assertIsInstance(prediction.reply, str)
         self.assertIsInstance(prediction.session_id, str)
 
-        with self.assertRaises(AttributeError):
-            prediction.chatlog
+        assert prediction.chatlog is None
 
     def testValidChatlogOverride(self):
         query = "What about you?"
@@ -119,3 +118,36 @@ class TestChat(unittest.TestCase):
                             session_id="1234",
                             chatlog_override=chatlog_override,
                             return_chatlog=True)
+
+    def test_return_prompt(self):
+        prediction = co.chat("Yo what up?", return_prompt=True)
+        self.assertIsInstance(prediction.reply, str)
+        self.assertIsInstance(prediction.session_id, str)
+        self.assertIsNotNone(prediction.prompt)
+        self.assertGreaterEqual(len(prediction.prompt), len(prediction.reply))
+
+    def test_return_prompt_false(self):
+        prediction = co.chat("Yo what up?", return_prompt=False)
+        self.assertIsInstance(prediction.reply, str)
+        self.assertIsInstance(prediction.session_id, str)
+        assert prediction.prompt is None
+
+    def test_preamble_override(self):
+        preamble = "You are a dog who mostly barks"
+        prediction = co.chat("Yo what up?", preamble_override=preamble, return_prompt=True)
+        self.assertIsInstance(prediction.reply, str)
+        self.assertIsInstance(prediction.session_id, str)
+        self.assertIn(preamble, prediction.prompt)
+        print(prediction.prompt)
+
+    def test_invalid_preamble_override(self):
+        with self.assertRaises(cohere.CohereError):
+            co.chat("Yo what up?", preamble_override=123).reply
+
+    def test_username_override(self):
+        username = "CustomUser"
+        prediction = co.chat("Yo what up?", username=username, return_chatlog=True)
+        self.assertIsInstance(prediction.reply, str)
+        self.assertIsInstance(prediction.session_id, str)
+        chatlog_starts_with_username = prediction.chatlog.strip().startswith(username)
+        self.assertTrue(chatlog_starts_with_username)

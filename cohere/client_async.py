@@ -130,29 +130,38 @@ class AsyncClient(Client):
         response = await self.__request(cohere.GENERATE_URL, json_body)
         return Generations.from_dict(response=response,return_likelihoods=return_likelihoods)
 
-    async def chat(
-        self,
-        query: str,
-        session_id: str = "",
-        persona: str = "cohere",
-        model: Optional[str] = None,
-        return_chatlog: bool = False,
-        chatlog_override: Optional[List[Dict[str, str]]] = None,
-    ) -> AsyncChat:
+    async def chat(self,
+             query: str,
+             session_id: str = "",
+             persona: str = "cohere",
+             model: Optional[str] = None,
+             return_chatlog: bool = False,
+             return_prompt: bool = False,
+             chatlog_override: List[Dict[str, str]] = None,
+             preamble_override: str = None,
+             username: str = None) -> AsyncChat:
 
         if chatlog_override is not None:
             self._validate_chatlog_override(chatlog_override)
-
         json_body = {
-            "query": query,
-            "session_id": session_id,
-            "persona": persona,
-            "model": model,
-            "return_chatlog": return_chatlog,
-            "chatlog_override": chatlog_override,
+            'query': query,
+            'session_id': session_id,
+            'persona': persona,
+            'model': model,
+            'return_chatlog': return_chatlog,
+            'return_prompt': return_prompt,
+            'chatlog_override': chatlog_override,
+            'preamble_override': preamble_override,
+            'username': username,
         }
         response = await self.__request(cohere.CHAT_URL, json=json_body)
-        return AsyncChat(query=query, persona=persona, response=response, return_chatlog=return_chatlog, client=self)
+        return AsyncChat.from_dict(
+                response,   
+                    query=query,
+                    persona=persona,
+                    client=self
+                )
+
 
     async def embed(self, texts: List[str], model: Optional[str] = None, truncate: Optional[str] = None) -> Embeddings:
         json_bodys = [
