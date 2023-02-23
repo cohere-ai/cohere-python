@@ -4,9 +4,10 @@ import pytest
 async def test_async_multi_replies(async_client):
     num_replies = 3
     prediction = await async_client.chat("Yo what's up?", return_chatlog=True)
-    print(prediction.chatlog)
+    assert prediction.chatlog is not None
     for _ in range(num_replies):
         prediction = await prediction.respond("oh that's cool")
         assert isinstance(prediction.reply, str)
         assert isinstance(prediction.session_id, str)
         assert prediction.persona == "cohere"
+        assert prediction.chatlog is not None        
