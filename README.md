@@ -55,12 +55,7 @@ There is also an asyncio compatible client called `cohere.AsyncClient` with an i
 
 ## Versioning
 
-To use the SDK with a specific API version, you can specify it when creating the Cohere Client:
-
-```python
-import cohere
-
-co = cohere.Client('YOUR_API_KEY', '2022-12-06')
+This SDK currently supports v1 of the API. To use the SDK with a specific API version, you need to download the specific version of the SDK tied to the API version you want. Look at the Changelog to see which SDK version to download.
 ```
 
 ## Endpoints

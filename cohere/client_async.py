@@ -48,7 +48,6 @@ class AsyncClient(Client):
     def __init__(
         self,
         api_key: str = None,
-        version: Optional[str] = None,
         num_workers: int = 16,
         request_dict: dict = {},
         check_api_key: bool = False,
@@ -65,7 +64,7 @@ class AsyncClient(Client):
         self.max_retries = max_retries
         if client_name:
             self.request_source += ":" + client_name
-        self.cohere_version = version or cohere.COHERE_VERSION
+        self.cohere_version = cohere.COHERE_VERSION
         self._need_to_check_api_key = check_api_key  # TODO: check in __enter__
         self._backend = AIOHTTPBackend(logger, num_workers, max_retries, timeout)
 
@@ -73,7 +72,6 @@ class AsyncClient(Client):
         headers = {
             "Authorization": f"BEARER {self.api_key}",
             "Request-Source": self.request_source,
-            "Cohere-Version": self.cohere_version,
         }
         return await self._backend.request(urljoin(self.api_url, path), json, method,headers)
 

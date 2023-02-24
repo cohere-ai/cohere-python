@@ -4,7 +4,7 @@ import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List, Optional, Union
-from urllib.parse import urljoin
+from posixpath import join as posixJoin
 from concurrent import futures
 
 import requests
@@ -30,7 +30,6 @@ class Client:
 
     Args:
         api_key (str): Your API key.
-        version (str): API version to use. Will use cohere.COHERE_VERSION by default.
         num_workers (int): Maximal number of threads for parallelized calls.
         request_dict (dict): Additional parameters for calls to requests.post
         check_api_key (bool): Whether to check the api key for validity on initialization.
@@ -40,7 +39,6 @@ class Client:
     """
     def __init__(self,
                  api_key: str = None,
-                 version: Optional[str] = None,
                  num_workers: int = 64,
                  request_dict: dict = {},
                  check_api_key: bool = True,
@@ -56,13 +54,9 @@ class Client:
         self.request_source = 'python-sdk'
         self.max_retries = max_retries
         self.timeout = timeout
+        self.cohere_version = cohere.COHERE_VERSION
         if client_name:
             self.request_source += ":" + client_name
-
-        if version is None:
-            self.cohere_version = cohere.COHERE_VERSION
-        else:
-            self.cohere_version = version
 
         if check_api_key:
             res = self.check_api_key()
@@ -78,10 +72,8 @@ class Client:
             'Content-Type': 'application/json',
             'Request-Source': 'python-sdk',
         }
-        if self.cohere_version != '':
-            headers['Cohere-Version'] = self.cohere_version
 
-        url = urljoin(self.api_url, cohere.CHECK_API_KEY_URL)
+        url = posixJoin(self.api_url, cohere.CHECK_API_KEY_URL)
         response = requests.request('POST', url, headers=headers)
 
         try:
@@ -483,10 +475,8 @@ class Client:
             'Content-Type': 'application/json',
             'Request-Source': self.request_source,
         }
-        if self.cohere_version != '':
-            headers['Cohere-Version'] = self.cohere_version
 
-        url = urljoin(self.api_url, endpoint)
+        url = posixJoin(self.api_url, self.cohere_version, endpoint)
         with requests.Session() as session:
             retries = Retry(
                 total=self.max_retries,
