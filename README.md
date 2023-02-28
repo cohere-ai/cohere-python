@@ -11,7 +11,7 @@ This package provides functionality developed to simplify interfacing with the [
 * SDK Documentation is hosted on [Read the docs](https://cohere-sdk.readthedocs.io/en/latest/).
   * You can build SDK documentation locally using `cd docs; make clean html`.
 * For more details on advanced parameters, you can also consult the [API documentation](https://docs.cohere.ai/reference/about).
-* See the [examples](examples/) directory for examples, including  some additional functionality for visualizations in Jupyter notebook.
+* See the [examples](examples/) directory for examples, including  some additional functionality for visualizations in Jupyter notebooks.
 
 ## Installation
 
@@ -51,11 +51,11 @@ prediction = co.generate(
 print('prediction: {}'.format(prediction.generations[0].text))
 ```
 
-There is also an asyncio compatible client called `cohere.AsyncClient` with an identical interface. Consult the [SDK Docs](https://cohere-sdk.readthedocs.io/en/latest/) for more details.
+There is also an asyncio compatible client called `cohere.AsyncClient` with an equivalent interface. Consult the [SDK Docs](https://cohere-sdk.readthedocs.io/en/latest/) for more details.
 
 ## Versioning
 
-This SDK currently supports v1 of the API. To use the SDK with a specific API version, you need to download the specific version of the SDK tied to the API version you want. Look at the Changelog to see which SDK version to download.
+Each SDK release is only compatible with the latest version of the Cohere API at the time of release. To use the SDK with an older API version, you need to download a version of the SDK tied to the API version you want. Look at the [Changelog](https://github.com/cohere-ai/cohere-python/blob/main/CHANGELOG.md) to see which SDK version to download.
 ```
 
 ## Endpoints
