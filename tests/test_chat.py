@@ -24,7 +24,7 @@ class TestChat(unittest.TestCase):
             self.assertIsInstance(prediction.reply, str)
             self.assertIsInstance(prediction.session_id, str)
             self.assertEqual(prediction.persona, "cohere")
-    
+
     # TODO re-add test
     # def test_invalid_persona(self):
     #     with self.assertRaises(cohere.CohereError):
