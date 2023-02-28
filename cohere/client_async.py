@@ -64,11 +64,11 @@ class AsyncClient(Client):
         self.max_retries = max_retries
         if client_name:
             self.request_source += ":" + client_name
-        self.cohere_version = cohere.COHERE_VERSION
+        self.api_version = cohere.API_VERSION
         self._need_to_check_api_key = check_api_key  # TODO: check in __enter__
         self._backend = AIOHTTPBackend(logger, num_workers, max_retries, timeout)
 
-    async def __request(self, path, json=None, method="POST") -> JSON:
+    async def _request(self, path, json=None, method="POST") -> JSON:
         headers = {
             "Authorization": f"BEARER {self.api_key}",
             "Request-Source": self.request_source,
@@ -80,7 +80,7 @@ class AsyncClient(Client):
 
     # API methods
     async def check_api_key(self) -> Dict[str, bool]:
-        return await self.__request(cohere.CHECK_API_KEY_URL)
+        return await self._request(cohere.CHECK_API_KEY_URL)
 
     async def batch_generate(self, prompts: List[str], return_exceptions=False, **kwargs) -> List[Generations]:
         """return_exceptions is passed to asyncio.gather"""
@@ -125,7 +125,7 @@ class AsyncClient(Client):
             "truncate": truncate,
             "logit_bias": logit_bias,
         }
-        response = await self.__request(cohere.GENERATE_URL, json_body)
+        response = await self._request(cohere.GENERATE_URL, json_body)
         return Generations.from_dict(response=response,return_likelihoods=return_likelihoods)
 
     async def chat(self,
@@ -152,7 +152,7 @@ class AsyncClient(Client):
             'preamble_override': preamble_override,
             'username': username,
         }
-        response = await self.__request(cohere.CHAT_URL, json=json_body)
+        response = await self._request(cohere.CHAT_URL, json=json_body)
         return AsyncChat.from_dict(
                 response,   
                     query=query,
@@ -166,7 +166,7 @@ class AsyncClient(Client):
             dict(texts=texts[i : i + cohere.COHERE_EMBED_BATCH_SIZE], model=model, truncate=truncate)
             for i in range(0, len(texts), cohere.COHERE_EMBED_BATCH_SIZE)
         ]
-        responses = await asyncio.gather(*[self.__request(cohere.EMBED_URL, json) for json in json_bodys])
+        responses = await asyncio.gather(*[self._request(cohere.EMBED_URL, json) for json in json_bodys])
         embeddings = Embeddings([e for res in responses for e in res["embeddings"]])  # concatenate results
         return embeddings
 
@@ -187,7 +187,7 @@ class AsyncClient(Client):
             "examples": examples_dicts,
             "truncate": truncate,
         }
-        response = await self.__request(cohere.CLASSIFY_URL, json=json_body)
+        response = await self._request(cohere.CLASSIFY_URL, json=json_body)
         classifications = []
         for res in response["classifications"]:
             labelObj = {}
@@ -220,7 +220,7 @@ class AsyncClient(Client):
         }
         # remove None values from the dict
         json_body = {k: v for k, v in json_body.items() if v is not None}
-        response = await self.__request(cohere.SUMMARIZE_URL, json=json_body)
+        response = await self._request(cohere.SUMMARIZE_URL, json=json_body)
         return SummarizeResponse(id=response["id"], summary=response["summary"])
 
     async def batch_tokenize(self, texts: List[str], return_exceptions=False) -> List[Tokens]:
@@ -228,7 +228,7 @@ class AsyncClient(Client):
 
     async def tokenize(self, text: str) -> Tokens:
         json_body = {"text": text}
-        res = await self.__request(cohere.TOKENIZE_URL, json_body)
+        res = await self._request(cohere.TOKENIZE_URL, json_body)
         return Tokens(tokens=res["tokens"], token_strings=res["token_strings"])
 
     async def batch_detokenize(self, list_of_tokens: List[List[int]], return_exceptions=False) -> List[Detokenization]:
@@ -236,14 +236,14 @@ class AsyncClient(Client):
 
     async def detokenize(self, tokens: List[int]) -> Detokenization:
         json_body = {"tokens": tokens}
-        res = await self.__request(cohere.DETOKENIZE_URL, json_body)
+        res = await self._request(cohere.DETOKENIZE_URL, json_body)
         return Detokenization(text=res["text"])
 
     async def detect_language(self, texts: List[str]) -> DetectLanguageResponse:
         json_body = {
             "texts": texts,
         }
-        response = await self.__request(cohere.DETECT_LANG_URL, json=json_body)
+        response = await self._request(cohere.DETECT_LANG_URL, json=json_body)
         results = []
         for result in response["results"]:
             results.append(Language(result["language_code"], result["language_name"]))
@@ -256,7 +256,7 @@ class AsyncClient(Client):
             "desired_response": desired_response,
             "feedback": feedback,
         }
-        await self.__request(cohere.FEEDBACK_URL, json_body)
+        await self._request(cohere.FEEDBACK_URL, json_body)
         return Feedback(id=id, good_response=good_response, desired_response=desired_response, feedback=feedback)
 
     async def rerank(
@@ -288,7 +288,7 @@ class AsyncClient(Client):
             "top_n": top_n,
             "return_documents": False,
         }
-        reranking = Reranking(await self.__request(cohere.RERANK_URL, json=json_body))
+        reranking = Reranking(await self._request(cohere.RERANK_URL, json=json_body))
         for rank in reranking.results:
             rank.document = parsed_docs[rank.index]
         return reranking
@@ -316,7 +316,7 @@ class AsyncClient(Client):
             "threshold": threshold,
             "min_cluster_size": min_cluster_size,
         }
-        response = await self.__request(cohere.CLUSTER_JOBS_URL, json=json_body)
+        response = await self._request(cohere.CLUSTER_JOBS_URL, json=json_body)
         return AsyncCreateClusterJobResponse.from_dict(
             response,
             wait_fn=self.wait_for_cluster_job,
@@ -341,7 +341,7 @@ class AsyncClient(Client):
         if not job_id.strip():
             raise ValueError('"job_id" is empty')
 
-        response = await self.__request(os.path.join(cohere.CLUSTER_JOBS_URL, job_id), method='GET')
+        response = await self._request(os.path.join(cohere.CLUSTER_JOBS_URL, job_id), method='GET')
         return ClusterJobResult.from_dict(response)
 
     async def list_cluster_jobs(self) -> List[ClusterJobResult]:
@@ -351,7 +351,7 @@ class AsyncClient(Client):
             List[ClusterJobResult]: Clustering jobs created.
         """
 
-        response = await self.__request(cohere.CLUSTER_JOBS_URL, method='GET')
+        response = await self._request(cohere.CLUSTER_JOBS_URL, method='GET')
         return [ClusterJobResult.from_dict(r) for r in response['jobs']]
 
     async def wait_for_cluster_job(

@@ -31,7 +31,7 @@ class Client:
     Args:
         api_key (str): Your API key.
         num_workers (int): Maximal number of threads for parallelized calls.
-        request_dict (dict): Additional parameters for calls to requests.post
+        request_dict (dict): Additional parameters for calls with the requests library. Currently ignored in AsyncClient
         check_api_key (bool): Whether to check the api key for validity on initialization.
         client_name (str): A string to identify your application for internal analytics purposes.
         max_retries (int): maximal number of retries for requests.
@@ -54,18 +54,18 @@ class Client:
         self.request_source = 'python-sdk'
         self.max_retries = max_retries
         self.timeout = timeout
-        self.cohere_version = cohere.COHERE_VERSION
+        self.api_version = cohere.API_VERSION
         if client_name:
             self.request_source += ":" + client_name
 
         if check_api_key:
             res = self.check_api_key()
             if not res['valid']:
-                raise CohereError('invalid api key')
+                raise CohereError('invalid API key')
 
     def check_api_key(self) -> Dict[str, bool]:
         """Checks the api key.
-        Happens automatically in Client initialization, but not in AsyncClient
+        Happens automatically during Client initialization, but not in AsyncClient
         """
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
@@ -85,7 +85,7 @@ class Client:
         return res
 
     def batch_generate(self, prompts: List[str], **kwargs) -> List[Generations]:
-        """A batched version of generate."""
+        """A batched version of generate with multiple prompts."""
         with futures.ThreadPoolExecutor(max_workers=self.num_workers) as executor:
             res = executor.map(lambda prompt: self.generate(prompt=prompt, **kwargs), prompts)
         return list(res)
@@ -111,7 +111,7 @@ class Client:
         See https://docs.cohere.ai/reference/generate for advanced arguments
 
         Args:
-            prompt (str): either a single prompt, or a list of them
+            prompt (str): Represents the prompt or text to be completed. Trailing whitespaces will be trimmed.
             model (str): (Optional) The model to use for generating the next reply.
             return_likelihoods (str): (Optional) One of GENERATION|ALL|NONE to specify how and if the token likelihoods are returned with the response.
             preset (str): (Optional) The ID of a custom playground preset.
@@ -140,7 +140,7 @@ class Client:
             'truncate': truncate,
             'logit_bias': logit_bias,
         }
-        response = self.__request(cohere.GENERATE_URL, json=json_body)
+        response = self._request(cohere.GENERATE_URL, json=json_body)
         return Generations.from_dict(response=response,return_likelihoods=return_likelihoods)
 
     def chat(self,
@@ -207,7 +207,7 @@ class Client:
             'preamble_override': preamble_override,
             'username': username,
         }
-        response = self.__request(cohere.CHAT_URL, json=json_body)
+        response = self._request(cohere.CHAT_URL, json=json_body)
         return Chat.from_dict(
                     response,   
                     query=query,
@@ -245,7 +245,7 @@ class Client:
                 'texts': texts_batch,
                 'truncate': truncate,
             })
-        for result in self._executor.map(lambda json_body: self.__request(cohere.EMBED_URL, json=json_body),
+        for result in self._executor.map(lambda json_body: self._request(cohere.EMBED_URL, json=json_body),
                                             json_bodys):
             responses.extend(result['embeddings'])
 
@@ -277,7 +277,7 @@ class Client:
             'examples': examples_dicts,
             'truncate': truncate,
         }
-        response = self.__request(cohere.CLASSIFY_URL, json=json_body)
+        response = self._request(cohere.CLASSIFY_URL, json=json_body)
 
         classifications = []
         for res in response['classifications']:
@@ -344,7 +344,7 @@ class Client:
         }
         # remove None values from the dict
         json_body = {k: v for k, v in json_body.items() if v is not None}
-        response = self.__request(cohere.SUMMARIZE_URL, json=json_body)
+        response = self._request(cohere.SUMMARIZE_URL, json=json_body)
 
         return SummarizeResponse(id=response["id"], summary=response["summary"])
 
@@ -361,7 +361,7 @@ class Client:
             text (str): Text to summarize.
         """
         json_body = {'text': text}
-        res = self.__request(cohere.TOKENIZE_URL, json=json_body)
+        res = self._request(cohere.TOKENIZE_URL, json=json_body)
         return Tokens(tokens=res['tokens'], token_strings=res['token_strings'])
 
     def batch_detokenize(self, list_of_tokens: List[List[int]]) -> List[Detokenization]:
@@ -377,7 +377,7 @@ class Client:
             tokens (List[int]): A list of tokens to convert to strings
         """
         json_body = {'tokens': tokens}
-        res = self.__request(cohere.DETOKENIZE_URL, json=json_body)
+        res = self._request(cohere.DETOKENIZE_URL, json=json_body)
         return Detokenization(text=res['text'])
 
     def detect_language(self, texts: List[str]) -> DetectLanguageResponse:
@@ -389,7 +389,7 @@ class Client:
         json_body = {
             "texts": texts,
         }
-        response = self.__request(cohere.DETECT_LANG_URL, json=json_body)
+        response = self._request(cohere.DETECT_LANG_URL, json=json_body)
         results = []
         for result in response["results"]:
             results.append(Language(result["language_code"], result["language_name"]))
@@ -427,7 +427,7 @@ class Client:
             'desired_response': desired_response,
             'feedback': feedback,
         }
-        self.__request(cohere.FEEDBACK_URL, json_body)
+        self._request(cohere.FEEDBACK_URL, json_body)
         return Feedback(id=id, good_response=good_response, desired_response=desired_response, feedback=feedback)
 
     def rerank(self,
@@ -460,7 +460,7 @@ class Client:
             "top_n": top_n,
             "return_documents": False,
         }
-        reranking = Reranking(self.__request(cohere.RERANK_URL, json=json_body))
+        reranking = Reranking(self._request(cohere.RERANK_URL, json=json_body))
         for rank in reranking.results:
             rank.document = parsed_docs[rank.index]
         return reranking
@@ -469,14 +469,14 @@ class Client:
         if 'X-API-Warning' in response.headers:
             print("\033[93mWarning: {}\n\033[0m".format(response.headers['X-API-Warning']), file=sys.stderr)
 
-    def __request(self, endpoint, json=None, method='POST') -> Any:
+    def _request(self, endpoint, json=None, method='POST') -> Any:
         headers = {
             'Authorization': 'BEARER {}'.format(self.api_key),
             'Content-Type': 'application/json',
             'Request-Source': self.request_source,
         }
 
-        url = posixJoin(self.api_url, self.cohere_version, endpoint)
+        url = posixJoin(self.api_url, self.api_version, endpoint)
         with requests.Session() as session:
             retries = Retry(
                 total=self.max_retries,
@@ -530,7 +530,7 @@ class Client:
             "min_cluster_size": min_cluster_size,
         }
 
-        response = self.__request(cohere.CLUSTER_JOBS_URL, json=json_body)
+        response = self._request(cohere.CLUSTER_JOBS_URL, json=json_body)
         return CreateClusterJobResponse.from_dict(
             response,
             wait_fn=self.wait_for_cluster_job,
@@ -555,7 +555,7 @@ class Client:
         if not job_id.strip():
             raise ValueError('"job_id" is empty')
 
-        response = self.__request(os.path.join(cohere.CLUSTER_JOBS_URL, job_id), method='GET')
+        response = self._request(os.path.join(cohere.CLUSTER_JOBS_URL, job_id), method='GET')
         return ClusterJobResult.from_dict(response)
 
     def list_cluster_jobs(self) -> List[ClusterJobResult]:
@@ -565,7 +565,7 @@ class Client:
             List[ClusterJobResult]: Clustering jobs created.
         """
 
-        response = self.__request(cohere.CLUSTER_JOBS_URL, method='GET')
+        response = self._request(cohere.CLUSTER_JOBS_URL, method='GET')
         return [ClusterJobResult.from_dict(r) for r in response['jobs']]
 
     def wait_for_cluster_job(

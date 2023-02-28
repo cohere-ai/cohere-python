@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "pyproject.toml"
 
 jobs:
   upload_package:
