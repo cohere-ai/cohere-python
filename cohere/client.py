@@ -476,13 +476,15 @@ class Client:
                 http_status=status_code,
                 headers=headers,
             )
-        if status_code >= 300:
+        if 400 <= status_code < 500:
             raise CohereAPIError(
-                message=f"Unexpected API error (status {status_code}): {json_response}",
+                message=f"Unexpected client error (status {status_code}): {json_response}",
                 http_status=status_code,
                 headers=headers,
             )           
-
+        if status_code >= 500:
+            raise CohereError(
+                message=f"Unexpected server error (status {status_code}): {json_response}") 
 
     def _request(self, endpoint, json=None, method='POST') -> Any:
         headers = {
