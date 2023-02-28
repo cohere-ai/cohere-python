@@ -4,8 +4,9 @@ import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List, Optional, Union
-from posixpath import join as posixJoin
+import posixpath
 from concurrent import futures
+from cohere.logging import logger
 
 import requests
 from requests import Response
@@ -73,7 +74,7 @@ class Client:
             'Request-Source': 'python-sdk',
         }
 
-        url = posixJoin(self.api_url, cohere.CHECK_API_KEY_URL)
+        url = posixpath.join(self.api_url, cohere.CHECK_API_KEY_URL)
         response = requests.request('POST', url, headers=headers)
 
         try:
@@ -465,9 +466,23 @@ class Client:
             rank.document = parsed_docs[rank.index]
         return reranking
 
-    def __print_warning_msg(self, response: Response):
-        if 'X-API-Warning' in response.headers:
-            print("\033[93mWarning: {}\n\033[0m".format(response.headers['X-API-Warning']), file=sys.stderr)
+
+    def _check_response(self, json_response: Dict, headers: Dict, status_code: int):
+        if "X-API-Warning" in headers:
+            logger.warning(headers["X-API-Warning"])
+        if 'message' in json_response:  # has errors
+            raise CohereAPIError(
+                message=json_response['message'],
+                http_status=status_code,
+                headers=headers,
+            )
+        if status_code >= 300:
+            raise CohereAPIError(
+                message=f"Unexpected API error (status {status_code}): {json_response}",
+                http_status=status_code,
+                headers=headers,
+            )           
+
 
     def _request(self, endpoint, json=None, method='POST') -> Any:
         headers = {
@@ -476,35 +491,31 @@ class Client:
             'Request-Source': self.request_source,
         }
 
-        url = posixJoin(self.api_url, self.api_version, endpoint)
+        url = posixpath.join(self.api_url, self.api_version, endpoint)
         with requests.Session() as session:
             retries = Retry(
                 total=self.max_retries,
                 backoff_factor=0.5,
                 allowed_methods=['POST', 'GET'],
-                status_forcelist=[429, 500, 502, 503, 504],
+                status_forcelist=cohere.RETRY_STATUS_CODES,
             )
             session.mount('https://', HTTPAdapter(max_retries=retries))
             session.mount('http://', HTTPAdapter(max_retries=retries))
 
-            response = session.request(method, url, headers=headers, json=json, **self.request_dict)
             try:
-                res = response.json()
-            except Exception:
-                raise CohereAPIError(
-                    message=response.text,
-                    http_status=response.status_code,
-                    headers=response.headers,
-                )
-            if 'message' in res:  # has errors
-                raise CohereAPIError(
-                    message=res['message'],
-                    http_status=response.status_code,
-                    headers=response.headers,
-                )
-            self.__print_warning_msg(response)
+                response = session.request(method, url, headers=headers, json=json, **self.request_dict)
+            except requests.exceptions.ConnectionError as e:
+                raise CohereConnectionError(str(e)) from e
+            except requests.exceptions.RequestException as e:
+                raise CohereError(f"Unexpected exception ({e.__class__.__name__}): {e}") from e
 
-        return res
+            try:
+                json_response = response.json()
+            except jsonlib.decoder.JSONDecodeError:  # CohereAPIError will capture status
+                raise CohereAPIError.from_response(response, message=f"Failed to decode json body: {response.text}")
+
+            self._check_response(json_response, response.headers, response.status_code)
+        return json_response
 
     def create_cluster_job(
         self,

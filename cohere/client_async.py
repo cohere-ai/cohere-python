@@ -2,6 +2,7 @@ import asyncio
 import json as jsonlib
 import os
 import time
+import posixpath
 from collections import defaultdict
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from urllib.parse import urljoin
@@ -68,15 +69,32 @@ class AsyncClient(Client):
         self._need_to_check_api_key = check_api_key  # TODO: check in __enter__
         self._backend = AIOHTTPBackend(logger, num_workers, max_retries, timeout)
 
-    async def _request(self, path, json=None, method="POST") -> JSON:
+    async def _request(self, endpoint, json=None, method="POST") -> JSON:
         headers = {
             "Authorization": f"BEARER {self.api_key}",
             "Request-Source": self.request_source,
         }
-        return await self._backend.request(urljoin(self.api_url, path), json, method,headers)
+        url = posixpath.join(self.api_url, self.api_version, endpoint)
+        response = await self._backend.request(url, json, method, headers)
+
+        try:
+            json_response = await response.json()
+        except jsonlib.decoder.JSONDecodeError:  # CohereAPIError will capture status
+            raise CohereAPIError.from_response(response, message=f"Failed to decode json body: {await response.text()}")
+
+        logger.debug(f"JSON response: {json_response}")
+        self._check_response(json_response, response.headers, response.status)
+        return json_response
+
 
     async def close(self):
         return await self._backend.close()
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_value, traceback):
+        await self.close()
 
     # API methods
     async def check_api_key(self) -> Dict[str, bool]:
@@ -392,8 +410,7 @@ class AsyncClient(Client):
 class AIOHTTPBackend:
     """HTTP backend which handles retries, concurrency limiting and logging"""
 
-    # TODO: should we retry error 500? Not normally, but I have seen them occurring intermittently.
-    RETRY_STATUS_CODES = [429, 500, 502, 503, 504]
+
     SLEEP_AFTER_FAILURE = defaultdict(lambda: 0.25, {429: 1})
 
     def __init__(self, logger, max_concurrent_requests: int = 64, max_retries: int = 5, timeout: int = 120):
@@ -415,7 +432,7 @@ class AIOHTTPBackend:
         async def make_request_fn(session, *args, **kwargs):
             async with self._semaphore:  # this limits total concurrency by the client
                 response = await session.request(*args, **kwargs)
-            if response.status in self.RETRY_STATUS_CODES:  # likely temporary, raise to retry
+            if response.status in cohere.RETRY_STATUS_CODES:  # likely temporary, raise to retry
                 self.logger.info(f"Received status {response.status}, retrying...")
                 await asyncio.sleep(self.SLEEP_AFTER_FAILURE[response.status])
                 response.raise_for_status()
@@ -425,10 +442,6 @@ class AIOHTTPBackend:
         return make_request_fn
 
     async def request(self, url, json=None, method: str = "post", headers=None, session=None, **kwargs) -> JSON:
-        headers = {
-            "Content-Type": "application/json",
-            **(headers or {}),
-        }
         session = session or await self.session()
         self.logger.debug(f"Making request to {url} with content {json}")
 
@@ -448,19 +461,11 @@ class AIOHTTPBackend:
             self.logger.debug(f"Unexpected fatal error after {time.time()-request_start:.1f}s: {e}")
             raise CohereError(f"Unexpected exception ({e.__class__.__name__}): {e}") from e
 
-        if "X-API-Warning" in response.headers:
-            self.logger.warning(response.headers["X-API-Warning"])
-
-        try:
-            json_response = await response.json()
-        except jsonlib.decoder.JSONDecodeError:  # CohereError will capture status
-            raise CohereAPIError.from_response(response, message=f"Failed to decode json body: {await response.text()}")
         self.logger.debug(
-            f"Received response with status {response.status} after {time.time()-request_start:.1f}s : {json_response}"
+            f"Received response with status {response.status} after {time.time()-request_start:.1f}s"
         )
-        if "message" in json_response:  # has errors
-            raise CohereAPIError.from_response(response, message=json_response["message"])
-        return json_response
+        return response
+
 
     async def session(self) -> aiohttp.ClientSession:
         if self._session is None:
