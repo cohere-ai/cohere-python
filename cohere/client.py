@@ -107,13 +107,13 @@ class Client:
                  return_likelihoods: Optional[str] = None,
                  truncate: Optional[str] = None,
                  logit_bias: Dict[int, float] = {}) -> Generations:
-        """Generate endpoint.
+        """Generate a coherent text response for the specified prompt.
         See https://docs.cohere.ai/reference/generate for advanced arguments
 
         Args:
             prompt (str): Represents the prompt or text to be completed. Trailing whitespaces will be trimmed.
-            model (str): (Optional) The model to use for generating the next reply.
-            return_likelihoods (str): (Optional) One of GENERATION|ALL|NONE to specify how and if the token likelihoods are returned with the response.
+            model (str): (Optional) The model ID to use for generating the next reply.
+            return_likelihoods (str): (Optional) One of GENERATION|ALL|NONE to specify how and if the token (log) likelihoods are returned with the response.
             preset (str): (Optional) The ID of a custom playground preset.
             num_generations (int): (Optional) The number of generations that will be returned, defaults to 1.
             max_tokens (int): (Optional) The number of tokens to predict per generation, defaults to 20.
@@ -299,7 +299,7 @@ class Client:
         additional_command: Optional[str] = None,
         extractiveness: Optional[str] = None,
     ) -> SummarizeResponse:
-        """Return a generated summary of the specified length for the provided text.
+        """Returns a generated summary of the specified length for the provided text.
 
         Args:
             text (str): Text to summarize.
