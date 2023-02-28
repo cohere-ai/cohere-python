@@ -64,7 +64,7 @@ class Client:
                 raise CohereError('invalid api key')
 
     def check_api_key(self) -> Dict[str, bool]:
-        """Checks the api key.
+        """Confirms that the API key is valid.
         Happens automatically in Client initialization, but not in AsyncClient
         """
         headers = {
