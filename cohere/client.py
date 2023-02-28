@@ -228,11 +228,11 @@ class Client:
                     message='chatlog_override must be a list of dicts, each mapping the agent to the message.')
 
     def embed(self, texts: List[str], model: Optional[str] = None, truncate: Optional[str] = None) -> Embeddings:
-        """Returns an Embeddings object of the texts provided, see https://docs.cohere.ai/reference/embed for advances usage.
+        """Returns an Embeddings object for the provided texts. Visit https://cohere.ai/embed to learn about embeddings.
 
         Args:
             text (List[str]): A list of strings to embed.
-            model (str): (Optional) The model to use for embeddings the text.
+            model (str): (Optional) The model ID to use for embedding the text.
             truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
         """
         responses = []
@@ -260,8 +260,8 @@ class Client:
         """Returns a Classifications object of the inputs provided, see https://docs.cohere.ai/reference/classify for advances usage.
 
         Args:
-            inputs (List[str]): A list of strings to classify.
-            model (str): (Optional) The model to use for classifing the inputs.
+            inputs (List[str]): A list of texts to classify.
+            model (str): (Optional) The model ID to use for classifing the inputs.
             examples (List[ClassifyExample]): A list of ClassifyExample objects containing a text and its associated label.
             truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
         """
@@ -329,7 +329,7 @@ class Client:
                 >>>     model="summarize-xlarge",
                 >>>     length="long",
                 >>>     format="bullets",
-                >>>     temperature=0.9,
+                >>>     temperature=0.3,
                 >>>     additional_command="focusing on the highest performing stocks")
                 >>> print(res.summary)
         """
@@ -355,7 +355,7 @@ class Client:
         return list(res)
 
     def tokenize(self, text: str) -> Tokens:
-        """Return a Tokens object of the provided text, see https://docs.cohere.ai/reference/tokenize for advanced usage.
+        """Returns a Tokens object of the provided text, see https://docs.cohere.ai/reference/tokenize for advanced usage.
 
         Args:
             text (str): Text to summarize.
@@ -371,7 +371,7 @@ class Client:
         return list(res)
 
     def detokenize(self, tokens: List[int]) -> Detokenization:
-        """Return a Detokenization object of the provided tokens, see https://docs.cohere.ai/reference/detokenize-1 for advanced usage.
+        """Returns a Detokenization object of the provided tokens, see https://docs.cohere.ai/reference/detokenize for advanced usage.
         
         Args:
             tokens (List[int]): A list of tokens to convert to strings
@@ -381,10 +381,10 @@ class Client:
         return Detokenization(text=res['text'])
 
     def detect_language(self, texts: List[str]) -> DetectLanguageResponse:
-        """Return a DetectLanguageResponse object of the provided texts, see https://docs.cohere.ai/reference/detect-language-1 for advanced usage.
+        """Returns a DetectLanguageResponse object of the provided texts, see https://docs.cohere.ai/reference/detect-language-1 for advanced usage.
         
         Args:
-            texts (List[str]): A list of strings to identify by language
+            texts (List[str]): A list of texts to identify language for
         """
         json_body = {
             "texts": texts,
