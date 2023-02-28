@@ -11,6 +11,7 @@
   - Chat objects are initialized using `from_dict`. Optional attributes are now `None` rather than missing.
   - Documentation expanded and built using sphinx.
   - Use Poetry, and format using black and isort, include pre-commit hooks.
+  - Removed ability for user to choose API version. This SDK version defaults to v1.
 
 ## 3.8
 
