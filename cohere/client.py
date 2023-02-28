@@ -502,6 +502,7 @@ class Client:
                     backoff_factor=0.5,
                     allowed_methods=['POST', 'GET'],
                     status_forcelist=[429, 500, 502, 503, 504],
+                    raise_on_status=False,
                 )
                 session.mount('https://', HTTPAdapter(max_retries=retries))
                 session.mount('http://', HTTPAdapter(max_retries=retries))
