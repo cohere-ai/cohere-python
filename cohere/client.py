@@ -432,12 +432,14 @@ class Client:
     def rerank(self,
                query: str,
                documents: Union[List[str], List[Dict[str, Any]]],
+               model: str = None,
                top_n: Optional[int] = None) -> Reranking:
         """Returns an ordered list of documents ordered by their relevance to the provided query
 
         Args:
             query (str): The search query
             documents (list[str], list[dict]): The documents to rerank
+            model (str): (Optional) The model to use for re-ranking
             top_n (int): (optional) The number of results to return, defaults to returning all results
         """
         parsed_docs = []
@@ -453,6 +455,7 @@ class Client:
         json_body = {
             "query": query,
             "documents": parsed_docs,
+            "model": model,
             "top_n": top_n,
             "return_documents": False,
         }

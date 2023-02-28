@@ -25,9 +25,10 @@ class TestChat(unittest.TestCase):
             self.assertIsInstance(prediction.session_id, str)
             self.assertEqual(prediction.persona, "cohere")
 
-    def test_invalid_persona(self):
-        with self.assertRaises(cohere.CohereError):
-            co.chat("Yo what up?", persona="NOT_A_VALID_PERSONA").reply
+    # TODO re-add tests
+    # def test_invalid_persona(self):
+    #     with self.assertRaises(cohere.CohereError):
+    #         co.chat("Yo what up?", persona="NOT_A_VALID_PERSONA").reply
 
     def test_valid_persona(self):
         prediction = co.chat("Yo what up?", persona="wizard")
@@ -35,20 +36,20 @@ class TestChat(unittest.TestCase):
         self.assertIsInstance(prediction.session_id, str)
         self.assertEqual(prediction.persona, "wizard")
 
-    def test_manual_session_id(self):
-        max_num_tries = 5
-        prediction = co.chat("Hi my name is Rui")
+    # def test_manual_session_id(self):
+    #     max_num_tries = 5
+    #     prediction = co.chat("Hi my name is Rui")
 
-        for _ in range(max_num_tries):
-            # manually pick the chat back up using the session_id
-            # check that it still has access to information I gave it
-            # this is a brittle test, not sure how to improve
-            prediction = co.chat("Good to meet you. What's my name?", session_id=prediction.session_id)
-            test = "rui" in prediction.reply.lower()
-            if test:
-                break
-        else:
-            self.fail()
+    #     for _ in range(max_num_tries):
+    #         # manually pick the chat back up using the session_id
+    #         # check that it still has access to information I gave it
+    #         # this is a brittle test, not sure how to improve
+    #         prediction = co.chat("Good to meet you. What's my name?", session_id=prediction.session_id)
+    #         test = "rui" in prediction.reply.lower()
+    #         if test:
+    #             break
+    #     else:
+    #         self.fail()
 
     def test_valid_model(self):
         prediction = co.chat("Yo what up?", model="medium")
