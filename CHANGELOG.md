@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.9
+- [#158](https://github.com/cohere-ai/cohere-python/pull/168)
+  - Add support for co.Rerank parameter:
+    - `model`
+
 ## 3.8
 - [#158](https://github.com/cohere-ai/cohere-python/pull/158)
   - Add support for co.Chat parameters:
