@@ -104,9 +104,6 @@ class CreateClusterJobResponse(CohereObject):
                 Defaults to None.
             interval (float, optional): Wait poll interval in seconds. Defaults to 10.
 
-        Raises:
-            TimeoutError: wait timed out
-
         Returns:
             ClusterJobResult: Clustering job result.
         """

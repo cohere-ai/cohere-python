@@ -602,9 +602,6 @@ class Client:
                 Defaults to None.
             interval (float, optional): Wait poll interval in seconds. Defaults to 10.
 
-        Raises:
-            TimeoutError: wait timed out
-
         Returns:
             ClusterJobResult: Clustering job result.
         """
@@ -614,7 +611,7 @@ class Client:
 
         while job.status == 'processing':
             if timeout is not None and time.time() - start_time > timeout:
-                raise TimeoutError(f'wait_for_cluster_job timed out after {timeout} seconds')
+                return job
 
             time.sleep(interval)
             job = self.get_cluster_job(job_id)

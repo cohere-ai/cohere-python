@@ -63,10 +63,8 @@ class TestClient(unittest.TestCase):
             threshold=0.5,
         )
 
-        def wait():
-            co.wait_for_cluster_job(create_res.job_id, timeout=5, interval=2)
-
-        self.assertRaises(TimeoutError, wait)
+        job = co.wait_for_cluster_job(create_res.job_id, timeout=5, interval=2)
+        self.check_job_result(job, completed=False)
 
     @unittest.skipIf(in_ci(), "can sometimes fail due to duration variation")
     def test_job_wait_method_succeeds(self):
@@ -88,10 +86,8 @@ class TestClient(unittest.TestCase):
             threshold=0.5,
         )
 
-        def wait():
-            create_res.wait(timeout=5, interval=2)
-
-        self.assertRaises(TimeoutError, wait)
+        job = create_res.wait(timeout=5, interval=2)
+        self.check_job_result(job, completed=False)
 
     def create_co(self) -> cohere.Client:
         return cohere.Client(get_api_key(), check_api_key=False, client_name='test')
@@ -105,3 +101,5 @@ class TestClient(unittest.TestCase):
             assert job.output_clusters_url
             assert job.output_outliers_url
             assert job.clusters
+        else:
+            assert job.status != 'complete'
