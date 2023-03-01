@@ -18,16 +18,7 @@ class CohereError(Exception):
         return msg
 
     def __repr__(self) -> str:
-        return '%s(message=%r, http_status=%r)' % (
-            self.__class__.__name__,
-            self.message,
-            self.http_status,
-        )
-
-
-    def _visualize_helper(self):  # used when exceptions are mixed in generations
-        return {"error": str(self)}
-
+        return f"{self.__class__.__name__}(message={str(self)})"
 
 class CohereAPIError(CohereError):
     """Returned when the API responds with an error message"""

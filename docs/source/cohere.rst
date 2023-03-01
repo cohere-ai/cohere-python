@@ -37,7 +37,7 @@ It is recommended to use `AsyncClient` for performance critical applications wit
 .. code:: python
 
     from cohere import AsyncClient
-    async with AsyncClient() as co:  # using 'async with' closes any sessions automatically
+    async with AsyncClient() as co:  # using 'async with' runs check_api_key and closes any sessions automatically
         await co.generate("Hello, my name is", max_tokens=10)
 
 

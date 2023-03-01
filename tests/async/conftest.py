@@ -9,13 +9,6 @@ import pytest_asyncio
 from cohere import AsyncClient
 
 
-@pytest.fixture(scope="session")
-def event_loop():  # TODO: intermittent event loop closed thing
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
-
-
 @pytest_asyncio.fixture
 async def async_client() -> AsyncClient:
     api_key = os.getenv("CO_API_KEY")

@@ -44,14 +44,14 @@ class AsyncClient(Client):
     or when calling the Cohere API from a server such as FastAPI.
 
     The methods here are typically identical to those in the main `Client`, with an extra argument 
-    `return_exceptions` for the batch* methods, which is passed to asyncio.gather"""
+    `return_exceptions` for the batch* methods, which is passed to asyncio.gather."""
 
     def __init__(
         self,
         api_key: str = None,
         num_workers: int = 16,
         request_dict: dict = {},
-        check_api_key: bool = False,
+        check_api_key: bool = True,
         client_name: Optional[str] = None,
         max_retries: int = 3,
         timeout=120,
@@ -66,15 +66,19 @@ class AsyncClient(Client):
         if client_name:
             self.request_source += ":" + client_name
         self.api_version = cohere.API_VERSION
-        self._need_to_check_api_key = check_api_key  # TODO: check in __enter__
+        self._check_api_key_on_enter = check_api_key
         self._backend = AIOHTTPBackend(logger, num_workers, max_retries, timeout)
 
-    async def _request(self, endpoint, json=None, method="POST") -> JSON:
+    async def _request(self, endpoint, json=None, method="POST", full_url=None) -> JSON:
         headers = {
             "Authorization": f"BEARER {self.api_key}",
             "Request-Source": self.request_source,
         }
-        url = posixpath.join(self.api_url, self.api_version, endpoint)
+        if endpoint is None and full_url is not None: # api key
+            url = full_url
+        else:
+            url = posixpath.join(self.api_url, self.api_version, endpoint)
+
         response = await self._backend.request(url, json, method, headers)
 
         try:
@@ -91,6 +95,9 @@ class AsyncClient(Client):
         return await self._backend.close()
 
     async def __aenter__(self):
+        if self._check_api_key_on_enter:
+            if not (await self.check_api_key())['valid']:
+                raise CohereError('invalid API key')            
         return self
 
     async def __aexit__(self, exc_type, exc_value, traceback):
@@ -98,7 +105,7 @@ class AsyncClient(Client):
 
     # API methods
     async def check_api_key(self) -> Dict[str, bool]:
-        return await self._request(cohere.CHECK_API_KEY_URL)
+        return await self._request(endpoint=None, full_url=posixpath.join(self.api_url, cohere.CHECK_API_KEY_URL))
 
     async def batch_generate(self, prompts: List[str], return_exceptions=False, **kwargs) -> List[Generations]:
         """return_exceptions is passed to asyncio.gather"""
