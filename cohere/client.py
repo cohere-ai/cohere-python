@@ -1,5 +1,4 @@
 import json as jsonlib
-import os
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
