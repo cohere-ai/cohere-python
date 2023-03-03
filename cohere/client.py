@@ -568,7 +568,7 @@ class Client:
         if not job_id.strip():
             raise ValueError('"job_id" is empty')
 
-        response = self._request(os.path.join(cohere.CLUSTER_JOBS_URL, job_id), method='GET')
+        response = self._request(f'{cohere.CLUSTER_JOBS_URL}/{job_id}', method='GET')
         return ClusterJobResult.from_dict(response)
 
     def list_cluster_jobs(self) -> List[ClusterJobResult]:

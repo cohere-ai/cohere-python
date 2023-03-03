@@ -366,7 +366,7 @@ class AsyncClient(Client):
         if not job_id.strip():
             raise ValueError('"job_id" is empty')
 
-        response = await self._request(os.path.join(cohere.CLUSTER_JOBS_URL, job_id), method='GET')
+        response = await self._request(f'{cohere.CLUSTER_JOBS_URL}/{job_id}', method='GET')
         return ClusterJobResult.from_dict(response)
 
     async def list_cluster_jobs(self) -> List[ClusterJobResult]:
