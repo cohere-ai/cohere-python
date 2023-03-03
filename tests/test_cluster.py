@@ -55,7 +55,7 @@ class TestClient(unittest.TestCase):
         )
 
         job = co.wait_for_cluster_job(create_res.job_id, timeout=60, interval=5)
-        self.check_job_result(job)
+        self.check_job_result(job, status='complete')
 
     def test_wait_for_cluster_job_times_out(self):
         co = self.create_co()
@@ -80,7 +80,7 @@ class TestClient(unittest.TestCase):
         )
 
         job = create_res.wait(timeout=60, interval=5)
-        self.check_job_result(job)
+        self.check_job_result(job, status='complete')
 
     def test_job_wait_method_times_out(self):
         co = self.create_co()
