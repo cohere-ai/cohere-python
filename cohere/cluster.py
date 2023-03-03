@@ -41,6 +41,7 @@ class ClusterJobResult(CohereObject):
     output_clusters_url: Optional[str]
     output_outliers_url: Optional[str]
     clusters: Optional[List[Cluster]]
+    error: Optional[str]
 
     def __init__(
         self,
@@ -49,6 +50,7 @@ class ClusterJobResult(CohereObject):
         output_clusters_url: Optional[str],
         output_outliers_url: Optional[str],
         clusters: Optional[List[Cluster]],
+        error: Optional[str],
     ):
         # convert empty string to `None`
         if not output_clusters_url:
@@ -61,6 +63,7 @@ class ClusterJobResult(CohereObject):
         self.output_clusters_url = output_clusters_url
         self.output_outliers_url = output_outliers_url
         self.clusters = clusters
+        self.error = error
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'ClusterJobResult':
@@ -75,6 +78,7 @@ class ClusterJobResult(CohereObject):
             output_clusters_url=data['output_clusters_url'],
             output_outliers_url=data['output_outliers_url'],
             clusters=clusters,
+            error=data.get('error'),
         )
 
 

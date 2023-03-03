@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.10.0
+- [#176](https://github.com/cohere-ai/cohere-python/pull/176)
+  - Add failure reason to clustering jobs
+
 ## 3.9.1
 - [#175](https://github.com/cohere-ai/cohere-python/pull/175)
   - Fix url path for cluster-job get endpoint
