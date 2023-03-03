@@ -1,7 +1,11 @@
 # Changelog
 
+## 3.9.1
+- [#175](https://github.com/cohere-ai/cohere-python/pull/175)
+  - Fix url path for cluster-job get endpoint
+
 ## 3.9
-- [#158](https://github.com/cohere-ai/cohere-python/pull/168)
+- [#168](https://github.com/cohere-ai/cohere-python/pull/168)
   - Add support for co.Rerank parameter:
     - `model`
 
@@ -14,8 +18,8 @@
 
 ## 3.7
 - [#164](https://github.com/cohere-ai/cohere-python/pull/164)
-  - Add clustering methods: 
-    - `co.create_cluster_job`  
+  - Add clustering methods:
+    - `co.create_cluster_job`
     - `co.get_cluster_job`
     - `co.list_cluster_jobs`
     - `co.wait_for_cluster_job`
