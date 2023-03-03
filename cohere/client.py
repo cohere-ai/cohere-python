@@ -4,7 +4,6 @@ import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List, Optional, Union
-import posixpath
 from concurrent import futures
 from cohere.logging import logger
 
@@ -55,7 +54,7 @@ class Client:
         self.request_source = 'python-sdk'
         self.max_retries = max_retries
         self.timeout = timeout
-        self.api_version = cohere.API_VERSION
+        self.api_version = f'v{cohere.API_VERSION}'
         if client_name:
             self.request_source += ":" + client_name
 
@@ -74,7 +73,7 @@ class Client:
             'Request-Source': 'python-sdk',
         }
 
-        url = posixpath.join(self.api_url, cohere.CHECK_API_KEY_URL)
+        url = os.path.join(self.api_url, cohere.CHECK_API_KEY_URL)
         response = requests.request('POST', url, headers=headers)
 
         try:
@@ -493,7 +492,7 @@ class Client:
             'Request-Source': self.request_source,
         }
 
-        url = posixpath.join(self.api_url, self.api_version, endpoint)
+        url = os.path.join(self.api_url, self.api_version, endpoint)
         with requests.Session() as session:
             retries = Retry(
                 total=self.max_retries,
