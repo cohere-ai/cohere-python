@@ -510,7 +510,7 @@ class Client:
                 response = session.request(method, url, headers=headers, json=json, **self.request_dict)
             except Exception as err:
                 raise CohereError(message=str(err))
-            
+
             try:
                 res = response.json()
             except Exception:
