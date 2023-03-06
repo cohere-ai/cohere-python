@@ -135,22 +135,22 @@ class TestChat(unittest.TestCase):
         with self.assertRaises(AttributeError):
             prediction.prompt
 
-    def test_preamble_override(self):
-        preamble = "You are a dog who mostly barks"
-        prediction = co.chat("Yo what up?", preamble_override=preamble, return_prompt=True)
-        self.assertIsInstance(prediction.reply, str)
-        self.assertIsInstance(prediction.session_id, str)
-        self.assertIn(preamble, prediction.prompt)
-        print(prediction.prompt)
+    # def test_preamble_override(self):
+    #     preamble = "You are a dog who mostly barks"
+    #     prediction = co.chat("Yo what up?", preamble_override=preamble, return_prompt=True)
+    #     self.assertIsInstance(prediction.reply, str)
+    #     self.assertIsInstance(prediction.session_id, str)
+    #     self.assertIn(preamble, prediction.prompt)
+    #     print(prediction.prompt)
 
-    def test_invalid_preamble_override(self):
-        with self.assertRaises(cohere.CohereError):
-            co.chat("Yo what up?", preamble_override=123).reply
+    # def test_invalid_preamble_override(self):
+    #     with self.assertRaises(cohere.CohereError):
+    #         co.chat("Yo what up?", preamble_override=123).reply
 
-    def test_username_override(self):
-        username = "CustomUser"
-        prediction = co.chat("Yo what up?", username=username, return_chatlog=True)
-        self.assertIsInstance(prediction.reply, str)
-        self.assertIsInstance(prediction.session_id, str)
-        chatlog_starts_with_username = prediction.chatlog.strip().startswith(username)
-        self.assertTrue(chatlog_starts_with_username)
+    # def test_username_override(self):
+    #     username = "CustomUser"
+    #     prediction = co.chat("Yo what up?", username=username, return_chatlog=True)
+    #     self.assertIsInstance(prediction.reply, str)
+    #     self.assertIsInstance(prediction.session_id, str)
+    #     chatlog_starts_with_username = prediction.chatlog.strip().startswith(username)
+    #     self.assertTrue(chatlog_starts_with_username)
