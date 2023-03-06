@@ -1,6 +1,5 @@
 import json as jsonlib
 import os
-import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List, Optional, Union
@@ -8,7 +7,6 @@ from concurrent import futures
 from cohere.logging import logger
 
 import requests
-from requests import Response
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
@@ -73,7 +71,7 @@ class Client:
             'Request-Source': 'python-sdk',
         }
 
-        url = os.path.join(self.api_url, cohere.CHECK_API_KEY_URL)
+        url = f'{self.api_url}/{cohere.CHECK_API_KEY_URL}'
         response = requests.request('POST', url, headers=headers)
 
         try:
@@ -492,7 +490,7 @@ class Client:
             'Request-Source': self.request_source,
         }
 
-        url = os.path.join(self.api_url, self.api_version, endpoint)
+        url = f'{self.api_url}/v{self.api_version}/{endpoint}'
         with requests.Session() as session:
             retries = Retry(
                 total=self.max_retries,
