@@ -1,5 +1,6 @@
 from typing import Any, Dict, Optional, List
 from cohere.responses.base import CohereObject
+from cohere.responses.meta_response import Meta
 
 
 class Chat(CohereObject):
@@ -9,6 +10,7 @@ class Chat(CohereObject):
                  persona: str,
                  reply: str,
                  session_id: str,
+                 meta: Optional[List[Meta]] = None,
                  prompt: Optional[str] = None,
                  chatlog: Optional[List[Dict[str, str]]] = None,
                  client=None,
@@ -21,6 +23,7 @@ class Chat(CohereObject):
         self.prompt = prompt # optional 
         self.chatlog = chatlog # optional 
         self.client = client
+        self.meta = meta
 
     @classmethod
     def from_dict(cls,response: Dict[str, Any], query: str, persona: str,client) -> "Chat":
@@ -31,7 +34,8 @@ class Chat(CohereObject):
             reply=response['reply'],
             prompt=response.get('prompt'), # optional 
             chatlog=response.get('chatlog'), # optional 
-            client=client
+            client=client,
+            meta=response['meta']
         )
 
     def respond(self, response: str) -> "Chat":

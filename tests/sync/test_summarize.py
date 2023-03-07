@@ -23,6 +23,9 @@ class TestFeedback(unittest.TestCase):
     def test_success(self):
         res = co.summarize(text)
         self.assertIsInstance(res, SummarizeResponse)
+        self.assertTrue(res.meta)
+        self.assertTrue(res.meta["api_version"])
+        self.assertTrue(res.meta["api_version"]["version"])
 
     def error(self):
         res = co.summarize(text, length="potato")

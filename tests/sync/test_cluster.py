@@ -99,6 +99,9 @@ class TestClient(unittest.TestCase):
     def check_job_result(self, job: ClusterJobResult, completed: bool = True):
         assert job.job_id
         assert job.status
+        assert job.meta
+        assert job.meta["api_version"]
+        assert job.meta["api_version"]["version"]
 
         if completed:
             assert job.status == 'complete'

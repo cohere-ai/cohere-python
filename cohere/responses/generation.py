@@ -7,6 +7,8 @@ from collections import UserList
 from dataclasses import asdict, dataclass
 from typing import Dict, List, Optional, Union
 
+from cohere.responses.meta_response import Meta
+
 
 TokenLikelihood = NamedTuple("TokenLikelihood", [("token", str), ("likelihood", float)])
 
@@ -77,9 +79,12 @@ class Generation(CohereObject, str):
 class Generations(UserList, CohereObject):
 
     def __init__(self,generations,
-                 return_likelihoods: str) -> None:
+                 return_likelihoods: str,
+                 meta: Optional[List[Meta]] = None
+                 ) -> None:
         super().__init__(generations)
-        self.return_likelihoods = return_likelihoods        
+        self.return_likelihoods = return_likelihoods   
+        self.meta = meta     
 
     @classmethod
     def from_dict(cls, response: Dict[str, Any], return_likelihoods: bool) -> List[Generation]:
@@ -96,7 +101,7 @@ class Generations(UserList, CohereObject):
                     token_likelihoods.append(TokenLikelihood(likelihoods['token'], token_likelihood))
             generations.append(Generation(gen['text'], likelihood, token_likelihoods, prompt= response.get("prompt"), id=gen["id"]))
 
-        return cls(generations,return_likelihoods)
+        return cls(generations,return_likelihoods,response['meta'])
 
     @property
     def generations(self) -> List[Generation]:  # backward compatibility

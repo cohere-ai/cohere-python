@@ -1,5 +1,5 @@
 from concurrent.futures import Future
-from typing import Any, Callable, Iterator
+from typing import Any, Callable, Iterator, NamedTuple
 from xmlrpc.client import Boolean
 
 from cohere.responses.feedback import Feedback
@@ -7,8 +7,6 @@ import html
 from collections import UserList
 from dataclasses import asdict, dataclass
 from typing import Dict, List, Optional, Union
-
-
 
 def _escape_html(text):
     return html.escape(str(text), quote=False)

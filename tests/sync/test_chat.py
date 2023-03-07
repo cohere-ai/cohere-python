@@ -15,6 +15,9 @@ class TestChat(unittest.TestCase):
         self.assertIsInstance(prediction.reply, str)
         self.assertIsInstance(prediction.session_id, str)
         self.assertEqual(prediction.persona, "cohere")
+        self.assertTrue(prediction.meta)
+        self.assertTrue(prediction.meta["api_version"])
+        self.assertTrue(prediction.meta["api_version"]["version"])
 
     def test_multi_replies(self):
         num_replies = 3

@@ -1,6 +1,7 @@
 from typing import List, Optional, Dict, NamedTuple, Any, Iterator
 
 from cohere.responses.base import CohereObject
+from cohere.responses.meta_response import Meta
 
 RerankDocument = NamedTuple("Document", [("text", str)])
 RerankDocument.__doc__ = """
@@ -35,10 +36,12 @@ class Reranking(CohereObject):
 
     def __init__(self,
                  response: Optional[Dict[str, Any]] = None,
+                 meta: Optional[List[Meta]] = None,
                  **kwargs) -> None:
         super().__init__(**kwargs, id=response.get('id'))
         assert response is not None
         self.results = self._results(response)
+        self.meta = response["meta"]
 
     def _results(self, response: Dict[str, Any]) -> List[RerankResult]:
         results = []
