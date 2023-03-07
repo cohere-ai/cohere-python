@@ -244,11 +244,10 @@ class Client:
                 'truncate': truncate,
             })
 
-        meta = None
         for result in self._executor.map(lambda json_body: self._request(cohere.EMBED_URL, json=json_body),
                                             json_bodys):
             responses.extend(result['embeddings'])
-            meta = result['meta']
+            meta = responses[0]["meta"] if responses else None
 
         return Embeddings(responses, meta)
 

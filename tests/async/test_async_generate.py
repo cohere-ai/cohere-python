@@ -21,7 +21,9 @@ async def test_single_generate(async_client):
     # pandas is optional
     # assert isinstance(prediction[0]._repr_html_(), str)  # Generation
     # assert isinstance(prediction._repr_html_(), str)  # Generations repr
-
+    assert prediction.meta
+    assert prediction.meta["api_version"]
+    assert prediction.meta["api_version"]["version"]
 
 @pytest.mark.asyncio
 async def test_return_likelihoods_generation(async_client):

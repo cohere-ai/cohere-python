@@ -18,5 +18,6 @@ async def test_async_classify(async_client):
                                     Example('magenta', 'color')
                                 ])
     assert isinstance(prediction.classifications, list)
-
-
+    assert prediction.meta
+    assert prediction.meta["api_version"]
+    assert prediction.meta["api_version"]["version"]
