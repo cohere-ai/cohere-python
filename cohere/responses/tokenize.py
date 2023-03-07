@@ -13,7 +13,6 @@ from typing import Dict, List, Optional, Union
 
 from cohere.responses.meta_response import Meta
 
-
 class Tokens(CohereObject):
 
     def __init__(self,

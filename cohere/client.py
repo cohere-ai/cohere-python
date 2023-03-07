@@ -244,10 +244,11 @@ class Client:
                 'truncate': truncate,
             })
 
+        meta = None
         for result in self._executor.map(lambda json_body: self._request(cohere.EMBED_URL, json=json_body),
                                             json_bodys):
             responses.extend(result['embeddings'])
-            meta = responses[0]["meta"] if responses else None
+            meta = result["meta"] if not meta else meta
 
         return Embeddings(responses, meta)
 
@@ -285,9 +286,9 @@ class Client:
             for label, prediction in res['labels'].items():
                 labelObj[label] = LabelPrediction(prediction['confidence'])
             classifications.append(
-                Classification(res['input'], res['prediction'], res['confidence'], labelObj, response['meta'], id=res["id"]))
+                Classification(res['input'], res['prediction'], res['confidence'], labelObj, id=res["id"]))
 
-        return Classifications(classifications)
+        return Classifications(classifications, response['meta'])
 
     def summarize(
         self,
