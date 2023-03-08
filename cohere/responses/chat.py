@@ -35,7 +35,7 @@ class Chat(CohereObject):
             prompt=response.get('prompt'), # optional 
             chatlog=response.get('chatlog'), # optional 
             client=client,
-            meta=response['meta']
+            meta=response.get('meta')
         )
 
     def respond(self, response: str) -> "Chat":

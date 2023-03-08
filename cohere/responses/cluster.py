@@ -82,15 +82,15 @@ class ClusterJobResult(CohereObject):
             output_outliers_url=data['output_outliers_url'],
             clusters=clusters,
             error=data.get('error'),
-            meta=data['meta']
+            meta=data.get('meta')
         )
 
 
 class CreateClusterJobResponse(CohereObject):
     job_id: str
-    meta: Meta
+    meta: Optional[Meta]
 
-    def __init__(self, job_id: str, meta: Meta, wait_fn):
+    def __init__(self, job_id: str, meta: Optional[Meta], wait_fn):
         self.job_id = job_id
         self._wait_fn = wait_fn
         self.meta = meta
@@ -100,7 +100,7 @@ class CreateClusterJobResponse(CohereObject):
         return cls(
             job_id=data['job_id'],
             wait_fn=wait_fn,
-            meta=data['meta']            
+            meta=data.get('meta')
         )
 
     def wait(

@@ -289,7 +289,7 @@ class Client:
             classifications.append(
                 Classification(res['input'], res['prediction'], res['confidence'], labelObj, id=res["id"]))
 
-        return Classifications(classifications, response['meta'])
+        return Classifications(classifications, response.get('meta'))
 
     def summarize(
         self,
@@ -364,7 +364,7 @@ class Client:
         """
         json_body = {'text': text}
         res = self._request(cohere.TOKENIZE_URL, json=json_body)
-        return Tokens(tokens=res['tokens'], token_strings=res['token_strings'], meta=res['meta'])
+        return Tokens(tokens=res['tokens'], token_strings=res['token_strings'], meta=res.get('meta'))
 
     def batch_detokenize(self, list_of_tokens: List[List[int]]) -> List[Detokenization]:
         """A batched version of detokenize"""
@@ -380,7 +380,7 @@ class Client:
         """
         json_body = {'tokens': tokens}
         res = self._request(cohere.DETOKENIZE_URL, json=json_body)
-        return Detokenization(text=res['text'], meta=res['meta'])
+        return Detokenization(text=res['text'], meta=res.get('meta'))
 
     def detect_language(self, texts: List[str]) -> DetectLanguageResponse:
         """Returns a DetectLanguageResponse object of the provided texts, see https://docs.cohere.ai/reference/detect-language-1 for advanced usage.
@@ -581,7 +581,7 @@ class Client:
         """
 
         response = self._request(cohere.CLUSTER_JOBS_URL, method='GET')
-        return [ClusterJobResult.from_dict({'meta':response['meta'],**r}) for r in response['jobs']]
+        return [ClusterJobResult.from_dict({'meta':response.get('meta'),**r}) for r in response['jobs']]
 
     def wait_for_cluster_job(
         self,

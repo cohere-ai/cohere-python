@@ -378,7 +378,7 @@ class AsyncClient(Client):
         """
 
         response = await self._request(cohere.CLUSTER_JOBS_URL, method='GET')
-        return [ClusterJobResult.from_dict({'meta':response['meta'],**r}) for r in response['jobs']]
+        return [ClusterJobResult.from_dict({'meta':response.get('meta'),**r}) for r in response['jobs']]
 
     async def wait_for_cluster_job(
         self,

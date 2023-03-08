@@ -101,7 +101,7 @@ class Generations(UserList, CohereObject):
                     token_likelihoods.append(TokenLikelihood(likelihoods['token'], token_likelihood))
             generations.append(Generation(gen['text'], likelihood, token_likelihoods, prompt= response.get("prompt"), id=gen["id"]))
 
-        return cls(generations,return_likelihoods,response['meta'])
+        return cls(generations,return_likelihoods,response.get('meta'))
 
     @property
     def generations(self) -> List[Generation]:  # backward compatibility
