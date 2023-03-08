@@ -26,7 +26,7 @@ class Classification(CohereObject):
 
 class Classifications(CohereObject):
 
-    def __init__(self, classifications: List[Classification], meta: Optional[List[Meta]] = None) -> None:
+    def __init__(self, classifications: List[Classification], meta: Optional[Meta] = None) -> None:
         self.classifications = classifications
         self.meta = meta
 

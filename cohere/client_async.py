@@ -156,35 +156,34 @@ class AsyncClient(Client):
     async def chat(self,
              query: str,
              session_id: str = "",
-             persona: str = "cohere",
+             persona_name: str = "cohere",
              model: Optional[str] = None,
              return_chatlog: bool = False,
              return_prompt: bool = False,
              chatlog_override: List[Dict[str, str]] = None,
-             preamble_override: str = None,
-             username: str = None) -> AsyncChat:
+             persona_prompt: str = None,
+             user_name: str = None) -> AsyncChat:
 
         if chatlog_override is not None:
             self._validate_chatlog_override(chatlog_override)
         json_body = {
             'query': query,
             'session_id': session_id,
-            'persona': persona,
+            'persona_name': persona_name,
             'model': model,
             'return_chatlog': return_chatlog,
             'return_prompt': return_prompt,
             'chatlog_override': chatlog_override,
-            'preamble_override': preamble_override,
-            'username': username,
+            'persona_prompt': persona_prompt,
+            'user_name': user_name,
         }
         response = await self._request(cohere.CHAT_URL, json=json_body)
         return AsyncChat.from_dict(
                 response,   
                     query=query,
-                    persona=persona,
+                    persona_name=persona_name,
                     client=self
                 )
-
 
     async def embed(self, texts: List[str], model: Optional[str] = None, truncate: Optional[str] = None) -> Embeddings:
         json_bodys = [
@@ -346,7 +345,6 @@ class AsyncClient(Client):
         response = await self._request(cohere.CLUSTER_JOBS_URL, json=json_body)
         return AsyncCreateClusterJobResponse.from_dict(
             response,
-            response["meta"],
             wait_fn=self.wait_for_cluster_job,
         )
 
@@ -370,7 +368,7 @@ class AsyncClient(Client):
             raise ValueError('"job_id" is empty')
 
         response = await self._request(f'{cohere.CLUSTER_JOBS_URL}/{job_id}', method='GET')
-        return ClusterJobResult.from_dict(response, response["meta"])
+        return ClusterJobResult.from_dict(response)
 
     async def list_cluster_jobs(self) -> List[ClusterJobResult]:
         """List clustering jobs.
@@ -380,7 +378,7 @@ class AsyncClient(Client):
         """
 
         response = await self._request(cohere.CLUSTER_JOBS_URL, method='GET')
-        return [ClusterJobResult.from_dict(r, response["meta"]) for r in response['jobs']]
+        return [ClusterJobResult.from_dict({'meta':response['meta'],**r}) for r in response['jobs']]
 
     async def wait_for_cluster_job(
         self,

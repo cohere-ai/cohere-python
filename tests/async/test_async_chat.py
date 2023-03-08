@@ -9,7 +9,7 @@ async def test_async_multi_replies(async_client):
         prediction = await prediction.respond("oh that's cool")
         assert isinstance(prediction.reply, str)
         assert isinstance(prediction.session_id, str)
-        assert prediction.persona == "cohere"
+        assert prediction.persona_name == "cohere"
         assert prediction.chatlog is not None
         assert prediction.meta
         assert prediction.meta["api_version"]

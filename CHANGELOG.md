@@ -12,6 +12,21 @@
   - Documentation expanded and built using sphinx.
   - Use Poetry, and format using black and isort, include pre-commit hooks.
   - Removed ability for user to choose API version. This SDK version defaults to v1.
+  - Added 'meta' fields to response objects with API version
+  - Updated co.Chat to use persona_name, persona_prompt, user_name
+  
+## 3.10.0
+- [#176](https://github.com/cohere-ai/cohere-python/pull/176)
+  - Add failure reason to clustering jobs
+
+## 3.9.1
+- [#175](https://github.com/cohere-ai/cohere-python/pull/175)
+  - Fix url path for cluster-job get endpoint
+
+## 3.9
+- [#168](https://github.com/cohere-ai/cohere-python/pull/168)
+  - Add support for co.Rerank parameter:
+    - `model`
 
 ## 3.8
 
@@ -24,8 +39,8 @@
 ## 3.7
 
 - [#164](https://github.com/cohere-ai/cohere-python/pull/164)
-  - Add clustering methods: 
-    - `co.create_cluster_job`  
+  - Add clustering methods:
+    - `co.create_cluster_job`
     - `co.get_cluster_job`
     - `co.list_cluster_jobs`
     - `co.wait_for_cluster_job`

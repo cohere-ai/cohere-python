@@ -16,6 +16,6 @@ class Language(CohereObject):
 
 class DetectLanguageResponse:
 
-    def __init__(self, results: List[Language], meta: Optional[List[Meta]] = None):
+    def __init__(self, results: List[Language], meta: Optional[Meta] = None):
         self.results = results
         self.meta = meta

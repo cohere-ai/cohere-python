@@ -1,5 +1,6 @@
 import json as jsonlib
 import os
+import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List, Optional, Union
@@ -144,24 +145,24 @@ class Client:
     def chat(self,
              query: str,
              session_id: str = "",
-             persona: str = "cohere",
+             persona_name: str = "cohere",
              model: Optional[str] = None,
              return_chatlog: bool = False,
              return_prompt: bool = False,
              chatlog_override: List[Dict[str, str]] = None,
-             preamble_override: str = None,
-             username: str = None) -> Chat:
+             persona_prompt: str = None,
+             user_name: str = None) -> Chat:
         """Returns a Chat object with the query reply.
 
         Args:
             query (str): The query to send to the chatbot.
             session_id (str): (Optional) The session id to continue the conversation.
-            persona (str): (Optional) The persona to use.
+            persona_name (str): (Optional) The persona to use.
             model (str): (Optional) The model to use for generating the next reply.
             return_chatlog (bool): (Optional) Whether to return the chatlog.
             return_prompt (bool): (Optional) Whether to return the prompt.
             chatlog_override (List[Dict[str, str]]): (Optional) A list of chatlog entries to override the chatlog.
-            preamble_override (str): (Optional) A string to override the preamble.
+            persona_prompt (str): (Optional) A string to override the preamble.
             username (str): (Optional) A string to override the username.
 
         Examples:
@@ -173,7 +174,7 @@ class Client:
                 >>> res = co.chat(
                 >>>     query="Hey! How are you doing today?",
                 >>>     session_id="1234",
-                >>>     persona="fortune",
+                >>>     persona_name="fortune",
                 >>>     model="command-xlarge",
                 >>>     return_chatlog=True)
                 >>> print(res.reply)
@@ -197,19 +198,19 @@ class Client:
         json_body = {
             'query': query,
             'session_id': session_id,
-            'persona': persona,
+            'persona_name': persona_name,
             'model': model,
             'return_chatlog': return_chatlog,
             'return_prompt': return_prompt,
             'chatlog_override': chatlog_override,
-            'preamble_override': preamble_override,
-            'username': username,
+            'persona_prompt': persona_prompt,
+            'user_name': user_name,
         }
         response = self._request(cohere.CHAT_URL, json=json_body)
         return Chat.from_dict(
                     response,   
                     query=query,
-                    persona=persona,
+                    persona_name=persona_name,
                     client=self
                 )
 
@@ -547,7 +548,6 @@ class Client:
         response = self._request(cohere.CLUSTER_JOBS_URL, json=json_body)
         return CreateClusterJobResponse.from_dict(
             response,
-            response["meta"],
             wait_fn=self.wait_for_cluster_job,
         )
 
@@ -571,7 +571,7 @@ class Client:
             raise ValueError('"job_id" is empty')
 
         response = self._request(f'{cohere.CLUSTER_JOBS_URL}/{job_id}', method='GET')
-        return ClusterJobResult.from_dict(response, response['meta'])
+        return ClusterJobResult.from_dict(response)
 
     def list_cluster_jobs(self) -> List[ClusterJobResult]:
         """List clustering jobs.
@@ -581,7 +581,7 @@ class Client:
         """
 
         response = self._request(cohere.CLUSTER_JOBS_URL, method='GET')
-        return [ClusterJobResult.from_dict(r, response['meta']) for r in response['jobs']]
+        return [ClusterJobResult.from_dict({'meta':response['meta'],**r}) for r in response['jobs']]
 
     def wait_for_cluster_job(
         self,

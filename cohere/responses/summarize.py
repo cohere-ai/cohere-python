@@ -2,7 +2,7 @@ from typing import List, NamedTuple
 
 from cohere.responses.meta_response import Meta
 
-SummarizeResponse = NamedTuple("SummarizeResponse", [("id", str), ("summary", str), ("meta", List[Meta])])
+SummarizeResponse = NamedTuple("SummarizeResponse", [("id", str), ("summary", str), ("meta", Meta)])
 SummarizeResponse.__doc__ = """
 Returned by co.summarize, which generates a summary of the specified length for the provided text.
 

@@ -80,7 +80,7 @@ class Generations(UserList, CohereObject):
 
     def __init__(self,generations,
                  return_likelihoods: str,
-                 meta: Optional[List[Meta]] = None
+                 meta: Optional[Meta] = None
                  ) -> None:
         super().__init__(generations)
         self.return_likelihoods = return_likelihoods   

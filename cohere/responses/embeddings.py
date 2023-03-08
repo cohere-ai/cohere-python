@@ -18,7 +18,7 @@ class Embedding(CohereObject):
 
 class Embeddings(CohereObject):
 
-    def __init__(self, embeddings: List[Embedding], meta: Optional[List[Meta]] = None) -> None:
+    def __init__(self, embeddings: List[Embedding], meta: Optional[Meta] = None) -> None:
         self.embeddings = embeddings
         self.meta = meta
 
