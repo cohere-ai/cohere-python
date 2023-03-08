@@ -34,10 +34,11 @@ class TestChat(unittest.TestCase):
              co.chat("Yo what up?", persona_name="NOT_A_VALID_PERSONA").reply
 
     def test_valid_persona(self):
-        prediction = co.chat("Yo what up?", persona_name="wizard")
+        prediction = co.chat("Yo what up?", persona_name="Wizard",return_chatlog=True)
         self.assertIsInstance(prediction.reply, str)
         self.assertIsInstance(prediction.session_id, str)
-        self.assertEqual(prediction.persona_name, "wizard")
+        self.assertEqual(prediction.persona_name, "Wizard")
+        # TODO: check 'Wizard:' in chatlog
 
     @unittest.skip("Very brittle test")
     def test_manual_session_id(self):
@@ -144,8 +145,9 @@ class TestChat(unittest.TestCase):
         print(prediction.prompt)
 
     def test_invalid_preamble_override(self):
-        with self.assertRaises(cohere.CohereError):
-            r = co.chat("Yo what up?", persona_prompt=123).reply
+        with self.assertRaises(cohere.CohereError) as e:
+            co.chat("Yo what up?", persona_prompt=123).reply
+        self.assertIn('invalid type', str(e.exception)) 
 
     def test_username_override(self):
         username = "CustomUser"

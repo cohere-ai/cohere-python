@@ -156,11 +156,11 @@ class AsyncClient(Client):
     async def chat(self,
              query: str,
              session_id: str = "",
-             persona_name: str = "cohere",
              model: Optional[str] = None,
              return_chatlog: bool = False,
              return_prompt: bool = False,
              chatlog_override: List[Dict[str, str]] = None,
+             persona_name: str = None,
              persona_prompt: str = None,
              user_name: str = None) -> AsyncChat:
 
@@ -169,11 +169,11 @@ class AsyncClient(Client):
         json_body = {
             'query': query,
             'session_id': session_id,
-            'persona_name': persona_name,
             'model': model,
             'return_chatlog': return_chatlog,
             'return_prompt': return_prompt,
             'chatlog_override': chatlog_override,
+            'persona_name': persona_name,
             'persona_prompt': persona_prompt,
             'user_name': user_name,
         }

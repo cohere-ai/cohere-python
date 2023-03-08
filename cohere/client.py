@@ -145,11 +145,11 @@ class Client:
     def chat(self,
              query: str,
              session_id: str = "",
-             persona_name: str = "cohere",
              model: Optional[str] = None,
              return_chatlog: bool = False,
              return_prompt: bool = False,
              chatlog_override: List[Dict[str, str]] = None,
+             persona_name: str = None,
              persona_prompt: str = None,
              user_name: str = None) -> Chat:
         """Returns a Chat object with the query reply.
@@ -157,11 +157,11 @@ class Client:
         Args:
             query (str): The query to send to the chatbot.
             session_id (str): (Optional) The session id to continue the conversation.
-            persona_name (str): (Optional) The persona to use.
             model (str): (Optional) The model to use for generating the next reply.
             return_chatlog (bool): (Optional) Whether to return the chatlog.
             return_prompt (bool): (Optional) Whether to return the prompt.
             chatlog_override (List[Dict[str, str]]): (Optional) A list of chatlog entries to override the chatlog.
+            persona_name (str): (Optional) The bot's name to use.
             persona_prompt (str): (Optional) A string to override the preamble.
             username (str): (Optional) A string to override the username.
 
@@ -198,11 +198,11 @@ class Client:
         json_body = {
             'query': query,
             'session_id': session_id,
-            'persona_name': persona_name,
             'model': model,
             'return_chatlog': return_chatlog,
             'return_prompt': return_prompt,
             'chatlog_override': chatlog_override,
+            'persona_name': persona_name,
             'persona_prompt': persona_prompt,
             'user_name': user_name,
         }
