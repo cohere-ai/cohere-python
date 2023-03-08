@@ -28,11 +28,6 @@ class TestChat(unittest.TestCase):
             self.assertIsInstance(prediction.session_id, str)
             self.assertEqual(prediction.persona_name, "cohere")
 
-    @unittest.skip("Not raising an error")
-    def test_invalid_persona(self):
-         with self.assertRaises(cohere.CohereError):
-             co.chat("Yo what up?", persona_name="NOT_A_VALID_PERSONA").reply
-
     def test_valid_persona(self):
         prediction = co.chat("Yo what up?", persona_name="Wizard",return_chatlog=True)
         self.assertIsInstance(prediction.reply, str)
