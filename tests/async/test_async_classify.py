@@ -2,7 +2,7 @@ import pytest
 from cohere.responses.classify import Example
 
 @pytest.mark.asyncio
-async def test_summarize(async_client):
+async def test_async_classify(async_client):
     prediction = await async_client.classify(model='small',
                                 inputs=['purple'],
                                 examples=[
@@ -18,5 +18,6 @@ async def test_summarize(async_client):
                                     Example('magenta', 'color')
                                 ])
     assert isinstance(prediction.classifications, list)
-
-
+    assert prediction.meta
+    assert prediction.meta["api_version"]
+    assert prediction.meta["api_version"]["version"]

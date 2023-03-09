@@ -9,6 +9,9 @@ from typing import Dict, List, Optional, Union, Generator
 import json
 import requests
 
+from cohere.responses.meta_response import Meta
+
+
 TokenLikelihood = NamedTuple("TokenLikelihood", [("token", str), ("likelihood", float)])
 
 TOKEN_COLORS = [
@@ -78,9 +81,12 @@ class Generation(CohereObject, str):
 class Generations(UserList, CohereObject):
 
     def __init__(self,generations,
-                 return_likelihoods: str) -> None:
+                 return_likelihoods: str,
+                 meta: Optional[Meta] = None
+                 ) -> None:
         super().__init__(generations)
-        self.return_likelihoods = return_likelihoods        
+        self.return_likelihoods = return_likelihoods   
+        self.meta = meta     
 
     @classmethod
     def from_dict(cls, response: Dict[str, Any], return_likelihoods: bool) -> List[Generation]:
@@ -97,7 +103,7 @@ class Generations(UserList, CohereObject):
                     token_likelihoods.append(TokenLikelihood(likelihoods['token'], token_likelihood))
             generations.append(Generation(gen['text'], likelihood, token_likelihoods, prompt= response.get("prompt"), id=gen["id"]))
 
-        return cls(generations,return_likelihoods)
+        return cls(generations,return_likelihoods,response.get('meta'))
 
     @property
     def generations(self) -> List[Generation]:  # backward compatibility
@@ -116,21 +122,36 @@ class Generations(UserList, CohereObject):
         return self[0].prompt  # should all be the same
 
 
-StreamingTokenLikelihood = NamedTuple("TokenLikelihood", [("index", int), ("token", str), ("likelihood", float)])
-
+# ("likelihood", Optional[float])])
+StreamingText = NamedTuple("StreamingText", [("id", Optional[int]), ("index", Optional[int]), ("text", str)])
 
 class StreamingGenerations(CohereObject):
 
     def __init__(self, response):
         self.response = response
+        self.ids = []
+        self.texts = []
 
-    def __iter__(self) -> Generator[StreamingTokenLikelihood, None, None]:
+    def _make_response_item(self, line) -> StreamingText:
+        streaming_item = json.loads(line)
+        index = streaming_item.get('index',0)
+        text = streaming_item['text']
+        id = streaming_item.get('id')
+        while len(self.texts) <= index:
+            self.texts.append("")
+            self.ids.append(None)
+        self.texts[index] += text
+        if id is not None:
+            self.ids[index] = id
+        return StreamingText(id=id, index=index, text = text)
+
+    def __iter__(self) -> Generator[StreamingText, None, None]:
         if not isinstance(self.response, requests.Response):
             raise ValueError("For AsyncClient, use `async for` to iterate through the `StreamingGenerations`")
 
         for line in self.response.iter_lines():
-            yield StreamingTokenLikelihood(**json.loads(line))
+            yield self._make_response_item(line)
 
-    async def __aiter__(self) -> Generator[StreamingTokenLikelihood, None, None]:
+    async def __aiter__(self) -> Generator[StreamingText, None, None]:
         async for line in self.response.content:
-            yield StreamingTokenLikelihood(**json.loads(line))
+            yield self._make_response_item(line)

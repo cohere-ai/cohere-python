@@ -38,6 +38,9 @@ class TestEmbed(unittest.TestCase):
         self.assertIsInstance(prediction.embeddings[1], list)
         self.assertEqual(len(prediction.embeddings[0]), 1024)
         self.assertEqual(len(prediction.embeddings[1]), 1024)
+        self.assertTrue(prediction.meta)
+        self.assertTrue(prediction.meta["api_version"])
+        self.assertTrue(prediction.meta["api_version"]["version"])
 
     def test_default_model(self):
         prediction = co.embed(texts=['co:here', 'cohere'])

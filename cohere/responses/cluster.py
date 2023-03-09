@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional
 
 from cohere.responses.base import CohereObject
+from cohere.responses.meta_response import Meta
 
 
 class Cluster(CohereObject):
@@ -41,6 +42,8 @@ class ClusterJobResult(CohereObject):
     output_clusters_url: Optional[str]
     output_outliers_url: Optional[str]
     clusters: Optional[List[Cluster]]
+    error: Optional[str]
+    meta: Optional[Meta]
 
     def __init__(
         self,
@@ -49,6 +52,8 @@ class ClusterJobResult(CohereObject):
         output_clusters_url: Optional[str],
         output_outliers_url: Optional[str],
         clusters: Optional[List[Cluster]],
+        error: Optional[str],
+        meta: Optional[Meta] = None,        
     ):
         # convert empty string to `None`
         if not output_clusters_url:
@@ -61,6 +66,8 @@ class ClusterJobResult(CohereObject):
         self.output_clusters_url = output_clusters_url
         self.output_outliers_url = output_outliers_url
         self.clusters = clusters
+        self.meta = meta
+        self.error = error
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'ClusterJobResult':
@@ -68,28 +75,32 @@ class ClusterJobResult(CohereObject):
             clusters = None
         else:
             clusters = [Cluster.from_dict(c) for c in data['clusters']]
-
         return ClusterJobResult(
             job_id=data['job_id'],
             status=data['status'],
             output_clusters_url=data['output_clusters_url'],
             output_outliers_url=data['output_outliers_url'],
             clusters=clusters,
+            error=data.get('error'),
+            meta=data.get('meta')
         )
 
 
 class CreateClusterJobResponse(CohereObject):
     job_id: str
+    meta: Optional[Meta]
 
-    def __init__(self, job_id: str, wait_fn):
+    def __init__(self, job_id: str, meta: Optional[Meta], wait_fn):
         self.job_id = job_id
         self._wait_fn = wait_fn
+        self.meta = meta
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any], wait_fn) -> 'CreateClusterJobResponse':
         return cls(
             job_id=data['job_id'],
             wait_fn=wait_fn,
+            meta=data.get('meta')
         )
 
     def wait(
@@ -115,12 +126,6 @@ class CreateClusterJobResponse(CohereObject):
 
 
 class AsyncCreateClusterJobResponse(CreateClusterJobResponse):
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any], wait_fn) -> 'AsyncCreateClusterJobResponse':
-        return cls(
-            job_id=data['job_id'],
-            wait_fn=wait_fn,
-        )
 
     async def wait(
         self,

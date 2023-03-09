@@ -3,7 +3,10 @@ from cohere.client_async import AsyncClient
 from cohere.error import CohereError, CohereAPIError,CohereConnectionError
 
 COHERE_API_URL = 'https://api.cohere.ai'
-COHERE_VERSION = '2022-12-06'
+RETRY_STATUS_CODES = [429, 500, 502, 503, 504]
+
+
+API_VERSION = '1'
 COHERE_EMBED_BATCH_SIZE = 96
 CHAT_URL = 'chat'
 CLASSIFY_URL = 'classify'

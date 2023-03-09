@@ -1,50 +1,50 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 from cohere.responses.base import CohereObject
+from cohere.responses.meta_response import Meta
 
 
 class Chat(CohereObject):
 
     def __init__(self,
                  query: str,
-                 persona: str,
-                 return_chatlog: bool = False,
-                 response: Optional[Dict[str, Any]] = None,
+                 persona_name: str,
+                 reply: str,
+                 session_id: str,
+                 meta: Optional[Meta] = None,
+                 prompt: Optional[str] = None,
+                 chatlog: Optional[List[Dict[str, str]]] = None,
                  client=None,
                  **kwargs) -> None:
         super().__init__(**kwargs)
         self.query = query
-        self.persona = persona
-        assert response is not None
-        self.reply = self._reply(response)
-        self.session_id = self._session_id(response)
+        self.persona_name = persona_name
+        self.reply = reply
+        self.session_id = session_id
+        self.prompt = prompt # optional 
+        self.chatlog = chatlog # optional 
         self.client = client
+        self.meta = meta
 
-        if return_chatlog:
-            self.chatlog = self._chatlog(response)
-
-    def _reply(self, response: Dict[str, Any]) -> str:
-        return response['reply']
-
-    def _session_id(self, response: Dict[str, Any]) -> str:
-        return response['session_id']
-
-    def _chatlog(self, response: Dict[str, Any]) -> str:
-        return response['chatlog']
+    @classmethod
+    def from_dict(cls,response: Dict[str, Any], query: str, persona_name: str,client) -> "Chat":
+        return cls(
+            query = query,
+            persona_name=persona_name,
+            session_id=response['session_id'],
+            reply=response['reply'],
+            prompt=response.get('prompt'), # optional 
+            chatlog=response.get('chatlog'), # optional 
+            client=client,
+            meta=response.get('meta')
+        )
 
     def respond(self, response: str) -> "Chat":
-        return self.client.chat(query=response, session_id=self.session_id, persona=self.persona)
+        return self.client.chat(query=response, session_id=self.session_id, persona_name=self.persona_name,
+                                return_chatlog = self.chatlog is not None, return_prompt = self.prompt is not None)
 
 
 class AsyncChat(Chat):
-
-    def __init__(self,
-                 query: str,
-                 persona: str,
-                 return_chatlog: bool = False,
-                 response: Optional[Dict[str, Any]] = None,
-                 client=None,
-                 **kwargs) -> None:
-        super().__init__(query, persona, return_chatlog, response, client, **kwargs)
-
     async def respond(self, response: str) -> "AsyncChat":
-        return self.client.chat(query=response, session_id=self.session_id, persona=self.persona)
+        return await self.client.chat(query=response, session_id=self.session_id, persona_name=self.persona_name,
+                                     return_chatlog = self.chatlog is not None, return_prompt = self.prompt is not None)
+

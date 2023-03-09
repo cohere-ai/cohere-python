@@ -2,13 +2,8 @@ from concurrent.futures import Future
 from typing import Any, Callable, Iterator
 from xmlrpc.client import Boolean
 
-from cohere.responses.feedback import Feedback
 import html
-from collections import UserList
-from dataclasses import asdict, dataclass
-from typing import Dict, List, Optional, Union
-
-
+from typing import Dict, Optional
 
 def _escape_html(text):
     return html.escape(str(text), quote=False)

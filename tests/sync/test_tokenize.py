@@ -16,6 +16,10 @@ class TestTokenize(unittest.TestCase):
         self.assertIsInstance(tokens.length, int)
         self.assertEqual(tokens.length, len(tokens.tokens))
         self.assertEqual(tokens.length, len(tokens.token_strings))
+        self.assertTrue(tokens.meta)
+        self.assertTrue(tokens.meta["api_version"])
+        self.assertTrue(tokens.meta["api_version"]["version"])
+        
 
     def test_invalid_text(self):
         with self.assertRaises(cohere.CohereError):

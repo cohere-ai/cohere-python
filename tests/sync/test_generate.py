@@ -15,6 +15,9 @@ class TestGenerate(unittest.TestCase):
         self.assertIsInstance(prediction.generations[0].text, str)
         self.assertIsNone(prediction.generations[0].token_likelihoods)
         self.assertEqual(prediction.return_likelihoods, None)
+        self.assertTrue(prediction.meta)
+        self.assertTrue(prediction.meta["api_version"])
+        self.assertTrue(prediction.meta["api_version"]["version"])
 
     def test_success_batched(self):
         _batch_size = 10
@@ -47,10 +50,6 @@ class TestGenerate(unittest.TestCase):
 
     def test_no_version_works(self):
         cohere.Client(API_KEY).generate(model='medium', prompt='co:here', max_tokens=1).generations
-
-    def test_invalid_version_fails(self):
-        with self.assertRaises(cohere.CohereError):
-            _ = cohere.Client(API_KEY, 'fake').generate(model='medium', prompt='co:here', max_tokens=1).generations
 
     def test_invalid_key(self):
         with self.assertRaises(cohere.CohereError):
