@@ -33,22 +33,7 @@ class TestChat(unittest.TestCase):
         self.assertIsInstance(prediction.reply, str)
         self.assertIsInstance(prediction.session_id, str)
         self.assertEqual(prediction.persona_name, "Wizard")
-        # TODO: check 'Wizard:' in chatlog
-
-    @unittest.skip("Very brittle test")
-    def test_manual_session_id(self):
-        max_num_tries = 5
-        prediction = co.chat("Hi my name is Rui")
-    #     for _ in range(max_num_tries):
-    #         # manually pick the chat back up using the session_id
-    #         # check that it still has access to information I gave it
-    #         # this is a brittle test, not sure how to improve
-    #         prediction = co.chat("Good to meet you. What's my name?", session_id=prediction.session_id)
-    #         test = "rui" in prediction.reply.lower()
-    #         if test:
-    #             break
-    #     else:
-    #         self.fail()
+        self.assertIn('Wizard:', prediction.chatlog) 
 
     def test_valid_model(self):
         prediction = co.chat("Yo what up?", model="medium")
