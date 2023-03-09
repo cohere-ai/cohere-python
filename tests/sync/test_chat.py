@@ -14,7 +14,7 @@ class TestChat(unittest.TestCase):
         prediction = co.chat("Yo what up?")
         self.assertIsInstance(prediction.reply, str)
         self.assertIsInstance(prediction.session_id, str)
-        self.assertEqual(prediction.persona_name, "cohere")
+        self.assertIsNone(prediction.persona_name)
         self.assertTrue(prediction.meta)
         self.assertTrue(prediction.meta["api_version"])
         self.assertTrue(prediction.meta["api_version"]["version"])
@@ -26,7 +26,6 @@ class TestChat(unittest.TestCase):
             prediction = prediction.respond("oh that's cool")
             self.assertIsInstance(prediction.reply, str)
             self.assertIsInstance(prediction.session_id, str)
-            self.assertEqual(prediction.persona_name, "cohere")
 
     def test_valid_persona(self):
         prediction = co.chat("Yo what up?", persona_name="Wizard",return_chatlog=True)
@@ -39,7 +38,6 @@ class TestChat(unittest.TestCase):
         prediction = co.chat("Yo what up?", model="medium")
         self.assertIsInstance(prediction.reply, str)
         self.assertIsInstance(prediction.session_id, str)
-        self.assertEqual(prediction.persona_name, "cohere")
 
     def test_invalid_model(self):
         with self.assertRaises(cohere.CohereError):
