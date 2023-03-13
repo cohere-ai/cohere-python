@@ -230,7 +230,7 @@ class Client:
             'return_chatlog': return_chatlog,
             'return_prompt': return_prompt,
             'chatlog_override': chatlog_override,
-            'username': username,
+            'user_name': username,
             'temperature': temperature,
             'max_tokens': max_tokens,
         }
