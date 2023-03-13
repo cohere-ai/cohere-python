@@ -1,7 +1,7 @@
 # Changelog
 
 ## 3.11.0
-- [#158](https://github.com/cohere-ai/cohere-python/pull/158)
+- [#179](https://github.com/cohere-ai/cohere-python/pull/179)
   - Add support for co.Chat parameters:
     - `temperature`
     - `max_tokens`
