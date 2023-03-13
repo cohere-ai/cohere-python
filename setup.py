@@ -1,4 +1,5 @@
 import setuptools
+from cohere import SDK_VERSION
 from setuptools.command.install import install
 from setuptools.dist import Distribution
 
@@ -24,7 +25,7 @@ class BinaryDistribution(Distribution):
 
 
 setuptools.setup(name='cohere',
-                 version='3.10.0',
+                 version=SDK_VERSION,
                  author='1vn',
                  author_email='ivan@cohere.ai',
                  description='A Python library for the Cohere API',
