@@ -154,7 +154,6 @@ class Client:
              return_chatlog: bool = False,
              return_prompt: bool = False,
              chatlog_override: List[Dict[str, str]] = None,
-             preamble_override: str = None,
              username: str = None) -> Chat:
         """Returns a Chat object with the query reply.
 
@@ -166,7 +165,6 @@ class Client:
             return_chatlog (bool): (Optional) Whether to return the chatlog.
             return_prompt (bool): (Optional) Whether to return the prompt.
             chatlog_override (List[Dict[str, str]]): (Optional) A list of chatlog entries to override the chatlog.
-            preamble_override (str): (Optional) A string to override the preamble.
             username (str): (Optional) A string to override the username.
 
         Example:
@@ -210,7 +208,6 @@ class Client:
         ```
         res = co.chat(
             query="What about you?",
-            preamble_override="You are a dog who mostly barks",
             return_chatlog=True)
             )
         print(res.reply)
@@ -227,7 +224,6 @@ class Client:
             'return_chatlog': return_chatlog,
             'return_prompt': return_prompt,
             'chatlog_override': chatlog_override,
-            'preamble_override': preamble_override,
             'username': username,
         }
         response = self._executor.submit(self.__request, cohere.CHAT_URL, json=json_body)
