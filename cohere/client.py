@@ -163,7 +163,7 @@ class Client:
             chatlog_override (List[Dict[str, str]]): (Optional) A list of chatlog entries to override the chatlog.
             persona_name (str): (Optional) The bot's name to use.
             persona_prompt (str): (Optional) A string to override the preamble.
-            username (str): (Optional) A string to override the username.
+            user_name (str): (Optional) A string to override the username.
 
         Examples:
             A simple chat messsage:
