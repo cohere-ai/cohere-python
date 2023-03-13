@@ -154,7 +154,9 @@ class Client:
              return_chatlog: bool = False,
              return_prompt: bool = False,
              chatlog_override: List[Dict[str, str]] = None,
-             username: str = None) -> Chat:
+             username: str = None,
+             temperature: float = 0.8,
+             max_tokens: int = 200) -> Chat:
         """Returns a Chat object with the query reply.
 
         Args:
@@ -166,6 +168,10 @@ class Client:
             return_prompt (bool): (Optional) Whether to return the prompt.
             chatlog_override (List[Dict[str, str]]): (Optional) A list of chatlog entries to override the chatlog.
             username (str): (Optional) A string to override the username.
+            temperature (float): (Optional) The temperature to use for the next reply. \
+                The higher the temperature, the more random the reply.
+            max_tokens (int): (Optional) The max tokens generated for the next reply.
+
 
         Example:
         ```
@@ -225,6 +231,8 @@ class Client:
             'return_prompt': return_prompt,
             'chatlog_override': chatlog_override,
             'username': username,
+            'temperature': temperature,
+            'max_tokens': max_tokens,
         }
         response = self._executor.submit(self.__request, cohere.CHAT_URL, json=json_body)
         return Chat(

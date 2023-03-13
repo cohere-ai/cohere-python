@@ -142,3 +142,19 @@ class TestChat(unittest.TestCase):
         self.assertIsInstance(prediction.session_id, str)
         chatlog_starts_with_username = prediction.chatlog.strip().startswith(username)
         self.assertTrue(chatlog_starts_with_username)
+
+    def test_valid_temperatures(self):
+        temperatures = [0.1, 0.5, 0.9]
+
+        for temperature in temperatures:
+            prediction = co.chat("Yo what up?", temperature=temperature)
+            self.assertIsInstance(prediction.reply, str)
+            self.assertIsInstance(prediction.session_id, str)
+            self.assertEqual(prediction.persona, "cohere")
+
+    def test_max_tokens(self):
+        prediction = co.chat("Yo what up?", max_tokens=10)
+        self.assertIsInstance(prediction.reply, str)
+        self.assertIsInstance(prediction.session_id, str)
+        tokens = co.tokenize(prediction.reply)
+        self.assertLessEqual(tokens.length, 10)
