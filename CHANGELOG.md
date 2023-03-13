@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.11.0
+- [#158](https://github.com/cohere-ai/cohere-python/pull/158)
+  - Add support for co.Chat parameters:
+    - `temperature`
+    - `max_tokens`
+  - Remove support for co.Chat parameters:
+    - `preamble_override`
+  - Fixes the `user_name` parameter
+
 ## 3.10.0
 - [#176](https://github.com/cohere-ai/cohere-python/pull/176)
   - Add failure reason to clustering jobs
