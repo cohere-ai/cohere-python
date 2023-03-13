@@ -128,9 +128,9 @@ class TestChat(unittest.TestCase):
         self.assertIn('invalid type', str(e.exception)) 
 
     def test_username_override(self):
-        username = "CustomUser"
-        prediction = co.chat("Yo what up?", user_name=username, return_chatlog=True)
+        user_name = "CustomUser"
+        prediction = co.chat("Yo what up?", user_name=user_name, return_chatlog=True)
         self.assertIsInstance(prediction.reply, str)
         self.assertIsInstance(prediction.session_id, str)
-        chatlog_starts_with_username = prediction.chatlog.strip().startswith(username)
+        chatlog_starts_with_username = prediction.chatlog.strip().startswith(user_name)
         self.assertTrue(chatlog_starts_with_username)
