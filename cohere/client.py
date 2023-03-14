@@ -153,6 +153,8 @@ class Client:
              return_chatlog: bool = False,
              return_prompt: bool = False,
              chatlog_override: List[Dict[str, str]] = None,
+             persona_name: str = None,
+             persona_prompt: str = None,
              user_name: str = None,
              temperature: float = 0.8,
              max_tokens: int = 200) -> Chat:
@@ -165,56 +167,38 @@ class Client:
             return_chatlog (bool): (Optional) Whether to return the chatlog.
             return_prompt (bool): (Optional) Whether to return the prompt.
             chatlog_override (List[Dict[str, str]]): (Optional) A list of chatlog entries to override the chatlog.
+            persona_name (str): (Optional) The bot's name to use.
+            persona_prompt (str): (Optional) A string to override the preamble.
             user_name (str): (Optional) A string to override the username.
             temperature (float): (Optional) The temperature to use for the next reply. \
                 The higher the temperature, the more random the reply.
             max_tokens (int): (Optional) The max tokens generated for the next reply.
 
-
-        Example:
-        ```
-        res = co.chat(query="Hey! How are you doing today?")
-        print(res.reply)
-        print(res.session_id)
-        ```
-
-        Example:
-        ```
-        res = co.chat(
-            query="Hey! How are you doing today?",
-            session_id="1234",
-            model="command-xlarge",
-            return_chatlog=True,
-            return_prompt=True)
-        print(res.reply)
-        print(res.chatlog)
-        print(res.prompt)
-        ```
-
-        Example:
-        ```
-        res = co.chat(
-            query="What about you?",
-            session_id="1234",
-            chatlog_override=[
-                {'Bot': 'Hey!'},
-                {'CustomUser': 'I am doing great!'},
-                {'Bot': 'That is great to hear!'},
-            ],
-            user_name="CustomUser",
-            return_chatlog=True)
-        print(res.reply)
-        print(res.chatlog)
-        ```
-
-        Example:
-        ```
-        res = co.chat(
-            query="What about you?",
-            return_chatlog=True)
-            )
-        print(res.reply)
-        print(res.chatlog)
+        Examples:
+            A simple chat messsage:
+                >>> res = co.chat(query="Hey! How are you doing today?")
+                >>> print(res.reply)
+                >>> print(res.session_id)
+            Continuing a session using a specific model:
+                >>> res = co.chat(
+                >>>     query="Hey! How are you doing today?",
+                >>>     session_id="1234",
+                >>>     model="command-xlarge",
+                >>>     return_chatlog=True)
+                >>> print(res.reply)
+                >>> print(res.chatlog)
+            Overriding a chat log:
+                >>> res = co.chat(
+                >>>     query="What about you?",
+                >>>     session_id="1234",
+                >>>     chatlog_override=[
+                >>>         {'Bot': 'Hey!'},
+                >>>         {'User': 'I am doing great!'},
+                >>>         {'Bot': 'That is great to hear!'},
+                >>>     ],
+                >>>     return_chatlog=True)
+                >>> print(res.reply)
+                >>> print(res.chatlog)
         """
         if chatlog_override is not None:
             self._validate_chatlog_override(chatlog_override)
@@ -227,12 +211,15 @@ class Client:
             'return_prompt': return_prompt,
             'chatlog_override': chatlog_override,
             'user_name': user_name,
+            'persona_name': persona_name,
+            'persona_prompt': persona_prompt,
             'temperature': temperature,
             'max_tokens': max_tokens,
         }
         response = self._executor.submit(self.__request, cohere.CHAT_URL, json=json_body)
         return Chat(
                     query=query,
+                    persona_name=persona_name,
                     _future=response,
                     client=self,
                     return_chatlog=return_chatlog,

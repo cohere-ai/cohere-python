@@ -14,6 +14,7 @@ class TestChat(unittest.TestCase):
         prediction = co.chat("Yo what up?")
         self.assertIsInstance(prediction.reply, str)
         self.assertIsInstance(prediction.session_id, str)
+        self.assertIsNone(prediction.persona_name)
 
     def test_multi_replies(self):
         num_replies = 3
@@ -23,22 +24,16 @@ class TestChat(unittest.TestCase):
             self.assertIsInstance(prediction.reply, str)
             self.assertIsInstance(prediction.session_id, str)
 
-    # TODO re-add tests
+    def test_valid_persona_name(self):
+        prediction = co.chat("Yo what up?", persona_name="Wizard", return_chatlog=True)
+        self.assertIsInstance(prediction.reply, str)
+        self.assertIsInstance(prediction.session_id, str)
+        self.assertEqual(prediction.persona_name, "Wizard")
+        self.assertIn('Wizard:', prediction.chatlog)
 
-    # def test_manual_session_id(self):
-    #     max_num_tries = 5
-    #     prediction = co.chat("Hi my name is Rui")
-
-    #     for _ in range(max_num_tries):
-    #         # manually pick the chat back up using the session_id
-    #         # check that it still has access to information I gave it
-    #         # this is a brittle test, not sure how to improve
-    #         prediction = co.chat("Good to meet you. What's my name?", session_id=prediction.session_id)
-    #         test = "rui" in prediction.reply.lower()
-    #         if test:
-    #             break
-    #     else:
-    #         self.fail()
+    def test_invalid_persona_name(self):
+        with self.assertRaises(cohere.CohereError):
+            co.chat("Yo what up?", persona_name=123).reply
 
     def test_valid_model(self):
         prediction = co.chat("Yo what up?", model="medium")
@@ -122,6 +117,19 @@ class TestChat(unittest.TestCase):
 
         with self.assertRaises(AttributeError):
             prediction.prompt
+
+    def test_persona_prompt(self):
+        preamble = "You are a dog who mostly barks"
+        prediction = co.chat("Yo what up?", persona_prompt=preamble, return_prompt=True)
+        self.assertIsInstance(prediction.reply, str)
+        self.assertIsInstance(prediction.session_id, str)
+        self.assertIn(preamble, prediction.prompt)
+        print(prediction.prompt)
+
+    def test_invalid_persona_prompt(self):
+        with self.assertRaises(cohere.CohereError) as e:
+            co.chat("Yo what up?", persona_prompt=123).reply
+        self.assertIn('invalid type', str(e.exception))
 
     def test_username_override(self):
         user_name = "CustomUser"
