@@ -1,5 +1,23 @@
 # Changelog
 
+## 4.0
+
+- [#160](https://github.com/cohere-ai/cohere-python/pull/160)
+  - Add AsyncClient
+  - Default value of API key from environment variable `CO_API_KEY`.
+  - Feedback endpoint moved from CohereObject to Client/AsyncClient.
+  - Lazy initialization using futures removed.
+  - Generations is now a UserList, and initialized from responses using `from_dict`.
+  - Chat objects are initialized using `from_dict`. Optional attributes are now `None` rather than missing.
+  - Documentation expanded and built using sphinx.
+  - Use Poetry, and format using black and isort, include pre-commit hooks.
+  - Removed ability for user to choose API version. This SDK version defaults to v1.
+  - Added 'meta' fields to response objects with API version
+- [#179](https://github.com/cohere-ai/cohere-python/pull/179)
+  - Add support for co.Chat parameters: `temperature`, `max_tokens`, `persona_name`, `persona_prompt`
+  - Remove support for co.Chat parameters: `persona`, `preamble_override`
+  - Updates the co.Chat `user_name` parameter
+
 ## 3.10.0
 - [#176](https://github.com/cohere-ai/cohere-python/pull/176)
   - Add failure reason to clustering jobs
@@ -14,6 +32,7 @@
     - `model`
 
 ## 3.8
+
 - [#158](https://github.com/cohere-ai/cohere-python/pull/158)
   - Add support for co.Chat parameters:
     - `preamble_override`
@@ -21,6 +40,7 @@
     - `username`
 
 ## 3.7
+
 - [#164](https://github.com/cohere-ai/cohere-python/pull/164)
   - Add clustering methods:
     - `co.create_cluster_job`
@@ -29,6 +49,7 @@
     - `co.wait_for_cluster_job`
 
 ## 3.6
+
 - [#156](https://github.com/cohere-ai/cohere-python/pull/156)
   - Replace `abstractiveness` param with `extractiveness` in co.Summarize
   - Rename `additional_instruction` param to `additional_command` in co.Summarize
