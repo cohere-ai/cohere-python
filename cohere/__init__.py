@@ -5,7 +5,7 @@ from cohere.error import CohereAPIError, CohereConnectionError, CohereError
 COHERE_API_URL = "https://api.cohere.ai"
 RETRY_STATUS_CODES = [429, 500, 502, 503, 504]
 
-
+SDK_VERSION = "4.1.0"
 API_VERSION = "1"
 COHERE_EMBED_BATCH_SIZE = 96
 CHAT_URL = "chat"

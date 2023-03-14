@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.1
+- [#182](https://github.com/cohere-ai/cohere-python/pull/182)
+  - Added support for experimental SDK releases
+
 ## 4.0.1
 - [#181](https://github.com/cohere-ai/cohere-python/pull/181)
   - Allow Python >=3.11
