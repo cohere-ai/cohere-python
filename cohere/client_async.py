@@ -424,7 +424,7 @@ class AIOHTTPBackend:
     """HTTP backend which handles retries, concurrency limiting and logging"""
 
 
-    SLEEP_AFTER_FAILURE = defaultdict(lambda: 0.25, {429: 1})
+    SLEEP_AFTER_FAILURE = defaultdict(lambda: 0.25, {429: 5})
 
     def __init__(self, logger, max_concurrent_requests: int = 64, max_retries: int = 5, timeout: int = 120):
         self.logger = logger

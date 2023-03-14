@@ -18,9 +18,6 @@ async def test_single_generate(async_client):
     assert prediction[0].prompt == "co:here"
     # test repr
     assert prediction[0].visualize_token_likelihoods() is None
-    # pandas is optional
-    # assert isinstance(prediction[0]._repr_html_(), str)  # Generation
-    # assert isinstance(prediction._repr_html_(), str)  # Generations repr
     assert prediction.meta
     assert prediction.meta["api_version"]
     assert prediction.meta["api_version"]["version"]
