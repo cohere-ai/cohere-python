@@ -2,7 +2,7 @@ name: CI Tests
 
 on: pull_request
 jobs:
-  build:
+  run_tests_docs_build:
     runs-on: ubuntu-latest
 
     strategy:
