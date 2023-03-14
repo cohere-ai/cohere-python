@@ -2,13 +2,13 @@ name: CI Tests
 
 on: pull_request
 jobs:
-  build:
+  run_tests_docs_build:
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.7", "3.10"] # assume min and max are sufficient
+        python-version: ["3.7", "3.11"] # assume min and max are sufficient
 
     steps:
     - uses: actions/checkout@v2
