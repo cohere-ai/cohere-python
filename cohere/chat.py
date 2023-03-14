@@ -7,7 +7,6 @@ class Chat(CohereObject):
 
     def __init__(self,
                  query: str,
-                 persona: str,
                  return_chatlog: bool = False,
                  return_prompt: bool = False,
                  response: Optional[Dict[str, Any]] = None,
@@ -16,7 +15,6 @@ class Chat(CohereObject):
                  **kwargs) -> None:
         super().__init__(**kwargs)
         self.query = query
-        self.persona = persona
 
         if _future is not None:
             self._init_from_future(_future, return_chatlog, return_prompt)
@@ -54,4 +52,4 @@ class Chat(CohereObject):
         return response['prompt']
 
     def respond(self, response: str) -> "Chat":
-        return self.client.chat(query=response, session_id=self.session_id, persona=self.persona)
+        return self.client.chat(query=response, session_id=self.session_id)

@@ -149,7 +149,6 @@ class Client:
     def chat(self,
              query: str,
              session_id: str = "",
-             persona: str = "cohere",
              model: Optional[str] = None,
              return_chatlog: bool = False,
              return_prompt: bool = False,
@@ -162,7 +161,6 @@ class Client:
         Args:
             query (str): The query to send to the chatbot.
             session_id (str): (Optional) The session id to continue the conversation.
-            persona (str): (Optional) The persona to use.
             model (str): (Optional) The model to use for generating the next reply.
             return_chatlog (bool): (Optional) Whether to return the chatlog.
             return_prompt (bool): (Optional) Whether to return the prompt.
@@ -185,7 +183,6 @@ class Client:
         res = co.chat(
             query="Hey! How are you doing today?",
             session_id="1234",
-            persona="fortune",
             model="command-xlarge",
             return_chatlog=True,
             return_prompt=True)
@@ -225,7 +222,6 @@ class Client:
         json_body = {
             'query': query,
             'session_id': session_id,
-            'persona': persona,
             'model': model,
             'return_chatlog': return_chatlog,
             'return_prompt': return_prompt,
@@ -237,7 +233,6 @@ class Client:
         response = self._executor.submit(self.__request, cohere.CHAT_URL, json=json_body)
         return Chat(
                     query=query,
-                    persona=persona,
                     _future=response,
                     client=self,
                     return_chatlog=return_chatlog,
