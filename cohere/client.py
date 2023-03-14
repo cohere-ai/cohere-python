@@ -512,7 +512,8 @@ class Client:
                 res = response.json()
             except requests.exceptions.ConnectionError:
                 raise CohereError(
-                    message='A Connection error occurred when trying to connect to the Cohere API. Please check your internet connection.'
+                    message='A Connection error occurred when trying to connect to the Cohere API.'
+                            ' Please check your internet connection.'
                 )
             except requests.exceptions.Timeout:
                 raise CohereError(
@@ -520,7 +521,7 @@ class Client:
                 )
             except requests.exceptions.HTTPError as http_error:
                 raise CohereError(
-                    message=http_error.response.text, 
+                    message=http_error.response.text,
                     http_status=http_error.response.status_code,
                     headers=http_error.response.headers,
                 )
