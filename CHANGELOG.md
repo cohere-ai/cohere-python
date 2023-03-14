@@ -5,9 +5,12 @@
   - Add support for co.Chat parameters:
     - `temperature`
     - `max_tokens`
+    - `persona_name`
+    - `persona_prompt`
   - Remove support for co.Chat parameters:
+    - `persona`
     - `preamble_override`
-  - Fixes the `user_name` parameter
+  - Updates the `user_name` parameter
 
 ## 3.10.0
 - [#176](https://github.com/cohere-ai/cohere-python/pull/176)
