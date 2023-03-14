@@ -154,7 +154,7 @@ class Client:
              return_chatlog: bool = False,
              return_prompt: bool = False,
              chatlog_override: List[Dict[str, str]] = None,
-             username: str = None,
+             user_name: str = None,
              temperature: float = 0.8,
              max_tokens: int = 200) -> Chat:
         """Returns a Chat object with the query reply.
@@ -167,7 +167,7 @@ class Client:
             return_chatlog (bool): (Optional) Whether to return the chatlog.
             return_prompt (bool): (Optional) Whether to return the prompt.
             chatlog_override (List[Dict[str, str]]): (Optional) A list of chatlog entries to override the chatlog.
-            username (str): (Optional) A string to override the username.
+            user_name (str): (Optional) A string to override the username.
             temperature (float): (Optional) The temperature to use for the next reply. \
                 The higher the temperature, the more random the reply.
             max_tokens (int): (Optional) The max tokens generated for the next reply.
@@ -204,7 +204,7 @@ class Client:
                 {'CustomUser': 'I am doing great!'},
                 {'Bot': 'That is great to hear!'},
             ],
-            username="CustomUser",
+            user_name="CustomUser",
             return_chatlog=True)
         print(res.reply)
         print(res.chatlog)
@@ -230,7 +230,7 @@ class Client:
             'return_chatlog': return_chatlog,
             'return_prompt': return_prompt,
             'chatlog_override': chatlog_override,
-            'user_name': username,
+            'user_name': user_name,
             'temperature': temperature,
             'max_tokens': max_tokens,
         }
