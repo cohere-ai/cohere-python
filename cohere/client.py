@@ -508,17 +508,33 @@ class Client:
 
             try:
                 response = session.request(method, url, headers=headers, json=json, **self.request_dict)
-            except Exception as err:
-                raise CohereError(message=str(err))
-
-            try:
+                response.raise_for_status()
                 res = response.json()
-            except Exception:
+            except requests.exceptions.ConnectionError:
+                raise CohereError(
+                    message='A Connection error occurred when trying to connect to the Cohere API. Please check your internet connection.'
+                )
+            except requests.exceptions.Timeout:
+                raise CohereError(
+                    message='The request to the Cohere API timed out'
+                )
+            except requests.exceptions.HTTPError as http_error:
+                raise CohereError(
+                    message=http_error.response.text, 
+                    http_status=http_error.response.status_code,
+                    headers=http_error.response.headers,
+                )
+            except requests.exceptions.JSONDecodeError:
                 raise CohereError(
                     message=response.text,
                     http_status=response.status_code,
                     headers=response.headers,
                 )
+            except requests.exceptions.RequestException:
+                raise CohereError(
+                    message="An unknown error occurend when trying to reach the Cohere API"
+                )
+
             if 'message' in res:  # has errors
                 raise CohereError(
                     message=res['message'],
