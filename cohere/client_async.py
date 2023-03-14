@@ -162,7 +162,10 @@ class AsyncClient(Client):
              chatlog_override: List[Dict[str, str]] = None,
              persona_name: str = None,
              persona_prompt: str = None,
-             user_name: str = None) -> AsyncChat:
+             user_name: str = None,
+            temperature: float = 0.8,
+             max_tokens: int = 200
+             ) -> AsyncChat:
 
         if chatlog_override is not None:
             self._validate_chatlog_override(chatlog_override)
@@ -176,6 +179,8 @@ class AsyncClient(Client):
             'persona_name': persona_name,
             'persona_prompt': persona_prompt,
             'user_name': user_name,
+            'temperature': temperature,
+            'max_tokens': max_tokens,            
         }
         response = await self._request(cohere.CHAT_URL, json=json_body)
         return AsyncChat.from_dict(

@@ -151,7 +151,10 @@ class Client:
              chatlog_override: List[Dict[str, str]] = None,
              persona_name: str = None,
              persona_prompt: str = None,
-             user_name: str = None) -> Chat:
+             user_name: str = None,
+             temperature: float = 0.8,
+             max_tokens: int = 200
+             ) -> Chat:
         """Returns a Chat object with the query reply.
 
         Args:
@@ -164,6 +167,8 @@ class Client:
             persona_name (str): (Optional) The bot's name to use.
             persona_prompt (str): (Optional) A string to override the preamble.
             user_name (str): (Optional) A string to override the username.
+            temperature (float): (Optional) The temperature to use for the next reply. The higher the temperature, the more random the reply.
+            max_tokens (int): (Optional) The max tokens generated for the next reply.
 
         Examples:
             A simple chat messsage:
@@ -204,6 +209,8 @@ class Client:
             'persona_name': persona_name,
             'persona_prompt': persona_prompt,
             'user_name': user_name,
+            'temperature': temperature,
+            'max_tokens': max_tokens,            
         }
         response = self._request(cohere.CHAT_URL, json=json_body)
         return Chat.from_dict(

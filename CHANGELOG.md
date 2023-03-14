@@ -13,8 +13,11 @@
   - Use Poetry, and format using black and isort, include pre-commit hooks.
   - Removed ability for user to choose API version. This SDK version defaults to v1.
   - Added 'meta' fields to response objects with API version
-  - Updated co.Chat to use persona_name, persona_prompt, user_name
-  
+- [#179](https://github.com/cohere-ai/cohere-python/pull/179)
+  - Add support for co.Chat parameters: `temperature`, `max_tokens`, `persona_name`, `persona_prompt`
+  - Remove support for co.Chat parameters: `persona`, `preamble_override`
+  - Updates the co.Chat `user_name` parameter
+
 ## 3.10.0
 - [#176](https://github.com/cohere-ai/cohere-python/pull/176)
   - Add failure reason to clustering jobs
