@@ -1,9 +1,7 @@
 import json
 
-
-try: # numpy is optional, but support json encoding if the user has it
+try:  # numpy is optional, but support json encoding if the user has it
     import numpy as np
-
 
     class CohereJsonEncoder(json.JSONEncoder):
         """Handles numpy datatypes and such in json encoding"""
@@ -19,7 +17,9 @@ try: # numpy is optional, but support json encoding if the user has it
                 return list(obj)
             else:
                 return super().default(obj)
+
 except:
+
     class CohereJsonEncoder(json.JSONEncoder):
         """numpy is missing, so we can't handle these (and don't expect them)"""
 
@@ -27,7 +27,8 @@ except:
             if isinstance(obj, set):
                 return list(obj)
             else:
-                return super().default(obj)    
+                return super().default(obj)
+
 
 def np_json_dumps(data, **kwargs):
     return json.dumps(data, cls=CohereJsonEncoder, **kwargs)

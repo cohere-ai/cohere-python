@@ -1,24 +1,21 @@
-
 from typing import Dict
 
 
 class CohereError(Exception):
     """Base Exception class, returned when nothing more specific applies"""
 
-    def __init__(
-        self,
-        message=None
-    ) -> None:
+    def __init__(self, message=None) -> None:
         super(CohereError, self).__init__(message)
 
         self.message = message
 
     def __str__(self) -> str:
-        msg = self.message or '<empty message>'
+        msg = self.message or "<empty message>"
         return msg
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(message={str(self)})"
+
 
 class CohereAPIError(CohereError):
     """Returned when the API responds with an error message"""

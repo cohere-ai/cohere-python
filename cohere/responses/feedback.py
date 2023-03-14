@@ -17,8 +17,6 @@ if user_edits_suggestion:
 ```
 """
 
-from typing import List, NamedTuple
-
-from cohere.responses.meta_response import Meta
+from typing import NamedTuple
 
 Feedback = NamedTuple("Feedback", [("id", str), ("good_response", bool), ("desired_response", str), ("feedback", str)])

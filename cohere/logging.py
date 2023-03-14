@@ -1,6 +1,5 @@
 import logging
 
-
 logger = logging.getLogger("cohere-python-sdk")
 
 # create console handler with a higher log level

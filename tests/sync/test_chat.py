@@ -1,6 +1,6 @@
 import unittest
 
-from utils import get_api_key,in_ci
+from utils import get_api_key
 
 import cohere
 
@@ -9,7 +9,6 @@ co = cohere.Client(API_KEY)
 
 
 class TestChat(unittest.TestCase):
-
     def test_simple_success(self):
         prediction = co.chat("Yo what up?")
         self.assertIsInstance(prediction.reply, str)
@@ -32,7 +31,7 @@ class TestChat(unittest.TestCase):
         self.assertIsInstance(prediction.reply, str)
         self.assertIsInstance(prediction.session_id, str)
         self.assertEqual(prediction.persona_name, "Wizard")
-        self.assertIn('Wizard:', prediction.chatlog) 
+        self.assertIn("Wizard:", prediction.chatlog)
 
     def test_invalid_persona_name(self):
         with self.assertRaises(cohere.CohereError):
@@ -63,17 +62,14 @@ class TestChat(unittest.TestCase):
 
     def testValidChatlogOverride(self):
         query = "What about you?"
-        valid_chatlog_overrides = [[
-            {
-                'Bot': 'Hey!'
-            },
-            {
-                'User': 'I am doing great!'
-            },
-            {
-                'Bot': 'That is great to hear!'
-            },
-        ], []]
+        valid_chatlog_overrides = [
+            [
+                {"Bot": "Hey!"},
+                {"User": "I am doing great!"},
+                {"Bot": "That is great to hear!"},
+            ],
+            [],
+        ]
 
         for chatlog_override in valid_chatlog_overrides:
             expected_chatlog = ""
@@ -92,18 +88,14 @@ class TestChat(unittest.TestCase):
         invalid_chatlog_overrides = [
             "invalid",
             ["invalid"],
-            [{
-                "user": "invalid",
-                "bot": "invalid"
-            }],
+            [{"user": "invalid", "bot": "invalid"}],
         ]
 
         for chatlog_override in invalid_chatlog_overrides:
             with self.assertRaises(cohere.error.CohereError):
-                _ = co.chat(query="What about you?",
-                            session_id="1234",
-                            chatlog_override=chatlog_override,
-                            return_chatlog=True)
+                _ = co.chat(
+                    query="What about you?", session_id="1234", chatlog_override=chatlog_override, return_chatlog=True
+                )
 
     def test_return_prompt(self):
         prediction = co.chat("Yo what up?", return_prompt=True)
@@ -129,7 +121,7 @@ class TestChat(unittest.TestCase):
     def test_invalid_persona_prompt(self):
         with self.assertRaises(cohere.CohereError) as e:
             co.chat("Yo what up?", persona_prompt=123).reply
-        self.assertIn('invalid type', str(e.exception))
+        self.assertIn("invalid type", str(e.exception))
 
     def test_username_override(self):
         user_name = "CustomUser"

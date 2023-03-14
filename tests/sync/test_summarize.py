@@ -3,8 +3,8 @@ import unittest
 from utils import get_api_key
 
 import cohere
-from cohere.responses.summarize import SummarizeResponse
 from cohere.error import CohereError
+from cohere.responses.summarize import SummarizeResponse
 
 API_KEY = get_api_key()
 co = cohere.Client(API_KEY)
@@ -19,7 +19,6 @@ LaBelle grew up listening to music, including jazz and the Beatles, but felt the
 
 
 class TestFeedback(unittest.TestCase):
-
     def test_success(self):
         res = co.summarize(text)
         self.assertIsInstance(res, SummarizeResponse)

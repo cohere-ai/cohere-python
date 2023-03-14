@@ -1,14 +1,13 @@
 import unittest
 
-import cohere
-
 from utils import get_api_key
+
+import cohere
 
 co = cohere.Client(get_api_key())
 
 
 class TestDetokenize(unittest.TestCase):
-
     def test_success(self):
         resp = co.detokenize([10104, 12221, 974, 514, 34])
         text = resp.text

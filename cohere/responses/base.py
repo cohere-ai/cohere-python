@@ -1,9 +1,8 @@
+import html
 from concurrent.futures import Future
-from typing import Any, Callable, Iterator
+from typing import Any, Callable, Dict, Iterator, Optional
 from xmlrpc.client import Boolean
 
-import html
-from typing import Dict, Optional
 
 def _escape_html(text):
     return html.escape(str(text), quote=False)
@@ -21,8 +20,7 @@ def _df_html(
     return df.to_html(**kwargs)
 
 
-
-class AsyncAttribute():
+class AsyncAttribute:
     """An attribute of an object that is lazily fetched.
 
     `async_request` is a Future object that is expected to resolve to an object that will be consumed by `getter`.
@@ -59,8 +57,7 @@ class AsyncAttribute():
         return self._result
 
 
-class CohereObject():
-
+class CohereObject:
     def __init__(self, id: str = None) -> None:
         self.id = id
 
@@ -72,14 +69,14 @@ class CohereObject():
             return attr
 
     def __repr__(self) -> str:
-        contents = ''
-        exclude_list = ['iterator']
+        contents = ""
+        exclude_list = ["iterator"]
 
         for k in self.__dict__.keys():
             if k not in exclude_list:
-                contents += f'\t{k}: {self.__dict__[k]}\n'
+                contents += f"\t{k}: {self.__dict__[k]}\n"
 
-        output = f'cohere.{type(self).__name__} {{\n{contents}}}'
+        output = f"cohere.{type(self).__name__} {{\n{contents}}}"
         return output
 
     def _repr_html_(self):  # rich html output for Jupyter
