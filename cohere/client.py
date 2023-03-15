@@ -10,7 +10,7 @@ from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
 import cohere
-from cohere.error import CohereAPIError, CohereConnectionError, CohereError
+from cohere.error import CohereAPIError, CohereError
 from cohere.logging import logger
 from cohere.responses import (
     Classification,
@@ -522,6 +522,7 @@ class Client:
                 backoff_factor=0.5,
                 allowed_methods=["POST", "GET"],
                 status_forcelist=cohere.RETRY_STATUS_CODES,
+                raise_on_status=False,
             )
             session.mount("https://", HTTPAdapter(max_retries=retries))
             session.mount("http://", HTTPAdapter(max_retries=retries))
@@ -529,7 +530,12 @@ class Client:
             try:
                 response = session.request(method, url, headers=headers, json=json, **self.request_dict)
             except requests.exceptions.ConnectionError as e:
-                raise CohereConnectionError(str(e)) from e
+                raise CohereError(
+                    message="A Connection error occurred when trying to connect to the Cohere API."
+                    " Please check your internet connection."
+                ) from e
+            except requests.exceptions.Timeout as e:
+                raise CohereError(message="The request to the Cohere API timed out") from e
             except requests.exceptions.RequestException as e:
                 raise CohereError(f"Unexpected exception ({e.__class__.__name__}): {e}") from e
 
