@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.0.3
+- [#184](https://github.com/cohere-ai/cohere-python/pull/184)
+  - Respect timeout option for sync client
+
 ## 4.0.2
 - [#183](https://github.com/cohere-ai/cohere-python/pull/183)
   - Better error messages for synchronous client
