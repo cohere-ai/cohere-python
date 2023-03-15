@@ -171,6 +171,8 @@ class AsyncClient(Client):
         persona_name: str = None,
         persona_prompt: str = None,
         user_name: str = None,
+        temperature: float = 0.8,
+        max_tokens: int = 200,
     ) -> AsyncChat:
 
         if chatlog_override is not None:
@@ -185,6 +187,8 @@ class AsyncClient(Client):
             "persona_name": persona_name,
             "persona_prompt": persona_prompt,
             "user_name": user_name,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
         }
         response = await self._request(cohere.CHAT_URL, json=json_body)
         return AsyncChat.from_dict(response, query=query, persona_name=persona_name, client=self)
@@ -425,7 +429,7 @@ class AsyncClient(Client):
 class AIOHTTPBackend:
     """HTTP backend which handles retries, concurrency limiting and logging"""
 
-    SLEEP_AFTER_FAILURE = defaultdict(lambda: 0.25, {429: 1})
+    SLEEP_AFTER_FAILURE = defaultdict(lambda: 0.25, {429: 5})
 
     def __init__(self, logger, max_concurrent_requests: int = 64, max_retries: int = 5, timeout: int = 120):
         self.logger = logger

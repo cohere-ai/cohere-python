@@ -26,12 +26,16 @@ class TestChat(unittest.TestCase):
             self.assertIsInstance(prediction.reply, str)
             self.assertIsInstance(prediction.session_id, str)
 
-    def test_valid_persona(self):
+    def test_valid_persona_name(self):
         prediction = co.chat("Yo what up?", persona_name="Wizard", return_chatlog=True)
         self.assertIsInstance(prediction.reply, str)
         self.assertIsInstance(prediction.session_id, str)
         self.assertEqual(prediction.persona_name, "Wizard")
         self.assertIn("Wizard:", prediction.chatlog)
+
+    def test_invalid_persona_name(self):
+        with self.assertRaises(cohere.CohereError):
+            co.chat("Yo what up?", persona_name=123).reply
 
     def test_valid_model(self):
         prediction = co.chat("Yo what up?", model="medium")
@@ -106,7 +110,7 @@ class TestChat(unittest.TestCase):
         self.assertIsInstance(prediction.session_id, str)
         assert prediction.prompt is None
 
-    def test_preamble_override(self):
+    def test_persona_prompt(self):
         preamble = "You are a dog who mostly barks"
         prediction = co.chat("Yo what up?", persona_prompt=preamble, return_prompt=True)
         self.assertIsInstance(prediction.reply, str)
@@ -114,15 +118,30 @@ class TestChat(unittest.TestCase):
         self.assertIn(preamble, prediction.prompt)
         print(prediction.prompt)
 
-    def test_invalid_preamble_override(self):
+    def test_invalid_persona_prompt(self):
         with self.assertRaises(cohere.CohereError) as e:
             co.chat("Yo what up?", persona_prompt=123).reply
         self.assertIn("invalid type", str(e.exception))
 
     def test_username_override(self):
-        username = "CustomUser"
-        prediction = co.chat("Yo what up?", user_name=username, return_chatlog=True)
+        user_name = "CustomUser"
+        prediction = co.chat("Yo what up?", user_name=user_name, return_chatlog=True)
         self.assertIsInstance(prediction.reply, str)
         self.assertIsInstance(prediction.session_id, str)
-        chatlog_starts_with_username = prediction.chatlog.strip().startswith(username)
+        chatlog_starts_with_username = prediction.chatlog.strip().startswith(user_name)
         self.assertTrue(chatlog_starts_with_username)
+
+    def test_valid_temperatures(self):
+        temperatures = [0.1, 0.9]
+
+        for temperature in temperatures:
+            prediction = co.chat("Yo what up?", temperature=temperature, max_tokens=5)
+            self.assertIsInstance(prediction.reply, str)
+            self.assertIsInstance(prediction.session_id, str)
+
+    def test_max_tokens(self):
+        prediction = co.chat("Yo what up?", max_tokens=10)
+        self.assertIsInstance(prediction.reply, str)
+        self.assertIsInstance(prediction.session_id, str)
+        tokens = co.tokenize(prediction.reply)
+        self.assertLessEqual(tokens.length, 10)

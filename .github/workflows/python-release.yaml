@@ -19,6 +19,8 @@ jobs:
         uses: actions/setup-python@v4
 
       - name: Install dependencies
+        env:
+          PYTHON_KEYRING_BACKEND: keyring.backends.null.Keyring
         run: |
           pip install twine poetry==1.2.2
           poetry install

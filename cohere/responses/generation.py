@@ -80,7 +80,7 @@ class Generation(CohereObject, str):
             token_likelihoods=self.visualize_token_likelihoods(display=False),
         )
 
-    def visualize(self, **kwargs) -> str:  # TODO: this was Generations([self]) but that no longer works
+    def visualize(self, **kwargs) -> str:
         import pandas as pd
 
         with pd.option_context("display.max_colwidth", 250):

@@ -27,5 +27,5 @@ def log_error():
     logger.setLevel(logging.ERROR)
 
 
-def log_off():
+def log_critical():
     logger.setLevel(logging.CRITICAL)

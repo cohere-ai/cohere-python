@@ -56,7 +56,7 @@ There is also an asyncio compatible client called `cohere.AsyncClient` with an e
 ## Versioning
 
 Each SDK release is only compatible with the latest version of the Cohere API at the time of release. To use the SDK with an older API version, you need to download a version of the SDK tied to the API version you want. Look at the [Changelog](https://github.com/cohere-ai/cohere-python/blob/main/CHANGELOG.md) to see which SDK version to download.
-```
+
 
 ## Endpoints
 
@@ -82,3 +82,25 @@ All of the endpoint functions will return a Cohere object corresponding to the e
 ## Exceptions
 
 Unsuccessful API calls from the SDK will raise an exception. Please see the documentation's page on [errors](https://docs.cohere.ai/errors-reference) for more information about what the errors mean.
+
+## Contributing
+
+To set up a development environment, run:
+
+```
+poetry shell    # any time you want to run code or tests
+poetry install  # install and update dependencies in your environment, the first time
+```
+
+In addition, to ensure your code is formatted correctly, install pre-commit hooks using:
+
+```bash
+pre-commit install
+```
+
+You can run tests locally using:
+```
+python -m pytest
+```
+
+

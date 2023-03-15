@@ -10,7 +10,7 @@ from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
 import cohere
-from cohere.error import CohereAPIError, CohereConnectionError, CohereError
+from cohere.error import CohereAPIError, CohereError
 from cohere.logging import logger
 from cohere.responses import (
     Classification,
@@ -131,7 +131,7 @@ class Client:
             max_tokens (int): (Optional) The number of tokens to predict per generation, defaults to 20.
             temperature (float): (Optional) The degree of randomness in generations from 0.0 to 5.0, lower is less random.
             truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.\
-            stream ()
+            stream (bool): Return streaming tokens.
         Returns:
             a Generations object if stream=False, or a StreamingGenerations object if stream=True
         """
@@ -171,6 +171,8 @@ class Client:
         persona_name: str = None,
         persona_prompt: str = None,
         user_name: str = None,
+        temperature: float = 0.8,
+        max_tokens: int = 200,
     ) -> Chat:
         """Returns a Chat object with the query reply.
 
@@ -183,7 +185,9 @@ class Client:
             chatlog_override (List[Dict[str, str]]): (Optional) A list of chatlog entries to override the chatlog.
             persona_name (str): (Optional) The bot's name to use.
             persona_prompt (str): (Optional) A string to override the preamble.
-            username (str): (Optional) A string to override the username.
+            user_name (str): (Optional) A string to override the username.
+            temperature (float): (Optional) The temperature to use for the next reply. The higher the temperature, the more random the reply.
+            max_tokens (int): (Optional) The max tokens generated for the next reply.
 
         Examples:
             A simple chat messsage:
@@ -224,6 +228,8 @@ class Client:
             "persona_name": persona_name,
             "persona_prompt": persona_prompt,
             "user_name": user_name,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
         }
         response = self._request(cohere.CHAT_URL, json=json_body)
         return Chat.from_dict(response, query=query, persona_name=persona_name, client=self)
@@ -523,6 +529,7 @@ class Client:
                 backoff_factor=0.5,
                 allowed_methods=["POST", "GET"],
                 status_forcelist=cohere.RETRY_STATUS_CODES,
+                raise_on_status=False,
             )
             session.mount("https://", HTTPAdapter(max_retries=retries))
             session.mount("http://", HTTPAdapter(max_retries=retries))
