@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.0.2
+- [#183](https://github.com/cohere-ai/cohere-python/pull/183)
+  - Better error messages for synchronous client
+
 ## 4.0.1
 - [#181](https://github.com/cohere-ai/cohere-python/pull/181)
   - Allow Python >=3.11
