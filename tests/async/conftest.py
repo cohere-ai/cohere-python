@@ -1,4 +1,3 @@
-import asyncio
 import os
 import random
 import string
@@ -16,7 +15,6 @@ async def async_client() -> AsyncClient:
     client = AsyncClient(api_key, client_name="unittest")
     yield client
     await client.close()
-
 
 
 def random_word(length=10):

@@ -5,7 +5,6 @@ from cohere.responses.meta_response import Meta
 
 
 class Embedding(CohereObject):
-
     def __init__(self, embedding: List[float]) -> None:
         self.embedding = embedding
 
@@ -17,7 +16,6 @@ class Embedding(CohereObject):
 
 
 class Embeddings(CohereObject):
-
     def __init__(self, embeddings: List[Embedding], meta: Optional[Meta] = None) -> None:
         self.embeddings = embeddings
         self.meta = meta

@@ -1,16 +1,11 @@
-from concurrent.futures import Future
-from typing import Any, Dict, Iterator, List, NamedTuple, Optional, Union
-
-from cohere.responses.base import CohereObject, _df_html
-import html
-from collections import UserList
-from dataclasses import asdict, dataclass
-from typing import Dict, List, Optional, Union, Generator
 import json
+from collections import UserList
+from typing import Any, Dict, Generator, List, NamedTuple, Optional
+
 import requests
 
+from cohere.responses.base import CohereObject, _df_html
 from cohere.responses.meta_response import Meta
-
 
 TokenLikelihood = NamedTuple("TokenLikelihood", [("token", str), ("likelihood", float)])
 
@@ -26,13 +21,20 @@ TOKEN_COLORS = [
 
 
 class Generation(CohereObject, str):
-
     def __new__(cls, text: str, *_, **__):
         return str.__new__(cls, text)
 
-    def __init__(self, text: str, likelihood: float, token_likelihoods: List[TokenLikelihood], prompt: str=None, *args, **kwargs) -> None:
+    def __init__(
+        self,
+        text: str,
+        likelihood: float,
+        token_likelihoods: List[TokenLikelihood],
+        prompt: str = None,
+        *args,
+        **kwargs,
+    ) -> None:
         super().__init__(*args, **kwargs)
-        self.prompt=prompt
+        self.prompt = prompt
         self.text = text
         self.likelihood = likelihood
         self.token_likelihoods = token_likelihoods
@@ -46,10 +48,11 @@ class Generation(CohereObject, str):
             text=response.get("text"),
             likelihood=response.get("likelihood"),
             token_likelihoods=token_likelihoods,
-            prompt=prompt, 
-            id=response.get('id'),
-            **kwargs        
+            prompt=prompt,
+            id=response.get("id"),
+            **kwargs,
         )
+
     # nice jupyter output
     def visualize_token_likelihoods(self, ignore_first_n=0, midpoint=-3, value_range=8, display=True):  # very WIP
         if self.token_likelihoods is None:
@@ -70,40 +73,44 @@ class Generation(CohereObject, str):
         return html
 
     def _visualize_helper(self):
-        return dict(prompt=self.prompt,text=self.text,likelihood=self.likelihood, token_likelihoods= self.visualize_token_likelihoods(display=False))
+        return dict(
+            prompt=self.prompt,
+            text=self.text,
+            likelihood=self.likelihood,
+            token_likelihoods=self.visualize_token_likelihoods(display=False),
+        )
 
-    def visualize(self, **kwargs) -> str: # TODO: this was Generations([self]) but that no longer works
+    def visualize(self, **kwargs) -> str:  # TODO: this was Generations([self]) but that no longer works
         import pandas as pd
+
         with pd.option_context("display.max_colwidth", 250):
             return _df_html(pd.DataFrame([self._visualize_helper()]), **kwargs)
 
 
 class Generations(UserList, CohereObject):
-
-    def __init__(self,generations,
-                 return_likelihoods: str,
-                 meta: Optional[Meta] = None
-                 ) -> None:
+    def __init__(self, generations, return_likelihoods: str, meta: Optional[Meta] = None) -> None:
         super().__init__(generations)
-        self.return_likelihoods = return_likelihoods   
-        self.meta = meta     
+        self.return_likelihoods = return_likelihoods
+        self.meta = meta
 
     @classmethod
     def from_dict(cls, response: Dict[str, Any], return_likelihoods: bool) -> List[Generation]:
         generations: List[Generation] = []
-        for gen in response['generations']:
+        for gen in response["generations"]:
             likelihood = None
             token_likelihoods = None
-            if return_likelihoods in ['GENERATION', 'ALL']:
-                likelihood = gen['likelihood']
-            if 'token_likelihoods' in gen.keys():
+            if return_likelihoods in ["GENERATION", "ALL"]:
+                likelihood = gen["likelihood"]
+            if "token_likelihoods" in gen.keys():
                 token_likelihoods = []
-                for likelihoods in gen['token_likelihoods']:
-                    token_likelihood = likelihoods['likelihood'] if 'likelihood' in likelihoods.keys() else None
-                    token_likelihoods.append(TokenLikelihood(likelihoods['token'], token_likelihood))
-            generations.append(Generation(gen['text'], likelihood, token_likelihoods, prompt= response.get("prompt"), id=gen["id"]))
+                for likelihoods in gen["token_likelihoods"]:
+                    token_likelihood = likelihoods["likelihood"] if "likelihood" in likelihoods.keys() else None
+                    token_likelihoods.append(TokenLikelihood(likelihoods["token"], token_likelihood))
+            generations.append(
+                Generation(gen["text"], likelihood, token_likelihoods, prompt=response.get("prompt"), id=gen["id"])
+            )
 
-        return cls(generations,return_likelihoods,response.get('meta'))
+        return cls(generations, return_likelihoods, response.get("meta"))
 
     @property
     def generations(self) -> List[Generation]:  # backward compatibility
@@ -125,8 +132,8 @@ class Generations(UserList, CohereObject):
 # ("likelihood", Optional[float])])
 StreamingText = NamedTuple("StreamingText", [("id", Optional[int]), ("index", Optional[int]), ("text", str)])
 
-class StreamingGenerations(CohereObject):
 
+class StreamingGenerations(CohereObject):
     def __init__(self, response):
         self.response = response
         self.ids = []
@@ -134,16 +141,16 @@ class StreamingGenerations(CohereObject):
 
     def _make_response_item(self, line) -> StreamingText:
         streaming_item = json.loads(line)
-        index = streaming_item.get('index',0)
-        text = streaming_item['text']
-        id = streaming_item.get('id')
+        index = streaming_item.get("index", 0)
+        text = streaming_item["text"]
+        id = streaming_item.get("id")
         while len(self.texts) <= index:
             self.texts.append("")
             self.ids.append(None)
         self.texts[index] += text
         if id is not None:
             self.ids[index] = id
-        return StreamingText(id=id, index=index, text = text)
+        return StreamingText(id=id, index=index, text=text)
 
     def __iter__(self) -> Generator[StreamingText, None, None]:
         if not isinstance(self.response, requests.Response):

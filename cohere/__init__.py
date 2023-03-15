@@ -1,24 +1,24 @@
 from cohere.client import Client
 from cohere.client_async import AsyncClient
-from cohere.error import CohereError, CohereAPIError,CohereConnectionError
+from cohere.error import CohereAPIError, CohereConnectionError, CohereError
 
-COHERE_API_URL = 'https://api.cohere.ai'
+COHERE_API_URL = "https://api.cohere.ai"
 RETRY_STATUS_CODES = [429, 500, 502, 503, 504]
 
 
-API_VERSION = '1'
+API_VERSION = "1"
 COHERE_EMBED_BATCH_SIZE = 96
-CHAT_URL = 'chat'
-CLASSIFY_URL = 'classify'
-DETECT_LANG_URL = 'detect-language'
-EMBED_URL = 'embed'
-FEEDBACK_URL = 'feedback'
-GENERATE_URL = 'generate'
-SUMMARIZE_URL = 'summarize'
-RERANK_URL = 'rerank'
+CHAT_URL = "chat"
+CLASSIFY_URL = "classify"
+DETECT_LANG_URL = "detect-language"
+EMBED_URL = "embed"
+FEEDBACK_URL = "feedback"
+GENERATE_URL = "generate"
+SUMMARIZE_URL = "summarize"
+RERANK_URL = "rerank"
 
-CHECK_API_KEY_URL = 'check-api-key'
-TOKENIZE_URL = 'tokenize'
-DETOKENIZE_URL = 'detokenize'
+CHECK_API_KEY_URL = "check-api-key"
+TOKENIZE_URL = "tokenize"
+DETOKENIZE_URL = "detokenize"
 
-CLUSTER_JOBS_URL = 'cluster-jobs'
+CLUSTER_JOBS_URL = "cluster-jobs"

@@ -1,11 +1,10 @@
 import asyncio
 import json as jsonlib
 import os
-import time
 import posixpath
+import time
 from collections import defaultdict
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
-from urllib.parse import urljoin
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import aiohttp
 import backoff
@@ -14,11 +13,11 @@ import cohere
 from cohere.client import Client
 from cohere.error import CohereAPIError, CohereConnectionError, CohereError
 from cohere.logging import logger
-from cohere.responses.base import CohereObject
-from cohere.responses.chat import AsyncChat
 from cohere.responses import (
+    AsyncCreateClusterJobResponse,
     Classification,
     Classifications,
+    ClusterJobResult,
     DetectLanguageResponse,
     Detokenization,
     Embeddings,
@@ -27,9 +26,11 @@ from cohere.responses import (
     LabelPrediction,
     Language,
     Reranking,
-    SummarizeResponse,StreamingGenerations,
-    Tokens,AsyncCreateClusterJobResponse, ClusterJobResult
+    StreamingGenerations,
+    SummarizeResponse,
+    Tokens,
 )
+from cohere.responses.chat import AsyncChat
 from cohere.responses.classify import Example as ClassifyExample
 from cohere.utils import np_json_dumps
 
@@ -38,12 +39,12 @@ JSON = Union[Dict, List]
 
 class AsyncClient(Client):
     """AsyncClient
-    
+
     This client provides an asyncio/aiohttp interface.
     Using this client is recommended when you are making highly parallel request,
     or when calling the Cohere API from a server such as FastAPI.
 
-    The methods here are typically identical to those in the main `Client`, with an extra argument 
+    The methods here are typically identical to those in the main `Client`, with an extra argument
     `return_exceptions` for the batch* methods, which is passed to asyncio.gather."""
 
     def __init__(
@@ -65,7 +66,7 @@ class AsyncClient(Client):
         self.max_retries = max_retries
         if client_name:
             self.request_source += ":" + client_name
-        self.api_version = f'v{cohere.API_VERSION}'
+        self.api_version = f"v{cohere.API_VERSION}"
         self._check_api_key_on_enter = check_api_key
         self._backend = AIOHTTPBackend(logger, num_workers, max_retries, timeout)
 
@@ -74,7 +75,7 @@ class AsyncClient(Client):
             "Authorization": f"BEARER {self.api_key}",
             "Request-Source": self.request_source,
         }
-        if endpoint is None and full_url is not None: # api key
+        if endpoint is None and full_url is not None:  # api key
             url = full_url
         else:
             url = posixpath.join(self.api_url, self.api_version, endpoint)
@@ -92,14 +93,13 @@ class AsyncClient(Client):
         self._check_response(json_response, response.headers, response.status)
         return json_response
 
-
     async def close(self):
         return await self._backend.close()
 
     async def __aenter__(self):
         if self._check_api_key_on_enter:
-            if not (await self.check_api_key())['valid']:
-                raise CohereError('invalid API key')            
+            if not (await self.check_api_key())["valid"]:
+                raise CohereError("invalid API key")
         return self
 
     async def __aexit__(self, exc_type, exc_value, traceback):
@@ -133,7 +133,8 @@ class AsyncClient(Client):
         return_likelihoods: Optional[str] = None,
         truncate: Optional[str] = None,
         logit_bias: Dict[int, float] = {},
-        stream: bool = False) -> Union[Generations,StreamingGenerations]:
+        stream: bool = False,
+    ) -> Union[Generations, StreamingGenerations]:
         json_body = {
             "model": model,
             "prompt": prompt,
@@ -151,45 +152,42 @@ class AsyncClient(Client):
             "return_likelihoods": return_likelihoods,
             "truncate": truncate,
             "logit_bias": logit_bias,
-            'stream': stream
+            "stream": stream,
         }
         response = await self._request(cohere.GENERATE_URL, json=json_body, stream=stream)
         if stream:
-            return StreamingGenerations(response) 
+            return StreamingGenerations(response)
         else:
-            return Generations.from_dict(response=response,return_likelihoods=return_likelihoods)
+            return Generations.from_dict(response=response, return_likelihoods=return_likelihoods)
 
-    async def chat(self,
-             query: str,
-             session_id: str = "",
-             model: Optional[str] = None,
-             return_chatlog: bool = False,
-             return_prompt: bool = False,
-             chatlog_override: List[Dict[str, str]] = None,
-             persona_name: str = None,
-             persona_prompt: str = None,
-             user_name: str = None) -> AsyncChat:
+    async def chat(
+        self,
+        query: str,
+        session_id: str = "",
+        model: Optional[str] = None,
+        return_chatlog: bool = False,
+        return_prompt: bool = False,
+        chatlog_override: List[Dict[str, str]] = None,
+        persona_name: str = None,
+        persona_prompt: str = None,
+        user_name: str = None,
+    ) -> AsyncChat:
 
         if chatlog_override is not None:
             self._validate_chatlog_override(chatlog_override)
         json_body = {
-            'query': query,
-            'session_id': session_id,
-            'model': model,
-            'return_chatlog': return_chatlog,
-            'return_prompt': return_prompt,
-            'chatlog_override': chatlog_override,
-            'persona_name': persona_name,
-            'persona_prompt': persona_prompt,
-            'user_name': user_name,
+            "query": query,
+            "session_id": session_id,
+            "model": model,
+            "return_chatlog": return_chatlog,
+            "return_prompt": return_prompt,
+            "chatlog_override": chatlog_override,
+            "persona_name": persona_name,
+            "persona_prompt": persona_prompt,
+            "user_name": user_name,
         }
         response = await self._request(cohere.CHAT_URL, json=json_body)
-        return AsyncChat.from_dict(
-                response,   
-                    query=query,
-                    persona_name=persona_name,
-                    client=self
-                )
+        return AsyncChat.from_dict(response, query=query, persona_name=persona_name, client=self)
 
     async def embed(self, texts: List[str], model: Optional[str] = None, truncate: Optional[str] = None) -> Embeddings:
         json_bodys = [
@@ -292,7 +290,11 @@ class AsyncClient(Client):
         return Feedback(id=id, good_response=good_response, desired_response=desired_response, feedback=feedback)
 
     async def rerank(
-        self, query: str, documents: Union[List[str], List[Dict[str, Any]]], model: str = None, top_n: Optional[int] = None
+        self,
+        query: str,
+        documents: Union[List[str], List[Dict[str, Any]]],
+        model: str = None,
+        top_n: Optional[int] = None,
     ) -> Reranking:
         """Returns an ordered list of documents ordered by their relevance to the provided query
 
@@ -373,7 +375,7 @@ class AsyncClient(Client):
         if not job_id.strip():
             raise ValueError('"job_id" is empty')
 
-        response = await self._request(f'{cohere.CLUSTER_JOBS_URL}/{job_id}', method='GET')
+        response = await self._request(f"{cohere.CLUSTER_JOBS_URL}/{job_id}", method="GET")
         return ClusterJobResult.from_dict(response)
 
     async def list_cluster_jobs(self) -> List[ClusterJobResult]:
@@ -383,8 +385,8 @@ class AsyncClient(Client):
             List[ClusterJobResult]: Clustering jobs created.
         """
 
-        response = await self._request(cohere.CLUSTER_JOBS_URL, method='GET')
-        return [ClusterJobResult.from_dict({'meta':response.get('meta'),**r}) for r in response['jobs']]
+        response = await self._request(cohere.CLUSTER_JOBS_URL, method="GET")
+        return [ClusterJobResult.from_dict({"meta": response.get("meta"), **r}) for r in response["jobs"]]
 
     async def wait_for_cluster_job(
         self,
@@ -410,9 +412,9 @@ class AsyncClient(Client):
         start_time = time.time()
         job = await self.get_cluster_job(job_id)
 
-        while job.status == 'processing':
+        while job.status == "processing":
             if timeout is not None and time.time() - start_time > timeout:
-                raise TimeoutError(f'wait_for_cluster_job timed out after {timeout} seconds')
+                raise TimeoutError(f"wait_for_cluster_job timed out after {timeout} seconds")
 
             await asyncio.sleep(interval)
             job = await self.get_cluster_job(job_id)
@@ -420,10 +422,8 @@ class AsyncClient(Client):
         return job
 
 
-
 class AIOHTTPBackend:
     """HTTP backend which handles retries, concurrency limiting and logging"""
-
 
     SLEEP_AFTER_FAILURE = defaultdict(lambda: 0.25, {429: 1})
 
@@ -455,7 +455,9 @@ class AIOHTTPBackend:
 
         return make_request_fn
 
-    async def request(self, url, json=None, method: str = "post", headers=None, session=None, stream=False, **kwargs) -> JSON:
+    async def request(
+        self, url, json=None, method: str = "post", headers=None, session=None, stream=False, **kwargs
+    ) -> JSON:
         session = session or await self.session()
         self.logger.debug(f"Making request to {url} with content {json}")
 
@@ -475,11 +477,8 @@ class AIOHTTPBackend:
             self.logger.debug(f"Unexpected fatal error after {time.time()-request_start:.1f}s: {e}")
             raise CohereError(f"Unexpected exception ({e.__class__.__name__}): {e}") from e
 
-        self.logger.debug(
-            f"Received response with status {response.status} after {time.time()-request_start:.1f}s"
-        )
+        self.logger.debug(f"Received response with status {response.status} after {time.time()-request_start:.1f}s")
         return response
-
 
     async def session(self) -> aiohttp.ClientSession:
         if self._session is None:

@@ -1,5 +1,6 @@
 import pytest
 
+
 @pytest.mark.asyncio
 async def test_async_multi_replies(async_client):
     num_replies = 3

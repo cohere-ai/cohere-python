@@ -8,9 +8,9 @@ Example = NamedTuple("Example", [("text", str), ("label", str)])
 
 
 class Classification(CohereObject):
-
-    def __init__(self, input: str, prediction: str, confidence: float, labels: Dict[str, LabelPrediction], *args,
-                 **kwargs) -> None:
+    def __init__(
+        self, input: str, prediction: str, confidence: float, labels: Dict[str, LabelPrediction], *args, **kwargs
+    ) -> None:
         super().__init__(*args, **kwargs)
         self.input = input
         self.prediction = prediction
@@ -21,11 +21,10 @@ class Classification(CohereObject):
         prediction = self.prediction
         confidence = self.confidence
         labels = self.labels
-        return f"Classification<prediction: \"{prediction}\", confidence: {confidence}, labels: {labels}>"
+        return f'Classification<prediction: "{prediction}", confidence: {confidence}, labels: {labels}>'
 
 
 class Classifications(CohereObject):
-
     def __init__(self, classifications: List[Classification], meta: Optional[Meta] = None) -> None:
         self.classifications = classifications
         self.meta = meta

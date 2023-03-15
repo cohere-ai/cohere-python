@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict, NamedTuple, Any, Iterator
+from typing import Any, Dict, Iterator, List, NamedTuple, Optional
 
 from cohere.responses.base import CohereObject
 from cohere.responses.meta_response import Meta
@@ -11,12 +11,9 @@ dict which always contains text but can also contain arbitrary fields
 
 
 class RerankResult(CohereObject):
-
-    def __init__(self,
-                 document: Dict[str, Any] = None,
-                 index: int = None,
-                 relevance_score: float = None,
-                 *args, **kwargs) -> None:
+    def __init__(
+        self, document: Dict[str, Any] = None, index: int = None, relevance_score: float = None, *args, **kwargs
+    ) -> None:
         super().__init__(*args, **kwargs)
         self.document = document
         self.index = index
@@ -28,30 +25,24 @@ class RerankResult(CohereObject):
         if self.document is None:
             return f"RerankResult<index: {index}, relevance_score: {score}>"
         else:
-            text = self.document['text']
+            text = self.document["text"]
             return f"RerankResult<document['text']: {text}, index: {index}, relevance_score: {score}>"
 
 
 class Reranking(CohereObject):
-
-    def __init__(self,
-                 response: Optional[Dict[str, Any]] = None,
-                 meta: Optional[Meta] = None,
-                 **kwargs) -> None:
-        super().__init__(**kwargs, id=response.get('id'))
+    def __init__(self, response: Optional[Dict[str, Any]] = None, meta: Optional[Meta] = None, **kwargs) -> None:
+        super().__init__(**kwargs, id=response.get("id"))
         assert response is not None
         self.results = self._results(response)
         self.meta = response["meta"]
 
     def _results(self, response: Dict[str, Any]) -> List[RerankResult]:
         results = []
-        for res in response['results']:
-            if 'document' in res.keys():
-                results.append(
-                    RerankResult(res['document'], res['index'], res['relevance_score']))
+        for res in response["results"]:
+            if "document" in res.keys():
+                results.append(RerankResult(res["document"], res["index"], res["relevance_score"]))
             else:
-                results.append(
-                    RerankResult(index=res['index'], relevance_score=res['relevance_score']))
+                results.append(RerankResult(index=res["index"], relevance_score=res["relevance_score"]))
         return results
 
     def __str__(self) -> str:

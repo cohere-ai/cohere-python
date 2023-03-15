@@ -22,6 +22,7 @@ async def test_invalid_text(async_client):
     with pytest.raises(cohere.CohereError):
         await async_client.tokenize("")
 
+
 @pytest.mark.asyncio
 async def test_detokenize(async_client):
     detokenized = await async_client.detokenize([10104, 12221, 974, 514, 34])

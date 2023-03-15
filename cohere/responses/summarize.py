@@ -1,4 +1,4 @@
-from typing import List, NamedTuple, Optional
+from typing import NamedTuple, Optional
 
 from cohere.responses.meta_response import Meta
 
