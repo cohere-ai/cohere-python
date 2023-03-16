@@ -40,7 +40,7 @@ def np_json_dumps(data, **kwargs):
 def is_api_key_valid(key: typing.Optional[str]) -> bool:
     if not key:
         raise CohereError(
-            "No API key provided. Provide the API key in the client initialisation or the CO_API_KEY environment variable."  # noqa: E501
+            "No API key provided. Provide the API key in the client initialization or the CO_API_KEY environment variable."  # noqa: E501
         )
 
     return True
