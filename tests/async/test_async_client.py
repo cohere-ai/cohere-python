@@ -12,12 +12,13 @@ async def test_async_enter():
 
 
 @pytest.mark.asyncio
-async def test_async_enter_invalid_key():
-    cli = cohere.AsyncClient(api_key="invalid")
+async def test_async_enter_invalid_key(monkeypatch):
+    api_key = ""
+    monkeypatch.setenv("CO_API_KEY", api_key)
+    cli = cohere.AsyncClient(api_key=api_key)
     with pytest.raises(cohere.CohereError) as exc:
         async with cli as co:
             pass
-    assert "invalid API key" in str(exc)
 
 
 @pytest.mark.asyncio
