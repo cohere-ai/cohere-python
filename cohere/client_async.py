@@ -95,8 +95,7 @@ class AsyncClient(Client):
 
     async def __aenter__(self):
         if self._check_api_key_on_enter:
-            if not (await self.check_api_key())["valid"]:
-                raise CohereError("invalid API key")
+            await self.check_api_key()
         return self
 
     async def __aexit__(self, exc_type, exc_value, traceback):
@@ -104,6 +103,10 @@ class AsyncClient(Client):
 
     # API methods
     async def check_api_key(self) -> Dict[str, bool]:
+        """
+        check_api_key raises an exception when the key is invalid, but the return value for valid keys is kept for
+        backwards compatibility.
+        """
         return {"valid": is_api_key_valid(self.api_key)}
 
     async def batch_generate(self, prompts: List[str], return_exceptions=False, **kwargs) -> List[Generations]:

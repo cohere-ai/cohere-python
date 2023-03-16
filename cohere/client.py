@@ -73,8 +73,10 @@ class Client:
                 raise CohereError("invalid API key")
 
     def check_api_key(self) -> Dict[str, bool]:
-        """Checks the api key.
-        Happens automatically during Client initialization, but not in AsyncClient
+        """
+        Checks the api key, which happens automatically during Client initialization, but not in AsyncClient.
+        check_api_key raises an exception when the key is invalid, but the return value for valid keys is kept for
+        backwards compatibility.
         """
         return {"valid": is_api_key_valid(self.api_key)}
 
