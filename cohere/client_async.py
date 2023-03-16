@@ -31,7 +31,7 @@ from cohere.responses import (
 )
 from cohere.responses.chat import AsyncChat
 from cohere.responses.classify import Example as ClassifyExample
-from cohere.utils import np_json_dumps
+from cohere.utils import is_api_key_valid, np_json_dumps
 
 JSON = Union[Dict, List]
 
@@ -95,8 +95,7 @@ class AsyncClient(Client):
 
     async def __aenter__(self):
         if self._check_api_key_on_enter:
-            if not (await self.check_api_key())["valid"]:
-                raise CohereError("invalid API key")
+            await self.check_api_key()
         return self
 
     async def __aexit__(self, exc_type, exc_value, traceback):
@@ -104,7 +103,11 @@ class AsyncClient(Client):
 
     # API methods
     async def check_api_key(self) -> Dict[str, bool]:
-        return await self._request(endpoint=None, full_url=posixpath.join(self.api_url, cohere.CHECK_API_KEY_URL))
+        """
+        check_api_key raises an exception when the key is invalid, but the return value for valid keys is kept for
+        backwards compatibility.
+        """
+        return {"valid": is_api_key_valid(self.api_key)}
 
     async def batch_generate(self, prompts: List[str], return_exceptions=False, **kwargs) -> List[Generations]:
         """return_exceptions is passed to asyncio.gather"""

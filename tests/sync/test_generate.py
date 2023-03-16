@@ -1,4 +1,6 @@
+import os
 import unittest
+from unittest import mock
 
 from utils import get_api_key
 
@@ -51,8 +53,9 @@ class TestGenerate(unittest.TestCase):
         cohere.Client(API_KEY).generate(model="medium", prompt="co:here", max_tokens=1).generations
 
     def test_invalid_key(self):
-        with self.assertRaises(cohere.CohereError):
-            _ = cohere.Client("invalid")
+        api_key = ""
+        with self.assertRaises(cohere.CohereError), mock.patch.dict(os.environ, {"CO_API_KEY": api_key}):
+            _ = cohere.Client(api_key)
 
     def test_preset_success(self):
         prediction = co.generate(preset="SDK-PRESET-TEST-t94jfm")
