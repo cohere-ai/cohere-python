@@ -68,9 +68,7 @@ class Client:
             self.request_source += ":" + client_name
 
         if check_api_key:
-            res = self.check_api_key()
-            if not res["valid"]:
-                raise CohereError("invalid API key")
+            self.check_api_key()
 
     def check_api_key(self) -> Dict[str, bool]:
         """
