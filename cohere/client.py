@@ -28,6 +28,7 @@ from cohere.responses.embeddings import Embeddings
 from cohere.responses.feedback import Feedback
 from cohere.responses.rerank import Reranking
 from cohere.responses.summarize import SummarizeResponse
+from cohere.utils import is_api_key_valid
 
 
 class Client:
@@ -67,30 +68,15 @@ class Client:
             self.request_source += ":" + client_name
 
         if check_api_key:
-            res = self.check_api_key()
-            if not res["valid"]:
-                raise CohereError("invalid API key")
+            self.check_api_key()
 
     def check_api_key(self) -> Dict[str, bool]:
-        """Checks the api key.
-        Happens automatically during Client initialization, but not in AsyncClient
         """
-        headers = {
-            "Authorization": "BEARER {}".format(self.api_key),
-            "Content-Type": "application/json",
-            "Request-Source": "python-sdk",
-        }
-
-        url = f"{self.api_url}/{cohere.CHECK_API_KEY_URL}"
-        response = requests.request("POST", url, headers=headers)
-
-        try:
-            res = jsonlib.loads(response.text)
-        except Exception:
-            raise CohereAPIError.from_response(response)
-        if "message" in res.keys():  # has errors
-            raise CohereAPIError(message=res["message"], http_status=response.status_code, headers=response.headers)
-        return res
+        Checks the api key, which happens automatically during Client initialization, but not in AsyncClient.
+        check_api_key raises an exception when the key is invalid, but the return value for valid keys is kept for
+        backwards compatibility.
+        """
+        return {"valid": is_api_key_valid(self.api_key)}
 
     def batch_generate(self, prompts: List[str], **kwargs) -> List[Generations]:
         """A batched version of generate with multiple prompts."""
