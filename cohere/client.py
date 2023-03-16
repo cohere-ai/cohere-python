@@ -528,7 +528,9 @@ class Client:
             session.mount("http://", HTTPAdapter(max_retries=retries))
 
             try:
-                response = session.request(method, url, headers=headers, json=json, **self.request_dict)
+                response = session.request(
+                    method, url, headers=headers, json=json, timeout=self.timeout, **self.request_dict
+                )
             except requests.exceptions.ConnectionError as e:
                 raise CohereError(
                     message="A Connection error occurred when trying to connect to the Cohere API."
