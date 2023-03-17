@@ -21,7 +21,6 @@ from cohere.detectlang import DetectLanguageResponse, Language
 from cohere.detokenize import Detokenization
 from cohere.embeddings import Embeddings
 from cohere.error import CohereError
-from cohere.feedback import Feedback
 from cohere.generation import Generations
 from cohere.rerank import Reranking
 from cohere.summarize import SummarizeResponse
@@ -232,14 +231,12 @@ class Client:
             'username': username,
         }
         response = self._executor.submit(self.__request, cohere.CHAT_URL, json=json_body)
-        return Chat(
-                    query=query,
+        return Chat(query=query,
                     persona=persona,
                     _future=response,
                     client=self,
                     return_chatlog=return_chatlog,
-                    return_prompt=return_prompt
-                )
+                    return_prompt=return_prompt)
 
     def _validate_chatlog_override(self, chatlog_override: List[Dict[str, str]]) -> None:
         if not isinstance(chatlog_override, list):
@@ -391,43 +388,29 @@ class Client:
             results.append(Language(result["language_code"], result["language_name"]))
         return DetectLanguageResponse(results)
 
-    def feedback(self, id: str, good_response: bool, desired_response: str = "", feedback: str = "") -> Feedback:
-        """Give feedback on a response from the Cohere API to improve the model.
-
-        Can be used programmatically like so:
-
-        Example: a user accepts a model's suggestion in an assisted writing setting
-        ```
-        generations = co.generate(f"Write me a polite email responding to the one below:\n{email}\n\nResponse:")
-        if user_accepted_suggestion:
-            generations[0].feedback(good_response=True)
-        ```
-
-        Example: the user edits the model's suggestion
-        ```
-        generations = co.generate(f"Write me a polite email responding to the one below:\n{email}\n\nResponse:")
-        if user_edits_suggestion:
-            generations[0].feedback(good_response=False, desired_response=user_edited_response)
-        ```
-
-        Args:
-            id (str): the `id` associated with a generation from the Cohere API
-            good_response (bool): a boolean indicator as to whether the generation was good (True) or bad (False).
-            desired_response (str): an optional string of the response expected. To be used when a mistake has been
-            made or a better response exists.
-            feedback (str): an optional natural language description of the specific feedback about this generation.
-
-        Returns:
-            Feedback: a Feedback object
-        """
+    def generate_feedback(
+        self,
+        request_id: str,
+        good_response: bool,
+        model=None,
+        desired_response: str = None,
+        flagged_response: bool = None,
+        flagged_reason: str = None,
+        prompt: str = None,
+        annotator_id: str = None,
+    ):
         json_body = {
-            'id': id,
+            'request_id': request_id,
             'good_response': good_response,
             'desired_response': desired_response,
-            'feedback': feedback,
+            'flagged_response': flagged_response,
+            'flagged_reason': flagged_reason,
+            'prompt': prompt,
+            'annotator_id': annotator_id,
+            'model': model,
         }
-        self.__request(cohere.FEEDBACK_URL, json_body)
-        return Feedback(id=id, good_response=good_response, desired_response=desired_response, feedback=feedback)
+        self.__request(cohere.GENERATE_FEEDBACK_URL, json_body)
+        return
 
     def rerank(self,
                query: str,
