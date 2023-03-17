@@ -19,4 +19,4 @@ if user_edits_suggestion:
 
 from typing import NamedTuple
 
-Feedback = NamedTuple("Feedback", [("id", str), ("good_response", bool), ("desired_response", str), ("feedback", str)])
+GenerateFeedbackResponse = NamedTuple("GenerateFeedbackResponse", [("id", str)])

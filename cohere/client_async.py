@@ -13,22 +13,9 @@ import cohere
 from cohere.client import Client
 from cohere.error import CohereAPIError, CohereConnectionError, CohereError
 from cohere.logging import logger
-from cohere.responses import (
-    AsyncCreateClusterJobResponse,
-    Classification,
-    Classifications,
-    ClusterJobResult,
-    DetectLanguageResponse,
-    Detokenization,
-    Embeddings,
-    Feedback,
-    Generations,
-    LabelPrediction,
-    Language,
-    Reranking,
-    SummarizeResponse,
-    Tokens,
-)
+from cohere.responses import (AsyncCreateClusterJobResponse, Classification, Classifications, ClusterJobResult,
+                              DetectLanguageResponse, Detokenization, Embeddings, GenerateFeedbackResponse, Generations,
+                              LabelPrediction, Language, Reranking, SummarizeResponse, Tokens)
 from cohere.responses.chat import AsyncChat
 from cohere.responses.classify import Example as ClassifyExample
 from cohere.utils import is_api_key_valid, np_json_dumps
@@ -111,9 +98,8 @@ class AsyncClient(Client):
 
     async def batch_generate(self, prompts: List[str], return_exceptions=False, **kwargs) -> List[Generations]:
         """return_exceptions is passed to asyncio.gather"""
-        return await asyncio.gather(
-            *[self.generate(prompt, **kwargs) for prompt in prompts], return_exceptions=return_exceptions
-        )
+        return await asyncio.gather(*[self.generate(prompt, **kwargs) for prompt in prompts],
+                                    return_exceptions=return_exceptions)
 
     async def generate(
         self,
@@ -190,7 +176,7 @@ class AsyncClient(Client):
 
     async def embed(self, texts: List[str], model: Optional[str] = None, truncate: Optional[str] = None) -> Embeddings:
         json_bodys = [
-            dict(texts=texts[i : i + cohere.COHERE_EMBED_BATCH_SIZE], model=model, truncate=truncate)
+            dict(texts=texts[i:i + cohere.COHERE_EMBED_BATCH_SIZE], model=model, truncate=truncate)
             for i in range(0, len(texts), cohere.COHERE_EMBED_BATCH_SIZE)
         ]
         responses = await asyncio.gather(*[self._request(cohere.EMBED_URL, json) for json in json_bodys])
@@ -223,8 +209,7 @@ class AsyncClient(Client):
             for label, prediction in res["labels"].items():
                 labelObj[label] = LabelPrediction(prediction["confidence"])
             classifications.append(
-                Classification(res["input"], res["prediction"], res["confidence"], labelObj, id=res["id"])
-            )
+                Classification(res["input"], res["prediction"], res["confidence"], labelObj, id=res["id"]))
 
         return Classifications(classifications, response["meta"])
 
@@ -278,15 +263,19 @@ class AsyncClient(Client):
             results.append(Language(result["language_code"], result["language_name"]))
         return DetectLanguageResponse(results, response["meta"])
 
-    async def feedback(self, id: str, good_response: bool, desired_response: str = "", feedback: str = "") -> Feedback:
+    async def feedback(self,
+                       id: str,
+                       good_response: bool,
+                       desired_response: str = "",
+                       feedback: str = "") -> GenerateFeedbackResponse:
         json_body = {
             "id": id,
             "good_response": good_response,
             "desired_response": desired_response,
             "feedback": feedback,
         }
-        await self._request(cohere.FEEDBACK_URL, json_body)
-        return Feedback(id=id, good_response=good_response, desired_response=desired_response, feedback=feedback)
+        response = await self._request(cohere.FEEDBACK_URL, json_body)
+        return GenerateFeedbackResponse(id=response["id"])
 
     async def rerank(
         self,
@@ -311,8 +300,7 @@ class AsyncClient(Client):
                 parsed_docs.append(doc)
             else:
                 raise CohereError(
-                    message='invalid format for documents, must be a list of strings or dicts with a "text" key'
-                )
+                    message='invalid format for documents, must be a list of strings or dicts with a "text" key')
 
         json_body = {
             "query": query,
@@ -436,6 +424,7 @@ class AIOHTTPBackend:
         self._requester = None
 
     def build_aio_requester(self) -> Callable:  # returns a function for retryable requests
+
         @backoff.on_exception(
             backoff.expo,
             (aiohttp.ClientError, aiohttp.ClientResponseError),
