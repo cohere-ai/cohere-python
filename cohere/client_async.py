@@ -178,7 +178,6 @@ class AsyncClient(Client):
         max_tokens: int = 200,
         stream: bool = False,
     ) -> Union[AsyncChat, StreamingChat]:
-
         if chatlog_override is not None:
             self._validate_chatlog_override(chatlog_override)
         json_body = {

@@ -547,7 +547,7 @@ class Client:
                 raise CohereConnectionError(str(e)) from e
             except requests.exceptions.RequestException as e:
                 raise CohereError(f"Unexpected exception ({e.__class__.__name__}): {e}") from e
-        
+
             try:
                 json_response = response.json()
             except jsonlib.decoder.JSONDecodeError:  # CohereAPIError will capture status
