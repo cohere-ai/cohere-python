@@ -87,7 +87,7 @@ class StreamingChat(CohereObject):
         if not isinstance(self.response, requests.Response):
             raise ValueError("For AsyncClient, use `async for` to iterate through the `StreamingChat`")
 
-        for index, line in enumerate(self.response.iter_lines()):
+        for line in self.response.iter_lines():
             yield self._make_response_item(line)
 
     async def __aiter__(self) -> Generator[StreamingText, None, None]:

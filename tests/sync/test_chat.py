@@ -9,6 +9,7 @@ co = cohere.Client(API_KEY)
 
 
 class TestChat(unittest.TestCase):
+
     def test_simple_success(self):
         prediction = co.chat("Yo what up?")
         self.assertIsInstance(prediction.reply, str)
@@ -64,9 +65,15 @@ class TestChat(unittest.TestCase):
         query = "What about you?"
         valid_chatlog_overrides = [
             [
-                {"Bot": "Hey!"},
-                {"User": "I am doing great!"},
-                {"Bot": "That is great to hear!"},
+                {
+                    "Bot": "Hey!"
+                },
+                {
+                    "User": "I am doing great!"
+                },
+                {
+                    "Bot": "That is great to hear!"
+                },
             ],
             [],
         ]
@@ -88,14 +95,18 @@ class TestChat(unittest.TestCase):
         invalid_chatlog_overrides = [
             "invalid",
             ["invalid"],
-            [{"user": "invalid", "bot": "invalid"}],
+            [{
+                "user": "invalid",
+                "bot": "invalid"
+            }],
         ]
 
         for chatlog_override in invalid_chatlog_overrides:
             with self.assertRaises(cohere.error.CohereError):
-                _ = co.chat(
-                    query="What about you?", session_id="1234", chatlog_override=chatlog_override, return_chatlog=True
-                )
+                _ = co.chat(query="What about you?",
+                            session_id="1234",
+                            chatlog_override=chatlog_override,
+                            return_chatlog=True)
 
     def test_return_prompt(self):
         prediction = co.chat("Yo what up?", return_prompt=True)
@@ -116,7 +127,6 @@ class TestChat(unittest.TestCase):
         self.assertIsInstance(prediction.reply, str)
         self.assertIsInstance(prediction.session_id, str)
         self.assertIn(preamble, prediction.prompt)
-        print(prediction.prompt)
 
     def test_invalid_persona_prompt(self):
         with self.assertRaises(cohere.CohereError) as e:
@@ -145,3 +155,12 @@ class TestChat(unittest.TestCase):
         self.assertIsInstance(prediction.session_id, str)
         tokens = co.tokenize(prediction.reply)
         self.assertLessEqual(tokens.length, 10)
+
+    def test_stream(self):
+        prediction = co.chat(query="Yo what up?", max_tokens=5, stream=True)
+
+        for token in prediction:
+            self.assertIsInstance(token.text, str)
+            self.assertGreater(len(token.text), 0)
+
+        self.assertIsInstance(prediction.texts, list)
