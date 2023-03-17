@@ -1,6 +1,7 @@
 import json
+from typing import Any, Dict, Generator, List, NamedTuple, Optional
+
 import requests
-from typing import Any, Dict, List, Optional, NamedTuple, Generator
 
 from cohere.responses.base import CohereObject
 from cohere.responses.meta_response import Meta
