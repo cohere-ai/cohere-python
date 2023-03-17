@@ -15,3 +15,18 @@ async def test_async_multi_replies(async_client):
         assert prediction.meta
         assert prediction.meta["api_version"]
         assert prediction.meta["api_version"]["version"]
+
+
+@pytest.mark.asyncio
+async def test_stream(async_client):
+    res = await async_client.chat(
+        query="wagmi",
+        max_tokens=5,
+        stream=True,
+    )
+
+    async for token in res:
+        assert isinstance(token.text, str)
+        assert len(token.text) > 0
+
+    assert isinstance(res.texts, list)
