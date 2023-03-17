@@ -20,7 +20,7 @@ from cohere.responses import (
     StreamingGenerations,
     Tokens,
 )
-from cohere.responses.chat import Chat
+from cohere.responses.chat import Chat, StreamingChat
 from cohere.responses.classify import Example as ClassifyExample
 from cohere.responses.classify import LabelPrediction
 from cohere.responses.cluster import ClusterJobResult, CreateClusterJobResponse
@@ -159,7 +159,8 @@ class Client:
         user_name: str = None,
         temperature: float = 0.8,
         max_tokens: int = 200,
-    ) -> Chat:
+        stream: bool = False,
+    ) -> Union[Chat, StreamingChat]:
         """Returns a Chat object with the query reply.
 
         Args:
@@ -174,6 +175,9 @@ class Client:
             user_name (str): (Optional) A string to override the username.
             temperature (float): (Optional) The temperature to use for the next reply. The higher the temperature, the more random the reply.
             max_tokens (int): (Optional) The max tokens generated for the next reply.
+            stream (bool): Return streaming tokens.
+        Returns:
+            a Chat object if stream=False, or a StreamingChat object if stream=True
 
         Examples:
             A simple chat messsage:
@@ -200,6 +204,12 @@ class Client:
                 >>>     return_chatlog=True)
                 >>> print(res.reply)
                 >>> print(res.chatlog)
+            Streaming chat:
+                >>> res = co.chat(
+                >>>     query="Hey! How are you doing today?",
+                >>>     stream=True)
+                >>> for token in res:
+                >>>     print(token)
         """
         if chatlog_override is not None:
             self._validate_chatlog_override(chatlog_override)
@@ -216,9 +226,14 @@ class Client:
             "user_name": user_name,
             "temperature": temperature,
             "max_tokens": max_tokens,
+            "stream": stream,
         }
-        response = self._request(cohere.CHAT_URL, json=json_body)
-        return Chat.from_dict(response, query=query, persona_name=persona_name, client=self)
+        response = self._request(cohere.CHAT_URL, json=json_body, stream=stream)
+
+        if stream:
+            return StreamingChat(response)
+        else:
+            return Chat.from_dict(response, query=query, persona_name=persona_name, client=self)
 
     def _validate_chatlog_override(self, chatlog_override: List[Dict[str, str]]) -> None:
         if not isinstance(chatlog_override, list):
@@ -532,7 +547,7 @@ class Client:
                 raise CohereConnectionError(str(e)) from e
             except requests.exceptions.RequestException as e:
                 raise CohereError(f"Unexpected exception ({e.__class__.__name__}): {e}") from e
-
+        
             try:
                 json_response = response.json()
             except jsonlib.decoder.JSONDecodeError:  # CohereAPIError will capture status
