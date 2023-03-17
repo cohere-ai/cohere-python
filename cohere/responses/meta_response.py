@@ -1,4 +1,4 @@
-from typing import NamedTuple
+from typing import List, NamedTuple
 
 APIVersion = NamedTuple("api_version", [("version", str), ("is_deprecated", bool), ("is_experimental", bool)])
-Meta = NamedTuple("meta", [("api_version", APIVersion)])
+Meta = NamedTuple("meta", [("api_version", APIVersion), ("warnings", List[str])])
