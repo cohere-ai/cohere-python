@@ -30,7 +30,7 @@ from cohere.responses import (
     SummarizeResponse,
     Tokens,
 )
-from cohere.responses.chat import AsyncChat
+from cohere.responses.chat import AsyncChat, StreamingChat
 from cohere.responses.classify import Example as ClassifyExample
 from cohere.utils import is_api_key_valid, np_json_dumps
 
@@ -176,7 +176,8 @@ class AsyncClient(Client):
         user_name: str = None,
         temperature: float = 0.8,
         max_tokens: int = 200,
-    ) -> AsyncChat:
+        stream: bool = False,
+    ) -> Union[AsyncChat, StreamingChat]:
 
         if chatlog_override is not None:
             self._validate_chatlog_override(chatlog_override)
@@ -192,9 +193,14 @@ class AsyncClient(Client):
             "user_name": user_name,
             "temperature": temperature,
             "max_tokens": max_tokens,
+            "stream": stream,
         }
-        response = await self._request(cohere.CHAT_URL, json=json_body)
-        return AsyncChat.from_dict(response, query=query, persona_name=persona_name, client=self)
+        response = await self._request(cohere.CHAT_URL, json=json_body, stream=stream)
+
+        if stream:
+            return StreamingChat(response)
+        else:
+            return AsyncChat.from_dict(response, query=query, persona_name=persona_name, client=self)
 
     async def embed(self, texts: List[str], model: Optional[str] = None, truncate: Optional[str] = None) -> Embeddings:
         json_bodys = [
