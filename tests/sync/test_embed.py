@@ -6,7 +6,8 @@ from utils import get_api_key
 
 import cohere
 
-co = cohere.Client(get_api_key())
+API_KEY = get_api_key()
+co = cohere.Client(API_KEY)
 
 
 def random_word():

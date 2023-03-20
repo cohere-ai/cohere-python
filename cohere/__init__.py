@@ -5,14 +5,13 @@ from cohere.error import CohereAPIError, CohereConnectionError, CohereError
 COHERE_API_URL = "https://api.cohere.ai"
 RETRY_STATUS_CODES = [429, 500, 502, 503, 504]
 
-
 API_VERSION = "1"
 COHERE_EMBED_BATCH_SIZE = 96
 CHAT_URL = "chat"
 CLASSIFY_URL = "classify"
 DETECT_LANG_URL = "detect-language"
 EMBED_URL = "embed"
-FEEDBACK_URL = "feedback"
+GENERATE_FEEDBACK_URL = "feedback/generate"
 GENERATE_URL = "generate"
 SUMMARIZE_URL = "summarize"
 RERANK_URL = "rerank"
