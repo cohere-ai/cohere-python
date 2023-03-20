@@ -25,7 +25,7 @@ from cohere.responses.classify import LabelPrediction
 from cohere.responses.cluster import ClusterJobResult, CreateClusterJobResponse
 from cohere.responses.detectlang import DetectLanguageResponse, Language
 from cohere.responses.embeddings import Embeddings
-from cohere.responses.feedback import Feedback
+from cohere.responses.feedback import GenerateFeedbackResponse
 from cohere.responses.rerank import Reranking
 from cohere.responses.summarize import SummarizeResponse
 from cohere.utils import is_api_key_valid
@@ -402,40 +402,54 @@ class Client:
             results.append(Language(result["language_code"], result["language_name"]))
         return DetectLanguageResponse(results, response["meta"])
 
-    def feedback(self, id: str, good_response: bool, desired_response: str = "", feedback: str = "") -> Feedback:
-        """Give feedback on a response from the Cohere API to improve the model.
+    def generate_feedback(
+        self,
+        request_id: str,
+        good_response: bool,
+        model=None,
+        desired_response: str = None,
+        flagged_response: bool = None,
+        flagged_reason: str = None,
+        prompt: str = None,
+        annotator_id: str = None,
+    ) -> GenerateFeedbackResponse:
+        """Give feedback on a response from the Cohere Generate API to improve the model.
 
         Args:
-            id (str): the `id` associated with a generation from the Cohere API
-            good_response (bool): a boolean indicator as to whether the generation was good (True) or bad (False).
-            desired_response (str): an optional string of the response expected. To be used when a mistake has been
-            made or a better response exists.
-            feedback (str): an optional natural language description of the specific feedback about this generation.
-
-        Returns:
-            Feedback: a Feedback object
-
+            request_id (str): The request_id of the generation request to give feedback on.
+            good_response (bool): Whether the response was good or not.
+            model (str): (Optional) ID of the model.
+            desired_response (str): (Optional) The desired response.
+            flagged_response (bool): (Optional) Whether the response was flagged or not.
+            flagged_reason (str): (Optional) The reason the response was flagged.
+            prompt (str): (Optional) The prompt used to generate the response.
+            annotator_id (str): (Optional) The ID of the annotator.
 
         Examples:
             A user accepts a model's suggestion in an assisted writing setting:
                 >>> generations = co.generate(f"Write me a polite email responding to the one below: {email}. Response:")
                 >>> if user_accepted_suggestion:
-                >>>     generations[0].feedback(good_response=True)
+                >>>     co.generate_feedback(request_id=generations[0].id, good_response=True)
 
             The user edits the model's suggestion:
                 >>> generations = co.generate(f"Write me a polite email responding to the one below: {email}. Response:")
                 >>> if user_edits_suggestion:
-                >>>     generations[0].feedback(good_response=False, desired_response=user_edited_response)
+                >>>     co.generate_feedback(request_id=generations[0].id, good_response=False, desired_response=user_edited_suggestion)
 
         """
+
         json_body = {
-            "id": id,
+            "request_id": request_id,
             "good_response": good_response,
             "desired_response": desired_response,
-            "feedback": feedback,
+            "flagged_response": flagged_response,
+            "flagged_reason": flagged_reason,
+            "prompt": prompt,
+            "annotator_id": annotator_id,
+            "model": model,
         }
-        self._request(cohere.FEEDBACK_URL, json_body)
-        return Feedback(id=id, good_response=good_response, desired_response=desired_response, feedback=feedback)
+        response = self._request(cohere.GENERATE_FEEDBACK_URL, json_body)
+        return GenerateFeedbackResponse(id=response["id"])
 
     def rerank(
         self,

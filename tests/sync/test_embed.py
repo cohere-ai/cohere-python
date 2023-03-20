@@ -2,11 +2,12 @@ import random
 import string
 import unittest
 
+from utils import get_api_key
+
 import cohere
 
-# from utils import get_api_key
-
-co = cohere.Client("77SLnmau853Ww2a8U2Vq8hqrEFX7TCZhv4b24lIr")
+API_KEY = get_api_key()
+co = cohere.Client(API_KEY)
 
 
 def random_word():
