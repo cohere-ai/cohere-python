@@ -21,7 +21,7 @@ from cohere.responses import (
     DetectLanguageResponse,
     Detokenization,
     Embeddings,
-    Feedback,
+    GenerateFeedbackResponse,
     Generations,
     LabelPrediction,
     Language,
@@ -278,15 +278,29 @@ class AsyncClient(Client):
             results.append(Language(result["language_code"], result["language_name"]))
         return DetectLanguageResponse(results, response["meta"])
 
-    async def feedback(self, id: str, good_response: bool, desired_response: str = "", feedback: str = "") -> Feedback:
+    async def generate_feedback(
+        self,
+        request_id: str,
+        good_response: bool,
+        model=None,
+        desired_response: str = None,
+        flagged_response: bool = None,
+        flagged_reason: str = None,
+        prompt: str = None,
+        annotator_id: str = None,
+    ) -> GenerateFeedbackResponse:
         json_body = {
-            "id": id,
+            "request_id": request_id,
             "good_response": good_response,
             "desired_response": desired_response,
-            "feedback": feedback,
+            "flagged_response": flagged_response,
+            "flagged_reason": flagged_reason,
+            "prompt": prompt,
+            "annotator_id": annotator_id,
+            "model": model,
         }
-        await self._request(cohere.FEEDBACK_URL, json_body)
-        return Feedback(id=id, good_response=good_response, desired_response=desired_response, feedback=feedback)
+        response = await self._request(cohere.GENERATE_FEEDBACK_URL, json_body)
+        return GenerateFeedbackResponse(id=response["id"])
 
     async def rerank(
         self,
