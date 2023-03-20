@@ -1,5 +1,13 @@
 # Changelog
 
+## 4.1.0
+
+- [#188](https://github.com/cohere-ai/cohere-python/pull/188)
+  - Add `stream` parameter to chat, and relevant return object.
+- [#169](https://github.com/cohere-ai/cohere-python/pull/169)
+  - Add `stream` parameter to generate, and relevant return object.
+  - Add example notebook for streaming.
+
 ## 4.0.4
 - [#185](https://github.com/cohere-ai/cohere-python/pull/185)
   - Validate API key without API call
