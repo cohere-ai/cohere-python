@@ -1,7 +1,6 @@
 from typing import Any, Dict, List, Optional
 
 from cohere.responses.base import CohereObject
-from cohere.responses.meta_response import Meta
 
 
 class Cluster(CohereObject):
@@ -43,7 +42,7 @@ class ClusterJobResult(CohereObject):
     output_outliers_url: Optional[str]
     clusters: Optional[List[Cluster]]
     error: Optional[str]
-    meta: Optional[Meta]
+    meta: Optional[Dict[str, Any]]
 
     def __init__(
         self,
@@ -53,7 +52,7 @@ class ClusterJobResult(CohereObject):
         output_outliers_url: Optional[str],
         clusters: Optional[List[Cluster]],
         error: Optional[str],
-        meta: Optional[Meta] = None,
+        meta: Optional[Dict[str, Any]] = None,
     ):
         # convert empty string to `None`
         if not output_clusters_url:
@@ -88,9 +87,9 @@ class ClusterJobResult(CohereObject):
 
 class CreateClusterJobResponse(CohereObject):
     job_id: str
-    meta: Optional[Meta]
+    meta: Optional[Dict[str, Any]]
 
-    def __init__(self, job_id: str, meta: Optional[Meta], wait_fn):
+    def __init__(self, job_id: str, meta: Optional[Dict[str, Any]], wait_fn):
         self.job_id = job_id
         self._wait_fn = wait_fn
         self.meta = meta
