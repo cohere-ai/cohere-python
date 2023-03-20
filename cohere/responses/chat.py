@@ -1,8 +1,6 @@
 from typing import Any, Dict, List, Optional
 
 from cohere.responses.base import CohereObject
-from cohere.responses.meta_response import Meta
-
 
 class Chat(CohereObject):
     def __init__(
@@ -11,7 +9,7 @@ class Chat(CohereObject):
         persona_name: str,
         reply: str,
         session_id: str,
-        meta: Optional[Meta] = None,
+        meta: Optional[Dict[str, Any]] = None,
         prompt: Optional[str] = None,
         chatlog: Optional[List[Dict[str, str]]] = None,
         client=None,
