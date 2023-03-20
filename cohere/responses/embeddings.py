@@ -1,7 +1,6 @@
-from typing import Iterator, List, Optional
+from typing import Any, Dict, Iterator, List, Optional
 
 from cohere.responses.base import CohereObject
-from cohere.responses.meta_response import Meta
 
 
 class Embedding(CohereObject):
@@ -16,7 +15,7 @@ class Embedding(CohereObject):
 
 
 class Embeddings(CohereObject):
-    def __init__(self, embeddings: List[Embedding], meta: Optional[Meta] = None) -> None:
+    def __init__(self, embeddings: List[Embedding], meta: Optional[Dict[str, Any]] = None) -> None:
         self.embeddings = embeddings
         self.meta = meta
 

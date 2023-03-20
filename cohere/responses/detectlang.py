@@ -1,7 +1,6 @@
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from cohere.responses.base import CohereObject
-from cohere.responses.meta_response import Meta
 
 
 class Language(CohereObject):
@@ -14,6 +13,6 @@ class Language(CohereObject):
 
 
 class DetectLanguageResponse:
-    def __init__(self, results: List[Language], meta: Optional[Meta] = None):
+    def __init__(self, results: List[Language], meta: Optional[Dict[str, Any]] = None):
         self.results = results
         self.meta = meta
