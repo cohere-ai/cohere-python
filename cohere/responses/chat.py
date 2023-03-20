@@ -74,13 +74,15 @@ class StreamingChat(CohereObject):
     def _make_response_item(self, line) -> Any:
         streaming_item = json.loads(line)
         index = streaming_item.get("index", 0)
-        text = streaming_item["text"]
+        text = streaming_item.get("text")
 
         while len(self.texts) <= index:
             self.texts.append("")
 
-        self.texts[index] += text
+        if text is None:
+            return None
 
+        self.texts[index] += text
         return StreamingText(index=index, text=text)
 
     def __iter__(self) -> Generator[StreamingText, None, None]:
@@ -88,8 +90,12 @@ class StreamingChat(CohereObject):
             raise ValueError("For AsyncClient, use `async for` to iterate through the `StreamingChat`")
 
         for line in self.response.iter_lines():
-            yield self._make_response_item(line)
+            item = self._make_response_item(line)
+            if item is not None:
+                yield item
 
     async def __aiter__(self) -> Generator[StreamingText, None, None]:
         async for line in self.response.content:
-            yield self._make_response_item(line)
+            item = self._make_response_item(line)
+            if item is not None:
+                yield item

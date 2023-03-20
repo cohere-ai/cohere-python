@@ -138,17 +138,19 @@ class StreamingGenerations(CohereObject):
         self.ids = []
         self.texts = []
 
-    def _make_response_item(self, line) -> StreamingText:
+    def _make_response_item(self, line) -> Optional[StreamingText]:
         streaming_item = json.loads(line)
         index = streaming_item.get("index", 0)
-        text = streaming_item["text"]
+        text = streaming_item.get("text")
         id = streaming_item.get("id")
         while len(self.texts) <= index:
             self.texts.append("")
             self.ids.append(None)
-        self.texts[index] += text
         if id is not None:
             self.ids[index] = id
+        if text is None:
+            return None
+        self.texts[index] += text
         return StreamingText(id=id, index=index, text=text)
 
     def __iter__(self) -> Generator[StreamingText, None, None]:
@@ -156,8 +158,12 @@ class StreamingGenerations(CohereObject):
             raise ValueError("For AsyncClient, use `async for` to iterate through the `StreamingGenerations`")
 
         for line in self.response.iter_lines():
-            yield self._make_response_item(line)
+            item = self._make_response_item(line)
+            if item is not None:
+                yield item
 
     async def __aiter__(self) -> Generator[StreamingText, None, None]:
         async for line in self.response.content:
-            yield self._make_response_item(line)
+            item = self._make_response_item(line)
+            if item is not None:
+                yield item
