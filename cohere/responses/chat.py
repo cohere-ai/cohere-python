@@ -1,4 +1,7 @@
-from typing import Any, Dict, List, Optional
+import json
+from typing import Any, Dict, Generator, List, NamedTuple, Optional
+
+import requests
 
 from cohere.responses.base import CohereObject
 from cohere.responses.meta_response import Meta
@@ -59,3 +62,35 @@ class AsyncChat(Chat):
             return_chatlog=self.chatlog is not None,
             return_prompt=self.prompt is not None,
         )
+
+
+StreamingText = NamedTuple("StreamingText", [("index", Optional[int]), ("text", str)])
+
+
+class StreamingChat(CohereObject):
+    def __init__(self, response):
+        self.response = response
+        self.texts = []
+
+    def _make_response_item(self, line) -> Any:
+        streaming_item = json.loads(line)
+        index = streaming_item.get("index", 0)
+        text = streaming_item["text"]
+
+        while len(self.texts) <= index:
+            self.texts.append("")
+
+        self.texts[index] += text
+
+        return StreamingText(index=index, text=text)
+
+    def __iter__(self) -> Generator[StreamingText, None, None]:
+        if not isinstance(self.response, requests.Response):
+            raise ValueError("For AsyncClient, use `async for` to iterate through the `StreamingChat`")
+
+        for line in self.response.iter_lines():
+            yield self._make_response_item(line)
+
+    async def __aiter__(self) -> Generator[StreamingText, None, None]:
+        async for line in self.response.content:
+            yield self._make_response_item(line)
