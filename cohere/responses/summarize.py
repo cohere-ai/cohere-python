@@ -1,6 +1,5 @@
 from typing import Any, Dict, NamedTuple, Optional
 
-
 SummarizeResponse = NamedTuple("SummarizeResponse", [("id", str), ("summary", str), ("meta", Optional[Dict[str, Any]])])
 SummarizeResponse.__doc__ = """
 Returned by co.summarize, which generates a summary of the specified length for the provided text.

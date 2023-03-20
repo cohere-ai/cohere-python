@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Optional
 
 from cohere.responses.base import CohereObject
 
+
 class Chat(CohereObject):
     def __init__(
         self,

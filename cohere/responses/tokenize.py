@@ -2,9 +2,13 @@ from typing import Any, Dict, List, Optional
 
 from cohere.responses.base import CohereObject, _df_html
 
+
 class Tokens(CohereObject):
     def __init__(
-        self, tokens: Optional[List[int]] = None, token_strings: Optional[List[str]] = None, meta: Optional[Dict[str, Any]] = None
+        self,
+        tokens: Optional[List[int]] = None,
+        token_strings: Optional[List[str]] = None,
+        meta: Optional[Dict[str, Any]] = None,
     ) -> None:
         assert tokens is not None
         assert token_strings is not None
