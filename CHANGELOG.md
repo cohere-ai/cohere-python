@@ -8,6 +8,10 @@
   - Add `stream` parameter to generate, and relevant return object.
   - Add example notebook for streaming.
 
+## 4.0.5
+- [#186](https://github.com/cohere-ai/cohere-python/pull/186)
+  - Added warnings support for meta response
+
 ## 4.0.4
 - [#185](https://github.com/cohere-ai/cohere-python/pull/185)
   - Validate API key without API call

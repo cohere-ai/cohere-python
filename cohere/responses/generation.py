@@ -5,7 +5,6 @@ from typing import Any, Dict, Generator, List, NamedTuple, Optional
 import requests
 
 from cohere.responses.base import CohereObject, _df_html
-from cohere.responses.meta_response import Meta
 
 TokenLikelihood = NamedTuple("TokenLikelihood", [("token", str), ("likelihood", float)])
 
@@ -88,7 +87,7 @@ class Generation(CohereObject, str):
 
 
 class Generations(UserList, CohereObject):
-    def __init__(self, generations, return_likelihoods: str, meta: Optional[Meta] = None) -> None:
+    def __init__(self, generations, return_likelihoods: str, meta: Optional[Dict[str, Any]] = None) -> None:
         super().__init__(generations)
         self.return_likelihoods = return_likelihoods
         self.meta = meta

@@ -51,3 +51,12 @@ async def test_raise_ex(async_client):
     )
     assert isinstance(multi[0], Generations)
     assert isinstance(multi[1], CohereAPIError)
+
+
+@pytest.mark.asyncio
+async def test_async_generate_stream(async_client):
+    res = await async_client.generate("Hey!", max_tokens=5, stream=True)
+    async for token in res:
+        assert isinstance(token.text, str)
+        assert len(token.text) > 0
+    assert isinstance(res.texts, list)

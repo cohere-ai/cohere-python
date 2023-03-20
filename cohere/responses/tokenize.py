@@ -1,12 +1,14 @@
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from cohere.responses.base import CohereObject, _df_html
-from cohere.responses.meta_response import Meta
 
 
 class Tokens(CohereObject):
     def __init__(
-        self, tokens: Optional[List[int]] = None, token_strings: Optional[List[str]] = None, meta: Optional[Meta] = None
+        self,
+        tokens: Optional[List[int]] = None,
+        token_strings: Optional[List[str]] = None,
+        meta: Optional[Dict[str, Any]] = None,
     ) -> None:
         assert tokens is not None
         assert token_strings is not None
@@ -29,7 +31,7 @@ class Tokens(CohereObject):
 
 
 class Detokenization(CohereObject):
-    def __init__(self, text: Optional[str] = None, meta: Optional[Meta] = None) -> None:
+    def __init__(self, text: Optional[str] = None, meta: Optional[Dict[str, Any]] = None) -> None:
         assert text is not None
         self.text = text
         self.meta = meta

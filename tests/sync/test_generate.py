@@ -70,3 +70,10 @@ class TestGenerate(unittest.TestCase):
     def test_prompt_vars(self):
         prediction = co.generate(prompt="Hello {{ name }}", prompt_vars={"name": "Aidan"})
         self.assertIsInstance(prediction.generations[0].text, str)
+
+    def test_generate_stream(self):
+        res = co.generate(prompt="Hello [insert name here]", stream=True)
+        for token in res:
+            assert isinstance(token.text, str)
+            assert len(token.text) > 0
+        assert isinstance(res.texts, list)
