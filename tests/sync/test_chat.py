@@ -116,7 +116,6 @@ class TestChat(unittest.TestCase):
         self.assertIsInstance(prediction.reply, str)
         self.assertIsInstance(prediction.session_id, str)
         self.assertIn(preamble, prediction.prompt)
-        print(prediction.prompt)
 
     def test_invalid_persona_prompt(self):
         with self.assertRaises(cohere.CohereError) as e:
@@ -145,3 +144,12 @@ class TestChat(unittest.TestCase):
         self.assertIsInstance(prediction.session_id, str)
         tokens = co.tokenize(prediction.reply)
         self.assertLessEqual(tokens.length, 10)
+
+    def test_stream(self):
+        prediction = co.chat(query="Yo what up?", max_tokens=5, stream=True)
+
+        for token in prediction:
+            self.assertIsInstance(token.text, str)
+            self.assertGreater(len(token.text), 0)
+
+        self.assertIsInstance(prediction.texts, list)

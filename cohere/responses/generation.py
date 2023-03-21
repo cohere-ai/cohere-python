@@ -1,5 +1,8 @@
+import json
 from collections import UserList
-from typing import Any, Dict, List, NamedTuple, Optional
+from typing import Any, Dict, Generator, List, NamedTuple, Optional
+
+import requests
 
 from cohere.responses.base import CohereObject, _df_html
 
@@ -123,3 +126,44 @@ class Generations(UserList, CohereObject):
     def prompt(self) -> str:
         """Returns the prompt used as input"""
         return self[0].prompt  # should all be the same
+
+
+# ("likelihood", Optional[float])])
+StreamingText = NamedTuple("StreamingText", [("id", Optional[int]), ("index", Optional[int]), ("text", str)])
+
+
+class StreamingGenerations(CohereObject):
+    def __init__(self, response):
+        self.response = response
+        self.ids = []
+        self.texts = []
+
+    def _make_response_item(self, line) -> Optional[StreamingText]:
+        streaming_item = json.loads(line)
+        index = streaming_item.get("index", 0)
+        text = streaming_item.get("text")
+        id = streaming_item.get("id")
+        while len(self.texts) <= index:
+            self.texts.append("")
+            self.ids.append(None)
+        if id is not None:
+            self.ids[index] = id
+        if text is None:
+            return None
+        self.texts[index] += text
+        return StreamingText(id=id, index=index, text=text)
+
+    def __iter__(self) -> Generator[StreamingText, None, None]:
+        if not isinstance(self.response, requests.Response):
+            raise ValueError("For AsyncClient, use `async for` to iterate through the `StreamingGenerations`")
+
+        for line in self.response.iter_lines():
+            item = self._make_response_item(line)
+            if item is not None:
+                yield item
+
+    async def __aiter__(self) -> Generator[StreamingText, None, None]:
+        async for line in self.response.content:
+            item = self._make_response_item(line)
+            if item is not None:
+                yield item
