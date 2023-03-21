@@ -17,9 +17,10 @@ from cohere.responses import (
     Classifications,
     Detokenization,
     Generations,
+    StreamingGenerations,
     Tokens,
 )
-from cohere.responses.chat import Chat
+from cohere.responses.chat import Chat, StreamingChat
 from cohere.responses.classify import Example as ClassifyExample
 from cohere.responses.classify import LabelPrediction
 from cohere.responses.cluster import ClusterJobResult, CreateClusterJobResponse
@@ -102,8 +103,9 @@ class Client:
         return_likelihoods: Optional[str] = None,
         truncate: Optional[str] = None,
         logit_bias: Dict[int, float] = {},
-    ) -> Generations:
-        """Generate a coherent text response for the specified prompt.
+        stream: bool = False,
+    ) -> Union[Generations, StreamingGenerations]:
+        """Generate endpoint.
         See https://docs.cohere.ai/reference/generate for advanced arguments
 
         Args:
@@ -114,9 +116,10 @@ class Client:
             num_generations (int): (Optional) The number of generations that will be returned, defaults to 1.
             max_tokens (int): (Optional) The number of tokens to predict per generation, defaults to 20.
             temperature (float): (Optional) The degree of randomness in generations from 0.0 to 5.0, lower is less random.
-            truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
+            truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.\
+            stream (bool): Return streaming tokens.
         Returns:
-            a Generations object
+            a Generations object if stream=False, or a StreamingGenerations object if stream=True
         """
         json_body = {
             "model": model,
@@ -135,9 +138,13 @@ class Client:
             "return_likelihoods": return_likelihoods,
             "truncate": truncate,
             "logit_bias": logit_bias,
+            "stream": stream,
         }
-        response = self._request(cohere.GENERATE_URL, json=json_body)
-        return Generations.from_dict(response=response, return_likelihoods=return_likelihoods)
+        response = self._request(cohere.GENERATE_URL, json=json_body, stream=stream)
+        if stream:
+            return StreamingGenerations(response)
+        else:
+            return Generations.from_dict(response=response, return_likelihoods=return_likelihoods)
 
     def chat(
         self,
@@ -152,7 +159,8 @@ class Client:
         user_name: str = None,
         temperature: float = 0.8,
         max_tokens: int = 200,
-    ) -> Chat:
+        stream: bool = False,
+    ) -> Union[Chat, StreamingChat]:
         """Returns a Chat object with the query reply.
 
         Args:
@@ -167,6 +175,9 @@ class Client:
             user_name (str): (Optional) A string to override the username.
             temperature (float): (Optional) The temperature to use for the next reply. The higher the temperature, the more random the reply.
             max_tokens (int): (Optional) The max tokens generated for the next reply.
+            stream (bool): Return streaming tokens.
+        Returns:
+            a Chat object if stream=False, or a StreamingChat object if stream=True
 
         Examples:
             A simple chat messsage:
@@ -193,6 +204,12 @@ class Client:
                 >>>     return_chatlog=True)
                 >>> print(res.reply)
                 >>> print(res.chatlog)
+            Streaming chat:
+                >>> res = co.chat(
+                >>>     query="Hey! How are you doing today?",
+                >>>     stream=True)
+                >>> for token in res:
+                >>>     print(token)
         """
         if chatlog_override is not None:
             self._validate_chatlog_override(chatlog_override)
@@ -209,9 +226,14 @@ class Client:
             "user_name": user_name,
             "temperature": temperature,
             "max_tokens": max_tokens,
+            "stream": stream,
         }
-        response = self._request(cohere.CHAT_URL, json=json_body)
-        return Chat.from_dict(response, query=query, persona_name=persona_name, client=self)
+        response = self._request(cohere.CHAT_URL, json=json_body, stream=stream)
+
+        if stream:
+            return StreamingChat(response)
+        else:
+            return Chat.from_dict(response, query=query, persona_name=persona_name, client=self)
 
     def _validate_chatlog_override(self, chatlog_override: List[Dict[str, str]]) -> None:
         if not isinstance(chatlog_override, list):
@@ -508,7 +530,7 @@ class Client:
         if status_code >= 500:
             raise CohereError(message=f"Unexpected server error (status {status_code}): {json_response}")
 
-    def _request(self, endpoint, json=None, method="POST") -> Any:
+    def _request(self, endpoint, json=None, method="POST", stream=False) -> Any:
         headers = {
             "Authorization": "BEARER {}".format(self.api_key),
             "Content-Type": "application/json",
@@ -527,17 +549,16 @@ class Client:
             session.mount("https://", HTTPAdapter(max_retries=retries))
             session.mount("http://", HTTPAdapter(max_retries=retries))
 
+            if stream:
+                return session.request(method, url, headers=headers, json=json, **self.request_dict, stream=True)
+
+            response = session.request(method, url, headers=headers, json=json, **self.request_dict)
             try:
                 response = session.request(
                     method, url, headers=headers, json=json, timeout=self.timeout, **self.request_dict
                 )
             except requests.exceptions.ConnectionError as e:
-                raise CohereError(
-                    message="A Connection error occurred when trying to connect to the Cohere API."
-                    " Please check your internet connection."
-                ) from e
-            except requests.exceptions.Timeout as e:
-                raise CohereError(message="The request to the Cohere API timed out") from e
+                raise CohereConnectionError(str(e)) from e
             except requests.exceptions.RequestException as e:
                 raise CohereError(f"Unexpected exception ({e.__class__.__name__}): {e}") from e
 

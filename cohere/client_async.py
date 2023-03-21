@@ -26,10 +26,11 @@ from cohere.responses import (
     LabelPrediction,
     Language,
     Reranking,
+    StreamingGenerations,
     SummarizeResponse,
     Tokens,
 )
-from cohere.responses.chat import AsyncChat
+from cohere.responses.chat import AsyncChat, StreamingChat
 from cohere.responses.classify import Example as ClassifyExample
 from cohere.utils import is_api_key_valid, np_json_dumps
 
@@ -69,7 +70,7 @@ class AsyncClient(Client):
         self._check_api_key_on_enter = check_api_key
         self._backend = AIOHTTPBackend(logger, num_workers, max_retries, timeout)
 
-    async def _request(self, endpoint, json=None, method="POST", full_url=None) -> JSON:
+    async def _request(self, endpoint, json=None, method="POST", full_url=None, stream=False) -> JSON:
         headers = {
             "Authorization": f"BEARER {self.api_key}",
             "Request-Source": self.request_source,
@@ -79,7 +80,9 @@ class AsyncClient(Client):
         else:
             url = posixpath.join(self.api_url, self.api_version, endpoint)
 
-        response = await self._backend.request(url, json, method, headers)
+        response = await self._backend.request(url, json, method, headers, stream=stream)
+        if stream:
+            return response
 
         try:
             json_response = await response.json()
@@ -133,7 +136,8 @@ class AsyncClient(Client):
         return_likelihoods: Optional[str] = None,
         truncate: Optional[str] = None,
         logit_bias: Dict[int, float] = {},
-    ) -> Generations:
+        stream: bool = False,
+    ) -> Union[Generations, StreamingGenerations]:
         json_body = {
             "model": model,
             "prompt": prompt,
@@ -151,9 +155,13 @@ class AsyncClient(Client):
             "return_likelihoods": return_likelihoods,
             "truncate": truncate,
             "logit_bias": logit_bias,
+            "stream": stream,
         }
-        response = await self._request(cohere.GENERATE_URL, json_body)
-        return Generations.from_dict(response=response, return_likelihoods=return_likelihoods)
+        response = await self._request(cohere.GENERATE_URL, json=json_body, stream=stream)
+        if stream:
+            return StreamingGenerations(response)
+        else:
+            return Generations.from_dict(response=response, return_likelihoods=return_likelihoods)
 
     async def chat(
         self,
@@ -168,8 +176,8 @@ class AsyncClient(Client):
         user_name: str = None,
         temperature: float = 0.8,
         max_tokens: int = 200,
-    ) -> AsyncChat:
-
+        stream: bool = False,
+    ) -> Union[AsyncChat, StreamingChat]:
         if chatlog_override is not None:
             self._validate_chatlog_override(chatlog_override)
         json_body = {
@@ -184,9 +192,14 @@ class AsyncClient(Client):
             "user_name": user_name,
             "temperature": temperature,
             "max_tokens": max_tokens,
+            "stream": stream,
         }
-        response = await self._request(cohere.CHAT_URL, json=json_body)
-        return AsyncChat.from_dict(response, query=query, persona_name=persona_name, client=self)
+        response = await self._request(cohere.CHAT_URL, json=json_body, stream=stream)
+
+        if stream:
+            return StreamingChat(response)
+        else:
+            return AsyncChat.from_dict(response, query=query, persona_name=persona_name, client=self)
 
     async def embed(self, texts: List[str], model: Optional[str] = None, truncate: Optional[str] = None) -> Embeddings:
         json_bodys = [
@@ -468,7 +481,9 @@ class AIOHTTPBackend:
 
         return make_request_fn
 
-    async def request(self, url, json=None, method: str = "post", headers=None, session=None, **kwargs) -> JSON:
+    async def request(
+        self, url, json=None, method: str = "post", headers=None, session=None, stream=False, **kwargs
+    ) -> JSON:
         session = session or await self.session()
         self.logger.debug(f"Making request to {url} with content {json}")
 
