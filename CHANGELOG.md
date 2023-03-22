@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.1.1
+- [#190](https://github.com/cohere-ai/cohere-python/pull/190)
+  - Remove wrong "Embedding" class used for type hinting
+
 ## 4.1.0
 - [#188](https://github.com/cohere-ai/cohere-python/pull/188)
   - Add `stream` parameter to chat, and relevant return object.
@@ -10,7 +14,7 @@
 ## 4.0.6
 - [#187](https://github.com/cohere-ai/cohere-python/pull/187)
   - Refactor feedback to be generate specific
-  
+
 ## 4.0.5
 - [#186](https://github.com/cohere-ai/cohere-python/pull/186)
   - Added warnings support for meta response
