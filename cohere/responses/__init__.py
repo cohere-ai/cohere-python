@@ -6,7 +6,7 @@ from cohere.responses.cluster import (
     CreateClusterJobResponse,
 )
 from cohere.responses.detectlang import DetectLanguageResponse, Language
-from cohere.responses.embeddings import Embedding, Embeddings
+from cohere.responses.embeddings import Embeddings
 from cohere.responses.feedback import GenerateFeedbackResponse
 from cohere.responses.generation import Generation, Generations, StreamingGenerations
 from cohere.responses.rerank import RerankDocument, Reranking, RerankResult
