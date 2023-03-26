@@ -1,10 +1,17 @@
 # Changelog
 
+## 4.1.2
+
+- [#192](https://github.com/cohere-ai/cohere-python/pull/192)
+  - Fix duplicate Generate calls in the sync SDK
+
 ## 4.1.1
+
 - [#190](https://github.com/cohere-ai/cohere-python/pull/190)
   - Remove wrong "Embedding" class used for type hinting
 
 ## 4.1.0
+
 - [#188](https://github.com/cohere-ai/cohere-python/pull/188)
   - Add `stream` parameter to chat, and relevant return object.
 - [#169](https://github.com/cohere-ai/cohere-python/pull/169)
@@ -12,26 +19,32 @@
   - Add example notebook for streaming.
 
 ## 4.0.6
+
 - [#187](https://github.com/cohere-ai/cohere-python/pull/187)
   - Refactor feedback to be generate specific
 
 ## 4.0.5
+
 - [#186](https://github.com/cohere-ai/cohere-python/pull/186)
   - Added warnings support for meta response
 
 ## 4.0.4
+
 - [#185](https://github.com/cohere-ai/cohere-python/pull/185)
   - Validate API key without API call
 
 ## 4.0.3
+
 - [#184](https://github.com/cohere-ai/cohere-python/pull/184)
   - Respect timeout option for sync client
 
 ## 4.0.2
+
 - [#183](https://github.com/cohere-ai/cohere-python/pull/183)
   - Better error messages for synchronous client
 
 ## 4.0.1
+
 - [#181](https://github.com/cohere-ai/cohere-python/pull/181)
   - Allow Python >=3.11
 
@@ -54,14 +67,17 @@
   - Updates the co.Chat `user_name` parameter
 
 ## 3.10.0
+
 - [#176](https://github.com/cohere-ai/cohere-python/pull/176)
   - Add failure reason to clustering jobs
 
 ## 3.9.1
+
 - [#175](https://github.com/cohere-ai/cohere-python/pull/175)
   - Fix url path for cluster-job get endpoint
 
 ## 3.9
+
 - [#168](https://github.com/cohere-ai/cohere-python/pull/168)
   - Add support for co.Rerank parameter:
     - `model`
