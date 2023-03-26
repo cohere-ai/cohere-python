@@ -552,7 +552,6 @@ class Client:
             if stream:
                 return session.request(method, url, headers=headers, json=json, **self.request_dict, stream=True)
 
-            response = session.request(method, url, headers=headers, json=json, **self.request_dict)
             try:
                 response = session.request(
                     method, url, headers=headers, json=json, timeout=self.timeout, **self.request_dict
