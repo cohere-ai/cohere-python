@@ -82,7 +82,8 @@ class Client:
     def batch_generate(self, prompts: List[str], **kwargs) -> List[Generations]:
         """A batched version of generate with multiple prompts."""
         with futures.ThreadPoolExecutor(max_workers=self.num_workers) as executor:
-            res = executor.map(lambda prompt: self.generate(prompt=prompt, **kwargs), prompts)
+            res = executor.map(lambda prompt: self.generate(
+                prompt=prompt, **kwargs), prompts)
         return list(res)
 
     def generate(
@@ -140,7 +141,8 @@ class Client:
             "logit_bias": logit_bias,
             "stream": stream,
         }
-        response = self._request(cohere.GENERATE_URL, json=json_body, stream=stream)
+        response = self._request(
+            cohere.GENERATE_URL, json=json_body, stream=stream)
         if stream:
             return StreamingGenerations(response)
         else:
@@ -228,7 +230,8 @@ class Client:
             "max_tokens": max_tokens,
             "stream": stream,
         }
-        response = self._request(cohere.CHAT_URL, json=json_body, stream=stream)
+        response = self._request(
+            cohere.CHAT_URL, json=json_body, stream=stream)
 
         if stream:
             return StreamingChat(response)
@@ -237,7 +240,8 @@ class Client:
 
     def _validate_chatlog_override(self, chatlog_override: List[Dict[str, str]]) -> None:
         if not isinstance(chatlog_override, list):
-            raise CohereError(message="chatlog_override is not a list, but it must be a list of dicts")
+            raise CohereError(
+                message="chatlog_override is not a list, but it must be a list of dicts")
 
         for entry in chatlog_override:
             if not isinstance(entry, dict):
@@ -261,7 +265,7 @@ class Client:
         json_bodys = []
 
         for i in range(0, len(texts), self.batch_size):
-            texts_batch = texts[i : i + self.batch_size]
+            texts_batch = texts[i: i + self.batch_size]
             json_bodys.append(
                 {
                     "model": model,
@@ -313,7 +317,8 @@ class Client:
             for label, prediction in res["labels"].items():
                 labelObj[label] = LabelPrediction(prediction["confidence"])
             classifications.append(
-                Classification(res["input"], res["prediction"], res["confidence"], labelObj, id=res["id"])
+                Classification(res["input"], res["prediction"],
+                               res["confidence"], labelObj, id=res["id"])
             )
 
         return Classifications(classifications, response.get("meta"))
@@ -421,7 +426,8 @@ class Client:
         response = self._request(cohere.DETECT_LANG_URL, json=json_body)
         results = []
         for result in response["results"]:
-            results.append(Language(result["language_code"], result["language_name"]))
+            results.append(
+                Language(result["language_code"], result["language_name"]))
         return DetectLanguageResponse(results, response["meta"])
 
     def generate_feedback(
@@ -528,7 +534,8 @@ class Client:
                 headers=headers,
             )
         if status_code >= 500:
-            raise CohereError(message=f"Unexpected server error (status {status_code}): {json_response}")
+            raise CohereError(
+                message=f"Unexpected server error (status {status_code}): {json_response}")
 
     def _request(self, endpoint, json=None, method="POST", stream=False) -> Any:
         headers = {
@@ -552,7 +559,6 @@ class Client:
             if stream:
                 return session.request(method, url, headers=headers, json=json, **self.request_dict, stream=True)
 
-            response = session.request(method, url, headers=headers, json=json, **self.request_dict)
             try:
                 response = session.request(
                     method, url, headers=headers, json=json, timeout=self.timeout, **self.request_dict
@@ -560,14 +566,17 @@ class Client:
             except requests.exceptions.ConnectionError as e:
                 raise CohereConnectionError(str(e)) from e
             except requests.exceptions.RequestException as e:
-                raise CohereError(f"Unexpected exception ({e.__class__.__name__}): {e}") from e
+                raise CohereError(
+                    f"Unexpected exception ({e.__class__.__name__}): {e}") from e
 
             try:
                 json_response = response.json()
             except jsonlib.decoder.JSONDecodeError:  # CohereAPIError will capture status
-                raise CohereAPIError.from_response(response, message=f"Failed to decode json body: {response.text}")
+                raise CohereAPIError.from_response(
+                    response, message=f"Failed to decode json body: {response.text}")
 
-            self._check_response(json_response, response.headers, response.status_code)
+            self._check_response(
+                json_response, response.headers, response.status_code)
         return json_response
 
     def create_cluster_job(
@@ -619,7 +628,8 @@ class Client:
         if not job_id.strip():
             raise ValueError('"job_id" is empty')
 
-        response = self._request(f"{cohere.CLUSTER_JOBS_URL}/{job_id}", method="GET")
+        response = self._request(
+            f"{cohere.CLUSTER_JOBS_URL}/{job_id}", method="GET")
         return ClusterJobResult.from_dict(response)
 
     def list_cluster_jobs(self) -> List[ClusterJobResult]:
@@ -658,7 +668,8 @@ class Client:
 
         while job.status == "processing":
             if timeout is not None and time.time() - start_time > timeout:
-                raise TimeoutError(f"wait_for_cluster_job timed out after {timeout} seconds")
+                raise TimeoutError(
+                    f"wait_for_cluster_job timed out after {timeout} seconds")
 
             time.sleep(interval)
             job = self.get_cluster_job(job_id)
