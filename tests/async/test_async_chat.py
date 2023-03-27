@@ -30,3 +30,20 @@ async def test_async_chat_stream(async_client):
         assert len(token.text) > 0
 
     assert isinstance(res.texts, list)
+
+
+@pytest.mark.asyncio
+async def test_async_id(async_client):
+    res1 = await async_client.chat(
+        query="wagmi",
+        max_tokens=5,
+    )
+    assert isinstance(res1.id, str)
+
+    res2 = await async_client.chat(
+        query="wagmi",
+        max_tokens=5,
+    )
+    assert isinstance(res2.id, str)
+
+    assert res1.id != res2.id
