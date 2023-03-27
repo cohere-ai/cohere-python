@@ -32,6 +32,7 @@ class Chat(CohereObject):
     @classmethod
     def from_dict(cls, response: Dict[str, Any], query: str, persona_name: str, client) -> "Chat":
         return cls(
+            id=response["id"],
             query=query,
             persona_name=persona_name,
             session_id=response["session_id"],
