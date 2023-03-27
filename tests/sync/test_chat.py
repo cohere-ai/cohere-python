@@ -153,3 +153,12 @@ class TestChat(unittest.TestCase):
             self.assertGreater(len(token.text), 0)
 
         self.assertIsInstance(prediction.texts, list)
+
+    def test_id(self):
+        prediction1 = co.chat("Yo what up?")
+        self.assertIsNotNone(prediction1.id)
+
+        prediction2 = co.chat("hey")
+        self.assertIsNotNone(prediction2.id)
+
+        self.assertNotEqual(prediction1.id, prediction2.id)

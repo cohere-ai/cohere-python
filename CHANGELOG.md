@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.1.3
+- [#194](https://github.com/cohere-ai/cohere-python/pull/194)
+   - Return the generation ID for chat
+
 ## 4.1.2
 
 - [#192](https://github.com/cohere-ai/cohere-python/pull/192)
