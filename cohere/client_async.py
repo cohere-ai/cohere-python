@@ -438,7 +438,7 @@ class AsyncClient(Client):
         start_time = time.time()
         job = await self.get_cluster_job(job_id)
 
-        while job.status == "processing":
+        while not job.is_final_state:
             if timeout is not None and time.time() - start_time > timeout:
                 raise TimeoutError(f"wait_for_cluster_job timed out after {timeout} seconds")
 

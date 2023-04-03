@@ -38,6 +38,7 @@ class Cluster(CohereObject):
 class ClusterJobResult(CohereObject):
     job_id: str
     status: str
+    is_final_state: bool
     output_clusters_url: Optional[str]
     output_outliers_url: Optional[str]
     clusters: Optional[List[Cluster]]
@@ -52,6 +53,7 @@ class ClusterJobResult(CohereObject):
         output_outliers_url: Optional[str],
         clusters: Optional[List[Cluster]],
         error: Optional[str],
+        is_final_state: Optional[bool] = None,
         meta: Optional[Dict[str, Any]] = None,
     ):
         # convert empty string to `None`
@@ -62,6 +64,7 @@ class ClusterJobResult(CohereObject):
 
         self.job_id = job_id
         self.status = status
+        self.is_final_state = is_final_state
         self.output_clusters_url = output_clusters_url
         self.output_outliers_url = output_outliers_url
         self.clusters = clusters
@@ -74,9 +77,17 @@ class ClusterJobResult(CohereObject):
             clusters = None
         else:
             clusters = [Cluster.from_dict(c) for c in data["clusters"]]
+
+        is_final_state = data.get("is_final_state")
+        status = data["status"]
+        # TODO: remove this. temp for backward compatibility until the `is_final_state` field is added to the API
+        if is_final_state is None:
+            is_final_state = status in ["completed", "failed"]
+
         return ClusterJobResult(
             job_id=data["job_id"],
-            status=data["status"],
+            status=status,
+            is_final_state=is_final_state,
             output_clusters_url=data["output_clusters_url"],
             output_outliers_url=data["output_outliers_url"],
             clusters=clusters,
