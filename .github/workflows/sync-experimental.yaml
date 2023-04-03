@@ -1,0 +1,23 @@
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+    syncExperimental:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v3
+          with:
+            ref: experimental-release
+        - name: sync experimental-release branch
+          run: |
+            git fetch origin main:main
+            git reset --hard main
+        - name: Create Pull Request
+          uses: peter-evans/create-pull-request@v4
+          with:
+            branch: experimental-request
+            # change the title according to the version that will be created
+            title: Create experimental version x.x.x
