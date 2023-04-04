@@ -148,7 +148,14 @@ class TestChat(unittest.TestCase):
     def test_stream(self):
         prediction = co.chat(query="Yo what up?", max_tokens=5, stream=True)
 
-        for token in prediction:
+        for i, token in enumerate(prediction):
+            if i == 0:
+                self.assertIsNotNone(token.id)
+                self.assertIsNotNone(token.session_id)
+            else:
+                self.assertIsNone(token.id)
+                self.assertIsNone(token.session_id)
+
             self.assertIsInstance(token.text, str)
             self.assertGreater(len(token.text), 0)
 

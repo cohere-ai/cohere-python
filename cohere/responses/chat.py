@@ -64,27 +64,45 @@ class AsyncChat(Chat):
         )
 
 
-StreamingText = NamedTuple("StreamingText", [("index", Optional[int]), ("text", str)])
+StreamingText = NamedTuple(
+    "StreamingText",
+    [
+        ("id", Optional[str]),
+        ("session_id", Optional[str]),
+        ("index", Optional[int]),
+        ("text", str),
+    ],
+)
 
 
 class StreamingChat(CohereObject):
     def __init__(self, response):
         self.response = response
         self.texts = []
+        self.ids = []
+        self.session_ids = []
 
     def _make_response_item(self, line) -> Any:
         streaming_item = json.loads(line)
         index = streaming_item.get("index", 0)
         text = streaming_item.get("text")
+        id = streaming_item.get("id")
+        session_id = streaming_item.get("session_id")
 
         while len(self.texts) <= index:
             self.texts.append("")
+            self.ids.append(None)
+            self.session_ids.append(None)
 
+        if id is not None:
+            self.ids[index] = id
+        if session_id is not None:
+            self.session_ids[index] = session_id
         if text is None:
             return None
 
         self.texts[index] += text
-        return StreamingText(index=index, text=text)
+        return StreamingText(index=index, text=text, id=id, session_id=session_id)
 
     def __iter__(self) -> Generator[StreamingText, None, None]:
         if not isinstance(self.response, requests.Response):

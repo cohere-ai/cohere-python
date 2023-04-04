@@ -25,7 +25,16 @@ async def test_async_chat_stream(async_client):
         stream=True,
     )
 
+    first_element = True
     async for token in res:
+        if first_element:
+            assert token.id != None
+            assert token.session_id != None
+            first_element = False
+        else:
+            assert token.id == None
+            assert token.session_id == None
+
         assert isinstance(token.text, str)
         assert len(token.text) > 0
 
