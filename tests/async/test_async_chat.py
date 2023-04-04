@@ -9,8 +9,7 @@ async def test_async_multi_replies(async_client):
     for _ in range(num_replies):
         prediction = await prediction.respond("oh that's cool")
         assert isinstance(prediction.reply, str)
-        assert isinstance(prediction.session_id, str)
-        assert prediction.persona_name is None
+        assert isinstance(prediction.conversation_id, str)
         assert prediction.chatlog is not None
         assert prediction.meta
         assert prediction.meta["api_version"]
@@ -47,3 +46,43 @@ async def test_async_id(async_client):
     assert isinstance(res2.id, str)
 
     assert res1.id != res2.id
+
+
+@pytest.mark.asyncio
+async def test_async_session_id_warning(async_client):
+    with pytest.warns(DeprecationWarning):
+        await async_client.chat(
+            query="wagmi",
+            max_tokens=5,
+            session_id="test",
+        )
+
+
+@pytest.mark.asyncio
+async def test_deprecated_persona_prompt_warning(async_client):
+    with pytest.warns(DeprecationWarning):
+        await async_client.chat(
+            query="wagmi",
+            max_tokens=5,
+            persona_prompt="test",
+        )
+
+
+@pytest.mark.asyncio
+async def test_deprecated_persona_name_warning(async_client):
+    with pytest.warns(DeprecationWarning):
+        await async_client.chat(
+            query="wagmi",
+            max_tokens=5,
+            persona_name="test",
+        )
+
+
+@pytest.mark.asyncio
+async def test_deprecated_user_name_warning(async_client):
+    with pytest.warns(DeprecationWarning):
+        await async_client.chat(
+            query="wagmi",
+            max_tokens=5,
+            user_name="test",
+        )
