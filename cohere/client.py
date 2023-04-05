@@ -150,12 +150,15 @@ class Client:
         self,
         query: str,
         session_id: str = "",
+        conversation_id: str = "",
         model: Optional[str] = None,
         return_chatlog: bool = False,
         return_prompt: bool = False,
+        return_preamble: bool = False,
         chatlog_override: List[Dict[str, str]] = None,
         persona_name: str = None,
         persona_prompt: str = None,
+        preamble_override: str = None,
         user_name: str = None,
         temperature: float = 0.8,
         max_tokens: int = 200,
@@ -165,14 +168,17 @@ class Client:
 
         Args:
             query (str): The query to send to the chatbot.
-            session_id (str): (Optional) The session id to continue the conversation.
+            session_id (str): Deprecated, use conversation_id instead.
+            conversation_id (str): (Optional) The conversation id to continue the conversation.
             model (str): (Optional) The model to use for generating the next reply.
             return_chatlog (bool): (Optional) Whether to return the chatlog.
             return_prompt (bool): (Optional) Whether to return the prompt.
+            return_preamble (bool): (Optional) Whether to return the preamble.
             chatlog_override (List[Dict[str, str]]): (Optional) A list of chatlog entries to override the chatlog.
-            persona_name (str): (Optional) The bot's name to use.
-            persona_prompt (str): (Optional) A string to override the preamble.
-            user_name (str): (Optional) A string to override the username.
+            persona_name (str): Deprecated.
+            persona_prompt (str): Deprecated, use preamble_override instead.
+            preamble_override (str): (Optional) A string to override the preamble.
+            user_name (str): Deprecated.
             temperature (float): (Optional) The temperature to use for the next reply. The higher the temperature, the more random the reply.
             max_tokens (int): (Optional) The max tokens generated for the next reply.
             stream (bool): Return streaming tokens.
@@ -183,11 +189,11 @@ class Client:
             A simple chat messsage:
                 >>> res = co.chat(query="Hey! How are you doing today?")
                 >>> print(res.reply)
-                >>> print(res.session_id)
+                >>> print(res.conversation_id)
             Continuing a session using a specific model:
                 >>> res = co.chat(
                 >>>     query="Hey! How are you doing today?",
-                >>>     session_id="1234",
+                >>>     conversation_id="1234",
                 >>>     model="command-xlarge",
                 >>>     return_chatlog=True)
                 >>> print(res.reply)
@@ -195,7 +201,7 @@ class Client:
             Overriding a chat log:
                 >>> res = co.chat(
                 >>>     query="What about you?",
-                >>>     session_id="1234",
+                >>>     conversation_id="1234",
                 >>>     chatlog_override=[
                 >>>         {'Bot': 'Hey!'},
                 >>>         {'User': 'I am doing great!'},
@@ -214,16 +220,34 @@ class Client:
         if chatlog_override is not None:
             self._validate_chatlog_override(chatlog_override)
 
+        if session_id != "":
+            conversation_id = session_id
+            logger.warning(
+                "The 'session_id' parameter is deprecated and will be removed in a future version of this function. Use 'conversation_id' instead.",
+            )
+        if persona_prompt is not None:
+            preamble_override = persona_prompt
+            logger.warning(
+                "The 'persona_prompt' parameter is deprecated and will be removed in a future version of this function. Use 'preamble_override' instead.",
+            )
+        if persona_name is not None:
+            logger.warning(
+                "The 'persona_name' parameter is deprecated and will be removed in a future version of this function.",
+            )
+        if user_name is not None:
+            logger.warning(
+                "The 'user_name' parameter is deprecated and will be removed in a future version of this function.",
+            )
+
         json_body = {
             "query": query,
-            "session_id": session_id,
+            "conversation_id": conversation_id,
             "model": model,
             "return_chatlog": return_chatlog,
             "return_prompt": return_prompt,
+            "return_preamble": return_preamble,
             "chatlog_override": chatlog_override,
-            "persona_name": persona_name,
-            "persona_prompt": persona_prompt,
-            "user_name": user_name,
+            "preamble_override": preamble_override,
             "temperature": temperature,
             "max_tokens": max_tokens,
             "stream": stream,
@@ -233,7 +257,7 @@ class Client:
         if stream:
             return StreamingChat(response)
         else:
-            return Chat.from_dict(response, query=query, persona_name=persona_name, client=self)
+            return Chat.from_dict(response, query=query, client=self)
 
     def _validate_chatlog_override(self, chatlog_override: List[Dict[str, str]]) -> None:
         if not isinstance(chatlog_override, list):
