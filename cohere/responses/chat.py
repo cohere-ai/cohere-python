@@ -9,6 +9,7 @@ from cohere.responses.base import CohereObject
 class Chat(CohereObject):
     def __init__(
         self,
+        response_id: str,
         query: str,
         reply: str,
         conversation_id: str,
@@ -19,6 +20,7 @@ class Chat(CohereObject):
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
+        self.response_id = response_id
         self.query = query
         self.reply = reply
         self.conversation_id = conversation_id
@@ -30,7 +32,8 @@ class Chat(CohereObject):
     @classmethod
     def from_dict(cls, response: Dict[str, Any], query: str, client) -> "Chat":
         return cls(
-            id=response["id"],
+            id=response["response_id"],
+            response_id=response["response_id"],
             query=query,
             conversation_id=response["conversation_id"],
             reply=response["reply"],
