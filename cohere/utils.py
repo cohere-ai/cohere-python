@@ -3,7 +3,7 @@ import asyncio
 import json
 import time
 import typing
-from typing import Awaitable, Callable, List, Optional, TypeVar
+from typing import Awaitable, Callable, Optional, TypeVar
 
 from cohere.error import CohereError
 

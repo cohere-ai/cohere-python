@@ -2,7 +2,6 @@ import os
 
 import pytest
 
-import cohere
 from cohere import AsyncClient
 from cohere.responses.bulk_embed import BulkEmbedJob
 
