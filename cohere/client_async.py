@@ -453,6 +453,21 @@ class AsyncClient(Client):
         text_field: Optional[str] = None,
         output_format: Optional[str] = None,
     ) -> AsyncCreateBulkEmbedJobResponse:
+        """Create bulk embed job.
+
+        Args:
+            input_file_url (str): _description_
+            model (Optional[str], optional): _description_. Defaults to None.
+            truncate (Optional[str], optional): _description_. Defaults to None.
+            compress (Optional[bool], optional): _description_. Defaults to None.
+            compression_codebook (Optional[str], optional): _description_. Defaults to None.
+            text_field (Optional[str], optional): _description_. Defaults to None.
+            output_format (Optional[str], optional): _description_. Defaults to None.
+
+        Returns:
+            AsyncCreateBulkEmbedJobResponse: _description_
+        """
+
         json_body = {
             "input_file_url": input_file_url,
             "model": model,

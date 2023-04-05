@@ -7,7 +7,7 @@ from cohere.responses.bulk_embed import BulkEmbedJob
 BAD_INPUT_FILE = "./local-file.jsonl"
 
 
-@pytest.mark.skipif(in_ci(), reason="can timeout during high load")
+# @pytest.mark.skipif(in_ci(), reason="can timeout during high load")
 def test_create_job(co):
     create_res = co.create_bulk_embed_job(input_file_url=BAD_INPUT_FILE)
     job = create_res.wait(timeout=60, interval=5)

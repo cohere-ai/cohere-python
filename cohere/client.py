@@ -669,6 +669,21 @@ class Client:
         text_field: Optional[str] = None,
         output_format: Optional[str] = None,
     ) -> CreateBulkEmbedJobResponse:
+        """Create bulk embed job.
+
+        Args:
+            input_file_url (str): File with texts to embed.
+            model (Optional[str], optional): The model ID to use for embedding the text. Defaults to None.
+            truncate (Optional[str], optional): How the API handles text longer than the maximum token length. Defaults to None.
+            compress (Optional[bool], optional): _description_. Defaults to None.
+            compression_codebook (Optional[str], optional): _description_. Defaults to None.
+            text_field (Optional[str], optional): _description_. Defaults to None.
+            output_format (Optional[str], optional): _description_. Defaults to None.
+
+        Returns:
+            CreateBulkEmbedJobResponse: _description_
+        """
+
         json_body = {
             "input_file_url": input_file_url,
             "model": model,

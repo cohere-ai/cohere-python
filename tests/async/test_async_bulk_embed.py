@@ -10,7 +10,7 @@ IN_CI = os.getenv("CI", "").lower() in ["true", "1"]
 
 
 @pytest.mark.asyncio
-@pytest.mark.skipif(IN_CI, reason="can timeout during high load")
+# @pytest.mark.skipif(IN_CI, reason="can timeout during high load")
 async def test_create_job(async_client: AsyncClient):
     create_res = await async_client.create_bulk_embed_job(input_file_url=BAD_INPUT_FILE)
     job = await create_res.wait(timeout=60, interval=5)
