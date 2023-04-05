@@ -751,6 +751,21 @@ class Client:
         timeout: Optional[float] = None,
         interval: float = 10,
     ) -> BulkEmbedJob:
+        """Wait for bulk embed job completion.
+
+        Args:
+            job_id (str): Bulk embed job id.
+            timeout (Optional[float], optional): Wait timeout in seconds, if None - there is no limit to the wait time.
+                Defaults to None.
+            interval (float, optional): Wait poll interval in seconds. Defaults to 10.
+
+        Raises:
+            TimeoutError: wait timed out
+
+        Returns:
+            BulkEmbedJob: Bulk embed job.
+        """
+
         return wait_for_job(
             get_job=partial(self.get_bulk_embed_job, job_id),
             timeout=timeout,
