@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional
 
 from cohere.responses.base import CohereObject
+from cohere.utils import JobWithStatus
 
 
 class Cluster(CohereObject):
@@ -35,7 +36,7 @@ class Cluster(CohereObject):
         )
 
 
-class ClusterJobResult(CohereObject):
+class ClusterJobResult(CohereObject, JobWithStatus):
     job_id: str
     status: str
     output_clusters_url: Optional[str]
@@ -84,6 +85,9 @@ class ClusterJobResult(CohereObject):
             meta=data.get("meta"),
         )
 
+    def has_terminal_status(self) -> bool:
+        return self.status in ["complete", "failed"]
+
 
 class CreateClusterJobResponse(CohereObject):
     job_id: str
@@ -91,8 +95,8 @@ class CreateClusterJobResponse(CohereObject):
 
     def __init__(self, job_id: str, meta: Optional[Dict[str, Any]], wait_fn):
         self.job_id = job_id
-        self._wait_fn = wait_fn
         self.meta = meta
+        self._wait_fn = wait_fn
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any], wait_fn) -> "CreateClusterJobResponse":

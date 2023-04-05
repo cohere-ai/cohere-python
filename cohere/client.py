@@ -1,8 +1,8 @@
 import json as jsonlib
 import os
-import time
 from concurrent import futures
 from concurrent.futures import ThreadPoolExecutor
+from functools import partial
 from typing import Any, Dict, List, Optional, Union
 
 import requests
@@ -30,7 +30,7 @@ from cohere.responses.embeddings import Embeddings
 from cohere.responses.feedback import GenerateFeedbackResponse
 from cohere.responses.rerank import Reranking
 from cohere.responses.summarize import SummarizeResponse
-from cohere.utils import is_api_key_valid
+from cohere.utils import is_api_key_valid, wait_for_job
 
 
 class Client:
@@ -653,17 +653,11 @@ class Client:
             ClusterJobResult: Clustering job result.
         """
 
-        start_time = time.time()
-        job = self.get_cluster_job(job_id)
-
-        while job.status == "processing":
-            if timeout is not None and time.time() - start_time > timeout:
-                raise TimeoutError(f"wait_for_cluster_job timed out after {timeout} seconds")
-
-            time.sleep(interval)
-            job = self.get_cluster_job(job_id)
-
-        return job
+        return wait_for_job(
+            get_job=partial(self.get_cluster_job, job_id),
+            timeout=timeout,
+            interval=interval,
+        )
 
     def create_bulk_embed_job(
         self,
@@ -687,7 +681,10 @@ class Client:
 
         response = self._request(cohere.BULK_EMBED_JOBS_URL, json=json_body)
 
-        return CreateBulkEmbedJobResponse.from_dict(response)
+        return CreateBulkEmbedJobResponse.from_dict(
+            response,
+            wait_fn=self.wait_for_bulk_embed_job,
+        )
 
     def list_bulk_embed_jobs(self) -> List[BulkEmbedJob]:
         """List bulk embed jobs.
@@ -718,7 +715,7 @@ class Client:
         response = self._request(f"{cohere.BULK_EMBED_JOBS_URL}/{job_id}", method="GET")
         return BulkEmbedJob.from_dict(response)
 
-    def cacnel_bulk_embed_job(self, job_id: str) -> None:
+    def cancel_bulk_embed_job(self, job_id: str) -> None:
         """Cancel bulk embed job.
 
         Args:
@@ -732,3 +729,15 @@ class Client:
             raise ValueError('"job_id" is empty')
 
         self._request(f"{cohere.BULK_EMBED_JOBS_URL}/{job_id}/cancel", method="POST", json={})
+
+    def wait_for_bulk_embed_job(
+        self,
+        job_id: str,
+        timeout: Optional[float] = None,
+        interval: float = 10,
+    ) -> BulkEmbedJob:
+        return wait_for_job(
+            get_job=partial(self.get_bulk_embed_job, job_id),
+            timeout=timeout,
+            interval=interval,
+        )

@@ -1,5 +1,9 @@
+import abc
+import asyncio
 import json
+import time
 import typing
+from typing import Awaitable, Callable, List, Optional, TypeVar
 
 from cohere.error import CohereError
 
@@ -45,3 +49,48 @@ def is_api_key_valid(key: typing.Optional[str]) -> bool:
         )
 
     return True
+
+
+class JobWithStatus(abc.ABC):
+    @abc.abstractmethod
+    def has_terminal_status(self) -> bool:
+        ...
+
+
+T = TypeVar("T", bound=JobWithStatus)
+
+
+def wait_for_job(
+    get_job: Callable[[], T],
+    timeout: Optional[float] = None,
+    interval: float = 10,
+) -> T:
+    start_time = time.time()
+    job = get_job()
+
+    while not job.has_terminal_status():
+        if timeout is not None and time.time() - start_time > timeout:
+            raise TimeoutError(f"wait_for_job timed out after {timeout} seconds")
+
+        time.sleep(interval)
+        job = get_job()
+
+    return job
+
+
+async def async_wait_for_job(
+    get_job: Callable[[], Awaitable[T]],
+    timeout: Optional[float] = None,
+    interval: float = 10,
+) -> T:
+    start_time = time.time()
+    job = await get_job()
+
+    while not job.has_terminal_status():
+        if timeout is not None and time.time() - start_time > timeout:
+            raise TimeoutError(f"wait_for_job timed out after {timeout} seconds")
+
+        await asyncio.sleep(interval)
+        job = await get_job()
+
+    return job
