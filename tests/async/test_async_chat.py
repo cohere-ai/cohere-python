@@ -37,12 +37,12 @@ async def test_async_id(async_client):
         query="wagmi",
         max_tokens=5,
     )
-    assert isinstance(res1.id, str)
+    assert isinstance(res1.response_id, str)
 
     res2 = await async_client.chat(
         query="wagmi",
         max_tokens=5,
     )
-    assert isinstance(res2.id, str)
+    assert isinstance(res2.response_id, str)
 
-    assert res1.id != res2.id
+    assert res1.response_id != res2.response_id
