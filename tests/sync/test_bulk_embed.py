@@ -1,5 +1,5 @@
 import pytest
-from utils import get_api_key, in_ci
+from utils import get_api_key
 
 import cohere
 from cohere.responses.bulk_embed import BulkEmbedJob
