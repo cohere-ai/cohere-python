@@ -1,7 +1,6 @@
 import json as jsonlib
 import os
 import time
-import warnings
 from concurrent import futures
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List, Optional, Union
@@ -223,25 +222,21 @@ class Client:
 
         if session_id != "":
             conversation_id = session_id
-            warnings.warn(
+            logger.warning(
                 "The 'session_id' parameter is deprecated and will be removed in a future version of this function. Use 'conversation_id' instead.",
-                DeprecationWarning,
             )
         if persona_prompt is not None:
             preamble_override = persona_prompt
-            warnings.warn(
+            logger.warning(
                 "The 'persona_prompt' parameter is deprecated and will be removed in a future version of this function. Use 'preamble_override' instead.",
-                DeprecationWarning,
             )
         if persona_name is not None:
-            warnings.warn(
+            logger.warning(
                 "The 'persona_name' parameter is deprecated and will be removed in a future version of this function.",
-                DeprecationWarning,
             )
         if user_name is not None:
-            warnings.warn(
+            logger.warning(
                 "The 'user_name' parameter is deprecated and will be removed in a future version of this function.",
-                DeprecationWarning,
             )
 
         json_body = {

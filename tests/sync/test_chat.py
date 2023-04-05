@@ -147,19 +147,3 @@ class TestChat(unittest.TestCase):
         self.assertIsNotNone(prediction2.id)
 
         self.assertNotEqual(prediction1.id, prediction2.id)
-
-    def test_deprecated_session_id_warning(self):
-        with self.assertWarns(DeprecationWarning):
-            co.chat("Yo what up?", session_id="1234")
-
-    def test_deprecated_persona_prompt_warning(self):
-        with self.assertWarns(DeprecationWarning):
-            co.chat("Yo what up?", persona_prompt="This is you")
-
-    def test_deprecated_persona_name_warning(self):
-        with self.assertWarns(DeprecationWarning):
-            co.chat("Yo what up?", persona_name="You")
-
-    def test_deprecated_user_name_warning(self):
-        with self.assertWarns(DeprecationWarning):
-            co.chat("Yo what up?", user_name="You")
