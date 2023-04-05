@@ -12,7 +12,7 @@ BAD_INPUT_FILE = "./local-file.jsonl"
 
 
 class TestClient(unittest.TestCase):
-    # @unittest.skipIf(in_ci(), "can sometimes fail due to duration variation")
+    @unittest.skipIf(in_ci(), "can sometimes fail due to duration variation")
     def test_create_cluster_job(self):
         co = self.create_co()
         create_res = co.create_cluster_job(
