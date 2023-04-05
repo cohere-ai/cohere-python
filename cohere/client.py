@@ -20,6 +20,7 @@ from cohere.responses import (
     StreamingGenerations,
     Tokens,
 )
+from cohere.responses.bulk_embed import BulkEmbedJob, CreateBulkEmbedJobResponse
 from cohere.responses.chat import Chat, StreamingChat
 from cohere.responses.classify import Example as ClassifyExample
 from cohere.responses.classify import LabelPrediction
@@ -663,3 +664,71 @@ class Client:
             job = self.get_cluster_job(job_id)
 
         return job
+
+    def create_bulk_embed_job(
+        self,
+        input_file_url: str,
+        model: Optional[str] = None,
+        truncate: Optional[str] = None,
+        compress: Optional[bool] = None,
+        compression_codebook: Optional[str] = None,
+        text_field: Optional[str] = None,
+        output_format: Optional[str] = None,
+    ) -> CreateBulkEmbedJobResponse:
+        json_body = {
+            "input_file_url": input_file_url,
+            "model": model,
+            "truncate": truncate,
+            "compress": compress,
+            "compression_codebook": compression_codebook,
+            "text_field": text_field,
+            "output_format": output_format,
+        }
+
+        response = self._request(cohere.BULK_EMBED_JOBS_URL, json=json_body)
+
+        return CreateBulkEmbedJobResponse.from_dict(response)
+
+    def list_bulk_embed_jobs(self) -> List[BulkEmbedJob]:
+        """List bulk embed jobs.
+
+        Returns:
+            List[BulkEmbedJob]: Bulk embed jobs.
+        """
+
+        response = self._request(f"{cohere.BULK_EMBED_JOBS_URL}/list", method="GET")
+        return [BulkEmbedJob.from_dict({"meta": response.get("meta"), **r}) for r in response["bulk_embed_jobs"]]
+
+    def get_bulk_embed_job(self, job_id: str) -> BulkEmbedJob:
+        """Get bulk embed job.
+
+        Args:
+            job_id (str): Bulk embed job id.
+
+        Raises:
+            ValueError: "job_id" is empty
+
+        Returns:
+            BulkEmbedJob: Bulk embed job.
+        """
+
+        if not job_id.strip():
+            raise ValueError('"job_id" is empty')
+
+        response = self._request(f"{cohere.BULK_EMBED_JOBS_URL}/{job_id}", method="GET")
+        return BulkEmbedJob.from_dict(response)
+
+    def cacnel_bulk_embed_job(self, job_id: str) -> None:
+        """Cancel bulk embed job.
+
+        Args:
+            job_id (str): Bulk embed job id.
+
+        Raises:
+            ValueError: "job_id" is empty
+        """
+
+        if not job_id.strip():
+            raise ValueError('"job_id" is empty')
+
+        self._request(f"{cohere.BULK_EMBED_JOBS_URL}/{job_id}/cancel", method="POST", json={})
