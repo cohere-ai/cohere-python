@@ -169,12 +169,15 @@ class AsyncClient(Client):
         self,
         query: str,
         session_id: str = "",
+        conversation_id: str = "",
         model: Optional[str] = None,
         return_chatlog: bool = False,
         return_prompt: bool = False,
+        return_preamble: bool = False,
         chatlog_override: List[Dict[str, str]] = None,
         persona_name: str = None,
         persona_prompt: str = None,
+        preamble_override: str = None,
         user_name: str = None,
         temperature: float = 0.8,
         max_tokens: int = 200,
@@ -182,26 +185,46 @@ class AsyncClient(Client):
     ) -> Union[AsyncChat, StreamingChat]:
         if chatlog_override is not None:
             self._validate_chatlog_override(chatlog_override)
+
+        if session_id != "":
+            conversation_id = session_id
+            logger.warning(
+                "The 'session_id' parameter is deprecated and will be removed in a future version of this function. Use 'conversation_id' instead.",
+            )
+        if persona_prompt is not None:
+            preamble_override = persona_prompt
+            logger.warning(
+                "The 'persona_prompt' parameter is deprecated and will be removed in a future version of this function. Use 'preamble_override' instead.",
+            )
+        if persona_name is not None:
+            logger.warning(
+                "The 'persona_name' parameter is deprecated and will be removed in a future version of this function.",
+            )
+        if user_name is not None:
+            logger.warning(
+                "The 'user_name' parameter is deprecated and will be removed in a future version of this function.",
+            )
+
         json_body = {
             "query": query,
-            "session_id": session_id,
+            "conversation_id": conversation_id,
             "model": model,
             "return_chatlog": return_chatlog,
             "return_prompt": return_prompt,
+            "return_preamble": return_preamble,
             "chatlog_override": chatlog_override,
-            "persona_name": persona_name,
-            "persona_prompt": persona_prompt,
-            "user_name": user_name,
+            "preamble_override": preamble_override,
             "temperature": temperature,
             "max_tokens": max_tokens,
             "stream": stream,
         }
+
         response = await self._request(cohere.CHAT_URL, json=json_body, stream=stream)
 
         if stream:
             return StreamingChat(response)
         else:
-            return AsyncChat.from_dict(response, query=query, persona_name=persona_name, client=self)
+            return AsyncChat.from_dict(response, query=query, client=self)
 
     async def embed(self, texts: List[str], model: Optional[str] = None, truncate: Optional[str] = None) -> Embeddings:
         json_bodys = [
