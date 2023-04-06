@@ -23,7 +23,7 @@ class TestClient(unittest.TestCase):
         job = co.get_cluster_job(create_res.job_id)
         start = time.time()
 
-        while job.status == "processing":
+        while not job.is_final_state:
             if time.time() - start > 60:  # 60s timeout
                 raise TimeoutError()
             time.sleep(5)
