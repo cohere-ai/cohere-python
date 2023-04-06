@@ -7,7 +7,7 @@ from utils import get_api_key, in_ci
 import cohere
 from cohere.responses import ClusterJobResult
 
-VALID_INPUT_FILE = "gs://cohere-dev-central-2/cluster_tests/all_datasets/reddit_500.jsonl"
+VALID_INPUT_FILE = "gs://cohere-dev-central-2/cluster_tests/all_datasets/reddit_100.jsonl"
 BAD_INPUT_FILE = "./local-file.jsonl"
 
 

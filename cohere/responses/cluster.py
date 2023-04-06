@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional
 
 from cohere.responses.base import CohereObject
+from cohere.utils import JobWithStatus
 
 
 class Cluster(CohereObject):
@@ -35,7 +36,7 @@ class Cluster(CohereObject):
         )
 
 
-class ClusterJobResult(CohereObject):
+class ClusterJobResult(CohereObject, JobWithStatus):
     job_id: str
     status: str
     is_final_state: bool
@@ -53,7 +54,7 @@ class ClusterJobResult(CohereObject):
         output_outliers_url: Optional[str],
         clusters: Optional[List[Cluster]],
         error: Optional[str],
-        is_final_state: Optional[bool] = None,
+        is_final_state: bool,
         meta: Optional[Dict[str, Any]] = None,
     ):
         # convert empty string to `None`
@@ -82,7 +83,7 @@ class ClusterJobResult(CohereObject):
         status = data["status"]
         # TODO: remove this. temp for backward compatibility until the `is_final_state` field is added to the API
         if is_final_state is None:
-            is_final_state = status in ["completed", "failed"]
+            is_final_state = status in ["complete", "failed"]
 
         return ClusterJobResult(
             job_id=data["job_id"],
@@ -95,6 +96,9 @@ class ClusterJobResult(CohereObject):
             meta=data.get("meta"),
         )
 
+    def has_terminal_status(self) -> bool:
+        return self.is_final_state
+
 
 class CreateClusterJobResponse(CohereObject):
     job_id: str
@@ -102,8 +106,8 @@ class CreateClusterJobResponse(CohereObject):
 
     def __init__(self, job_id: str, meta: Optional[Dict[str, Any]], wait_fn):
         self.job_id = job_id
-        self._wait_fn = wait_fn
         self.meta = meta
+        self._wait_fn = wait_fn
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any], wait_fn) -> "CreateClusterJobResponse":

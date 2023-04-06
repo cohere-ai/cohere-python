@@ -8,7 +8,7 @@ import pytest
 from cohere import AsyncClient
 from cohere.responses.cluster import ClusterJobResult
 
-INPUT_FILE = "gs://cohere-dev-central-2/cluster_tests/all_datasets/reddit_500.jsonl"
+INPUT_FILE = "gs://cohere-dev-central-2/cluster_tests/all_datasets/reddit_100.jsonl"
 IN_CI = os.getenv("CI", "").lower() in ["true", "1"]
 
 
