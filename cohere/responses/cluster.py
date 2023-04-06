@@ -83,7 +83,7 @@ class ClusterJobResult(CohereObject, JobWithStatus):
         status = data["status"]
         # TODO: remove this. temp for backward compatibility until the `is_final_state` field is added to the API
         if is_final_state is None:
-            is_final_state = status in ["completed", "failed"]
+            is_final_state = status in ["complete", "failed"]
 
         return ClusterJobResult(
             job_id=data["job_id"],
