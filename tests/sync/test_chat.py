@@ -141,9 +141,9 @@ class TestChat(unittest.TestCase):
 
     def test_id(self):
         prediction1 = co.chat("Yo what up?")
-        self.assertIsNotNone(prediction1.id)
+        self.assertIsNotNone(prediction1.response_id)
 
         prediction2 = co.chat("hey")
-        self.assertIsNotNone(prediction2.id)
+        self.assertIsNotNone(prediction2.response_id)
 
-        self.assertNotEqual(prediction1.id, prediction2.id)
+        self.assertNotEqual(prediction1.response_id, prediction2.response_id)
