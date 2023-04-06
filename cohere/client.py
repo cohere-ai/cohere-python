@@ -1,8 +1,8 @@
 import json as jsonlib
 import os
-import time
 from concurrent import futures
 from concurrent.futures import ThreadPoolExecutor
+from functools import partial
 from typing import Any, Dict, List, Optional, Union
 
 import requests
@@ -20,6 +20,7 @@ from cohere.responses import (
     StreamingGenerations,
     Tokens,
 )
+from cohere.responses.bulk_embed import BulkEmbedJob, CreateBulkEmbedJobResponse
 from cohere.responses.chat import Chat, StreamingChat
 from cohere.responses.classify import Example as ClassifyExample
 from cohere.responses.classify import LabelPrediction
@@ -29,7 +30,7 @@ from cohere.responses.embeddings import Embeddings
 from cohere.responses.feedback import GenerateFeedbackResponse
 from cohere.responses.rerank import Reranking
 from cohere.responses.summarize import SummarizeResponse
-from cohere.utils import is_api_key_valid
+from cohere.utils import is_api_key_valid, wait_for_job
 
 
 class Client:
@@ -677,14 +678,121 @@ class Client:
             ClusterJobResult: Clustering job result.
         """
 
-        start_time = time.time()
-        job = self.get_cluster_job(job_id)
+        return wait_for_job(
+            get_job=partial(self.get_cluster_job, job_id),
+            timeout=timeout,
+            interval=interval,
+        )
 
-        while not job.is_final_state:
-            if timeout is not None and time.time() - start_time > timeout:
-                raise TimeoutError(f"wait_for_cluster_job timed out after {timeout} seconds")
+    def create_bulk_embed_job(
+        self,
+        input_file_url: str,
+        model: Optional[str] = None,
+        truncate: Optional[str] = None,
+        compress: Optional[bool] = None,
+        compression_codebook: Optional[str] = None,
+        text_field: Optional[str] = None,
+        output_format: Optional[str] = None,
+    ) -> CreateBulkEmbedJobResponse:
+        """Create bulk embed job.
 
-            time.sleep(interval)
-            job = self.get_cluster_job(job_id)
+        Args:
+            input_file_url (str): File with texts to embed.
+            model (Optional[str], optional): The model ID to use for embedding the text. Defaults to None.
+            truncate (Optional[str], optional): How the API handles text longer than the maximum token length. Defaults to None.
+            compress (Optional[bool], optional): Use embedding compression. Defaults to None.
+            compression_codebook (Optional[str], optional): Embedding compression codebook. Defaults to None.
+            text_field (Optional[str], optional): Name of the column containing text to embed. Defaults to None.
+            output_format (Optional[str], optional): Output format and file extension. Defaults to None.
 
-        return job
+        Returns:
+            CreateBulkEmbedJobResponse: Created bulk embed job handler
+        """
+
+        json_body = {
+            "input_file_url": input_file_url,
+            "model": model,
+            "truncate": truncate,
+            "compress": compress,
+            "compression_codebook": compression_codebook,
+            "text_field": text_field,
+            "output_format": output_format,
+        }
+
+        response = self._request(cohere.BULK_EMBED_JOBS_URL, json=json_body)
+
+        return CreateBulkEmbedJobResponse.from_dict(
+            response,
+            wait_fn=self.wait_for_bulk_embed_job,
+        )
+
+    def list_bulk_embed_jobs(self) -> List[BulkEmbedJob]:
+        """List bulk embed jobs.
+
+        Returns:
+            List[BulkEmbedJob]: Bulk embed jobs.
+        """
+
+        response = self._request(f"{cohere.BULK_EMBED_JOBS_URL}/list", method="GET")
+        return [BulkEmbedJob.from_dict({"meta": response.get("meta"), **r}) for r in response["bulk_embed_jobs"]]
+
+    def get_bulk_embed_job(self, job_id: str) -> BulkEmbedJob:
+        """Get bulk embed job.
+
+        Args:
+            job_id (str): Bulk embed job id.
+
+        Raises:
+            ValueError: "job_id" is empty
+
+        Returns:
+            BulkEmbedJob: Bulk embed job.
+        """
+
+        if not job_id.strip():
+            raise ValueError('"job_id" is empty')
+
+        response = self._request(f"{cohere.BULK_EMBED_JOBS_URL}/{job_id}", method="GET")
+        return BulkEmbedJob.from_dict(response)
+
+    def cancel_bulk_embed_job(self, job_id: str) -> None:
+        """Cancel bulk embed job.
+
+        Args:
+            job_id (str): Bulk embed job id.
+
+        Raises:
+            ValueError: "job_id" is empty
+        """
+
+        if not job_id.strip():
+            raise ValueError('"job_id" is empty')
+
+        self._request(f"{cohere.BULK_EMBED_JOBS_URL}/{job_id}/cancel", method="POST", json={})
+
+    def wait_for_bulk_embed_job(
+        self,
+        job_id: str,
+        timeout: Optional[float] = None,
+        interval: float = 10,
+    ) -> BulkEmbedJob:
+        """Wait for bulk embed job completion.
+
+        Args:
+            job_id (str): Bulk embed job id.
+            timeout (Optional[float], optional): Wait timeout in seconds, if None - there is no limit to the wait time.
+                Defaults to None.
+            interval (float, optional): Wait poll interval in seconds. Defaults to 10.
+
+        Raises:
+            TimeoutError: wait timed out
+
+        Returns:
+            BulkEmbedJob: Bulk embed job.
+        """
+
+        return wait_for_job(
+            get_job=partial(self.get_bulk_embed_job, job_id),
+            timeout=timeout,
+            interval=interval,
+        )
