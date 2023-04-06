@@ -54,7 +54,7 @@ class ClusterJobResult(CohereObject, JobWithStatus):
         output_outliers_url: Optional[str],
         clusters: Optional[List[Cluster]],
         error: Optional[str],
-        is_final_state: Optional[bool] = None,
+        is_final_state: bool,
         meta: Optional[Dict[str, Any]] = None,
     ):
         # convert empty string to `None`
@@ -97,7 +97,7 @@ class ClusterJobResult(CohereObject, JobWithStatus):
         )
 
     def has_terminal_status(self) -> bool:
-        return self.status in ["complete", "failed"]
+        return self.is_final_state
 
 
 class CreateClusterJobResponse(CohereObject):
