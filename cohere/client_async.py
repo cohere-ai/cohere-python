@@ -479,16 +479,16 @@ class AsyncClient(Client):
         """Create bulk embed job.
 
         Args:
-            input_file_url (str): _description_
-            model (Optional[str], optional): _description_. Defaults to None.
-            truncate (Optional[str], optional): _description_. Defaults to None.
-            compress (Optional[bool], optional): _description_. Defaults to None.
-            compression_codebook (Optional[str], optional): _description_. Defaults to None.
-            text_field (Optional[str], optional): _description_. Defaults to None.
-            output_format (Optional[str], optional): _description_. Defaults to None.
+            input_file_url (str): File with texts to embed.
+            model (Optional[str], optional): The model ID to use for embedding the text. Defaults to None.
+            truncate (Optional[str], optional): How the API handles text longer than the maximum token length. Defaults to None.
+            compress (Optional[bool], optional): Use embedding compression. Defaults to None.
+            compression_codebook (Optional[str], optional): Embedding compression codebook. Defaults to None.
+            text_field (Optional[str], optional): Name of the column containing text to embed. Defaults to None.
+            output_format (Optional[str], optional): Output format and file extension. Defaults to None.
 
         Returns:
-            AsyncCreateBulkEmbedJobResponse: _description_
+            AsyncCreateBulkEmbedJobResponse: Created bulk embed job handler
         """
 
         json_body = {
@@ -558,6 +558,21 @@ class AsyncClient(Client):
         timeout: Optional[float] = None,
         interval: float = 10,
     ) -> BulkEmbedJob:
+        """Wait for bulk embed job completion.
+
+        Args:
+            job_id (str): Bulk embed job id.
+            timeout (Optional[float], optional): Wait timeout in seconds, if None - there is no limit to the wait time.
+                Defaults to None.
+            interval (float, optional): Wait poll interval in seconds. Defaults to 10.
+
+        Raises:
+            TimeoutError: wait timed out
+
+        Returns:
+            BulkEmbedJob: Bulk embed job.
+        """
+
         return await async_wait_for_job(
             get_job=partial(self.get_bulk_embed_job, job_id),
             timeout=timeout,

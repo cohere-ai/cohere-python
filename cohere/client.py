@@ -700,13 +700,13 @@ class Client:
             input_file_url (str): File with texts to embed.
             model (Optional[str], optional): The model ID to use for embedding the text. Defaults to None.
             truncate (Optional[str], optional): How the API handles text longer than the maximum token length. Defaults to None.
-            compress (Optional[bool], optional): _description_. Defaults to None.
-            compression_codebook (Optional[str], optional): _description_. Defaults to None.
-            text_field (Optional[str], optional): _description_. Defaults to None.
-            output_format (Optional[str], optional): _description_. Defaults to None.
+            compress (Optional[bool], optional): Use embedding compression. Defaults to None.
+            compression_codebook (Optional[str], optional): Embedding compression codebook. Defaults to None.
+            text_field (Optional[str], optional): Name of the column containing text to embed. Defaults to None.
+            output_format (Optional[str], optional): Output format and file extension. Defaults to None.
 
         Returns:
-            CreateBulkEmbedJobResponse: _description_
+            CreateBulkEmbedJobResponse: Created bulk embed job handler
         """
 
         json_body = {
