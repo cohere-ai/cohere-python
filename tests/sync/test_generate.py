@@ -2,6 +2,8 @@ import os
 import unittest
 from unittest import mock
 
+import pytest
+
 from utils import get_api_key
 
 import cohere
