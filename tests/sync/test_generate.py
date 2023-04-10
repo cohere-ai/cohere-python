@@ -57,6 +57,7 @@ class TestGenerate(unittest.TestCase):
         with self.assertRaises(cohere.CohereError), mock.patch.dict(os.environ, {"CO_API_KEY": api_key}):
             _ = cohere.Client(api_key)
 
+    @pytest.mark.skipif(os.getenv("CO_API_URL"), reason="relies on preset existing in prod")
     def test_preset_success(self):
         prediction = co.generate(preset="SDK-PRESET-TEST-t94jfm")
         self.assertIsInstance(prediction.generations[0].text, str)
