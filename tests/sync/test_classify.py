@@ -100,7 +100,7 @@ class TestClassify(unittest.TestCase):
         self.assertEqual(prediction.classifications[0].prediction, "fruit")
         self.assertEqual(prediction.classifications[1].prediction, "color")
 
-    @pytest.mark.skipif(os.getenv("CO_API_URL"), reason="relies on preset existing in prod")
+    @pytest.mark.skipif(bool(os.getenv("CO_API_URL")), reason="relies on preset existing in prod")
     def test_preset_success(self):
         prediction = co.classify(preset="SDK-TESTS-PRESET-rfa6h3")
         self.assertIsInstance(prediction.classifications, list)
