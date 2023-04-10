@@ -105,7 +105,7 @@ python -m pytest
 
 You can configure a different base url with:
 ```bash
-CO_API_URL="https://localhost:8050" python3 myprogram
+CO_API_URL="https://localhost:8050" python3 foo.py
 ```
 or
 ```python
