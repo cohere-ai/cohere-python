@@ -26,7 +26,11 @@ from cohere.responses.classify import LabelPrediction
 from cohere.responses.cluster import ClusterJobResult, CreateClusterJobResponse
 from cohere.responses.detectlang import DetectLanguageResponse, Language
 from cohere.responses.embeddings import Embeddings
-from cohere.responses.feedback import GenerateFeedbackResponse
+from cohere.responses.feedback import (
+    GenerateFeedbackResponse,
+    GeneratePreferenceFeedbackResponse,
+    PreferenceRating,
+)
 from cohere.responses.rerank import Reranking
 from cohere.responses.summarize import SummarizeResponse
 from cohere.utils import is_api_key_valid
@@ -242,12 +246,10 @@ class Client:
         for entry in chatlog_override:
             if not isinstance(entry, dict):
                 raise CohereError(
-                    message="chatlog_override must be a list of dicts, but it contains a non-dict element"
-                )
+                    message="chatlog_override must be a list of dicts, but it contains a non-dict element")
             if len(entry) != 1:
                 raise CohereError(
-                    message="chatlog_override must be a list of dicts, each mapping the agent to the message."
-                )
+                    message="chatlog_override must be a list of dicts, each mapping the agent to the message.")
 
     def embed(self, texts: List[str], model: Optional[str] = None, truncate: Optional[str] = None) -> Embeddings:
         """Returns an Embeddings object for the provided texts. Visit https://cohere.ai/embed to learn about embeddings.
@@ -261,14 +263,12 @@ class Client:
         json_bodys = []
 
         for i in range(0, len(texts), self.batch_size):
-            texts_batch = texts[i : i + self.batch_size]
-            json_bodys.append(
-                {
-                    "model": model,
-                    "texts": texts_batch,
-                    "truncate": truncate,
-                }
-            )
+            texts_batch = texts[i:i + self.batch_size]
+            json_bodys.append({
+                "model": model,
+                "texts": texts_batch,
+                "truncate": truncate,
+            })
 
         meta = None
         for result in self._executor.map(lambda json_body: self._request(cohere.EMBED_URL, json=json_body), json_bodys):
@@ -313,8 +313,7 @@ class Client:
             for label, prediction in res["labels"].items():
                 labelObj[label] = LabelPrediction(prediction["confidence"])
             classifications.append(
-                Classification(res["input"], res["prediction"], res["confidence"], labelObj, id=res["id"])
-            )
+                Classification(res["input"], res["prediction"], res["confidence"], labelObj, id=res["id"]))
 
         return Classifications(classifications, response.get("meta"))
 
@@ -473,6 +472,35 @@ class Client:
         response = self._request(cohere.GENERATE_FEEDBACK_URL, json_body)
         return GenerateFeedbackResponse(id=response["id"])
 
+    def generate_preference_feedback(
+        self,
+        ratings: List[PreferenceRating] = [],
+        model=None,
+        prompt: str = None,
+        annotator_id: str = None,
+    ) -> GeneratePreferenceFeedbackResponse:
+        ratings_dicts = []
+        for rating in ratings:
+            ratings_dict = {}
+            print(rating)
+            if rating.request_id is not None:
+                ratings_dict["request_id"] = rating.request_id
+            if rating.generation is not None:
+                ratings_dict["generation"] = rating.generation
+            if rating.rating is not None:
+                ratings_dict["rating"] = rating.rating
+            ratings_dicts.append(ratings_dict)
+
+        json_body = {
+            "ratings": ratings_dicts,
+            "prompt": prompt,
+            "annotator_id": annotator_id,
+            "model": model,
+        }
+        print(json_body)
+        response = self._request(cohere.GENERATE_PREFERENCE_FEEDBACK_URL, json_body)
+        return GenerateFeedbackResponse(id=response["id"])
+
     def rerank(
         self,
         query: str,
@@ -496,8 +524,7 @@ class Client:
                 parsed_docs.append(doc)
             else:
                 raise CohereError(
-                    message='invalid format for documents, must be a list of strings or dicts with a "text" key'
-                )
+                    message='invalid format for documents, must be a list of strings or dicts with a "text" key')
 
         json_body = {
             "query": query,
@@ -553,9 +580,12 @@ class Client:
                 return session.request(method, url, headers=headers, json=json, **self.request_dict, stream=True)
 
             try:
-                response = session.request(
-                    method, url, headers=headers, json=json, timeout=self.timeout, **self.request_dict
-                )
+                response = session.request(method,
+                                           url,
+                                           headers=headers,
+                                           json=json,
+                                           timeout=self.timeout,
+                                           **self.request_dict)
             except requests.exceptions.ConnectionError as e:
                 raise CohereConnectionError(str(e)) from e
             except requests.exceptions.RequestException as e:
