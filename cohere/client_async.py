@@ -381,25 +381,29 @@ class AsyncClient(Client):
     async def create_cluster_job(
         self,
         embeddings_url: str,
-        threshold: Optional[float] = None,
         min_cluster_size: Optional[int] = None,
+        n_neighbors: Optional[int] = None,
+        is_deterministic: Optional[bool] = None,
     ) -> AsyncCreateClusterJobResponse:
         """Create clustering job.
 
         Args:
             embeddings_url (str): File with embeddings to cluster.
-            threshold (Optional[float], optional): Similarity threshold above which two texts are deemed to belong in
-                the same cluster. Defaults to None.
             min_cluster_size (Optional[int], optional): Minimum number of elements in a cluster. Defaults to None.
-
+            n_neighbors (Optional[int], optional): Number of neighbors in dimensionality reduction with UMAP. Lower
+                values focus UMAP on local structure of the data while higher values will focus UMAP on global 
+                structure of the data. Defaults to None.
+            is_deterministic (Optional[bool], optional): Determines whether the output of the cluster job is 
+            deterministic. Defaults to None.
         Returns:
             CreateClusterJobResponse: Created clustering job handler
         """
 
         json_body = {
             "embeddings_url": embeddings_url,
-            "threshold": threshold,
             "min_cluster_size": min_cluster_size,
+            "n_neighbors": n_neighbors,
+            "is_deterministic": is_deterministic,
         }
         response = await self._request(cohere.CLUSTER_JOBS_URL, json=json_body)
         return AsyncCreateClusterJobResponse.from_dict(
