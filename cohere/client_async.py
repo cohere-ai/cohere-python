@@ -116,8 +116,9 @@ class AsyncClient(Client):
 
     async def batch_generate(self, prompts: List[str], return_exceptions=False, **kwargs) -> List[Generations]:
         """return_exceptions is passed to asyncio.gather"""
-        return await asyncio.gather(*[self.generate(prompt, **kwargs) for prompt in prompts],
-                                    return_exceptions=return_exceptions)
+        return await asyncio.gather(
+            *[self.generate(prompt, **kwargs) for prompt in prompts], return_exceptions=return_exceptions
+        )
 
     async def generate(
         self,
@@ -204,7 +205,7 @@ class AsyncClient(Client):
 
     async def embed(self, texts: List[str], model: Optional[str] = None, truncate: Optional[str] = None) -> Embeddings:
         json_bodys = [
-            dict(texts=texts[i:i + cohere.COHERE_EMBED_BATCH_SIZE], model=model, truncate=truncate)
+            dict(texts=texts[i : i + cohere.COHERE_EMBED_BATCH_SIZE], model=model, truncate=truncate)
             for i in range(0, len(texts), cohere.COHERE_EMBED_BATCH_SIZE)
         ]
         responses = await asyncio.gather(*[self._request(cohere.EMBED_URL, json) for json in json_bodys])
@@ -237,7 +238,8 @@ class AsyncClient(Client):
             for label, prediction in res["labels"].items():
                 labelObj[label] = LabelPrediction(prediction["confidence"])
             classifications.append(
-                Classification(res["input"], res["prediction"], res["confidence"], labelObj, id=res["id"]))
+                Classification(res["input"], res["prediction"], res["confidence"], labelObj, id=res["id"])
+            )
 
         return Classifications(classifications, response["meta"])
 
@@ -354,7 +356,8 @@ class AsyncClient(Client):
                 parsed_docs.append(doc)
             else:
                 raise CohereError(
-                    message='invalid format for documents, must be a list of strings or dicts with a "text" key')
+                    message='invalid format for documents, must be a list of strings or dicts with a "text" key'
+                )
 
         json_body = {
             "query": query,
@@ -478,7 +481,6 @@ class AIOHTTPBackend:
         self._requester = None
 
     def build_aio_requester(self) -> Callable:  # returns a function for retryable requests
-
         @backoff.on_exception(
             backoff.expo,
             (aiohttp.ClientError, aiohttp.ClientResponseError),
@@ -497,14 +499,9 @@ class AIOHTTPBackend:
 
         return make_request_fn
 
-    async def request(self,
-                      url,
-                      json=None,
-                      method: str = "post",
-                      headers=None,
-                      session=None,
-                      stream=False,
-                      **kwargs) -> JSON:
+    async def request(
+        self, url, json=None, method: str = "post", headers=None, session=None, stream=False, **kwargs
+    ) -> JSON:
         session = session or await self.session()
         self.logger.debug(f"Making request to {url} with content {json}")
 
