@@ -607,9 +607,9 @@ class Client:
             embeddings_url (str): File with embeddings to cluster.
                 the same cluster. Defaults to None.
             n_neighbors (Optional[int], optional): Number of neighbors in dimensionality reduction with UMAP. Lower
-                values focus UMAP on local structure of the data while higher values will focus UMAP on global 
+                values focus UMAP on local structure of the data while higher values will focus UMAP on global
                 structure of the data. Defaults to None.
-            is_deterministic (Optional[bool], optional): Determines whether the output of the cluster job is 
+            is_deterministic (Optional[bool], optional): Determines whether the output of the cluster job is
             deterministic. Defaults to None.
         Returns:
             CreateClusterJobResponse: Created clustering job handler
