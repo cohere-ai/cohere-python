@@ -1,8 +1,14 @@
 # Changelog
 
+## 4.1.4
+
+- [#204](https://github.com/cohere-ai/cohere-python/pull/187)
+  - Add `generate_preference_feedback` for submitting preference-style feedback
+
 ## 4.1.3
+
 - [#194](https://github.com/cohere-ai/cohere-python/pull/194)
-   - Return the generation ID for chat
+  - Return the generation ID for chat
 
 ## 4.1.2
 

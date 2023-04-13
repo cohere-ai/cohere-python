@@ -324,8 +324,19 @@ class AsyncClient(Client):
         prompt: str = None,
         annotator_id: str = None,
     ) -> GeneratePreferenceFeedbackResponse:
+        ratings_dicts = []
+        for rating in ratings:
+            ratings_dict = {}
+            if rating.request_id is not None:
+                ratings_dict["request_id"] = rating.request_id
+            if rating.generation is not None:
+                ratings_dict["generation"] = rating.generation
+            if rating.rating is not None:
+                ratings_dict["rating"] = rating.rating
+            ratings_dicts.append(ratings_dict)
+
         json_body = {
-            "ratings": ratings,
+            "ratings": ratings_dicts,
             "prompt": prompt,
             "annotator_id": annotator_id,
             "model": model,
