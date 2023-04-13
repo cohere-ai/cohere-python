@@ -368,6 +368,7 @@ class AsyncClient(Client):
         documents: Union[List[str], List[Dict[str, Any]]],
         model: str = None,
         top_n: Optional[int] = None,
+        max_chunks_per_doc: Optional[int] = None,
     ) -> Reranking:
         """Returns an ordered list of documents ordered by their relevance to the provided query
 
@@ -376,6 +377,7 @@ class AsyncClient(Client):
             documents (list[str], list[dict]): The documents to rerank
             model (str): (Optional) The model to use for re-ranking
             top_n (int): (optional) The number of results to return, defaults to returning all results
+            max_chunks_per_doc (int): (optional) The maximum number of chunks derived from a document
         """
         parsed_docs = []
         for doc in documents:
@@ -394,6 +396,7 @@ class AsyncClient(Client):
             "model": model,
             "top_n": top_n,
             "return_documents": False,
+            "max_chunks_per_doc": max_chunks_per_doc,
         }
         reranking = Reranking(await self._request(cohere.RERANK_URL, json=json_body))
         for rank in reranking.results:
