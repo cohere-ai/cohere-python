@@ -1,8 +1,8 @@
 import json as jsonlib
 import os
-import time
 from concurrent import futures
 from concurrent.futures import ThreadPoolExecutor
+from functools import partial
 from typing import Any, Dict, List, Optional, Union
 
 import requests
@@ -20,6 +20,7 @@ from cohere.responses import (
     StreamingGenerations,
     Tokens,
 )
+from cohere.responses.bulk_embed import BulkEmbedJob, CreateBulkEmbedJobResponse
 from cohere.responses.chat import Chat, StreamingChat
 from cohere.responses.classify import Example as ClassifyExample
 from cohere.responses.classify import LabelPrediction
@@ -33,7 +34,7 @@ from cohere.responses.feedback import (
 )
 from cohere.responses.rerank import Reranking
 from cohere.responses.summarize import SummarizeResponse
-from cohere.utils import is_api_key_valid
+from cohere.utils import is_api_key_valid, wait_for_job
 
 
 class Client:
@@ -154,12 +155,15 @@ class Client:
         self,
         query: str,
         session_id: str = "",
+        conversation_id: str = "",
         model: Optional[str] = None,
         return_chatlog: bool = False,
         return_prompt: bool = False,
+        return_preamble: bool = False,
         chatlog_override: List[Dict[str, str]] = None,
         persona_name: str = None,
         persona_prompt: str = None,
+        preamble_override: str = None,
         user_name: str = None,
         temperature: float = 0.8,
         max_tokens: int = 200,
@@ -169,14 +173,17 @@ class Client:
 
         Args:
             query (str): The query to send to the chatbot.
-            session_id (str): (Optional) The session id to continue the conversation.
+            session_id (str): Deprecated, use conversation_id instead.
+            conversation_id (str): (Optional) The conversation id to continue the conversation.
             model (str): (Optional) The model to use for generating the next reply.
             return_chatlog (bool): (Optional) Whether to return the chatlog.
             return_prompt (bool): (Optional) Whether to return the prompt.
+            return_preamble (bool): (Optional) Whether to return the preamble.
             chatlog_override (List[Dict[str, str]]): (Optional) A list of chatlog entries to override the chatlog.
-            persona_name (str): (Optional) The bot's name to use.
-            persona_prompt (str): (Optional) A string to override the preamble.
-            user_name (str): (Optional) A string to override the username.
+            persona_name (str): Deprecated.
+            persona_prompt (str): Deprecated, use preamble_override instead.
+            preamble_override (str): (Optional) A string to override the preamble.
+            user_name (str): Deprecated.
             temperature (float): (Optional) The temperature to use for the next reply. The higher the temperature, the more random the reply.
             max_tokens (int): (Optional) The max tokens generated for the next reply.
             stream (bool): Return streaming tokens.
@@ -187,11 +194,11 @@ class Client:
             A simple chat messsage:
                 >>> res = co.chat(query="Hey! How are you doing today?")
                 >>> print(res.reply)
-                >>> print(res.session_id)
+                >>> print(res.conversation_id)
             Continuing a session using a specific model:
                 >>> res = co.chat(
                 >>>     query="Hey! How are you doing today?",
-                >>>     session_id="1234",
+                >>>     conversation_id="1234",
                 >>>     model="command-xlarge",
                 >>>     return_chatlog=True)
                 >>> print(res.reply)
@@ -199,7 +206,7 @@ class Client:
             Overriding a chat log:
                 >>> res = co.chat(
                 >>>     query="What about you?",
-                >>>     session_id="1234",
+                >>>     conversation_id="1234",
                 >>>     chatlog_override=[
                 >>>         {'Bot': 'Hey!'},
                 >>>         {'User': 'I am doing great!'},
@@ -218,16 +225,34 @@ class Client:
         if chatlog_override is not None:
             self._validate_chatlog_override(chatlog_override)
 
+        if session_id != "":
+            conversation_id = session_id
+            logger.warning(
+                "The 'session_id' parameter is deprecated and will be removed in a future version of this function. Use 'conversation_id' instead.",
+            )
+        if persona_prompt is not None:
+            preamble_override = persona_prompt
+            logger.warning(
+                "The 'persona_prompt' parameter is deprecated and will be removed in a future version of this function. Use 'preamble_override' instead.",
+            )
+        if persona_name is not None:
+            logger.warning(
+                "The 'persona_name' parameter is deprecated and will be removed in a future version of this function.",
+            )
+        if user_name is not None:
+            logger.warning(
+                "The 'user_name' parameter is deprecated and will be removed in a future version of this function.",
+            )
+
         json_body = {
             "query": query,
-            "session_id": session_id,
+            "conversation_id": conversation_id,
             "model": model,
             "return_chatlog": return_chatlog,
             "return_prompt": return_prompt,
+            "return_preamble": return_preamble,
             "chatlog_override": chatlog_override,
-            "persona_name": persona_name,
-            "persona_prompt": persona_prompt,
-            "user_name": user_name,
+            "preamble_override": preamble_override,
             "temperature": temperature,
             "max_tokens": max_tokens,
             "stream": stream,
@@ -237,7 +262,7 @@ class Client:
         if stream:
             return StreamingChat(response)
         else:
-            return Chat.from_dict(response, query=query, persona_name=persona_name, client=self)
+            return Chat.from_dict(response, query=query, client=self)
 
     def _validate_chatlog_override(self, chatlog_override: List[Dict[str, str]]) -> None:
         if not isinstance(chatlog_override, list):
@@ -668,6 +693,7 @@ class Client:
             raise ValueError('"job_id" is empty')
 
         response = self._request(f"{cohere.CLUSTER_JOBS_URL}/{job_id}", method="GET")
+
         return ClusterJobResult.from_dict(response)
 
     def list_cluster_jobs(self) -> List[ClusterJobResult]:
@@ -701,14 +727,121 @@ class Client:
             ClusterJobResult: Clustering job result.
         """
 
-        start_time = time.time()
-        job = self.get_cluster_job(job_id)
+        return wait_for_job(
+            get_job=partial(self.get_cluster_job, job_id),
+            timeout=timeout,
+            interval=interval,
+        )
 
-        while job.status == "processing":
-            if timeout is not None and time.time() - start_time > timeout:
-                raise TimeoutError(f"wait_for_cluster_job timed out after {timeout} seconds")
+    def create_bulk_embed_job(
+        self,
+        input_file_url: str,
+        model: Optional[str] = None,
+        truncate: Optional[str] = None,
+        compress: Optional[bool] = None,
+        compression_codebook: Optional[str] = None,
+        text_field: Optional[str] = None,
+        output_format: Optional[str] = None,
+    ) -> CreateBulkEmbedJobResponse:
+        """Create bulk embed job.
 
-            time.sleep(interval)
-            job = self.get_cluster_job(job_id)
+        Args:
+            input_file_url (str): File with texts to embed.
+            model (Optional[str], optional): The model ID to use for embedding the text. Defaults to None.
+            truncate (Optional[str], optional): How the API handles text longer than the maximum token length. Defaults to None.
+            compress (Optional[bool], optional): Use embedding compression. Defaults to None.
+            compression_codebook (Optional[str], optional): Embedding compression codebook. Defaults to None.
+            text_field (Optional[str], optional): Name of the column containing text to embed. Defaults to None.
+            output_format (Optional[str], optional): Output format and file extension. Defaults to None.
 
-        return job
+        Returns:
+            CreateBulkEmbedJobResponse: Created bulk embed job handler
+        """
+
+        json_body = {
+            "input_file_url": input_file_url,
+            "model": model,
+            "truncate": truncate,
+            "compress": compress,
+            "compression_codebook": compression_codebook,
+            "text_field": text_field,
+            "output_format": output_format,
+        }
+
+        response = self._request(cohere.BULK_EMBED_JOBS_URL, json=json_body)
+
+        return CreateBulkEmbedJobResponse.from_dict(
+            response,
+            wait_fn=self.wait_for_bulk_embed_job,
+        )
+
+    def list_bulk_embed_jobs(self) -> List[BulkEmbedJob]:
+        """List bulk embed jobs.
+
+        Returns:
+            List[BulkEmbedJob]: Bulk embed jobs.
+        """
+
+        response = self._request(f"{cohere.BULK_EMBED_JOBS_URL}/list", method="GET")
+        return [BulkEmbedJob.from_dict({"meta": response.get("meta"), **r}) for r in response["bulk_embed_jobs"]]
+
+    def get_bulk_embed_job(self, job_id: str) -> BulkEmbedJob:
+        """Get bulk embed job.
+
+        Args:
+            job_id (str): Bulk embed job id.
+
+        Raises:
+            ValueError: "job_id" is empty
+
+        Returns:
+            BulkEmbedJob: Bulk embed job.
+        """
+
+        if not job_id.strip():
+            raise ValueError('"job_id" is empty')
+
+        response = self._request(f"{cohere.BULK_EMBED_JOBS_URL}/{job_id}", method="GET")
+        return BulkEmbedJob.from_dict(response)
+
+    def cancel_bulk_embed_job(self, job_id: str) -> None:
+        """Cancel bulk embed job.
+
+        Args:
+            job_id (str): Bulk embed job id.
+
+        Raises:
+            ValueError: "job_id" is empty
+        """
+
+        if not job_id.strip():
+            raise ValueError('"job_id" is empty')
+
+        self._request(f"{cohere.BULK_EMBED_JOBS_URL}/{job_id}/cancel", method="POST", json={})
+
+    def wait_for_bulk_embed_job(
+        self,
+        job_id: str,
+        timeout: Optional[float] = None,
+        interval: float = 10,
+    ) -> BulkEmbedJob:
+        """Wait for bulk embed job completion.
+
+        Args:
+            job_id (str): Bulk embed job id.
+            timeout (Optional[float], optional): Wait timeout in seconds, if None - there is no limit to the wait time.
+                Defaults to None.
+            interval (float, optional): Wait poll interval in seconds. Defaults to 10.
+
+        Raises:
+            TimeoutError: wait timed out
+
+        Returns:
+            BulkEmbedJob: Bulk embed job.
+        """
+
+        return wait_for_job(
+            get_job=partial(self.get_bulk_embed_job, job_id),
+            timeout=timeout,
+            interval=interval,
+        )

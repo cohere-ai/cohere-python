@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional
 
 from cohere.responses.base import CohereObject
+from cohere.utils import JobWithStatus
 
 
 class Cluster(CohereObject):
@@ -35,9 +36,10 @@ class Cluster(CohereObject):
         )
 
 
-class ClusterJobResult(CohereObject):
+class ClusterJobResult(CohereObject, JobWithStatus):
     job_id: str
     status: str
+    is_final_state: bool
     output_clusters_url: Optional[str]
     output_outliers_url: Optional[str]
     clusters: Optional[List[Cluster]]
@@ -52,6 +54,7 @@ class ClusterJobResult(CohereObject):
         output_outliers_url: Optional[str],
         clusters: Optional[List[Cluster]],
         error: Optional[str],
+        is_final_state: bool,
         meta: Optional[Dict[str, Any]] = None,
     ):
         # convert empty string to `None`
@@ -62,6 +65,7 @@ class ClusterJobResult(CohereObject):
 
         self.job_id = job_id
         self.status = status
+        self.is_final_state = is_final_state
         self.output_clusters_url = output_clusters_url
         self.output_outliers_url = output_outliers_url
         self.clusters = clusters
@@ -74,15 +78,26 @@ class ClusterJobResult(CohereObject):
             clusters = None
         else:
             clusters = [Cluster.from_dict(c) for c in data["clusters"]]
+
+        is_final_state = data.get("is_final_state")
+        status = data["status"]
+        # TODO: remove this. temp for backward compatibility until the `is_final_state` field is added to the API
+        if is_final_state is None:
+            is_final_state = status in ["complete", "failed"]
+
         return ClusterJobResult(
             job_id=data["job_id"],
-            status=data["status"],
+            status=status,
+            is_final_state=is_final_state,
             output_clusters_url=data["output_clusters_url"],
             output_outliers_url=data["output_outliers_url"],
             clusters=clusters,
             error=data.get("error"),
             meta=data.get("meta"),
         )
+
+    def has_terminal_status(self) -> bool:
+        return self.is_final_state
 
 
 class CreateClusterJobResponse(CohereObject):
@@ -91,8 +106,8 @@ class CreateClusterJobResponse(CohereObject):
 
     def __init__(self, job_id: str, meta: Optional[Dict[str, Any]], wait_fn):
         self.job_id = job_id
-        self._wait_fn = wait_fn
         self.meta = meta
+        self._wait_fn = wait_fn
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any], wait_fn) -> "CreateClusterJobResponse":

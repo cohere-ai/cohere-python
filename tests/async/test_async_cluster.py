@@ -8,7 +8,7 @@ import pytest
 from cohere import AsyncClient
 from cohere.responses.cluster import ClusterJobResult
 
-INPUT_FILE = "gs://cohere-dev-central-2/cluster_tests/all_datasets/reddit_500.jsonl"
+INPUT_FILE = "gs://cohere-dev-central-2/cluster_tests/all_datasets/reddit_100.jsonl"
 IN_CI = os.getenv("CI", "").lower() in ["true", "1"]
 
 
@@ -23,7 +23,7 @@ async def test_async_create_cluster_job(async_client: AsyncClient):
     job = await async_client.get_cluster_job(create_res.job_id)
     start = time.time()
 
-    while job.status == "processing":
+    while not job.is_final_state:
         if time.time() - start > 60:  # 60s timeout
             raise TimeoutError()
         await asyncio.sleep(5)

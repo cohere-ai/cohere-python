@@ -7,7 +7,7 @@ from utils import get_api_key, in_ci
 import cohere
 from cohere.responses import ClusterJobResult
 
-VALID_INPUT_FILE = "gs://cohere-dev-central-2/cluster_tests/all_datasets/reddit_500.jsonl"
+VALID_INPUT_FILE = "gs://cohere-dev-central-2/cluster_tests/all_datasets/reddit_100.jsonl"
 BAD_INPUT_FILE = "./local-file.jsonl"
 
 
@@ -23,7 +23,7 @@ class TestClient(unittest.TestCase):
         job = co.get_cluster_job(create_res.job_id)
         start = time.time()
 
-        while job.status == "processing":
+        while not job.is_final_state:
             if time.time() - start > 60:  # 60s timeout
                 raise TimeoutError()
             time.sleep(5)

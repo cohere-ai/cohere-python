@@ -12,8 +12,7 @@ class TestChat(unittest.TestCase):
     def test_simple_success(self):
         prediction = co.chat("Yo what up?")
         self.assertIsInstance(prediction.reply, str)
-        self.assertIsInstance(prediction.session_id, str)
-        self.assertIsNone(prediction.persona_name)
+        self.assertIsInstance(prediction.conversation_id, str)
         self.assertTrue(prediction.meta)
         self.assertTrue(prediction.meta["api_version"])
         self.assertTrue(prediction.meta["api_version"]["version"])
@@ -24,23 +23,12 @@ class TestChat(unittest.TestCase):
         for _ in range(num_replies):
             prediction = prediction.respond("oh that's cool")
             self.assertIsInstance(prediction.reply, str)
-            self.assertIsInstance(prediction.session_id, str)
-
-    def test_valid_persona_name(self):
-        prediction = co.chat("Yo what up?", persona_name="Wizard", return_chatlog=True)
-        self.assertIsInstance(prediction.reply, str)
-        self.assertIsInstance(prediction.session_id, str)
-        self.assertEqual(prediction.persona_name, "Wizard")
-        self.assertIn("Wizard:", prediction.chatlog)
-
-    def test_invalid_persona_name(self):
-        with self.assertRaises(cohere.CohereError):
-            co.chat("Yo what up?", persona_name=123).reply
+            self.assertIsInstance(prediction.conversation_id, str)
 
     def test_valid_model(self):
         prediction = co.chat("Yo what up?", model="medium")
         self.assertIsInstance(prediction.reply, str)
-        self.assertIsInstance(prediction.session_id, str)
+        self.assertIsInstance(prediction.conversation_id, str)
 
     def test_invalid_model(self):
         with self.assertRaises(cohere.CohereError):
@@ -49,14 +37,14 @@ class TestChat(unittest.TestCase):
     def test_return_chatlog(self):
         prediction = co.chat("Yo what up?", return_chatlog=True)
         self.assertIsInstance(prediction.reply, str)
-        self.assertIsInstance(prediction.session_id, str)
+        self.assertIsInstance(prediction.conversation_id, str)
         self.assertIsNotNone(prediction.chatlog)
         self.assertGreaterEqual(len(prediction.chatlog), len(prediction.reply))
 
     def test_return_chatlog_false(self):
         prediction = co.chat("Yo what up?", return_chatlog=False)
         self.assertIsInstance(prediction.reply, str)
-        self.assertIsInstance(prediction.session_id, str)
+        self.assertIsInstance(prediction.conversation_id, str)
 
         assert prediction.chatlog is None
 
@@ -78,10 +66,12 @@ class TestChat(unittest.TestCase):
                 expected_chatlog += f"{key}: {value}\n"
             expected_chatlog += "User: " + query
 
-            prediction = co.chat(query=query, session_id="1234", chatlog_override=chatlog_override, return_chatlog=True)
+            prediction = co.chat(
+                query=query, conversation_id="1234", chatlog_override=chatlog_override, return_chatlog=True
+            )
 
             self.assertIsInstance(prediction.reply, str)
-            self.assertIsInstance(prediction.session_id, str)
+            self.assertIsInstance(prediction.conversation_id, str)
             self.assertIn(expected_chatlog, prediction.chatlog)
 
     def testInvalidChatlogOverride(self):
@@ -94,41 +84,36 @@ class TestChat(unittest.TestCase):
         for chatlog_override in invalid_chatlog_overrides:
             with self.assertRaises(cohere.error.CohereError):
                 _ = co.chat(
-                    query="What about you?", session_id="1234", chatlog_override=chatlog_override, return_chatlog=True
+                    query="What about you?",
+                    conversation_id="1234",
+                    chatlog_override=chatlog_override,
+                    return_chatlog=True,
                 )
 
     def test_return_prompt(self):
         prediction = co.chat("Yo what up?", return_prompt=True)
         self.assertIsInstance(prediction.reply, str)
-        self.assertIsInstance(prediction.session_id, str)
+        self.assertIsInstance(prediction.conversation_id, str)
         self.assertIsNotNone(prediction.prompt)
         self.assertGreaterEqual(len(prediction.prompt), len(prediction.reply))
 
     def test_return_prompt_false(self):
         prediction = co.chat("Yo what up?", return_prompt=False)
         self.assertIsInstance(prediction.reply, str)
-        self.assertIsInstance(prediction.session_id, str)
+        self.assertIsInstance(prediction.conversation_id, str)
         assert prediction.prompt is None
 
-    def test_persona_prompt(self):
+    def test_preamble_override(self):
         preamble = "You are a dog who mostly barks"
-        prediction = co.chat("Yo what up?", persona_prompt=preamble, return_prompt=True)
+        prediction = co.chat("Yo what up?", preamble_override=preamble, return_prompt=True)
         self.assertIsInstance(prediction.reply, str)
-        self.assertIsInstance(prediction.session_id, str)
+        self.assertIsInstance(prediction.conversation_id, str)
         self.assertIn(preamble, prediction.prompt)
 
-    def test_invalid_persona_prompt(self):
+    def test_invalid_preamble_override(self):
         with self.assertRaises(cohere.CohereError) as e:
-            co.chat("Yo what up?", persona_prompt=123).reply
+            co.chat("Yo what up?", preamble_override=123).reply
         self.assertIn("invalid type", str(e.exception))
-
-    def test_username_override(self):
-        user_name = "CustomUser"
-        prediction = co.chat("Yo what up?", user_name=user_name, return_chatlog=True)
-        self.assertIsInstance(prediction.reply, str)
-        self.assertIsInstance(prediction.session_id, str)
-        chatlog_starts_with_username = prediction.chatlog.strip().startswith(user_name)
-        self.assertTrue(chatlog_starts_with_username)
 
     def test_valid_temperatures(self):
         temperatures = [0.1, 0.9]
@@ -136,12 +121,12 @@ class TestChat(unittest.TestCase):
         for temperature in temperatures:
             prediction = co.chat("Yo what up?", temperature=temperature, max_tokens=5)
             self.assertIsInstance(prediction.reply, str)
-            self.assertIsInstance(prediction.session_id, str)
+            self.assertIsInstance(prediction.conversation_id, str)
 
     def test_max_tokens(self):
         prediction = co.chat("Yo what up?", max_tokens=10)
         self.assertIsInstance(prediction.reply, str)
-        self.assertIsInstance(prediction.session_id, str)
+        self.assertIsInstance(prediction.conversation_id, str)
         tokens = co.tokenize(prediction.reply)
         self.assertLessEqual(tokens.length, 10)
 
@@ -156,9 +141,9 @@ class TestChat(unittest.TestCase):
 
     def test_id(self):
         prediction1 = co.chat("Yo what up?")
-        self.assertIsNotNone(prediction1.id)
+        self.assertIsNotNone(prediction1.response_id)
 
         prediction2 = co.chat("hey")
-        self.assertIsNotNone(prediction2.id)
+        self.assertIsNotNone(prediction2.response_id)
 
-        self.assertNotEqual(prediction1.id, prediction2.id)
+        self.assertNotEqual(prediction1.response_id, prediction2.response_id)

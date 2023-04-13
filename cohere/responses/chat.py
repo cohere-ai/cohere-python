@@ -9,10 +9,10 @@ from cohere.responses.base import CohereObject
 class Chat(CohereObject):
     def __init__(
         self,
+        response_id: str,
         query: str,
-        persona_name: str,
         reply: str,
-        session_id: str,
+        conversation_id: str,
         meta: Optional[Dict[str, Any]] = None,
         prompt: Optional[str] = None,
         chatlog: Optional[List[Dict[str, str]]] = None,
@@ -20,22 +20,22 @@ class Chat(CohereObject):
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
+        self.response_id = response_id
         self.query = query
-        self.persona_name = persona_name
         self.reply = reply
-        self.session_id = session_id
+        self.conversation_id = conversation_id
         self.prompt = prompt  # optional
         self.chatlog = chatlog  # optional
         self.client = client
         self.meta = meta
 
     @classmethod
-    def from_dict(cls, response: Dict[str, Any], query: str, persona_name: str, client) -> "Chat":
+    def from_dict(cls, response: Dict[str, Any], query: str, client) -> "Chat":
         return cls(
-            id=response["id"],
+            id=response["response_id"],
+            response_id=response["response_id"],
             query=query,
-            persona_name=persona_name,
-            session_id=response["session_id"],
+            conversation_id=response["conversation_id"],
             reply=response["reply"],
             prompt=response.get("prompt"),  # optional
             chatlog=response.get("chatlog"),  # optional
@@ -46,8 +46,7 @@ class Chat(CohereObject):
     def respond(self, response: str) -> "Chat":
         return self.client.chat(
             query=response,
-            session_id=self.session_id,
-            persona_name=self.persona_name,
+            conversation_id=self.conversation_id,
             return_chatlog=self.chatlog is not None,
             return_prompt=self.prompt is not None,
         )
@@ -57,8 +56,7 @@ class AsyncChat(Chat):
     async def respond(self, response: str) -> "AsyncChat":
         return await self.client.chat(
             query=response,
-            session_id=self.session_id,
-            persona_name=self.persona_name,
+            conversation_id=self.conversation_id,
             return_chatlog=self.chatlog is not None,
             return_prompt=self.prompt is not None,
         )
