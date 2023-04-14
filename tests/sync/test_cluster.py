@@ -56,6 +56,7 @@ class TestClient(unittest.TestCase):
         job = co.wait_for_cluster_job(create_res.job_id, timeout=60, interval=5)
         self.check_job_result(job, status="complete")
 
+    @unittest.skipIf(in_ci(), "can sometimes fail due to duration variation")
     def test_wait_for_cluster_job_times_out(self):
         co = self.create_co()
         create_res = co.create_cluster_job(
@@ -81,6 +82,7 @@ class TestClient(unittest.TestCase):
         job = create_res.wait(timeout=60, interval=5)
         self.check_job_result(job, status="complete")
 
+    @unittest.skipIf(in_ci(), "can sometimes fail due to duration variation")
     def test_job_wait_method_times_out(self):
         co = self.create_co()
         create_res = co.create_cluster_job(

@@ -4,6 +4,7 @@ import os
 import posixpath
 import time
 from collections import defaultdict
+from dataclasses import asdict
 from functools import partial
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -23,9 +24,11 @@ from cohere.responses import (
     Detokenization,
     Embeddings,
     GenerateFeedbackResponse,
+    GeneratePreferenceFeedbackResponse,
     Generations,
     LabelPrediction,
     Language,
+    PreferenceRating,
     Reranking,
     StreamingGenerations,
     SummarizeResponse,
@@ -339,6 +342,25 @@ class AsyncClient(Client):
         }
         response = await self._request(cohere.GENERATE_FEEDBACK_URL, json_body)
         return GenerateFeedbackResponse(id=response["id"])
+
+    async def generate_preference_feedback(
+        self,
+        ratings: List[PreferenceRating],
+        model=None,
+        prompt: str = None,
+        annotator_id: str = None,
+    ) -> GeneratePreferenceFeedbackResponse:
+        ratings_dicts = []
+        for rating in ratings:
+            ratings_dicts.append(asdict(rating))
+        json_body = {
+            "ratings": ratings_dicts,
+            "prompt": prompt,
+            "annotator_id": annotator_id,
+            "model": model,
+        }
+        response = await self._request(cohere.GENERATE_PREFERENCE_FEEDBACK_URL, json_body)
+        return GeneratePreferenceFeedbackResponse(id=response["id"])
 
     async def rerank(
         self,
