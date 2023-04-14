@@ -4,6 +4,7 @@ import os
 import posixpath
 import time
 from collections import defaultdict
+from dataclasses import asdict
 from functools import partial
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -351,14 +352,7 @@ class AsyncClient(Client):
     ) -> GeneratePreferenceFeedbackResponse:
         ratings_dicts = []
         for rating in ratings:
-            ratings_dict = {}
-            if rating.request_id is not None:
-                ratings_dict["request_id"] = rating.request_id
-            if rating.generation is not None:
-                ratings_dict["generation"] = rating.generation
-            if rating.rating is not None:
-                ratings_dict["rating"] = rating.rating
-            ratings_dicts.append(ratings_dict)
+            ratings_dicts.append(asdict(rating))
 
         json_body = {
             "ratings": ratings_dicts,

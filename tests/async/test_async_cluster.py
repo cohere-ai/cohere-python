@@ -61,7 +61,6 @@ async def test_async_wait_for_cluster_job_succeeds(async_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-@pytest.mark.skipif(IN_CI, reason="can timeout during high load")
 async def test_async_wait_for_cluster_job_times_out(async_client: AsyncClient):
     create_res = await async_client.create_cluster_job(
         INPUT_FILE,

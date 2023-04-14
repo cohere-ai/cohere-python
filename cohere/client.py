@@ -2,6 +2,7 @@ import json as jsonlib
 import os
 from concurrent import futures
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import asdict
 from functools import partial
 from typing import Any, Dict, List, Optional, Union
 
@@ -523,23 +524,16 @@ class Client:
             >>> if user_accepted_idx: // prompt user for which generation they prefer
             >>>    ratings = []
             >>>    if user_accepted_idx == 0:
-            >>>        ratings.append(PreferenceRating(generation=0, rating=1))
-            >>>        ratings.append(PreferenceRating(generation=1, rating=0))
+            >>>        ratings.append(PreferenceRating(request_id=0, rating=1))
+            >>>        ratings.append(PreferenceRating(request_id=1, rating=0))
             >>>    else:
-            >>>        ratings.append(PreferenceRating(generation=0, rating=0))
-            >>>        ratings.append(PreferenceRating(generation=1, rating=1))
+            >>>        ratings.append(PreferenceRating(request_id=0, rating=0))
+            >>>        ratings.append(PreferenceRating(request_id=1, rating=1))
             >>>    co.generate_preference_feedback(ratings=ratings)
         """
         ratings_dicts = []
         for rating in ratings:
-            ratings_dict = {}
-            if rating.request_id is not None:
-                ratings_dict["request_id"] = rating.request_id
-            if rating.generation is not None:
-                ratings_dict["generation"] = rating.generation
-            if rating.rating is not None:
-                ratings_dict["rating"] = rating.rating
-            ratings_dicts.append(ratings_dict)
+            ratings_dicts.append(asdict(rating))
 
         json_body = {
             "ratings": ratings_dicts,
