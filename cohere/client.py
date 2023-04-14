@@ -2,6 +2,7 @@ import json as jsonlib
 import os
 from concurrent import futures
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import asdict
 from functools import partial
 from typing import Any, Dict, List, Optional, Union
 
@@ -27,7 +28,11 @@ from cohere.responses.classify import LabelPrediction
 from cohere.responses.cluster import ClusterJobResult, CreateClusterJobResponse
 from cohere.responses.detectlang import DetectLanguageResponse, Language
 from cohere.responses.embeddings import Embeddings
-from cohere.responses.feedback import GenerateFeedbackResponse
+from cohere.responses.feedback import (
+    GenerateFeedbackResponse,
+    GeneratePreferenceFeedbackResponse,
+    PreferenceRating,
+)
 from cohere.responses.rerank import Reranking
 from cohere.responses.summarize import SummarizeResponse
 from cohere.utils import is_api_key_valid, wait_for_job
@@ -496,6 +501,47 @@ class Client:
             "model": model,
         }
         response = self._request(cohere.GENERATE_FEEDBACK_URL, json_body)
+        return GenerateFeedbackResponse(id=response["id"])
+
+    def generate_preference_feedback(
+        self,
+        ratings: List[PreferenceRating],
+        model=None,
+        prompt: str = None,
+        annotator_id: str = None,
+    ) -> GeneratePreferenceFeedbackResponse:
+        """Give preference feedback on a response from the Cohere Generate API to improve the model.
+
+        Args:
+            ratings (List[PreferenceRating]): A list of PreferenceRating objects.
+            model (str): (Optional) ID of the model.
+            prompt (str): (Optional) The prompt used to generate the response.
+            annotator_id (str): (Optional) The ID of the annotator.
+
+        Examples:
+            A user accepts a model's suggestion in an assisted writing setting, and prefers it to a second suggestion:
+            >>> generations = co.generate(f"Write me a polite email responding to the one below: {email}. Response:", num_generations=2)
+            >>> if user_accepted_idx: // prompt user for which generation they prefer
+            >>>    ratings = []
+            >>>    if user_accepted_idx == 0:
+            >>>        ratings.append(PreferenceRating(request_id=0, rating=1))
+            >>>        ratings.append(PreferenceRating(request_id=1, rating=0))
+            >>>    else:
+            >>>        ratings.append(PreferenceRating(request_id=0, rating=0))
+            >>>        ratings.append(PreferenceRating(request_id=1, rating=1))
+            >>>    co.generate_preference_feedback(ratings=ratings)
+        """
+        ratings_dicts = []
+        for rating in ratings:
+            ratings_dicts.append(asdict(rating))
+
+        json_body = {
+            "ratings": ratings_dicts,
+            "prompt": prompt,
+            "annotator_id": annotator_id,
+            "model": model,
+        }
+        response = self._request(cohere.GENERATE_PREFERENCE_FEEDBACK_URL, json_body)
         return GenerateFeedbackResponse(id=response["id"])
 
     def rerank(
