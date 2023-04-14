@@ -353,7 +353,6 @@ class AsyncClient(Client):
         ratings_dicts = []
         for rating in ratings:
             ratings_dicts.append(asdict(rating))
-
         json_body = {
             "ratings": ratings_dicts,
             "prompt": prompt,

@@ -7,7 +7,6 @@ GeneratePreferenceFeedbackResponse = NamedTuple("GeneratePreferenceFeedbackRespo
 
 @dataclass
 class PreferenceRating:
-    def __init__(self, request_id: str, rating: float, generation: str):
-        self.request_id = request_id
-        self.rating = rating
-        self.generation = generation
+    request_id: str
+    rating: float
+    generation: str
