@@ -237,12 +237,10 @@ class Client:
             )
         if persona_name is not None:
             logger.warning(
-                "The 'persona_name' parameter is deprecated and will be removed in a future version of this function.",
-            )
+                "The 'persona_name' parameter is deprecated and will be removed in a future version of this function.",)
         if user_name is not None:
             logger.warning(
-                "The 'user_name' parameter is deprecated and will be removed in a future version of this function.",
-            )
+                "The 'user_name' parameter is deprecated and will be removed in a future version of this function.",)
 
         json_body = {
             "query": query,
@@ -271,12 +269,10 @@ class Client:
         for entry in chatlog_override:
             if not isinstance(entry, dict):
                 raise CohereError(
-                    message="chatlog_override must be a list of dicts, but it contains a non-dict element"
-                )
+                    message="chatlog_override must be a list of dicts, but it contains a non-dict element")
             if len(entry) != 1:
                 raise CohereError(
-                    message="chatlog_override must be a list of dicts, each mapping the agent to the message."
-                )
+                    message="chatlog_override must be a list of dicts, each mapping the agent to the message.")
 
     def embed(self, texts: List[str], model: Optional[str] = None, truncate: Optional[str] = None) -> Embeddings:
         """Returns an Embeddings object for the provided texts. Visit https://cohere.ai/embed to learn about embeddings.
@@ -290,14 +286,12 @@ class Client:
         json_bodys = []
 
         for i in range(0, len(texts), self.batch_size):
-            texts_batch = texts[i : i + self.batch_size]
-            json_bodys.append(
-                {
-                    "model": model,
-                    "texts": texts_batch,
-                    "truncate": truncate,
-                }
-            )
+            texts_batch = texts[i:i + self.batch_size]
+            json_bodys.append({
+                "model": model,
+                "texts": texts_batch,
+                "truncate": truncate,
+            })
 
         meta = None
         for result in self._executor.map(lambda json_body: self._request(cohere.EMBED_URL, json=json_body), json_bodys):
@@ -342,8 +336,7 @@ class Client:
             for label, prediction in res["labels"].items():
                 labelObj[label] = LabelPrediction(prediction["confidence"])
             classifications.append(
-                Classification(res["input"], res["prediction"], res["confidence"], labelObj, id=res["id"])
-            )
+                Classification(res["input"], res["prediction"], res["confidence"], labelObj, id=res["id"]))
 
         return Classifications(classifications, response.get("meta"))
 
@@ -504,7 +497,7 @@ class Client:
 
     def generate_preference_feedback(
         self,
-        ratings: List[PreferenceRating] = [],
+        ratings: List[PreferenceRating],
         model=None,
         prompt: str = None,
         annotator_id: str = None,
@@ -573,8 +566,7 @@ class Client:
                 parsed_docs.append(doc)
             else:
                 raise CohereError(
-                    message='invalid format for documents, must be a list of strings or dicts with a "text" key'
-                )
+                    message='invalid format for documents, must be a list of strings or dicts with a "text" key')
 
         json_body = {
             "query": query,
@@ -630,9 +622,12 @@ class Client:
                 return session.request(method, url, headers=headers, json=json, **self.request_dict, stream=True)
 
             try:
-                response = session.request(
-                    method, url, headers=headers, json=json, timeout=self.timeout, **self.request_dict
-                )
+                response = session.request(method,
+                                           url,
+                                           headers=headers,
+                                           json=json,
+                                           timeout=self.timeout,
+                                           **self.request_dict)
             except requests.exceptions.ConnectionError as e:
                 raise CohereConnectionError(str(e)) from e
             except requests.exceptions.RequestException as e:
