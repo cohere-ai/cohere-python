@@ -389,12 +389,12 @@ class AsyncClient(Client):
 
         Args:
             embeddings_url (str): File with embeddings to cluster.
-            min_cluster_size (Optional[int], optional): Minimum number of elements in a cluster. Defaults to None.
-            n_neighbors (Optional[int], optional): Number of neighbors in dimensionality reduction with UMAP. Lower
-                values focus UMAP on local structure of the data while higher values will focus UMAP on global
-                structure of the data. Defaults to None.
+            min_cluster_size (Optional[int], optional): Minimum number of elements in a cluster. Defaults to 10.
+            n_neighbors (Optional[int], optional): Number of nearest neighbors used by UMAP to establish the 
+            local structure of the data. Defaults to 15. For more information, please refer to 
+            https://umap-learn.readthedocs.io/en/latest/parameters.html#n-neighbors
             is_deterministic (Optional[bool], optional): Determines whether the output of the cluster job is
-            deterministic. Defaults to None.
+            deterministic. Defaults to True.
         Returns:
             CreateClusterJobResponse: Created clustering job handler
         """
