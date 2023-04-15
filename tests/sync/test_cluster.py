@@ -17,8 +17,8 @@ class TestClient(unittest.TestCase):
         co = self.create_co()
         create_res = co.create_cluster_job(
             VALID_INPUT_FILE,
-            min_cluster_size=3,
-            n_neighbors=5,
+            min_cluster_size=10,
+            n_neighbors=15,
             is_deterministic=True,
         )
         job = co.get_cluster_job(create_res.job_id)
@@ -50,8 +50,8 @@ class TestClient(unittest.TestCase):
         co = self.create_co()
         create_res = co.create_cluster_job(
             VALID_INPUT_FILE,
-            min_cluster_size=3,
-            n_neighbors=5,
+            min_cluster_size=10,
+            n_neighbors=15,
             is_deterministic=True,
         )
 
@@ -62,8 +62,8 @@ class TestClient(unittest.TestCase):
         co = self.create_co()
         create_res = co.create_cluster_job(
             VALID_INPUT_FILE,
-            min_cluster_size=3,
-            n_neighbors=5,
+            min_cluster_size=10,
+            n_neighbors=15,
             is_deterministic=True,
         )
 
@@ -77,8 +77,8 @@ class TestClient(unittest.TestCase):
         co = self.create_co()
         create_res = co.create_cluster_job(
             VALID_INPUT_FILE,
-            min_cluster_size=3,
-            n_neighbors=5,
+            min_cluster_size=10,
+            n_neighbors=15,
             is_deterministic=True,
         )
 
@@ -89,8 +89,8 @@ class TestClient(unittest.TestCase):
         co = self.create_co()
         create_res = co.create_cluster_job(
             VALID_INPUT_FILE,
-            min_cluster_size=3,
-            n_neighbors=5,
+            min_cluster_size=10,
+            n_neighbors=15,
             is_deterministic=True,
         )
 
@@ -104,8 +104,8 @@ class TestClient(unittest.TestCase):
         co = self.create_co()
         create_res = co.create_cluster_job(
             BAD_INPUT_FILE,
-            min_cluster_size=3,
-            n_neighbors=5,
+            min_cluster_size=10,
+            n_neighbors=15,
             is_deterministic=True,
         )
 
