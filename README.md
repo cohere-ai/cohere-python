@@ -103,4 +103,11 @@ You can run tests locally using:
 python -m pytest
 ```
 
-
+You can configure a different base url with:
+```bash
+CO_API_URL="https://localhost:8050" python3 foo.py
+```
+or
+```python
+cohere.COHERE_API_URL = "https://localhost:8050" # Place before client initilization
+```
