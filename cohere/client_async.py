@@ -366,7 +366,7 @@ class AsyncClient(Client):
         self,
         query: str,
         documents: Union[List[str], List[Dict[str, Any]]],
-        model: str = None,
+        model: str,
         top_n: Optional[int] = None,
         max_chunks_per_doc: Optional[int] = None,
     ) -> Reranking:
@@ -375,7 +375,7 @@ class AsyncClient(Client):
         Args:
             query (str): The search query
             documents (list[str], list[dict]): The documents to rerank
-            model (str): (Optional) The model to use for re-ranking
+            model (str): The model to use for re-ranking
             top_n (int): (optional) The number of results to return, defaults to returning all results
             max_chunks_per_doc (int): (optional) The maximum number of chunks derived from a document
         """
