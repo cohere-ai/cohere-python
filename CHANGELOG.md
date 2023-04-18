@@ -1,10 +1,15 @@
 # Changelog
 
+## 4.1.6
+
+- [#205](https://github.com/cohere-ai/cohere-python/pull/205)
+    - Add param max_chunks_per_doc to rerank
+    - Enforce model param for rerank
+
 ## 4.1.5
 
 - [#208](https://github.com/cohere-ai/cohere-python/pull/208)
   - Fix a missing import for CohereConnectionError
-
 
 ## 4.1.4
 
