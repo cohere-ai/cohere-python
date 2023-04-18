@@ -617,24 +617,17 @@ class AIOHTTPBackend:
         self._requester = None
 
     def build_aio_requester(self) -> Callable:  # returns a function for retryable requests
-        def f(e=None):
-            print(e)
-            return 3
-
         @backoff.on_exception(
-            backoff.runtime,
+            backoff.expo,
             (aiohttp.ClientError, aiohttp.ClientResponseError),
             max_tries=self.max_retries + 1,
             max_time=self.timeout,
-            value=f,  # 1 3 9 27 81 - last one long enough to get past rate limit
         )
         async def make_request_fn(session, *args, **kwargs):
             async with self._semaphore:  # this limits total concurrency by the client
                 response = await session.request(*args, **kwargs)
             if response.status in cohere.RETRY_STATUS_CODES:  # likely temporary, raise to retry
-                self.logger.info(
-                    f"Received status {response.status}, retrying after {self.SLEEP_AFTER_FAILURE[response.status]}s plus backoff..."
-                )
+                self.logger.info(f"Received status {response.status}, retrying...")
                 await asyncio.sleep(self.SLEEP_AFTER_FAILURE[response.status])
                 response.raise_for_status()
 

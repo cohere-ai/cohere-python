@@ -1,8 +1,14 @@
 # Changelog
 
+## 4.1.5
+
+- [#208](https://github.com/cohere-ai/cohere-python/pull/208)
+  - Fix a missing import for CohereConnectionError
+
+
 ## 4.1.4
 
-- [#204](https://github.com/cohere-ai/cohere-python/pull/187)
+- [#204](https://github.com/cohere-ai/cohere-python/pull/204)
   - Add `generate_preference_feedback` for submitting preference-style feedback
 
 ## 4.1.3
