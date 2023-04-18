@@ -873,7 +873,7 @@ class FinetuneClient:
         Args:
             name (str): name of your finetune, has to be unique across your organization
             finetune_type (GENERATIVE, CONTRASTIVE, CLASSIFICATION): type of finetune
-            dataset (Dataset): A dataset for your training. Consists of a train and optional eval file.
+            dataset (InMemoryDataset, CsvDataset, JsonlDataset, TextDataset): A dataset for your training. Consists of a train and optional eval file.
         Returns:
             str: the id of the finetune that was created
 
@@ -912,7 +912,6 @@ class FinetuneClient:
                 dataset.get_eval_file_contents(), name, dataset.eval_file_name(), finetune_type
             )
             json["settings"]["evalFiles"].append({"path": remote_path, **dataset.file_config()})
-
 
         response = self._client._request(f"{cohere.BLOBHEART_URL}/CreateFinetune", method="POST", json=json)
         return response["finetune"]["id"]

@@ -75,7 +75,19 @@ class LocalFileDataset(Dataset):
 
 
 class CsvDataset(LocalFileDataset):
+    """
+    A dataset consisting of local csv files. Each row should contain two items.
+    E.g.: for prompt completion:
+    this is the prompt,and this the completion
+    another prompt, another completion
+    """
+
     def __init__(self, train_file: str, delimiter: str, eval_file: Optional[Path] = None):
+        """
+        Args:
+            train_file (str): local path to csv with training data
+            eval_file: (str, optional): local path to a csv with eval data
+        """
         super().__init__(train_file, eval_file)
         self._delimiter = delimiter
 
@@ -86,11 +98,21 @@ class CsvDataset(LocalFileDataset):
 
 
 class JsonlDataset(LocalFileDataset):
+    """
+    A dataset consisting of local jsonl files.
+    Examples:
+        prompt completion: {"prompt": "this is the prompt", "completion": "this is the completion"}
+    """
+
     def file_config(self) -> FileConfig:
         return _empty_file_config.copy()
 
 
 class TextDataset(LocalFileDataset):
+    """
+    A dataset consisting of local text files. Can be used for generative finetunes.
+    """
+
     def __init__(self, train_file: str, separator: Optional[str], eval_file: Optional[Path] = None):
         super().__init__(train_file, eval_file)
         self._separator = separator
@@ -103,6 +125,14 @@ class TextDataset(LocalFileDataset):
 
 
 class InMemoryDataset(Dataset):
+    """
+    A dataset existing in memory. You may pass a generator to avoid loading your whole dataset into memory at once.
+
+    Examples:
+        >>> InMemoryDataset([("this is a prompt", "this is a completion")])
+        >>> InMemoryDataset([("example1", "label1"), ("example2", "label1"), ("example3", "label2")])
+    """
+
     def __init__(self, training_data: Iterable[tuple[str, str]], eval_data: Optional[Iterable[tuple[str, str]]] = None):
         self._training_data = training_data
         self._eval_data = eval_data
