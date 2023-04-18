@@ -11,7 +11,7 @@ from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
 import cohere
-from cohere.error import CohereAPIError, CohereError
+from cohere.error import CohereAPIError, CohereConnectionError, CohereError
 from cohere.logging import logger
 from cohere.responses import (
     Classification,
@@ -548,16 +548,18 @@ class Client:
         self,
         query: str,
         documents: Union[List[str], List[Dict[str, Any]]],
-        model: str = None,
+        model: str,
         top_n: Optional[int] = None,
+        max_chunks_per_doc: Optional[int] = None,
     ) -> Reranking:
         """Returns an ordered list of documents ordered by their relevance to the provided query
 
         Args:
             query (str): The search query
             documents (list[str], list[dict]): The documents to rerank
-            model (str): (Optional) The model to use for re-ranking
+            model (str): The model to use for re-ranking
             top_n (int): (optional) The number of results to return, defaults to returning all results
+            max_chunks_per_doc (int): (optional) The maximum number of chunks derived from a document
         """
         parsed_docs = []
         for doc in documents:
@@ -576,6 +578,7 @@ class Client:
             "model": model,
             "top_n": top_n,
             "return_documents": False,
+            "max_chunks_per_doc": max_chunks_per_doc,
         }
 
         reranking = Reranking(self._request(cohere.RERANK_URL, json=json_body))
