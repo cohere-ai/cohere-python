@@ -22,3 +22,6 @@ DETOKENIZE_URL = "detokenize"
 
 CLUSTER_JOBS_URL = "cluster-jobs"
 BULK_EMBED_JOBS_URL = "embed-jobs"
+
+
+BLOBHEART_URL = "rpc/BlobheartAPI"

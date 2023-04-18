@@ -2,8 +2,9 @@ import json as jsonlib
 import os
 from concurrent import futures
 from concurrent.futures import ThreadPoolExecutor
+from datetime import timezone, datetime
 from functools import partial
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Literal, Iterable, TypedDict
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -11,6 +12,7 @@ from urllib3 import Retry
 
 import cohere
 from cohere.error import CohereAPIError, CohereError
+from cohere.finetune_dataset import Dataset
 from cohere.logging import logger
 from cohere.responses import (
     Classification,
@@ -28,6 +30,7 @@ from cohere.responses.cluster import ClusterJobResult, CreateClusterJobResponse
 from cohere.responses.detectlang import DetectLanguageResponse, Language
 from cohere.responses.embeddings import Embeddings
 from cohere.responses.feedback import GenerateFeedbackResponse
+from cohere.responses.finetune import Finetune, FINETUNE_STATUS, FINETUNE_BASE_TYPE
 from cohere.responses.rerank import Reranking
 from cohere.responses.summarize import SummarizeResponse
 from cohere.utils import is_api_key_valid, wait_for_job
@@ -66,6 +69,7 @@ class Client:
         self.max_retries = max_retries
         self.timeout = timeout
         self.api_version = f"v{cohere.API_VERSION}"
+        self.finetune = FinetuneClient(self)
         if client_name:
             self.request_source += ":" + client_name
 
@@ -562,7 +566,7 @@ class Client:
             "Request-Source": self.request_source,
         }
 
-        url = f"{self.api_url}/{self.api_version}/{endpoint}"
+        url = f"{self.api_url}/{endpoint}"
         with requests.Session() as session:
             retries = Retry(
                 total=self.max_retries,
@@ -796,3 +800,134 @@ class Client:
             timeout=timeout,
             interval=interval,
         )
+
+
+class FinetuneClient:
+    def __init__(self, client: Client):
+        self._client = client
+
+    def get(self, finetune_id: str) -> Finetune:
+        """Get a finetune by id.
+
+        Args:
+            finetune_id (str): finetune id
+        Returns:
+            Finetune: the finetune
+        """
+        json = {"finetuneID": finetune_id}
+        response = self._client._request(f"{cohere.BLOBHEART_URL}/GetFinetune", method="POST", json=json)
+        return Finetune.from_dict(response["finetune"])
+
+    def get_by_name(self, name: str) -> Finetune:
+        """Get a finetune by name.
+
+        Args:
+            name (str): finetune name
+        Returns:
+            Finetune: the finetune
+        """
+        json = {"name": name}
+        response = self._client._request(f"{cohere.BLOBHEART_URL}/GetFinetuneByName", method="POST", json=json)
+        return Finetune.from_dict(response["finetune"])
+
+    def list(
+        self,
+        statuses: Optional[List[FINETUNE_STATUS]] = None,
+        before: Optional[datetime] = None,
+        after: Optional[datetime] = None,
+        limit: int = 50,
+        order_by: Optional[Literal["asc", "desc"]] = None,
+    ) -> List[Finetune]:
+        """List finetunes of your organization.
+
+        Args:
+            statuses (FINETUNE_STATUS, optional): search for fintunes which are in one of these states
+            before (datetime, optional): search for finetunes that were created before this timestamp
+            after (datetime, optional): search for finetunes that were created after this timestamp
+            limit (int, optional): maximum number of results
+            order_by (Literal["asc", "desc"], optional): sort finetunes by created at, either asc or desc
+        Returns:
+            List[Finetune]: a list of finetunes.
+        """
+        if before:
+            before = before.replace(tzinfo=before.tzinfo or timezone.utc)
+        if after:
+            after = after.replace(tzinfo=after.tzinfo or timezone.utc)
+
+        json = {
+            "query": {
+                "statuses": statuses,
+                "before": before.isoformat(timespec="seconds") if before else None,
+                "after": after.isoformat(timespec="seconds") if after else None,
+                "limit": limit,
+                "orderBy": order_by,
+            }
+        }
+
+        response = self._client._request(f"{cohere.BLOBHEART_URL}/ListFinetunes", method="POST", json=json)
+        return [Finetune.from_dict(r) for r in response["finetunes"]]
+
+    def create(self, name: str, finetune_type: FINETUNE_BASE_TYPE, dataset: Dataset) -> Finetune:
+        """Create a new finetune
+
+        Args:
+            name (str): name of your finetune, has to be unique across your organization
+            finetune_type (GENERATIVE, CONTRASTIVE, CLASSIFICATION): type of finetune
+            dataset (Dataset): A dataset for your training. Consists of a train and optional eval file.
+        Returns:
+            Finetune: the finetune that was created
+
+        Examples:
+            prompt completion finetune with csv file
+            >>> from cohere.finetune_dataset import CsvDataset
+            >>> co = cohere.Client("YOUR_API_KEY")
+            >>> dataset = CsvDataset(train_file="/path/to/your/file.csv", delimiter=",")
+            >>> finetune = co.finetune.create("prompt-completion-ft", dataset=dataset, finetune_type="GENERATIVE")
+
+            prompt completion finetune with in-memory dataset
+            >>> from cohere.finetune_dataset import InMemoryDataset
+            >>> co = cohere.Client("YOUR_API_KEY")
+            >>> dataset = InMemoryDataset(training_data=[
+            >>>     ("this is the prompt", "and this is the completion"),
+            >>>     ("another prompt", "and another completion")
+            >>> ])
+            >>> finetune = co.finetune.create("prompt-completion-ft", dataset=dataset, finetune_type="GENERATIVE")
+
+        """
+        json = {
+            "name": name,
+            "settings": {
+                "trainFiles": [],
+                "evalFiles": [],
+                "baseModel": "medium",
+                "finetuneType": finetune_type,
+            },
+        }
+        remote_path = self._upload_dataset(
+            dataset.get_train_file_contents(), name, dataset.train_file_name(), finetune_type
+        )
+        json["settings"]["trainFiles"].append({"path": remote_path, **dataset.file_config()})
+        if dataset.has_eval_file():
+            remote_path = self._upload_dataset(
+                dataset.get_eval_file_contents(), name, dataset.eval_file_name(), finetune_type
+            )
+            json["settings"]["evalFiles"].append({"path": remote_path, **dataset.file_config()})
+
+
+        response = self._client._request(f"{cohere.BLOBHEART_URL}/CreateFinetune", method="POST", json=json)
+        return Finetune.from_dict(response["finetune"])
+
+    def _upload_dataset(
+        self, content: Iterable[bytes], finetune_name: str, file_name: str, type: FINETUNE_BASE_TYPE
+    ) -> str:
+        gcs = self._create_signed_url(finetune_name, file_name, type)
+        response = requests.put(gcs["url"], data=content, headers={"content-type": "text/plain"})
+        if not response.status_code == 200:
+            raise Exception(f"Unable to upload dataset: {response.text}")
+        return gcs["gcspath"]
+
+    def _create_signed_url(
+        self, finetune_name: str, file_name: str, type: FINETUNE_BASE_TYPE
+    ) -> TypedDict("gcsData", {"url": str, "gcspath": str}):
+        json = {"finetuneName": finetune_name, "fileName": file_name, "finetuneType": type}
+        return self._client._request(f"{cohere.BLOBHEART_URL}/GetFinetuneUploadSignedURL", method="POST", json=json)
