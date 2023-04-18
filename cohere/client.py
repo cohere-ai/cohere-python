@@ -2,6 +2,7 @@ import json as jsonlib
 import os
 from concurrent import futures
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import asdict
 from functools import partial
 from typing import Any, Dict, List, Optional, Union
 
@@ -10,7 +11,7 @@ from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
 import cohere
-from cohere.error import CohereAPIError, CohereError
+from cohere.error import CohereAPIError, CohereConnectionError, CohereError
 from cohere.logging import logger
 from cohere.responses import (
     Classification,
@@ -27,7 +28,11 @@ from cohere.responses.classify import LabelPrediction
 from cohere.responses.cluster import ClusterJobResult, CreateClusterJobResponse
 from cohere.responses.detectlang import DetectLanguageResponse, Language
 from cohere.responses.embeddings import Embeddings
-from cohere.responses.feedback import GenerateFeedbackResponse
+from cohere.responses.feedback import (
+    GenerateFeedbackResponse,
+    GeneratePreferenceFeedbackResponse,
+    PreferenceRating,
+)
 from cohere.responses.rerank import Reranking
 from cohere.responses.summarize import SummarizeResponse
 from cohere.utils import is_api_key_valid, wait_for_job
@@ -57,7 +62,7 @@ class Client:
         timeout: int = 120,
     ) -> None:
         self.api_key = api_key or os.getenv("CO_API_KEY")
-        self.api_url = cohere.COHERE_API_URL
+        self.api_url = os.getenv("CO_API_URL", cohere.COHERE_API_URL)
         self.batch_size = cohere.COHERE_EMBED_BATCH_SIZE
         self._executor = ThreadPoolExecutor(num_workers)
         self.num_workers = num_workers
@@ -498,20 +503,63 @@ class Client:
         response = self._request(cohere.GENERATE_FEEDBACK_URL, json_body)
         return GenerateFeedbackResponse(id=response["id"])
 
+    def generate_preference_feedback(
+        self,
+        ratings: List[PreferenceRating],
+        model=None,
+        prompt: str = None,
+        annotator_id: str = None,
+    ) -> GeneratePreferenceFeedbackResponse:
+        """Give preference feedback on a response from the Cohere Generate API to improve the model.
+
+        Args:
+            ratings (List[PreferenceRating]): A list of PreferenceRating objects.
+            model (str): (Optional) ID of the model.
+            prompt (str): (Optional) The prompt used to generate the response.
+            annotator_id (str): (Optional) The ID of the annotator.
+
+        Examples:
+            A user accepts a model's suggestion in an assisted writing setting, and prefers it to a second suggestion:
+            >>> generations = co.generate(f"Write me a polite email responding to the one below: {email}. Response:", num_generations=2)
+            >>> if user_accepted_idx: // prompt user for which generation they prefer
+            >>>    ratings = []
+            >>>    if user_accepted_idx == 0:
+            >>>        ratings.append(PreferenceRating(request_id=0, rating=1))
+            >>>        ratings.append(PreferenceRating(request_id=1, rating=0))
+            >>>    else:
+            >>>        ratings.append(PreferenceRating(request_id=0, rating=0))
+            >>>        ratings.append(PreferenceRating(request_id=1, rating=1))
+            >>>    co.generate_preference_feedback(ratings=ratings)
+        """
+        ratings_dicts = []
+        for rating in ratings:
+            ratings_dicts.append(asdict(rating))
+
+        json_body = {
+            "ratings": ratings_dicts,
+            "prompt": prompt,
+            "annotator_id": annotator_id,
+            "model": model,
+        }
+        response = self._request(cohere.GENERATE_PREFERENCE_FEEDBACK_URL, json_body)
+        return GenerateFeedbackResponse(id=response["id"])
+
     def rerank(
         self,
         query: str,
         documents: Union[List[str], List[Dict[str, Any]]],
-        model: str = None,
+        model: str,
         top_n: Optional[int] = None,
+        max_chunks_per_doc: Optional[int] = None,
     ) -> Reranking:
         """Returns an ordered list of documents ordered by their relevance to the provided query
 
         Args:
             query (str): The search query
             documents (list[str], list[dict]): The documents to rerank
-            model (str): (Optional) The model to use for re-ranking
+            model (str): The model to use for re-ranking
             top_n (int): (optional) The number of results to return, defaults to returning all results
+            max_chunks_per_doc (int): (optional) The maximum number of chunks derived from a document
         """
         parsed_docs = []
         for doc in documents:
@@ -530,6 +578,7 @@ class Client:
             "model": model,
             "top_n": top_n,
             "return_documents": False,
+            "max_chunks_per_doc": max_chunks_per_doc,
         }
 
         reranking = Reranking(self._request(cohere.RERANK_URL, json=json_body))
@@ -607,10 +656,10 @@ class Client:
             embeddings_url (str): File with embeddings to cluster.
             min_cluster_size (Optional[int], optional): Minimum number of elements in a cluster. Defaults to 10.
             n_neighbors (Optional[int], optional): Number of nearest neighbors used by UMAP to establish the
-            local structure of the data. Defaults to 15. For more information, please refer to
-            https://umap-learn.readthedocs.io/en/latest/parameters.html#n-neighbors
+                local structure of the data. Defaults to 15. For more information, please refer to
+                https://umap-learn.readthedocs.io/en/latest/parameters.html#n-neighbors
             is_deterministic (Optional[bool], optional): Determines whether the output of the cluster job is
-            deterministic. Defaults to True.
+                deterministic. Defaults to True.
 
         Returns:
             CreateClusterJobResponse: Created clustering job handler
