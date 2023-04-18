@@ -867,7 +867,7 @@ class FinetuneClient:
         response = self._client._request(f"{cohere.BLOBHEART_URL}/ListFinetunes", method="POST", json=json)
         return [Finetune.from_dict(r) for r in response["finetunes"]]
 
-    def create(self, name: str, finetune_type: FINETUNE_BASE_TYPE, dataset: Dataset) -> Finetune:
+    def create(self, name: str, finetune_type: FINETUNE_BASE_TYPE, dataset: Dataset) -> str:
         """Create a new finetune
 
         Args:
@@ -875,7 +875,7 @@ class FinetuneClient:
             finetune_type (GENERATIVE, CONTRASTIVE, CLASSIFICATION): type of finetune
             dataset (Dataset): A dataset for your training. Consists of a train and optional eval file.
         Returns:
-            Finetune: the finetune that was created
+            str: the id of the finetune that was created
 
         Examples:
             prompt completion finetune with csv file
@@ -915,7 +915,7 @@ class FinetuneClient:
 
 
         response = self._client._request(f"{cohere.BLOBHEART_URL}/CreateFinetune", method="POST", json=json)
-        return Finetune.from_dict(response["finetune"])
+        return response["finetune"]["id"]
 
     def _upload_dataset(
         self, content: Iterable[bytes], finetune_name: str, file_name: str, type: FINETUNE_BASE_TYPE
