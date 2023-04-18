@@ -308,7 +308,11 @@ class Client:
 
         return Embeddings(responses, meta)
 
-    def codebook(self, model: Optional[str] = None, compression_codebook: Optional[str] = "default",) -> Codebook:
+    def codebook(
+        self,
+        model: Optional[str] = None,
+        compression_codebook: Optional[str] = "default",
+    ) -> Codebook:
         """Returns a codebook object for the provided model. Visit https://cohere.ai/embed to learn about compressed embeddings and codebooks.
 
         Args:
@@ -319,8 +323,8 @@ class Client:
             "model": model,
             "compression_codebook": compression_codebook,
         }
-        response =  self._request(cohere.CODEBOOK_URL, json=json_body)
-        return Codebook(response['codebook'], response["meta"])
+        response = self._request(cohere.CODEBOOK_URL, json=json_body)
+        return Codebook(response["codebook"], response["meta"])
 
     def classify(
         self,

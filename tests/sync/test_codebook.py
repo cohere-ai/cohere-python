@@ -23,8 +23,9 @@ class TestCodebook(unittest.TestCase):
         self.assertTrue(prediction.meta["api_version"]["version"])
 
     def test_default_model(self):
-        prediction = co.codebook(model="multilingual-22-12",)
+        prediction = co.codebook(
+            model="multilingual-22-12",
+        )
         self.assertEqual(len(prediction.codebook), 96)
         self.assertIsInstance(prediction.codebook[0], list)
         self.assertIsInstance(prediction.codebook[1], list)
-
