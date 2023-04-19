@@ -8,7 +8,7 @@
     - `persona_name`
     - `persona_prompt`
   - Add deprecation warning for Chat attribute
-    - `Use 'text' instead of 'reply'`
+    - Use `text` instead of `reply`
 
 ## 4.1.6
 
