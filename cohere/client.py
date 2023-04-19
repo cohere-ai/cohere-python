@@ -30,7 +30,8 @@ from cohere.responses.cluster import ClusterJobResult, CreateClusterJobResponse
 from cohere.responses.detectlang import DetectLanguageResponse, Language
 from cohere.responses.embeddings import Embeddings
 from cohere.responses.feedback import GenerateFeedbackResponse
-from cohere.responses.finetune import Finetune, FINETUNE_STATUS, FINETUNE_BASE_TYPE
+from cohere.responses.finetune import Finetune, FINETUNE_STATUS, _INTERNAL_FINETUNE_TYPE, FINETUNE_TYPE, \
+    FINETUNE_PRODUCT_MAPPING
 from cohere.responses.rerank import Reranking
 from cohere.responses.summarize import SummarizeResponse
 from cohere.utils import is_api_key_valid, wait_for_job
@@ -865,7 +866,7 @@ class FinetuneClient:
         response = self._client._request(f"{cohere.BLOBHEART_URL}/ListFinetunes", method="POST", json=json)
         return [Finetune.from_dict(r) for r in response["finetunes"]]
 
-    def create(self, name: str, finetune_type: FINETUNE_BASE_TYPE, dataset: Dataset) -> str:
+    def create(self, name: str, finetune_type: FINETUNE_TYPE, dataset: Dataset) -> str:
         """Create a new finetune
 
         Args:
@@ -898,7 +899,7 @@ class FinetuneClient:
                 "trainFiles": [],
                 "evalFiles": [],
                 "baseModel": "medium",
-                "finetuneType": finetune_type,
+                "finetuneType": FINETUNE_PRODUCT_MAPPING[finetune_type],
             },
         }
         remote_path = self._upload_dataset(
@@ -915,7 +916,7 @@ class FinetuneClient:
         return response["finetune"]["id"]
 
     def _upload_dataset(
-        self, content: Iterable[bytes], finetune_name: str, file_name: str, type: FINETUNE_BASE_TYPE
+        self, content: Iterable[bytes], finetune_name: str, file_name: str, type: _INTERNAL_FINETUNE_TYPE
     ) -> str:
         gcs = self._create_signed_url(finetune_name, file_name, type)
         response = requests.put(gcs["url"], data=content, headers={"content-type": "text/plain"})
@@ -924,7 +925,7 @@ class FinetuneClient:
         return gcs["gcspath"]
 
     def _create_signed_url(
-        self, finetune_name: str, file_name: str, type: FINETUNE_BASE_TYPE
+        self, finetune_name: str, file_name: str, type: _INTERNAL_FINETUNE_TYPE
     ) -> TypedDict("gcsData", {"url": str, "gcspath": str}):
         json = {"finetuneName": finetune_name, "fileName": file_name, "finetuneType": type}
         return self._client._request(f"{cohere.BLOBHEART_URL}/GetFinetuneUploadSignedURL", method="POST", json=json)
