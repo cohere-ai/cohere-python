@@ -10,9 +10,6 @@
   - Add deprecation warning for Chat attribute
     - Use `text` instead of `reply`
   - Add support for `generation_id`
-
-## 4.1.8
-
 - [#206](https://github.com/cohere-ai/cohere-python/pull/206)
     - Update cluster endpoint to use UMAP+HDBSCAN
     - Remove threshold and add n_neighbors and is_deterministic as params
