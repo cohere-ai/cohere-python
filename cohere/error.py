@@ -27,7 +27,7 @@ class CohereAPIError(CohereError):
 
     @classmethod
     def from_response(cls, response, message=None):
-        return cls(message=message or response.text, http_status=response.status, headers=response.headers)
+        return cls(message=message or response.text, http_status=response.status_code, headers=response.headers)
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(message={str(self)}, http_status={self.http_status})"

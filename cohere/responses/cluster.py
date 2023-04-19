@@ -36,7 +36,7 @@ class Cluster(CohereObject):
         )
 
 
-class ClusterJobResult(CohereObject, JobWithStatus):
+class BaseClusterJobResult(CohereObject, JobWithStatus):
     job_id: str
     status: str
     is_final_state: bool
@@ -56,6 +56,7 @@ class ClusterJobResult(CohereObject, JobWithStatus):
         error: Optional[str],
         is_final_state: bool,
         meta: Optional[Dict[str, Any]] = None,
+        wait_fn=None,
     ):
         # convert empty string to `None`
         if not output_clusters_url:
@@ -71,9 +72,10 @@ class ClusterJobResult(CohereObject, JobWithStatus):
         self.clusters = clusters
         self.meta = meta
         self.error = error
+        self._wait_fn = wait_fn
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ClusterJobResult":
+    def from_dict(cls, data: Dict[str, Any], wait_fn) -> "ClusterJobResult":
         if data.get("clusters") is None:
             clusters = None
         else:
@@ -85,7 +87,7 @@ class ClusterJobResult(CohereObject, JobWithStatus):
         if is_final_state is None:
             is_final_state = status in ["complete", "failed"]
 
-        return ClusterJobResult(
+        return cls(
             job_id=data["job_id"],
             status=status,
             is_final_state=is_final_state,
@@ -94,31 +96,20 @@ class ClusterJobResult(CohereObject, JobWithStatus):
             clusters=clusters,
             error=data.get("error"),
             meta=data.get("meta"),
+            wait_fn=wait_fn,
         )
 
     def has_terminal_status(self) -> bool:
         return self.is_final_state
 
 
-class CreateClusterJobResponse(CohereObject):
-    job_id: str
-    meta: Optional[Dict[str, Any]]
-
-    def __init__(self, job_id: str, meta: Optional[Dict[str, Any]], wait_fn):
-        self.job_id = job_id
-        self.meta = meta
-        self._wait_fn = wait_fn
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any], wait_fn) -> "CreateClusterJobResponse":
-        return cls(job_id=data["job_id"], wait_fn=wait_fn, meta=data.get("meta"))
-
+class ClusterJobResult(BaseClusterJobResult):
     def wait(
         self,
         timeout: Optional[float] = None,
         interval: float = 10,
-    ) -> ClusterJobResult:
-        """Wait for clustering job result.
+    ) -> "ClusterJobResult":
+        """Wait for cluster job completion and updates attributes once finished.
 
         Args:
             timeout (Optional[float], optional): Wait timeout in seconds, if None - there is no limit to the wait time.
@@ -127,21 +118,19 @@ class CreateClusterJobResponse(CohereObject):
 
         Raises:
             TimeoutError: wait timed out
-
-        Returns:
-            ClusterJobResult: Clustering job result.
         """
+        updated_job = self._wait_fn(job_id=self.job_id, timeout=timeout, interval=interval)
+        self._update_self(updated_job)
+        return updated_job
 
-        return self._wait_fn(job_id=self.job_id, timeout=timeout, interval=interval)
 
-
-class AsyncCreateClusterJobResponse(CreateClusterJobResponse):
+class AsyncClusterJobResult(BaseClusterJobResult):
     async def wait(
         self,
         timeout: Optional[float] = None,
         interval: float = 10,
-    ) -> ClusterJobResult:
-        """Wait for clustering job result.
+    ) -> "ClusterJobResult":
+        """Wait for cluster job completion and updates attributes once finished.
 
         Args:
             timeout (Optional[float], optional): Wait timeout in seconds, if None - there is no limit to the wait time.
@@ -150,9 +139,7 @@ class AsyncCreateClusterJobResponse(CreateClusterJobResponse):
 
         Raises:
             TimeoutError: wait timed out
-
-        Returns:
-            ClusterJobResult: Clustering job result.
         """
-
-        return await self._wait_fn(job_id=self.job_id, timeout=timeout, interval=interval)
+        updated_job = await self._wait_fn(job_id=self.job_id, timeout=timeout, interval=interval)
+        self._update_self(updated_job)
+        return updated_job
