@@ -33,11 +33,11 @@ class Dataset(ABC):
         ...
 
     @abstractmethod
-    def get_train_file_contents(self) -> Iterable[bytes]:
+    def get_train_data(self) -> Iterable[bytes]:
         ...
 
     @abstractmethod
-    def get_eval_file_contents(self) -> Iterable[bytes]:
+    def get_eval_data(self) -> Iterable[bytes]:
         ...
 
 
@@ -61,12 +61,12 @@ class LocalFileDataset(Dataset):
     def has_eval_file(self) -> str:
         return self._eval_file is not None
 
-    def get_train_file_contents(self) -> Iterable[bytes]:
+    def get_train_data(self) -> Iterable[bytes]:
         with open(self._train_file, mode="rb") as _f:
             for line in _f:
                 yield line
 
-    def get_eval_file_contents(self) -> Iterable[bytes]:
+    def get_eval_data(self) -> Iterable[bytes]:
         if not self.has_eval_file():
             raise ValueError("Dataset has no eval file")
         with open(self._eval_file, mode="rb") as _f:
@@ -149,11 +149,11 @@ class InMemoryDataset(Dataset):
     def has_eval_file(self) -> str:
         return self._eval_data is not None
 
-    def get_train_file_contents(self) -> Iterable[bytes]:
+    def get_train_data(self) -> Iterable[bytes]:
         for row in self._training_data:
             yield self._serialize_row(row)
 
-    def get_eval_file_contents(self) -> Iterable[bytes]:
+    def get_eval_data(self) -> Iterable[bytes]:
         if not self.has_eval_file():
             raise ValueError("Dataset has no eval data")
         for row in self._eval_data:

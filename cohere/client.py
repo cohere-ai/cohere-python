@@ -903,12 +903,12 @@ class FinetuneClient:
             },
         }
         remote_path = self._upload_dataset(
-            dataset.get_train_file_contents(), name, dataset.train_file_name(), finetune_type
+            dataset.get_train_data(), name, dataset.train_file_name(), finetune_type
         )
         json["settings"]["trainFiles"].append({"path": remote_path, **dataset.file_config()})
         if dataset.has_eval_file():
             remote_path = self._upload_dataset(
-                dataset.get_eval_file_contents(), name, dataset.eval_file_name(), finetune_type
+                dataset.get_eval_data(), name, dataset.eval_file_name(), finetune_type
             )
             json["settings"]["evalFiles"].append({"path": remote_path, **dataset.file_config()})
 
