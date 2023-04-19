@@ -2,7 +2,7 @@
 
 ## 4.2.0
 
-- [#]() 
+- [#212](https://github.com/cohere-ai/cohere-python/pull/212) 
   - Deprecate co.chat params
     - `session_id`
     - `persona_name`
