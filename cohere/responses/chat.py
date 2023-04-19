@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Any, Dict, Generator, List, NamedTuple, Optional
 
 import requests
@@ -10,8 +11,8 @@ class Chat(CohereObject):
     def __init__(
         self,
         response_id: str,
+        generation_id: str,
         query: str,
-        reply: str,
         text: str,
         conversation_id: str,
         meta: Optional[Dict[str, Any]] = None,
@@ -22,8 +23,8 @@ class Chat(CohereObject):
     ) -> None:
         super().__init__(**kwargs)
         self.response_id = response_id
+        self.generation_id = generation_id
         self.query = query
-        self.reply = reply
         self.text = text
         self.conversation_id = conversation_id
         self.prompt = prompt  # optional
@@ -36,9 +37,9 @@ class Chat(CohereObject):
         return cls(
             id=response["response_id"],
             response_id=response["response_id"],
+            generation_id=response["generation_id"],
             query=query,
             conversation_id=response["conversation_id"],
-            reply=response["text"],
             text=response["text"],
             prompt=response.get("prompt"),  # optional
             chatlog=response.get("chatlog"),  # optional
@@ -53,6 +54,13 @@ class Chat(CohereObject):
             return_chatlog=self.chatlog is not None,
             return_prompt=self.prompt is not None,
         )
+
+    @property
+    def reply(self) -> str:
+        logging.warning(
+            "The 'reply' attribute is deprecated and will be removed in a future version of this function. Use 'text' instead.",
+        )
+        return self.text
 
 
 class AsyncChat(Chat):

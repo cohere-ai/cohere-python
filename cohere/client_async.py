@@ -186,10 +186,6 @@ class AsyncClient(Client):
         if chatlog_override is not None:
             self._validate_chatlog_override(chatlog_override)
 
-        logger.warning(
-            "The 'reply' attribute is deprecated and will be removed in a future version of this function. Use 'text' instead.",
-        )
-
         json_body = {
             "query": query,
             "conversation_id": conversation_id,
