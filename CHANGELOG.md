@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.2.0
+
+- [#]() 
+  - Deprecate co.chat params
+    - `session_id`
+    - `persona_name`
+    - `persona_prompt`
+  - Add deprecation warning for Chat attribute
+    - `Use 'text' instead of 'reply'`
+
 ## 4.1.6
 
 - [#205](https://github.com/cohere-ai/cohere-python/pull/205)
