@@ -9,6 +9,7 @@
     - `persona_prompt`
   - Add deprecation warning for Chat attribute
     - Use `text` instead of `reply`
+  - Add support for `generation_id`
 
 ## 4.1.6
 
