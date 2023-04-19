@@ -835,7 +835,6 @@ class FinetuneClient:
         statuses: Optional[List[FINETUNE_STATUS]] = None,
         before: Optional[datetime] = None,
         after: Optional[datetime] = None,
-        limit: int = 50,
         order_by: Optional[Literal["asc", "desc"]] = None,
     ) -> List[Finetune]:
         """List finetunes of your organization.
@@ -859,7 +858,6 @@ class FinetuneClient:
                 "statuses": statuses,
                 "before": before.isoformat(timespec="seconds") if before else None,
                 "after": after.isoformat(timespec="seconds") if after else None,
-                "limit": limit,
                 "orderBy": order_by,
             }
         }
