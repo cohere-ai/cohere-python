@@ -12,6 +12,7 @@ class Chat(CohereObject):
         response_id: str,
         query: str,
         reply: str,
+        text: str,
         conversation_id: str,
         meta: Optional[Dict[str, Any]] = None,
         prompt: Optional[str] = None,
@@ -23,6 +24,7 @@ class Chat(CohereObject):
         self.response_id = response_id
         self.query = query
         self.reply = reply
+        self.text = text
         self.conversation_id = conversation_id
         self.prompt = prompt  # optional
         self.chatlog = chatlog  # optional
@@ -36,7 +38,8 @@ class Chat(CohereObject):
             response_id=response["response_id"],
             query=query,
             conversation_id=response["conversation_id"],
-            reply=response["reply"],
+            reply=response["text"],
+            text=response["text"],
             prompt=response.get("prompt"),  # optional
             chatlog=response.get("chatlog"),  # optional
             client=client,
