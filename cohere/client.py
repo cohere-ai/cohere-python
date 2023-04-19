@@ -622,7 +622,6 @@ class Client:
     def create_cluster_job(
         self,
         embeddings_url: str,
-        threshold: Optional[float] = None,
         min_cluster_size: Optional[int] = None,
         n_neighbors: Optional[int] = None,
         is_deterministic: Optional[bool] = None,
@@ -631,8 +630,6 @@ class Client:
 
         Args:
             embeddings_url (str): File with embeddings to cluster.
-            threshold (Optional[float], optional): Similarity threshold above which two texts are deemed to belong in
-                the same cluster. Defaults to 0.75.
             min_cluster_size (Optional[int], optional): Minimum number of elements in a cluster. Defaults to 10.
             n_neighbors (Optional[int], optional): Number of nearest neighbors used by UMAP to establish the
                 local structure of the data. Defaults to 15. For more information, please refer to
@@ -646,7 +643,6 @@ class Client:
 
         json_body = {
             "embeddings_url": embeddings_url,
-            "threshold": threshold,
             "min_cluster_size": min_cluster_size,
             "n_neighbors": n_neighbors,
             "is_deterministic": is_deterministic,

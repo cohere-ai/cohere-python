@@ -17,8 +17,9 @@ IN_CI = os.getenv("CI", "").lower() in ["true", "1"]
 async def test_async_create_cluster_job(async_client: AsyncClient):
     create_res = await async_client.create_cluster_job(
         INPUT_FILE,
-        min_cluster_size=3,
-        threshold=0.5,
+        min_cluster_size=10,
+        n_neighbors=15,
+        is_deterministic=True,
     )
     job = await async_client.get_cluster_job(create_res.job_id)
     start = time.time()
@@ -52,8 +53,9 @@ async def test_async_list_cluster_jobs(async_client: AsyncClient):
 async def test_async_wait_for_cluster_job_succeeds(async_client: AsyncClient):
     create_res = await async_client.create_cluster_job(
         INPUT_FILE,
-        min_cluster_size=3,
-        threshold=0.5,
+        min_cluster_size=10,
+        n_neighbors=15,
+        is_deterministic=True,
     )
 
     job = await async_client.wait_for_cluster_job(create_res.job_id, timeout=60, interval=5)
@@ -64,8 +66,9 @@ async def test_async_wait_for_cluster_job_succeeds(async_client: AsyncClient):
 async def test_async_wait_for_cluster_job_times_out(async_client: AsyncClient):
     create_res = await async_client.create_cluster_job(
         INPUT_FILE,
-        min_cluster_size=3,
-        threshold=0.5,
+        min_cluster_size=10,
+        n_neighbors=15,
+        is_deterministic=True,
     )
 
     with pytest.raises(TimeoutError):
@@ -77,8 +80,9 @@ async def test_async_wait_for_cluster_job_times_out(async_client: AsyncClient):
 async def test_async_job_wait_method_succeeds(async_client: AsyncClient):
     create_res = await async_client.create_cluster_job(
         INPUT_FILE,
-        min_cluster_size=3,
-        threshold=0.5,
+        min_cluster_size=10,
+        n_neighbors=15,
+        is_deterministic=True,
     )
 
     job = await create_res.wait(timeout=60, interval=5)
@@ -90,8 +94,9 @@ async def test_async_job_wait_method_succeeds(async_client: AsyncClient):
 async def test_async_job_wait_method_times_out(async_client: AsyncClient):
     create_res = await async_client.create_cluster_job(
         INPUT_FILE,
-        min_cluster_size=3,
-        threshold=0.5,
+        min_cluster_size=10,
+        n_neighbors=15,
+        is_deterministic=True,
     )
 
     with pytest.raises(TimeoutError):
