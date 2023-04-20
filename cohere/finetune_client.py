@@ -1,4 +1,5 @@
 import json as jsonlib
+import os
 from datetime import timezone, datetime
 from typing import Any, List, Optional, Literal, Iterable, TypedDict
 
@@ -18,10 +19,10 @@ from cohere.responses.response import check_response
 
 
 class FinetuneClient:
-    def __init__(self, api_url: str, api_key: str, request_source: str):
-        self._api_url = api_url
-        self._api_key = api_key
-        self._request_source = request_source
+    def __init__(self, api_key: Optional[str] = None):
+        self.api_key = api_key or os.getenv("CO_API_KEY")
+        self.api_url = cohere.COHERE_API_URL
+        self._request_source = "python-sdk"
 
     def get(self, finetune_id: str) -> Finetune:
         """Get a finetune by id.
