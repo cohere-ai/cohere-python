@@ -2,6 +2,7 @@ import pytest
 
 from cohere.responses import Codebook
 
+
 @pytest.mark.asyncio
 async def test_async_multiple_codebook(async_client):
     compression_codebooks = {
@@ -24,6 +25,7 @@ async def test_async_multiple_codebook(async_client):
         assert codebook.meta
         assert codebook.meta["api_version"]["version"]
         assert codebook.meta["api_version"]
+
 
 @pytest.mark.asyncio
 async def test_async_codebook_default(async_client):
