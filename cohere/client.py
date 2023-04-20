@@ -30,8 +30,13 @@ from cohere.responses.cluster import ClusterJobResult, CreateClusterJobResponse
 from cohere.responses.detectlang import DetectLanguageResponse, Language
 from cohere.responses.embeddings import Embeddings
 from cohere.responses.feedback import GenerateFeedbackResponse
-from cohere.responses.finetune import Finetune, FINETUNE_STATUS, _INTERNAL_FINETUNE_TYPE, FINETUNE_TYPE, \
-    FINETUNE_PRODUCT_MAPPING
+from cohere.responses.finetune import (
+    Finetune,
+    FINETUNE_STATUS,
+    _INTERNAL_FINETUNE_TYPE,
+    FINETUNE_TYPE,
+    FINETUNE_PRODUCT_MAPPING,
+)
 from cohere.responses.rerank import Reranking
 from cohere.responses.summarize import SummarizeResponse
 from cohere.utils import is_api_key_valid, wait_for_job
@@ -542,8 +547,6 @@ class Client:
             rank.document = parsed_docs[rank.index]
         return reranking
 
-
-
     def _request(self, endpoint, json=None, method="POST", stream=False) -> Any:
         headers = {
             "Authorization": "BEARER {}".format(self.api_key),
@@ -920,18 +923,18 @@ class FinetuneClient:
         if not headers:
             headers = {}
 
-        headers.update({
-            "Authorization": "BEARER {}".format(self._api_key),
-            "Content-Type": "application/json",
-            "Request-Source": self._request_source,
-        })
+        headers.update(
+            {
+                "Authorization": "BEARER {}".format(self._api_key),
+                "Content-Type": "application/json",
+                "Request-Source": self._request_source,
+            }
+        )
 
         url = f"{self._api_url}/{endpoint}"
 
         try:
-            response = requests.request(
-                method, url, headers=headers, json=json
-            )
+            response = requests.request(method, url, headers=headers, json=json)
         except requests.exceptions.ConnectionError as e:
             raise CohereConnectionError(str(e)) from e
         except requests.exceptions.RequestException as e:
