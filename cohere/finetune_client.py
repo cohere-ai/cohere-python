@@ -1,19 +1,19 @@
 import json as jsonlib
 import os
-from datetime import timezone, datetime
-from typing import Any, List, Optional, Literal, Iterable, TypedDict
+from datetime import datetime, timezone
+from typing import Any, Iterable, List, Literal, Optional, TypedDict
 
 import requests
 
 import cohere
-from cohere.error import CohereAPIError, CohereError, CohereConnectionError
+from cohere.error import CohereAPIError, CohereConnectionError, CohereError
 from cohere.finetune_dataset import Dataset
 from cohere.responses.finetune import (
-    Finetune,
-    FINETUNE_STATUS,
-    INTERNAL_FINETUNE_TYPE,
-    FINETUNE_TYPE,
     FINETUNE_PRODUCT_MAPPING,
+    FINETUNE_STATUS,
+    FINETUNE_TYPE,
+    INTERNAL_FINETUNE_TYPE,
+    Finetune,
 )
 from cohere.responses.response import check_response
 

@@ -1,7 +1,7 @@
 from cohere.client import Client
-from cohere.finetune_client import FinetuneClient
 from cohere.client_async import AsyncClient
 from cohere.error import CohereAPIError, CohereConnectionError, CohereError
+from cohere.finetune_client import FinetuneClient
 
 COHERE_API_URL = "https://api.cohere.ai"
 RETRY_STATUS_CODES = [429, 500, 502, 503, 504]
