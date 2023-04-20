@@ -34,6 +34,7 @@ from cohere.responses import (
 from cohere.responses.bulk_embed import AsyncCreateBulkEmbedJobResponse, BulkEmbedJob
 from cohere.responses.chat import AsyncChat, StreamingChat
 from cohere.responses.classify import Example as ClassifyExample
+from cohere.responses.response import check_response
 from cohere.utils import async_wait_for_job, is_api_key_valid, np_json_dumps
 
 JSON = Union[Dict, List]
@@ -92,7 +93,7 @@ class AsyncClient(Client):
             raise CohereAPIError.from_response(response, message=f"Failed to decode json body: {await response.text()}")
 
         logger.debug(f"JSON response: {json_response}")
-        self._check_response(json_response, response.headers, response.status)
+        check_response(json_response, response.headers, response.status)
         return json_response
 
     async def close(self):
