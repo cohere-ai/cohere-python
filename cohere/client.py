@@ -11,7 +11,7 @@ from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
 import cohere
-from cohere.error import CohereAPIError, CohereError
+from cohere.error import CohereAPIError, CohereError, CohereConnectionError
 from cohere.finetune_dataset import Dataset
 from cohere.logging import logger
 from cohere.responses import (
@@ -70,7 +70,7 @@ class Client:
         self.max_retries = max_retries
         self.timeout = timeout
         self.api_version = f"v{cohere.API_VERSION}"
-        self.finetune = FinetuneClient(self)
+        self.finetune = FinetuneClient(self.api_url, self.api_key, self.request_source)
         if client_name:
             self.request_source += ":" + client_name
 
@@ -542,23 +542,7 @@ class Client:
             rank.document = parsed_docs[rank.index]
         return reranking
 
-    def _check_response(self, json_response: Dict, headers: Dict, status_code: int):
-        if "X-API-Warning" in headers:
-            logger.warning(headers["X-API-Warning"])
-        if "message" in json_response:  # has errors
-            raise CohereAPIError(
-                message=json_response["message"],
-                http_status=status_code,
-                headers=headers,
-            )
-        if 400 <= status_code < 500:
-            raise CohereAPIError(
-                message=f"Unexpected client error (status {status_code}): {json_response}",
-                http_status=status_code,
-                headers=headers,
-            )
-        if status_code >= 500:
-            raise CohereError(message=f"Unexpected server error (status {status_code}): {json_response}")
+
 
     def _request(self, endpoint, json=None, method="POST", stream=False) -> Any:
         headers = {
@@ -567,7 +551,7 @@ class Client:
             "Request-Source": self.request_source,
         }
 
-        url = f"{self.api_url}/{endpoint}"
+        url = f"{self.api_url}/{self.api_version}/{endpoint}"
         with requests.Session() as session:
             retries = Retry(
                 total=self.max_retries,
@@ -596,7 +580,7 @@ class Client:
             except jsonlib.decoder.JSONDecodeError:  # CohereAPIError will capture status
                 raise CohereAPIError.from_response(response, message=f"Failed to decode json body: {response.text}")
 
-            self._check_response(json_response, response.headers, response.status_code)
+            _check_response(json_response, response.headers, response.status_code)
         return json_response
 
     def create_cluster_job(
@@ -804,8 +788,10 @@ class Client:
 
 
 class FinetuneClient:
-    def __init__(self, client: Client):
-        self._client = client
+    def __init__(self, api_url: str, api_key: str, request_source: str):
+        self._api_url = api_url
+        self._api_key = api_key
+        self._request_source = request_source
 
     def get(self, finetune_id: str) -> Finetune:
         """Get a finetune by id.
@@ -816,7 +802,7 @@ class FinetuneClient:
             Finetune: the finetune
         """
         json = {"finetuneID": finetune_id}
-        response = self._client._request(f"{cohere.BLOBHEART_URL}/GetFinetune", method="POST", json=json)
+        response = self._request(f"{cohere.BLOBHEART_URL}/GetFinetune", method="POST", json=json)
         return Finetune.from_dict(response["finetune"])
 
     def get_by_name(self, name: str) -> Finetune:
@@ -828,7 +814,7 @@ class FinetuneClient:
             Finetune: the finetune
         """
         json = {"name": name}
-        response = self._client._request(f"{cohere.BLOBHEART_URL}/GetFinetuneByName", method="POST", json=json)
+        response = self._request(f"{cohere.BLOBHEART_URL}/GetFinetuneByName", method="POST", json=json)
         return Finetune.from_dict(response["finetune"])
 
     def list(
@@ -863,7 +849,7 @@ class FinetuneClient:
             }
         }
 
-        response = self._client._request(f"{cohere.BLOBHEART_URL}/ListFinetunes", method="POST", json=json)
+        response = self._request(f"{cohere.BLOBHEART_URL}/ListFinetunes", method="POST", json=json)
         return [Finetune.from_dict(r) for r in response["finetunes"]]
 
     def create(self, name: str, finetune_type: FINETUNE_TYPE, dataset: Dataset) -> str:
@@ -893,26 +879,27 @@ class FinetuneClient:
             >>> finetune = co.finetune.create("prompt-completion-ft", dataset=dataset, finetune_type="GENERATIVE")
 
         """
+        internal_finetune_type = FINETUNE_PRODUCT_MAPPING[finetune_type]
         json = {
             "name": name,
             "settings": {
                 "trainFiles": [],
                 "evalFiles": [],
                 "baseModel": "medium",
-                "finetuneType": FINETUNE_PRODUCT_MAPPING[finetune_type],
+                "finetuneType": internal_finetune_type,
             },
         }
         remote_path = self._upload_dataset(
-            dataset.get_train_data(), name, dataset.train_file_name(), finetune_type
+            dataset.get_train_data(), name, dataset.train_file_name(), internal_finetune_type
         )
         json["settings"]["trainFiles"].append({"path": remote_path, **dataset.file_config()})
         if dataset.has_eval_file():
             remote_path = self._upload_dataset(
-                dataset.get_eval_data(), name, dataset.eval_file_name(), finetune_type
+                dataset.get_eval_data(), name, dataset.eval_file_name(), internal_finetune_type
             )
             json["settings"]["evalFiles"].append({"path": remote_path, **dataset.file_config()})
 
-        response = self._client._request(f"{cohere.BLOBHEART_URL}/CreateFinetune", method="POST", json=json)
+        response = self._request(f"{cohere.BLOBHEART_URL}/CreateFinetune", method="POST", json=json)
         return response["finetune"]["id"]
 
     def _upload_dataset(
@@ -920,12 +907,59 @@ class FinetuneClient:
     ) -> str:
         gcs = self._create_signed_url(finetune_name, file_name, type)
         response = requests.put(gcs["url"], data=content, headers={"content-type": "text/plain"})
-        if not response.status_code == 200:
-            raise Exception(f"Unable to upload dataset: {response.text}")
+        _check_response({}, response.headers, response.status_code)
         return gcs["gcspath"]
 
     def _create_signed_url(
         self, finetune_name: str, file_name: str, type: _INTERNAL_FINETUNE_TYPE
     ) -> TypedDict("gcsData", {"url": str, "gcspath": str}):
         json = {"finetuneName": finetune_name, "fileName": file_name, "finetuneType": type}
-        return self._client._request(f"{cohere.BLOBHEART_URL}/GetFinetuneUploadSignedURL", method="POST", json=json)
+        return self._request(f"{cohere.BLOBHEART_URL}/GetFinetuneUploadSignedURL", method="POST", json=json)
+
+    def _request(self, endpoint, json=None, method="POST", headers: Optional[dict[str, str]] = None) -> Any:
+        if not headers:
+            headers = {}
+
+        headers.update({
+            "Authorization": "BEARER {}".format(self._api_key),
+            "Content-Type": "application/json",
+            "Request-Source": self._request_source,
+        })
+
+        url = f"{self._api_url}/{endpoint}"
+
+        try:
+            response = requests.request(
+                method, url, headers=headers, json=json
+            )
+        except requests.exceptions.ConnectionError as e:
+            raise CohereConnectionError(str(e)) from e
+        except requests.exceptions.RequestException as e:
+            raise CohereError(f"Unexpected exception ({e.__class__.__name__}): {e}") from e
+
+        try:
+            json_response = response.json()
+        except jsonlib.decoder.JSONDecodeError:  # CohereAPIError will capture status
+            raise CohereAPIError.from_response(response, message=f"Failed to decode json body: {response.text}")
+
+        _check_response(json_response, response.headers, response.status_code)
+        return json_response
+
+
+def _check_response(json_response: Dict, headers: Dict, status_code: int):
+    if "X-API-Warning" in headers:
+        logger.warning(headers["X-API-Warning"])
+    if "message" in json_response:  # has errors
+        raise CohereAPIError(
+            message=json_response["message"],
+            http_status=status_code,
+            headers=headers,
+        )
+    if 400 <= status_code < 500:
+        raise CohereAPIError(
+            message=f"Unexpected client error (status {status_code}): {json_response}",
+            http_status=status_code,
+            headers=headers,
+        )
+    if status_code >= 500:
+        raise CohereError(message=f"Unexpected server error (status {status_code}): {json_response}")
