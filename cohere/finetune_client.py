@@ -152,13 +152,13 @@ class FinetuneClient:
 
         headers.update(
             {
-                "Authorization": "BEARER {}".format(self._api_key),
+                "Authorization": "BEARER {}".format(self.api_key),
                 "Content-Type": "application/json",
                 "Request-Source": self._request_source,
             }
         )
 
-        url = f"{self._api_url}/{endpoint}"
+        url = f"{self.api_url}/{endpoint}"
 
         try:
             response = requests.request(method, url, headers=headers, json=json)

@@ -1,6 +1,6 @@
 from typing import Dict
 
-from cohere import CohereAPIError, CohereError
+from cohere.error import CohereAPIError, CohereError
 from cohere.logging import logger
 
 
