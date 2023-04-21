@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.3.0
+- [#209](https://github.com/cohere-ai/cohere-python/pull/209)
+  - add support for finetunes
+
 ## 4.2.0
 
 - [#212](https://github.com/cohere-ai/cohere-python/pull/212) 
