@@ -161,7 +161,7 @@ class InMemoryDataset(Dataset):
         for row in self._eval_data:
             yield self._serialize_row(row)
 
-    def _serialize_row(self, row: tuple[str, str]) -> bytes:
+    def _serialize_row(self, row: Tuple[str, str]) -> bytes:
         buffer = StringIO()
         writer = csv.writer(buffer, delimiter=self._delimiter)
         writer.writerow(row)
