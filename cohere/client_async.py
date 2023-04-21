@@ -4,6 +4,7 @@ import os
 import posixpath
 import time
 from collections import defaultdict
+from dataclasses import asdict
 from functools import partial
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -23,9 +24,11 @@ from cohere.responses import (
     Detokenization,
     Embeddings,
     GenerateFeedbackResponse,
+    GeneratePreferenceFeedbackResponse,
     Generations,
     LabelPrediction,
     Language,
+    PreferenceRating,
     Reranking,
     StreamingGenerations,
     SummarizeResponse,
@@ -61,7 +64,7 @@ class AsyncClient(Client):
         timeout=120,
     ) -> None:
         self.api_key = api_key or os.getenv("CO_API_KEY")
-        self.api_url = cohere.COHERE_API_URL
+        self.api_url = os.getenv("CO_API_URL", cohere.COHERE_API_URL)
         self.batch_size = cohere.COHERE_EMBED_BATCH_SIZE
         self.num_workers = num_workers
         self.request_dict = request_dict
@@ -169,15 +172,12 @@ class AsyncClient(Client):
     async def chat(
         self,
         query: str,
-        session_id: str = "",
         conversation_id: str = "",
         model: Optional[str] = None,
         return_chatlog: bool = False,
         return_prompt: bool = False,
         return_preamble: bool = False,
         chatlog_override: List[Dict[str, str]] = None,
-        persona_name: str = None,
-        persona_prompt: str = None,
         preamble_override: str = None,
         user_name: str = None,
         temperature: float = 0.8,
@@ -186,25 +186,6 @@ class AsyncClient(Client):
     ) -> Union[AsyncChat, StreamingChat]:
         if chatlog_override is not None:
             self._validate_chatlog_override(chatlog_override)
-
-        if session_id != "":
-            conversation_id = session_id
-            logger.warning(
-                "The 'session_id' parameter is deprecated and will be removed in a future version of this function. Use 'conversation_id' instead.",
-            )
-        if persona_prompt is not None:
-            preamble_override = persona_prompt
-            logger.warning(
-                "The 'persona_prompt' parameter is deprecated and will be removed in a future version of this function. Use 'preamble_override' instead.",
-            )
-        if persona_name is not None:
-            logger.warning(
-                "The 'persona_name' parameter is deprecated and will be removed in a future version of this function.",
-            )
-        if user_name is not None:
-            logger.warning(
-                "The 'user_name' parameter is deprecated and will be removed in a future version of this function.",
-            )
 
         json_body = {
             "query": query,
@@ -218,6 +199,7 @@ class AsyncClient(Client):
             "temperature": temperature,
             "max_tokens": max_tokens,
             "stream": stream,
+            "user_name": user_name,
         }
 
         response = await self._request(cohere.CHAT_URL, json=json_body, stream=stream)
@@ -341,20 +323,41 @@ class AsyncClient(Client):
         response = await self._request(cohere.GENERATE_FEEDBACK_URL, json_body)
         return GenerateFeedbackResponse(id=response["id"])
 
+    async def generate_preference_feedback(
+        self,
+        ratings: List[PreferenceRating],
+        model=None,
+        prompt: str = None,
+        annotator_id: str = None,
+    ) -> GeneratePreferenceFeedbackResponse:
+        ratings_dicts = []
+        for rating in ratings:
+            ratings_dicts.append(asdict(rating))
+        json_body = {
+            "ratings": ratings_dicts,
+            "prompt": prompt,
+            "annotator_id": annotator_id,
+            "model": model,
+        }
+        response = await self._request(cohere.GENERATE_PREFERENCE_FEEDBACK_URL, json_body)
+        return GeneratePreferenceFeedbackResponse(id=response["id"])
+
     async def rerank(
         self,
         query: str,
         documents: Union[List[str], List[Dict[str, Any]]],
-        model: str = None,
+        model: str,
         top_n: Optional[int] = None,
+        max_chunks_per_doc: Optional[int] = None,
     ) -> Reranking:
         """Returns an ordered list of documents ordered by their relevance to the provided query
 
         Args:
             query (str): The search query
             documents (list[str], list[dict]): The documents to rerank
-            model (str): (Optional) The model to use for re-ranking
+            model (str): The model to use for re-ranking
             top_n (int): (optional) The number of results to return, defaults to returning all results
+            max_chunks_per_doc (int): (optional) The maximum number of chunks derived from a document
         """
         parsed_docs = []
         for doc in documents:
@@ -373,6 +376,7 @@ class AsyncClient(Client):
             "model": model,
             "top_n": top_n,
             "return_documents": False,
+            "max_chunks_per_doc": max_chunks_per_doc,
         }
         reranking = Reranking(await self._request(cohere.RERANK_URL, json=json_body))
         for rank in reranking.results:
@@ -382,16 +386,20 @@ class AsyncClient(Client):
     async def create_cluster_job(
         self,
         embeddings_url: str,
-        threshold: Optional[float] = None,
         min_cluster_size: Optional[int] = None,
+        n_neighbors: Optional[int] = None,
+        is_deterministic: Optional[bool] = None,
     ) -> AsyncCreateClusterJobResponse:
         """Create clustering job.
 
         Args:
             embeddings_url (str): File with embeddings to cluster.
-            threshold (Optional[float], optional): Similarity threshold above which two texts are deemed to belong in
-                the same cluster. Defaults to None.
-            min_cluster_size (Optional[int], optional): Minimum number of elements in a cluster. Defaults to None.
+            min_cluster_size (Optional[int], optional): Minimum number of elements in a cluster. Defaults to 10.
+            n_neighbors (Optional[int], optional): Number of nearest neighbors used by UMAP to establish the
+                local structure of the data. Defaults to 15. For more information, please refer to
+                https://umap-learn.readthedocs.io/en/latest/parameters.html#n-neighbors
+            is_deterministic (Optional[bool], optional): Determines whether the output of the cluster job is
+                deterministic. Defaults to True.
 
         Returns:
             CreateClusterJobResponse: Created clustering job handler
@@ -399,8 +407,9 @@ class AsyncClient(Client):
 
         json_body = {
             "embeddings_url": embeddings_url,
-            "threshold": threshold,
             "min_cluster_size": min_cluster_size,
+            "n_neighbors": n_neighbors,
+            "is_deterministic": is_deterministic,
         }
         response = await self._request(cohere.CLUSTER_JOBS_URL, json=json_body)
         return AsyncCreateClusterJobResponse.from_dict(

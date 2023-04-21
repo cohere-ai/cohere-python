@@ -1,8 +1,39 @@
 # Changelog
 
+## 4.2.0
+
+- [#212](https://github.com/cohere-ai/cohere-python/pull/212) 
+  - Deprecate co.chat params
+    - `session_id`
+    - `persona_name`
+    - `persona_prompt`
+  - Add deprecation warning for Chat attribute
+    - Use `text` instead of `reply`
+  - Add support for `generation_id`
+- [#206](https://github.com/cohere-ai/cohere-python/pull/206)
+    - Update cluster endpoint to use UMAP+HDBSCAN
+    - Remove threshold and add n_neighbors and is_deterministic as params
+
+## 4.1.6
+
+- [#205](https://github.com/cohere-ai/cohere-python/pull/205)
+    - Add param max_chunks_per_doc to rerank
+    - Enforce model param for rerank
+
+## 4.1.5
+
+- [#208](https://github.com/cohere-ai/cohere-python/pull/208)
+  - Fix a missing import for CohereConnectionError
+
+## 4.1.4
+
+- [#204](https://github.com/cohere-ai/cohere-python/pull/204)
+  - Add `generate_preference_feedback` for submitting preference-style feedback
+
 ## 4.1.3
+
 - [#194](https://github.com/cohere-ai/cohere-python/pull/194)
-   - Return the generation ID for chat
+  - Return the generation ID for chat
 
 ## 4.1.2
 

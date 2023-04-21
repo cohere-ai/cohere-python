@@ -17,8 +17,9 @@ class TestClient(unittest.TestCase):
         co = self.create_co()
         create_res = co.create_cluster_job(
             VALID_INPUT_FILE,
-            min_cluster_size=3,
-            threshold=0.5,
+            min_cluster_size=10,
+            n_neighbors=15,
+            is_deterministic=True,
         )
         job = co.get_cluster_job(create_res.job_id)
         start = time.time()
@@ -49,19 +50,22 @@ class TestClient(unittest.TestCase):
         co = self.create_co()
         create_res = co.create_cluster_job(
             VALID_INPUT_FILE,
-            min_cluster_size=3,
-            threshold=0.5,
+            min_cluster_size=10,
+            n_neighbors=15,
+            is_deterministic=True,
         )
 
         job = co.wait_for_cluster_job(create_res.job_id, timeout=60, interval=5)
         self.check_job_result(job, status="complete")
 
+    @unittest.skipIf(in_ci(), "can sometimes fail due to duration variation")
     def test_wait_for_cluster_job_times_out(self):
         co = self.create_co()
         create_res = co.create_cluster_job(
             VALID_INPUT_FILE,
-            min_cluster_size=3,
-            threshold=0.5,
+            min_cluster_size=10,
+            n_neighbors=15,
+            is_deterministic=True,
         )
 
         def wait():
@@ -74,19 +78,22 @@ class TestClient(unittest.TestCase):
         co = self.create_co()
         create_res = co.create_cluster_job(
             VALID_INPUT_FILE,
-            min_cluster_size=3,
-            threshold=0.5,
+            min_cluster_size=10,
+            n_neighbors=15,
+            is_deterministic=True,
         )
 
         job = create_res.wait(timeout=60, interval=5)
         self.check_job_result(job, status="complete")
 
+    @unittest.skipIf(in_ci(), "can sometimes fail due to duration variation")
     def test_job_wait_method_times_out(self):
         co = self.create_co()
         create_res = co.create_cluster_job(
             VALID_INPUT_FILE,
-            min_cluster_size=3,
-            threshold=0.5,
+            min_cluster_size=10,
+            n_neighbors=15,
+            is_deterministic=True,
         )
 
         def wait():
@@ -99,8 +106,9 @@ class TestClient(unittest.TestCase):
         co = self.create_co()
         create_res = co.create_cluster_job(
             BAD_INPUT_FILE,
-            min_cluster_size=3,
-            threshold=0.5,
+            min_cluster_size=10,
+            n_neighbors=15,
+            is_deterministic=True,
         )
 
         job = create_res.wait(timeout=60, interval=5)
