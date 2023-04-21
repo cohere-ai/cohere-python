@@ -2,7 +2,7 @@ from typing import Dict
 
 
 class CohereError(Exception):
-    """Base Exception class, returned when nothing more specific applies"""
+    """Base Exception class, returned when nothing more specific applies1"""
 
     def __init__(self, message=None) -> None:
         super(CohereError, self).__init__(message)
