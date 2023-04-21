@@ -2,7 +2,7 @@ import csv
 from abc import ABC, abstractmethod
 from io import StringIO
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Tuple
 
 from typing_extensions import TypedDict
 
@@ -135,7 +135,7 @@ class InMemoryDataset(Dataset):
         >>> InMemoryDataset([("example1", "label1"), ("example2", "label1"), ("example3", "label2")])
     """
 
-    def __init__(self, training_data: Iterable[tuple[str, str]], eval_data: Optional[Iterable[tuple[str, str]]] = None):
+    def __init__(self, training_data: Iterable[Tuple[str, str]], eval_data: Optional[Iterable[Tuple[str, str]]] = None):
         self._training_data = training_data
         self._eval_data = eval_data
         self._delimiter = ","
