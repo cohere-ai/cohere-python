@@ -53,6 +53,33 @@ print('prediction: {}'.format(prediction.generations[0].text))
 
 There is also an asyncio compatible client called `cohere.AsyncClient` with an equivalent interface. Consult the [SDK Docs](https://cohere-sdk.readthedocs.io/en/latest/) for more details.
 
+If you are looking to work with finetunes you will have to instantiate a FinetuneClient
+```python
+import cohere
+from cohere.finetune_dataset import  InMemoryDataset, JsonlDataset
+
+co = cohere.Client('YOUR_API_KEY')
+client = cohere.FinetuneClient('YOUR_API_KEY')
+
+dataset = InMemoryDataset(training_data=[
+  ("this is a prompt", "this is a completion"),
+  # make sure to have at least 32 examples
+])
+# or
+dataset = JsonlDataset(train_file="training.jsonl")
+
+finetune = client.create("my-finetune", "GENERATIVE", dataset)
+# check the status
+client.get(finetune.id)
+# or
+client.get_by_name("my-finetune")
+
+# list all finished finetunes
+client.list(statuses=["READY"])
+
+co.generate(model=finetune.id, prompt="this is my prompt")
+```
+
 ## Versioning
 
 Each SDK release is only compatible with the latest version of the Cohere API at the time of release. To use the SDK with an older API version, you need to download a version of the SDK tied to the API version you want. Look at the [Changelog](https://github.com/cohere-ai/cohere-python/blob/main/CHANGELOG.md) to see which SDK version to download.
