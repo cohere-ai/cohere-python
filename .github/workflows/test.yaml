@@ -24,7 +24,7 @@ jobs:
         poetry install
 
     - name: Check formatting
-      run: poetry run pre-commit run --all-files 
+      run: poetry run pre-commit run --all-files --verbose
 
     - name: Run tests
       env:
