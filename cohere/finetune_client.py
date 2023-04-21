@@ -1,10 +1,10 @@
 import json as jsonlib
 import os
 from datetime import datetime, timezone
-from typing import Any, Iterable, List, Optional, TypedDict
+from typing import Any, Iterable, List, Optional
 
 import requests
-from typing_extensions import Literal
+from typing_extensions import Literal, TypedDict
 
 import cohere
 from cohere.error import CohereAPIError, CohereConnectionError, CohereError

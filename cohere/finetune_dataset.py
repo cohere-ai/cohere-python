@@ -2,7 +2,9 @@ import csv
 from abc import ABC, abstractmethod
 from io import StringIO
 from pathlib import Path
-from typing import Iterable, Optional, TypedDict
+from typing import Iterable, Optional
+
+from typing_extensions import TypedDict
 
 
 class FileConfig(TypedDict):
