@@ -1,7 +1,7 @@
 import csv
 import tempfile
 
-from cohere.finetune_dataset import InMemoryDataset, CsvDataset, JsonlDataset
+from cohere.finetune_dataset import CsvDataset, InMemoryDataset, JsonlDataset
 
 
 def test_in_memory_dataset():

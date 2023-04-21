@@ -82,7 +82,7 @@ class CsvDataset(LocalFileDataset):
     another prompt, another completion
     """
 
-    def __init__(self, train_file: str, delimiter: str, eval_file: Optional[Path] = None):
+    def __init__(self, train_file: str, delimiter: str, eval_file: Optional[str] = None):
         """
         Args:
             train_file (str): local path to csv with training data
@@ -163,7 +163,7 @@ class InMemoryDataset(Dataset):
         buffer = StringIO()
         writer = csv.writer(buffer, delimiter=self._delimiter)
         writer.writerow(row)
-        return f"{buffer}\n".encode("utf-8")
+        return buffer.getvalue().encode("utf-8")
 
     def file_config(self) -> FileConfig:
         config = _empty_file_config.copy()
