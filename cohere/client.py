@@ -29,6 +29,7 @@ from cohere.responses.detectlang import DetectLanguageResponse, Language
 from cohere.responses.embeddings import Embeddings
 from cohere.responses.feedback import GenerateFeedbackResponse
 from cohere.responses.rerank import Reranking
+from cohere.responses.response import check_response
 from cohere.responses.summarize import SummarizeResponse
 from cohere.utils import is_api_key_valid, wait_for_job
 
@@ -537,24 +538,6 @@ class Client:
             rank.document = parsed_docs[rank.index]
         return reranking
 
-    def _check_response(self, json_response: Dict, headers: Dict, status_code: int):
-        if "X-API-Warning" in headers:
-            logger.warning(headers["X-API-Warning"])
-        if "message" in json_response:  # has errors
-            raise CohereAPIError(
-                message=json_response["message"],
-                http_status=status_code,
-                headers=headers,
-            )
-        if 400 <= status_code < 500:
-            raise CohereAPIError(
-                message=f"Unexpected client error (status {status_code}): {json_response}",
-                http_status=status_code,
-                headers=headers,
-            )
-        if status_code >= 500:
-            raise CohereError(message=f"Unexpected server error (status {status_code}): {json_response}")
-
     def _request(self, endpoint, json=None, method="POST", stream=False) -> Any:
         headers = {
             "Authorization": "BEARER {}".format(self.api_key),
@@ -591,7 +574,7 @@ class Client:
             except jsonlib.decoder.JSONDecodeError:  # CohereAPIError will capture status
                 raise CohereAPIError.from_response(response, message=f"Failed to decode json body: {response.text}")
 
-            self._check_response(json_response, response.headers, response.status_code)
+            check_response(json_response, response.headers, response.status_code)
         return json_response
 
     def create_cluster_job(
