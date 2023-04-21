@@ -58,12 +58,11 @@ If you are looking to work with finetunes you will have to instantiate a Finetun
 import cohere
 from cohere.finetune_dataset import  InMemoryDataset, JsonlDataset
 
-co = cohere.Client('YOUR_API_KEY')
 client = cohere.FinetuneClient('YOUR_API_KEY')
 
 dataset = InMemoryDataset(training_data=[
-  ("this is a prompt", "this is a completion"),
-  # make sure to have at least 32 examples
+("this is a prompt", "this is a completion"),
+# make sure to have at least 32 examples
 ])
 # or
 dataset = JsonlDataset(train_file="training.jsonl")
@@ -77,6 +76,8 @@ client.get_by_name("my-finetune")
 # list all finished finetunes
 client.list(statuses=["READY"])
 
+# query your finetune
+co = cohere.Client('YOUR_API_KEY')
 co.generate(model=finetune.id, prompt="this is my prompt")
 ```
 
