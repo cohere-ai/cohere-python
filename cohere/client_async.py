@@ -37,8 +37,12 @@ from cohere.responses import (
 from cohere.responses.bulk_embed import AsyncCreateBulkEmbedJobResponse, BulkEmbedJob
 from cohere.responses.chat import AsyncChat, StreamingChat
 from cohere.responses.classify import Example as ClassifyExample
-from cohere.responses.response import check_response
-from cohere.utils import async_wait_for_job, is_api_key_valid, np_json_dumps
+from cohere.utils import (
+    async_wait_for_job,
+    check_response,
+    is_api_key_valid,
+    np_json_dumps,
+)
 
 JSON = Union[Dict, List]
 

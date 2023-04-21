@@ -5,6 +5,8 @@ from typing import Any, Dict, Iterable, List, Optional
 
 import requests
 
+from cohere.utils import check_response
+
 try:
     from typing import Literal, TypedDict
 except ImportError:
@@ -20,7 +22,6 @@ from cohere.responses.finetune import (
     INTERNAL_FINETUNE_TYPE,
     Finetune,
 )
-from cohere.responses.response import check_response
 
 
 class FinetuneClient:

@@ -33,9 +33,8 @@ from cohere.responses.feedback import (
     PreferenceRating,
 )
 from cohere.responses.rerank import Reranking
-from cohere.responses.response import check_response
 from cohere.responses.summarize import SummarizeResponse
-from cohere.utils import is_api_key_valid, wait_for_job
+from cohere.utils import check_response, is_api_key_valid, wait_for_job
 
 
 class Client:
