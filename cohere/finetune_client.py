@@ -1,7 +1,7 @@
 import json as jsonlib
 import os
 from datetime import datetime, timezone
-from typing import Any, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional
 
 import requests
 from typing_extensions import Literal, TypedDict
@@ -147,7 +147,7 @@ class FinetuneClient:
         json = {"finetuneName": finetune_name, "fileName": file_name, "finetuneType": type}
         return self._request(f"{cohere.BLOBHEART_URL}/GetFinetuneUploadSignedURL", method="POST", json=json)
 
-    def _request(self, endpoint, json=None, method="POST", headers: Optional[dict[str, str]] = None) -> Any:
+    def _request(self, endpoint, json=None, method="POST", headers: Optional[Dict[str, str]] = None) -> Any:
         if not headers:
             headers = {}
 
