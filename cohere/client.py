@@ -29,7 +29,6 @@ from cohere.responses.detectlang import DetectLanguageResponse, Language
 from cohere.responses.embeddings import Embeddings
 from cohere.responses.feedback import GenerateFeedbackResponse
 from cohere.responses.rerank import Reranking
-from cohere.responses.response import check_response
 from cohere.responses.summarize import SummarizeResponse
 from cohere.utils import is_api_key_valid, wait_for_job
 
