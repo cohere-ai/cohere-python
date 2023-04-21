@@ -4,7 +4,11 @@ from datetime import datetime, timezone
 from typing import Any, Dict, Iterable, List, Optional
 
 import requests
-from typing_extensions import Literal, TypedDict
+
+try:
+    from typing import Literal, TypedDict
+except ImportError:
+    from typing_extensions import Literal, TypedDict
 
 import cohere
 from cohere.error import CohereAPIError, CohereConnectionError, CohereError

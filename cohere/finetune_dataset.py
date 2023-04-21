@@ -4,7 +4,10 @@ from io import StringIO
 from pathlib import Path
 from typing import Iterable, Optional, Tuple
 
-from typing_extensions import TypedDict
+try:
+    from typing import TypedDict
+except ImportError:
+    from typing_extensions import TypedDict
 
 
 class FileConfig(TypedDict):

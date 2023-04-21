@@ -1,7 +1,10 @@
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from typing_extensions import Literal
+try:
+    from typing import Literal
+except ImportError:
+    from typing_extensions import Literal
 
 from cohere.responses.base import CohereObject
 
