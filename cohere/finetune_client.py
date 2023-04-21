@@ -1,7 +1,8 @@
 import json as jsonlib
 import os
 from datetime import datetime, timezone
-from typing import Any, Iterable, List, Literal, Optional, TypedDict
+from typing import Any, Iterable, List, Optional, TypedDict
+from typing_extensions import Literal
 
 import requests
 
