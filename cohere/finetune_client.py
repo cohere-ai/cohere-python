@@ -88,7 +88,7 @@ class FinetuneClient:
         response = self._request(f"{cohere.BLOBHEART_URL}/ListFinetunes", method="POST", json=json)
         return [Finetune.from_dict(r) for r in response["finetunes"]]
 
-    def create(self, name: str, finetune_type: FINETUNE_TYPE, dataset: Dataset) -> str:
+    def create(self, name: str, finetune_type: FINETUNE_TYPE, dataset: Dataset) -> Finetune:
         """Create a new finetune
 
         Args:
@@ -136,7 +136,7 @@ class FinetuneClient:
             json["settings"]["evalFiles"].append({"path": remote_path, **dataset.file_config()})
 
         response = self._request(f"{cohere.BLOBHEART_URL}/CreateFinetune", method="POST", json=json)
-        return response["finetune"]["id"]
+        return Finetune.from_dict(response["finetune"])
 
     def _upload_dataset(
         self, content: Iterable[bytes], finetune_name: str, file_name: str, type: INTERNAL_FINETUNE_TYPE
