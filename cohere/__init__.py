@@ -4,6 +4,8 @@ from cohere.error import CohereAPIError, CohereConnectionError, CohereError
 from cohere.finetune_client import FinetuneClient
 
 COHERE_API_URL = "https://api.cohere.ai"
+COHERE_FINETUNE_API_URL = "https://api.os.cohere.ai"
+
 RETRY_STATUS_CODES = [429, 500, 502, 503, 504]
 
 API_VERSION = "1"

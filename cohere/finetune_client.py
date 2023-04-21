@@ -26,7 +26,7 @@ from cohere.responses.response import check_response
 class FinetuneClient:
     def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key or os.getenv("CO_API_KEY")
-        self.api_url = cohere.COHERE_API_URL
+        self.api_url = cohere.COHERE_FINETUNE_API_URL
         self._request_source = "python-sdk"
 
     def get(self, finetune_id: str) -> Finetune:
