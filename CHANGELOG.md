@@ -1,8 +1,17 @@
 # Changelog
 
+## 4.2.1
+
+- [#210](https://github.com/cohere-ai/cohere-python/pull/210)
+  - Update embed with compressed embeddings
+    - `compress`
+    - `compression_codebook`
+- [#211](https://github.com/cohere-ai/cohere-python/pull/211)
+  - Add co.codebook endpoint for compressed embeddings
+
 ## 4.2.0
 
-- [#212](https://github.com/cohere-ai/cohere-python/pull/212) 
+- [#212](https://github.com/cohere-ai/cohere-python/pull/212)
   - Deprecate co.chat params
     - `session_id`
     - `persona_name`
