@@ -18,6 +18,7 @@ class Chat(CohereObject):
         meta: Optional[Dict[str, Any]] = None,
         prompt: Optional[str] = None,
         chatlog: Optional[List[Dict[str, str]]] = None,
+        preamble: Optional[str] = None,
         client=None,
         **kwargs,
     ) -> None:
@@ -29,6 +30,7 @@ class Chat(CohereObject):
         self.conversation_id = conversation_id
         self.prompt = prompt  # optional
         self.chatlog = chatlog  # optional
+        self.preamble = preamble
         self.client = client
         self.meta = meta
 
@@ -43,6 +45,7 @@ class Chat(CohereObject):
             text=response["text"],
             prompt=response.get("prompt"),  # optional
             chatlog=response.get("chatlog"),  # optional
+            preamble=response.get("preamble"),  # option
             client=client,
             meta=response.get("meta"),
         )
@@ -53,6 +56,7 @@ class Chat(CohereObject):
             conversation_id=self.conversation_id,
             return_chatlog=self.chatlog is not None,
             return_prompt=self.prompt is not None,
+            return_preamble=self.preamble is not None,
         )
 
     @property
@@ -70,6 +74,7 @@ class AsyncChat(Chat):
             conversation_id=self.conversation_id,
             return_chatlog=self.chatlog is not None,
             return_prompt=self.prompt is not None,
+            return_preamble=self.preamble is not None,
         )
 
 

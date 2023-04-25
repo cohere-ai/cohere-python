@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.2.1
+
+- [#214](https://github.com/cohere-ai/cohere-python/pull/214)
+  - Add support for co.Chat parameter:
+    - `return_preamble` 
+
 ## 4.2.0
 
 - [#212](https://github.com/cohere-ai/cohere-python/pull/212) 
