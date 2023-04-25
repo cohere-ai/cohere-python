@@ -4,7 +4,7 @@
 
 # Cohere Python SDK
 
-This package provides functionality developed to simplify interfacing with the [Cohere API](https://docs.cohere.com/docs) in Python 3.
+This package provides functionality developed to simplify interfacing with the [Cohere API](https://docs.cohere.com/) in Python 3.
 
 ## Documentation
 
