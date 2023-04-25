@@ -8,7 +8,7 @@ async def test_async_multi_replies(async_client):
     assert prediction.chatlog is not None
     for _ in range(num_replies):
         prediction = await prediction.respond("oh that's cool")
-        assert isinstance(prediction.reply, str)
+        assert isinstance(prediction.text, str)
         assert isinstance(prediction.conversation_id, str)
         assert prediction.chatlog is not None
         assert prediction.meta

@@ -1,5 +1,19 @@
 # Changelog
 
+## 4.2.0
+
+- [#212](https://github.com/cohere-ai/cohere-python/pull/212) 
+  - Deprecate co.chat params
+    - `session_id`
+    - `persona_name`
+    - `persona_prompt`
+  - Add deprecation warning for Chat attribute
+    - Use `text` instead of `reply`
+  - Add support for `generation_id`
+- [#206](https://github.com/cohere-ai/cohere-python/pull/206)
+    - Update cluster endpoint to use UMAP+HDBSCAN
+    - Remove threshold and add n_neighbors and is_deterministic as params
+
 ## 4.1.6
 
 - [#205](https://github.com/cohere-ai/cohere-python/pull/205)

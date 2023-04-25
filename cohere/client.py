@@ -155,15 +155,12 @@ class Client:
     def chat(
         self,
         query: str,
-        session_id: str = "",
         conversation_id: str = "",
         model: Optional[str] = None,
         return_chatlog: bool = False,
         return_prompt: bool = False,
         return_preamble: bool = False,
         chatlog_override: List[Dict[str, str]] = None,
-        persona_name: str = None,
-        persona_prompt: str = None,
         preamble_override: str = None,
         user_name: str = None,
         temperature: float = 0.8,
@@ -174,17 +171,14 @@ class Client:
 
         Args:
             query (str): The query to send to the chatbot.
-            session_id (str): Deprecated, use conversation_id instead.
             conversation_id (str): (Optional) The conversation id to continue the conversation.
             model (str): (Optional) The model to use for generating the next reply.
             return_chatlog (bool): (Optional) Whether to return the chatlog.
             return_prompt (bool): (Optional) Whether to return the prompt.
             return_preamble (bool): (Optional) Whether to return the preamble.
             chatlog_override (List[Dict[str, str]]): (Optional) A list of chatlog entries to override the chatlog.
-            persona_name (str): Deprecated.
-            persona_prompt (str): Deprecated, use preamble_override instead.
             preamble_override (str): (Optional) A string to override the preamble.
-            user_name (str): Deprecated.
+            user_name (str): (Optional) A string to override the username.
             temperature (float): (Optional) The temperature to use for the next reply. The higher the temperature, the more random the reply.
             max_tokens (int): (Optional) The max tokens generated for the next reply.
             stream (bool): Return streaming tokens.
@@ -194,7 +188,7 @@ class Client:
         Examples:
             A simple chat messsage:
                 >>> res = co.chat(query="Hey! How are you doing today?")
-                >>> print(res.reply)
+                >>> print(res.text)
                 >>> print(res.conversation_id)
             Continuing a session using a specific model:
                 >>> res = co.chat(
@@ -202,7 +196,7 @@ class Client:
                 >>>     conversation_id="1234",
                 >>>     model="command-xlarge",
                 >>>     return_chatlog=True)
-                >>> print(res.reply)
+                >>> print(res.text)
                 >>> print(res.chatlog)
             Overriding a chat log:
                 >>> res = co.chat(
@@ -214,7 +208,7 @@ class Client:
                 >>>         {'Bot': 'That is great to hear!'},
                 >>>     ],
                 >>>     return_chatlog=True)
-                >>> print(res.reply)
+                >>> print(res.text)
                 >>> print(res.chatlog)
             Streaming chat:
                 >>> res = co.chat(
@@ -225,25 +219,6 @@ class Client:
         """
         if chatlog_override is not None:
             self._validate_chatlog_override(chatlog_override)
-
-        if session_id != "":
-            conversation_id = session_id
-            logger.warning(
-                "The 'session_id' parameter is deprecated and will be removed in a future version of this function. Use 'conversation_id' instead.",
-            )
-        if persona_prompt is not None:
-            preamble_override = persona_prompt
-            logger.warning(
-                "The 'persona_prompt' parameter is deprecated and will be removed in a future version of this function. Use 'preamble_override' instead.",
-            )
-        if persona_name is not None:
-            logger.warning(
-                "The 'persona_name' parameter is deprecated and will be removed in a future version of this function.",
-            )
-        if user_name is not None:
-            logger.warning(
-                "The 'user_name' parameter is deprecated and will be removed in a future version of this function.",
-            )
 
         json_body = {
             "query": query,
@@ -257,6 +232,7 @@ class Client:
             "temperature": temperature,
             "max_tokens": max_tokens,
             "stream": stream,
+            "user_name": user_name,
         }
         response = self._request(cohere.CHAT_URL, json=json_body, stream=stream)
 
@@ -665,7 +641,6 @@ class Client:
     def create_cluster_job(
         self,
         embeddings_url: str,
-        threshold: Optional[float] = None,
         min_cluster_size: Optional[int] = None,
         n_neighbors: Optional[int] = None,
         is_deterministic: Optional[bool] = None,
@@ -674,8 +649,6 @@ class Client:
 
         Args:
             embeddings_url (str): File with embeddings to cluster.
-            threshold (Optional[float], optional): Similarity threshold above which two texts are deemed to belong in
-                the same cluster. Defaults to 0.75.
             min_cluster_size (Optional[int], optional): Minimum number of elements in a cluster. Defaults to 10.
             n_neighbors (Optional[int], optional): Number of nearest neighbors used by UMAP to establish the
                 local structure of the data. Defaults to 15. For more information, please refer to
@@ -689,7 +662,6 @@ class Client:
 
         json_body = {
             "embeddings_url": embeddings_url,
-            "threshold": threshold,
             "min_cluster_size": min_cluster_size,
             "n_neighbors": n_neighbors,
             "is_deterministic": is_deterministic,
