@@ -11,10 +11,10 @@ co = cohere.Client(API_KEY)
 class TestCodebook(unittest.TestCase):
     def test_success(self):
         compression_codebooks = {
-            "32x": (96, 256, 8),
-            "48x": (64, 256, 12),
-            "64x": (48, 256, 16),
-            "96x": (32, 256, 24),
+            "PQ32x": (96, 256, 8),
+            "PQ48x": (64, 256, 12),
+            "PQ64x": (48, 256, 16),
+            "PQ96x": (32, 256, 24),
         }
         for cb, (segments, num_centroids, length) in compression_codebooks.items():
             prediction = co.codebook(
