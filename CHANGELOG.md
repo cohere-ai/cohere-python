@@ -1,14 +1,23 @@
 # Changelog
 
+## 4.3.0
+
+- [#210](https://github.com/cohere-ai/cohere-python/pull/210)
+  - Update embed with compressed embeddings
+    - `compress`
+    - `compression_codebook`
+- [#211](https://github.com/cohere-ai/cohere-python/pull/211)
+  - Add co.codebook endpoint for compressed embeddings
+
 ## 4.2.1
 
 - [#214](https://github.com/cohere-ai/cohere-python/pull/214)
   - Add support for co.Chat parameter:
-    - `return_preamble` 
+    - `return_preamble`
 
 ## 4.2.0
 
-- [#212](https://github.com/cohere-ai/cohere-python/pull/212) 
+- [#212](https://github.com/cohere-ai/cohere-python/pull/212)
   - Deprecate co.chat params
     - `session_id`
     - `persona_name`
@@ -17,14 +26,14 @@
     - Use `text` instead of `reply`
   - Add support for `generation_id`
 - [#206](https://github.com/cohere-ai/cohere-python/pull/206)
-    - Update cluster endpoint to use UMAP+HDBSCAN
-    - Remove threshold and add n_neighbors and is_deterministic as params
+  - Update cluster endpoint to use UMAP+HDBSCAN
+  - Remove threshold and add n_neighbors and is_deterministic as params
 
 ## 4.1.6
 
 - [#205](https://github.com/cohere-ai/cohere-python/pull/205)
-    - Add param max_chunks_per_doc to rerank
-    - Enforce model param for rerank
+  - Add param max_chunks_per_doc to rerank
+  - Enforce model param for rerank
 
 ## 4.1.5
 
@@ -236,7 +245,7 @@
   Change generations to return `Generations`, which has as a list of `Generation` \* Each `Generation` has a `text` and `token_likelihoods` field to store generations and token likelihoods respectively
 - [#34](https://github.com/cohere-ai/cohere-python/pull/34)
   API Updates and SDK QoL Improvements
-  _ Add support for multiple generations
+  _Add support for multiple generations
   _ Add capability to use a specific API version \* Fully remove `CohereClient`
 - [#32](https://github.com/cohere-ai/cohere-python/pull/32)
   Handle different errors more safely
