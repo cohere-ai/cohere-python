@@ -16,6 +16,7 @@ from cohere.logging import logger
 from cohere.responses import (
     Classification,
     Classifications,
+    Codebook,
     Detokenization,
     Generations,
     StreamingGenerations,
@@ -301,6 +302,24 @@ class Client:
             compressed_embeddings=responses["compressed_embeddings"],
             meta=meta,
         )
+
+    def codebook(
+        self,
+        model: Optional[str] = None,
+        compression_codebook: Optional[str] = "default",
+    ) -> Codebook:
+        """Returns a codebook object for the provided model. Visit https://cohere.ai/embed to learn about compressed embeddings and codebooks.
+
+        Args:
+            model (str): (Optional) The model ID to use for embedding the text.
+            compression_codebook (str): (Optional) The compression codebook to use for compressed embeddings. Defaults to "default".
+        """
+        json_body = {
+            "model": model,
+            "compression_codebook": compression_codebook,
+        }
+        response = self._request(cohere.CODEBOOK_URL, json=json_body)
+        return Codebook(response["codebook"], response["meta"])
 
     def classify(
         self,
