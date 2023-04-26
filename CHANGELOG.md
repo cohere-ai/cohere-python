@@ -1,6 +1,6 @@
 # Changelog
 
-## 4.2.2
+## 4.3.0
 
 - [#210](https://github.com/cohere-ai/cohere-python/pull/210)
   - Update embed with compressed embeddings

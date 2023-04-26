@@ -7,7 +7,7 @@ class Embeddings(CohereObject):
     def __init__(
         self,
         embeddings: List[List[float]],
-        compressed_embeddings: List[List[int]],
+        compressed_embeddings: List[List[int]] = None,
         meta: Optional[Dict[str, Any]] = None,
     ) -> None:
         self.embeddings = embeddings
