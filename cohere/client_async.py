@@ -209,16 +209,41 @@ class AsyncClient(Client):
         else:
             return AsyncChat.from_dict(response, query=query, client=self)
 
-    async def embed(self, texts: List[str], model: Optional[str] = None, truncate: Optional[str] = None) -> Embeddings:
+    async def embed(
+        self,
+        texts: List[str],
+        model: Optional[str] = None,
+        truncate: Optional[str] = None,
+        compress: Optional[bool] = False,
+        compression_codebook: Optional[str] = "default",
+    ) -> Embeddings:
+        """Returns an Embeddings object for the provided texts. Visit https://cohere.ai/embed to learn about embeddings.
+
+        Args:
+            text (List[str]): A list of strings to embed.
+            model (str): (Optional) The model ID to use for embedding the text.
+            truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
+            compress (bool): (Optional) Whether to compress the embeddings. When True, the compressed_embeddings will be returned as integers in the range [0, 255].
+            compression_codebook (str): (Optional) The compression codebook to use for compressed embeddings. Defaults to "default".
+        """
         json_bodys = [
-            dict(texts=texts[i : i + cohere.COHERE_EMBED_BATCH_SIZE], model=model, truncate=truncate)
+            dict(
+                texts=texts[i : i + cohere.COHERE_EMBED_BATCH_SIZE],
+                model=model,
+                truncate=truncate,
+                compress=compress,
+                compression_codebook=compression_codebook,
+            )
             for i in range(0, len(texts), cohere.COHERE_EMBED_BATCH_SIZE)
         ]
         responses = await asyncio.gather(*[self._request(cohere.EMBED_URL, json) for json in json_bodys])
         meta = responses[0]["meta"] if responses else None
 
-        embeddings = Embeddings([e for res in responses for e in res["embeddings"]], meta)  # concatenate results
-        return embeddings
+        return Embeddings(
+            embeddings=[e for res in responses for e in res["embeddings"]],
+            compressed_embeddings=[e for res in responses for e in res["compressed_embeddings"]] if compress else None,
+            meta=meta,
+        )
 
     async def codebook(
         self,
