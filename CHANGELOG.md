@@ -1,6 +1,6 @@
 # Changelog
 
-## 4.2.1
+## 4.2.2
 
 - [#210](https://github.com/cohere-ai/cohere-python/pull/210)
   - Update embed with compressed embeddings
@@ -8,6 +8,12 @@
     - `compression_codebook`
 - [#211](https://github.com/cohere-ai/cohere-python/pull/211)
   - Add co.codebook endpoint for compressed embeddings
+
+## 4.2.1
+
+- [#214](https://github.com/cohere-ai/cohere-python/pull/214)
+  - Add support for co.Chat parameter:
+    - `return_preamble`
 
 ## 4.2.0
 

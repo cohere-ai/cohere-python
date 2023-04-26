@@ -105,10 +105,11 @@ class TestChat(unittest.TestCase):
 
     def test_preamble_override(self):
         preamble = "You are a dog who mostly barks"
-        prediction = co.chat("Yo what up?", preamble_override=preamble, return_prompt=True)
+        prediction = co.chat("Yo what up?", preamble_override=preamble, return_prompt=True, return_preamble=True)
         self.assertIsInstance(prediction.text, str)
         self.assertIsInstance(prediction.conversation_id, str)
         self.assertIn(preamble, prediction.prompt)
+        self.assertEqual(preamble, prediction.preamble)
 
     def test_invalid_preamble_override(self):
         with self.assertRaises(cohere.CohereError) as e:
@@ -147,3 +148,18 @@ class TestChat(unittest.TestCase):
         self.assertIsNotNone(prediction2.response_id)
 
         self.assertNotEqual(prediction1.response_id, prediction2.response_id)
+
+    def test_return_preamble(self):
+        prediction = co.chat("Yo what up?", return_preamble=True, return_prompt=True)
+        self.assertIsInstance(prediction.text, str)
+        self.assertIsInstance(prediction.conversation_id, str)
+        self.assertIsNotNone(prediction.preamble)
+        self.assertIsNotNone(prediction.prompt)
+        self.assertIn(prediction.preamble, prediction.prompt)
+
+    def test_return_preamble_false(self):
+        prediction = co.chat("Yo what up?", return_preamble=False)
+        self.assertIsInstance(prediction.text, str)
+        self.assertIsInstance(prediction.conversation_id, str)
+
+        assert prediction.preamble is None
