@@ -20,6 +20,7 @@ from cohere.responses import (
     Classification,
     Classifications,
     ClusterJobResult,
+    Codebook,
     DetectLanguageResponse,
     Detokenization,
     Embeddings,
@@ -218,6 +219,24 @@ class AsyncClient(Client):
 
         embeddings = Embeddings([e for res in responses for e in res["embeddings"]], meta)  # concatenate results
         return embeddings
+
+    async def codebook(
+        self,
+        model: Optional[str] = None,
+        compression_codebook: Optional[str] = "default",
+    ) -> Codebook:
+        """Returns a codebook object for the provided model. Visit https://cohere.ai/embed to learn about compressed embeddings and codebooks.
+
+        Args:
+            model (str): (Optional) The model ID to use for embedding the text.
+            compression_codebook (str): (Optional) The compression codebook to use for compressed embeddings. Defaults to "default".
+        """
+        json_body = {
+            "model": model,
+            "compression_codebook": compression_codebook,
+        }
+        response = await self._request(cohere.CODEBOOK_URL, json=json_body)
+        return Codebook(response["codebook"], response["meta"])
 
     async def classify(
         self,
