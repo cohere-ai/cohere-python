@@ -5,6 +5,7 @@ from cohere.responses.cluster import (
     ClusterJobResult,
     CreateClusterJobResponse,
 )
+from cohere.responses.codebook import Codebook
 from cohere.responses.detectlang import DetectLanguageResponse, Language
 from cohere.responses.embeddings import Embeddings
 from cohere.responses.feedback import (
