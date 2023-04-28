@@ -195,7 +195,7 @@ class Client:
                 >>> res = co.chat(
                 >>>     query="Hey! How are you doing today?",
                 >>>     conversation_id="1234",
-                >>>     model="command-xlarge",
+                >>>     model="command",
                 >>>     return_chatlog=True)
                 >>> print(res.text)
                 >>> print(res.chatlog)
