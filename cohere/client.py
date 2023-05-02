@@ -16,6 +16,7 @@ from cohere.logging import logger
 from cohere.responses import (
     Classification,
     Classifications,
+    Codebook,
     Detokenization,
     Generations,
     StreamingGenerations,
@@ -194,7 +195,7 @@ class Client:
                 >>> res = co.chat(
                 >>>     query="Hey! How are you doing today?",
                 >>>     conversation_id="1234",
-                >>>     model="command-xlarge",
+                >>>     model="command",
                 >>>     return_chatlog=True)
                 >>> print(res.text)
                 >>> print(res.chatlog)
@@ -255,15 +256,27 @@ class Client:
                     message="chatlog_override must be a list of dicts, each mapping the agent to the message."
                 )
 
-    def embed(self, texts: List[str], model: Optional[str] = None, truncate: Optional[str] = None) -> Embeddings:
+    def embed(
+        self,
+        texts: List[str],
+        model: Optional[str] = None,
+        truncate: Optional[str] = None,
+        compress: Optional[bool] = False,
+        compression_codebook: Optional[str] = "default",
+    ) -> Embeddings:
         """Returns an Embeddings object for the provided texts. Visit https://cohere.ai/embed to learn about embeddings.
 
         Args:
             text (List[str]): A list of strings to embed.
             model (str): (Optional) The model ID to use for embedding the text.
             truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
+            compress (bool): (Optional) Whether to compress the embeddings. When True, the compressed_embeddings will be returned as integers in the range [0, 255].
+            compression_codebook (str): (Optional) The compression codebook to use for compressed embeddings. Defaults to "default".
         """
-        responses = []
+        responses = {
+            "embeddings": [],
+            "compressed_embeddings": [],
+        }
         json_bodys = []
 
         for i in range(0, len(texts), self.batch_size):
@@ -273,15 +286,40 @@ class Client:
                     "model": model,
                     "texts": texts_batch,
                     "truncate": truncate,
+                    "compress": compress,
+                    "compression_codebook": compression_codebook,
                 }
             )
 
         meta = None
         for result in self._executor.map(lambda json_body: self._request(cohere.EMBED_URL, json=json_body), json_bodys):
-            responses.extend(result["embeddings"])
+            responses["embeddings"].extend(result["embeddings"])
+            responses["compressed_embeddings"].extend(result.get("compressed_embeddings", []))
             meta = result["meta"] if not meta else meta
 
-        return Embeddings(responses, meta)
+        return Embeddings(
+            embeddings=responses["embeddings"],
+            compressed_embeddings=responses["compressed_embeddings"],
+            meta=meta,
+        )
+
+    def codebook(
+        self,
+        model: Optional[str] = None,
+        compression_codebook: Optional[str] = "default",
+    ) -> Codebook:
+        """Returns a codebook object for the provided model. Visit https://cohere.ai/embed to learn about compressed embeddings and codebooks.
+
+        Args:
+            model (str): (Optional) The model ID to use for embedding the text.
+            compression_codebook (str): (Optional) The compression codebook to use for compressed embeddings. Defaults to "default".
+        """
+        json_body = {
+            "model": model,
+            "compression_codebook": compression_codebook,
+        }
+        response = self._request(cohere.CODEBOOK_URL, json=json_body)
+        return Codebook(response["codebook"], response["meta"])
 
     def classify(
         self,
