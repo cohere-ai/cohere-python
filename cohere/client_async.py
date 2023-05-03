@@ -178,14 +178,23 @@ class AsyncClient(Client):
         return_prompt: bool = False,
         return_preamble: bool = False,
         chatlog_override: List[Dict[str, str]] = None,
+        chat_history: List[Dict[str, str]] = None,
         preamble_override: str = None,
         user_name: str = None,
         temperature: float = 0.8,
-        max_tokens: int = 200,
+        max_tokens: int = None,
         stream: bool = False,
     ) -> Union[AsyncChat, StreamingChat]:
         if chatlog_override is not None:
             self._validate_chatlog_override(chatlog_override)
+
+        if chat_history is not None:
+            self._validate_chat_history(chat_history)
+
+        if max_tokens is not None:
+            logger.warning(
+                "The 'max_tokens' parameter is deprecated and will be removed in a future version of this function.",
+            )
 
         json_body = {
             "query": query,
@@ -195,9 +204,9 @@ class AsyncClient(Client):
             "return_prompt": return_prompt,
             "return_preamble": return_preamble,
             "chatlog_override": chatlog_override,
+            "chat_history": chat_history,
             "preamble_override": preamble_override,
             "temperature": temperature,
-            "max_tokens": max_tokens,
             "stream": stream,
             "user_name": user_name,
         }
