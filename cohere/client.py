@@ -219,6 +219,16 @@ class Client:
                 >>>     stream=True)
                 >>> for token in res:
                 >>>     print(token)
+            Stateless chat with chat history:
+                >>> res = co.chat(
+                >>>     query="Tell me a joke!",
+                >>>     chat_history=[
+                >>>         {'user_name': 'User', message': 'Hey! How are you doing today?'},
+                >>>         {'user_name': 'Bot', message': 'I am doing great! How can I help you?'},
+                >>>     ],
+                >>>     return_prompt=True)
+                >>> print(res.text)
+                >>> print(res.prompt)
         """
         if chatlog_override is not None:
             self._validate_chatlog_override(chatlog_override)
