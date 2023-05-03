@@ -4,7 +4,6 @@
 - [#220](https://github.com/cohere-ai/cohere-python/pull/220)
   - Update chat params
     - Add support for `chat_history`
-    - Add deprecation warning for `max_tokens`
 
 ## 4.3.0
 

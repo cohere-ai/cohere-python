@@ -191,11 +191,6 @@ class AsyncClient(Client):
         if chat_history is not None:
             self._validate_chat_history(chat_history)
 
-        if max_tokens is not None:
-            logger.warning(
-                "The 'max_tokens' parameter is deprecated and will be removed in a future version of this function.",
-            )
-
         json_body = {
             "query": query,
             "conversation_id": conversation_id,
@@ -207,6 +202,7 @@ class AsyncClient(Client):
             "chat_history": chat_history,
             "preamble_override": preamble_override,
             "temperature": temperature,
+            "max_tokens": max_tokens,
             "stream": stream,
             "user_name": user_name,
         }

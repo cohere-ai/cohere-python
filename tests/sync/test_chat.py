@@ -120,12 +120,19 @@ class TestChat(unittest.TestCase):
         temperatures = [0.1, 0.9]
 
         for temperature in temperatures:
-            prediction = co.chat("Yo what up?", temperature=temperature)
+            prediction = co.chat("Yo what up?", temperature=temperature, max_tokens=5)
             self.assertIsInstance(prediction.text, str)
             self.assertIsInstance(prediction.conversation_id, str)
 
+    def test_max_tokens(self):
+        prediction = co.chat("Yo what up?", max_tokens=10)
+        self.assertIsInstance(prediction.text, str)
+        self.assertIsInstance(prediction.conversation_id, str)
+        tokens = co.tokenize(prediction.text)
+        self.assertLessEqual(tokens.length, 10)
+
     def test_stream(self):
-        prediction = co.chat(query="Yo what up?", stream=True)
+        prediction = co.chat(query="Yo what up?", max_tokens=5, stream=True)
 
         for token in prediction:
             self.assertIsInstance(token.text, str)

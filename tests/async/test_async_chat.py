@@ -20,6 +20,7 @@ async def test_async_multi_replies(async_client):
 async def test_async_chat_stream(async_client):
     res = await async_client.chat(
         query="wagmi",
+        max_tokens=5,
         stream=True,
     )
 
@@ -34,11 +35,13 @@ async def test_async_chat_stream(async_client):
 async def test_async_id(async_client):
     res1 = await async_client.chat(
         query="wagmi",
+        max_tokens=5,
     )
     assert isinstance(res1.response_id, str)
 
     res2 = await async_client.chat(
         query="wagmi",
+        max_tokens=5,
     )
     assert isinstance(res2.response_id, str)
 

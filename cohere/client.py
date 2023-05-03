@@ -183,7 +183,7 @@ class Client:
             preamble_override (str): (Optional) A string to override the preamble.
             user_name (str): (Optional) A string to override the username.
             temperature (float): (Optional) The temperature to use for the next reply. The higher the temperature, the more random the reply.
-            max_tokens (int): (Optional) Deprecated.
+            max_tokens (int): (Optional) The max tokens generated for the next reply.
             stream (bool): Return streaming tokens.
         Returns:
             a Chat object if stream=False, or a StreamingChat object if stream=True
@@ -236,11 +236,6 @@ class Client:
         if chat_history is not None:
             self._validate_chat_history(chat_history)
 
-        if max_tokens is not None:
-            logger.warning(
-                "The 'max_tokens' parameter is deprecated and will be removed in a future version of this function.",
-            )
-
         json_body = {
             "query": query,
             "conversation_id": conversation_id,
@@ -252,6 +247,7 @@ class Client:
             "chat_history": chat_history,
             "preamble_override": preamble_override,
             "temperature": temperature,
+            "max_tokens": max_tokens,
             "stream": stream,
             "user_name": user_name,
         }
