@@ -163,3 +163,33 @@ class TestChat(unittest.TestCase):
         self.assertIsInstance(prediction.conversation_id, str)
 
         assert prediction.preamble is None
+
+    def test_chat_history(self):
+        prediction = co.chat(
+            "Yo what up?",
+            chat_history=[
+                {"user_name": "User", "message": "Yo what up?"},
+                {"user_name": "Bot", "message": "Not much, you?"},
+            ],
+            return_prompt=True,
+            return_chatlog=True,
+        )
+        self.assertIsInstance(prediction.text, str)
+        self.assertIsInstance(prediction.conversation_id, str)
+        self.assertIsNone(prediction.chatlog)
+        self.assertIn("User: Yo what up?", prediction.prompt)
+        self.assertIn("Bot: Not much, you?", prediction.prompt)
+
+    def test_invalid_chat_history(self):
+        invalid_chat_histories = [
+            "invalid",
+            ["invalid"],
+            [{"user": "invalid", "bot": "invalid"}],
+        ]
+
+        for chat_history in invalid_chat_histories:
+            with self.assertRaises(cohere.error.CohereError):
+                _ = co.chat(
+                    query="Hey!",
+                    chat_history=chat_history,
+                )
