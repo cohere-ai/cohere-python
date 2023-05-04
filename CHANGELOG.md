@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.3.1
+- [#220](https://github.com/cohere-ai/cohere-python/pull/220)
+  - Update chat params
+    - Add support for `chat_history`
+
 ## 4.3.0
 
 - [#210](https://github.com/cohere-ai/cohere-python/pull/210)

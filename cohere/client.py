@@ -162,10 +162,11 @@ class Client:
         return_prompt: bool = False,
         return_preamble: bool = False,
         chatlog_override: List[Dict[str, str]] = None,
+        chat_history: List[Dict[str, str]] = None,
         preamble_override: str = None,
         user_name: str = None,
         temperature: float = 0.8,
-        max_tokens: int = 200,
+        max_tokens: int = None,
         stream: bool = False,
     ) -> Union[Chat, StreamingChat]:
         """Returns a Chat object with the query reply.
@@ -178,6 +179,7 @@ class Client:
             return_prompt (bool): (Optional) Whether to return the prompt.
             return_preamble (bool): (Optional) Whether to return the preamble.
             chatlog_override (List[Dict[str, str]]): (Optional) A list of chatlog entries to override the chatlog.
+            chat_history (List[Dict[str, str]]): (Optional) A list of entries used to construct the conversation. If provided, these messages will be used to build the prompt and the conversation_id will be ignored so no data will be stored to maintain state.
             preamble_override (str): (Optional) A string to override the preamble.
             user_name (str): (Optional) A string to override the username.
             temperature (float): (Optional) The temperature to use for the next reply. The higher the temperature, the more random the reply.
@@ -217,9 +219,22 @@ class Client:
                 >>>     stream=True)
                 >>> for token in res:
                 >>>     print(token)
+            Stateless chat with chat history:
+                >>> res = co.chat(
+                >>>     query="Tell me a joke!",
+                >>>     chat_history=[
+                >>>         {'user_name': 'User', message': 'Hey! How are you doing today?'},
+                >>>         {'user_name': 'Bot', message': 'I am doing great! How can I help you?'},
+                >>>     ],
+                >>>     return_prompt=True)
+                >>> print(res.text)
+                >>> print(res.prompt)
         """
         if chatlog_override is not None:
             self._validate_chatlog_override(chatlog_override)
+
+        if chat_history is not None:
+            self._validate_chat_history(chat_history)
 
         json_body = {
             "query": query,
@@ -229,6 +244,7 @@ class Client:
             "return_prompt": return_prompt,
             "return_preamble": return_preamble,
             "chatlog_override": chatlog_override,
+            "chat_history": chat_history,
             "preamble_override": preamble_override,
             "temperature": temperature,
             "max_tokens": max_tokens,
@@ -241,6 +257,20 @@ class Client:
             return StreamingChat(response)
         else:
             return Chat.from_dict(response, query=query, client=self)
+
+    def _validate_chat_history(self, chat_history: List[Dict[str, str]]) -> None:
+        if not isinstance(chat_history, list):
+            raise CohereError(message="chat_history is not a list, but it must be a list of dicts")
+
+        for entry in chat_history:
+            if not isinstance(entry, dict):
+                raise CohereError(message="chat_history must be a list of dicts, but it contains a non-dict element")
+            if "user_name" not in entry or "message" not in entry:
+                raise CohereError(
+                    message="chat_history must be a list of dicts, each mapping the user_name and message."
+                )
+            if not isinstance(entry["user_name"], str) or not isinstance(entry["message"], str):
+                raise CohereError(message="both user_name and message must be strings in chat_history.")
 
     def _validate_chatlog_override(self, chatlog_override: List[Dict[str, str]]) -> None:
         if not isinstance(chatlog_override, list):
