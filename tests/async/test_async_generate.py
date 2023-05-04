@@ -3,8 +3,7 @@ import pytest
 from cohere import CohereAPIError
 from cohere.responses import Generations
 
-TEST_MODEL = "medium"
-VERBOTEN = "Nazi Germany was the German state between 1933 and 1945, when Adolf Hitler controlled the country, transforming it into a dictatorship."  # blocked sentence from wikipedia
+TEST_MODEL = "base-light"
 
 
 @pytest.mark.asyncio
