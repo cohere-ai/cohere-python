@@ -6,10 +6,10 @@ from cohere.responses import Codebook
 @pytest.mark.asyncio
 async def test_async_multiple_codebook(async_client):
     compression_codebooks = {
-        "PQ32x": (96, 256, 8),
-        "PQ48x": (64, 256, 12),
-        "PQ64x": (48, 256, 16),
-        "PQ96x": (32, 256, 24),
+        "PQ96": (96, 256, 8),
+        "PQ64": (64, 256, 12),
+        "PQ48": (48, 256, 16),
+        "PQ32": (32, 256, 24),
     }
     for cb, (segments, num_centroids, length) in compression_codebooks.items():
         codebook = await async_client.codebook(
