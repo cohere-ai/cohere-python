@@ -1,7 +1,8 @@
+from importlib.metadata import version
+
 from cohere.client import Client
 from cohere.client_async import AsyncClient
 from cohere.error import CohereAPIError, CohereConnectionError, CohereError
-from importlib.metadata import version
 
 COHERE_API_URL = "https://api.cohere.ai"
 RETRY_STATUS_CODES = [429, 500, 502, 503, 504]
