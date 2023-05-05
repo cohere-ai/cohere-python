@@ -68,7 +68,7 @@ class AsyncClient(Client):
         self.batch_size = cohere.COHERE_EMBED_BATCH_SIZE
         self.num_workers = num_workers
         self.request_dict = request_dict
-        self.request_source = "python-sdk"
+        self.request_source = "python-sdk-" + cohere.SDK_VERSION
         self.max_retries = max_retries
         if client_name:
             self.request_source += ":" + client_name
