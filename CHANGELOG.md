@@ -1,6 +1,12 @@
 # Changelog
 
+## 4.3.2
+
+- [#222](https://github.com/cohere-ai/cohere-python/pull/222)
+  - Pass along SDK version in request source header
+
 ## 4.3.1
+
 - [#220](https://github.com/cohere-ai/cohere-python/pull/220)
   - Update chat params
     - Add support for `chat_history`
