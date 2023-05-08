@@ -59,13 +59,6 @@ class Chat(CohereObject):
             return_preamble=self.preamble is not None,
         )
 
-    @property
-    def reply(self) -> str:
-        logging.warning(
-            "The 'reply' attribute is deprecated and will be removed in a future version of this function. Use 'text' instead.",
-        )
-        return self.text
-
 
 class AsyncChat(Chat):
     async def respond(self, response: str) -> "AsyncChat":
