@@ -223,8 +223,8 @@ class Client:
                 >>> res = co.chat(
                 >>>     query="Tell me a joke!",
                 >>>     chat_history=[
-                >>>         {'user_name': 'User', message': 'Hey! How are you doing today?'},
-                >>>         {'user_name': 'Bot', message': 'I am doing great! How can I help you?'},
+                >>>         {'user_name': 'User', text': 'Hey! How are you doing today?'},
+                >>>         {'user_name': 'Bot', text': 'I am doing great! How can I help you?'},
                 >>>     ],
                 >>>     return_prompt=True)
                 >>> print(res.text)
@@ -265,12 +265,10 @@ class Client:
         for entry in chat_history:
             if not isinstance(entry, dict):
                 raise CohereError(message="chat_history must be a list of dicts, but it contains a non-dict element")
-            if "user_name" not in entry or "message" not in entry:
-                raise CohereError(
-                    message="chat_history must be a list of dicts, each mapping the user_name and message."
-                )
-            if not isinstance(entry["user_name"], str) or not isinstance(entry["message"], str):
-                raise CohereError(message="both user_name and message must be strings in chat_history.")
+            if "user_name" not in entry or "text" not in entry:
+                raise CohereError(message="chat_history must be a list of dicts, each mapping the user_name and text.")
+            if not isinstance(entry["user_name"], str) or not isinstance(entry["text"], str):
+                raise CohereError(message="both user_name and text must be strings in chat_history.")
 
     def _validate_chatlog_override(self, chatlog_override: List[Dict[str, str]]) -> None:
         if not isinstance(chatlog_override, list):
