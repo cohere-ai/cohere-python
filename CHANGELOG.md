@@ -2,7 +2,7 @@
 
 ## 4.4.0
 - [#223](https://github.com/cohere-ai/cohere-python/pull/223)
-  - Deprecate co.chat param `reply`
+  - Remove deprecated co.chat parameter `reply`
 
 ## 4.3.1
 - [#220](https://github.com/cohere-ai/cohere-python/pull/220)
