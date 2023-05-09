@@ -164,7 +164,6 @@ class TestChat(unittest.TestCase):
 
         assert prediction.preamble is None
 
-    @unittest.skip("broken between deploys")
     def test_chat_history(self):
         prediction = co.chat(
             "Who are you?",
@@ -179,7 +178,7 @@ class TestChat(unittest.TestCase):
         self.assertIsInstance(prediction.conversation_id, str)
         self.assertIsNone(prediction.chatlog)
         self.assertIn("User: Hey!", prediction.prompt)
-        self.assertIn("Bot: Hey! How can I help you?", prediction.prompt)
+        self.assertIn("Chatbot: Hey! How can I help you?", prediction.prompt)
 
     def test_invalid_chat_history(self):
         invalid_chat_histories = [
