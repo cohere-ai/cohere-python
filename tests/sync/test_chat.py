@@ -32,7 +32,7 @@ class TestChat(unittest.TestCase):
 
     def test_invalid_model(self):
         with self.assertRaises(cohere.CohereError):
-            co.chat("Yo what up?", model="NOT_A_VALID_MODEL").reply
+            co.chat("Yo what up?", model="NOT_A_VALID_MODEL").text
 
     def test_return_chatlog(self):
         prediction = co.chat("Yo what up?", return_chatlog=True)
@@ -113,7 +113,7 @@ class TestChat(unittest.TestCase):
 
     def test_invalid_preamble_override(self):
         with self.assertRaises(cohere.CohereError) as e:
-            co.chat("Yo what up?", preamble_override=123).reply
+            co.chat("Yo what up?", preamble_override=123).text
         self.assertIn("invalid type", str(e.exception))
 
     def test_valid_temperatures(self):

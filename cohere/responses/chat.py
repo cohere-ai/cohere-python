@@ -1,5 +1,4 @@
 import json
-import logging
 from typing import Any, Dict, Generator, List, NamedTuple, Optional
 
 import requests
@@ -58,13 +57,6 @@ class Chat(CohereObject):
             return_prompt=self.prompt is not None,
             return_preamble=self.preamble is not None,
         )
-
-    @property
-    def reply(self) -> str:
-        logging.warning(
-            "The 'reply' attribute is deprecated and will be removed in a future version of this function. Use 'text' instead.",
-        )
-        return self.text
 
 
 class AsyncChat(Chat):
