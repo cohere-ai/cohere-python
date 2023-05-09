@@ -169,7 +169,7 @@ class TestChat(unittest.TestCase):
             "Who are you?",
             chat_history=[
                 {"user_name": "User", "text": "Hey!"},
-                {"user_name": "Chatbot", "text": "Hey! How can I help you?"},
+                {"user_name": "Bot", "text": "Hey! How can I help you?"},
             ],
             return_prompt=True,
             return_chatlog=True,
@@ -178,7 +178,7 @@ class TestChat(unittest.TestCase):
         self.assertIsInstance(prediction.conversation_id, str)
         self.assertIsNone(prediction.chatlog)
         self.assertIn("User: Hey!", prediction.prompt)
-        self.assertIn("Chatbot: Hey! How can I help you?", prediction.prompt)
+        self.assertIn("Bot: Hey! How can I help you?", prediction.prompt)
 
     def test_invalid_chat_history(self):
         invalid_chat_histories = [
