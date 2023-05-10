@@ -164,13 +164,12 @@ class TestChat(unittest.TestCase):
 
         assert prediction.preamble is None
 
-    @unittest.skip("broken between deploys")
     def test_chat_history(self):
         prediction = co.chat(
             "Who are you?",
             chat_history=[
                 {"user_name": "User", "text": "Hey!"},
-                {"user_name": "Chatbot", "text": "Hey! How can I help you?"},
+                {"user_name": "Bot", "text": "Hey! How can I help you?"},
             ],
             return_prompt=True,
             return_chatlog=True,
