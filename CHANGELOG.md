@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.4.2
+- [#225](https://github.com/cohere-ai/cohere-python/pull/224)
+  - Remove support for the co.chat parameter `chatlog_override` and add deprecation warning
+
 ## 4.4.1
 - [#224](https://github.com/cohere-ai/cohere-python/pull/224)
   - Update co.chat parameter `chat_history`
