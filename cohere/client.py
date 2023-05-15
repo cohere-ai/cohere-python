@@ -178,7 +178,7 @@ class Client:
             return_chatlog (bool): (Optional) Whether to return the chatlog.
             return_prompt (bool): (Optional) Whether to return the prompt.
             return_preamble (bool): (Optional) Whether to return the preamble.
-            chatlog_override (List[Dict[str, str]]): (Optional) A list of chatlog entries to override the chatlog.
+            chatlog_override (List[Dict[str, str]]): Deprecated.
             chat_history (List[Dict[str, str]]): (Optional) A list of entries used to construct the conversation. If provided, these messages will be used to build the prompt and the conversation_id will be ignored so no data will be stored to maintain state.
             preamble_override (str): (Optional) A string to override the preamble.
             user_name (str): (Optional) A string to override the username.
