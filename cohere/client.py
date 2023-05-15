@@ -201,18 +201,6 @@ class Client:
                 >>>     return_chatlog=True)
                 >>> print(res.text)
                 >>> print(res.chatlog)
-            Overriding a chat log:
-                >>> res = co.chat(
-                >>>     query="What about you?",
-                >>>     conversation_id="1234",
-                >>>     chatlog_override=[
-                >>>         {'Bot': 'Hey!'},
-                >>>         {'User': 'I am doing great!'},
-                >>>         {'Bot': 'That is great to hear!'},
-                >>>     ],
-                >>>     return_chatlog=True)
-                >>> print(res.text)
-                >>> print(res.chatlog)
             Streaming chat:
                 >>> res = co.chat(
                 >>>     query="Hey! How are you doing today?",
@@ -232,6 +220,10 @@ class Client:
         """
         if chatlog_override is not None:
             self._validate_chatlog_override(chatlog_override)
+            logger.warning(
+                "The 'chatlog_override' parameter is deprecated and will be removed in a future version of this function. "
+                + "Use 'chat_history' to keep track of the conversation instead.",
+            )
 
         if chat_history is not None:
             self._validate_chat_history(chat_history)
@@ -243,7 +235,6 @@ class Client:
             "return_chatlog": return_chatlog,
             "return_prompt": return_prompt,
             "return_preamble": return_preamble,
-            "chatlog_override": chatlog_override,
             "chat_history": chat_history,
             "preamble_override": preamble_override,
             "temperature": temperature,
