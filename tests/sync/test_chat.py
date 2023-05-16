@@ -83,7 +83,7 @@ class TestChat(unittest.TestCase):
             self.assertIsInstance(prediction.conversation_id, str)
 
     def test_max_tokens(self):
-        prediction = co.chat("Yo what up?", max_tokens=10, temperature=0)
+        prediction = co.chat("Yo what up?", max_tokens=10)
         self.assertIsInstance(prediction.text, str)
         self.assertIsInstance(prediction.conversation_id, str)
         tokens = co.tokenize(prediction.text)
