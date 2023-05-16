@@ -186,7 +186,6 @@ class AsyncClient(Client):
         stream: bool = False,
     ) -> Union[AsyncChat, StreamingChat]:
         if chatlog_override is not None:
-            self._validate_chatlog_override(chatlog_override)
             logger.warning(
                 "The 'chatlog_override' parameter is deprecated and will be removed in a future version of this function. "
                 + "Use 'chat_history' to keep track of the conversation instead."

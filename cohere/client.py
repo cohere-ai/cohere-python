@@ -219,7 +219,6 @@ class Client:
                 >>> print(res.prompt)
         """
         if chatlog_override is not None:
-            self._validate_chatlog_override(chatlog_override)
             logger.warning(
                 "The 'chatlog_override' parameter is deprecated and will be removed in a future version of this function. "
                 + "Use 'chat_history' to keep track of the conversation instead.",
@@ -260,20 +259,6 @@ class Client:
                 raise CohereError(message="chat_history must be a list of dicts, each mapping the user_name and text.")
             if not isinstance(entry["user_name"], str) or not isinstance(entry["text"], str):
                 raise CohereError(message="both user_name and text must be strings in chat_history.")
-
-    def _validate_chatlog_override(self, chatlog_override: List[Dict[str, str]]) -> None:
-        if not isinstance(chatlog_override, list):
-            raise CohereError(message="chatlog_override is not a list, but it must be a list of dicts")
-
-        for entry in chatlog_override:
-            if not isinstance(entry, dict):
-                raise CohereError(
-                    message="chatlog_override must be a list of dicts, but it contains a non-dict element"
-                )
-            if len(entry) != 1:
-                raise CohereError(
-                    message="chatlog_override must be a list of dicts, each mapping the agent to the message."
-                )
 
     def embed(
         self,
