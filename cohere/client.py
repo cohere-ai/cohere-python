@@ -211,8 +211,8 @@ class Client:
                 >>> res = co.chat(
                 >>>     query="Tell me a joke!",
                 >>>     chat_history=[
-                >>>         {'speaker': 'USER', text': 'Hey! How are you doing today?'},
-                >>>         {'speaker': 'CHATBOT', text': 'I am doing great! How can I help you?'},
+                >>>         {'user_name': 'User', text': 'Hey! How are you doing today?'},
+                >>>         {'user_name': 'Bot', text': 'I am doing great! How can I help you?'},
                 >>>     ],
                 >>>     return_prompt=True)
                 >>> print(res.text)
@@ -227,7 +227,6 @@ class Client:
 
         if chat_history is not None:
             self._validate_chat_history(chat_history)
-            chat_history = self._format_chat_history(chat_history)
 
         json_body = {
             "query": query,
@@ -250,18 +249,6 @@ class Client:
         else:
             return Chat.from_dict(response, query=query, client=self)
 
-    def _format_chat_history(self, chat_history: List[Dict[str, str]]) -> List[Dict[str, str]]:
-        # ensure that the user inputs the updated format while still supporting the old one
-        formatted_chat_history = []
-        for entry in chat_history:
-            text = entry["text"]
-            if "speaker" in entry:
-                speaker = entry["speaker"].capitalize()
-            else:
-                speaker = entry["user_name"].capitalize()
-            formatted_chat_history.append({"user_name": speaker, "text": text})
-        return formatted_chat_history
-
     def _validate_chat_history(self, chat_history: List[Dict[str, str]]) -> None:
         if not isinstance(chat_history, list):
             raise CohereError(message="chat_history is not a list, but it must be a list of dicts")
@@ -269,14 +256,10 @@ class Client:
         for entry in chat_history:
             if not isinstance(entry, dict):
                 raise CohereError(message="chat_history must be a list of dicts, but it contains a non-dict element")
-            if "text" not in entry or "speaker" not in entry:
-                raise CohereError(message="chat_history must be a list of dicts, each mapping the speaker and text.")
-            if "text" in entry and not isinstance(entry["text"], str):
-                raise CohereError(message="text must be a string in chat_history.")
-            if "speaker" in entry and not isinstance(entry["speaker"], str):
-                raise CohereError(message="speaker must be a string in chat_history.")
-            if "speaker" in entry and entry["speaker"] not in ["USER", "CHATBOT", "SYSTEM"]:
-                raise CohereError(message="speaker must be either 'USER', 'CHATBOT' or 'SYSTEM' in chat_history.")
+            if "user_name" not in entry or "text" not in entry:
+                raise CohereError(message="chat_history must be a list of dicts, each mapping the user_name and text.")
+            if not isinstance(entry["user_name"], str) or not isinstance(entry["text"], str):
+                raise CohereError(message="both user_name and text must be strings in chat_history.")
 
     def _validate_chatlog_override(self, chatlog_override: List[Dict[str, str]]) -> None:
         if not isinstance(chatlog_override, list):

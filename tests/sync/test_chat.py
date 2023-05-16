@@ -126,8 +126,8 @@ class TestChat(unittest.TestCase):
         prediction = co.chat(
             "Who are you?",
             chat_history=[
-                {"speaker": "USER", "text": "Hey!"},
-                {"speaker": "CHATBOT", "text": "Hey! How can I help you?"},
+                {"user_name": "User", "text": "Hey!"},
+                {"user_name": "Chatbot", "text": "Hey! How can I help you?"},
             ],
             return_prompt=True,
             return_chatlog=True,
