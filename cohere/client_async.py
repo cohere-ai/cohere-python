@@ -48,10 +48,7 @@ class AsyncClient(Client):
 
     This client provides an asyncio/aiohttp interface.
     Using this client is recommended when you are making highly parallel request,
-    or when calling the Cohere API from a server such as FastAPI.
-
-    The methods here are typically identical to those in the main `Client`, with an extra argument
-    `return_exceptions` for the batch* methods, which is passed to asyncio.gather."""
+    or when calling the Cohere API from a server such as FastAPI."""
 
     def __init__(
         self,
@@ -121,7 +118,6 @@ class AsyncClient(Client):
     async def batch_generate(
         self, prompts: List[str], return_exceptions=False, **kwargs
     ) -> List[Union[Exception, Generations]]:
-        """return_exceptions is passed to asyncio.gather"""
         return await asyncio.gather(
             *[self.generate(prompt, **kwargs) for prompt in prompts], return_exceptions=return_exceptions
         )
@@ -278,6 +274,12 @@ class AsyncClient(Client):
         examples: List[ClassifyExample] = [],
         truncate: Optional[str] = None,
     ) -> Classifications:
+        if not preset:
+            if not examples:
+                raise CohereError(message="examples must be a non-empty list of ClassifyExample objects.")
+            if not inputs:
+                raise CohereError(message="inputs must be a non-empty list of strings.")
+
         examples_dicts = [{"text": example.text, "label": example.label} for example in examples]
 
         json_body = {

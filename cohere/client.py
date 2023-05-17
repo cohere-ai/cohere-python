@@ -1,6 +1,5 @@
 import json as jsonlib
 import os
-from concurrent import futures
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict
 from functools import partial
@@ -89,7 +88,13 @@ class Client:
     def batch_generate(
         self, prompts: List[str], return_exceptions=False, **kwargs
     ) -> List[Union[Generations, Exception]]:
-        """A batched version of generate with multiple prompts."""
+        """A batched version of generate with multiple prompts.
+
+        Args:
+            prompts: list of prompts
+            return_exceptions (bool): Return exceptions as list items rather than raise them. Ensures your entire batch is not lost on one of the items failing.
+            kwargs: other arguments to `generate`
+        """
         return threadpool_map(
             self.generate,
             [dict(prompt=prompt, **kwargs) for prompt in prompts],
@@ -370,10 +375,13 @@ class Client:
             examples (List[ClassifyExample]): A list of ClassifyExample objects containing a text and its associated label.
             truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
         """
-        examples_dicts: list[dict[str, str]] = []
-        for example in examples:
-            example_dict = {"text": example.text, "label": example.label}
-            examples_dicts.append(example_dict)
+        if not preset:
+            if not examples:
+                raise CohereError(message="examples must be a non-empty list of ClassifyExample objects.")
+            if not inputs:
+                raise CohereError(message="inputs must be a non-empty list of strings.")
+
+        examples_dicts = [{"text": example.text, "label": example.label} for example in examples]
 
         json_body = {
             "model": model,
@@ -454,14 +462,13 @@ class Client:
 
         return SummarizeResponse(id=response["id"], summary=response["summary"], meta=response["meta"])
 
-    def batch_tokenize(self, texts: List[str]) -> List[Tokens]:
-        """A batched version of tokenize"""
-        with futures.ThreadPoolExecutor(max_workers=self.num_workers) as executor:
-            res = executor.map(self.tokenize, texts)
-        return list(res)
-
     def batch_tokenize(self, texts: List[str], return_exceptions=False) -> List[Union[Tokens, Exception]]:
-        """A batched version of tokenize."""
+        """A batched version of tokenize.
+
+        Args:
+            texts: list of texts
+            return_exceptions (bool): Return exceptions as list items rather than raise them. Ensures your entire batch is not lost on one of the items failing.
+        """
         return threadpool_map(
             self.tokenize,
             [dict(text=text) for text in texts],
@@ -482,7 +489,12 @@ class Client:
     def batch_detokenize(
         self, list_of_tokens: List[List[int]], return_exceptions=False
     ) -> List[Union[Detokenization, Exception]]:
-        """A batched version of detokenize"""
+        """A batched version of detokenize.
+
+        Args:
+            list_of_tokens: list of list of tokens
+            return_exceptions (bool): Return exceptions as list items rather than raise them. Ensures your entire batch is not lost on one of the items failing.
+        """
         return threadpool_map(
             self.detokenize,
             [dict(tokens=tokens) for tokens in list_of_tokens],

@@ -4,6 +4,10 @@
 - [#229](https://github.com/cohere-ai/cohere-python/pull/229)
   - Add `return_exceptions` parameter to Client's `batch_*` methods, mirroring AsyncClient
 
+## 4.4.2
+- [#230](https://github.com/cohere-ai/cohere-python/pull/230)
+  - Add SDK level validation for classify params
+
 ## 4.4.1
 - [#224](https://github.com/cohere-ai/cohere-python/pull/224)
   - Update co.chat parameter `chat_history`
