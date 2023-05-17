@@ -184,7 +184,10 @@ class AsyncClient(Client):
         stream: bool = False,
     ) -> Union[AsyncChat, StreamingChat]:
         if chatlog_override is not None:
-            self._validate_chatlog_override(chatlog_override)
+            logger.warning(
+                "The 'chatlog_override' parameter is deprecated and will be removed in a future version of this function. "
+                + "Use 'chat_history' to keep track of the conversation instead."
+            )
 
         if chat_history is not None:
             self._validate_chat_history(chat_history)
@@ -196,7 +199,6 @@ class AsyncClient(Client):
             "return_chatlog": return_chatlog,
             "return_prompt": return_prompt,
             "return_preamble": return_preamble,
-            "chatlog_override": chatlog_override,
             "chat_history": chat_history,
             "preamble_override": preamble_override,
             "temperature": temperature,

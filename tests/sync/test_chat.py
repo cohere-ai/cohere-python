@@ -48,48 +48,6 @@ class TestChat(unittest.TestCase):
 
         assert prediction.chatlog is None
 
-    def testValidChatlogOverride(self):
-        query = "What about you?"
-        valid_chatlog_overrides = [
-            [
-                {"Bot": "Hey!"},
-                {"User": "I am doing great!"},
-                {"Bot": "That is great to hear!"},
-            ],
-            [],
-        ]
-
-        for chatlog_override in valid_chatlog_overrides:
-            expected_chatlog = ""
-            for message in chatlog_override:
-                key, value = next(iter(message.items()))
-                expected_chatlog += f"{key}: {value}\n"
-            expected_chatlog += "User: " + query
-
-            prediction = co.chat(
-                query=query, conversation_id="1234", chatlog_override=chatlog_override, return_chatlog=True
-            )
-
-            self.assertIsInstance(prediction.text, str)
-            self.assertIsInstance(prediction.conversation_id, str)
-            self.assertIn(expected_chatlog, prediction.chatlog)
-
-    def testInvalidChatlogOverride(self):
-        invalid_chatlog_overrides = [
-            "invalid",
-            ["invalid"],
-            [{"user": "invalid", "bot": "invalid"}],
-        ]
-
-        for chatlog_override in invalid_chatlog_overrides:
-            with self.assertRaises(cohere.error.CohereError):
-                _ = co.chat(
-                    query="What about you?",
-                    conversation_id="1234",
-                    chatlog_override=chatlog_override,
-                    return_chatlog=True,
-                )
-
     def test_return_prompt(self):
         prediction = co.chat("Yo what up?", return_prompt=True)
         self.assertIsInstance(prediction.text, str)
@@ -162,7 +120,7 @@ class TestChat(unittest.TestCase):
             "Who are you?",
             chat_history=[
                 {"user_name": "User", "text": "Hey!"},
-                {"user_name": "Bot", "text": "Hey! How can I help you?"},
+                {"user_name": "Chatbot", "text": "Hey! How can I help you?"},
             ],
             return_prompt=True,
             return_chatlog=True,
@@ -171,7 +129,7 @@ class TestChat(unittest.TestCase):
         self.assertIsInstance(prediction.conversation_id, str)
         self.assertIsNone(prediction.chatlog)
         self.assertIn("User: Hey!", prediction.prompt)
-        self.assertIn("Bot: Hey! How can I help you?", prediction.prompt)
+        self.assertIn("Chatbot: Hey! How can I help you?", prediction.prompt)
 
     def test_invalid_chat_history(self):
         invalid_chat_histories = [
