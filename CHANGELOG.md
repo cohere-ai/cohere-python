@@ -1,8 +1,16 @@
 # Changelog
 
-## 4.4.2
+## 4.5.1
 - [#225](https://github.com/cohere-ai/cohere-python/pull/224)
   - Remove support for the co.chat parameter `chatlog_override` and add deprecation warning
+
+## 4.5.0
+- [#229](https://github.com/cohere-ai/cohere-python/pull/229)
+  - Add `return_exceptions` parameter to Client's `batch_*` methods, mirroring AsyncClient
+
+## 4.4.2
+- [#230](https://github.com/cohere-ai/cohere-python/pull/230)
+  - Add SDK level validation for classify params
 
 ## 4.4.1
 - [#224](https://github.com/cohere-ai/cohere-python/pull/224)
