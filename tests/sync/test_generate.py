@@ -29,6 +29,18 @@ class TestGenerate(unittest.TestCase):
             self.assertIsNone(prediction.generations[0].token_likelihoods)
             self.assertEqual(prediction.return_likelihoods, None)
 
+    def test_batch_return_exceptions(self):
+        prompts = ["x y z" * 3333] + ["co:here"] * 2  # too long for 8192
+        # test return_exceptions = False -> fails
+        with self.assertRaises(cohere.CohereError):
+            predictions = co.batch_generate(model="medium", prompts=prompts, max_tokens=1)
+        # test return_exceptions = True
+        predictions = co.batch_generate(model="medium", prompts=prompts, max_tokens=1, return_exceptions=True)
+        self.assertEqual(len(predictions), len(prompts))
+        self.assertIsInstance(predictions[0], Exception)
+        self.assertIsInstance(predictions[1][0].text, str)
+        self.assertIsInstance(predictions[2][0].text, str)
+
     def test_return_likelihoods_generation(self):
         prediction = co.generate(model="medium", prompt="co:here", max_tokens=1, return_likelihoods="GENERATION")
         self.assertTrue(prediction.generations[0].token_likelihoods)
