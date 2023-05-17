@@ -188,7 +188,7 @@ class Client:
             return_chatlog (bool): (Optional) Whether to return the chatlog.
             return_prompt (bool): (Optional) Whether to return the prompt.
             return_preamble (bool): (Optional) Whether to return the preamble.
-            chatlog_override (List[Dict[str, str]]): (Optional) A list of chatlog entries to override the chatlog.
+            chatlog_override (List[Dict[str, str]]): Deprecated.
             chat_history (List[Dict[str, str]]): (Optional) A list of entries used to construct the conversation. If provided, these messages will be used to build the prompt and the conversation_id will be ignored so no data will be stored to maintain state.
             preamble_override (str): (Optional) A string to override the preamble.
             user_name (str): (Optional) A string to override the username.
@@ -211,18 +211,6 @@ class Client:
                 >>>     return_chatlog=True)
                 >>> print(res.text)
                 >>> print(res.chatlog)
-            Overriding a chat log:
-                >>> res = co.chat(
-                >>>     query="What about you?",
-                >>>     conversation_id="1234",
-                >>>     chatlog_override=[
-                >>>         {'Bot': 'Hey!'},
-                >>>         {'User': 'I am doing great!'},
-                >>>         {'Bot': 'That is great to hear!'},
-                >>>     ],
-                >>>     return_chatlog=True)
-                >>> print(res.text)
-                >>> print(res.chatlog)
             Streaming chat:
                 >>> res = co.chat(
                 >>>     query="Hey! How are you doing today?",
@@ -241,7 +229,10 @@ class Client:
                 >>> print(res.prompt)
         """
         if chatlog_override is not None:
-            self._validate_chatlog_override(chatlog_override)
+            logger.warning(
+                "The 'chatlog_override' parameter is deprecated and will be removed in a future version of this function. "
+                + "Use 'chat_history' to keep track of the conversation instead.",
+            )
 
         if chat_history is not None:
             self._validate_chat_history(chat_history)
@@ -253,7 +244,6 @@ class Client:
             "return_chatlog": return_chatlog,
             "return_prompt": return_prompt,
             "return_preamble": return_preamble,
-            "chatlog_override": chatlog_override,
             "chat_history": chat_history,
             "preamble_override": preamble_override,
             "temperature": temperature,
@@ -279,20 +269,6 @@ class Client:
                 raise CohereError(message="chat_history must be a list of dicts, each mapping the user_name and text.")
             if not isinstance(entry["user_name"], str) or not isinstance(entry["text"], str):
                 raise CohereError(message="both user_name and text must be strings in chat_history.")
-
-    def _validate_chatlog_override(self, chatlog_override: List[Dict[str, str]]) -> None:
-        if not isinstance(chatlog_override, list):
-            raise CohereError(message="chatlog_override is not a list, but it must be a list of dicts")
-
-        for entry in chatlog_override:
-            if not isinstance(entry, dict):
-                raise CohereError(
-                    message="chatlog_override must be a list of dicts, but it contains a non-dict element"
-                )
-            if len(entry) != 1:
-                raise CohereError(
-                    message="chatlog_override must be a list of dicts, each mapping the agent to the message."
-                )
 
     def embed(
         self,
