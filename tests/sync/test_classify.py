@@ -2,6 +2,7 @@ import os
 import unittest
 
 import pytest
+from cohere.error import CohereError
 from utils import get_api_key
 
 import cohere
@@ -39,6 +40,30 @@ class TestClassify(unittest.TestCase):
         self.assertEqual(len(prediction.classifications[0].labels), 2)
         self.assertEqual(len(prediction.classifications), 1)
         self.assertEqual(prediction.classifications[0].prediction, "color")
+
+    def test_input_validation(self):
+        for value in [None, []]:
+            with pytest.raises(CohereError) as exc:
+                co.classify(
+                    model="small",
+                    inputs=value,
+                    examples=[
+                        Example("apple", "fruit"),
+                        Example("kiwi", "fruit"),
+                        Example("yellow", "color"),
+                        Example("magenta", "color"),
+                    ],
+                )
+            assert "inputs must be a non-empty list of strings." in str(exc.value)
+
+        for value in [None, []]:
+            with pytest.raises(CohereError) as exc:
+                co.classify(
+                    model="small",
+                    inputs=["apple", "yellow"],
+                    examples=value,
+                )
+        assert "examples must be a non-empty list of ClassifyExample objects." in str(exc.value)
 
     def test_empty_inputs(self):
         with self.assertRaises(cohere.CohereError):
