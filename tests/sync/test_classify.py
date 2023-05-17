@@ -2,10 +2,10 @@ import os
 import unittest
 
 import pytest
-from cohere.error import CohereError
 from utils import get_api_key
 
 import cohere
+from cohere.error import CohereError
 from cohere.responses.classify import Example
 
 co = cohere.Client(get_api_key())

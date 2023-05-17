@@ -1,7 +1,7 @@
 import pytest
 
-from cohere.responses.classify import Example
 from cohere.error import CohereError
+from cohere.responses.classify import Example
 
 
 @pytest.mark.asyncio
