@@ -8,7 +8,7 @@ co = cohere.Client(get_api_key())
 
 
 class TestTokenize(unittest.TestCase):
-    def test_success(self):
+    def test_tokenize_success(self):
         tokens = co.tokenize("tokenize me!")
         self.assertIsInstance(tokens.tokens, list)
         self.assertIsInstance(tokens.token_strings, list)
@@ -18,6 +18,12 @@ class TestTokenize(unittest.TestCase):
         self.assertTrue(tokens.meta)
         self.assertTrue(tokens.meta["api_version"])
         self.assertTrue(tokens.meta["api_version"]["version"])
+
+    def test_batch_tokenize(self):
+        tokens = co.batch_tokenize(["tokenize me!", "tokenize me too!"])
+        self.assertEqual(len(tokens), 2)
+        self.assertIsInstance(tokens[0].tokens, list)
+        self.assertIsInstance(tokens[1].tokens, list)
 
     def test_invalid_text(self):
         with self.assertRaises(cohere.CohereError):

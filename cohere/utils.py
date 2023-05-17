@@ -2,8 +2,8 @@ import abc
 import asyncio
 import json
 import time
-import typing
-from typing import Awaitable, Callable, Optional, TypeVar
+from concurrent import futures
+from typing import Awaitable, Callable, Dict, List, Optional, TypeVar
 
 from cohere.error import CohereError
 
@@ -41,7 +41,7 @@ def np_json_dumps(data, **kwargs):
     return json.dumps(data, cls=CohereJsonEncoder, **kwargs)
 
 
-def is_api_key_valid(key: typing.Optional[str]) -> bool:
+def is_api_key_valid(key: Optional[str]) -> bool:
     """is_api_key_valid returns True when the key is valid and raises a CohereError when it is invalid."""
     if not key:
         raise CohereError(
@@ -94,3 +94,19 @@ async def async_wait_for_job(
         job = await get_job()
 
     return job
+
+
+def threadpool_map(f, call_args: List[Dict], num_workers, return_exceptions: bool = False) -> List:
+    """Helper function similar to futures.ThreadPoolExecutor.map, but allows returning exceptions"""
+    results = []
+    with futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
+        futures_list = [executor.submit(f, **args) for args in call_args]
+        for future in futures_list:
+            try:
+                results.append(future.result())
+            except Exception as e:
+                if return_exceptions:
+                    results.append(e)
+                else:
+                    raise
+    return results
