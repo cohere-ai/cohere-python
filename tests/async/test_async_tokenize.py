@@ -18,7 +18,7 @@ async def test_tokenize(async_client):
 
 
 @pytest.mark.asyncio
-@pytest.mark.skipif(True, reason="until this is available globally in the API")
+@pytest.mark.skip(reason="until this is available globally in the API")
 async def test_model_param_tokenization(async_client):
     medium_res = await async_client.tokenize("Hello world!", model="medium")
     medium_res_batch = await async_client.batch_tokenize(["Hello world!"] * 3, model="medium")
