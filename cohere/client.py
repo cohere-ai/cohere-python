@@ -444,6 +444,7 @@ class Client:
         Args:
             texts: list of texts
             return_exceptions (bool): Return exceptions as list items rather than raise them. Ensures your entire batch is not lost on one of the items failing.
+            kwargs: other arguments to `tokenize`
         """
         return threadpool_map(
             self.tokenize,
@@ -457,6 +458,7 @@ class Client:
 
         Args:
             text (str): Text to summarize.
+            model (str): An optional model name that will ensure that the tokenization uses the tokenizer used by that model, which can be critical for counting tokens properly.
         """
         json_body = {"text": text}
         if model is not None:
@@ -472,6 +474,7 @@ class Client:
         Args:
             list_of_tokens: list of list of tokens
             return_exceptions (bool): Return exceptions as list items rather than raise them. Ensures your entire batch is not lost on one of the items failing.
+            kwargs: other arguments to `detokenize`
         """
         return threadpool_map(
             self.detokenize,
@@ -485,6 +488,7 @@ class Client:
 
         Args:
             tokens (List[int]): A list of tokens to convert to strings
+            model (str): An optional model name. This will ensure that the detokenization is done by the tokenizer used by that model.
         """
         json_body = {"tokens": tokens}
         if model is not None:
