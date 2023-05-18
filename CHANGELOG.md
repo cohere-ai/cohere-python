@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.6.0
+- [#232](https://github.com/cohere-ai/cohere-python/pull/232)
+  - Support model parameter in tokenize and detokenize
+
 ## 4.5.1
 - [#225](https://github.com/cohere-ai/cohere-python/pull/224)
   - Remove support for the co.chat parameter `chatlog_override` and add deprecation warning
