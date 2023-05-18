@@ -452,7 +452,7 @@ class Client:
             return_exceptions=return_exceptions,
         )
 
-    def tokenize(self, text: str, model: str = None) -> Tokens:
+    def tokenize(self, text: str, model: Optional[str] = None) -> Tokens:
         """Returns a Tokens object of the provided text, see https://docs.cohere.ai/reference/tokenize for advanced usage.
 
         Args:
@@ -480,7 +480,7 @@ class Client:
             return_exceptions=return_exceptions,
         )
 
-    def detokenize(self, tokens: List[int], model: str = None) -> Detokenization:
+    def detokenize(self, tokens: List[int], model: Optional[str] = None) -> Detokenization:
         """Returns a Detokenization object of the provided tokens, see https://docs.cohere.ai/reference/detokenize for advanced usage.
 
         Args:

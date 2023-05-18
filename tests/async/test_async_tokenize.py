@@ -52,7 +52,7 @@ async def test_detokenize(async_client):
 
 
 @pytest.mark.asyncio
-@pytest.mark.skipif(True, reason="until this is available globally in the API")
+@pytest.mark.skip(reason="until this is available globally in the API")
 async def test_model_param_detokenization(async_client):
     medium_detokenized = await async_client.detokenize([10104, 12221, 974, 514, 34], model="medium")
     medium_detokenized_batch = await async_client.batch_detokenize([[10104, 12221, 974, 514, 34]] * 3, model="medium")
