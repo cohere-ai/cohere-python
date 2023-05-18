@@ -346,7 +346,7 @@ class AsyncClient(Client):
             *[self.detokenize(t, **kwargs) for t in list_of_tokens], return_exceptions=return_exceptions
         )
 
-    async def detokenize(self, tokens: List[int]) -> Detokenization:
+    async def detokenize(self, tokens: List[int], model: str = None) -> Detokenization:
         json_body = {"tokens": tokens}
         if model is not None:
             json_body["model"] = model
