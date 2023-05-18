@@ -1,5 +1,6 @@
 import unittest
 
+import pytest
 from utils import get_api_key
 
 import cohere
@@ -8,6 +9,17 @@ co = cohere.Client(get_api_key())
 
 
 class TestTokenize(unittest.TestCase):
+    @pytest.mark.skipif(True, reason="until this is available globally in the API")
+    def test_model_param_tokenization(self):
+        medium_res = co.tokenize("Hello world!", model="medium")
+        medium_res_batch = co.batch_tokenize(["Hello world!"] * 3, model="medium")
+
+        command_res = co.tokenize("Hello world!", model="command")
+        command_res_batch = co.batch_tokenize(["Hello world!"] * 3, model="command")
+        assert medium_res == set(medium_res_batch)
+        assert command_res == set(command_res_batch)
+        assert medium_res != command_res
+
     def test_tokenize_success(self):
         tokens = co.tokenize("tokenize me!")
         self.assertIsInstance(tokens.tokens, list)

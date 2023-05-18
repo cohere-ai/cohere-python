@@ -327,21 +327,29 @@ class AsyncClient(Client):
         response = await self._request(cohere.SUMMARIZE_URL, json=json_body)
         return SummarizeResponse(id=response["id"], summary=response["summary"], meta=response["meta"])
 
-    async def batch_tokenize(self, texts: List[str], return_exceptions=False) -> List[Union[Tokens, Exception]]:
-        return await asyncio.gather(*[self.tokenize(t) for t in texts], return_exceptions=return_exceptions)
+    async def batch_tokenize(
+        self, texts: List[str], return_exceptions=False, **kwargs
+    ) -> List[Union[Tokens, Exception]]:
+        return await asyncio.gather(*[self.tokenize(t, **kwargs) for t in texts], return_exceptions=return_exceptions)
 
-    async def tokenize(self, text: str) -> Tokens:
+    async def tokenize(self, text: str, model: str = None) -> Tokens:
         json_body = {"text": text}
+        if model is not None:
+            json_body["model"] = model
         res = await self._request(cohere.TOKENIZE_URL, json_body)
         return Tokens(tokens=res["tokens"], token_strings=res["token_strings"], meta=res["meta"])
 
     async def batch_detokenize(
-        self, list_of_tokens: List[List[int]], return_exceptions=False
+        self, list_of_tokens: List[List[int]], return_exceptions=False, **kwargs
     ) -> List[Union[Detokenization, Exception]]:
-        return await asyncio.gather(*[self.detokenize(t) for t in list_of_tokens], return_exceptions=return_exceptions)
+        return await asyncio.gather(
+            *[self.detokenize(t, **kwargs) for t in list_of_tokens], return_exceptions=return_exceptions
+        )
 
     async def detokenize(self, tokens: List[int]) -> Detokenization:
         json_body = {"tokens": tokens}
+        if model is not None:
+            json_body["model"] = model
         res = await self._request(cohere.DETOKENIZE_URL, json_body)
         return Detokenization(text=res["text"], meta=res["meta"])
 
