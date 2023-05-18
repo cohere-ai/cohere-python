@@ -332,7 +332,7 @@ class AsyncClient(Client):
     ) -> List[Union[Tokens, Exception]]:
         return await asyncio.gather(*[self.tokenize(t, **kwargs) for t in texts], return_exceptions=return_exceptions)
 
-    async def tokenize(self, text: str, model: str = None) -> Tokens:
+    async def tokenize(self, text: str, model: Optional[str] = None) -> Tokens:
         json_body = {"text": text}
         if model is not None:
             json_body["model"] = model
