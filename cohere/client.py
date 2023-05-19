@@ -1,6 +1,5 @@
 import json as jsonlib
 import os
-from concurrent import futures
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict
 from functools import partial
@@ -36,7 +35,7 @@ from cohere.responses.feedback import (
 )
 from cohere.responses.rerank import Reranking
 from cohere.responses.summarize import SummarizeResponse
-from cohere.utils import is_api_key_valid, wait_for_job
+from cohere.utils import is_api_key_valid, threadpool_map, wait_for_job
 
 
 class Client:
@@ -86,11 +85,22 @@ class Client:
         """
         return {"valid": is_api_key_valid(self.api_key)}
 
-    def batch_generate(self, prompts: List[str], **kwargs) -> List[Generations]:
-        """A batched version of generate with multiple prompts."""
-        with futures.ThreadPoolExecutor(max_workers=self.num_workers) as executor:
-            res = executor.map(lambda prompt: self.generate(prompt=prompt, **kwargs), prompts)
-        return list(res)
+    def batch_generate(
+        self, prompts: List[str], return_exceptions=False, **kwargs
+    ) -> List[Union[Generations, Exception]]:
+        """A batched version of generate with multiple prompts.
+
+        Args:
+            prompts: list of prompts
+            return_exceptions (bool): Return exceptions as list items rather than raise them. Ensures your entire batch is not lost on one of the items failing.
+            kwargs: other arguments to `generate`
+        """
+        return threadpool_map(
+            self.generate,
+            [dict(prompt=prompt, **kwargs) for prompt in prompts],
+            num_workers=self.num_workers,
+            return_exceptions=return_exceptions,
+        )
 
     def generate(
         self,
@@ -178,7 +188,7 @@ class Client:
             return_chatlog (bool): (Optional) Whether to return the chatlog.
             return_prompt (bool): (Optional) Whether to return the prompt.
             return_preamble (bool): (Optional) Whether to return the preamble.
-            chatlog_override (List[Dict[str, str]]): (Optional) A list of chatlog entries to override the chatlog.
+            chatlog_override (List[Dict[str, str]]): Deprecated.
             chat_history (List[Dict[str, str]]): (Optional) A list of entries used to construct the conversation. If provided, these messages will be used to build the prompt and the conversation_id will be ignored so no data will be stored to maintain state.
             preamble_override (str): (Optional) A string to override the preamble.
             user_name (str): (Optional) A string to override the username.
@@ -201,18 +211,6 @@ class Client:
                 >>>     return_chatlog=True)
                 >>> print(res.text)
                 >>> print(res.chatlog)
-            Overriding a chat log:
-                >>> res = co.chat(
-                >>>     query="What about you?",
-                >>>     conversation_id="1234",
-                >>>     chatlog_override=[
-                >>>         {'Bot': 'Hey!'},
-                >>>         {'User': 'I am doing great!'},
-                >>>         {'Bot': 'That is great to hear!'},
-                >>>     ],
-                >>>     return_chatlog=True)
-                >>> print(res.text)
-                >>> print(res.chatlog)
             Streaming chat:
                 >>> res = co.chat(
                 >>>     query="Hey! How are you doing today?",
@@ -231,7 +229,10 @@ class Client:
                 >>> print(res.prompt)
         """
         if chatlog_override is not None:
-            self._validate_chatlog_override(chatlog_override)
+            logger.warning(
+                "The 'chatlog_override' parameter is deprecated and will be removed in a future version of this function. "
+                + "Use 'chat_history' to keep track of the conversation instead.",
+            )
 
         if chat_history is not None:
             self._validate_chat_history(chat_history)
@@ -243,7 +244,6 @@ class Client:
             "return_chatlog": return_chatlog,
             "return_prompt": return_prompt,
             "return_preamble": return_preamble,
-            "chatlog_override": chatlog_override,
             "chat_history": chat_history,
             "preamble_override": preamble_override,
             "temperature": temperature,
@@ -269,20 +269,6 @@ class Client:
                 raise CohereError(message="chat_history must be a list of dicts, each mapping the user_name and text.")
             if not isinstance(entry["user_name"], str) or not isinstance(entry["text"], str):
                 raise CohereError(message="both user_name and text must be strings in chat_history.")
-
-    def _validate_chatlog_override(self, chatlog_override: List[Dict[str, str]]) -> None:
-        if not isinstance(chatlog_override, list):
-            raise CohereError(message="chatlog_override is not a list, but it must be a list of dicts")
-
-        for entry in chatlog_override:
-            if not isinstance(entry, dict):
-                raise CohereError(
-                    message="chatlog_override must be a list of dicts, but it contains a non-dict element"
-                )
-            if len(entry) != 1:
-                raise CohereError(
-                    message="chatlog_override must be a list of dicts, each mapping the agent to the message."
-                )
 
     def embed(
         self,
@@ -365,10 +351,13 @@ class Client:
             examples (List[ClassifyExample]): A list of ClassifyExample objects containing a text and its associated label.
             truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
         """
-        examples_dicts: list[dict[str, str]] = []
-        for example in examples:
-            example_dict = {"text": example.text, "label": example.label}
-            examples_dicts.append(example_dict)
+        if not preset:
+            if not examples:
+                raise CohereError(message="examples must be a non-empty list of ClassifyExample objects.")
+            if not inputs:
+                raise CohereError(message="inputs must be a non-empty list of strings.")
+
+        examples_dicts = [{"text": example.text, "label": example.label} for example in examples]
 
         json_body = {
             "model": model,
@@ -449,11 +438,19 @@ class Client:
 
         return SummarizeResponse(id=response["id"], summary=response["summary"], meta=response["meta"])
 
-    def batch_tokenize(self, texts: List[str]) -> List[Tokens]:
-        """A batched version of tokenize"""
-        with futures.ThreadPoolExecutor(max_workers=self.num_workers) as executor:
-            res = executor.map(self.tokenize, texts)
-        return list(res)
+    def batch_tokenize(self, texts: List[str], return_exceptions=False) -> List[Union[Tokens, Exception]]:
+        """A batched version of tokenize.
+
+        Args:
+            texts: list of texts
+            return_exceptions (bool): Return exceptions as list items rather than raise them. Ensures your entire batch is not lost on one of the items failing.
+        """
+        return threadpool_map(
+            self.tokenize,
+            [dict(text=text) for text in texts],
+            num_workers=self.num_workers,
+            return_exceptions=return_exceptions,
+        )
 
     def tokenize(self, text: str) -> Tokens:
         """Returns a Tokens object of the provided text, see https://docs.cohere.ai/reference/tokenize for advanced usage.
@@ -465,11 +462,21 @@ class Client:
         res = self._request(cohere.TOKENIZE_URL, json=json_body)
         return Tokens(tokens=res["tokens"], token_strings=res["token_strings"], meta=res.get("meta"))
 
-    def batch_detokenize(self, list_of_tokens: List[List[int]]) -> List[Detokenization]:
-        """A batched version of detokenize"""
-        with futures.ThreadPoolExecutor(max_workers=self.num_workers) as executor:
-            res = executor.map(self.detokenize, list_of_tokens)
-        return list(res)
+    def batch_detokenize(
+        self, list_of_tokens: List[List[int]], return_exceptions=False
+    ) -> List[Union[Detokenization, Exception]]:
+        """A batched version of detokenize.
+
+        Args:
+            list_of_tokens: list of list of tokens
+            return_exceptions (bool): Return exceptions as list items rather than raise them. Ensures your entire batch is not lost on one of the items failing.
+        """
+        return threadpool_map(
+            self.detokenize,
+            [dict(tokens=tokens) for tokens in list_of_tokens],
+            num_workers=self.num_workers,
+            return_exceptions=return_exceptions,
+        )
 
     def detokenize(self, tokens: List[int]) -> Detokenization:
         """Returns a Detokenization object of the provided tokens, see https://docs.cohere.ai/reference/detokenize for advanced usage.

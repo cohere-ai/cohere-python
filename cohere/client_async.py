@@ -48,10 +48,7 @@ class AsyncClient(Client):
 
     This client provides an asyncio/aiohttp interface.
     Using this client is recommended when you are making highly parallel request,
-    or when calling the Cohere API from a server such as FastAPI.
-
-    The methods here are typically identical to those in the main `Client`, with an extra argument
-    `return_exceptions` for the batch* methods, which is passed to asyncio.gather."""
+    or when calling the Cohere API from a server such as FastAPI."""
 
     def __init__(
         self,
@@ -118,8 +115,9 @@ class AsyncClient(Client):
         """
         return {"valid": is_api_key_valid(self.api_key)}
 
-    async def batch_generate(self, prompts: List[str], return_exceptions=False, **kwargs) -> List[Generations]:
-        """return_exceptions is passed to asyncio.gather"""
+    async def batch_generate(
+        self, prompts: List[str], return_exceptions=False, **kwargs
+    ) -> List[Union[Exception, Generations]]:
         return await asyncio.gather(
             *[self.generate(prompt, **kwargs) for prompt in prompts], return_exceptions=return_exceptions
         )
@@ -186,7 +184,10 @@ class AsyncClient(Client):
         stream: bool = False,
     ) -> Union[AsyncChat, StreamingChat]:
         if chatlog_override is not None:
-            self._validate_chatlog_override(chatlog_override)
+            logger.warning(
+                "The 'chatlog_override' parameter is deprecated and will be removed in a future version of this function. "
+                + "Use 'chat_history' to keep track of the conversation instead."
+            )
 
         if chat_history is not None:
             self._validate_chat_history(chat_history)
@@ -198,7 +199,6 @@ class AsyncClient(Client):
             "return_chatlog": return_chatlog,
             "return_prompt": return_prompt,
             "return_preamble": return_preamble,
-            "chatlog_override": chatlog_override,
             "chat_history": chat_history,
             "preamble_override": preamble_override,
             "temperature": temperature,
@@ -276,6 +276,12 @@ class AsyncClient(Client):
         examples: List[ClassifyExample] = [],
         truncate: Optional[str] = None,
     ) -> Classifications:
+        if not preset:
+            if not examples:
+                raise CohereError(message="examples must be a non-empty list of ClassifyExample objects.")
+            if not inputs:
+                raise CohereError(message="inputs must be a non-empty list of strings.")
+
         examples_dicts = [{"text": example.text, "label": example.label} for example in examples]
 
         json_body = {
@@ -321,7 +327,7 @@ class AsyncClient(Client):
         response = await self._request(cohere.SUMMARIZE_URL, json=json_body)
         return SummarizeResponse(id=response["id"], summary=response["summary"], meta=response["meta"])
 
-    async def batch_tokenize(self, texts: List[str], return_exceptions=False) -> List[Tokens]:
+    async def batch_tokenize(self, texts: List[str], return_exceptions=False) -> List[Union[Tokens, Exception]]:
         return await asyncio.gather(*[self.tokenize(t) for t in texts], return_exceptions=return_exceptions)
 
     async def tokenize(self, text: str) -> Tokens:
@@ -329,7 +335,9 @@ class AsyncClient(Client):
         res = await self._request(cohere.TOKENIZE_URL, json_body)
         return Tokens(tokens=res["tokens"], token_strings=res["token_strings"], meta=res["meta"])
 
-    async def batch_detokenize(self, list_of_tokens: List[List[int]], return_exceptions=False) -> List[Detokenization]:
+    async def batch_detokenize(
+        self, list_of_tokens: List[List[int]], return_exceptions=False
+    ) -> List[Union[Detokenization, Exception]]:
         return await asyncio.gather(*[self.detokenize(t) for t in list_of_tokens], return_exceptions=return_exceptions)
 
     async def detokenize(self, tokens: List[int]) -> Detokenization:
