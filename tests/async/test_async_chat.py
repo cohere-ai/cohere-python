@@ -4,10 +4,10 @@ import pytest
 @pytest.mark.asyncio
 async def test_async_multi_replies(async_client):
     num_replies = 3
-    prediction = await async_client.chat("Yo what's up?", return_chatlog=True)
+    prediction = await async_client.chat("Yo what's up?", return_chatlog=True, max_tokens=5)
     assert prediction.chatlog is not None
     for _ in range(num_replies):
-        prediction = await prediction.respond("oh that's cool")
+        prediction = await prediction.respond("oh that's cool", max_tokens=5)
         assert isinstance(prediction.text, str)
         assert isinstance(prediction.conversation_id, str)
         assert prediction.chatlog is not None

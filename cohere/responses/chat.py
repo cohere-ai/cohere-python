@@ -49,24 +49,26 @@ class Chat(CohereObject):
             meta=response.get("meta"),
         )
 
-    def respond(self, response: str) -> "Chat":
+    def respond(self, response: str, max_tokens: int = None) -> "Chat":
         return self.client.chat(
             query=response,
             conversation_id=self.conversation_id,
             return_chatlog=self.chatlog is not None,
             return_prompt=self.prompt is not None,
             return_preamble=self.preamble is not None,
+            max_tokens=max_tokens,
         )
 
 
 class AsyncChat(Chat):
-    async def respond(self, response: str) -> "AsyncChat":
+    async def respond(self, response: str, max_tokens: int = None) -> "AsyncChat":
         return await self.client.chat(
             query=response,
             conversation_id=self.conversation_id,
             return_chatlog=self.chatlog is not None,
             return_prompt=self.prompt is not None,
             return_preamble=self.preamble is not None,
+            max_tokens=max_tokens,
         )
 
 
