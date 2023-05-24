@@ -100,6 +100,16 @@ API response objects
     :members:
     :member-order: bysource
 
+.. automodule:: cohere.responses.finetune
+    :members:
+    :member-order: bysource
+
+Datasets
+--------
+.. automodule:: cohere.finetune_dataset
+    :members: Dataset,InMemoryDataset,CsvDataset,JsonlDataset,TextDataset
+    :member-order: bysource
+
 Exceptions
 ----------
 .. automodule:: cohere.error
