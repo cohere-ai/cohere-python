@@ -4,7 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict
 from datetime import datetime, timezone
 from functools import partial
-from typing import Any, Dict, List, Optional, Union, Iterable
+from typing import Any, Dict, Iterable, List, Optional, Union
 
 try:
     from typing import Literal, TypedDict
@@ -40,8 +40,13 @@ from cohere.responses.feedback import (
     GeneratePreferenceFeedbackResponse,
     PreferenceRating,
 )
-from cohere.responses.finetune import FINETUNE_TYPE, Finetune, FINETUNE_PRODUCT_MAPPING, FINETUNE_STATUS, \
-    INTERNAL_FINETUNE_TYPE
+from cohere.responses.finetune import (
+    FINETUNE_PRODUCT_MAPPING,
+    FINETUNE_STATUS,
+    FINETUNE_TYPE,
+    INTERNAL_FINETUNE_TYPE,
+    Finetune,
+)
 from cohere.responses.rerank import Reranking
 from cohere.responses.summarize import SummarizeResponse
 from cohere.utils import is_api_key_valid, threadpool_map, wait_for_job
@@ -960,7 +965,7 @@ class Client:
         return Finetune.from_dict(response["finetune"])
 
     def _upload_dataset(
-            self, content: Iterable[bytes], finetune_name: str, file_name: str, type: INTERNAL_FINETUNE_TYPE
+        self, content: Iterable[bytes], finetune_name: str, file_name: str, type: INTERNAL_FINETUNE_TYPE
     ) -> str:
         gcs = self._create_signed_url(finetune_name, file_name, type)
         response = requests.put(gcs["url"], data=content, headers={"content-type": "text/plain"})
@@ -968,7 +973,7 @@ class Client:
         return gcs["gcspath"]
 
     def _create_signed_url(
-            self, finetune_name: str, file_name: str, type: INTERNAL_FINETUNE_TYPE
+        self, finetune_name: str, file_name: str, type: INTERNAL_FINETUNE_TYPE
     ) -> TypedDict("gcsData", {"url": str, "gcspath": str}):
         json = {"finetuneName": finetune_name, "fileName": file_name, "finetuneType": type}
         return self._request(f"{cohere.FINETUNE_URL}/GetFinetuneUploadSignedURL", method="POST", json=json)
@@ -998,11 +1003,11 @@ class Client:
         return Finetune.from_dict(response["finetune"])
 
     def list_finetunes(
-            self,
-            statuses: Optional[List[FINETUNE_STATUS]] = None,
-            before: Optional[datetime] = None,
-            after: Optional[datetime] = None,
-            order_by: Optional[Literal["asc", "desc"]] = None,
+        self,
+        statuses: Optional[List[FINETUNE_STATUS]] = None,
+        before: Optional[datetime] = None,
+        after: Optional[datetime] = None,
+        order_by: Optional[Literal["asc", "desc"]] = None,
     ) -> List[Finetune]:
         """List finetunes of your organization.
 

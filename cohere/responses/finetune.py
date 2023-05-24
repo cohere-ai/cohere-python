@@ -40,7 +40,7 @@ FINETUNE_PRODUCT_MAPPING: Dict[FINETUNE_TYPE, INTERNAL_FINETUNE_TYPE] = {
 
 class Finetune(CohereObject):
     def __init__(
-            self, id: str, name: str, status: FINETUNE_STATUS, created_at: datetime, completed_at: Optional[datetime]
+        self, id: str, name: str, status: FINETUNE_STATUS, created_at: datetime, completed_at: Optional[datetime]
     ) -> None:
         super().__init__()
         self.id = id
