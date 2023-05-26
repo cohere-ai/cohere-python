@@ -8,7 +8,7 @@ except ImportError:
 
 from cohere.responses.base import CohereObject
 
-FINETUNE_STATUS = Literal[
+CUSTOM_MODEL_STATUS = Literal[
     "UNKNOWN",
     "CREATED",
     "DATA_PROCESSING",
@@ -25,22 +25,22 @@ FINETUNE_STATUS = Literal[
     "QUEUED",
 ]
 
-INTERNAL_FINETUNE_TYPE = Literal[
+INTERNAL_CUSTOM_MODEL_TYPE = Literal[
     "GENERATIVE",
     "CONTRASTIVE",
     "CLASSIFICATION",
 ]
-FINETUNE_TYPE = Literal["GENERATIVE", "EMBED", "CLASSIFY"]
-FINETUNE_PRODUCT_MAPPING: Dict[FINETUNE_TYPE, INTERNAL_FINETUNE_TYPE] = {
+CUSTOM_MODEL_TYPE = Literal["GENERATIVE", "EMBED", "CLASSIFY"]
+CUSTOM_MODEL_PRODUCT_MAPPING: Dict[CUSTOM_MODEL_TYPE, INTERNAL_CUSTOM_MODEL_TYPE] = {
     "GENERATIVE": "GENERATIVE",
     "EMBED": "CONTRASTIVE",
     "CLASSIFY": "CLASSIFICATION",
 }
 
 
-class Finetune(CohereObject):
+class CustomModel(CohereObject):
     def __init__(
-        self, id: str, name: str, status: FINETUNE_STATUS, created_at: datetime, completed_at: Optional[datetime]
+        self, id: str, name: str, status: CUSTOM_MODEL_STATUS, created_at: datetime, completed_at: Optional[datetime]
     ) -> None:
         super().__init__()
         self.id = id
@@ -50,7 +50,7 @@ class Finetune(CohereObject):
         self.completed_at = completed_at
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Finetune":
+    def from_dict(cls, data: Dict[str, Any]) -> "CustomModel":
         return cls(
             id=data["id"],
             name=data["name"],

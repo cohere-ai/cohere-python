@@ -1,16 +1,16 @@
 import csv
 import tempfile
 
-from cohere.finetune_dataset import CsvDataset, InMemoryDataset, JsonlDataset
+from cohere.custom_model_dataset import CsvDataset, InMemoryCustomModelDataset, JsonlDataset
 
 
 def test_in_memory_dataset():
-    dataset_without_eval = InMemoryDataset(training_data=[("prompt", "completion")])
+    dataset_without_eval = InMemoryCustomModelDataset(training_data=[("prompt", "completion")])
     assert not dataset_without_eval.has_eval_file()
     decoded = csv.reader((row.decode("utf-8") for row in dataset_without_eval.get_train_data()))
     assert list(decoded) == [["prompt", "completion"]]
 
-    dataset_with_eval = InMemoryDataset(
+    dataset_with_eval = InMemoryCustomModelDataset(
         training_data=[("prompt", "completion")], eval_data=[("eval_prompt", "eval_completion")]
     )
     assert dataset_with_eval.has_eval_file()

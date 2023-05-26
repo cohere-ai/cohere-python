@@ -20,7 +20,7 @@ class FileConfig(TypedDict):
 _empty_file_config = FileConfig(separator="", switchColumns=False, hasHeader=False, delimiter="")
 
 
-class Dataset(ABC):
+class CustomModelDataset(ABC):
     @abstractmethod
     def file_config(self) -> FileConfig:
         pass
@@ -46,7 +46,7 @@ class Dataset(ABC):
         ...
 
 
-class LocalFileDataset(Dataset):
+class LocalFileCustomModelDataset(CustomModelDataset):
     def __init__(self, train_file: str, eval_file: Optional[str] = None):
         self._train_file = train_file
         self._eval_file = eval_file
@@ -79,7 +79,7 @@ class LocalFileDataset(Dataset):
                 yield line
 
 
-class CsvDataset(LocalFileDataset):
+class CsvDataset(LocalFileCustomModelDataset):
     """
     A dataset consisting of local csv files. Each row should contain two items.
     E.g.: for prompt completion:
@@ -102,7 +102,7 @@ class CsvDataset(LocalFileDataset):
         return config
 
 
-class JsonlDataset(LocalFileDataset):
+class JsonlDataset(LocalFileCustomModelDataset):
     """
     A dataset consisting of local jsonl files.
     Examples:
@@ -113,9 +113,9 @@ class JsonlDataset(LocalFileDataset):
         return _empty_file_config.copy()
 
 
-class TextDataset(LocalFileDataset):
+class TextDataset(LocalFileCustomModelDataset):
     """
-    A dataset consisting of local text files. Can be used for generative finetunes.
+    A dataset consisting of local text files. Can be used for generative custom models.
     """
 
     def __init__(self, train_file: str, separator: Optional[str], eval_file: Optional[Path] = None):
@@ -129,13 +129,13 @@ class TextDataset(LocalFileDataset):
         return config
 
 
-class InMemoryDataset(Dataset):
+class InMemoryCustomModelDataset(CustomModelDataset):
     """
     A dataset existing in memory. You may pass a generator to avoid loading your whole dataset into memory at once.
 
     Examples:
-        >>> InMemoryDataset([("this is a prompt", "this is a completion")])
-        >>> InMemoryDataset([("example1", "label1"), ("example2", "label1"), ("example3", "label2")])
+        >>> InMemoryCustomModelDataset([("this is a prompt", "this is a completion")])
+        >>> InMemoryCustomModelDataset([("example1", "label1"), ("example2", "label1"), ("example3", "label2")])
     """
 
     def __init__(self, training_data: Iterable[Tuple[str, str]], eval_data: Optional[Iterable[Tuple[str, str]]] = None):
