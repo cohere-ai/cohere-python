@@ -24,11 +24,25 @@ async def test_async_chat_stream(async_client):
         stream=True,
     )
 
+    assert res is not None
+    assert isinstance(res.texts, list)
+    assert len(res.texts) == 0
+    assert res.conversation_id is None
+    assert res.response_id is None
+
+    expected_index = 0
+    expected_text = ""
     async for token in res:
         assert isinstance(token.text, str)
         assert len(token.text) > 0
+        assert token.index == expected_index
 
-    assert isinstance(res.texts, list)
+        expected_index += 1
+        expected_text += token.text
+
+    assert res.texts == [expected_text]
+    assert res.conversation_id is not None
+    assert res.response_id is not None
 
 
 @pytest.mark.asyncio
