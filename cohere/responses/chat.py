@@ -84,6 +84,7 @@ class StreamingChat(CohereObject):
         self.preamble = None
         self.prompt = None
         self.chatlog = None
+        self.finish_reason = None
 
     def _make_response_item(self, index, line) -> Any:
         streaming_item = json.loads(line)
@@ -103,6 +104,7 @@ class StreamingChat(CohereObject):
         self.preamble = response.get("preamble")
         self.prompt = response.get("prompt")
         self.chatlog = response.get("chatlog")
+        self.finish_reason = streaming_item.get("finish_reason")
         self.texts = [response.get("text")]
         return None
 

@@ -96,6 +96,7 @@ class TestChat(unittest.TestCase):
         self.assertEqual(len(prediction.texts), 0)
         self.assertIsNone(prediction.conversation_id)
         self.assertIsNone(prediction.response_id)
+        self.assertIsNone(prediction.finish_reason)
 
         expected_index = 0
         expected_text = ""
@@ -112,6 +113,7 @@ class TestChat(unittest.TestCase):
         self.assertEqual(prediction.texts, [expected_text])
         self.assertIsNotNone(prediction.conversation_id)
         self.assertIsNotNone(prediction.response_id)
+        self.assertIsNotNone(prediction.finish_reason)
 
     def test_id(self):
         prediction1 = co.chat("Yo what up?", max_tokens=5)
