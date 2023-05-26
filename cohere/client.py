@@ -969,7 +969,8 @@ class Client:
     ) -> str:
         gcs = self._create_signed_url(finetune_name, file_name, type)
         response = requests.put(gcs["url"], data=content, headers={"content-type": "text/plain"})
-        self._check_response({}, dict(response.headers), response.status_code)
+        if response.status_code != 200:
+            raise CohereError(message=f"Unexpected server error (status {response.status_code}): {response.text}")
         return gcs["gcspath"]
 
     def _create_signed_url(
