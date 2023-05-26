@@ -85,13 +85,35 @@ class TestChat(unittest.TestCase):
             self.assertIsInstance(prediction.conversation_id, str)
 
     def test_stream(self):
-        prediction = co.chat(query="Yo what up?", max_tokens=5, stream=True)
+        prediction = co.chat(
+            query="Yo what up?",
+            max_tokens=5,
+            stream=True,
+        )
 
+        self.assertIsInstance(prediction, cohere.responses.chat.StreamingChat)
+        self.assertIsInstance(prediction.texts, list)
+        self.assertEqual(len(prediction.texts), 0)
+        self.assertIsNone(prediction.conversation_id)
+        self.assertIsNone(prediction.response_id)
+        self.assertIsNone(prediction.finish_reason)
+
+        expected_index = 0
+        expected_text = ""
         for token in prediction:
             self.assertIsInstance(token.text, str)
             self.assertGreater(len(token.text), 0)
 
-        self.assertIsInstance(prediction.texts, list)
+            self.assertIsInstance(token.index, int)
+            self.assertEqual(token.index, expected_index)
+
+            expected_text += token.text
+            expected_index += 1
+
+        self.assertEqual(prediction.texts, [expected_text])
+        self.assertIsNotNone(prediction.conversation_id)
+        self.assertIsNotNone(prediction.response_id)
+        self.assertIsNotNone(prediction.finish_reason)
 
     def test_id(self):
         prediction1 = co.chat("Yo what up?", max_tokens=5)
