@@ -934,9 +934,9 @@ class Client:
             >>> finetune = co.create_custom_model("prompt-completion-ft", dataset=dataset, custom_model_type="GENERATIVE")
 
             prompt completion finetune with in-memory dataset
-            >>> from cohere.custom_model_dataset import InMemoryCustomModelDataset
+            >>> from cohere.custom_model_dataset import InMemoryDataset
             >>> co = cohere.Client("YOUR_API_KEY")
-            >>> dataset = InMemoryCustomModelDataset(training_data=[
+            >>> dataset = InMemoryDataset(training_data=[
             >>>     ("this is the prompt", "and this is the completion"),
             >>>     ("another prompt", "and another completion")
             >>> ])

@@ -100,14 +100,14 @@ API response objects
     :members:
     :member-order: bysource
 
-.. automodule:: cohere.responses.finetune
+.. automodule:: cohere.responses.custom_model
     :members:
     :member-order: bysource
 
 Datasets
 --------
-.. automodule:: cohere.finetune_dataset
-    :members: Dataset,InMemoryDataset,CsvDataset,JsonlDataset,TextDataset
+.. automodule:: cohere.custom_model_dataset
+    :members: CustomModelDataset,InMemoryDataset,CsvDataset,JsonlDataset,TextDataset
     :member-order: bysource
 
 Exceptions

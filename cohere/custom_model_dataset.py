@@ -129,13 +129,13 @@ class TextDataset(LocalFileCustomModelDataset):
         return config
 
 
-class InMemoryCustomModelDataset(CustomModelDataset):
+class InMemoryDataset(CustomModelDataset):
     """
     A dataset existing in memory. You may pass a generator to avoid loading your whole dataset into memory at once.
 
     Examples:
-        >>> InMemoryCustomModelDataset([("this is a prompt", "this is a completion")])
-        >>> InMemoryCustomModelDataset([("example1", "label1"), ("example2", "label1"), ("example3", "label2")])
+        >>> InMemoryDataset([("this is a prompt", "this is a completion")])
+        >>> InMemoryDataset([("example1", "label1"), ("example2", "label1"), ("example3", "label2")])
     """
 
     def __init__(self, training_data: Iterable[Tuple[str, str]], eval_data: Optional[Iterable[Tuple[str, str]]] = None):
