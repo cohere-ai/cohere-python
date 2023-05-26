@@ -16,8 +16,8 @@ from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
 import cohere
-from cohere.error import CohereAPIError, CohereConnectionError, CohereError
 from cohere.custom_model_dataset import CustomModelDataset
+from cohere.error import CohereAPIError, CohereConnectionError, CohereError
 from cohere.logging import logger
 from cohere.responses import (
     Classification,
@@ -33,19 +33,19 @@ from cohere.responses.chat import Chat, StreamingChat
 from cohere.responses.classify import Example as ClassifyExample
 from cohere.responses.classify import LabelPrediction
 from cohere.responses.cluster import ClusterJobResult, CreateClusterJobResponse
-from cohere.responses.detectlang import DetectLanguageResponse, Language
-from cohere.responses.embeddings import Embeddings
-from cohere.responses.feedback import (
-    GenerateFeedbackResponse,
-    GeneratePreferenceFeedbackResponse,
-    PreferenceRating,
-)
 from cohere.responses.custom_model import (
     CUSTOM_MODEL_PRODUCT_MAPPING,
     CUSTOM_MODEL_STATUS,
     CUSTOM_MODEL_TYPE,
     INTERNAL_CUSTOM_MODEL_TYPE,
     CustomModel,
+)
+from cohere.responses.detectlang import DetectLanguageResponse, Language
+from cohere.responses.embeddings import Embeddings
+from cohere.responses.feedback import (
+    GenerateFeedbackResponse,
+    GeneratePreferenceFeedbackResponse,
+    PreferenceRating,
 )
 from cohere.responses.rerank import Reranking
 from cohere.responses.summarize import SummarizeResponse
@@ -914,7 +914,9 @@ class Client:
             interval=interval,
         )
 
-    def create_custom_model(self, name: str, custom_model_type: CUSTOM_MODEL_TYPE, dataset: CustomModelDataset) -> CustomModel:
+    def create_custom_model(
+        self, name: str, custom_model_type: CUSTOM_MODEL_TYPE, dataset: CustomModelDataset
+    ) -> CustomModel:
         """Create a new custom model
 
         Args:

@@ -1,7 +1,11 @@
 import csv
 import tempfile
 
-from cohere.custom_model_dataset import CsvDataset, InMemoryCustomModelDataset, JsonlDataset
+from cohere.custom_model_dataset import (
+    CsvDataset,
+    InMemoryCustomModelDataset,
+    JsonlDataset,
+)
 
 
 def test_in_memory_dataset():
