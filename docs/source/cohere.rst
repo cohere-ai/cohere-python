@@ -104,7 +104,7 @@ API response objects
     :members:
     :member-order: bysource
 
-Datasets
+CustomModelDataset
 --------
 .. automodule:: cohere.custom_model_dataset
     :members: CustomModelDataset,InMemoryDataset,CsvDataset,JsonlDataset,TextDataset

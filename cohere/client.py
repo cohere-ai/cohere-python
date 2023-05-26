@@ -928,19 +928,19 @@ class Client:
 
         Examples:
             prompt completion custom model with csv file
-            >>> from cohere.custom_model_dataset import CsvDataset
-            >>> co = cohere.Client("YOUR_API_KEY")
-            >>> dataset = CsvDataset(train_file="/path/to/your/file.csv", delimiter=",")
-            >>> finetune = co.create_custom_model("prompt-completion-ft", dataset=dataset, custom_model_type="GENERATIVE")
+                >>> from cohere.custom_model_dataset import CsvDataset
+                >>> co = cohere.Client("YOUR_API_KEY")
+                >>> dataset = CsvDataset(train_file="/path/to/your/file.csv", delimiter=",")
+                >>> finetune = co.create_custom_model("prompt-completion-ft", dataset=dataset, custom_model_type="GENERATIVE")
 
-            prompt completion finetune with in-memory dataset
-            >>> from cohere.custom_model_dataset import InMemoryDataset
-            >>> co = cohere.Client("YOUR_API_KEY")
-            >>> dataset = InMemoryDataset(training_data=[
-            >>>     ("this is the prompt", "and this is the completion"),
-            >>>     ("another prompt", "and another completion")
-            >>> ])
-            >>> finetune = co.create_custom_model("prompt-completion-ft", dataset=dataset, custom_model_type="GENERATIVE")
+            prompt completion custom model with in-memory dataset
+                >>> from cohere.custom_model_dataset import InMemoryDataset
+                >>> co = cohere.Client("YOUR_API_KEY")
+                >>> dataset = InMemoryDataset(training_data=[
+                >>>     ("this is the prompt", "and this is the completion"),
+                >>>     ("another prompt", "and another completion")
+                >>> ])
+                >>> finetune = co.create_custom_model("prompt-completion-ft", dataset=dataset, custom_model_type="GENERATIVE")
 
         """
         internal_custom_model_type = CUSTOM_MODEL_PRODUCT_MAPPING[custom_model_type]
