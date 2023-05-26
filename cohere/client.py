@@ -921,7 +921,7 @@ class Client:
 
         Args:
             name (str): name of your custom model, has to be unique across your organization
-            custom_model_type (GENERATIVE, CONTRASTIVE, CLASSIFICATION): type of custom model
+            custom_model_type (GENERATIVE, EMBED, CLASSIFY): type of custom model
             dataset (InMemoryDataset, CsvDataset, JsonlDataset, TextDataset): A dataset for your training. Consists of a train and optional eval file.
         Returns:
             str: the id of the custom model that was created
