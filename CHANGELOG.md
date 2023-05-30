@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.7.0
+- [#237](https://github.com/cohere-ai/cohere-python/pull/237)
+  - add support for finetunes
+
 ## 4.6.0
 - [#238](https://github.com/cohere-ai/cohere-python/pull/238)
   - Add `is_finished` to each element of the streaming chat response
