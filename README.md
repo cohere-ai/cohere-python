@@ -52,6 +52,7 @@ print('prediction: {}'.format(prediction.generations[0].text))
 ```
 
 There is also an asyncio compatible client called `cohere.AsyncClient` with an equivalent interface. Consult the [SDK Docs](https://cohere-sdk.readthedocs.io/en/latest/) for more details.
+Please note that functions related to custom models do not have asynchronous versions.
 
 ## Versioning
 
