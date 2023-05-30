@@ -7,7 +7,7 @@ from collections import defaultdict
 from dataclasses import asdict
 from datetime import datetime, timezone
 from functools import partial
-from typing import Any, Callable, Dict, List, Optional, Union, Iterable
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 try:
     from typing import Literal, TypedDict
@@ -45,8 +45,13 @@ from cohere.responses import (
 from cohere.responses.bulk_embed import AsyncCreateBulkEmbedJobResponse, BulkEmbedJob
 from cohere.responses.chat import AsyncChat, StreamingChat
 from cohere.responses.classify import Example as ClassifyExample
-from cohere.responses.custom_model import CustomModel, CUSTOM_MODEL_PRODUCT_MAPPING, CUSTOM_MODEL_TYPE, \
-    INTERNAL_CUSTOM_MODEL_TYPE, CUSTOM_MODEL_STATUS
+from cohere.responses.custom_model import (
+    CUSTOM_MODEL_PRODUCT_MAPPING,
+    CUSTOM_MODEL_STATUS,
+    CUSTOM_MODEL_TYPE,
+    INTERNAL_CUSTOM_MODEL_TYPE,
+    CustomModel,
+)
 from cohere.utils import async_wait_for_job, is_api_key_valid, np_json_dumps
 
 JSON = Union[Dict, List]
@@ -655,7 +660,7 @@ class AsyncClient(Client):
         )
 
     async def create_custom_model(
-            self, name: str, custom_model_type: CUSTOM_MODEL_TYPE, dataset: CustomModelDataset
+        self, name: str, custom_model_type: CUSTOM_MODEL_TYPE, dataset: CustomModelDataset
     ) -> CustomModel:
         """Create a new custom model
 
@@ -707,17 +712,19 @@ class AsyncClient(Client):
         return CustomModel.from_dict(response["finetune"])
 
     async def _upload_dataset(
-            self, content: Iterable[bytes], custom_model_name: str, file_name: str, type: INTERNAL_CUSTOM_MODEL_TYPE
+        self, content: Iterable[bytes], custom_model_name: str, file_name: str, type: INTERNAL_CUSTOM_MODEL_TYPE
     ) -> str:
         gcs = await self._create_signed_url(custom_model_name, file_name, type)
         async with aiohttp.ClientSession() as session:
-            async with session.put(url=gcs["url"], data=b''.join(content), headers={"content-type": "text/plain"}) as response:
+            async with session.put(
+                url=gcs["url"], data=b"".join(content), headers={"content-type": "text/plain"}
+            ) as response:
                 if response.status != 200:
                     raise CohereError(message=f"Unexpected server error (status {response.status}): {response.text}")
         return gcs["gcspath"]
 
     async def _create_signed_url(
-            self, custom_model_name: str, file_name: str, type: INTERNAL_CUSTOM_MODEL_TYPE
+        self, custom_model_name: str, file_name: str, type: INTERNAL_CUSTOM_MODEL_TYPE
     ) -> TypedDict("gcsData", {"url": str, "gcspath": str}):
         json = {"finetuneName": custom_model_name, "fileName": file_name, "finetuneType": type}
         return await self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneUploadSignedURL", method="POST", json=json)
@@ -747,11 +754,11 @@ class AsyncClient(Client):
         return CustomModel.from_dict(response["finetune"])
 
     async def list_custom_models(
-            self,
-            statuses: Optional[List[CUSTOM_MODEL_STATUS]] = None,
-            before: Optional[datetime] = None,
-            after: Optional[datetime] = None,
-            order_by: Optional[Literal["asc", "desc"]] = None,
+        self,
+        statuses: Optional[List[CUSTOM_MODEL_STATUS]] = None,
+        before: Optional[datetime] = None,
+        after: Optional[datetime] = None,
+        order_by: Optional[Literal["asc", "desc"]] = None,
     ) -> List[CustomModel]:
         """List custom models of your organization.
 
@@ -779,7 +786,6 @@ class AsyncClient(Client):
 
         response = await self._request(f"{cohere.CUSTOM_MODEL_URL}/ListFinetunes", method="POST", json=json)
         return [CustomModel.from_dict(r) for r in response["finetunes"]]
-
 
 
 class AIOHTTPBackend:
