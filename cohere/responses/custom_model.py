@@ -40,7 +40,13 @@ CUSTOM_MODEL_PRODUCT_MAPPING: Dict[CUSTOM_MODEL_TYPE, INTERNAL_CUSTOM_MODEL_TYPE
 
 class CustomModel(CohereObject):
     def __init__(
-        self, id: str, name: str, status: CUSTOM_MODEL_STATUS, created_at: datetime, completed_at: Optional[datetime]
+        self,
+        id: str,
+        name: str,
+        status: CUSTOM_MODEL_STATUS,
+        created_at: datetime,
+        completed_at: Optional[datetime],
+        model_id: Optional[str] = None,
     ) -> None:
         super().__init__()
         self.id = id
@@ -48,6 +54,7 @@ class CustomModel(CohereObject):
         self.status = status
         self.created_at = created_at
         self.completed_at = completed_at
+        self.model_id = model_id
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "CustomModel":
@@ -57,6 +64,7 @@ class CustomModel(CohereObject):
             status=data["status"],
             created_at=_parse_date(data["created_at"]),
             completed_at=_parse_date(data["completed_at"]) if "completed_at" in data else None,
+            model_id=data["model"]["route"] if "model" in data else None,
         )
 
 
