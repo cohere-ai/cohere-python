@@ -5,15 +5,12 @@ import inspect
 from cohere import AsyncClient, Client
 
 EXPECTED_EXTRA_ASYNC = {"close"}
-EXPECTED_EXTRA_SYNC = {"create_custom_model", "get_custom_model", "list_custom_models", "get_custom_model_by_name"}
 
 
 def test_consistency_and_docs():
     # Get a list of all non-private functions in the Client class
     client_methods = {
-        name: func
-        for name, func in inspect.getmembers(Client)
-        if not name.startswith("_") and inspect.isfunction(func) and name not in EXPECTED_EXTRA_SYNC
+        name: func for name, func in inspect.getmembers(Client) if not name.startswith("_") and inspect.isfunction(func)
     }
 
     # Get a list of all non-private coroutine functions in the AsyncClient class
