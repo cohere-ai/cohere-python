@@ -715,12 +715,10 @@ class AsyncClient(Client):
         self, content: Iterable[bytes], custom_model_name: str, file_name: str, type: INTERNAL_CUSTOM_MODEL_TYPE
     ) -> str:
         gcs = await self._create_signed_url(custom_model_name, file_name, type)
-        async with aiohttp.ClientSession() as session:
-            async with session.put(
-                url=gcs["url"], data=b"".join(content), headers={"content-type": "text/plain"}
-            ) as response:
-                if response.status != 200:
-                    raise CohereError(message=f"Unexpected server error (status {response.status}): {response.text}")
+        session = await self._backend.session()
+        response = await session.put(url=gcs["url"], data=b"".join(content), headers={"content-type": "text/plain"})
+        if response.status != 200:
+            raise CohereError(message=f"Unexpected server error (status {response.status}): {response.text}")
         return gcs["gcspath"]
 
     async def _create_signed_url(
