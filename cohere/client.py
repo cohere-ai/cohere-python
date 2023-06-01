@@ -351,12 +351,6 @@ class Client:
             examples (List[ClassifyExample]): A list of ClassifyExample objects containing a text and its associated label.
             truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
         """
-        if not preset:
-            if not examples:
-                raise CohereError(message="examples must be a non-empty list of ClassifyExample objects.")
-            if not inputs:
-                raise CohereError(message="inputs must be a non-empty list of strings.")
-
         examples_dicts = [{"text": example.text, "label": example.label} for example in examples]
 
         json_body = {
