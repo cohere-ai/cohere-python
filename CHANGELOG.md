@@ -2,7 +2,11 @@
 
 ## 4.7.0
 - [#237](https://github.com/cohere-ai/cohere-python/pull/237)
-  - add support for finetunes
+  - add support for custom models
+
+## 4.6.1
+- [#240](https://github.com/cohere-ai/cohere-python/pull/240)
+  - Revert: Add SDK level validation for classify params
 
 ## 4.6.0
 - [#238](https://github.com/cohere-ai/cohere-python/pull/238)
