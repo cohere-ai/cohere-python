@@ -909,13 +909,13 @@ class Client:
         )
 
     def create_custom_model(
-        self, name: str, custom_model_type: CUSTOM_MODEL_TYPE, dataset: CustomModelDataset
+        self, name: str, model_type: CUSTOM_MODEL_TYPE, dataset: CustomModelDataset
     ) -> CustomModel:
         """Create a new custom model
 
         Args:
             name (str): name of your custom model, has to be unique across your organization
-            custom_model_type (GENERATIVE, EMBED, CLASSIFY): type of custom model
+            model_type (GENERATIVE, EMBED, CLASSIFY): type of custom model
             dataset (InMemoryDataset, CsvDataset, JsonlDataset, TextDataset): A dataset for your training. Consists of a train and optional eval file.
         Returns:
             str: the id of the custom model that was created
@@ -925,7 +925,7 @@ class Client:
                 >>> from cohere.custom_model_dataset import CsvDataset
                 >>> co = cohere.Client("YOUR_API_KEY")
                 >>> dataset = CsvDataset(train_file="/path/to/your/file.csv", delimiter=",")
-                >>> finetune = co.create_custom_model("prompt-completion-ft", dataset=dataset, custom_model_type="GENERATIVE")
+                >>> finetune = co.create_custom_model("prompt-completion-ft", dataset=dataset, model_type="GENERATIVE")
 
             prompt completion custom model with in-memory dataset
                 >>> from cohere.custom_model_dataset import InMemoryDataset
@@ -934,10 +934,10 @@ class Client:
                 >>>     ("this is the prompt", "and this is the completion"),
                 >>>     ("another prompt", "and another completion")
                 >>> ])
-                >>> finetune = co.create_custom_model("prompt-completion-ft", dataset=dataset, custom_model_type="GENERATIVE")
+                >>> finetune = co.create_custom_model("prompt-completion-ft", dataset=dataset, model_type="GENERATIVE")
 
         """
-        internal_custom_model_type = CUSTOM_MODEL_PRODUCT_MAPPING[custom_model_type]
+        internal_custom_model_type = CUSTOM_MODEL_PRODUCT_MAPPING[model_type]
         json = {
             "name": name,
             "settings": {
