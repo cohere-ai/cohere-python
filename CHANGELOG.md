@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.7.0
+- [#242](https://github.com/cohere-ai/cohere-python/pull/242)
+  - Add token count to the chat response
+
 ## 4.6.1
 - [#240](https://github.com/cohere-ai/cohere-python/pull/240)
   - Revert: Add SDK level validation for classify params
