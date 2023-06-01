@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.6.1
+- [#240](https://github.com/cohere-ai/cohere-python/pull/240)
+  - Revert: Add SDK level validation for classify params
+
 ## 4.6.0
 - [#238](https://github.com/cohere-ai/cohere-python/pull/238)
   - Add `is_finished` to each element of the streaming chat response
