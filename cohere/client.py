@@ -908,9 +908,7 @@ class Client:
             interval=interval,
         )
 
-    def create_custom_model(
-        self, name: str, model_type: CUSTOM_MODEL_TYPE, dataset: CustomModelDataset
-    ) -> CustomModel:
+    def create_custom_model(self, name: str, model_type: CUSTOM_MODEL_TYPE, dataset: CustomModelDataset) -> CustomModel:
         """Create a new custom model
 
         Args:

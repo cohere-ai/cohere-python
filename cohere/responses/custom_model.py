@@ -36,6 +36,9 @@ CUSTOM_MODEL_PRODUCT_MAPPING: Dict[CUSTOM_MODEL_TYPE, INTERNAL_CUSTOM_MODEL_TYPE
     "EMBED": "CONTRASTIVE",
     "CLASSIFY": "CLASSIFICATION",
 }
+REVERSE_CUSTOM_MODEL_PRODUCT_MAPPING: Dict[INTERNAL_CUSTOM_MODEL_TYPE, CUSTOM_MODEL_TYPE] = {
+    v: k for k, v in CUSTOM_MODEL_PRODUCT_MAPPING.items()
+}
 
 
 class CustomModel(CohereObject):
@@ -44,6 +47,7 @@ class CustomModel(CohereObject):
         id: str,
         name: str,
         status: CUSTOM_MODEL_STATUS,
+        model_type: CUSTOM_MODEL_TYPE,
         created_at: datetime,
         completed_at: Optional[datetime],
         model_id: Optional[str] = None,
@@ -52,6 +56,7 @@ class CustomModel(CohereObject):
         self.id = id
         self.name = name
         self.status = status
+        self.model_type = model_type
         self.created_at = created_at
         self.completed_at = completed_at
         self.model_id = model_id
@@ -62,6 +67,7 @@ class CustomModel(CohereObject):
             id=data["id"],
             name=data["name"],
             status=data["status"],
+            model_type=REVERSE_CUSTOM_MODEL_PRODUCT_MAPPING[data["settings"]["finetuneType"]],
             created_at=_parse_date(data["created_at"]),
             completed_at=_parse_date(data["completed_at"]) if "completed_at" in data else None,
             model_id=data["model"]["route"] if "model" in data else None,
