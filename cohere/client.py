@@ -1004,7 +1004,7 @@ class Client:
         after: Optional[datetime] = None,
         order_by: Optional[Literal["asc", "desc"]] = None,
     ) -> List[CustomModel]:
-        """List custom models of your organization.
+        """List custom models of your organization. Limit is 50.
 
         Args:
             statuses (CUSTOM_MODEL_STATUS, optional): search for fintunes which are in one of these states
