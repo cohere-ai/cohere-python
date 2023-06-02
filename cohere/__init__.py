@@ -1,4 +1,4 @@
-from importlib.metadata import version
+from importlib_metadata import version  # use package to support python 3.7
 
 from cohere.client import Client
 from cohere.client_async import AsyncClient
