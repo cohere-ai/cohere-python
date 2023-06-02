@@ -18,7 +18,6 @@ async def test_tokenize(async_client):
 
 
 @pytest.mark.asyncio
-@pytest.mark.skip(reason="until this is available globally in the API")
 async def test_model_param_tokenization(async_client):
     medium_res = await async_client.tokenize("Hello world!", model="medium")
     medium_res_batch = await async_client.batch_tokenize(["Hello world!"] * 3, model="medium")
@@ -52,7 +51,6 @@ async def test_detokenize(async_client):
 
 
 @pytest.mark.asyncio
-@pytest.mark.skip(reason="until this is available globally in the API")
 async def test_model_param_detokenization(async_client):
     medium_detokenized = await async_client.detokenize([10104, 12221, 974, 514, 34], model="medium")
     medium_detokenized_batch = await async_client.batch_detokenize([[10104, 12221, 974, 514, 34]] * 3, model="medium")
