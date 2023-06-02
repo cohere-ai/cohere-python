@@ -19,5 +19,6 @@ class TestFinetuneClient(unittest.TestCase):
 
     def test_get_by_name(self):
         first = client.list_custom_models()[0]
+        self.assertEqual(first.name, "FOO")
         by_id = client.get_custom_model_by_name(first.name)
         self.assertEqual(first.id, by_id.id)
