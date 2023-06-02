@@ -1,6 +1,6 @@
 # Changelog
 
-## 4.6.2
+## 4.7.0
 - [#232](https://github.com/cohere-ai/cohere-python/pull/232)
   - Support model parameter in tokenize and detokenize
 

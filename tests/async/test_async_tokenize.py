@@ -38,13 +38,13 @@ async def test_invalid_text(async_client):
 
 @pytest.mark.asyncio
 async def test_detokenize(async_client):
-    detokenized = await async_client.detokenize([10104, 12221, 974, 514, 34], model="xlarge")
+    detokenized = await async_client.detokenize([10104, 12221, 974, 514, 34], model="base")
     assert detokenized == Detokenization("detokenize me!")
     assert detokenized.meta
     assert detokenized.meta["api_version"]
     assert detokenized.meta["api_version"]["version"]
 
-    detokenizeds = await async_client.batch_detokenize([[10104, 12221, 974, 514, 34]] * 3, model="xlarge")
+    detokenizeds = await async_client.batch_detokenize([[10104, 12221, 974, 514, 34]] * 3, model="base")
     assert detokenizeds == [Detokenization("detokenize me!")] * 3
 
     detokenized = await async_client.detokenize([])

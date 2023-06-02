@@ -327,9 +327,7 @@ class AsyncClient(Client):
         return await asyncio.gather(*[self.tokenize(t, **kwargs) for t in texts], return_exceptions=return_exceptions)
 
     async def tokenize(self, text: str, model: Optional[str] = None) -> Tokens:
-        json_body = {"text": text}
-        if model is not None:
-            json_body["model"] = model
+        json_body = {"text": text, model: model}
         res = await self._request(cohere.TOKENIZE_URL, json_body)
         return Tokens(tokens=res["tokens"], token_strings=res["token_strings"], meta=res["meta"])
 
@@ -341,9 +339,7 @@ class AsyncClient(Client):
         )
 
     async def detokenize(self, tokens: List[int], model: Optional[str] = None) -> Detokenization:
-        json_body = {"tokens": tokens}
-        if model is not None:
-            json_body["model"] = model
+        json_body = {"tokens": tokens, model: model}
         res = await self._request(cohere.DETOKENIZE_URL, json_body)
         return Detokenization(text=res["text"], meta=res["meta"])
 
