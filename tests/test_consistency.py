@@ -28,14 +28,13 @@ def test_consistency_and_docs():
 
     for name, func in client_methods.items():
         assert func.__doc__ is not None, f"Missing documentation for Client.{name}"
-        if not name.startswith("batch_"):  # these have return_exceptions
-            client_signature = inspect.signature(func)
-            async_signature = inspect.signature(async_client_methods[name])
-            if client_signature.return_annotation != async_signature.return_annotation:
-                # some methods return a separate async class. This could also be within a Union
-                assert str(async_signature.return_annotation).replace("Async", "") == str(
-                    client_signature.return_annotation
-                )
-                assert client_signature.parameters == async_signature.parameters
-            else:
-                assert client_signature == async_signature
+        client_signature = inspect.signature(func)
+        async_signature = inspect.signature(async_client_methods[name])
+        if client_signature.return_annotation != async_signature.return_annotation:
+            # some methods return a separate async class. This could also be within a Union
+            assert str(async_signature.return_annotation).replace("Async", "") == str(
+                client_signature.return_annotation
+            )
+            assert client_signature.parameters == async_signature.parameters
+        else:
+            assert client_signature == async_signature
