@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.7.0
+- [#232](https://github.com/cohere-ai/cohere-python/pull/232)
+  - Support model parameter in tokenize and detokenize
+
 ## 4.6.1
 - [#240](https://github.com/cohere-ai/cohere-python/pull/240)
   - Revert: Add SDK level validation for classify params
