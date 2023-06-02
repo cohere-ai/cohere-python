@@ -18,6 +18,6 @@ class TestFinetuneClient(unittest.TestCase):
         self.assertEqual(first.id, by_id.id)
 
     def test_get_by_name(self):
-        first = client.list_custom_models()[0]
-        by_id = client.get_custom_model_by_name(first.name)
-        self.assertEqual(first.id, by_id.id)
+        name = "joon-customer-300"
+        cm = client.get_custom_model_by_name(name)
+        self.assertEqual(name, cm.name)
