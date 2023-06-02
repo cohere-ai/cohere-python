@@ -9,13 +9,13 @@ co = cohere.Client(get_api_key())
 
 class TestTokenize(unittest.TestCase):
     def test_model_param_tokenization(self):
-        medium_res = co.tokenize("Hello world!", model="medium")
-        medium_res_batch = co.batch_tokenize(["Hello world!"] * 3, model="medium")
+        medium_res = tuple(co.tokenize("Hello world!", model="medium").tokens)
+        medium_res_batch = [tuple(x.tokens) for x in co.batch_tokenize(["Hello world!"] * 3, model="medium")]
 
-        command_res = co.tokenize("Hello world!", model="command")
-        command_res_batch = co.batch_tokenize(["Hello world!"] * 3, model="command")
-        assert medium_res == set(medium_res_batch)
-        assert command_res == set(command_res_batch)
+        command_res = tuple(co.tokenize("Hello world!", model="command").tokens)
+        command_res_batch = [tuple(x.tokens) for x in co.batch_tokenize(["Hello world!"] * 3, model="command")]
+        assert set([medium_res]) == set(medium_res_batch)
+        assert set([command_res]) == set(command_res_batch)
         assert medium_res != command_res
 
     def test_tokenize_success(self):
