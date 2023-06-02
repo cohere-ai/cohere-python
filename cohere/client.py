@@ -454,7 +454,7 @@ class Client:
             text (str): Text to summarize.
             model (str): An optional model name that will ensure that the tokenization uses the tokenizer used by that model, which can be critical for counting tokens properly.
         """
-        json_body = {"text": text, model: model}
+        json_body = {"text": text, "model": model}
         res = self._request(cohere.TOKENIZE_URL, json=json_body)
         return Tokens(tokens=res["tokens"], token_strings=res["token_strings"], meta=res.get("meta"))
 
@@ -482,7 +482,7 @@ class Client:
             tokens (List[int]): A list of tokens to convert to strings
             model (str): An optional model name. This will ensure that the detokenization is done by the tokenizer used by that model.
         """
-        json_body = {"tokens": tokens, model: model}
+        json_body = {"tokens": tokens, "model": model}
         res = self._request(cohere.DETOKENIZE_URL, json=json_body)
         return Detokenization(text=res["text"], meta=res.get("meta"))
 
