@@ -5,14 +5,21 @@ import posixpath
 import time
 from collections import defaultdict
 from dataclasses import asdict
+from datetime import datetime, timezone
 from functools import partial
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union
+
+try:
+    from typing import Literal, TypedDict
+except ImportError:
+    from typing_extensions import Literal, TypedDict
 
 import aiohttp
 import backoff
 
 import cohere
 from cohere.client import Client
+from cohere.custom_model_dataset import CustomModelDataset
 from cohere.error import CohereAPIError, CohereConnectionError, CohereError
 from cohere.logging import logger
 from cohere.responses import (
@@ -38,6 +45,13 @@ from cohere.responses import (
 from cohere.responses.bulk_embed import AsyncCreateBulkEmbedJobResponse, BulkEmbedJob
 from cohere.responses.chat import AsyncChat, StreamingChat
 from cohere.responses.classify import Example as ClassifyExample
+from cohere.responses.custom_model import (
+    CUSTOM_MODEL_PRODUCT_MAPPING,
+    CUSTOM_MODEL_STATUS,
+    CUSTOM_MODEL_TYPE,
+    INTERNAL_CUSTOM_MODEL_TYPE,
+    CustomModel,
+)
 from cohere.utils import async_wait_for_job, is_api_key_valid, np_json_dumps
 
 JSON = Union[Dict, List]
@@ -321,21 +335,25 @@ class AsyncClient(Client):
         response = await self._request(cohere.SUMMARIZE_URL, json=json_body)
         return SummarizeResponse(id=response["id"], summary=response["summary"], meta=response["meta"])
 
-    async def batch_tokenize(self, texts: List[str], return_exceptions=False) -> List[Union[Tokens, Exception]]:
-        return await asyncio.gather(*[self.tokenize(t) for t in texts], return_exceptions=return_exceptions)
+    async def batch_tokenize(
+        self, texts: List[str], return_exceptions=False, **kwargs
+    ) -> List[Union[Tokens, Exception]]:
+        return await asyncio.gather(*[self.tokenize(t, **kwargs) for t in texts], return_exceptions=return_exceptions)
 
-    async def tokenize(self, text: str) -> Tokens:
-        json_body = {"text": text}
+    async def tokenize(self, text: str, model: Optional[str] = None) -> Tokens:
+        json_body = {"text": text, "model": model}
         res = await self._request(cohere.TOKENIZE_URL, json_body)
         return Tokens(tokens=res["tokens"], token_strings=res["token_strings"], meta=res["meta"])
 
     async def batch_detokenize(
-        self, list_of_tokens: List[List[int]], return_exceptions=False
+        self, list_of_tokens: List[List[int]], return_exceptions=False, **kwargs
     ) -> List[Union[Detokenization, Exception]]:
-        return await asyncio.gather(*[self.detokenize(t) for t in list_of_tokens], return_exceptions=return_exceptions)
+        return await asyncio.gather(
+            *[self.detokenize(t, **kwargs) for t in list_of_tokens], return_exceptions=return_exceptions
+        )
 
-    async def detokenize(self, tokens: List[int]) -> Detokenization:
-        json_body = {"tokens": tokens}
+    async def detokenize(self, tokens: List[int], model: Optional[str] = None) -> Detokenization:
+        json_body = {"tokens": tokens, "model": model}
         res = await self._request(cohere.DETOKENIZE_URL, json_body)
         return Detokenization(text=res["text"], meta=res["meta"])
 
@@ -638,6 +656,132 @@ class AsyncClient(Client):
             timeout=timeout,
             interval=interval,
         )
+
+    async def create_custom_model(
+        self, name: str, model_type: CUSTOM_MODEL_TYPE, dataset: CustomModelDataset
+    ) -> CustomModel:
+        """Create a new custom model
+
+        Args:
+            name (str): name of your custom model, has to be unique across your organization
+            model_type (GENERATIVE, EMBED, CLASSIFY): type of custom model
+            dataset (InMemoryDataset, CsvDataset, JsonlDataset, TextDataset): A dataset for your training. Consists of a train and optional eval file.
+        Returns:
+            str: the id of the custom model that was created
+
+        Examples:
+            prompt completion custom model with csv file
+                >>> from cohere.custom_model_dataset import CsvDataset
+                >>> co = cohere.Client("YOUR_API_KEY")
+                >>> dataset = CsvDataset(train_file="/path/to/your/file.csv", delimiter=",")
+                >>> finetune = co.create_custom_model("prompt-completion-ft", dataset=dataset, model_type="GENERATIVE")
+
+            prompt completion custom model with in-memory dataset
+                >>> from cohere.custom_model_dataset import InMemoryDataset
+                >>> co = cohere.Client("YOUR_API_KEY")
+                >>> dataset = InMemoryDataset(training_data=[
+                >>>     ("this is the prompt", "and this is the completion"),
+                >>>     ("another prompt", "and another completion")
+                >>> ])
+                >>> finetune = co.create_custom_model("prompt-completion-ft", dataset=dataset, model_type="GENERATIVE")
+
+        """
+        internal_custom_model_type = CUSTOM_MODEL_PRODUCT_MAPPING[model_type]
+        json = {
+            "name": name,
+            "settings": {
+                "trainFiles": [],
+                "evalFiles": [],
+                "baseModel": "medium",
+                "finetuneType": internal_custom_model_type,
+            },
+        }
+        remote_path = await self._upload_dataset(
+            dataset.get_train_data(), name, dataset.train_file_name(), internal_custom_model_type
+        )
+        json["settings"]["trainFiles"].append({"path": remote_path, **dataset.file_config()})
+        if dataset.has_eval_file():
+            remote_path = await self._upload_dataset(
+                dataset.get_eval_data(), name, dataset.eval_file_name(), internal_custom_model_type
+            )
+            json["settings"]["evalFiles"].append({"path": remote_path, **dataset.file_config()})
+
+        response = await self._request(f"{cohere.CUSTOM_MODEL_URL}/CreateFinetune", method="POST", json=json)
+        return CustomModel.from_dict(response["finetune"])
+
+    async def _upload_dataset(
+        self, content: Iterable[bytes], custom_model_name: str, file_name: str, type: INTERNAL_CUSTOM_MODEL_TYPE
+    ) -> str:
+        gcs = await self._create_signed_url(custom_model_name, file_name, type)
+        session = await self._backend.session()
+        response = await session.put(url=gcs["url"], data=b"".join(content), headers={"content-type": "text/plain"})
+        if response.status != 200:
+            raise CohereError(message=f"Unexpected server error (status {response.status}): {response.text}")
+        return gcs["gcspath"]
+
+    async def _create_signed_url(
+        self, custom_model_name: str, file_name: str, type: INTERNAL_CUSTOM_MODEL_TYPE
+    ) -> TypedDict("gcsData", {"url": str, "gcspath": str}):
+        json = {"finetuneName": custom_model_name, "fileName": file_name, "finetuneType": type}
+        return await self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneUploadSignedURL", method="POST", json=json)
+
+    async def get_custom_model(self, custom_model_id: str) -> CustomModel:
+        """Get a custom model by id.
+
+        Args:
+            custom_model_id (str): custom model id
+        Returns:
+            CustomModel: the custom model
+        """
+        json = {"finetuneID": custom_model_id}
+        response = await self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetune", method="POST", json=json)
+        return CustomModel.from_dict(response["finetune"])
+
+    async def get_custom_model_by_name(self, name: str) -> CustomModel:
+        """Get a custom model by name.
+
+        Args:
+            name (str): custom model name
+        Returns:
+            CustomModel: the custom model
+        """
+        json = {"name": name}
+        response = await self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneByName", method="POST", json=json)
+        return CustomModel.from_dict(response["finetune"])
+
+    async def list_custom_models(
+        self,
+        statuses: Optional[List[CUSTOM_MODEL_STATUS]] = None,
+        before: Optional[datetime] = None,
+        after: Optional[datetime] = None,
+        order_by: Optional[Literal["asc", "desc"]] = None,
+    ) -> List[CustomModel]:
+        """List custom models of your organization.
+
+        Args:
+            statuses (CUSTOM_MODEL_STATUS, optional): search for fintunes which are in one of these states
+            before (datetime, optional): search for custom models that were created before this timestamp
+            after (datetime, optional): search for custom models that were created after this timestamp
+            order_by (Literal["asc", "desc"], optional): sort custom models by created at, either asc or desc
+        Returns:
+            List[CustomModel]: a list of custom models.
+        """
+        if before:
+            before = before.replace(tzinfo=before.tzinfo or timezone.utc)
+        if after:
+            after = after.replace(tzinfo=after.tzinfo or timezone.utc)
+
+        json = {
+            "query": {
+                "statuses": statuses,
+                "before": before.isoformat(timespec="seconds") if before else None,
+                "after": after.isoformat(timespec="seconds") if after else None,
+                "orderBy": order_by,
+            }
+        }
+
+        response = await self._request(f"{cohere.CUSTOM_MODEL_URL}/ListFinetunes", method="POST", json=json)
+        return [CustomModel.from_dict(r) for r in response["finetunes"]]
 
 
 class AIOHTTPBackend:
