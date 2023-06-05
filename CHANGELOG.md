@@ -1,8 +1,12 @@
 # Changelog
 
-## 4.7.0
+## 4.8.0
 - [#237](https://github.com/cohere-ai/cohere-python/pull/237)
   - add support for custom models
+
+## 4.7.0
+- [#232](https://github.com/cohere-ai/cohere-python/pull/232)
+  - Support model parameter in tokenize and detokenize
 
 ## 4.6.1
 - [#240](https://github.com/cohere-ai/cohere-python/pull/240)

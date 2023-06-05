@@ -446,53 +446,57 @@ class Client:
 
         return SummarizeResponse(id=response["id"], summary=response["summary"], meta=response["meta"])
 
-    def batch_tokenize(self, texts: List[str], return_exceptions=False) -> List[Union[Tokens, Exception]]:
+    def batch_tokenize(self, texts: List[str], return_exceptions=False, **kwargs) -> List[Union[Tokens, Exception]]:
         """A batched version of tokenize.
 
         Args:
             texts: list of texts
             return_exceptions (bool): Return exceptions as list items rather than raise them. Ensures your entire batch is not lost on one of the items failing.
+            kwargs: other arguments to `tokenize`
         """
         return threadpool_map(
             self.tokenize,
-            [dict(text=text) for text in texts],
+            [dict(text=text, **kwargs) for text in texts],
             num_workers=self.num_workers,
             return_exceptions=return_exceptions,
         )
 
-    def tokenize(self, text: str) -> Tokens:
+    def tokenize(self, text: str, model: Optional[str] = None) -> Tokens:
         """Returns a Tokens object of the provided text, see https://docs.cohere.ai/reference/tokenize for advanced usage.
 
         Args:
             text (str): Text to summarize.
+            model (str): An optional model name that will ensure that the tokenization uses the tokenizer used by that model, which can be critical for counting tokens properly.
         """
-        json_body = {"text": text}
+        json_body = {"text": text, "model": model}
         res = self._request(cohere.TOKENIZE_URL, json=json_body)
         return Tokens(tokens=res["tokens"], token_strings=res["token_strings"], meta=res.get("meta"))
 
     def batch_detokenize(
-        self, list_of_tokens: List[List[int]], return_exceptions=False
+        self, list_of_tokens: List[List[int]], return_exceptions=False, **kwargs
     ) -> List[Union[Detokenization, Exception]]:
         """A batched version of detokenize.
 
         Args:
             list_of_tokens: list of list of tokens
             return_exceptions (bool): Return exceptions as list items rather than raise them. Ensures your entire batch is not lost on one of the items failing.
+            kwargs: other arguments to `detokenize`
         """
         return threadpool_map(
             self.detokenize,
-            [dict(tokens=tokens) for tokens in list_of_tokens],
+            [dict(tokens=tokens, **kwargs) for tokens in list_of_tokens],
             num_workers=self.num_workers,
             return_exceptions=return_exceptions,
         )
 
-    def detokenize(self, tokens: List[int]) -> Detokenization:
+    def detokenize(self, tokens: List[int], model: Optional[str] = None) -> Detokenization:
         """Returns a Detokenization object of the provided tokens, see https://docs.cohere.ai/reference/detokenize for advanced usage.
 
         Args:
             tokens (List[int]): A list of tokens to convert to strings
+            model (str): An optional model name. This will ensure that the detokenization is done by the tokenizer used by that model.
         """
-        json_body = {"tokens": tokens}
+        json_body = {"tokens": tokens, "model": model}
         res = self._request(cohere.DETOKENIZE_URL, json=json_body)
         return Detokenization(text=res["text"], meta=res.get("meta"))
 

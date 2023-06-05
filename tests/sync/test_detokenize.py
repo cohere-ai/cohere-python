@@ -9,7 +9,7 @@ co = cohere.Client(get_api_key())
 
 class TestDetokenize(unittest.TestCase):
     def test_detokenize_success(self):
-        resp = co.detokenize([10104, 12221, 974, 514, 34])
+        resp = co.detokenize([10104, 12221, 974, 514, 34], model="base")
         text = resp.text
         self.assertEqual(text, "detokenize me!")
         self.assertTrue(resp.meta)
@@ -18,7 +18,7 @@ class TestDetokenize(unittest.TestCase):
 
     def test_detokenize_batched(self):
         _batch_size = 3
-        texts = co.batch_detokenize([[10104, 12221, 974, 514, 34]] * _batch_size)
+        texts = co.batch_detokenize([[10104, 12221, 974, 514, 34]] * _batch_size, model="base")
         results = []
         for text in texts:
             results.append(str(text))
