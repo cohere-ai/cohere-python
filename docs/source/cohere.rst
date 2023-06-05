@@ -100,6 +100,16 @@ API response objects
     :members:
     :member-order: bysource
 
+.. automodule:: cohere.responses.custom_model
+    :members:
+    :member-order: bysource
+
+CustomModelDataset
+--------
+.. automodule:: cohere.custom_model_dataset
+    :members: CustomModelDataset,InMemoryDataset,CsvDataset,JsonlDataset,TextDataset
+    :member-order: bysource
+
 Exceptions
 ----------
 .. automodule:: cohere.error

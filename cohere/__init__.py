@@ -24,3 +24,4 @@ DETOKENIZE_URL = "detokenize"
 
 CLUSTER_JOBS_URL = "cluster-jobs"
 BULK_EMBED_JOBS_URL = "embed-jobs"
+CUSTOM_MODEL_URL = "finetune"
