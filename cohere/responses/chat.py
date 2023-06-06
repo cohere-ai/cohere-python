@@ -18,6 +18,7 @@ class Chat(CohereObject):
         prompt: Optional[str] = None,
         chatlog: Optional[List[Dict[str, str]]] = None,
         preamble: Optional[str] = None,
+        token_count: Optional[Dict[str, int]] = None,
         client=None,
         **kwargs,
     ) -> None:
@@ -31,6 +32,7 @@ class Chat(CohereObject):
         self.chatlog = chatlog  # optional
         self.preamble = preamble
         self.client = client
+        self.token_count = token_count
         self.meta = meta
 
     @classmethod
@@ -46,6 +48,7 @@ class Chat(CohereObject):
             chatlog=response.get("chatlog"),  # optional
             preamble=response.get("preamble"),  # option
             client=client,
+            token_count=response.get("token_count"),
             meta=response.get("meta"),
         )
 
