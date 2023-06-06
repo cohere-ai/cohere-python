@@ -169,3 +169,11 @@ class TestChat(unittest.TestCase):
                     query="Hey!",
                     chat_history=chat_history,
                 )
+
+    def test_token_count(self):
+        prediction = co.chat("Yo what up?", max_tokens=5)
+        self.assertLessEqual(prediction.token_count["response_tokens"], 5)
+        self.assertEqual(
+            prediction.token_count["total_tokens"],
+            prediction.token_count["prompt_tokens"] + prediction.token_count["response_tokens"],
+        )

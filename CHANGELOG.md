@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.9.0
+- [#242](https://github.com/cohere-ai/cohere-python/pull/242)
+  - Add token count to the chat response
+
 ## 4.8.0
 - [#237](https://github.com/cohere-ai/cohere-python/pull/237)
   - add support for custom models
