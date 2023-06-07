@@ -671,6 +671,10 @@ class Client:
             "Content-Type": "application/json",
             "Request-Source": self.request_source,
         }
+        
+        if 'headers' in self.request_dict:
+            headers.update(self.request_dict['headers'])
+            self.request_dict.pop('headers', None)
 
         url = f"{self.api_url}/{self.api_version}/{endpoint}"
         with requests.Session() as session:
