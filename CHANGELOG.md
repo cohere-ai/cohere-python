@@ -1,8 +1,8 @@
 # Changelog
 
 ## 4.10.0
-- []()
-  - Add params `p`, `k` and `logit_bias` to rerank
+- [#245](https://github.com/cohere-ai/cohere-python/pull/245)
+  - Add params `p`, `k` and `logit_bias` to chat
 
 ## 4.9.0
 - [#242](https://github.com/cohere-ai/cohere-python/pull/242)
