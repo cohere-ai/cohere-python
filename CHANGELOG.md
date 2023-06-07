@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.10.0
+- []()
+  - Add params `p`, `k` and `logit_bias` to rerank
+
 ## 4.9.0
 - [#242](https://github.com/cohere-ai/cohere-python/pull/242)
   - Add token count to the chat response
@@ -317,3 +321,4 @@
 
 - [#18](https://github.com/cohere-ai/cohere-python/pull/18) API Updates - Generate Endpoint
   - Add Frequency Penalty, Presence Penalty, Stop Sequences, and Return Likelihoods for Generate
+
