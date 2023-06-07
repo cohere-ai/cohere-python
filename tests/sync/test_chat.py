@@ -177,3 +177,37 @@ class TestChat(unittest.TestCase):
             prediction.token_count["total_tokens"],
             prediction.token_count["prompt_tokens"] + prediction.token_count["response_tokens"],
         )
+
+    def test_p(self):
+        prediction = co.chat("Yo what up?", p=0.9, max_tokens=5)
+        self.assertIsInstance(prediction.text, str)
+        self.assertIsInstance(prediction.conversation_id, str)
+
+    def test_invalid_p(self):
+        with self.assertRaises(cohere.error.CohereError):
+            _ = co.chat("Yo what up?", p="invalid", max_tokens=5)
+
+    def test_k(self):
+        prediction = co.chat("Yo what up?", k=5, max_tokens=5)
+        self.assertIsInstance(prediction.text, str)
+        self.assertIsInstance(prediction.conversation_id, str)
+
+    def test_invalid_k(self):
+        with self.assertRaises(cohere.error.CohereError):
+            _ = co.chat("Yo what up?", k="invalid", max_tokens=5)
+
+    def test_logit_bias(self):
+        prediction = co.chat("Yo what up?", logit_bias={42: 10}, max_tokens=5)
+        self.assertIsInstance(prediction.text, str)
+        self.assertIsInstance(prediction.conversation_id, str)
+
+    def test_invalid_logit_bias(self):
+        invalid = [
+            "invalid",
+            {"hello": "invalid"},
+            {-42: 10},
+        ]
+
+        for logit_bias in invalid:
+            with self.assertRaises(cohere.error.CohereError):
+                _ = co.chat("Yo what up?", logit_bias=logit_bias, max_tokens=5)
