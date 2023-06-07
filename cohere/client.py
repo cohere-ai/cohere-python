@@ -192,6 +192,9 @@ class Client:
         temperature: float = 0.8,
         max_tokens: int = None,
         stream: bool = False,
+        p: float = None,
+        k: float = None,
+        logit_bias: Dict[int, float] = {},
     ) -> Union[Chat, StreamingChat]:
         """Returns a Chat object with the query reply.
 
@@ -209,6 +212,9 @@ class Client:
             temperature (float): (Optional) The temperature to use for the next reply. The higher the temperature, the more random the reply.
             max_tokens (int): (Optional) The max tokens generated for the next reply.
             stream (bool): Return streaming tokens.
+            p (float): (Optional) The nucleus sampling probability.
+            k (float): (Optional) The top-k sampling probability.
+            logit_bias (Dict[int, float]): (Optional) A dictionary of logit bias values to use for the next reply.
         Returns:
             a Chat object if stream=False, or a StreamingChat object if stream=True
 
@@ -251,6 +257,8 @@ class Client:
         if chat_history is not None:
             self._validate_chat_history(chat_history)
 
+        self._validate_chat_params(logit_bias)
+
         json_body = {
             "query": query,
             "conversation_id": conversation_id,
@@ -264,6 +272,9 @@ class Client:
             "max_tokens": max_tokens,
             "stream": stream,
             "user_name": user_name,
+            "p": p,
+            "k": k,
+            "logit_bias": logit_bias,
         }
         response = self._request(cohere.CHAT_URL, json=json_body, stream=stream)
 
@@ -283,6 +294,16 @@ class Client:
                 raise CohereError(message="chat_history must be a list of dicts, each mapping the user_name and text.")
             if not isinstance(entry["user_name"], str) or not isinstance(entry["text"], str):
                 raise CohereError(message="both user_name and text must be strings in chat_history.")
+
+    def _validate_chat_params(self, logit_bias: Dict[int, float]) -> None:
+        if not isinstance(logit_bias, dict):
+            raise CohereError(message="logit_bias must be a dictionary mapping positive integers to floats.")
+
+        for key, value in logit_bias.items():
+            if not isinstance(key, int) or not isinstance(value, (float, int)):
+                raise CohereError(message="logit_bias must be a dictionary mapping positive integers to numbers.")
+            if key < 0:
+                raise CohereError(message="logit_bias keys must be positive integers.")
 
     def embed(
         self,
