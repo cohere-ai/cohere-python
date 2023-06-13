@@ -196,6 +196,9 @@ class AsyncClient(Client):
         temperature: float = 0.8,
         max_tokens: int = None,
         stream: bool = False,
+        p: float = None,
+        k: float = None,
+        logit_bias: Dict[int, float] = {},
     ) -> Union[AsyncChat, StreamingChat]:
         if chatlog_override is not None:
             logger.warning(
@@ -205,6 +208,8 @@ class AsyncClient(Client):
 
         if chat_history is not None:
             self._validate_chat_history(chat_history)
+
+        self._validate_chat_params(logit_bias)
 
         json_body = {
             "query": query,
@@ -219,6 +224,9 @@ class AsyncClient(Client):
             "max_tokens": max_tokens,
             "stream": stream,
             "user_name": user_name,
+            "p": p,
+            "k": k,
+            "logit_bias": logit_bias,
         }
 
         response = await self._request(cohere.CHAT_URL, json=json_body, stream=stream)
