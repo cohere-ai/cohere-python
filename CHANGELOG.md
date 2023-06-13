@@ -1,5 +1,13 @@
 # Changelog
 
+## 5.0.0
+- [#247](https://github.com/cohere-ai/cohere-python/pull/247)
+  - Remove `id` from intermediate streaming response (`StreamingText`) from generate
+  - Add `is_finished` to intermediate streaming response (`StreamingText`) from generate
+  - Add `id` to `StreamingGenerations` final response from generate
+  - Add `finish_reason` to `StreamingGenerations` final response from generate
+  - Add `Generations` to `StreamingGenerations` final response from generate
+
 ## 4.9.0
 - [#242](https://github.com/cohere-ai/cohere-python/pull/242)
   - Add token count to the chat response
