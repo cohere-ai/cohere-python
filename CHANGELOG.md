@@ -4,49 +4,65 @@
 - [#245](https://github.com/cohere-ai/cohere-python/pull/245)
   - Add params `p`, `k` and `logit_bias` to chat
 
+## 4.9.1
+
+- [#222](https://github.com/cohere-ai/cohere-python/pull/222)
+  - Pass along SDK version in request source header
+
 ## 4.9.0
+
 - [#242](https://github.com/cohere-ai/cohere-python/pull/242)
   - Add token count to the chat response
 
 ## 4.8.0
+
 - [#237](https://github.com/cohere-ai/cohere-python/pull/237)
-  - add support for custom models
+  - Add support for custom models
 
 ## 4.7.0
+
 - [#232](https://github.com/cohere-ai/cohere-python/pull/232)
   - Support model parameter in tokenize and detokenize
 
 ## 4.6.1
+
 - [#240](https://github.com/cohere-ai/cohere-python/pull/240)
   - Revert: Add SDK level validation for classify params
 
 ## 4.6.0
+
 - [#238](https://github.com/cohere-ai/cohere-python/pull/238)
   - Add `is_finished` to each element of the streaming chat response
   - Add `conversation_id`, `response_id`, `finish_reason`, `chatlog`, `preamble` and `prompt` to the streaming chat response
   - Fix chat streaming index
 
 ## 4.5.1
+
 - [#225](https://github.com/cohere-ai/cohere-python/pull/224)
   - Remove support for the co.chat parameter `chatlog_override` and add deprecation warning
 
 ## 4.5.0
+
 - [#229](https://github.com/cohere-ai/cohere-python/pull/229)
   - Add `return_exceptions` parameter to Client's `batch_*` methods, mirroring AsyncClient
 
 ## 4.4.2
+
 - [#230](https://github.com/cohere-ai/cohere-python/pull/230)
   - Add SDK level validation for classify params
 
 ## 4.4.1
+
 - [#224](https://github.com/cohere-ai/cohere-python/pull/224)
   - Update co.chat parameter `chat_history`
 
 ## 4.4.0
+
 - [#223](https://github.com/cohere-ai/cohere-python/pull/223)
   - Remove deprecated co.chat parameter `reply`
 
 ## 4.3.1
+
 - [#220](https://github.com/cohere-ai/cohere-python/pull/220)
   - Update chat params
     - Add support for `chat_history`
