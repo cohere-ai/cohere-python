@@ -10,7 +10,7 @@ co = cohere.Client(API_KEY)
 
 class TestChat(unittest.TestCase):
     def test_simple_success(self):
-        prediction = co.chat("Yo what up?")
+        prediction = co.chat("Yo what up?", max_tokens=5)
         self.assertIsInstance(prediction.text, str)
         self.assertIsInstance(prediction.conversation_id, str)
         self.assertTrue(prediction.meta)
@@ -19,14 +19,14 @@ class TestChat(unittest.TestCase):
 
     def test_multi_replies(self):
         num_replies = 3
-        prediction = co.chat("Yo what up?")
+        prediction = co.chat("Yo what up?", max_tokens=5)
         for _ in range(num_replies):
-            prediction = prediction.respond("oh that's cool")
+            prediction = prediction.respond("oh that's cool", max_tokens=5)
             self.assertIsInstance(prediction.text, str)
             self.assertIsInstance(prediction.conversation_id, str)
 
     def test_valid_model(self):
-        prediction = co.chat("Yo what up?", model="medium")
+        prediction = co.chat("Yo what up?", model="medium", max_tokens=5)
         self.assertIsInstance(prediction.text, str)
         self.assertIsInstance(prediction.conversation_id, str)
 
@@ -35,35 +35,37 @@ class TestChat(unittest.TestCase):
             co.chat("Yo what up?", model="NOT_A_VALID_MODEL").text
 
     def test_return_chatlog(self):
-        prediction = co.chat("Yo what up?", return_chatlog=True)
+        prediction = co.chat("Yo what up?", return_chatlog=True, max_tokens=5)
         self.assertIsInstance(prediction.text, str)
         self.assertIsInstance(prediction.conversation_id, str)
         self.assertIsNotNone(prediction.chatlog)
         self.assertGreaterEqual(len(prediction.chatlog), len(prediction.text))
 
     def test_return_chatlog_false(self):
-        prediction = co.chat("Yo what up?", return_chatlog=False)
+        prediction = co.chat("Yo what up?", return_chatlog=False, max_tokens=5)
         self.assertIsInstance(prediction.text, str)
         self.assertIsInstance(prediction.conversation_id, str)
 
         assert prediction.chatlog is None
 
     def test_return_prompt(self):
-        prediction = co.chat("Yo what up?", return_prompt=True)
+        prediction = co.chat("Yo what up?", return_prompt=True, max_tokens=5)
         self.assertIsInstance(prediction.text, str)
         self.assertIsInstance(prediction.conversation_id, str)
         self.assertIsNotNone(prediction.prompt)
         self.assertGreaterEqual(len(prediction.prompt), len(prediction.text))
 
     def test_return_prompt_false(self):
-        prediction = co.chat("Yo what up?", return_prompt=False)
+        prediction = co.chat("Yo what up?", return_prompt=False, max_tokens=5)
         self.assertIsInstance(prediction.text, str)
         self.assertIsInstance(prediction.conversation_id, str)
         assert prediction.prompt is None
 
     def test_preamble_override(self):
         preamble = "You are a dog who mostly barks"
-        prediction = co.chat("Yo what up?", preamble_override=preamble, return_prompt=True, return_preamble=True)
+        prediction = co.chat(
+            "Yo what up?", preamble_override=preamble, return_prompt=True, return_preamble=True, max_tokens=5
+        )
         self.assertIsInstance(prediction.text, str)
         self.assertIsInstance(prediction.conversation_id, str)
         self.assertIn(preamble, prediction.prompt)
@@ -83,25 +85,47 @@ class TestChat(unittest.TestCase):
             self.assertIsInstance(prediction.conversation_id, str)
 
     def test_stream(self):
-        prediction = co.chat(query="Yo what up?", max_tokens=5, stream=True)
+        prediction = co.chat(
+            query="Yo what up?",
+            max_tokens=5,
+            stream=True,
+        )
 
+        self.assertIsInstance(prediction, cohere.responses.chat.StreamingChat)
+        self.assertIsInstance(prediction.texts, list)
+        self.assertEqual(len(prediction.texts), 0)
+        self.assertIsNone(prediction.conversation_id)
+        self.assertIsNone(prediction.response_id)
+        self.assertIsNone(prediction.finish_reason)
+
+        expected_index = 0
+        expected_text = ""
         for token in prediction:
             self.assertIsInstance(token.text, str)
             self.assertGreater(len(token.text), 0)
 
-        self.assertIsInstance(prediction.texts, list)
+            self.assertIsInstance(token.index, int)
+            self.assertEqual(token.index, expected_index)
+
+            expected_text += token.text
+            expected_index += 1
+
+        self.assertEqual(prediction.texts, [expected_text])
+        self.assertIsNotNone(prediction.conversation_id)
+        self.assertIsNotNone(prediction.response_id)
+        self.assertIsNotNone(prediction.finish_reason)
 
     def test_id(self):
-        prediction1 = co.chat("Yo what up?")
+        prediction1 = co.chat("Yo what up?", max_tokens=5)
         self.assertIsNotNone(prediction1.response_id)
 
-        prediction2 = co.chat("hey")
+        prediction2 = co.chat("hey", max_tokens=5)
         self.assertIsNotNone(prediction2.response_id)
 
         self.assertNotEqual(prediction1.response_id, prediction2.response_id)
 
     def test_return_preamble(self):
-        prediction = co.chat("Yo what up?", return_preamble=True, return_prompt=True)
+        prediction = co.chat("Yo what up?", return_preamble=True, return_prompt=True, max_tokens=5)
         self.assertIsInstance(prediction.text, str)
         self.assertIsInstance(prediction.conversation_id, str)
         self.assertIsNotNone(prediction.preamble)
@@ -109,7 +133,7 @@ class TestChat(unittest.TestCase):
         self.assertIn(prediction.preamble, prediction.prompt)
 
     def test_return_preamble_false(self):
-        prediction = co.chat("Yo what up?", return_preamble=False)
+        prediction = co.chat("Yo what up?", return_preamble=False, max_tokens=5)
         self.assertIsInstance(prediction.text, str)
         self.assertIsInstance(prediction.conversation_id, str)
 
@@ -124,6 +148,7 @@ class TestChat(unittest.TestCase):
             ],
             return_prompt=True,
             return_chatlog=True,
+            max_tokens=5,
         )
         self.assertIsInstance(prediction.text, str)
         self.assertIsInstance(prediction.conversation_id, str)
@@ -144,3 +169,11 @@ class TestChat(unittest.TestCase):
                     query="Hey!",
                     chat_history=chat_history,
                 )
+
+    def test_token_count(self):
+        prediction = co.chat("Yo what up?", max_tokens=5)
+        self.assertLessEqual(prediction.token_count["response_tokens"], 5)
+        self.assertEqual(
+            prediction.token_count["total_tokens"],
+            prediction.token_count["prompt_tokens"] + prediction.token_count["response_tokens"],
+        )

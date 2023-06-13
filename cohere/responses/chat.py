@@ -18,6 +18,7 @@ class Chat(CohereObject):
         prompt: Optional[str] = None,
         chatlog: Optional[List[Dict[str, str]]] = None,
         preamble: Optional[str] = None,
+        token_count: Optional[Dict[str, int]] = None,
         client=None,
         **kwargs,
     ) -> None:
@@ -31,6 +32,7 @@ class Chat(CohereObject):
         self.chatlog = chatlog  # optional
         self.preamble = preamble
         self.client = client
+        self.token_count = token_count
         self.meta = meta
 
     @classmethod
@@ -46,63 +48,82 @@ class Chat(CohereObject):
             chatlog=response.get("chatlog"),  # optional
             preamble=response.get("preamble"),  # option
             client=client,
+            token_count=response.get("token_count"),
             meta=response.get("meta"),
         )
 
-    def respond(self, response: str) -> "Chat":
+    def respond(self, response: str, max_tokens: int = None) -> "Chat":
         return self.client.chat(
             query=response,
             conversation_id=self.conversation_id,
             return_chatlog=self.chatlog is not None,
             return_prompt=self.prompt is not None,
             return_preamble=self.preamble is not None,
+            max_tokens=max_tokens,
         )
 
 
 class AsyncChat(Chat):
-    async def respond(self, response: str) -> "AsyncChat":
+    async def respond(self, response: str, max_tokens: int = None) -> "AsyncChat":
         return await self.client.chat(
             query=response,
             conversation_id=self.conversation_id,
             return_chatlog=self.chatlog is not None,
             return_prompt=self.prompt is not None,
             return_preamble=self.preamble is not None,
+            max_tokens=max_tokens,
         )
 
 
-StreamingText = NamedTuple("StreamingText", [("index", Optional[int]), ("text", str)])
+StreamingText = NamedTuple("StreamingText", [("index", Optional[int]), ("text", str), ("is_finished", bool)])
 
 
 class StreamingChat(CohereObject):
     def __init__(self, response):
         self.response = response
         self.texts = []
+        self.response_id = None
+        self.conversation_id = None
+        self.preamble = None
+        self.prompt = None
+        self.chatlog = None
+        self.finish_reason = None
 
-    def _make_response_item(self, line) -> Any:
+    def _make_response_item(self, index, line) -> Any:
         streaming_item = json.loads(line)
-        index = streaming_item.get("index", 0)
+        is_finished = streaming_item.get("is_finished")
         text = streaming_item.get("text")
 
-        while len(self.texts) <= index:
-            self.texts.append("")
+        if not is_finished:
+            return StreamingText(text=text, is_finished=is_finished, index=index)
 
-        if text is None:
+        response = streaming_item.get("response")
+
+        if response is None:
             return None
 
-        self.texts[index] += text
-        return StreamingText(index=index, text=text)
+        self.response_id = response.get("response_id")
+        self.conversation_id = response.get("conversation_id")
+        self.preamble = response.get("preamble")
+        self.prompt = response.get("prompt")
+        self.chatlog = response.get("chatlog")
+        self.finish_reason = streaming_item.get("finish_reason")
+        self.texts = [response.get("text")]
+        return None
 
     def __iter__(self) -> Generator[StreamingText, None, None]:
         if not isinstance(self.response, requests.Response):
             raise ValueError("For AsyncClient, use `async for` to iterate through the `StreamingChat`")
 
-        for line in self.response.iter_lines():
-            item = self._make_response_item(line)
+        for index, line in enumerate(self.response.iter_lines()):
+            item = self._make_response_item(index, line)
             if item is not None:
                 yield item
 
     async def __aiter__(self) -> Generator[StreamingText, None, None]:
+        index = 0
         async for line in self.response.content:
-            item = self._make_response_item(line)
+            item = self._make_response_item(index, line)
+            index += 1
             if item is not None:
                 yield item

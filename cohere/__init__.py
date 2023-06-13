@@ -1,3 +1,5 @@
+from importlib_metadata import version  # use package to support python 3.7
+
 from cohere.client import Client
 from cohere.client_async import AsyncClient
 from cohere.error import CohereAPIError, CohereConnectionError, CohereError
@@ -6,6 +8,7 @@ COHERE_API_URL = "https://api.cohere.ai"
 RETRY_STATUS_CODES = [429, 500, 502, 503, 504]
 
 API_VERSION = "1"
+SDK_VERSION = version("cohere")
 COHERE_EMBED_BATCH_SIZE = 96
 CHAT_URL = "chat"
 CLASSIFY_URL = "classify"
@@ -24,3 +27,4 @@ DETOKENIZE_URL = "detokenize"
 
 CLUSTER_JOBS_URL = "cluster-jobs"
 BULK_EMBED_JOBS_URL = "embed-jobs"
+CUSTOM_MODEL_URL = "finetune"
