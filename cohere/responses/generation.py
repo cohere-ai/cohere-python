@@ -29,6 +29,7 @@ class Generation(CohereObject, str):
         likelihood: float,
         token_likelihoods: List[TokenLikelihood],
         prompt: str = None,
+        finish_reason: str = None,
         *args,
         **kwargs,
     ) -> None:
@@ -36,6 +37,7 @@ class Generation(CohereObject, str):
         self.prompt = prompt
         self.text = text
         self.likelihood = likelihood
+        self.finish_reason = finish_reason
         self.token_likelihoods = token_likelihoods
 
     @classmethod
@@ -49,6 +51,7 @@ class Generation(CohereObject, str):
             token_likelihoods=token_likelihoods,
             prompt=prompt,
             id=response.get("id"),
+            finish_reason=response.get("finish_reason"),
             **kwargs,
         )
 
@@ -93,7 +96,7 @@ class Generations(UserList, CohereObject):
         self.meta = meta
 
     @classmethod
-    def from_dict(cls, response: Dict[str, Any], return_likelihoods: bool) -> List[Generation]:
+    def from_dict(cls, response: Dict[str, Any], return_likelihoods: str) -> List[Generation]:
         generations: List[Generation] = []
         for gen in response["generations"]:
             likelihood = None
@@ -106,7 +109,14 @@ class Generations(UserList, CohereObject):
                     token_likelihood = likelihoods["likelihood"] if "likelihood" in likelihoods.keys() else None
                     token_likelihoods.append(TokenLikelihood(likelihoods["token"], token_likelihood))
             generations.append(
-                Generation(gen["text"], likelihood, token_likelihoods, prompt=response.get("prompt"), id=gen["id"])
+                Generation(
+                    gen["text"],
+                    likelihood,
+                    token_likelihoods,
+                    prompt=response.get("prompt"),
+                    id=gen["id"],
+                    finish_reason=gen.get("finish_reason"),
+                )
             )
 
         return cls(generations, return_likelihoods, response.get("meta"))
@@ -128,30 +138,42 @@ class Generations(UserList, CohereObject):
         return self[0].prompt  # should all be the same
 
 
-# ("likelihood", Optional[float])])
-StreamingText = NamedTuple("StreamingText", [("id", Optional[int]), ("index", Optional[int]), ("text", str)])
+# ("likelihood", Optional[float])]) not supported
+StreamingText = NamedTuple("StreamingText", [("index", Optional[int]), ("text", str), ("is_finished", bool)])
 
 
 class StreamingGenerations(CohereObject):
     def __init__(self, response):
         self.response = response
-        self.ids = []
+        self.id = None
+        self.generations = None
+        self.finish_reason = None
         self.texts = []
 
     def _make_response_item(self, line) -> Optional[StreamingText]:
         streaming_item = json.loads(line)
-        index = streaming_item.get("index", 0)
-        text = streaming_item.get("text")
-        id = streaming_item.get("id")
-        while len(self.texts) <= index:
-            self.texts.append("")
-            self.ids.append(None)
-        if id is not None:
-            self.ids[index] = id
-        if text is None:
+        is_finished = streaming_item.get("is_finished")
+
+        if not is_finished:
+            index = streaming_item.get("index", 0)
+            text = streaming_item.get("text")
+            while len(self.texts) <= index:
+                self.texts.append("")
+            if text is None:
+                return None
+            self.texts[index] += text
+            return StreamingText(text=text, is_finished=is_finished, index=index)
+
+        self.finish_reason = streaming_item.get("finish_reason")
+        generation_response = streaming_item.get("response")
+
+        if generation_response is None:
             return None
-        self.texts[index] += text
-        return StreamingText(id=id, index=index, text=text)
+
+        self.id = generation_response.get("id")
+        # likelihoods not supported in streaming currently
+        self.generations = Generations.from_dict(generation_response, return_likelihoods="NONE")
+        return None
 
     def __iter__(self) -> Generator[StreamingText, None, None]:
         if not isinstance(self.response, requests.Response):
