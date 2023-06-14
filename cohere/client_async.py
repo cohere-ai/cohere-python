@@ -196,8 +196,8 @@ class AsyncClient(Client):
         temperature: float = 0.8,
         max_tokens: int = None,
         stream: bool = False,
-        p: float = None,
-        k: float = None,
+        p: Optional[float] = None,
+        k: Optional[float] = None,
         logit_bias: Dict[int, float] = {},
     ) -> Union[AsyncChat, StreamingChat]:
         if chatlog_override is not None:
