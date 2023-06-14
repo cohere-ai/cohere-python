@@ -6,6 +6,7 @@ import pytest
 from utils import get_api_key
 
 import cohere
+from cohere.responses.generation import Generations
 
 API_KEY = get_api_key()
 co = cohere.Client(API_KEY)
@@ -87,7 +88,22 @@ class TestGenerate(unittest.TestCase):
 
     def test_generate_stream(self):
         res = co.generate(prompt="Hello [insert name here]", stream=True)
+        final_text = ""
         for token in res:
-            assert isinstance(token.text, str)
+            self.assertIsInstance(token.text, str)
             assert len(token.text) > 0
-        assert isinstance(res.texts, list)
+            self.assertEqual(token.index, 0)
+            self.assertFalse(token.is_finished)
+            final_text += token.text
+
+        self.assertIsNotNone(res.id)
+        self.assertEqual(res.finish_reason, "COMPLETE")
+
+        self.assertIsInstance(res.generations, Generations)
+        self.assertEqual(res.generations[0].finish_reason, "COMPLETE")
+        self.assertEqual(res.generations[0].prompt, "Hello [insert name here]")
+        self.assertEqual(res.generations[0].text, final_text)
+        self.assertIsNotNone(res.generations[0].id)
+
+        self.assertIsInstance(res.texts, list)
+        assert len(res.texts) > 0

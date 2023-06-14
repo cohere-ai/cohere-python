@@ -58,7 +58,22 @@ async def test_raise_ex(async_client):
 @pytest.mark.asyncio
 async def test_async_generate_stream(async_client):
     res = await async_client.generate("Hey!", max_tokens=5, stream=True)
+    final_text = ""
     async for token in res:
         assert isinstance(token.text, str)
         assert len(token.text) > 0
+        assert token.index == 0
+        assert not token.is_finished
+        final_text += token.text
+
+    assert res.id != None
+    assert res.finish_reason, "COMPLETE"
+
+    assert isinstance(res.generations, Generations)
+    assert res.generations[0].finish_reason == "COMPLETE"
+    assert res.generations[0].prompt == "Hey!"
+    assert res.generations[0].text == final_text
+    assert res.generations[0].id != None
+
     assert isinstance(res.texts, list)
+    assert len(res.texts) > 0
