@@ -201,7 +201,8 @@ class Client:
 
     def chat(
         self,
-        query: str,
+        message: Optional[str] = None,
+        query: Optional[str] = None,
         conversation_id: Optional[str] = "",
         model: Optional[str] = None,
         return_chatlog: Optional[bool] = False,
@@ -221,7 +222,8 @@ class Client:
         """Returns a Chat object with the query reply.
 
         Args:
-            query (str): The query to send to the chatbot.
+            query (str): Deprecated. Use message instead.
+            message (str): The message to send to the chatbot.
             conversation_id (str): (Optional) The conversation id to continue the conversation.
             model (str): (Optional) The model to use for generating the next reply.
             return_chatlog (bool): (Optional) Whether to return the chatlog.
@@ -242,12 +244,12 @@ class Client:
 
         Examples:
             A simple chat message:
-                >>> res = co.chat(query="Hey! How are you doing today?")
+                >>> res = co.chat(message="Hey! How are you doing today?")
                 >>> print(res.text)
                 >>> print(res.conversation_id)
             Continuing a session using a specific model:
                 >>> res = co.chat(
-                >>>     query="Hey! How are you doing today?",
+                >>>     message="Hey! How are you doing today?",
                 >>>     conversation_id="1234",
                 >>>     model="command",
                 >>>     return_chatlog=True)
@@ -255,13 +257,13 @@ class Client:
                 >>> print(res.chatlog)
             Streaming chat:
                 >>> res = co.chat(
-                >>>     query="Hey! How are you doing today?",
+                >>>     message="Hey! How are you doing today?",
                 >>>     stream=True)
                 >>> for token in res:
                 >>>     print(token)
             Stateless chat with chat history:
                 >>> res = co.chat(
-                >>>     query="Tell me a joke!",
+                >>>     message="Tell me a joke!",
                 >>>     chat_history=[
                 >>>         {'user_name': 'User', text': 'Hey! How are you doing today?'},
                 >>>         {'user_name': 'Bot', text': 'I am doing great! How can I help you?'},
@@ -279,8 +281,18 @@ class Client:
         if chat_history is not None:
             self._validate_chat_history(chat_history)
 
+        if query is None and message is None:
+            raise CohereError("Either 'query' or 'message' must be provided.")
+
+        if query is not None:
+            logger.warning(
+                "The 'query' parameter is deprecated and will be removed in a future version of this function. "
+                + "Use 'message' instead.",
+            )
+            message = query
+
         json_body = {
-            "query": query,
+            "message": message,
             "conversation_id": conversation_id,
             "model": model,
             "return_chatlog": return_chatlog,
@@ -301,7 +313,7 @@ class Client:
         if stream:
             return StreamingChat(response)
         else:
-            return Chat.from_dict(response, query=query, client=self)
+            return Chat.from_dict(response, message=message, client=self)
 
     def _validate_chat_history(self, chat_history: List[Dict[str, str]]) -> None:
         if not isinstance(chat_history, list):

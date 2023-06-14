@@ -183,7 +183,8 @@ class AsyncClient(Client):
 
     async def chat(
         self,
-        query: str,
+        message: Optional[str] = None,
+        query: Optional[str] = None,
         conversation_id: Optional[str] = "",
         model: Optional[str] = None,
         return_chatlog: Optional[bool] = False,
@@ -209,8 +210,18 @@ class AsyncClient(Client):
         if chat_history is not None:
             self._validate_chat_history(chat_history)
 
+        if query is None and message is None:
+            raise CohereError("Either 'query' or 'message' must be provided.")
+
+        if query is not None:
+            logger.warning(
+                "The 'query' parameter is deprecated and will be removed in a future version of this function. "
+                + "Use 'message' instead.",
+            )
+            message = query
+
         json_body = {
-            "query": query,
+            "message": message,
             "conversation_id": conversation_id,
             "model": model,
             "return_chatlog": return_chatlog,
@@ -232,7 +243,7 @@ class AsyncClient(Client):
         if stream:
             return StreamingChat(response)
         else:
-            return AsyncChat.from_dict(response, query=query, client=self)
+            return AsyncChat.from_dict(response, message=message, client=self)
 
     async def embed(
         self,

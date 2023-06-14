@@ -11,7 +11,7 @@ class Chat(CohereObject):
         self,
         response_id: str,
         generation_id: str,
-        query: str,
+        message: str,
         text: str,
         conversation_id: str,
         meta: Optional[Dict[str, Any]] = None,
@@ -25,23 +25,24 @@ class Chat(CohereObject):
         super().__init__(**kwargs)
         self.response_id = response_id
         self.generation_id = generation_id
-        self.query = query
+        self.query = message  # to be deprecated
+        self.message = message
         self.text = text
         self.conversation_id = conversation_id
         self.prompt = prompt  # optional
         self.chatlog = chatlog  # optional
-        self.preamble = preamble
+        self.preamble = preamble  # optional
         self.client = client
         self.token_count = token_count
         self.meta = meta
 
     @classmethod
-    def from_dict(cls, response: Dict[str, Any], query: str, client) -> "Chat":
+    def from_dict(cls, response: Dict[str, Any], message: str, client) -> "Chat":
         return cls(
             id=response["response_id"],
             response_id=response["response_id"],
             generation_id=response["generation_id"],
-            query=query,
+            message=message,
             conversation_id=response["conversation_id"],
             text=response["text"],
             prompt=response.get("prompt"),  # optional
@@ -54,7 +55,7 @@ class Chat(CohereObject):
 
     def respond(self, response: str, max_tokens: int = None) -> "Chat":
         return self.client.chat(
-            query=response,
+            message=response,
             conversation_id=self.conversation_id,
             return_chatlog=self.chatlog is not None,
             return_prompt=self.prompt is not None,
@@ -66,7 +67,7 @@ class Chat(CohereObject):
 class AsyncChat(Chat):
     async def respond(self, response: str, max_tokens: int = None) -> "AsyncChat":
         return await self.client.chat(
-            query=response,
+            message=response,
             conversation_id=self.conversation_id,
             return_chatlog=self.chatlog is not None,
             return_prompt=self.prompt is not None,
