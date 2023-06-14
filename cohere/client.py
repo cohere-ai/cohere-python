@@ -150,7 +150,29 @@ class Client:
             truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.\
             stream (bool): Return streaming tokens.
         Returns:
-            a Generations object if stream=False, or a StreamingGenerations object if stream=True
+            if stream=False: a Generations object
+            if stream=True: a StreamingGenerations object including:
+                id (str): The id of the whole generation call
+                generations (Generations): same as the response when stream=False
+                finish_reason (string) possible values:
+                    COMPLETE: when the stream successfully completed
+                    ERROR: when an error occurred during streaming
+                    ERROR_TOXIC: when the stream was halted due to toxic output.
+                    ERROR_LIMIT: when the context is too big to generate.
+                    USER_CANCEL: when the user has closed the stream / cancelled the request
+                    MAX_TOKENS: when the max tokens limit was reached.
+                texts (List[str]): list of segments of text streamed back from the API
+
+        Examples:
+            A simple generate message:
+                >>> res = co.generate(prompt="Hey! How are you doing today?")
+                >>> print(res.text)
+            Streaming generate:
+                >>> res = co.generate(
+                >>>     prompt="Hey! How are you doing today?",
+                >>>     stream=True)
+                >>> for token in res:
+                >>>     print(token)
         """
         json_body = {
             "model": model,
@@ -213,7 +235,7 @@ class Client:
             a Chat object if stream=False, or a StreamingChat object if stream=True
 
         Examples:
-            A simple chat messsage:
+            A simple chat message:
                 >>> res = co.chat(query="Hey! How are you doing today?")
                 >>> print(res.text)
                 >>> print(res.conversation_id)
