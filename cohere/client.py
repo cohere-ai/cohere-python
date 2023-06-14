@@ -182,19 +182,19 @@ class Client:
         query: str,
         conversation_id: str = "",
         model: Optional[str] = None,
-        return_chatlog: bool = False,
-        return_prompt: bool = False,
-        return_preamble: bool = False,
+        return_chatlog: Optional[bool] = False,
+        return_prompt: Optional[bool] = False,
+        return_preamble: Optional[bool] = False,
         chatlog_override: List[Dict[str, str]] = None,
-        chat_history: List[Dict[str, str]] = None,
-        preamble_override: str = None,
-        user_name: str = None,
-        temperature: float = 0.8,
-        max_tokens: int = None,
-        stream: bool = False,
-        p: float = None,
-        k: float = None,
-        logit_bias: Dict[int, float] = {},
+        chat_history: Optional[List[Dict[str, str]]] = None,
+        preamble_override: Optional[str] = None,
+        user_name: Optional[str] = None,
+        temperature: Optional[float] = 0.8,
+        max_tokens: Optional[int] = None,
+        stream: Optional[bool] = False,
+        p: Optional[float] = None,
+        k: Optional[float] = None,
+        logit_bias: Optional[Dict[int, float]] = None,
     ) -> Union[Chat, StreamingChat]:
         """Returns a Chat object with the query reply.
 
@@ -257,8 +257,6 @@ class Client:
         if chat_history is not None:
             self._validate_chat_history(chat_history)
 
-        self._validate_chat_params(logit_bias)
-
         json_body = {
             "query": query,
             "conversation_id": conversation_id,
@@ -294,16 +292,6 @@ class Client:
                 raise CohereError(message="chat_history must be a list of dicts, each mapping the user_name and text.")
             if not isinstance(entry["user_name"], str) or not isinstance(entry["text"], str):
                 raise CohereError(message="both user_name and text must be strings in chat_history.")
-
-    def _validate_chat_params(self, logit_bias: Dict[int, float]) -> None:
-        if not isinstance(logit_bias, dict):
-            raise CohereError(message="logit_bias must be a dictionary mapping positive integers to floats.")
-
-        for key, value in logit_bias.items():
-            if not isinstance(key, int) or not isinstance(value, (float, int)):
-                raise CohereError(message="logit_bias must be a dictionary mapping positive integers to numbers.")
-            if key < 0:
-                raise CohereError(message="logit_bias keys must be positive integers.")
 
     def embed(
         self,
