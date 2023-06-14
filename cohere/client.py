@@ -202,18 +202,21 @@ class Client:
     def chat(
         self,
         query: str,
-        conversation_id: str = "",
+        conversation_id: Optional[str] = "",
         model: Optional[str] = None,
-        return_chatlog: bool = False,
-        return_prompt: bool = False,
-        return_preamble: bool = False,
+        return_chatlog: Optional[bool] = False,
+        return_prompt: Optional[bool] = False,
+        return_preamble: Optional[bool] = False,
         chatlog_override: List[Dict[str, str]] = None,
-        chat_history: List[Dict[str, str]] = None,
-        preamble_override: str = None,
-        user_name: str = None,
-        temperature: float = 0.8,
-        max_tokens: int = None,
-        stream: bool = False,
+        chat_history: Optional[List[Dict[str, str]]] = None,
+        preamble_override: Optional[str] = None,
+        user_name: Optional[str] = None,
+        temperature: Optional[float] = 0.8,
+        max_tokens: Optional[int] = None,
+        stream: Optional[bool] = False,
+        p: Optional[float] = None,
+        k: Optional[float] = None,
+        logit_bias: Optional[Dict[int, float]] = None,
     ) -> Union[Chat, StreamingChat]:
         """Returns a Chat object with the query reply.
 
@@ -231,6 +234,9 @@ class Client:
             temperature (float): (Optional) The temperature to use for the next reply. The higher the temperature, the more random the reply.
             max_tokens (int): (Optional) The max tokens generated for the next reply.
             stream (bool): Return streaming tokens.
+            p (float): (Optional) The nucleus sampling probability.
+            k (float): (Optional) The top-k sampling probability.
+            logit_bias (Dict[int, float]): (Optional) A dictionary of logit bias values to use for the next reply.
         Returns:
             a Chat object if stream=False, or a StreamingChat object if stream=True
 
@@ -286,6 +292,9 @@ class Client:
             "max_tokens": max_tokens,
             "stream": stream,
             "user_name": user_name,
+            "p": p,
+            "k": k,
+            "logit_bias": logit_bias,
         }
         response = self._request(cohere.CHAT_URL, json=json_body, stream=stream)
 

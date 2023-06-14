@@ -184,18 +184,21 @@ class AsyncClient(Client):
     async def chat(
         self,
         query: str,
-        conversation_id: str = "",
+        conversation_id: Optional[str] = "",
         model: Optional[str] = None,
-        return_chatlog: bool = False,
-        return_prompt: bool = False,
-        return_preamble: bool = False,
+        return_chatlog: Optional[bool] = False,
+        return_prompt: Optional[bool] = False,
+        return_preamble: Optional[bool] = False,
         chatlog_override: List[Dict[str, str]] = None,
-        chat_history: List[Dict[str, str]] = None,
-        preamble_override: str = None,
-        user_name: str = None,
-        temperature: float = 0.8,
-        max_tokens: int = None,
-        stream: bool = False,
+        chat_history: Optional[List[Dict[str, str]]] = None,
+        preamble_override: Optional[str] = None,
+        user_name: Optional[str] = None,
+        temperature: Optional[float] = 0.8,
+        max_tokens: Optional[int] = None,
+        stream: Optional[bool] = False,
+        p: Optional[float] = None,
+        k: Optional[float] = None,
+        logit_bias: Optional[Dict[int, float]] = None,
     ) -> Union[AsyncChat, StreamingChat]:
         if chatlog_override is not None:
             logger.warning(
@@ -219,6 +222,9 @@ class AsyncClient(Client):
             "max_tokens": max_tokens,
             "stream": stream,
             "user_name": user_name,
+            "p": p,
+            "k": k,
+            "logit_bias": logit_bias,
         }
 
         response = await self._request(cohere.CHAT_URL, json=json_body, stream=stream)
