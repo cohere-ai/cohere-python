@@ -202,7 +202,7 @@ class Client:
     def chat(
         self,
         query: str,
-        conversation_id: str = "",
+        conversation_id: Optional[str] = "",
         model: Optional[str] = None,
         return_chatlog: Optional[bool] = False,
         return_prompt: Optional[bool] = False,
