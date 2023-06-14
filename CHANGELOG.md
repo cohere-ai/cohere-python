@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.11.0
+
+- [#245](https://github.com/cohere-ai/cohere-python/pull/245)
+  - Add params `p`, `k` and `logit_bias` to chat
+
 ## 4.10.0
 
 - [#247](https://github.com/cohere-ai/cohere-python/pull/247)
@@ -342,3 +347,4 @@
 
 - [#18](https://github.com/cohere-ai/cohere-python/pull/18) API Updates - Generate Endpoint
   - Add Frequency Penalty, Presence Penalty, Stop Sequences, and Return Likelihoods for Generate
+
