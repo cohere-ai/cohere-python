@@ -81,7 +81,7 @@ class Client:
         self._executor = ThreadPoolExecutor(num_workers)
         self.num_workers = num_workers
         self.request_dict = request_dict
-        self.request_source = "python-sdk"
+        self.request_source = "python-sdk-" + cohere.SDK_VERSION
         self.max_retries = max_retries
         self.timeout = timeout
         self.api_version = f"v{cohere.API_VERSION}"
