@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.11.1
+- [#248](https://github.com/cohere-ai/cohere-python/pull/248)
+  - Add deprecation warning for Chat parameter
+    - Use `message` instead of `query`
+
 ## 4.11.0
 
 - [#245](https://github.com/cohere-ai/cohere-python/pull/245)
