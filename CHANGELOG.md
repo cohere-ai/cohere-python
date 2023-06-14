@@ -1,6 +1,6 @@
 # Changelog
 
-## 5.0.0
+## 4.10.0
 - [#247](https://github.com/cohere-ai/cohere-python/pull/247)
   - Remove `id` from intermediate streaming response (`StreamingText`) from generate
   - Add `is_finished` to intermediate streaming response (`StreamingText`) from generate

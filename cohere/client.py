@@ -162,6 +162,17 @@ class Client:
                     USER_CANCEL: when the user has closed the stream / cancelled the request
                     MAX_TOKENS: when the max tokens limit was reached.
                 texts (List[str]): list of segments of text streamed back from the API
+
+        Examples:
+            A simple generate message:
+                >>> res = co.generate(prompt="Hey! How are you doing today?")
+                >>> print(res.text)
+            Streaming generate:
+                >>> res = co.generate(
+                >>>     prompt="Hey! How are you doing today?",
+                >>>     stream=True)
+                >>> for token in res:
+                >>>     print(token)
         """
         json_body = {
             "model": model,
@@ -224,7 +235,7 @@ class Client:
             a Chat object if stream=False, or a StreamingChat object if stream=True
 
         Examples:
-            A simple chat messsage:
+            A simple chat message:
                 >>> res = co.chat(query="Hey! How are you doing today?")
                 >>> print(res.text)
                 >>> print(res.conversation_id)
