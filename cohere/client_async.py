@@ -103,7 +103,7 @@ class AsyncClient(Client):
 
         try:
             json_response = await response.json()
-	# `CohereAPIError.from_response()` will capture the http status code
+        #   `CohereAPIError.from_response()` will capture the http status code
         except jsonlib.decoder.JSONDecodeError:
             raise CohereAPIError.from_response(response, message=f"Failed to decode json body: {await response.text()}")
         except aiohttp.ClientPayloadError as e:
