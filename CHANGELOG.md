@@ -6,7 +6,7 @@
   - Add params `p`, `k` and `logit_bias` to chat
 - [#228](https://github.com/cohere-ai/cohere-python/pull/228)
   - Better string representation for DetectLanguageResponse
-- [#2..](https://github.com/cohere-ai/cohere-python/pull/2..)
+- [#249](https://github.com/cohere-ai/cohere-python/pull/249)
   - Catch ClientPayloadError in AsyncClient and convert it to a CohereAPIError
 
 ## 4.10.0
