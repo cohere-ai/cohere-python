@@ -103,8 +103,13 @@ class AsyncClient(Client):
 
         try:
             json_response = await response.json()
-        except jsonlib.decoder.JSONDecodeError:  # CohereAPIError will capture status
+        #   `CohereAPIError.from_response()` will capture the http status code
+        except jsonlib.decoder.JSONDecodeError:
             raise CohereAPIError.from_response(response, message=f"Failed to decode json body: {await response.text()}")
+        except aiohttp.ClientPayloadError as e:
+            raise CohereAPIError.from_response(
+                response, message=f"An unexpected error occurred while receiving the response: {e}"
+            )
 
         logger.debug(f"JSON response: {json_response}")
         self._check_response(json_response, response.headers, response.status)
