@@ -1,9 +1,11 @@
 # Changelog
 
-## 4.11.0
+## 4.11
 
 - [#245](https://github.com/cohere-ai/cohere-python/pull/245)
   - Add params `p`, `k` and `logit_bias` to chat
+- [#228](https://github.com/cohere-ai/cohere-python/pull/228)
+  - Better string representation for DetectLanguageResponse
 
 ## 4.10.0
 
