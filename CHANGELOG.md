@@ -1,5 +1,19 @@
 # Changelog
 
+## 4.11.0
+
+- [#245](https://github.com/cohere-ai/cohere-python/pull/245)
+  - Add params `p`, `k` and `logit_bias` to chat
+
+## 4.10.0
+
+- [#247](https://github.com/cohere-ai/cohere-python/pull/247)
+  - Remove `id` from intermediate streaming response (`StreamingText`) from generate
+  - Add `is_finished` to intermediate streaming response (`StreamingText`) from generate
+  - Add `id` to `StreamingGenerations` final response from generate
+  - Add `finish_reason` to `StreamingGenerations` final response from generate
+  - Add `Generations` to `StreamingGenerations` final response from generate
+
 ## 4.9.1
 
 - [#222](https://github.com/cohere-ai/cohere-python/pull/222)
@@ -333,3 +347,4 @@
 
 - [#18](https://github.com/cohere-ai/cohere-python/pull/18) API Updates - Generate Endpoint
   - Add Frequency Penalty, Presence Penalty, Stop Sequences, and Return Likelihoods for Generate
+
