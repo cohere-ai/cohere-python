@@ -12,7 +12,7 @@ class Language(CohereObject):
         return f'Language<language_code: "{self.language_code}", language_name: "{self.language_name}">'
 
 
-class DetectLanguageResponse:
+class DetectLanguageResponse(CohereObject):
     def __init__(self, results: List[Language], meta: Optional[Dict[str, Any]] = None):
         self.results = results
         self.meta = meta
