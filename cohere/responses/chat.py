@@ -1,25 +1,31 @@
 import json
+from enum import Enum
 from typing import Any, Dict, Generator, List, NamedTuple, Optional
 
 import requests
 
 from cohere.responses.base import CohereObject
 
+Mode = Enum("Mode", ["chat", "search_query_generation", "augmented_generation"])
+
 
 class Chat(CohereObject):
     def __init__(
         self,
-        response_id: str,
-        generation_id: str,
-        query: str,
-        text: str,
-        conversation_id: str,
+        response_id: Optional[str],
+        generation_id: Optional[str],
+        query: Optional[str],
+        text: Optional[str],
+        conversation_id: Optional[str],
         meta: Optional[Dict[str, Any]] = None,
         prompt: Optional[str] = None,
         chatlog: Optional[List[Dict[str, str]]] = None,
         preamble: Optional[str] = None,
         token_count: Optional[Dict[str, int]] = None,
         client=None,
+        is_search_required: Optional[bool] = None,
+        queries: Optional[List[str]] = None,
+        citations: Optional[List[Dict[str, str]]] = None,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -34,22 +40,28 @@ class Chat(CohereObject):
         self.client = client
         self.token_count = token_count
         self.meta = meta
+        self.queries = queries
+        self.citations = citations
+        self.is_search_required = is_search_required
 
     @classmethod
     def from_dict(cls, response: Dict[str, Any], query: str, client) -> "Chat":
         return cls(
-            id=response["response_id"],
-            response_id=response["response_id"],
-            generation_id=response["generation_id"],
+            id=response.get("response_id"),
+            response_id=response.get("response_id"),
+            generation_id=response.get("generation_id"),
             query=query,
             conversation_id=response["conversation_id"],
-            text=response["text"],
+            text=response.get("text"),
             prompt=response.get("prompt"),  # optional
             chatlog=response.get("chatlog"),  # optional
             preamble=response.get("preamble"),  # option
             client=client,
             token_count=response.get("token_count"),
             meta=response.get("meta"),
+            queries=response.get("queries"),
+            is_search_required=response.get("is_search_required"),
+            citations=response.get("citations"),
         )
 
     def respond(self, response: str, max_tokens: int = None) -> "Chat":

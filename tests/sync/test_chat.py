@@ -1,4 +1,5 @@
 import unittest
+from typing import List
 
 from utils import get_api_key
 
@@ -211,3 +212,27 @@ class TestChat(unittest.TestCase):
         for logit_bias in invalid:
             with self.assertRaises(cohere.error.CohereError):
                 _ = co.chat("Yo what up?", logit_bias=logit_bias, max_tokens=5)
+
+    def test_search_query_generation(self):
+        prediction = co.chat("What are the tallest penguins?", mode="search_query_generation")
+        self.assertIsInstance(prediction.is_search_required, bool)
+        self.assertIsInstance(prediction.queries, List)
+        self.assertTrue(prediction.is_search_required)
+        self.assertGreater(len(prediction.queries), 0)
+
+    def test_augmented_generation(self):
+        prediction = co.chat(
+            "What are the tallest penguins?",
+            mode="augmented_generation",
+            documents=[
+                {
+                    "title": "Tall penguins",
+                    "snippet": "Emperor penguins are the tallest",
+                    "url": "http://example.com/foo",
+                }
+            ],
+        )
+        self.assertIsInstance(prediction.text, str)
+        self.assertIsInstance(prediction.citations, List)
+        self.assertGreater(len(prediction.text), 0)
+        self.assertGreater(len(prediction.citations), 0)
