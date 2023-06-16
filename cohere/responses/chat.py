@@ -6,7 +6,11 @@ import requests
 
 from cohere.responses.base import CohereObject
 
-Mode = Enum("Mode", ["chat", "search_query_generation", "augmented_generation"])
+
+class Mode(str, Enum):
+    CHAT = "chat"
+    SEARCH_QUERY_GENERATION = "search_query_generation"
+    AUGMENTED_GENERATION = "augmented_generation"
 
 
 class Chat(CohereObject):

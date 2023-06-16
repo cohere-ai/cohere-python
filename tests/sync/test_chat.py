@@ -4,6 +4,7 @@ from typing import List
 from utils import get_api_key
 
 import cohere
+from cohere.responses.chat import Mode
 
 API_KEY = get_api_key()
 co = cohere.Client(API_KEY)
@@ -215,6 +216,13 @@ class TestChat(unittest.TestCase):
 
     def test_search_query_generation(self):
         prediction = co.chat("What are the tallest penguins?", mode="search_query_generation")
+        self.assertIsInstance(prediction.is_search_required, bool)
+        self.assertIsInstance(prediction.queries, List)
+        self.assertTrue(prediction.is_search_required)
+        self.assertGreater(len(prediction.queries), 0)
+
+    def test_search_query_generation_with_enum(self):
+        prediction = co.chat("What are the tallest penguins?", mode=Mode.SEARCH_QUERY_GENERATION)
         self.assertIsInstance(prediction.is_search_required, bool)
         self.assertIsInstance(prediction.queries, List)
         self.assertTrue(prediction.is_search_required)
