@@ -88,8 +88,15 @@ Unsuccessful API calls from the SDK will raise an exception. Please see the docu
 To set up a development environment, run:
 
 ```
+pip install poetry~=1.2.2
 poetry shell    # any time you want to run code or tests
 poetry install  # install and update dependencies in your environment, the first time
+```
+
+New dependencies can be added by running:
+
+```
+poetry add <package-name>
 ```
 
 In addition, to ensure your code is formatted correctly, install pre-commit hooks using:
