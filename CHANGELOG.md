@@ -10,6 +10,8 @@
   - Catch ClientPayloadError in AsyncClient and convert it to a CohereAPIError
 - [#250](https://github.com/cohere-ai/cohere-python/pull/250)
   - Add support for query generation and documents in chat (non-streaming)
+- [#253](https://github.com/cohere-ai/cohere-python/pull/250)
+  - Add support for query generation and documents in chat (non-streaming)
 
 ## 4.10.0
 
@@ -353,4 +355,3 @@
 
 - [#18](https://github.com/cohere-ai/cohere-python/pull/18) API Updates - Generate Endpoint
   - Add Frequency Penalty, Presence Penalty, Stop Sequences, and Return Likelihoods for Generate
-
