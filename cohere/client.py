@@ -29,7 +29,7 @@ from cohere.responses import (
     Tokens,
 )
 from cohere.responses.bulk_embed import BulkEmbedJob, CreateBulkEmbedJobResponse
-from cohere.responses.chat import Chat, StreamingChat
+from cohere.responses.chat import Chat, Mode, StreamingChat
 from cohere.responses.classify import Example as ClassifyExample
 from cohere.responses.classify import LabelPrediction
 from cohere.responses.cluster import ClusterJobResult, CreateClusterJobResponse
@@ -218,6 +218,8 @@ class Client:
         p: Optional[float] = None,
         k: Optional[float] = None,
         logit_bias: Optional[Dict[int, float]] = None,
+        mode: Optional[Mode] = None,
+        documents: Optional[List[Dict[str, str]]] = None,
     ) -> Union[Chat, StreamingChat]:
         """Returns a Chat object with the query reply.
 
@@ -239,6 +241,11 @@ class Client:
             p (float): (Optional) The nucleus sampling probability.
             k (float): (Optional) The top-k sampling probability.
             logit_bias (Dict[int, float]): (Optional) A dictionary of logit bias values to use for the next reply.
+            mode Mode: (Optional) This property determines which functionality of retrieval augmented generation to use.
+                                    chat mode doesn't use any retrieval augmented generation functionality.
+                                    search_query_generation uses the provided query to produce search terms that you can use to search for documents.
+                                    augmented_generation uses the provided documents and query to produce citations
+            document Document: (Optional) The documents to use in augmented_generation mode. Shape: ("title", str), ("snippet", str), ("url", str)
         Returns:
             a Chat object if stream=False, or a StreamingChat object if stream=True
 
@@ -271,6 +278,16 @@ class Client:
                 >>>     return_prompt=True)
                 >>> print(res.text)
                 >>> print(res.prompt)
+            Query generation example:
+                >>> res = co.chat(query="What are the tallest penguins?", mode="search_query_generation")
+                >>> print(res.queries)
+                >>> print(res.is_search_required)
+            Augmented generation example:
+                >>> res = co.chat(query="What are the tallest penguins?",
+                                  mode="augmented_generation",
+                                  documents = [{"title":"Tall penguins", "snippet":"Emperor penguins are the tallest", "url":"http://example.com/foo"}])
+                >>> print(res.text)
+                >>> print(res.citations)
         """
         if chatlog_override is not None:
             logger.warning(
@@ -307,6 +324,8 @@ class Client:
             "p": p,
             "k": k,
             "logit_bias": logit_bias,
+            "mode": mode,
+            "documents": documents,
         }
         response = self._request(cohere.CHAT_URL, json=json_body, stream=stream)
 
