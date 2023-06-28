@@ -298,7 +298,7 @@ class Client:
 
         if query is not None:
             logger.warning(
-                "The 'query' parameter is deprecated and will be removed in a future version of this function. "
+                "The chat_history 'text' key is deprecated and will be removed in a future version of this function. "
                 + "Use 'message' instead.",
             )
             message = query
