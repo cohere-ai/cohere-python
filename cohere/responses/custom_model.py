@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, Optional
 
@@ -73,6 +74,23 @@ class CustomModel(CohereObject):
             model_id=data["model"]["route"] if "model" in data else None,
         )
 
+@dataclass
+class ModelMetric(CohereObject):
+    created_at: datetime
+    step_num: int
+    loss: float
+    accuracy: float
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "ModelMetric":
+        # model metrics timestamp sometimes contains nanoseconds, so we truncate
+        dt_concat = data["created_at"][:26] + data["created_at"][-1:]
+        return cls(
+            created_at=_parse_date(dt_concat),
+            step_num=data["step_num"],
+            loss=data["loss"],
+            accuracy=data["accuracy"]
+        )
 
 def _parse_date(datetime_string: str) -> datetime:
     return datetime.strptime(datetime_string, "%Y-%m-%dT%H:%M:%S.%f%z")
