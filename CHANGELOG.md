@@ -1,14 +1,16 @@
 # Changelog
 
-## 4.11.3
+## 4.12.0
 
 - [#248](https://github.com/cohere-ai/cohere-python/pull/248)
   - Add deprecation warning for Chat parameter `query`
+  - Add deprecation warning for Chat `text` in `chat_history`
+  - Deprecate Chat `chatlog_override`
 
 ## 4.11.0
 
 - [#245](https://github.com/cohere-ai/cohere-python/pull/245)
-  - Add params `p`, `k` and `logit_bias` to chat
+  - Add parameters `p`, `k` and `logit_bias` to chat
 - [#228](https://github.com/cohere-ai/cohere-python/pull/228)
   - Better string representation for DetectLanguageResponse
 - [#249](https://github.com/cohere-ai/cohere-python/pull/249)

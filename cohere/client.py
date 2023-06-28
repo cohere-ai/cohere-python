@@ -208,7 +208,6 @@ class Client:
         return_chatlog: Optional[bool] = False,
         return_prompt: Optional[bool] = False,
         return_preamble: Optional[bool] = False,
-        chatlog_override: List[Dict[str, str]] = None,
         chat_history: Optional[List[Dict[str, str]]] = None,
         preamble_override: Optional[str] = None,
         user_name: Optional[str] = None,
@@ -231,7 +230,6 @@ class Client:
             return_chatlog (bool): (Optional) Whether to return the chatlog.
             return_prompt (bool): (Optional) Whether to return the prompt.
             return_preamble (bool): (Optional) Whether to return the preamble.
-            chatlog_override (List[Dict[str, str]]): Deprecated.
             chat_history (List[Dict[str, str]]): (Optional) A list of entries used to construct the conversation. If provided, these messages will be used to build the prompt and the conversation_id will be ignored so no data will be stored to maintain state.
             preamble_override (str): (Optional) A string to override the preamble.
             user_name (str): (Optional) A string to override the username.
@@ -272,8 +270,8 @@ class Client:
                 >>> res = co.chat(
                 >>>     message="Tell me a joke!",
                 >>>     chat_history=[
-                >>>         {'user_name': 'User', text': 'Hey! How are you doing today?'},
-                >>>         {'user_name': 'Bot', text': 'I am doing great! How can I help you?'},
+                >>>         {'user_name': 'User', message': 'Hey! How are you doing today?'},
+                >>>         {'user_name': 'Bot', message': 'I am doing great! How can I help you?'},
                 >>>     ],
                 >>>     return_prompt=True)
                 >>> print(res.text)
@@ -289,17 +287,14 @@ class Client:
                 >>> print(res.text)
                 >>> print(res.citations)
         """
-        if chatlog_override is not None:
-            logger.warning(
-                "The 'chatlog_override' parameter is deprecated and will be removed in a future version of this function. "
-                + "Use 'chat_history' to keep track of the conversation instead.",
-            )
-
         if chat_history is not None:
-            self._validate_chat_history(chat_history)
-
-        if query is None and message is None:
-            raise CohereError("Either 'query' or 'message' must be provided.")
+            for entry in chat_history:
+                if "text" in entry:
+                    logger.warning(
+                        "The 'text' parameter is deprecated and will be removed in a future version of this function. "
+                        + "Use 'message' instead.",
+                    )
+                    break
 
         if query is not None:
             logger.warning(
@@ -333,18 +328,6 @@ class Client:
             return StreamingChat(response)
         else:
             return Chat.from_dict(response, message=message, client=self)
-
-    def _validate_chat_history(self, chat_history: List[Dict[str, str]]) -> None:
-        if not isinstance(chat_history, list):
-            raise CohereError(message="chat_history is not a list, but it must be a list of dicts")
-
-        for entry in chat_history:
-            if not isinstance(entry, dict):
-                raise CohereError(message="chat_history must be a list of dicts, but it contains a non-dict element")
-            if "user_name" not in entry or "text" not in entry:
-                raise CohereError(message="chat_history must be a list of dicts, each mapping the user_name and text.")
-            if not isinstance(entry["user_name"], str) or not isinstance(entry["text"], str):
-                raise CohereError(message="both user_name and text must be strings in chat_history.")
 
     def embed(
         self,

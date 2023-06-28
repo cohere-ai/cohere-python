@@ -195,7 +195,6 @@ class AsyncClient(Client):
         return_chatlog: Optional[bool] = False,
         return_prompt: Optional[bool] = False,
         return_preamble: Optional[bool] = False,
-        chatlog_override: List[Dict[str, str]] = None,
         chat_history: Optional[List[Dict[str, str]]] = None,
         preamble_override: Optional[str] = None,
         user_name: Optional[str] = None,
@@ -208,14 +207,14 @@ class AsyncClient(Client):
         mode: Optional[Mode] = None,
         documents: Optional[List[Dict[str, str]]] = None,
     ) -> Union[AsyncChat, StreamingChat]:
-        if chatlog_override is not None:
-            logger.warning(
-                "The 'chatlog_override' parameter is deprecated and will be removed in a future version of this function. "
-                + "Use 'chat_history' to keep track of the conversation instead."
-            )
-
         if chat_history is not None:
-            self._validate_chat_history(chat_history)
+            for entry in chat_history:
+                if "text" in entry:
+                    logger.warning(
+                        "The 'text' parameter is deprecated and will be removed in a future version of this function. "
+                        + "Use 'message' instead.",
+                    )
+                    break
 
         if query is None and message is None:
             raise CohereError("Either 'query' or 'message' must be provided.")
