@@ -74,6 +74,7 @@ class CustomModel(CohereObject):
             model_id=data["model"]["route"] if "model" in data else None,
         )
 
+
 @dataclass
 class ModelMetric(CohereObject):
     created_at: datetime
