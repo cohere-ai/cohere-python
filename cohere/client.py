@@ -39,7 +39,7 @@ from cohere.responses.custom_model import (
     CUSTOM_MODEL_TYPE,
     INTERNAL_CUSTOM_MODEL_TYPE,
     CustomModel,
-    ModelMetric
+    ModelMetric,
 )
 from cohere.responses.detectlang import DetectLanguageResponse, Language
 from cohere.responses.embeddings import Embeddings
