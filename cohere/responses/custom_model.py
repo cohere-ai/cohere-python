@@ -79,11 +79,11 @@ class CustomModel(CohereObject):
 class ModelMetric(CohereObject):
     created_at: datetime
     step_num: int
-    loss: float
-    accuracy: float
-    f1: float
-    precision: float
-    recall: float
+    loss: Optional[float] = None
+    accuracy: Optional[float] = None
+    f1: Optional[float] = None
+    precision: Optional[float] = None
+    recall: Optional[float] = None
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "ModelMetric":
@@ -92,11 +92,11 @@ class ModelMetric(CohereObject):
         return cls(
             created_at=_parse_date(dt_concat),
             step_num=data["step_num"],
-            loss=data["loss"],
-            accuracy=data["accuracy"],
-            f1=data["f1"],
-            precision=data["precision"],
-            recall=data["recall"],
+            loss=data.get("loss"),
+            accuracy=data.get("accuracy"),
+            f1=data.get("f1"),
+            precision=data.get("precision"),
+            recall=data.get("recall"),
         )
 
 
