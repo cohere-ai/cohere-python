@@ -201,13 +201,13 @@ class Client:
 
     def chat(
         self,
-        query: str,
+        message: Optional[str] = None,
+        query: Optional[str] = None,
         conversation_id: Optional[str] = "",
         model: Optional[str] = None,
         return_chatlog: Optional[bool] = False,
         return_prompt: Optional[bool] = False,
         return_preamble: Optional[bool] = False,
-        chatlog_override: List[Dict[str, str]] = None,
         chat_history: Optional[List[Dict[str, str]]] = None,
         preamble_override: Optional[str] = None,
         user_name: Optional[str] = None,
@@ -223,13 +223,13 @@ class Client:
         """Returns a Chat object with the query reply.
 
         Args:
-            query (str): The query to send to the chatbot.
+            query (str): Deprecated. Use message instead.
+            message (str): The message to send to the chatbot.
             conversation_id (str): (Optional) The conversation id to continue the conversation.
             model (str): (Optional) The model to use for generating the next reply.
             return_chatlog (bool): (Optional) Whether to return the chatlog.
             return_prompt (bool): (Optional) Whether to return the prompt.
             return_preamble (bool): (Optional) Whether to return the preamble.
-            chatlog_override (List[Dict[str, str]]): Deprecated.
             chat_history (List[Dict[str, str]]): (Optional) A list of entries used to construct the conversation. If provided, these messages will be used to build the prompt and the conversation_id will be ignored so no data will be stored to maintain state.
             preamble_override (str): (Optional) A string to override the preamble.
             user_name (str): (Optional) A string to override the username.
@@ -249,12 +249,12 @@ class Client:
 
         Examples:
             A simple chat message:
-                >>> res = co.chat(query="Hey! How are you doing today?")
+                >>> res = co.chat(message="Hey! How are you doing today?")
                 >>> print(res.text)
                 >>> print(res.conversation_id)
             Continuing a session using a specific model:
                 >>> res = co.chat(
-                >>>     query="Hey! How are you doing today?",
+                >>>     message="Hey! How are you doing today?",
                 >>>     conversation_id="1234",
                 >>>     model="command",
                 >>>     return_chatlog=True)
@@ -262,16 +262,16 @@ class Client:
                 >>> print(res.chatlog)
             Streaming chat:
                 >>> res = co.chat(
-                >>>     query="Hey! How are you doing today?",
+                >>>     message="Hey! How are you doing today?",
                 >>>     stream=True)
                 >>> for token in res:
                 >>>     print(token)
             Stateless chat with chat history:
                 >>> res = co.chat(
-                >>>     query="Tell me a joke!",
+                >>>     message="Tell me a joke!",
                 >>>     chat_history=[
-                >>>         {'user_name': 'User', text': 'Hey! How are you doing today?'},
-                >>>         {'user_name': 'Bot', text': 'I am doing great! How can I help you?'},
+                >>>         {'user_name': 'User', message': 'Hey! How are you doing today?'},
+                >>>         {'user_name': 'Bot', message': 'I am doing great! How can I help you?'},
                 >>>     ],
                 >>>     return_prompt=True)
                 >>> print(res.text)
@@ -287,17 +287,28 @@ class Client:
                 >>> print(res.text)
                 >>> print(res.citations)
         """
-        if chatlog_override is not None:
-            logger.warning(
-                "The 'chatlog_override' parameter is deprecated and will be removed in a future version of this function. "
-                + "Use 'chat_history' to keep track of the conversation instead.",
-            )
-
         if chat_history is not None:
-            self._validate_chat_history(chat_history)
+            should_warn = True
+            for entry in chat_history:
+                if "text" in entry:
+                    entry["message"] = entry["text"]
+
+                if "text" in entry and should_warn:
+                    logger.warning(
+                        "The 'text' parameter is deprecated and will be removed in a future version of this function. "
+                        + "Use 'message' instead.",
+                    )
+                    should_warn = False
+
+        if query is not None:
+            logger.warning(
+                "The chat_history 'text' key is deprecated and will be removed in a future version of this function. "
+                + "Use 'message' instead.",
+            )
+            message = query
 
         json_body = {
-            "query": query,
+            "message": message,
             "conversation_id": conversation_id,
             "model": model,
             "return_chatlog": return_chatlog,
@@ -320,19 +331,7 @@ class Client:
         if stream:
             return StreamingChat(response)
         else:
-            return Chat.from_dict(response, query=query, client=self)
-
-    def _validate_chat_history(self, chat_history: List[Dict[str, str]]) -> None:
-        if not isinstance(chat_history, list):
-            raise CohereError(message="chat_history is not a list, but it must be a list of dicts")
-
-        for entry in chat_history:
-            if not isinstance(entry, dict):
-                raise CohereError(message="chat_history must be a list of dicts, but it contains a non-dict element")
-            if "user_name" not in entry or "text" not in entry:
-                raise CohereError(message="chat_history must be a list of dicts, each mapping the user_name and text.")
-            if not isinstance(entry["user_name"], str) or not isinstance(entry["text"], str):
-                raise CohereError(message="both user_name and text must be strings in chat_history.")
+            return Chat.from_dict(response, message=message, client=self)
 
     def embed(
         self,

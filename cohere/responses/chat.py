@@ -18,7 +18,7 @@ class Chat(CohereObject):
         self,
         response_id: Optional[str],
         generation_id: Optional[str],
-        query: Optional[str],
+        message: Optional[str],
         text: Optional[str],
         conversation_id: Optional[str],
         meta: Optional[Dict[str, Any]] = None,
@@ -35,12 +35,13 @@ class Chat(CohereObject):
         super().__init__(**kwargs)
         self.response_id = response_id
         self.generation_id = generation_id
-        self.query = query
+        self.query = message  # to be deprecated
+        self.message = message
         self.text = text
         self.conversation_id = conversation_id
         self.prompt = prompt  # optional
         self.chatlog = chatlog  # optional
-        self.preamble = preamble
+        self.preamble = preamble  # optional
         self.client = client
         self.token_count = token_count
         self.meta = meta
@@ -49,12 +50,12 @@ class Chat(CohereObject):
         self.is_search_required = is_search_required
 
     @classmethod
-    def from_dict(cls, response: Dict[str, Any], query: str, client) -> "Chat":
+    def from_dict(cls, response: Dict[str, Any], message: str, client) -> "Chat":
         return cls(
             id=response.get("response_id"),
             response_id=response.get("response_id"),
             generation_id=response.get("generation_id"),
-            query=query,
+            message=message,
             conversation_id=response["conversation_id"],
             text=response.get("text"),
             prompt=response.get("prompt"),  # optional
@@ -70,7 +71,7 @@ class Chat(CohereObject):
 
     def respond(self, response: str, max_tokens: int = None) -> "Chat":
         return self.client.chat(
-            query=response,
+            message=response,
             conversation_id=self.conversation_id,
             return_chatlog=self.chatlog is not None,
             return_prompt=self.prompt is not None,
@@ -82,7 +83,7 @@ class Chat(CohereObject):
 class AsyncChat(Chat):
     async def respond(self, response: str, max_tokens: int = None) -> "AsyncChat":
         return await self.client.chat(
-            query=response,
+            message=response,
             conversation_id=self.conversation_id,
             return_chatlog=self.chatlog is not None,
             return_prompt=self.prompt is not None,
