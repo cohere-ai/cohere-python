@@ -88,7 +88,7 @@ class TestChat(unittest.TestCase):
 
     def test_stream(self):
         prediction = co.chat(
-            query="Yo what up?",
+            message="Yo what up?",
             max_tokens=5,
             stream=True,
         )
@@ -145,8 +145,8 @@ class TestChat(unittest.TestCase):
         prediction = co.chat(
             "Who are you?",
             chat_history=[
-                {"user_name": "User", "text": "Hey!"},
-                {"user_name": "Chatbot", "text": "Hey! How can I help you?"},
+                {"user_name": "User", "message": "Hey!"},
+                {"user_name": "Chatbot", "message": "Hey! How can I help you?"},
             ],
             return_prompt=True,
             return_chatlog=True,
@@ -168,7 +168,7 @@ class TestChat(unittest.TestCase):
         for chat_history in invalid_chat_histories:
             with self.assertRaises(cohere.error.CohereError):
                 _ = co.chat(
-                    query="Hey!",
+                    message="Hey!",
                     chat_history=chat_history,
                 )
 
