@@ -208,13 +208,17 @@ class AsyncClient(Client):
         documents: Optional[List[Dict[str, str]]] = None,
     ) -> Union[AsyncChat, StreamingChat]:
         if chat_history is not None:
+            should_warn = True
             for entry in chat_history:
                 if "text" in entry:
+                    entry["message"] = entry["text"]
+
+                if "text" in entry and should_warn:
                     logger.warning(
                         "The 'text' parameter is deprecated and will be removed in a future version of this function. "
                         + "Use 'message' instead.",
                     )
-                    break
+                    should_warn = False
 
         if query is None and message is None:
             raise CohereError("Either 'query' or 'message' must be provided.")
