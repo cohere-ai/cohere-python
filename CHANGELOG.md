@@ -10,6 +10,8 @@
   - Catch ClientPayloadError in AsyncClient and convert it to a CohereAPIError
 - [#250](https://github.com/cohere-ai/cohere-python/pull/250)
   - Add support for query generation and documents in chat (non-streaming)
+- [#254](https://github.com/cohere-ai/cohere-python/pull/254)
+  - Add support for hyperparameters for custom models
 
 ## 4.10.0
 
