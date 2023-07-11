@@ -6,6 +6,8 @@
   - Add deprecation warning for Chat parameter `query`
   - Add deprecation warning for Chat `text` in `chat_history`
   - Deprecate Chat `chatlog_override`
+- [#254](https://github.com/cohere-ai/cohere-python/pull/254)
+  - Add support for hyperparameters for custom models
 
 ## 4.11
 
@@ -17,6 +19,7 @@
   - Catch ClientPayloadError in AsyncClient and convert it to a CohereAPIError
 - [#250](https://github.com/cohere-ai/cohere-python/pull/250)
   - Add support for query generation and documents in chat (non-streaming)
+
 
 ## 4.10.0
 

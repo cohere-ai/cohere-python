@@ -51,6 +51,7 @@ from cohere.responses.custom_model import (
     CUSTOM_MODEL_TYPE,
     INTERNAL_CUSTOM_MODEL_TYPE,
     CustomModel,
+    HyperParametersInput,
 )
 from cohere.utils import async_wait_for_job, is_api_key_valid, np_json_dumps
 
@@ -687,7 +688,11 @@ class AsyncClient(Client):
         )
 
     async def create_custom_model(
-        self, name: str, model_type: CUSTOM_MODEL_TYPE, dataset: CustomModelDataset
+        self,
+        name: str,
+        model_type: CUSTOM_MODEL_TYPE,
+        dataset: CustomModelDataset,
+        hyperparameters: Optional[HyperParametersInput] = None,
     ) -> CustomModel:
         """Create a new custom model
 
@@ -695,6 +700,7 @@ class AsyncClient(Client):
             name (str): name of your custom model, has to be unique across your organization
             model_type (GENERATIVE, EMBED, CLASSIFY): type of custom model
             dataset (InMemoryDataset, CsvDataset, JsonlDataset, TextDataset): A dataset for your training. Consists of a train and optional eval file.
+            hyperparameters (HyperParametersInput): adjust hyperparameters for your custom model. Only for generative custom models.
         Returns:
             str: the id of the custom model that was created
 
@@ -725,6 +731,15 @@ class AsyncClient(Client):
                 "finetuneType": internal_custom_model_type,
             },
         }
+        if hyperparameters:
+            json["settings"]["hyperparameters"] = {
+                "earlyStoppingPatience": hyperparameters.get("early_stopping_patience"),
+                "earlyStoppingThreshold": hyperparameters.get("early_stopping_threshold"),
+                "trainBatchSize": hyperparameters.get("train_batch_size"),
+                "trainSteps": hyperparameters.get("train_steps"),
+                "learningRate": hyperparameters.get("learning_rate"),
+            }
+
         remote_path = await self._upload_dataset(
             dataset.get_train_data(), name, dataset.train_file_name(), internal_custom_model_type
         )
