@@ -760,6 +760,7 @@ class Client:
         min_cluster_size: Optional[int] = None,
         n_neighbors: Optional[int] = None,
         is_deterministic: Optional[bool] = None,
+        generate_descriptions: Optional[bool] = None,
     ) -> CreateClusterJobResponse:
         """Create clustering job.
 
@@ -771,6 +772,7 @@ class Client:
                 https://umap-learn.readthedocs.io/en/latest/parameters.html#n-neighbors
             is_deterministic (Optional[bool], optional): Determines whether the output of the cluster job is
                 deterministic. Defaults to True.
+            generate_descriptions (Optional[bool], optional): Determines whether to generate cluster descriptions. Defaults to False.
 
         Returns:
             CreateClusterJobResponse: Created clustering job handler
@@ -781,6 +783,7 @@ class Client:
             "min_cluster_size": min_cluster_size,
             "n_neighbors": n_neighbors,
             "is_deterministic": is_deterministic,
+            "generate_descriptions": generate_descriptions,
         }
 
         response = self._request(cohere.CLUSTER_JOBS_URL, json=json_body)
