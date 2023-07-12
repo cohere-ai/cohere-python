@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.13.0
+
+- [#999](https://github.com/cohere-ai/cohere-python/pull/999)
+  - Add `generate_descriptions` parameter to `create_cluster_job`
+
 ## 4.12
 
 - [#248](https://github.com/cohere-ai/cohere-python/pull/248)
