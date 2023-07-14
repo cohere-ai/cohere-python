@@ -64,6 +64,7 @@ class Client:
         client_name (str): A string to identify your application for internal analytics purposes.
         max_retries (int): maximal number of retries for requests.
         timeout (int): request timeout in seconds.
+        api_url (str): override the default api url from the default cohere.COHERE_API_URL
     """
 
     def __init__(
@@ -75,9 +76,10 @@ class Client:
         client_name: Optional[str] = None,
         max_retries: int = 3,
         timeout: int = 120,
+        api_url: str = None,
     ) -> None:
         self.api_key = api_key or os.getenv("CO_API_KEY")
-        self.api_url = os.getenv("CO_API_URL", cohere.COHERE_API_URL)
+        self.api_url = api_url or os.getenv("CO_API_URL", cohere.COHERE_API_URL)
         self.batch_size = cohere.COHERE_EMBED_BATCH_SIZE
         self._executor = ThreadPoolExecutor(num_workers)
         self.num_workers = num_workers
