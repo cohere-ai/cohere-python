@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.15 
+
+- [#256](https://github.com/cohere-ai/cohere-python/pull/256)
+  - Add rerank finetuning endpoint
+
 ## 4.14
 
 - [#259](https://github.com/cohere-ai/cohere-python/pull/259)
