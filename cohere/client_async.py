@@ -702,7 +702,7 @@ class AsyncClient(Client):
 
         Args:
             name (str): name of your custom model, has to be unique across your organization
-            model_type (GENERATIVE, EMBED, CLASSIFY): type of custom model
+            model_type (GENERATIVE, EMBED, CLASSIFY, RERANK): type of custom model
             dataset (InMemoryDataset, CsvDataset, JsonlDataset, TextDataset): A dataset for your training. Consists of a train and optional eval file.
             hyperparameters (HyperParametersInput): adjust hyperparameters for your custom model. Only for generative custom models.
         Returns:
