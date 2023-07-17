@@ -74,9 +74,10 @@ class AsyncClient(Client):
         client_name: Optional[str] = None,
         max_retries: int = 3,
         timeout=120,
+        api_url: str = None,
     ) -> None:
         self.api_key = api_key or os.getenv("CO_API_KEY")
-        self.api_url = os.getenv("CO_API_URL", cohere.COHERE_API_URL)
+        self.api_url = api_url or os.getenv("CO_API_URL", cohere.COHERE_API_URL)
         self.batch_size = cohere.COHERE_EMBED_BATCH_SIZE
         self.num_workers = num_workers
         self.request_dict = request_dict

@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.14
+
+- [#259](https://github.com/cohere-ai/cohere-python/pull/259)
+  - Add the `api_url` parameter to the client.
+
 ## 4.13
 
 - [#258](https://github.com/cohere-ai/cohere-python/pull/258)
