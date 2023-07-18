@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.16
+
+- [#262](https://github.com/cohere-ai/cohere-python/pull/262)
+  - Deprecate embed custom models
+
 ## 4.15 
 
 - [#256](https://github.com/cohere-ai/cohere-python/pull/256)
