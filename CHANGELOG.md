@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.17
+
+- [#263](https://github.com/cohere-ai/cohere-python/pull/263)
+  - Add wait() to custom models
+
 ## 4.16
 
 - [#262](https://github.com/cohere-ai/cohere-python/pull/262)
