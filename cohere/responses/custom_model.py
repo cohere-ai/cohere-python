@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, Optional
 
+from cohere.utils import JobWithStatus
+
 try:
     from typing import Literal, TypedDict
 except ImportError:
@@ -73,9 +75,10 @@ class HyperParametersInput(TypedDict):
     learning_rate: float
 
 
-class CustomModel(CohereObject):
+class BaseCustomModel(CohereObject, JobWithStatus):
     def __init__(
         self,
+        wait_fn,
         id: str,
         name: str,
         status: CUSTOM_MODEL_STATUS,
@@ -94,10 +97,12 @@ class CustomModel(CohereObject):
         self.completed_at = completed_at
         self.model_id = model_id
         self.hyperparameters = hyperparameters
+        self._wait_fn = wait_fn
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "CustomModel":
+    def from_dict(cls, data: Dict[str, Any], wait_fn) -> "BaseCustomModel":
         return cls(
+            wait_fn=wait_fn,
             id=data["id"],
             name=data["name"],
             status=data["status"],
@@ -109,6 +114,55 @@ class CustomModel(CohereObject):
             if data["settings"]["hyperparameters"]
             else None,
         )
+
+    def has_terminal_status(self) -> bool:
+        return self.status == "READY"
+
+
+class CustomModel(BaseCustomModel):
+    def wait(
+        self,
+        timeout: Optional[float] = None,
+        interval: float = 60,
+    ) -> "CustomModel":
+        """Wait for custom model job completion.
+
+        Args:
+            timeout (Optional[float], optional): Wait timeout in seconds, if None - there is no limit to the wait time.
+                Defaults to None.
+            interval (float, optional): Wait poll interval in seconds. Defaults to 60.
+
+        Raises:
+            TimeoutError: wait timed out
+
+        Returns:
+            CustomModel: custom model.
+        """
+
+        return self._wait_fn(custom_model_id=self.id, timeout=timeout, interval=interval)
+
+
+class AsyncCustomModel(BaseCustomModel):
+    async def wait(
+        self,
+        timeout: Optional[float] = None,
+        interval: float = 60,
+    ) -> "CustomModel":
+        """Wait for custom model job completion.
+
+        Args:
+            timeout (Optional[float], optional): Wait timeout in seconds, if None - there is no limit to the wait time.
+                Defaults to None.
+            interval (float, optional): Wait poll interval in seconds. Defaults to 60.
+
+        Raises:
+            TimeoutError: wait timed out
+
+        Returns:
+            CustomModel: custom model.
+        """
+
+        return await self._wait_fn(custom_model_id=self.id, timeout=timeout, interval=interval)
 
 
 def _parse_date(datetime_string: str) -> datetime:

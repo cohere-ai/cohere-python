@@ -1031,7 +1031,34 @@ class Client:
             json["settings"]["evalFiles"].append({"path": remote_path, **dataset.file_config()})
 
         response = self._request(f"{cohere.CUSTOM_MODEL_URL}/CreateFinetune", method="POST", json=json)
-        return CustomModel.from_dict(response["finetune"])
+        return CustomModel.from_dict(response["finetune"], self.wait_for_custom_model)
+
+    def wait_for_custom_model(
+        self,
+        custom_model_id: str,
+        timeout: Optional[float] = None,
+        interval: float = 60,
+    ) -> CustomModel:
+        """Wait for custom model training completion.
+
+        Args:
+            custom_model_id (str): Custom model id.
+            timeout (Optional[float], optional): Wait timeout in seconds, if None - there is no limit to the wait time.
+                Defaults to None.
+            interval (float, optional): Wait poll interval in seconds. Defaults to 10.
+
+        Raises:
+            TimeoutError: wait timed out
+
+        Returns:
+            BulkEmbedJob: Custom model.
+        """
+
+        return wait_for_job(
+            get_job=partial(self.get_custom_model, custom_model_id),
+            timeout=timeout,
+            interval=interval,
+        )
 
     def _upload_dataset(
         self, content: Iterable[bytes], custom_model_name: str, file_name: str, type: INTERNAL_CUSTOM_MODEL_TYPE
@@ -1058,7 +1085,7 @@ class Client:
         """
         json = {"finetuneID": custom_model_id}
         response = self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetune", method="POST", json=json)
-        return CustomModel.from_dict(response["finetune"])
+        return CustomModel.from_dict(response["finetune"], self.wait_for_custom_model)
 
     def get_custom_model_by_name(self, name: str) -> CustomModel:
         """Get a custom model by name.
@@ -1070,7 +1097,7 @@ class Client:
         """
         json = {"name": name}
         response = self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneByName", method="POST", json=json)
-        return CustomModel.from_dict(response["finetune"])
+        return CustomModel.from_dict(response["finetune"], self.wait_for_custom_model)
 
     def list_custom_models(
         self,
@@ -1104,4 +1131,4 @@ class Client:
         }
 
         response = self._request(f"{cohere.CUSTOM_MODEL_URL}/ListFinetunes", method="POST", json=json)
-        return [CustomModel.from_dict(r) for r in response["finetunes"]]
+        return [CustomModel.from_dict(r, self.wait_for_custom_model) for r in response["finetunes"]]

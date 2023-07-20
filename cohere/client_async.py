@@ -50,7 +50,7 @@ from cohere.responses.custom_model import (
     CUSTOM_MODEL_STATUS,
     CUSTOM_MODEL_TYPE,
     INTERNAL_CUSTOM_MODEL_TYPE,
-    CustomModel,
+    AsyncCustomModel,
     HyperParametersInput,
 )
 from cohere.utils import async_wait_for_job, is_api_key_valid, np_json_dumps
@@ -697,7 +697,7 @@ class AsyncClient(Client):
         model_type: CUSTOM_MODEL_TYPE,
         dataset: CustomModelDataset,
         hyperparameters: Optional[HyperParametersInput] = None,
-    ) -> CustomModel:
+    ) -> AsyncCustomModel:
         """Create a new custom model
 
         Args:
@@ -755,7 +755,34 @@ class AsyncClient(Client):
             json["settings"]["evalFiles"].append({"path": remote_path, **dataset.file_config()})
 
         response = await self._request(f"{cohere.CUSTOM_MODEL_URL}/CreateFinetune", method="POST", json=json)
-        return CustomModel.from_dict(response["finetune"])
+        return AsyncCustomModel.from_dict(response["finetune"], self.wait_for_custom_model)
+
+    async def wait_for_custom_model(
+        self,
+        custom_model_id: str,
+        timeout: Optional[float] = None,
+        interval: float = 60,
+    ) -> AsyncCustomModel:
+        """Wait for custom model training completion.
+
+        Args:
+            custom_model_id (str): Custom model id.
+            timeout (Optional[float], optional): Wait timeout in seconds, if None - there is no limit to the wait time.
+                Defaults to None.
+            interval (float, optional): Wait poll interval in seconds. Defaults to 10.
+
+        Raises:
+            TimeoutError: wait timed out
+
+        Returns:
+            BulkEmbedJob: Custom model.
+        """
+
+        return await async_wait_for_job(
+            get_job=partial(self.get_custom_model, custom_model_id),
+            timeout=timeout,
+            interval=interval,
+        )
 
     async def _upload_dataset(
         self, content: Iterable[bytes], custom_model_name: str, file_name: str, type: INTERNAL_CUSTOM_MODEL_TYPE
@@ -773,7 +800,7 @@ class AsyncClient(Client):
         json = {"finetuneName": custom_model_name, "fileName": file_name, "finetuneType": type}
         return await self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneUploadSignedURL", method="POST", json=json)
 
-    async def get_custom_model(self, custom_model_id: str) -> CustomModel:
+    async def get_custom_model(self, custom_model_id: str) -> AsyncCustomModel:
         """Get a custom model by id.
 
         Args:
@@ -783,9 +810,9 @@ class AsyncClient(Client):
         """
         json = {"finetuneID": custom_model_id}
         response = await self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetune", method="POST", json=json)
-        return CustomModel.from_dict(response["finetune"])
+        return AsyncCustomModel.from_dict(response["finetune"], self.wait_for_custom_model)
 
-    async def get_custom_model_by_name(self, name: str) -> CustomModel:
+    async def get_custom_model_by_name(self, name: str) -> AsyncCustomModel:
         """Get a custom model by name.
 
         Args:
@@ -795,7 +822,7 @@ class AsyncClient(Client):
         """
         json = {"name": name}
         response = await self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneByName", method="POST", json=json)
-        return CustomModel.from_dict(response["finetune"])
+        return AsyncCustomModel.from_dict(response["finetune"], self.wait_for_custom_model)
 
     async def list_custom_models(
         self,
@@ -803,7 +830,7 @@ class AsyncClient(Client):
         before: Optional[datetime] = None,
         after: Optional[datetime] = None,
         order_by: Optional[Literal["asc", "desc"]] = None,
-    ) -> List[CustomModel]:
+    ) -> List[AsyncCustomModel]:
         """List custom models of your organization.
 
         Args:
@@ -829,7 +856,7 @@ class AsyncClient(Client):
         }
 
         response = await self._request(f"{cohere.CUSTOM_MODEL_URL}/ListFinetunes", method="POST", json=json)
-        return [CustomModel.from_dict(r) for r in response["finetunes"]]
+        return [AsyncCustomModel.from_dict(r, self.wait_for_custom_model) for r in response["finetunes"]]
 
 
 class AIOHTTPBackend:
