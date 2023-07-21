@@ -50,7 +50,8 @@ from cohere.responses.custom_model import (
     CUSTOM_MODEL_STATUS,
     CUSTOM_MODEL_TYPE,
     INTERNAL_CUSTOM_MODEL_TYPE,
-    CustomModel,
+    AsyncCustomModel,
+    HyperParametersInput,
 )
 from cohere.utils import async_wait_for_job, is_api_key_valid, np_json_dumps
 
@@ -73,9 +74,10 @@ class AsyncClient(Client):
         client_name: Optional[str] = None,
         max_retries: int = 3,
         timeout=120,
+        api_url: str = None,
     ) -> None:
         self.api_key = api_key or os.getenv("CO_API_KEY")
-        self.api_url = os.getenv("CO_API_URL", cohere.COHERE_API_URL)
+        self.api_url = api_url or os.getenv("CO_API_URL", cohere.COHERE_API_URL)
         self.batch_size = cohere.COHERE_EMBED_BATCH_SIZE
         self.num_workers = num_workers
         self.request_dict = request_dict
@@ -188,13 +190,13 @@ class AsyncClient(Client):
 
     async def chat(
         self,
-        query: str,
+        message: Optional[str] = None,
+        query: Optional[str] = None,
         conversation_id: Optional[str] = "",
         model: Optional[str] = None,
         return_chatlog: Optional[bool] = False,
         return_prompt: Optional[bool] = False,
         return_preamble: Optional[bool] = False,
-        chatlog_override: List[Dict[str, str]] = None,
         chat_history: Optional[List[Dict[str, str]]] = None,
         preamble_override: Optional[str] = None,
         user_name: Optional[str] = None,
@@ -207,17 +209,31 @@ class AsyncClient(Client):
         mode: Optional[Mode] = None,
         documents: Optional[List[Dict[str, str]]] = None,
     ) -> Union[AsyncChat, StreamingChat]:
-        if chatlog_override is not None:
-            logger.warning(
-                "The 'chatlog_override' parameter is deprecated and will be removed in a future version of this function. "
-                + "Use 'chat_history' to keep track of the conversation instead."
-            )
-
         if chat_history is not None:
-            self._validate_chat_history(chat_history)
+            should_warn = True
+            for entry in chat_history:
+                if "text" in entry:
+                    entry["message"] = entry["text"]
+
+                if "text" in entry and should_warn:
+                    logger.warning(
+                        "The 'text' parameter is deprecated and will be removed in a future version of this function. "
+                        + "Use 'message' instead.",
+                    )
+                    should_warn = False
+
+        if query is None and message is None:
+            raise CohereError("Either 'query' or 'message' must be provided.")
+
+        if query is not None:
+            logger.warning(
+                "The 'query' parameter is deprecated and will be removed in a future version of this function. "
+                + "Use 'message' instead.",
+            )
+            message = query
 
         json_body = {
-            "query": query,
+            "message": message,
             "conversation_id": conversation_id,
             "model": model,
             "return_chatlog": return_chatlog,
@@ -241,7 +257,7 @@ class AsyncClient(Client):
         if stream:
             return StreamingChat(response)
         else:
-            return AsyncChat.from_dict(response, query=query, client=self)
+            return AsyncChat.from_dict(response, message=message, client=self)
 
     async def embed(
         self,
@@ -472,6 +488,7 @@ class AsyncClient(Client):
         min_cluster_size: Optional[int] = None,
         n_neighbors: Optional[int] = None,
         is_deterministic: Optional[bool] = None,
+        generate_descriptions: Optional[bool] = None,
     ) -> AsyncCreateClusterJobResponse:
         """Create clustering job.
 
@@ -483,6 +500,7 @@ class AsyncClient(Client):
                 https://umap-learn.readthedocs.io/en/latest/parameters.html#n-neighbors
             is_deterministic (Optional[bool], optional): Determines whether the output of the cluster job is
                 deterministic. Defaults to True.
+            generate_descriptions (Optional[bool], optional): Determines whether to generate cluster descriptions. Defaults to False.
 
         Returns:
             CreateClusterJobResponse: Created clustering job handler
@@ -493,6 +511,7 @@ class AsyncClient(Client):
             "min_cluster_size": min_cluster_size,
             "n_neighbors": n_neighbors,
             "is_deterministic": is_deterministic,
+            "generate_descriptions": generate_descriptions,
         }
         response = await self._request(cohere.CLUSTER_JOBS_URL, json=json_body)
         return AsyncCreateClusterJobResponse.from_dict(
@@ -673,14 +692,19 @@ class AsyncClient(Client):
         )
 
     async def create_custom_model(
-        self, name: str, model_type: CUSTOM_MODEL_TYPE, dataset: CustomModelDataset
-    ) -> CustomModel:
+        self,
+        name: str,
+        model_type: CUSTOM_MODEL_TYPE,
+        dataset: CustomModelDataset,
+        hyperparameters: Optional[HyperParametersInput] = None,
+    ) -> AsyncCustomModel:
         """Create a new custom model
 
         Args:
             name (str): name of your custom model, has to be unique across your organization
-            model_type (GENERATIVE, EMBED, CLASSIFY): type of custom model
+            model_type (GENERATIVE, CLASSIFY, RERANK): type of custom model
             dataset (InMemoryDataset, CsvDataset, JsonlDataset, TextDataset): A dataset for your training. Consists of a train and optional eval file.
+            hyperparameters (HyperParametersInput): adjust hyperparameters for your custom model. Only for generative custom models.
         Returns:
             str: the id of the custom model that was created
 
@@ -711,6 +735,15 @@ class AsyncClient(Client):
                 "finetuneType": internal_custom_model_type,
             },
         }
+        if hyperparameters:
+            json["settings"]["hyperparameters"] = {
+                "earlyStoppingPatience": hyperparameters.get("early_stopping_patience"),
+                "earlyStoppingThreshold": hyperparameters.get("early_stopping_threshold"),
+                "trainBatchSize": hyperparameters.get("train_batch_size"),
+                "trainSteps": hyperparameters.get("train_steps"),
+                "learningRate": hyperparameters.get("learning_rate"),
+            }
+
         remote_path = await self._upload_dataset(
             dataset.get_train_data(), name, dataset.train_file_name(), internal_custom_model_type
         )
@@ -722,7 +755,34 @@ class AsyncClient(Client):
             json["settings"]["evalFiles"].append({"path": remote_path, **dataset.file_config()})
 
         response = await self._request(f"{cohere.CUSTOM_MODEL_URL}/CreateFinetune", method="POST", json=json)
-        return CustomModel.from_dict(response["finetune"])
+        return AsyncCustomModel.from_dict(response["finetune"], self.wait_for_custom_model)
+
+    async def wait_for_custom_model(
+        self,
+        custom_model_id: str,
+        timeout: Optional[float] = None,
+        interval: float = 60,
+    ) -> AsyncCustomModel:
+        """Wait for custom model training completion.
+
+        Args:
+            custom_model_id (str): Custom model id.
+            timeout (Optional[float], optional): Wait timeout in seconds, if None - there is no limit to the wait time.
+                Defaults to None.
+            interval (float, optional): Wait poll interval in seconds. Defaults to 10.
+
+        Raises:
+            TimeoutError: wait timed out
+
+        Returns:
+            BulkEmbedJob: Custom model.
+        """
+
+        return await async_wait_for_job(
+            get_job=partial(self.get_custom_model, custom_model_id),
+            timeout=timeout,
+            interval=interval,
+        )
 
     async def _upload_dataset(
         self, content: Iterable[bytes], custom_model_name: str, file_name: str, type: INTERNAL_CUSTOM_MODEL_TYPE
@@ -740,7 +800,7 @@ class AsyncClient(Client):
         json = {"finetuneName": custom_model_name, "fileName": file_name, "finetuneType": type}
         return await self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneUploadSignedURL", method="POST", json=json)
 
-    async def get_custom_model(self, custom_model_id: str) -> CustomModel:
+    async def get_custom_model(self, custom_model_id: str) -> AsyncCustomModel:
         """Get a custom model by id.
 
         Args:
@@ -750,9 +810,9 @@ class AsyncClient(Client):
         """
         json = {"finetuneID": custom_model_id}
         response = await self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetune", method="POST", json=json)
-        return CustomModel.from_dict(response["finetune"])
+        return AsyncCustomModel.from_dict(response["finetune"], self.wait_for_custom_model)
 
-    async def get_custom_model_by_name(self, name: str) -> CustomModel:
+    async def get_custom_model_by_name(self, name: str) -> AsyncCustomModel:
         """Get a custom model by name.
 
         Args:
@@ -762,7 +822,7 @@ class AsyncClient(Client):
         """
         json = {"name": name}
         response = await self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneByName", method="POST", json=json)
-        return CustomModel.from_dict(response["finetune"])
+        return AsyncCustomModel.from_dict(response["finetune"], self.wait_for_custom_model)
 
     async def list_custom_models(
         self,
@@ -770,7 +830,7 @@ class AsyncClient(Client):
         before: Optional[datetime] = None,
         after: Optional[datetime] = None,
         order_by: Optional[Literal["asc", "desc"]] = None,
-    ) -> List[CustomModel]:
+    ) -> List[AsyncCustomModel]:
         """List custom models of your organization.
 
         Args:
@@ -796,7 +856,7 @@ class AsyncClient(Client):
         }
 
         response = await self._request(f"{cohere.CUSTOM_MODEL_URL}/ListFinetunes", method="POST", json=json)
-        return [CustomModel.from_dict(r) for r in response["finetunes"]]
+        return [AsyncCustomModel.from_dict(r, self.wait_for_custom_model) for r in response["finetunes"]]
 
 
 class AIOHTTPBackend:

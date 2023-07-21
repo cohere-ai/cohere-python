@@ -39,6 +39,7 @@ from cohere.responses.custom_model import (
     CUSTOM_MODEL_TYPE,
     INTERNAL_CUSTOM_MODEL_TYPE,
     CustomModel,
+    HyperParametersInput,
     ModelMetric
 )
 from cohere.responses.detectlang import DetectLanguageResponse, Language
@@ -64,6 +65,7 @@ class Client:
         client_name (str): A string to identify your application for internal analytics purposes.
         max_retries (int): maximal number of retries for requests.
         timeout (int): request timeout in seconds.
+        api_url (str): override the default api url from the default cohere.COHERE_API_URL
     """
 
     def __init__(
@@ -75,9 +77,10 @@ class Client:
         client_name: Optional[str] = None,
         max_retries: int = 3,
         timeout: int = 120,
+        api_url: str = None,
     ) -> None:
         self.api_key = api_key or os.getenv("CO_API_KEY")
-        self.api_url = os.getenv("CO_API_URL", cohere.COHERE_API_URL)
+        self.api_url = api_url or os.getenv("CO_API_URL", cohere.COHERE_API_URL)
         self.batch_size = cohere.COHERE_EMBED_BATCH_SIZE
         self._executor = ThreadPoolExecutor(num_workers)
         self.num_workers = num_workers
@@ -202,13 +205,13 @@ class Client:
 
     def chat(
         self,
-        query: str,
+        message: Optional[str] = None,
+        query: Optional[str] = None,
         conversation_id: Optional[str] = "",
         model: Optional[str] = None,
         return_chatlog: Optional[bool] = False,
         return_prompt: Optional[bool] = False,
         return_preamble: Optional[bool] = False,
-        chatlog_override: List[Dict[str, str]] = None,
         chat_history: Optional[List[Dict[str, str]]] = None,
         preamble_override: Optional[str] = None,
         user_name: Optional[str] = None,
@@ -224,13 +227,13 @@ class Client:
         """Returns a Chat object with the query reply.
 
         Args:
-            query (str): The query to send to the chatbot.
+            query (str): Deprecated. Use message instead.
+            message (str): The message to send to the chatbot.
             conversation_id (str): (Optional) The conversation id to continue the conversation.
             model (str): (Optional) The model to use for generating the next reply.
             return_chatlog (bool): (Optional) Whether to return the chatlog.
             return_prompt (bool): (Optional) Whether to return the prompt.
             return_preamble (bool): (Optional) Whether to return the preamble.
-            chatlog_override (List[Dict[str, str]]): Deprecated.
             chat_history (List[Dict[str, str]]): (Optional) A list of entries used to construct the conversation. If provided, these messages will be used to build the prompt and the conversation_id will be ignored so no data will be stored to maintain state.
             preamble_override (str): (Optional) A string to override the preamble.
             user_name (str): (Optional) A string to override the username.
@@ -250,12 +253,12 @@ class Client:
 
         Examples:
             A simple chat message:
-                >>> res = co.chat(query="Hey! How are you doing today?")
+                >>> res = co.chat(message="Hey! How are you doing today?")
                 >>> print(res.text)
                 >>> print(res.conversation_id)
             Continuing a session using a specific model:
                 >>> res = co.chat(
-                >>>     query="Hey! How are you doing today?",
+                >>>     message="Hey! How are you doing today?",
                 >>>     conversation_id="1234",
                 >>>     model="command",
                 >>>     return_chatlog=True)
@@ -263,16 +266,16 @@ class Client:
                 >>> print(res.chatlog)
             Streaming chat:
                 >>> res = co.chat(
-                >>>     query="Hey! How are you doing today?",
+                >>>     message="Hey! How are you doing today?",
                 >>>     stream=True)
                 >>> for token in res:
                 >>>     print(token)
             Stateless chat with chat history:
                 >>> res = co.chat(
-                >>>     query="Tell me a joke!",
+                >>>     message="Tell me a joke!",
                 >>>     chat_history=[
-                >>>         {'user_name': 'User', text': 'Hey! How are you doing today?'},
-                >>>         {'user_name': 'Bot', text': 'I am doing great! How can I help you?'},
+                >>>         {'user_name': 'User', message': 'Hey! How are you doing today?'},
+                >>>         {'user_name': 'Bot', message': 'I am doing great! How can I help you?'},
                 >>>     ],
                 >>>     return_prompt=True)
                 >>> print(res.text)
@@ -288,17 +291,28 @@ class Client:
                 >>> print(res.text)
                 >>> print(res.citations)
         """
-        if chatlog_override is not None:
-            logger.warning(
-                "The 'chatlog_override' parameter is deprecated and will be removed in a future version of this function. "
-                + "Use 'chat_history' to keep track of the conversation instead.",
-            )
-
         if chat_history is not None:
-            self._validate_chat_history(chat_history)
+            should_warn = True
+            for entry in chat_history:
+                if "text" in entry:
+                    entry["message"] = entry["text"]
+
+                if "text" in entry and should_warn:
+                    logger.warning(
+                        "The 'text' parameter is deprecated and will be removed in a future version of this function. "
+                        + "Use 'message' instead.",
+                    )
+                    should_warn = False
+
+        if query is not None:
+            logger.warning(
+                "The chat_history 'text' key is deprecated and will be removed in a future version of this function. "
+                + "Use 'message' instead.",
+            )
+            message = query
 
         json_body = {
-            "query": query,
+            "message": message,
             "conversation_id": conversation_id,
             "model": model,
             "return_chatlog": return_chatlog,
@@ -321,19 +335,7 @@ class Client:
         if stream:
             return StreamingChat(response)
         else:
-            return Chat.from_dict(response, query=query, client=self)
-
-    def _validate_chat_history(self, chat_history: List[Dict[str, str]]) -> None:
-        if not isinstance(chat_history, list):
-            raise CohereError(message="chat_history is not a list, but it must be a list of dicts")
-
-        for entry in chat_history:
-            if not isinstance(entry, dict):
-                raise CohereError(message="chat_history must be a list of dicts, but it contains a non-dict element")
-            if "user_name" not in entry or "text" not in entry:
-                raise CohereError(message="chat_history must be a list of dicts, each mapping the user_name and text.")
-            if not isinstance(entry["user_name"], str) or not isinstance(entry["text"], str):
-                raise CohereError(message="both user_name and text must be strings in chat_history.")
+            return Chat.from_dict(response, message=message, client=self)
 
     def embed(
         self,
@@ -761,6 +763,7 @@ class Client:
         min_cluster_size: Optional[int] = None,
         n_neighbors: Optional[int] = None,
         is_deterministic: Optional[bool] = None,
+        generate_descriptions: Optional[bool] = None,
     ) -> CreateClusterJobResponse:
         """Create clustering job.
 
@@ -772,6 +775,7 @@ class Client:
                 https://umap-learn.readthedocs.io/en/latest/parameters.html#n-neighbors
             is_deterministic (Optional[bool], optional): Determines whether the output of the cluster job is
                 deterministic. Defaults to True.
+            generate_descriptions (Optional[bool], optional): Determines whether to generate cluster descriptions. Defaults to False.
 
         Returns:
             CreateClusterJobResponse: Created clustering job handler
@@ -782,6 +786,7 @@ class Client:
             "min_cluster_size": min_cluster_size,
             "n_neighbors": n_neighbors,
             "is_deterministic": is_deterministic,
+            "generate_descriptions": generate_descriptions,
         }
 
         response = self._request(cohere.CLUSTER_JOBS_URL, json=json_body)
@@ -963,13 +968,20 @@ class Client:
             interval=interval,
         )
 
-    def create_custom_model(self, name: str, model_type: CUSTOM_MODEL_TYPE, dataset: CustomModelDataset) -> CustomModel:
+    def create_custom_model(
+        self,
+        name: str,
+        model_type: CUSTOM_MODEL_TYPE,
+        dataset: CustomModelDataset,
+        hyperparameters: Optional[HyperParametersInput] = None,
+    ) -> CustomModel:
         """Create a new custom model
 
         Args:
             name (str): name of your custom model, has to be unique across your organization
-            model_type (GENERATIVE, EMBED, CLASSIFY): type of custom model
+            model_type (GENERATIVE, CLASSIFY, RERANK): type of custom model
             dataset (InMemoryDataset, CsvDataset, JsonlDataset, TextDataset): A dataset for your training. Consists of a train and optional eval file.
+            hyperparameters (HyperParametersInput): adjust hyperparameters for your custom model. Only for generative custom models.
         Returns:
             str: the id of the custom model that was created
 
@@ -1000,6 +1012,15 @@ class Client:
                 "finetuneType": internal_custom_model_type,
             },
         }
+        if hyperparameters:
+            json["settings"]["hyperparameters"] = {
+                "earlyStoppingPatience": hyperparameters.get("early_stopping_patience"),
+                "earlyStoppingThreshold": hyperparameters.get("early_stopping_threshold"),
+                "trainBatchSize": hyperparameters.get("train_batch_size"),
+                "trainSteps": hyperparameters.get("train_steps"),
+                "learningRate": hyperparameters.get("learning_rate"),
+            }
+
         remote_path = self._upload_dataset(
             dataset.get_train_data(), name, dataset.train_file_name(), internal_custom_model_type
         )
@@ -1011,7 +1032,34 @@ class Client:
             json["settings"]["evalFiles"].append({"path": remote_path, **dataset.file_config()})
 
         response = self._request(f"{cohere.CUSTOM_MODEL_URL}/CreateFinetune", method="POST", json=json)
-        return CustomModel.from_dict(response["finetune"])
+        return CustomModel.from_dict(response["finetune"], self.wait_for_custom_model)
+
+    def wait_for_custom_model(
+        self,
+        custom_model_id: str,
+        timeout: Optional[float] = None,
+        interval: float = 60,
+    ) -> CustomModel:
+        """Wait for custom model training completion.
+
+        Args:
+            custom_model_id (str): Custom model id.
+            timeout (Optional[float], optional): Wait timeout in seconds, if None - there is no limit to the wait time.
+                Defaults to None.
+            interval (float, optional): Wait poll interval in seconds. Defaults to 10.
+
+        Raises:
+            TimeoutError: wait timed out
+
+        Returns:
+            BulkEmbedJob: Custom model.
+        """
+
+        return wait_for_job(
+            get_job=partial(self.get_custom_model, custom_model_id),
+            timeout=timeout,
+            interval=interval,
+        )
 
     def _upload_dataset(
         self, content: Iterable[bytes], custom_model_name: str, file_name: str, type: INTERNAL_CUSTOM_MODEL_TYPE
@@ -1038,7 +1086,7 @@ class Client:
         """
         json = {"finetuneID": custom_model_id}
         response = self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetune", method="POST", json=json)
-        return CustomModel.from_dict(response["finetune"])
+        return CustomModel.from_dict(response["finetune"], self.wait_for_custom_model)
 
     def get_custom_model_by_name(self, name: str) -> CustomModel:
         """Get a custom model by name.
@@ -1050,7 +1098,7 @@ class Client:
         """
         json = {"name": name}
         response = self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneByName", method="POST", json=json)
-        return CustomModel.from_dict(response["finetune"])
+        return CustomModel.from_dict(response["finetune"], self.wait_for_custom_model)
 
     def get_model_metrics(self, custom_model_id: str) -> List[ModelMetric]:
         """Get model metrics by id
@@ -1096,4 +1144,4 @@ class Client:
         }
 
         response = self._request(f"{cohere.CUSTOM_MODEL_URL}/ListFinetunes", method="POST", json=json)
-        return [CustomModel.from_dict(r) for r in response["finetunes"]]
+        return [CustomModel.from_dict(r, self.wait_for_custom_model) for r in response["finetunes"]]

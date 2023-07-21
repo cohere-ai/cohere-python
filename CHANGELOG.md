@@ -1,9 +1,45 @@
 # Changelog
 
+## 4.17
+
+- [#263](https://github.com/cohere-ai/cohere-python/pull/263)
+  - Add wait() to custom models
+
+## 4.16
+
+- [#262](https://github.com/cohere-ai/cohere-python/pull/262)
+  - Deprecate embed custom models
+
+## 4.15 
+
+- [#256](https://github.com/cohere-ai/cohere-python/pull/256)
+  - Add rerank finetuning endpoint
+
+## 4.14
+
+- [#259](https://github.com/cohere-ai/cohere-python/pull/259)
+  - Add the `api_url` parameter to the client.
+
+## 4.13
+
+- [#258](https://github.com/cohere-ai/cohere-python/pull/258)
+  - Add `generate_descriptions` parameter to `create_cluster_job`
+- [#261](https://github.com/cohere-ai/cohere-python/pull/261)
+  - Pin urllib3 version
+
+## 4.12
+
+- [#248](https://github.com/cohere-ai/cohere-python/pull/248)
+  - Add deprecation warning for Chat parameter `query`
+  - Add deprecation warning for Chat `text` in `chat_history`
+  - Deprecate Chat `chatlog_override`
+- [#254](https://github.com/cohere-ai/cohere-python/pull/254)
+  - Add support for hyperparameters for custom models
+
 ## 4.11
 
 - [#245](https://github.com/cohere-ai/cohere-python/pull/245)
-  - Add params `p`, `k` and `logit_bias` to chat
+  - Add parameters `p`, `k` and `logit_bias` to chat
 - [#228](https://github.com/cohere-ai/cohere-python/pull/228)
   - Better string representation for DetectLanguageResponse
 - [#249](https://github.com/cohere-ai/cohere-python/pull/249)
@@ -353,4 +389,3 @@
 
 - [#18](https://github.com/cohere-ai/cohere-python/pull/18) API Updates - Generate Endpoint
   - Add Frequency Penalty, Presence Penalty, Stop Sequences, and Return Likelihoods for Generate
-
