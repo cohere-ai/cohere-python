@@ -177,11 +177,9 @@ class ModelMetric(CohereObject):
         # model metrics timestamp sometimes contains nanoseconds, so we truncate
         dt_concat = data["created_at"][:26] + data["created_at"][-1:]
         return cls(
-            created_at=_parse_date(dt_concat),
-            step_num=data["step_num"],
-            loss=data["loss"],
-            accuracy=data["accuracy"]
+            created_at=_parse_date(dt_concat), step_num=data["step_num"], loss=data["loss"], accuracy=data["accuracy"]
         )
+
 
 def _parse_date(datetime_string: str) -> datetime:
     return datetime.strptime(datetime_string, "%Y-%m-%dT%H:%M:%S.%f%z")
