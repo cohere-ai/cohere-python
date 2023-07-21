@@ -825,7 +825,7 @@ class AsyncClient(Client):
         response = await self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneByName", method="POST", json=json)
         return AsyncCustomModel.from_dict(response["finetune"], self.wait_for_custom_model)
 
-    async def get_model_metrics(self, custom_model_id: str) -> List[ModelMetric]:
+    async def get_custom_model_metrics(self, custom_model_id: str) -> List[ModelMetric]:
         """Get model metrics by id
 
         Args:
