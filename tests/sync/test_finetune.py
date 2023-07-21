@@ -16,3 +16,10 @@ class TestFinetuneClient(unittest.TestCase):
         first = client.list_custom_models()[0]
         by_id = client.get_custom_model(first.id)
         self.assertEqual(first.id, by_id.id)
+
+    def test_metrics(self):
+        models = client.list_custom_models(statuses=["PAUSED", "READY"])
+        # there should always be a model, but make sure tests don't randomly break
+        if models:
+            metrics = client.get_custom_model_metrics(models[0].id)
+            self.assertNotEquals(metrics, [])
