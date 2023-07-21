@@ -52,6 +52,7 @@ from cohere.responses.custom_model import (
     INTERNAL_CUSTOM_MODEL_TYPE,
     AsyncCustomModel,
     HyperParametersInput,
+    ModelMetric,
 )
 from cohere.utils import async_wait_for_job, is_api_key_valid, np_json_dumps
 
@@ -823,6 +824,18 @@ class AsyncClient(Client):
         json = {"name": name}
         response = await self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneByName", method="POST", json=json)
         return AsyncCustomModel.from_dict(response["finetune"], self.wait_for_custom_model)
+
+    async def get_model_metrics(self, custom_model_id: str) -> List[ModelMetric]:
+        """Get model metrics by id
+
+        Args:
+            custom_model_id (str): custom model id
+        Returns:
+            List[ModelMetric]: a list of model metrics
+        """
+        json = {"finetuneID": custom_model_id}
+        response = await self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneMetrics", method="POST", json=json)
+        return [ModelMetric.from_dict(metric) for metric in response["metrics"]]
 
     async def list_custom_models(
         self,
