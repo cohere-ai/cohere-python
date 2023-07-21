@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.18
+
+- [#255](https://github.com/cohere-ai/cohere-python/pull/255)
+  - Add custom model metrics endpoint
+
 ## 4.17
 
 - [#263](https://github.com/cohere-ai/cohere-python/pull/263)
