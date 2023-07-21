@@ -154,7 +154,7 @@ class TestChat(unittest.TestCase):
         )
         self.assertIsInstance(prediction.text, str)
         self.assertIsInstance(prediction.conversation_id, str)
-        self.assertIsNone(prediction.chatlog)
+        self.assertIsNotNone(prediction.chatlog)
         self.assertIn("User: Hey!", prediction.prompt)
         self.assertIn("Chatbot: Hey! How can I help you?", prediction.prompt)
 
