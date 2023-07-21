@@ -1100,8 +1100,8 @@ class Client:
         response = self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneByName", method="POST", json=json)
         return CustomModel.from_dict(response["finetune"], self.wait_for_custom_model)
 
-    def get_model_metrics(self, custom_model_id: str) -> List[ModelMetric]:
-        """Get model metrics by id
+    def get_custom_model_metrics(self, custom_model_id: str) -> List[ModelMetric]:
+        """Get a custom model's training metrics by id
 
         Args:
             custom_model_id (str): custom model id

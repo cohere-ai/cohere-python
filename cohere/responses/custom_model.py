@@ -169,17 +169,30 @@ class AsyncCustomModel(BaseCustomModel):
 class ModelMetric(CohereObject):
     created_at: datetime
     step_num: int
-    loss: float
-    accuracy: float
+    loss: Optional[float] = None
+    accuracy: Optional[float] = None
+    f1: Optional[float] = None
+    precision: Optional[float] = None
+    recall: Optional[float] = None
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "ModelMetric":
-        # model metrics timestamp sometimes contains nanoseconds, so we truncate
-        dt_concat = data["created_at"][:26] + data["created_at"][-1:]
         return cls(
-            created_at=_parse_date(dt_concat), step_num=data["step_num"], loss=data["loss"], accuracy=data["accuracy"]
+            created_at=_parse_date_with_variable_seconds(data["created_at"]),
+            step_num=data["step_num"],
+            loss=data.get("loss"),
+            accuracy=data.get("accuracy"),
+            f1=data.get("f1"),
+            precision=data.get("precision"),
+            recall=data.get("recall"),
         )
 
 
 def _parse_date(datetime_string: str) -> datetime:
     return datetime.strptime(datetime_string, "%Y-%m-%dT%H:%M:%S.%f%z")
+
+
+def _parse_date_with_variable_seconds(datetime_string: str) -> datetime:
+    # model metrics timestamp sometimes contains nanoseconds, so we truncate
+    dt_concat = datetime_string[:26] + datetime_string[-1:]
+    return datetime.strptime(dt_concat, "%Y-%m-%dT%H:%M:%S.%f%z")
