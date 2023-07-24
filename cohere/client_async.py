@@ -43,7 +43,7 @@ from cohere.responses import (
     Tokens,
 )
 from cohere.responses.bulk_embed import AsyncCreateBulkEmbedJobResponse, BulkEmbedJob
-from cohere.responses.chat import AsyncChat, Mode, StreamingChat
+from cohere.responses.chat import AsyncChat, StreamingChat
 from cohere.responses.classify import Example as ClassifyExample
 from cohere.responses.custom_model import (
     CUSTOM_MODEL_PRODUCT_MAPPING,
@@ -206,8 +206,6 @@ class AsyncClient(Client):
         p: Optional[float] = None,
         k: Optional[float] = None,
         logit_bias: Optional[Dict[int, float]] = None,
-        mode: Optional[Mode] = None,
-        documents: Optional[List[Dict[str, str]]] = None,
     ) -> Union[AsyncChat, StreamingChat]:
         if chat_history is not None:
             should_warn = True
@@ -248,8 +246,6 @@ class AsyncClient(Client):
             "p": p,
             "k": k,
             "logit_bias": logit_bias,
-            "mode": mode,
-            "documents": documents,
         }
 
         response = await self._request(cohere.CHAT_URL, json=json_body, stream=stream)

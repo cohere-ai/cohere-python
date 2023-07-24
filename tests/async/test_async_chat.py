@@ -1,8 +1,4 @@
-from typing import List
-
 import pytest
-
-from cohere.responses.chat import Mode
 
 
 @pytest.mark.asyncio
@@ -18,39 +14,6 @@ async def test_async_multi_replies(async_client):
         assert prediction.meta
         assert prediction.meta["api_version"]
         assert prediction.meta["api_version"]["version"]
-
-
-@pytest.mark.asyncio
-async def test_search_query_generation(async_client):
-    prediction = await async_client.chat("What are the tallest penguins?", mode="search_query_generation")
-    assert isinstance(prediction.is_search_required, bool)
-    assert isinstance(prediction.queries, List)
-    assert prediction.is_search_required
-    assert len(prediction.queries) > 0
-
-
-@pytest.mark.asyncio
-async def test_search_query_generation_with_enum(async_client):
-    prediction = await async_client.chat("What are the tallest penguins?", mode=Mode.SEARCH_QUERY_GENERATION)
-    assert isinstance(prediction.is_search_required, bool)
-    assert isinstance(prediction.queries, List)
-    assert prediction.is_search_required
-    assert len(prediction.queries) > 0
-
-
-@pytest.mark.asyncio
-async def test_augmented_generation(async_client):
-    prediction = await async_client.chat(
-        "What are the tallest penguins?",
-        mode="augmented_generation",
-        documents=[
-            {"title": "Tall penguins", "snippet": "Emperor penguins are the tallest", "url": "http://example.com/foo"}
-        ],
-    )
-    assert isinstance(prediction.text, str)
-    assert isinstance(prediction.citations, List)
-    assert len(prediction.text) > 0
-    assert len(prediction.citations) > 0
 
 
 @pytest.mark.asyncio
