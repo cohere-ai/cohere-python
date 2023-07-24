@@ -1,8 +1,10 @@
 import unittest
+from typing import List
 
 from utils import get_api_key
 
 import cohere
+from cohere.responses.chat import Mode
 
 API_KEY = get_api_key()
 co = cohere.Client(API_KEY)
@@ -212,9 +214,6 @@ class TestChat(unittest.TestCase):
             with self.assertRaises(cohere.error.CohereError):
                 _ = co.chat("Yo what up?", logit_bias=logit_bias, max_tokens=5)
 
-
-"""
-    Stop testing augmented generation while we change the API
     def test_search_query_generation(self):
         prediction = co.chat("What are the tallest penguins?", mode="search_query_generation")
         self.assertIsInstance(prediction.is_search_required, bool)
@@ -245,4 +244,3 @@ class TestChat(unittest.TestCase):
         self.assertIsInstance(prediction.citations, List)
         self.assertGreater(len(prediction.text), 0)
         self.assertGreater(len(prediction.citations), 0)
-"""
