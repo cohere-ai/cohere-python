@@ -49,8 +49,6 @@
   - Better string representation for DetectLanguageResponse
 - [#249](https://github.com/cohere-ai/cohere-python/pull/249)
   - Catch ClientPayloadError in AsyncClient and convert it to a CohereAPIError
-- [#250](https://github.com/cohere-ai/cohere-python/pull/250)
-  - Add support for query generation and documents in chat (non-streaming)
 
 ## 4.10.0
 
