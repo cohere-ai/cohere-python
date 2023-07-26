@@ -12,7 +12,7 @@ from cohere.responses import AsyncDataset
 
 @pytest.mark.asyncio
 async def test_async_create_dataset(async_client: AsyncClient):
-    job = await async_client.create_dataset(
+    dataset = await async_client.create_dataset(
         name="ci-test",
         data=dummy_file(
             [
@@ -22,21 +22,21 @@ async def test_async_create_dataset(async_client: AsyncClient):
         ),
         dataset_type="embed-input",
     )
-    job = await async_client.get_dataset(job.id)
+    dataset = await async_client.get_dataset(dataset.id)
 
     start = time.time()
-    while not job.has_terminal_status():
+    while not dataset.has_terminal_status():
         if time.time() - start > 120:  # 120s timeout
             raise TimeoutError()
         await asyncio.sleep(5)
-        job = await async_client.get_dataset(job.id)
+        dataset = await async_client.get_dataset(dataset.id)
 
-    check_result(job, status="validated")
+    check_result(dataset, status="validated")
 
 
 @pytest.mark.asyncio
 async def test_async_create_invalid_dataset(async_client: AsyncClient):
-    job = await async_client.create_dataset(
+    dataset = await async_client.create_dataset(
         name="ci-test",
         data=dummy_file(
             [
@@ -46,16 +46,16 @@ async def test_async_create_invalid_dataset(async_client: AsyncClient):
         ),
         dataset_type="embed-input",
     )
-    job = await async_client.get_dataset(job.id)
+    dataset = await async_client.get_dataset(dataset.id)
 
     start = time.time()
-    while not job.has_terminal_status():
+    while not dataset.has_terminal_status():
         if time.time() - start > 120:  # 120s timeout
             raise TimeoutError()
         await asyncio.sleep(5)
-        job = await async_client.get_dataset(job.id)
+        dataset = await async_client.get_dataset(dataset.id)
 
-    check_result(job, status="failed")
+    check_result(dataset, status="failed")
 
 
 @pytest.mark.asyncio

@@ -13,7 +13,7 @@ from cohere.responses import Dataset
 class TestDataset(unittest.TestCase):
     def test_create_dataset(self):
         co = self.create_co()
-        job = co.create_dataset(
+        dataset = co.create_dataset(
             name="ci-test",
             data=self.dummy_file(
                 [
@@ -25,17 +25,17 @@ class TestDataset(unittest.TestCase):
         )
 
         start = time.time()
-        while not job.has_terminal_status():
+        while not dataset.has_terminal_status():
             if time.time() - start > 120:  # 120s timeout
                 raise TimeoutError()
             time.sleep(5)
-            job = co.get_dataset(job.id)
+            dataset = co.get_dataset(dataset.id)
 
-        self.check_result(job, status="validated")
+        self.check_result(dataset, status="validated")
 
     def test_create_invalid_dataset(self):
         co = self.create_co()
-        job = co.create_dataset(
+        dataset = co.create_dataset(
             name="ci-test",
             data=self.dummy_file(
                 [
@@ -47,13 +47,13 @@ class TestDataset(unittest.TestCase):
         )
 
         start = time.time()
-        while not job.has_terminal_status():
+        while not dataset.has_terminal_status():
             if time.time() - start > 120:  # 120s timeout
                 raise TimeoutError()
             time.sleep(5)
-            job = co.get_dataset(job.id)
+            dataset = co.get_dataset(dataset.id)
 
-        self.check_result(job, status="failed")
+        self.check_result(dataset, status="failed")
 
     def test_get_dataset(self):
         co = self.create_co()

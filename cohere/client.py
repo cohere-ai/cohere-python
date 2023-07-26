@@ -759,14 +759,14 @@ class Client:
 
     def wait_for_dataset(
         self,
-        job_id: str,
+        dataset_id: str,
         timeout: Optional[float] = None,
         interval: float = 10,
     ) -> Dataset:
         """Wait for Dataset validation result.
 
         Args:
-            job_id (str): Dataset id.
+            dataset_id (str): Dataset id.
             timeout (Optional[float], optional): Wait timeout in seconds, if None - there is no limit to the wait time.
                 Defaults to None.
             interval (float, optional): Wait poll interval in seconds. Defaults to 10.
@@ -779,7 +779,7 @@ class Client:
         """
 
         return wait_for_job(
-            get_job=partial(self.get_dataset, job_id),
+            get_job=partial(self.get_dataset, dataset_id),
             timeout=timeout,
             interval=interval,
         )
@@ -861,6 +861,7 @@ class Client:
         """Create clustering job.
 
         Args:
+            input_dataset_id (str): Id of the dataset to cluster.
             embeddings_url (str): File with embeddings to cluster.
             min_cluster_size (Optional[int], optional): Minimum number of elements in a cluster. Defaults to 10.
             n_neighbors (Optional[int], optional): Number of nearest neighbors used by UMAP to establish the
@@ -963,7 +964,7 @@ class Client:
         """Create embed job.
 
         Args:
-            input_file_url (str): File with texts to embed.
+            input_dataset (Union[str, BaseDataset]): Dataset or dataset id with text to embed.
             name (Optional[str], optional): The name of the embed job. Defaults to None.
             model (Optional[str], optional): The model ID to use for embedding the text. Defaults to None.
             truncate (Optional[str], optional): How the API handles text longer than the maximum token length. Defaults to None.
@@ -980,7 +981,7 @@ class Client:
         elif isinstance(input_dataset, Dataset):
             input_dataset_id = input_dataset.id
         else:
-            raise CohereError(message="input_dataset must either a string or Dataset")
+            raise CohereError(message="input_dataset must be either a string or Dataset")
 
         json_body = {
             "input_dataset_id": input_dataset_id,
