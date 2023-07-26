@@ -3,9 +3,14 @@ import asyncio
 import json
 import time
 from concurrent import futures
+from datetime import datetime
 from typing import Awaitable, Callable, Dict, List, Optional, TypeVar
 
 from cohere.error import CohereError
+from cohere.logging import logger
+
+datetime_fmt = "%Y-%m-%dT%H:%M:%SZ"
+datetime_fmt_with_milli = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 try:  # numpy is optional, but support json encoding if the user has it
     import numpy as np
@@ -51,10 +56,25 @@ def is_api_key_valid(key: Optional[str]) -> bool:
     return True
 
 
+def parse_datetime(datetime_str) -> datetime:
+    try:
+        return datetime.strptime(datetime_str, datetime_fmt_with_milli)
+    except:
+        return datetime.strptime(datetime_str, datetime_fmt)
+
+
 class JobWithStatus(abc.ABC):
     @abc.abstractmethod
     def has_terminal_status(self) -> bool:
         ...
+
+    @abc.abstractmethod
+    def wait(self, timeout: Optional[float] = None, interval: float = 10) -> "JobWithStatus":
+        ...
+
+    def _update_self(self, updated_job):
+        for k, v in updated_job.__dict__.items():
+            setattr(self, k, v)
 
 
 T = TypeVar("T", bound=JobWithStatus)
@@ -73,6 +93,7 @@ def wait_for_job(
             raise TimeoutError(f"wait_for_job timed out after {timeout} seconds")
 
         time.sleep(interval)
+        logger.warning("...")
         job = get_job()
 
     return job

@@ -1,83 +1,69 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Union
 
 from cohere.responses.base import CohereObject
+from cohere.responses.dataset import Dataset
 from cohere.utils import JobWithStatus
 
 
-class BulkEmbedJob(CohereObject, JobWithStatus):
+class BaseEmbedJob(CohereObject, JobWithStatus):
     job_id: str
     status: str
     created_at: str
-    input_url: str
+    input_dataset_id: Optional[str]
     output_urls: Optional[List[str]]
+    output: Dataset
     model: str
     truncate: str
     percent_complete: float
-    meta: Optional[Dict[str, Any]]
+    _wait_fn: Union[Callable[[], "EmbedJob"], Callable[[], Awaitable["EmbedJob"]]]
 
     def __init__(
         self,
         job_id: str,
         status: str,
         created_at: str,
-        input_url: str,
+        input_dataset_id: Optional[str],
         output_urls: Optional[List[str]],
         model: str,
         truncate: str,
         percent_complete: float,
-        meta: Optional[Dict[str, Any]],
+        wait_fn,
     ) -> None:
         self.job_id = job_id
         self.status = status
         self.created_at = created_at
-        self.input_url = input_url
+        self.input_dataset_id = input_dataset_id
         self.output_urls = output_urls
         self.model = model
         self.truncate = truncate
         self.percent_complete = percent_complete
-        self.meta = meta
+        self._wait_fn = wait_fn
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "BulkEmbedJob":
+    def from_dict(cls, data: Dict[str, Any], wait_fn) -> "BaseEmbedJob":
         return cls(
             job_id=data["job_id"],
             status=data["status"],
             created_at=data["created_at"],
-            input_url=data["input_url"],
+            input_dataset_id=data.get("input_dataset_id"),
             output_urls=data.get("output_urls"),
             model=data["model"],
             truncate=data["truncate"],
             percent_complete=data["percent_complete"],
-            meta=data.get("meta"),
+            wait_fn=wait_fn,
         )
 
     def has_terminal_status(self) -> bool:
         return self.status in ["complete", "failed", "cancelled"]
 
 
-class CreateBulkEmbedJobResponse(CohereObject):
-    job_id: str
-    meta: Optional[Dict[str, Any]]
-
-    def __init__(self, job_id: str, meta: Optional[Dict[str, Any]], wait_fn):
-        self.job_id = job_id
-        self.meta = meta
-        self._wait_fn = wait_fn
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any], wait_fn) -> "CreateBulkEmbedJobResponse":
-        return cls(
-            job_id=data["job_id"],
-            meta=data.get("meta"),
-            wait_fn=wait_fn,
-        )
-
+class EmbedJob(BaseEmbedJob):
     def wait(
         self,
         timeout: Optional[float] = None,
         interval: float = 10,
-    ) -> BulkEmbedJob:
-        """Wait for bulk embed job completion.
+    ) -> "EmbedJob":
+        """Wait for embed job completion and updates all fields.
 
         Args:
             timeout (Optional[float], optional): Wait timeout in seconds, if None - there is no limit to the wait time.
@@ -88,19 +74,20 @@ class CreateBulkEmbedJobResponse(CohereObject):
             TimeoutError: wait timed out
 
         Returns:
-            BulkEmbedJob: Bulk embed job.
+            EmbedJob: the updated job
         """
+        updated_job = self._wait_fn(job_id=self.job_id, timeout=timeout, interval=interval)
+        self._update_self(updated_job)
+        return updated_job
 
-        return self._wait_fn(job_id=self.job_id, timeout=timeout, interval=interval)
 
-
-class AsyncCreateBulkEmbedJobResponse(CreateBulkEmbedJobResponse):
+class AsyncEmbedJob(BaseEmbedJob):
     async def wait(
         self,
         timeout: Optional[float] = None,
         interval: float = 10,
-    ) -> BulkEmbedJob:
-        """Wait for bulk embed job completion.
+    ) -> "EmbedJob":
+        """Wait for embed job completion and updates all fields.
 
         Args:
             timeout (Optional[float], optional): Wait timeout in seconds, if None - there is no limit to the wait time.
@@ -111,7 +98,8 @@ class AsyncCreateBulkEmbedJobResponse(CreateBulkEmbedJobResponse):
             TimeoutError: wait timed out
 
         Returns:
-            BulkEmbedJob: Bulk embed job.
+            EmbedJob: the updated job
         """
-
-        return await self._wait_fn(job_id=self.job_id, timeout=timeout, interval=interval)
+        updated_job = await self._wait_fn(job_id=self.job_id, timeout=timeout, interval=interval)
+        self._update_self(updated_job)
+        return updated_job

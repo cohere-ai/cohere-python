@@ -20,11 +20,12 @@ GENERATE_PREFERENCE_FEEDBACK_URL = "feedback/generate/preference"
 GENERATE_URL = "generate"
 SUMMARIZE_URL = "summarize"
 RERANK_URL = "rerank"
+DATASET_URL = "dataset"
 
 CHECK_API_KEY_URL = "check-api-key"
 TOKENIZE_URL = "tokenize"
 DETOKENIZE_URL = "detokenize"
 
 CLUSTER_JOBS_URL = "cluster-jobs"
-BULK_EMBED_JOBS_URL = "embed-jobs"
+EMBED_JOBS_URL = "embed-jobs"
 CUSTOM_MODEL_URL = "finetune"

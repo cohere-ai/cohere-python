@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.18
+
+- [#268](https://github.com/cohere-ai/cohere-python/pull/268)
+  - Add dataset endpoint
+
 ## 4.17
 
 - [#263](https://github.com/cohere-ai/cohere-python/pull/263)
