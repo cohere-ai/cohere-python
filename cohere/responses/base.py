@@ -70,7 +70,7 @@ class CohereObject:
 
     def __repr__(self) -> str:
         contents = ""
-        exclude_list = ["iterator"]
+        exclude_list = ["iterator", "_wait_fn"]
 
         for k in self.__dict__.keys():
             if k not in exclude_list:
