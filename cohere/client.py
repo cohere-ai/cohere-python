@@ -39,6 +39,7 @@ from cohere.responses.custom_model import (
     INTERNAL_CUSTOM_MODEL_TYPE,
     CustomModel,
     HyperParametersInput,
+    ModelMetric,
 )
 from cohere.responses.dataset import BaseDataset, Dataset
 from cohere.responses.detectlang import DetectLanguageResponse, Language
@@ -1207,6 +1208,18 @@ class Client:
         json = {"name": name}
         response = self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneByName", method="POST", json=json)
         return CustomModel.from_dict(response["finetune"], self.wait_for_custom_model)
+
+    def get_custom_model_metrics(self, custom_model_id: str) -> List[ModelMetric]:
+        """Get a custom model's training metrics by id
+
+        Args:
+            custom_model_id (str): custom model id
+        Returns:
+            List[ModelMetric]: a list of model metrics
+        """
+        json = {"finetuneID": custom_model_id}
+        response = self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneMetrics", method="POST", json=json)
+        return [ModelMetric.from_dict(metric) for metric in response["metrics"]]
 
     def list_custom_models(
         self,
