@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.19.1
+
+- [#273] (https://github.com/cohere-ai/cohere-python/pull/273)
+  - Fix fastavro version for python >=3.8
+
 ## 4.19
 
 - [#255](https://github.com/cohere-ai/cohere-python/pull/255)
