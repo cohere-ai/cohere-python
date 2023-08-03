@@ -30,7 +30,7 @@ jobs:
 
       - name: Upload to PyPi
         env:
-          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_COHERE_API_KEY_RISK_653 }}
         run: |
           twine upload --repository pypi dist/*
