@@ -972,6 +972,7 @@ class Client:
         name: str,
         model_type: CUSTOM_MODEL_TYPE,
         dataset: CustomModelDataset,
+        base_model: Optional[str] = None,
         hyperparameters: Optional[HyperParametersInput] = None,
     ) -> CustomModel:
         """Create a new custom model
@@ -980,6 +981,11 @@ class Client:
             name (str): name of your custom model, has to be unique across your organization
             model_type (GENERATIVE, CLASSIFY, RERANK): type of custom model
             dataset (InMemoryDataset, CsvDataset, JsonlDataset, TextDataset): A dataset for your training. Consists of a train and optional eval file.
+            base_model (str): base model to use for your custom model.
+                For generative and classify models, `base_model` has to be None (no option available for now)
+                For rerank models, you can choose between `english` and `multilingual`. Defaults to `english` if not specified.
+                    The English model is better for English, while the multilingual model should be picked if a non-negligible part of queries/documents
+                    will be in other languages
             hyperparameters (HyperParametersInput): adjust hyperparameters for your custom model. Only for generative custom models.
         Returns:
             str: the id of the custom model that was created
@@ -1002,12 +1008,26 @@ class Client:
 
         """
         internal_custom_model_type = CUSTOM_MODEL_PRODUCT_MAPPING[model_type]
+
+        # Figuring out base model
+        if internal_custom_model_type in ["GENERATIVE", "CLASSIFICATION"]:
+            assert base_model is None, "base_model has to be None for generative and classification models"
+            internal_base_model = "medium"
+        elif internal_custom_model_type == "RERANK":
+            internal_base_model = base_model or "english"
+            assert internal_base_model in [
+                "english",
+                "multilingual",
+            ], "base_model has to be `english` or `multilingual`"
+        else:
+            raise ValueError(f"Unsupported model_type: {internal_custom_model_type}")
+
         json = {
             "name": name,
             "settings": {
                 "trainFiles": [],
                 "evalFiles": [],
-                "baseModel": "medium",
+                "baseModel": internal_base_model,
                 "finetuneType": internal_custom_model_type,
             },
         }
