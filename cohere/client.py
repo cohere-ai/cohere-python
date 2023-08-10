@@ -1009,25 +1009,12 @@ class Client:
         """
         internal_custom_model_type = CUSTOM_MODEL_PRODUCT_MAPPING[model_type]
 
-        # Figuring out base model
-        if internal_custom_model_type in ["GENERATIVE", "CLASSIFICATION"]:
-            assert base_model is None, "base_model has to be None for generative and classification models"
-            internal_base_model = "medium"
-        elif internal_custom_model_type == "RERANK":
-            internal_base_model = base_model or "english"
-            assert internal_base_model in [
-                "english",
-                "multilingual",
-            ], "base_model has to be `english` or `multilingual`"
-        else:
-            raise ValueError(f"Unsupported model_type: {internal_custom_model_type}")
-
         json = {
             "name": name,
             "settings": {
                 "trainFiles": [],
                 "evalFiles": [],
-                "baseModel": internal_base_model,
+                "baseModel": base_model,
                 "finetuneType": internal_custom_model_type,
             },
         }
