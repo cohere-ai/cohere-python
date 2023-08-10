@@ -117,7 +117,7 @@ class Client:
 
         Args:
             prompt (str): The prompt
-            completion (str): The completion
+            completion (str): (Optional) The completion
             model (str): (Optional) The model to use for calculating the log-likelihoods
         """
         json_body = {"model": model, "prompt": prompt, "completion": completion}
