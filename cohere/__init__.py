@@ -25,6 +25,7 @@ DATASET_URL = "dataset"
 CHECK_API_KEY_URL = "check-api-key"
 TOKENIZE_URL = "tokenize"
 DETOKENIZE_URL = "detokenize"
+LOGLIKELIHOOD_URL = "loglikelihood"
 
 CLUSTER_JOBS_URL = "cluster-jobs"
 EMBED_JOBS_URL = "embed-jobs"
