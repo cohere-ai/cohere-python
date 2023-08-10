@@ -117,7 +117,7 @@ class Dataset(BaseDataset):
         Raises:
             TimeoutError: wait timed out
         """
-        updated_job = self._wait_fn(job_id=self.id, timeout=timeout, interval=interval)
+        updated_job = self._wait_fn(dataset_id=self.id, timeout=timeout, interval=interval)
         self._update_self(updated_job)
         return updated_job
 
@@ -138,6 +138,6 @@ class AsyncDataset(BaseDataset):
         Raises:
             TimeoutError: wait timed out
         """
-        updated_job = await self._wait_fn(job_id=self.id, timeout=timeout, interval=interval)
+        updated_job = await self._wait_fn(dataset_id=self.id, timeout=timeout, interval=interval)
         self._update_self(updated_job)
         return updated_job
