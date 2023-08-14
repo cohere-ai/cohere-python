@@ -1,6 +1,6 @@
 from typing import Dict, List, NamedTuple, Optional
 
-from cohere.responses.base import CohereObject, _df_html
+from cohere.responses.base import CohereObject, _df_html, _escape_html
 
 TokenLogLikelihood = NamedTuple("TokenLogLikelihood", [("encoded", int), ("decoded", str), ("log_likelihood", float)])
 
@@ -23,17 +23,17 @@ class LogLikelihoods(CohereObject):
     def visualize(self, **kwargs):
         import pandas as pd
 
-        html = ""
-        for lbl, tokens in [("prprompt_tokensompt", self.prompt_tokens), ("completion_tokens", self.completion_tokens)]:
+        dfs = []
+        for lbl, tokens in [("prompt_tokens", self.prompt_tokens), ("completion_tokens", self.completion_tokens)]:
             if tokens is not None:
-                html += f"<b>{lbl}</b><br>"
-                df = pd.DataFrame.from_dict(
-                    {
-                        "decoded": [t.decoded for t in tokens],
-                        "encoded": [t.encoded for t in tokens],
-                        "log_likelihood": [t.log_likelihood for t in tokens],
-                    },
-                    orient="index",
+                dfs.append(
+                    pd.DataFrame.from_dict(
+                        {
+                            lbl + ".decoded": [_escape_html(t.decoded) for t in tokens],
+                            lbl + ".encoded": [t.encoded for t in tokens],
+                            lbl + ".log_likelihood": [t.log_likelihood for t in tokens],
+                        },
+                        orient="index",
+                    )
                 )
-                html += _df_html(df.fillna(""), style={"font-size": "90%"})
-        return html
+        return _df_html(pd.concat(dfs, axis=0).fillna(""), style={"font-size": "90%"})
