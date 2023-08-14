@@ -25,6 +25,7 @@ from cohere.responses import (
     Codebook,
     Detokenization,
     Generations,
+    LogLikelihoods,
     StreamingGenerations,
     Tokens,
 )
@@ -103,6 +104,25 @@ class Client:
         backwards compatibility.
         """
         return {"valid": is_api_key_valid(self.api_key)}
+
+    def loglikelihood(
+        self,
+        prompt: Optional[str] = None,
+        completion: Optional[str] = None,
+        model: Optional[str] = None,
+    ) -> LogLikelihoods:
+        """Calculates the token log-likelihood for a provided prompt and completion.
+        Using this endpoint instead of co.generate with max_tokens=0 will guarantee that any required tokens such as <EOP_TOKEN>
+        are correctly inserted, and makes it easier to retrieve only the completion log-likelihood.
+
+        Args:
+            prompt (str): The prompt
+            completion (str): (Optional) The completion
+            model (str): (Optional) The model to use for calculating the log-likelihoods
+        """
+        json_body = {"model": model, "prompt": prompt, "completion": completion}
+        response = self._request(cohere.LOGLIKELIHOOD_URL, json=json_body)
+        return LogLikelihoods(response["prompt_tokens"], response["completion_tokens"])
 
     def batch_generate(
         self, prompts: List[str], return_exceptions=False, **kwargs
