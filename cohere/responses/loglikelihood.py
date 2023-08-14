@@ -24,9 +24,9 @@ class LogLikelihoods(CohereObject):
         import pandas as pd
 
         html = ""
-        for lbl, tokens in [("prompt", self.prompt_tokens), ("completion", self.completion_tokens)]:
+        for lbl, tokens in [("prprompt_tokensompt", self.prompt_tokens), ("completion_tokens", self.completion_tokens)]:
             if tokens is not None:
-                html += f"{lbl}<br>"
+                html += f"<b>{lbl}</b><br>"
                 df = pd.DataFrame.from_dict(
                     {
                         "decoded": [t.decoded for t in tokens],
@@ -35,5 +35,5 @@ class LogLikelihoods(CohereObject):
                     },
                     orient="index",
                 )
-            html += _df_html(df.fillna(""), style={"font-size": "90%"})
+                html += _df_html(df.fillna(""), style={"font-size": "90%"})
         return html
