@@ -16,10 +16,6 @@ class LogLikelihoods(CohereObject):
         self.prompt_tokens = self.token_list_from_dict(prompt_tokens)
         self.completion_tokens = self.token_list_from_dict(completion_tokens)
 
-    @property
-    def log_likelihood(self):
-        return [token.log_likelihood for token in self.completion_tokens]
-
     def visualize(self, **kwargs):
         import pandas as pd
 
