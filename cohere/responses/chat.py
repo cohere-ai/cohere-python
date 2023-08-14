@@ -43,7 +43,7 @@ class Chat(CohereObject):
             response_id=response["response_id"],
             generation_id=response["generation_id"],
             message=message,
-            conversation_id=response["conversation_id"],
+            conversation_id=response.get("conversation_id"),  # optional
             text=response.get("text"),
             prompt=response.get("prompt"),  # optional
             chatlog=response.get("chatlog"),  # optional
