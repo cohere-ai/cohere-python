@@ -85,6 +85,7 @@ class BaseCustomModel(CohereObject, JobWithStatus):
         model_type: CUSTOM_MODEL_TYPE,
         created_at: datetime,
         completed_at: Optional[datetime],
+        base_model: Optional[str] = None,
         model_id: Optional[str] = None,
         hyperparameters: Optional[HyperParameters] = None,
     ) -> None:
@@ -95,6 +96,7 @@ class BaseCustomModel(CohereObject, JobWithStatus):
         self.model_type = model_type
         self.created_at = created_at
         self.completed_at = completed_at
+        self.base_model = base_model
         self.model_id = model_id
         self.hyperparameters = hyperparameters
         self._wait_fn = wait_fn
@@ -109,6 +111,7 @@ class BaseCustomModel(CohereObject, JobWithStatus):
             model_type=REVERSE_CUSTOM_MODEL_PRODUCT_MAPPING[data["settings"]["finetuneType"]],
             created_at=_parse_date(data["created_at"]),
             completed_at=_parse_date(data["completed_at"]) if "completed_at" in data else None,
+            base_model=data["settings"]["baseModel"],
             model_id=data["model"]["route"] if "model" in data else None,
             hyperparameters=HyperParameters.from_response(data["settings"]["hyperparameters"])
             if data["settings"]["hyperparameters"]
