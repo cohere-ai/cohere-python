@@ -6,7 +6,7 @@ from typing import Optional
 import pytest
 
 from cohere import AsyncClient
-from cohere.responses.cluster import ClusterJobResult
+from cohere.responses.cluster import AsyncClusterJobResult
 
 INPUT_FILE = "gs://cohere-dev-central-2/cluster_tests/all_datasets/reddit_100.jsonl"
 IN_CI = os.getenv("CI", "").lower() in ["true", "1"]
@@ -103,7 +103,7 @@ async def test_async_job_wait_method_times_out(async_client: AsyncClient):
         await create_res.wait(timeout=1, interval=0.5)
 
 
-def check_job_result(job: ClusterJobResult, status: Optional[str] = None):
+def check_job_result(job: AsyncClusterJobResult, status: Optional[str] = None):
     assert job.job_id
     assert job.status
     assert job.meta

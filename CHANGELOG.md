@@ -1,5 +1,25 @@
 # Changelog
 
+## 4.19.1
+
+- [#273] (https://github.com/cohere-ai/cohere-python/pull/273)
+  - Fix fastavro version for python >=3.8
+
+## 4.19
+
+- [#255](https://github.com/cohere-ai/cohere-python/pull/255)
+  - Add custom model metrics endpoint
+
+## 4.18
+
+- [#268](https://github.com/cohere-ai/cohere-python/pull/268)
+  - Add dataset endpoint
+
+## 4.17
+
+- [#263](https://github.com/cohere-ai/cohere-python/pull/263)
+  - Add wait() to custom models
+
 ## 4.16
 
 - [#262](https://github.com/cohere-ai/cohere-python/pull/262)
@@ -39,8 +59,6 @@
   - Better string representation for DetectLanguageResponse
 - [#249](https://github.com/cohere-ai/cohere-python/pull/249)
   - Catch ClientPayloadError in AsyncClient and convert it to a CohereAPIError
-- [#250](https://github.com/cohere-ai/cohere-python/pull/250)
-  - Add support for query generation and documents in chat (non-streaming)
 
 ## 4.10.0
 

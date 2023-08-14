@@ -1,5 +1,4 @@
 import json
-from enum import Enum
 from typing import Any, Dict, Generator, List, NamedTuple, Optional
 
 import requests
@@ -7,29 +6,20 @@ import requests
 from cohere.responses.base import CohereObject
 
 
-class Mode(str, Enum):
-    CHAT = "chat"
-    SEARCH_QUERY_GENERATION = "search_query_generation"
-    AUGMENTED_GENERATION = "augmented_generation"
-
-
 class Chat(CohereObject):
     def __init__(
         self,
-        response_id: Optional[str],
-        generation_id: Optional[str],
-        message: Optional[str],
-        text: Optional[str],
-        conversation_id: Optional[str],
+        response_id: str,
+        generation_id: str,
+        message: str,
+        text: str,
+        conversation_id: str,
         meta: Optional[Dict[str, Any]] = None,
         prompt: Optional[str] = None,
         chatlog: Optional[List[Dict[str, str]]] = None,
         preamble: Optional[str] = None,
         token_count: Optional[Dict[str, int]] = None,
         client=None,
-        is_search_required: Optional[bool] = None,
-        queries: Optional[List[str]] = None,
-        citations: Optional[List[Dict[str, str]]] = None,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -45,16 +35,13 @@ class Chat(CohereObject):
         self.client = client
         self.token_count = token_count
         self.meta = meta
-        self.queries = queries
-        self.citations = citations
-        self.is_search_required = is_search_required
 
     @classmethod
     def from_dict(cls, response: Dict[str, Any], message: str, client) -> "Chat":
         return cls(
-            id=response.get("response_id"),
-            response_id=response.get("response_id"),
-            generation_id=response.get("generation_id"),
+            id=response["response_id"],
+            response_id=response["response_id"],
+            generation_id=response["generation_id"],
             message=message,
             conversation_id=response["conversation_id"],
             text=response.get("text"),
@@ -64,9 +51,6 @@ class Chat(CohereObject):
             client=client,
             token_count=response.get("token_count"),
             meta=response.get("meta"),
-            queries=response.get("queries"),
-            is_search_required=response.get("is_search_required"),
-            citations=response.get("citations"),
         )
 
     def respond(self, response: str, max_tokens: int = None) -> "Chat":
