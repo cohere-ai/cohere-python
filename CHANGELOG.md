@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.20.1
+- [#278] (https://github.com/cohere-ai/cohere-python/pull/278)
+  - Fix dataset listing key error
+
 ## 4.20.0
 
 - [#276] (https://github.com/cohere-ai/cohere-python/pull/276)
