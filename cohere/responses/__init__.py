@@ -11,6 +11,7 @@ from cohere.responses.feedback import (
     PreferenceRating,
 )
 from cohere.responses.generation import Generation, Generations, StreamingGenerations
+from cohere.responses.loglikelihood import LogLikelihoods
 from cohere.responses.rerank import RerankDocument, Reranking, RerankResult
 from cohere.responses.summarize import SummarizeResponse
 from cohere.responses.tokenize import Detokenization, Tokens

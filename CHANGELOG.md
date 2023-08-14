@@ -1,5 +1,12 @@
 # Changelog
 
+## 4.20.0
+
+- [#276] (https://github.com/cohere-ai/cohere-python/pull/276)
+  - Add support for base_model option in create_custom_model
+- [#277] (https://github.com/cohere-ai/cohere-python/pull/277)
+  - Add support for co.loglikelihood endpoint
+
 ## 4.19.1
 
 - [#273] (https://github.com/cohere-ai/cohere-python/pull/273)
