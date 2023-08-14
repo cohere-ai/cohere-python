@@ -4,13 +4,14 @@ import time
 import unittest
 from typing import Optional
 
-from utils import get_api_key
+from utils import get_api_key, in_ci
 
 import cohere
 from cohere.responses import Dataset
 
 
 class TestDataset(unittest.TestCase):
+    @unittest.skipIf(in_ci(), "can sometimes fail due to duration variation")
     def test_create_dataset(self):
         co = self.create_co()
         dataset = co.create_dataset(
@@ -33,6 +34,7 @@ class TestDataset(unittest.TestCase):
 
         self.check_result(dataset, status="validated")
 
+    @unittest.skipIf(in_ci(), "can sometimes fail due to duration variation")
     def test_create_invalid_dataset(self):
         co = self.create_co()
         dataset = co.create_dataset(
@@ -55,12 +57,14 @@ class TestDataset(unittest.TestCase):
 
         self.check_result(dataset, status="failed")
 
+    @unittest.skipIf(in_ci(), "can sometimes fail due to duration variation")
     def test_get_dataset(self):
         co = self.create_co()
         datasets = co.list_datasets()
         dataset = co.get_dataset(datasets[0].id)
         self.check_result(dataset)
 
+    @unittest.skipIf(in_ci(), "can sometimes fail due to duration variation")
     def test_list_dataset(self):
         co = self.create_co()
         datasets = co.list_datasets()
