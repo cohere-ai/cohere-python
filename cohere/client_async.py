@@ -826,6 +826,7 @@ class AsyncClient(Client):
         name: str,
         model_type: CUSTOM_MODEL_TYPE,
         dataset: CustomModelDataset,
+        base_model: Optional[str] = None,
         hyperparameters: Optional[HyperParametersInput] = None,
     ) -> AsyncCustomModel:
         """Create a new custom model
@@ -834,6 +835,11 @@ class AsyncClient(Client):
             name (str): name of your custom model, has to be unique across your organization
             model_type (GENERATIVE, CLASSIFY, RERANK): type of custom model
             dataset (InMemoryDataset, CsvDataset, JsonlDataset, TextDataset): A dataset for your training. Consists of a train and optional eval file.
+            base_model (str): base model to use for your custom model.
+                For generative and classify models, `base_model` has to be None (no option available for now)
+                For rerank models, you can choose between `english` and `multilingual`. Defaults to `english` if not specified.
+                    The English model is better for English, while the multilingual model should be picked if a non-negligible part of queries/documents
+                    will be in other languages
             hyperparameters (HyperParametersInput): adjust hyperparameters for your custom model. Only for generative custom models.
         Returns:
             str: the id of the custom model that was created
@@ -856,12 +862,13 @@ class AsyncClient(Client):
 
         """
         internal_custom_model_type = CUSTOM_MODEL_PRODUCT_MAPPING[model_type]
+
         json = {
             "name": name,
             "settings": {
                 "trainFiles": [],
                 "evalFiles": [],
-                "baseModel": "medium",
+                "baseModel": base_model,
                 "finetuneType": internal_custom_model_type,
             },
         }
