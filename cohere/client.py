@@ -765,14 +765,10 @@ class Client:
             "offset": offset,
         }
         response = self._request(f"{cohere.DATASET_URL}", method="GET", params=param_dict)
-        return (
-            [
-                Dataset.from_dict({"meta": response.get("meta"), **r}, wait_fn=self.wait_for_dataset)
-                for r in response["datasets"]
-            ]
-            if "datasets" in response
-            else []
-        )
+        return [
+            Dataset.from_dict({"meta": response.get("meta"), **r}, wait_fn=self.wait_for_dataset)
+            for r in (response.get("datasets") or [])
+        ]
 
     def delete_dataset(self, id: str) -> None:
         """Deletes your dataset
