@@ -24,7 +24,7 @@ class TestChat(unittest.TestCase):
             self.assertIsInstance(prediction.text, str)
 
     def test_valid_model(self):
-        prediction = co.chat("Yo what up?", model="medium", max_tokens=5)
+        prediction = co.chat("Yo what up?", model="command", max_tokens=5)
         self.assertIsInstance(prediction.text, str)
 
     def test_invalid_model(self):
