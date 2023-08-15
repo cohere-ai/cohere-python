@@ -1,6 +1,7 @@
 import asyncio
 import io
 import json
+import os
 import time
 from typing import Optional
 
@@ -9,8 +10,11 @@ import pytest
 from cohere import AsyncClient
 from cohere.responses import AsyncDataset
 
+IN_CI = os.getenv("CI", "").lower() in ["true", "1"]
+
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(IN_CI, reason="can timeout during high load")
 async def test_async_create_dataset(async_client: AsyncClient):
     dataset = await async_client.create_dataset(
         name="ci-test",
@@ -35,6 +39,7 @@ async def test_async_create_dataset(async_client: AsyncClient):
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(IN_CI, reason="can timeout during high load")
 async def test_async_create_invalid_dataset(async_client: AsyncClient):
     dataset = await async_client.create_dataset(
         name="ci-test",
@@ -59,6 +64,7 @@ async def test_async_create_invalid_dataset(async_client: AsyncClient):
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(IN_CI, reason="can timeout during high load")
 async def test_async_get_dataset(async_client: AsyncClient):
     datasets = await async_client.list_datasets()
     dataset = await async_client.get_dataset(datasets[0].id)
@@ -66,6 +72,7 @@ async def test_async_get_dataset(async_client: AsyncClient):
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(IN_CI, reason="can timeout during high load")
 async def test_async_list_dataset(async_client: AsyncClient):
     datasets = await async_client.list_datasets()
     assert len(datasets) > 0
