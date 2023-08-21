@@ -4,7 +4,18 @@ import json
 import time
 from concurrent import futures
 from datetime import datetime
-from typing import Awaitable, Callable, Dict, List, Optional, TypeVar
+from typing import (
+    Awaitable,
+    BinaryIO,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 from cohere.error import CohereError
 from cohere.logging import logger
@@ -131,3 +142,14 @@ def threadpool_map(f, call_args: List[Dict], num_workers, return_exceptions: boo
                 else:
                     raise
     return results
+
+
+def read_local_data(data: Union[BinaryIO, str, Iterable[dict]]) -> Tuple[str, bytes]:
+    if hasattr(data, "read"):
+        return data.name, data.read()
+
+    if isinstance(data, str):
+        with open(data, "rb") as _file:
+            return data, _file.read()
+
+    return "data.jsonl", b"".join(f"{json.dumps(d)}\n".encode() for d in data)

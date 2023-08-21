@@ -1,5 +1,6 @@
 import io
 import json
+import tempfile
 import time
 import unittest
 from typing import Optional
@@ -8,6 +9,7 @@ from utils import get_api_key, in_ci
 
 import cohere
 from cohere.responses import Dataset
+from cohere.utils import read_local_data
 
 
 class TestDataset(unittest.TestCase):
@@ -101,3 +103,18 @@ class TestDataset(unittest.TestCase):
 
         if status == "failed":
             assert dataset.validation_error
+
+    def test_read_local_data(self):
+        expected = b'{"text": "some text", "label": "some label"}\n'
+        record = [{"text": "some text", "label": "some label"}]
+        assert ("data.jsonl", expected) == read_local_data(record)
+
+        with tempfile.TemporaryFile("r+b") as _file:
+            _file.write(expected)
+            _file.seek(0)
+            assert (_file.name, expected) == read_local_data(_file)
+
+        with tempfile.NamedTemporaryFile("r+b") as _file:
+            _file.write(expected)
+            _file.seek(0)
+            assert (_file.name, expected) == read_local_data(_file.name)

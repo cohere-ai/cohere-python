@@ -53,7 +53,7 @@ from cohere.responses.feedback import (
 )
 from cohere.responses.rerank import Reranking
 from cohere.responses.summarize import SummarizeResponse
-from cohere.utils import is_api_key_valid, threadpool_map, wait_for_job
+from cohere.utils import is_api_key_valid, read_local_data, threadpool_map, wait_for_job
 
 
 class Client:
@@ -705,7 +705,7 @@ class Client:
     def create_dataset(
         self,
         name: str,
-        data: BinaryIO,
+        data: Union[BinaryIO, str, Iterable[dict]],
         dataset_type: str,
         keep_fields: Union[str, List[str]] = None,
         optional_fields: Union[str, List[str]] = None,
@@ -714,15 +714,24 @@ class Client:
 
         Args:
             name (str): The name of your dataset
-            data (BinaryIO): The data to be uploaded and validated
+            data (IO, Iterable[str], Iterable[dict]): The data to be uploaded and validated
             dataset_type (str): The type of dataset you want to upload
             keep_fields (Union[str, List[str]]): (optional) A list of fields you want to keep in the dataset that are required
             optional_fields (Union[str, List[str]]): (optional) A list of fields you want to keep in the dataset that are optional
 
         Returns:
             Dataset: Dataset object.
+
+        Examples:
+            dataset from file
+                >>> from cohere.responses.dataset import Dataset
+                >>> co = cohere.Client("YOUR_API_KEY")
+                >>> with open("your-data.csv", "rb") as _file:
+                >>>     ds1 = co.create_dataset(name="the-name", data=_file, dataset_type="the-type")
+                >>> ds2 = co.create_dataset(name="the-name", data="local/path/to/your/dataset", dataset_type="the-type")
+                >>> ds3 = co.create_dataset(name="the-name", data=[{"text": "some text", "label": "some label"}], dataset_type="the-type")
         """
-        files = {"file": data}
+        files = {"file": read_local_data(data)}
         params = {
             "name": name,
             "type": dataset_type,
