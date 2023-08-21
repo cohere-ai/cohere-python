@@ -56,7 +56,7 @@ from cohere.responses.custom_model import (
 )
 from cohere.responses.dataset import AsyncDataset, BaseDataset
 from cohere.responses.embed_job import AsyncEmbedJob
-from cohere.utils import async_wait_for_job, is_api_key_valid, np_json_dumps
+from cohere.utils import async_wait_for_job, is_api_key_valid, np_json_dumps, read_local_data
 
 JSON = Union[Dict, List]
 
@@ -516,7 +516,7 @@ class AsyncClient(Client):
         Returns:
             AsyncDataset: Dataset object.
         """
-        files = {"file": data}
+        files = {"file": read_local_data(data)}
         params = {
             "name": name,
             "type": dataset_type,
