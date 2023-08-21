@@ -56,7 +56,12 @@ from cohere.responses.custom_model import (
 )
 from cohere.responses.dataset import AsyncDataset, BaseDataset
 from cohere.responses.embed_job import AsyncEmbedJob
-from cohere.utils import async_wait_for_job, is_api_key_valid, np_json_dumps, read_local_data
+from cohere.utils import (
+    async_wait_for_job,
+    is_api_key_valid,
+    np_json_dumps,
+    read_local_data,
+)
 
 JSON = Union[Dict, List]
 
@@ -499,7 +504,7 @@ class AsyncClient(Client):
     async def create_dataset(
         self,
         name: str,
-        data: BinaryIO,
+        data: Union[BinaryIO, str, Iterable[dict]],
         dataset_type: str,
         keep_fields: Union[str, List[str]] = None,
         optional_fields: Union[str, List[str]] = None,
@@ -508,7 +513,7 @@ class AsyncClient(Client):
 
         Args:
             name (str): The name of your dataset
-            data (BinaryIO): The data to be uploaded and validated
+            data (BinaryIO, Iterable[str], Iterable[dict]): The data to be uploaded and validated
             dataset_type (str): The type of dataset you want to upload
             keep_fields (Union[str, List[str]]): (optional) A list of fields you want to keep in the dataset that are required
             optional_fields (Union[str, List[str]]): (optional) A list of fields you want to keep in the dataset that are optional
