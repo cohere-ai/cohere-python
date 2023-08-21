@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.20.2
+- [#284] (https://github.com/cohere-ai/cohere-python/pull/284)
+  - Rename dataset urls to download_urls
+
 ## 4.20.1
 - [#279] (https://github.com/cohere-ai/cohere-python/pull/279)
   - Fix dataset listing key error
