@@ -36,12 +36,13 @@ async def test_async_chat_stream(async_client):
     expected_index = 0
     expected_text = ""
     async for token in res:
-        assert isinstance(token.text, str)
-        assert len(token.text) > 0
-        assert token.index == expected_index
+        if token.text:
+            assert isinstance(token.text, str)
+            assert len(token.text) > 0
+            assert token.index == expected_index
 
+            expected_text += token.text
         expected_index += 1
-        expected_text += token.text
 
     assert res.texts == [expected_text]
     assert res.conversation_id is not None

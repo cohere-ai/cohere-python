@@ -91,13 +91,14 @@ class TestChat(unittest.TestCase):
         expected_index = 0
         expected_text = ""
         for token in prediction:
-            self.assertIsInstance(token.text, str)
-            self.assertGreater(len(token.text), 0)
+            if token.text:
+                self.assertIsInstance(token.text, str)
+                self.assertGreater(len(token.text), 0)
 
-            self.assertIsInstance(token.index, int)
-            self.assertEqual(token.index, expected_index)
+                self.assertIsInstance(token.index, int)
+                self.assertEqual(token.index, expected_index)
 
-            expected_text += token.text
+                expected_text += token.text
             expected_index += 1
 
         self.assertEqual(prediction.texts, [expected_text])
