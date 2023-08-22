@@ -8,24 +8,26 @@ Returned by co.rerank,
 dict which always contains text but can also contain arbitrary fields
 """
 
+
 class RerankSnippet(NamedTuple("Snippet", [("text", str), ("start_index", int)])):
     """
     Returned by co.rerank,
     object which contains `text` and `start_index`
     """
+
     def __repr__(self) -> str:
         return f"RerankSnippet<text: {self.text}, start_index: {self.start_index}>"
-    
-    
+
+
 class RerankResult(CohereObject):
     def __init__(
-        self, 
-        document: Dict[str, Any] = None, 
-        index: int = None, 
+        self,
+        document: Dict[str, Any] = None,
+        index: int = None,
         relevance_score: float = None,
-        snippets: List[RerankSnippet] = None, 
-        *args, 
-        **kwargs
+        snippets: List[RerankSnippet] = None,
+        *args,
+        **kwargs,
     ) -> None:
         super().__init__(*args, **kwargs)
         self.document = document
@@ -59,7 +61,7 @@ class Reranking(CohereObject):
         results = []
         for res in response["results"]:
             document = res.get("document")
-            
+
             if res.get("snippets") is not None:
                 snippets = [
                     RerankSnippet(text=snippet["text"], start_index=snippet["start_index"])
@@ -68,10 +70,11 @@ class Reranking(CohereObject):
             else:
                 snippets = None
 
-            results.append(RerankResult(document=document, 
-                                        index=res["index"], 
-                                        relevance_score=res["relevance_score"],
-                                        snippets=snippets))
+            results.append(
+                RerankResult(
+                    document=document, index=res["index"], relevance_score=res["relevance_score"], snippets=snippets
+                )
+            )
 
     def __str__(self) -> str:
         return str(self.results)
