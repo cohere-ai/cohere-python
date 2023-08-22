@@ -1081,7 +1081,9 @@ class Client:
         self,
         name: str,
         model_type: CUSTOM_MODEL_TYPE,
-        dataset: CustomModelDataset,
+        dataset: Optional[CustomModelDataset] = None,
+        train_dataset: Optional[str] = None,
+        eval_dataset: Optional[str] = None,
         hyperparameters: Optional[HyperParametersInput] = None,
     ) -> CustomModel:
         """Create a new custom model
@@ -1090,11 +1092,20 @@ class Client:
             name (str): name of your custom model, has to be unique across your organization
             model_type (GENERATIVE, CLASSIFY, RERANK): type of custom model
             dataset (InMemoryDataset, CsvDataset, JsonlDataset, TextDataset): A dataset for your training. Consists of a train and optional eval file.
+            train_dataset (str): a dataset id for the training data
+            eval_dataset (str): a dataset id for the eval data
             hyperparameters (HyperParametersInput): adjust hyperparameters for your custom model. Only for generative custom models.
         Returns:
             str: the id of the custom model that was created
 
         Examples:
+             prompt completion custom model with dataset
+                >>> from cohere.custom_model_dataset import CsvDataset
+                >>> co = cohere.Client("YOUR_API_KEY")
+                >>> ds = co.create_dataset(name="prompt-completion-datset", data=open("/path/to/your/file.csv", "rb"), dataset_type="prompt-completion-finetune-input")
+                >>> ds.await_validation()
+                >>> co.create_custom_model("prompt-completion-ft", model_type="GENERATIVE", train_dataset=ds.id)
+
             prompt completion custom model with csv file
                 >>> from cohere.custom_model_dataset import CsvDataset
                 >>> co = cohere.Client("YOUR_API_KEY")
@@ -1109,6 +1120,8 @@ class Client:
                 >>>     ("another prompt", "and another completion")
                 >>> ])
                 >>> finetune = co.create_custom_model("prompt-completion-ft", dataset=dataset, model_type="GENERATIVE")
+
+
 
         """
         internal_custom_model_type = CUSTOM_MODEL_PRODUCT_MAPPING[model_type]
@@ -1130,15 +1143,23 @@ class Client:
                 "learningRate": hyperparameters.get("learning_rate"),
             }
 
-        remote_path = self._upload_dataset(
-            dataset.get_train_data(), name, dataset.train_file_name(), internal_custom_model_type
-        )
-        json["settings"]["trainFiles"].append({"path": remote_path, **dataset.file_config()})
-        if dataset.has_eval_file():
+        if dataset:
             remote_path = self._upload_dataset(
-                dataset.get_eval_data(), name, dataset.eval_file_name(), internal_custom_model_type
+                dataset.get_train_data(), name, dataset.train_file_name(), internal_custom_model_type
             )
-            json["settings"]["evalFiles"].append({"path": remote_path, **dataset.file_config()})
+            json["settings"]["trainFiles"].append({"path": remote_path, **dataset.file_config()})
+            if dataset.has_eval_file():
+                remote_path = self._upload_dataset(
+                    dataset.get_eval_data(), name, dataset.eval_file_name(), internal_custom_model_type
+                )
+                json["settings"]["evalFiles"].append({"path": remote_path, **dataset.file_config()})
+        elif train_dataset:
+            json["settings"]["datasets"] = {
+                "trainDatasetID": train_dataset,
+                "evalDatasetID": eval_dataset,
+            }
+        else:
+            raise CohereError("no dataset supplied, use either dataset or train_dataset and eval_dataset")
 
         response = self._request(f"{cohere.CUSTOM_MODEL_URL}/CreateFinetune", method="POST", json=json)
         return CustomModel.from_dict(response["finetune"], self.wait_for_custom_model)
