@@ -441,6 +441,7 @@ class AsyncClient(Client):
         model: str,
         top_n: Optional[int] = None,
         max_chunks_per_doc: Optional[int] = None,
+        snippet_extraction: Literal["off", "short", "medium", "long"] = "off",
     ) -> Reranking:
         """Returns an ordered list of documents ordered by their relevance to the provided query
 
@@ -450,7 +451,16 @@ class AsyncClient(Client):
             model (str): The model to use for re-ranking
             top_n (int): (optional) The number of results to return, defaults to returning all results
             max_chunks_per_doc (int): (optional) The maximum number of chunks derived from a document
+            snippet_extraction (str): (optional) Snippet extraction mode:
+                - "off": do not run snippet extraction
+                - "short": return short snippets
+                - "medium": return medium-length snippets
+                - "long": return long snippets
         """
+        if snippet_extraction not in {"off", "short", "medium", "long"}:
+            raise CohereError(
+                message='invalid `snippet_extraction` mode, must be one of "off", "short", "medium", "long"'
+            )
         parsed_docs = []
         for doc in documents:
             if isinstance(doc, str):
@@ -469,6 +479,7 @@ class AsyncClient(Client):
             "top_n": top_n,
             "return_documents": False,
             "max_chunks_per_doc": max_chunks_per_doc,
+            "snippet_extraction": snippet_extraction,
         }
         reranking = Reranking(await self._request(cohere.RERANK_URL, json=json_body))
         for rank in reranking.results:
