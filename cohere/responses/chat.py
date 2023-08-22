@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, Generator, List, NamedTuple, Optional
+from typing import Any, Dict, Generator, List, Optional
 
 import requests
 
@@ -25,10 +25,9 @@ class Chat(CohereObject):
         super().__init__(**kwargs)
         self.response_id = response_id
         self.generation_id = generation_id
-        self.query = message  # to be deprecated
         self.message = message
         self.text = text
-        self.conversation_id = conversation_id
+        self.conversation_id = conversation_id  # optional
         self.prompt = prompt  # optional
         self.chatlog = chatlog  # optional
         self.preamble = preamble  # optional
@@ -47,7 +46,7 @@ class Chat(CohereObject):
             text=response.get("text"),
             prompt=response.get("prompt"),  # optional
             chatlog=response.get("chatlog"),  # optional
-            preamble=response.get("preamble"),  # option
+            preamble=response.get("preamble"),  # optional
             client=client,
             token_count=response.get("token_count"),
             meta=response.get("meta"),
@@ -76,7 +75,38 @@ class AsyncChat(Chat):
         )
 
 
-StreamingText = NamedTuple("StreamingText", [("index", Optional[int]), ("text", str), ("is_finished", bool)])
+class StreamResponse(CohereObject):
+    def __init__(
+        self,
+        is_finished: bool,
+        index: Optional[int],
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.is_finished = is_finished
+        self.index = index
+
+
+class StreamStart(StreamResponse):
+    def __init__(
+        self,
+        generation_id: str,
+        conversation_id: Optional[str],
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.generation_id = generation_id
+        self.conversation_id = conversation_id
+
+
+class StreamTextGeneration(StreamResponse):
+    def __init__(
+        self,
+        text: str,
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.text = text
 
 
 class StreamingChat(CohereObject):
@@ -85,34 +115,47 @@ class StreamingChat(CohereObject):
         self.texts = []
         self.response_id = None
         self.conversation_id = None
+        self.generation_id = None
         self.preamble = None
         self.prompt = None
         self.chatlog = None
         self.finish_reason = None
+        self.token_count = None
+        self.meta = None
 
     def _make_response_item(self, index, line) -> Any:
         streaming_item = json.loads(line)
-        is_finished = streaming_item.get("is_finished")
-        text = streaming_item.get("text")
+        event_type = streaming_item.get("event_type")
 
-        if not is_finished:
-            return StreamingText(text=text, is_finished=is_finished, index=index)
+        if event_type == "stream-start":
+            self.conversation_id = streaming_item.get("conversation_id")
+            self.generation_id = streaming_item.get("generation_id")
+            return StreamStart(
+                conversation_id=self.conversation_id, generation_id=self.generation_id, is_finished=False, index=index
+            )
+        elif event_type == "text-generation":
+            text = streaming_item.get("text")
+            return StreamTextGeneration(text=text, is_finished=False, index=index)
+        elif event_type == "stream-end":
+            response = streaming_item.get("response")
+            self.finish_reason = streaming_item.get("finish_reason")
 
-        response = streaming_item.get("response")
+            if response is None:
+                return None
 
-        if response is None:
+            self.response_id = response.get("response_id")
+            self.conversation_id = response.get("conversation_id")
+            self.texts = [response.get("text")]
+            self.generation_id = response.get("generation_id")
+            self.preamble = response.get("preamble")
+            self.prompt = response.get("prompt")
+            self.chatlog = response.get("chatlog")
+            self.token_count = response.get("token_count")
+            self.meta = response.get("meta")
             return None
-
-        self.response_id = response.get("response_id")
-        self.conversation_id = response.get("conversation_id")
-        self.preamble = response.get("preamble")
-        self.prompt = response.get("prompt")
-        self.chatlog = response.get("chatlog")
-        self.finish_reason = streaming_item.get("finish_reason")
-        self.texts = [response.get("text")]
         return None
 
-    def __iter__(self) -> Generator[StreamingText, None, None]:
+    def __iter__(self) -> Generator[StreamResponse, None, None]:
         if not isinstance(self.response, requests.Response):
             raise ValueError("For AsyncClient, use `async for` to iterate through the `StreamingChat`")
 
@@ -121,7 +164,7 @@ class StreamingChat(CohereObject):
             if item is not None:
                 yield item
 
-    async def __aiter__(self) -> Generator[StreamingText, None, None]:
+    async def __aiter__(self) -> Generator[StreamResponse, None, None]:
         index = 0
         async for line in self.response.content:
             item = self._make_response_item(index, line)

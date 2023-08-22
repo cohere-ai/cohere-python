@@ -227,7 +227,6 @@ class Client:
     def chat(
         self,
         message: Optional[str] = None,
-        query: Optional[str] = None,
         conversation_id: Optional[str] = "",
         model: Optional[str] = None,
         return_chatlog: Optional[bool] = False,
@@ -246,22 +245,26 @@ class Client:
         """Returns a Chat object with the query reply.
 
         Args:
-            query (str): Deprecated. Use message instead.
             message (str): The message to send to the chatbot.
-            conversation_id (str): (Optional) The conversation id to continue the conversation.
-            model (str): (Optional) The model to use for generating the next reply.
-            return_chatlog (bool): (Optional) Whether to return the chatlog.
-            return_prompt (bool): (Optional) Whether to return the prompt.
-            return_preamble (bool): (Optional) Whether to return the preamble.
-            chat_history (List[Dict[str, str]]): (Optional) A list of entries used to construct the conversation. If provided, these messages will be used to build the prompt and the conversation_id will be ignored so no data will be stored to maintain state.
-            preamble_override (str): (Optional) A string to override the preamble.
-            user_name (str): (Optional) A string to override the username.
-            temperature (float): (Optional) The temperature to use for the next reply. The higher the temperature, the more random the reply.
-            max_tokens (int): (Optional) The max tokens generated for the next reply.
+
             stream (bool): Return streaming tokens.
+            conversation_id (str): (Optional) To store a conversation then create a conversation id and use it for every related request.
+
+            preamble_override (str): (Optional) A string to override the preamble.
+            chat_history (List[Dict[str, str]]): (Optional) A list of entries used to construct the conversation. If provided, these messages will be used to build the prompt and the conversation_id will be ignored so no data will be stored to maintain state.
+
+            model (str): (Optional) The model to use for generating the response.
+            temperature (float): (Optional) The temperature to use for the response. The higher the temperature, the more random the response.
             p (float): (Optional) The nucleus sampling probability.
             k (float): (Optional) The top-k sampling probability.
             logit_bias (Dict[int, float]): (Optional) A dictionary of logit bias values to use for the next reply.
+            max_tokens (int): (Optional) The max tokens generated for the next reply.
+
+            return_chatlog (bool): (Optional) Whether to return the chatlog.
+            return_prompt (bool): (Optional) Whether to return the prompt.
+            return_preamble (bool): (Optional) Whether to return the preamble.
+
+            user_name (str): (Optional) A string to override the username.
         Returns:
             a Chat object if stream=False, or a StreamingChat object if stream=True
 
@@ -269,7 +272,6 @@ class Client:
             A simple chat message:
                 >>> res = co.chat(message="Hey! How are you doing today?")
                 >>> print(res.text)
-                >>> print(res.conversation_id)
             Continuing a session using a specific model:
                 >>> res = co.chat(
                 >>>     message="Hey! How are you doing today?",
@@ -295,25 +297,6 @@ class Client:
                 >>> print(res.text)
                 >>> print(res.prompt)
         """
-        if chat_history is not None:
-            should_warn = True
-            for entry in chat_history:
-                if "text" in entry:
-                    entry["message"] = entry["text"]
-
-                if "text" in entry and should_warn:
-                    logger.warning(
-                        "The 'text' parameter is deprecated and will be removed in a future version of this function. "
-                        + "Use 'message' instead.",
-                    )
-                    should_warn = False
-
-        if query is not None:
-            logger.warning(
-                "The chat_history 'text' key is deprecated and will be removed in a future version of this function. "
-                + "Use 'message' instead.",
-            )
-            message = query
 
         json_body = {
             "message": message,

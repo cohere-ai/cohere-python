@@ -209,7 +209,6 @@ class AsyncClient(Client):
     async def chat(
         self,
         message: Optional[str] = None,
-        query: Optional[str] = None,
         conversation_id: Optional[str] = "",
         model: Optional[str] = None,
         return_chatlog: Optional[bool] = False,
@@ -225,28 +224,8 @@ class AsyncClient(Client):
         k: Optional[float] = None,
         logit_bias: Optional[Dict[int, float]] = None,
     ) -> Union[AsyncChat, StreamingChat]:
-        if chat_history is not None:
-            should_warn = True
-            for entry in chat_history:
-                if "text" in entry:
-                    entry["message"] = entry["text"]
-
-                if "text" in entry and should_warn:
-                    logger.warning(
-                        "The 'text' parameter is deprecated and will be removed in a future version of this function. "
-                        + "Use 'message' instead.",
-                    )
-                    should_warn = False
-
-        if query is None and message is None:
-            raise CohereError("Either 'query' or 'message' must be provided.")
-
-        if query is not None:
-            logger.warning(
-                "The 'query' parameter is deprecated and will be removed in a future version of this function. "
-                + "Use 'message' instead.",
-            )
-            message = query
+        if message is None:
+            raise CohereError("'message' must be provided.")
 
         json_body = {
             "message": message,
