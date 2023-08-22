@@ -91,12 +91,12 @@ class StreamStart(StreamResponse):
     def __init__(
         self,
         generation_id: str,
-        conversation_id: str,
+        conversation_id: Optional[str],
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
         self.generation_id = generation_id
-        self.conversation_id = conversation_id  # optional
+        self.conversation_id = conversation_id
 
 
 class StreamTextGeneration(StreamResponse):
