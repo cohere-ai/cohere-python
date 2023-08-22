@@ -1,5 +1,7 @@
 import pytest
 
+import cohere
+
 
 @pytest.mark.asyncio
 async def test_async_multi_replies(async_client):
@@ -36,12 +38,17 @@ async def test_async_chat_stream(async_client):
     expected_index = 0
     expected_text = ""
     async for token in res:
-        if token.text:
+        if isinstance(token, cohere.responses.chat.StreamStart):
+            assert token.generation_id is not None
+            assert not token.is_finished
+        elif isinstance(token, cohere.responses.chat.StreamTextGeneration):
             assert isinstance(token.text, str)
             assert len(token.text) > 0
-            assert token.index == expected_index
-
             expected_text += token.text
+            assert not token.is_finished
+
+        assert isinstance(token.index, int)
+        assert token.index == expected_index
         expected_index += 1
 
     assert res.texts == [expected_text]

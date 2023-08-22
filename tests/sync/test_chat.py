@@ -91,14 +91,16 @@ class TestChat(unittest.TestCase):
         expected_index = 0
         expected_text = ""
         for token in prediction:
-            if token.text:
+            if isinstance(token, cohere.responses.chat.StreamStart):
+                self.assertIsNotNone(token.generation_id)
+                self.assertFalse(token.is_finished)
+            elif isinstance(token, cohere.responses.chat.StreamTextGeneration):
                 self.assertIsInstance(token.text, str)
                 self.assertGreater(len(token.text), 0)
-
-                self.assertIsInstance(token.index, int)
-                self.assertEqual(token.index, expected_index)
-
                 expected_text += token.text
+                self.assertFalse(token.is_finished)
+            self.assertIsInstance(token.index, int)
+            self.assertEqual(token.index, expected_index)
             expected_index += 1
 
         self.assertEqual(prediction.texts, [expected_text])
