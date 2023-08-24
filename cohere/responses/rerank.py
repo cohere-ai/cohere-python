@@ -31,6 +31,7 @@ class RerankResult(CohereObject):
     ) -> None:
         super().__init__(*args, **kwargs)
         self.document = document
+        self.snippets = snippets
         self.index = index
         self.relevance_score = relevance_score
 
@@ -75,6 +76,7 @@ class Reranking(CohereObject):
                     document=document, index=res["index"], relevance_score=res["relevance_score"], snippets=snippets
                 )
             )
+        return results
 
     def __str__(self) -> str:
         return str(self.results)
