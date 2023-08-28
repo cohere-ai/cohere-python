@@ -172,7 +172,7 @@ class Client:
             num_generations (int): (Optional) The number of generations that will be returned, defaults to 1.
             max_tokens (int): (Optional) The number of tokens to predict per generation, defaults to 20.
             temperature (float): (Optional) The degree of randomness in generations from 0.0 to 5.0, lower is less random.
-            truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.\
+            truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
             stream (bool): Return streaming tokens.
         Returns:
             if stream=False: a Generations object
