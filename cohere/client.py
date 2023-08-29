@@ -661,14 +661,14 @@ class Client:
             top_n (int): (optional) The number of results to return, defaults to returning all results
             max_chunks_per_doc (int): (optional) The maximum number of chunks derived from a document
             snippet_extraction (str): (optional) Snippet extraction mode:
-                - "off": do not run snippet extraction
+                - "disabled": do not run snippet extraction
                 - "short": return short snippets
                 - "medium": return medium-length snippets
                 - "long": return long snippets
         """
-        if snippet_extraction not in {"off", "short", "medium", "long"}:
+        if snippet_extraction not in {"disabled", "short", "medium", "long"}:
             raise CohereError(
-                message='invalid `snippet_extraction` mode, must be one of "off", "short", "medium", "long"'
+                message='invalid `snippet_extraction` mode, must be one of "disabled", "short", "medium", "long"'
             )
         parsed_docs = []
         for doc in documents:

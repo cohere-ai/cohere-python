@@ -9,14 +9,14 @@ dict which always contains text but can also contain arbitrary fields
 """
 
 
-class RerankSnippet(NamedTuple("Snippet", [("text", str), ("start_index", int)])):
+class RerankSnippet(NamedTuple("Snippet", [("text", str), ("start_index", int), ("end_index", int)])):
     """
     Returned by co.rerank,
-    object which contains `text` and `start_index`
+    object which contains `text`, `start_index` and `end_index`
     """
 
     def __repr__(self) -> str:
-        return f"RerankSnippet<text: {self.text}, start_index: {self.start_index}>"
+        return f"RerankSnippet<text: {self.text}, start_index: {self.start_index}, end_index: {self.end_index}>"
 
 
 class RerankResult(CohereObject):
@@ -65,7 +65,9 @@ class Reranking(CohereObject):
 
             if res.get("snippets") is not None:
                 snippets = [
-                    RerankSnippet(text=snippet["text"], start_index=snippet["start_index"])
+                    RerankSnippet(
+                        text=snippet["text"], start_index=snippet["start_index"], end_index=snippet["end_index"]
+                    )
                     for snippet in res["snippets"]
                 ]
             else:
