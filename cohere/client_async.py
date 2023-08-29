@@ -441,7 +441,7 @@ class AsyncClient(Client):
         model: str,
         top_n: Optional[int] = None,
         max_chunks_per_doc: Optional[int] = None,
-        snippet_extraction: Literal["off", "short", "medium", "long"] = "off",
+        snippet_extraction: Literal["disabled", "short", "medium", "long"] = "disabled",
     ) -> Reranking:
         """Returns an ordered list of documents ordered by their relevance to the provided query
 
