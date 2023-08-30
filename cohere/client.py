@@ -241,6 +241,10 @@ class Client:
         p: Optional[float] = None,
         k: Optional[float] = None,
         logit_bias: Optional[Dict[int, float]] = None,
+        search_queries_only: Optional[bool] = None,
+        documents: Optional[List[Dict[str, Any]]] = None,
+        citation_quality: Optional[str] = None,
+        connectors: Optional[List[Dict[str, Any]]] = None,
     ) -> Union[Chat, StreamingChat]:
         """Returns a Chat object with the query reply.
 
@@ -265,6 +269,15 @@ class Client:
             return_preamble (bool): (Optional) Whether to return the preamble.
 
             user_name (str): (Optional) A string to override the username.
+
+            // TODO
+
+            search_queries_only: Optional[bool] = None,
+
+            documents: Optional[List[Dict[str, str]]] = None,
+            connectors: Optional[List[Dict[str, str]]] = None,
+
+            citation_quality: Optional[str] = None,
         Returns:
             a Chat object if stream=False, or a StreamingChat object if stream=True
 
@@ -296,6 +309,18 @@ class Client:
                 >>>     return_prompt=True)
                 >>> print(res.text)
                 >>> print(res.prompt)
+            Generate search queries for fetching documents to use in chat:
+                >>> res = co.chat(
+                >>>     message="Tell me a joke!",
+                >>>     chat_history=[
+                >>>         {'user_name': 'User', message': 'Hey! How are you doing today?'},
+                >>>         {'user_name': 'Bot', message': 'I am doing great! How can I help you?'},
+                >>>     ],
+                >>>     return_prompt=True)
+                >>> print(res.text)
+                >>> print(res.prompt)
+            Generate search queries for fetching documents to use in chat:
+            // TODO examples
         """
 
         json_body = {
@@ -314,7 +339,12 @@ class Client:
             "p": p,
             "k": k,
             "logit_bias": logit_bias,
+            "search_queries_only": search_queries_only,
+            "documents": documents,
+            "connectors": connectors,
         }
+        if citation_quality is not None:
+            json_body["citation_quality"] = citation_quality
         response = self._request(cohere.CHAT_URL, json=json_body, stream=stream)
 
         if stream:

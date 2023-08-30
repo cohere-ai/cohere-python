@@ -197,3 +197,56 @@ class TestChat(unittest.TestCase):
         for logit_bias in invalid:
             with self.assertRaises(cohere.error.CohereError):
                 _ = co.chat("Yo what up?", logit_bias=logit_bias, max_tokens=5)
+
+    def test_search_queries_only_true(self):
+        prediction = co.chat(
+            "What is the height of Mount Everest? What is the depth of the Mariana Trench? What is the climate like in Nepal?",
+            search_queries_only=True,
+        )
+        self.assertTrue(prediction.is_search_required)
+        self.assertIsInstance(prediction.search_queries, list)
+        self.assertGreater(len(prediction.search_queries), 0)
+        self.assertIsInstance(prediction.search_queries[0]["text"], str)
+        self.assertIsInstance(prediction.search_queries[0]["generation_id"], str)
+
+    def test_search_queries_only_false(self):
+        prediction = co.chat("hello", search_queries_only=True)
+        self.assertFalse(prediction.is_search_required)
+        self.assertIsInstance(prediction.search_queries, list)
+        self.assertEqual(len(prediction.search_queries), 0)
+
+    def test_documents(self):
+        prediction = co.chat(
+            "How deep in the Mariana Trench",
+            temperature=0,
+            documents=[
+                {
+                    "id": "nationalgeographic_everest",
+                    "title": "Height of Mount Everest",
+                    "snippet": "The height of Mount Everest is 29,035 feet",
+                    "url": "https://education.nationalgeographic.org/resource/mount-everest/",
+                },
+                {
+                    "id": "nationalgeographic_mariana",
+                    "title": "Depth of the Mariana Trench",
+                    "snippet": "The depth of the Mariana Trench is 36,070 feet",
+                    "url": "https://www.nationalgeographic.org/activity/mariana-trench-deepest-place-earth",
+                },
+            ],
+        )
+        self.assertIsInstance(prediction.text, str)
+        self.assertIsInstance(prediction.citations, list)
+        self.assertGreater(len(prediction.citations), 0)
+        self.assertIsInstance(prediction.citations[0]["start"], int)
+        self.assertIsInstance(prediction.citations[0]["end"], int)
+        self.assertIsInstance(prediction.citations[0]["text"], str)
+        self.assertIsInstance(prediction.citations[0]["document_ids"], list)
+        self.assertGreater(len(prediction.citations[0]["document_ids"]), 0)
+        self.assertIsInstance(prediction.documents, list)
+        self.assertGreater(len(prediction.documents), 0)
+
+    # test search queries
+    # test with documents
+    # test with connectors
+    # test streaming with documents
+    # test citation quality
