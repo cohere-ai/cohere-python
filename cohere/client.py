@@ -270,14 +270,24 @@ class Client:
 
             user_name (str): (Optional) A string to override the username.
 
-            // TODO
-
-            search_queries_only: Optional[bool] = None,
-
-            documents: Optional[List[Dict[str, str]]] = None,
-            connectors: Optional[List[Dict[str, str]]] = None,
-
-            citation_quality: Optional[str] = None,
+            search_queries_only (bool) : (Optional) When true, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's message will be generated.
+            documents (List[Dict[str, str]]): (Optional) Documents to use to generate grounded response with citations. Example:
+                documents=[
+                    {
+                        "id": "national_geographic_everest",
+                        "title": "Height of Mount Everest",
+                        "snippet": "The height of Mount Everest is 29,035 feet",
+                        "url": "https://education.nationalgeographic.org/resource/mount-everest/",
+                    },
+                    {
+                        "id": "national_geographic_mariana",
+                        "title": "Depth of the Mariana Trench",
+                        "snippet": "The depth of the Mariana Trench is 36,070 feet",
+                        "url": "https://www.nationalgeographic.org/activity/mariana-trench-deepest-place-earth",
+                    },
+                ],
+            connectors (List[Dict[str, str]]): (Optional) When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG). Example: connectors=[{"id": "web-search"}]
+            citation_quality (str): (Optional) Dictates the approach taken to generating citations by allowing the user to specify whether they want "accurate" results or "fast" results. Defaults to "accurate".
         Returns:
             a Chat object if stream=False, or a StreamingChat object if stream=True
 
@@ -311,16 +321,37 @@ class Client:
                 >>> print(res.prompt)
             Generate search queries for fetching documents to use in chat:
                 >>> res = co.chat(
-                >>>     message="Tell me a joke!",
-                >>>     chat_history=[
-                >>>         {'user_name': 'User', message': 'Hey! How are you doing today?'},
-                >>>         {'user_name': 'Bot', message': 'I am doing great! How can I help you?'},
-                >>>     ],
-                >>>     return_prompt=True)
+                >>>     "What is the height of Mount Everest?",
+                >>>      search_queries_only=True)
+                >>> if res.is_search_required:
+                >>>      print(res.search_queries)
+            Chat message with documents to use to generate the response:
+                >>> res = co.chat(
+                >>>     "How deep in the Mariana Trench",
+                >>>     documents=[
+                >>>         {
+                >>>            "id": "national_geographic_everest",
+                >>>            "title": "Height of Mount Everest",
+                >>>            "snippet": "The height of Mount Everest is 29,035 feet",
+                >>>            "url": "https://education.nationalgeographic.org/resource/mount-everest/",
+                >>>         },
+                >>>         {
+                >>>             "id": "national_geographic_mariana",
+                >>>             "title": "Depth of the Mariana Trench",
+                >>>             "snippet": "The depth of the Mariana Trench is 36,070 feet",
+                >>>             "url": "https://www.nationalgeographic.org/activity/mariana-trench-deepest-place-earth",
+                >>>         },
+                >>>       ])
                 >>> print(res.text)
-                >>> print(res.prompt)
-            Generate search queries for fetching documents to use in chat:
-            // TODO examples
+                >>> print(res.citations)
+                >>> print(res.documents)
+            Chat message with connector to query and use the results to generate the response:
+                >>> res = co.chat(
+                >>>     "What is the height of Mount Everest?",
+                >>>      connectors=[{"id": "web-search"})
+                >>> print(res.text)
+                >>> print(res.citations)
+                >>> print(res.documents)
         """
 
         json_body = {
