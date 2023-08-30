@@ -3,6 +3,13 @@ import unittest
 from utils import get_api_key
 
 import cohere
+from cohere.responses.chat import (
+    StreamCitationGeneration,
+    StreamQueryGeneration,
+    StreamSearchResults,
+    StreamStart,
+    StreamTextGeneration,
+)
 
 API_KEY = get_api_key()
 co = cohere.Client(API_KEY)
@@ -215,19 +222,19 @@ class TestChat(unittest.TestCase):
         self.assertIsInstance(prediction.search_queries, list)
         self.assertEqual(len(prediction.search_queries), 0)
 
-    def test_documents(self):
+    def test_with_documents(self):
         prediction = co.chat(
             "How deep in the Mariana Trench",
             temperature=0,
             documents=[
                 {
-                    "id": "nationalgeographic_everest",
+                    "id": "national_geographic_everest",
                     "title": "Height of Mount Everest",
                     "snippet": "The height of Mount Everest is 29,035 feet",
                     "url": "https://education.nationalgeographic.org/resource/mount-everest/",
                 },
                 {
-                    "id": "nationalgeographic_mariana",
+                    "id": "national_geographic_mariana",
                     "title": "Depth of the Mariana Trench",
                     "snippet": "The depth of the Mariana Trench is 36,070 feet",
                     "url": "https://www.nationalgeographic.org/activity/mariana-trench-deepest-place-earth",
@@ -245,8 +252,96 @@ class TestChat(unittest.TestCase):
         self.assertIsInstance(prediction.documents, list)
         self.assertGreater(len(prediction.documents), 0)
 
-    # test search queries
-    # test with documents
-    # test with connectors
-    # test streaming with documents
-    # test citation quality
+    def test_with_connectors(self):
+        prediction = co.chat("How deep in the Mariana Trench", temperature=0, connectors=[{"id": "web-search"}])
+        self.assertIsInstance(prediction.text, str)
+        self.assertIsInstance(prediction.citations, list)
+        self.assertGreater(len(prediction.citations), 0)
+        self.assertIsInstance(prediction.citations[0]["start"], int)
+        self.assertIsInstance(prediction.citations[0]["end"], int)
+        self.assertIsInstance(prediction.citations[0]["text"], str)
+        self.assertIsInstance(prediction.citations[0]["document_ids"], list)
+        self.assertGreater(len(prediction.citations[0]["document_ids"]), 0)
+        self.assertIsInstance(prediction.documents, list)
+        self.assertGreater(len(prediction.documents), 0)
+        self.assertIsInstance(prediction.search_results, list)
+        self.assertGreater(len(prediction.search_results), 0)
+
+    def test_with_citation_quality(self):
+        prediction = co.chat(
+            "How deep in the Mariana Trench",
+            citation_quality="accurate",
+            temperature=0,
+            documents=[
+                {
+                    "id": "national_geographic_mariana",
+                    "title": "Depth of the Mariana Trench",
+                    "snippet": "The depth of the Mariana Trench is 36,070 feet",
+                    "url": "https://www.nationalgeographic.org/activity/mariana-trench-deepest-place-earth",
+                },
+            ],
+        )
+        self.assertIsInstance(prediction.text, str)
+        self.assertIsInstance(prediction.citations, list)
+        self.assertGreater(len(prediction.citations), 0)
+        self.assertIsInstance(prediction.citations[0]["start"], int)
+        self.assertIsInstance(prediction.citations[0]["end"], int)
+        self.assertIsInstance(prediction.citations[0]["text"], str)
+        self.assertIsInstance(prediction.citations[0]["document_ids"], list)
+        self.assertGreater(len(prediction.citations[0]["document_ids"]), 0)
+        self.assertIsInstance(prediction.documents, list)
+        self.assertGreater(len(prediction.documents), 0)
+
+    def test_stream_with_connectors(self):
+        prediction = co.chat(
+            "How deep in the Mariana Trench", temperature=0, stream=True, connectors=[{"id": "web-search"}]
+        )
+
+        self.assertIsInstance(prediction, cohere.responses.chat.StreamingChat)
+        self.assertIsInstance(prediction.texts, list)
+        self.assertEqual(len(prediction.texts), 0)
+        self.assertIsNone(prediction.response_id)
+        self.assertIsNone(prediction.finish_reason)
+
+        expected_index = 0
+        expected_text = ""
+
+        count_stream_start = 0
+        count_text_generation = 0
+        count_query_generation = 0
+        count_citation_generation = 0
+        count_search_results = 0
+        for token in prediction:
+            if isinstance(token, StreamStart):
+                count_stream_start += 1
+                self.assertIsNotNone(token.generation_id)
+                self.assertFalse(token.is_finished)
+            elif isinstance(token, StreamQueryGeneration):
+                count_query_generation += 1
+                self.assertIsNotNone(token.search_queries)
+            elif isinstance(token, StreamSearchResults):
+                count_search_results += 1
+                self.assertIsNotNone(token.documents)
+                self.assertIsNotNone(token.search_results)
+            elif isinstance(token, StreamCitationGeneration):
+                count_citation_generation += 1
+                self.assertIsNotNone(token.citations)
+            elif isinstance(token, StreamTextGeneration):
+                count_text_generation += 1
+                self.assertIsInstance(token.text, str)
+                self.assertGreater(len(token.text), 0)
+                expected_text += token.text
+                self.assertFalse(token.is_finished)
+            self.assertIsInstance(token.index, int)
+            self.assertEqual(token.index, expected_index)
+            expected_index += 1
+
+        self.assertEqual(count_stream_start, 1)
+        self.assertEqual(count_search_results, 1)
+        self.assertGreaterEqual(count_citation_generation, 1)
+        self.assertGreaterEqual(count_query_generation, 1)
+        self.assertGreaterEqual(count_text_generation, 1)
+
+        self.assertEqual(prediction.texts, [expected_text])
+        self.assertIsNotNone(prediction.response_id)
+        self.assertIsNotNone(prediction.finish_reason)
