@@ -95,7 +95,7 @@ class TestDataset(unittest.TestCase):
             assert dataset.validation_status == status
 
         if status == "validated":
-            assert dataset.urls
+            assert dataset.download_urls
             for row in dataset.open():
                 assert row
 
