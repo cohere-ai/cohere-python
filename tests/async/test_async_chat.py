@@ -3,6 +3,7 @@ import pytest
 import cohere
 from cohere.responses.chat import (
     StreamCitationGeneration,
+    StreamEnd,
     StreamQueryGeneration,
     StreamSearchResults,
     StreamStart,
@@ -79,6 +80,7 @@ async def test_async_chat_with_connectors_stream(async_client):
     expected_text = ""
 
     count_stream_start = 0
+    count_stream_end = 0
     count_text_generation = 0
     count_query_generation = 0
     count_citation_generation = 0
@@ -88,27 +90,38 @@ async def test_async_chat_with_connectors_stream(async_client):
             count_stream_start += 1
             assert token.generation_id is not None
             assert not token.is_finished
+            assert token.event_type == "stream-start"
         elif isinstance(token, StreamQueryGeneration):
             count_query_generation += 1
             assert token.search_queries is not None
+            assert token.event_type == "search-queries-generation"
         elif isinstance(token, StreamSearchResults):
             count_search_results += 1
             assert token.documents is not None
             assert token.search_results is not None
+            assert token.event_type == "search-results"
         elif isinstance(token, StreamCitationGeneration):
             count_citation_generation += 1
             assert token.citations is not None
+            assert token.event_type == "citation-generation"
         elif isinstance(token, StreamTextGeneration):
             count_text_generation += 1
             assert isinstance(token.text, str)
             assert len(token.text) > 0
             expected_text += token.text
             assert not token.is_finished
+            assert token.event_type == "text-generation"
+        elif isinstance(token, StreamEnd):
+            count_stream_end += 1
+            assert token.finish_reason == "COMPLETE"
+            assert token.is_finished
+            assert token.event_type == "stream-end"
         assert isinstance(token.index, int)
         assert token.index == expected_index
         expected_index += 1
 
     assert count_stream_start == 1
+    assert count_stream_end == 1
     assert count_search_results == 1
     assert count_citation_generation > 0
     assert count_query_generation > 0

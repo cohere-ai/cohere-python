@@ -5,6 +5,7 @@ from utils import get_api_key
 import cohere
 from cohere.responses.chat import (
     StreamCitationGeneration,
+    StreamEnd,
     StreamQueryGeneration,
     StreamSearchResults,
     StreamStart,
@@ -311,33 +312,45 @@ class TestChat(unittest.TestCase):
         count_query_generation = 0
         count_citation_generation = 0
         count_search_results = 0
+        count_stream_end = 0
         for token in prediction:
             if isinstance(token, StreamStart):
                 count_stream_start += 1
                 self.assertIsNotNone(token.generation_id)
                 self.assertFalse(token.is_finished)
+                self.assertEqual(token.event_type, "stream-start")
             elif isinstance(token, StreamQueryGeneration):
                 count_query_generation += 1
                 self.assertIsNotNone(token.search_queries)
+                self.assertEqual(token.event_type, "search-queries-generation")
             elif isinstance(token, StreamSearchResults):
                 count_search_results += 1
                 self.assertIsNotNone(token.documents)
                 self.assertIsNotNone(token.search_results)
+                self.assertEqual(token.event_type, "search-results")
             elif isinstance(token, StreamCitationGeneration):
                 count_citation_generation += 1
                 self.assertIsNotNone(token.citations)
+                self.assertEqual(token.event_type, "citation-generation")
             elif isinstance(token, StreamTextGeneration):
                 count_text_generation += 1
                 self.assertIsInstance(token.text, str)
                 self.assertGreater(len(token.text), 0)
                 expected_text += token.text
                 self.assertFalse(token.is_finished)
+                self.assertEqual(token.event_type, "text-generation")
+            elif isinstance(token, StreamEnd):
+                count_stream_end += 1
+                self.assertTrue(token.is_finished)
+                self.assertEqual(token.event_type, "stream-end")
+                self.assertEqual(token.finish_reason, "COMPLETE")
             self.assertIsInstance(token.index, int)
             self.assertEqual(token.index, expected_index)
             expected_index += 1
 
         self.assertEqual(count_stream_start, 1)
         self.assertEqual(count_search_results, 1)
+        self.assertEqual(count_stream_end, 1)
         self.assertGreaterEqual(count_citation_generation, 1)
         self.assertGreaterEqual(count_query_generation, 1)
         self.assertGreaterEqual(count_text_generation, 1)
