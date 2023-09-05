@@ -241,6 +241,10 @@ class Client:
         p: Optional[float] = None,
         k: Optional[float] = None,
         logit_bias: Optional[Dict[int, float]] = None,
+        search_queries_only: Optional[bool] = None,
+        documents: Optional[List[Dict[str, Any]]] = None,
+        citation_quality: Optional[str] = None,
+        connectors: Optional[List[Dict[str, Any]]] = None,
     ) -> Union[Chat, StreamingChat]:
         """Returns a Chat object with the query reply.
 
@@ -265,6 +269,25 @@ class Client:
             return_preamble (bool): (Optional) Whether to return the preamble.
 
             user_name (str): (Optional) A string to override the username.
+
+            search_queries_only (bool) : (Optional) When true, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's message will be generated.
+            documents (List[Dict[str, str]]): (Optional) Documents to use to generate grounded response with citations. Example:
+                documents=[
+                    {
+                        "id": "national_geographic_everest",
+                        "title": "Height of Mount Everest",
+                        "snippet": "The height of Mount Everest is 29,035 feet",
+                        "url": "https://education.nationalgeographic.org/resource/mount-everest/",
+                    },
+                    {
+                        "id": "national_geographic_mariana",
+                        "title": "Depth of the Mariana Trench",
+                        "snippet": "The depth of the Mariana Trench is 36,070 feet",
+                        "url": "https://www.nationalgeographic.org/activity/mariana-trench-deepest-place-earth",
+                    },
+                ],
+            connectors (List[Dict[str, str]]): (Optional) When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG). Example: connectors=[{"id": "web-search"}]
+            citation_quality (str): (Optional) Dictates the approach taken to generating citations by allowing the user to specify whether they want "accurate" results or "fast" results. Defaults to "accurate".
         Returns:
             a Chat object if stream=False, or a StreamingChat object if stream=True
 
@@ -296,6 +319,39 @@ class Client:
                 >>>     return_prompt=True)
                 >>> print(res.text)
                 >>> print(res.prompt)
+            Chat message with documents to use to generate the response:
+                >>> res = co.chat(
+                >>>     "How deep in the Mariana Trench",
+                >>>     documents=[
+                >>>         {
+                >>>            "id": "national_geographic_everest",
+                >>>            "title": "Height of Mount Everest",
+                >>>            "snippet": "The height of Mount Everest is 29,035 feet",
+                >>>            "url": "https://education.nationalgeographic.org/resource/mount-everest/",
+                >>>         },
+                >>>         {
+                >>>             "id": "national_geographic_mariana",
+                >>>             "title": "Depth of the Mariana Trench",
+                >>>             "snippet": "The depth of the Mariana Trench is 36,070 feet",
+                >>>             "url": "https://www.nationalgeographic.org/activity/mariana-trench-deepest-place-earth",
+                >>>         },
+                >>>       ])
+                >>> print(res.text)
+                >>> print(res.citations)
+                >>> print(res.documents)
+            Chat message with connector to query and use the results to generate the response:
+                >>> res = co.chat(
+                >>>     "What is the height of Mount Everest?",
+                >>>      connectors=[{"id": "web-search"})
+                >>> print(res.text)
+                >>> print(res.citations)
+                >>> print(res.documents)
+            Generate search queries for fetching documents to use in chat:
+                >>> res = co.chat(
+                >>>     "What is the height of Mount Everest?",
+                >>>      search_queries_only=True)
+                >>> if res.is_search_required:
+                >>>      print(res.search_queries)
         """
 
         json_body = {
@@ -314,7 +370,12 @@ class Client:
             "p": p,
             "k": k,
             "logit_bias": logit_bias,
+            "search_queries_only": search_queries_only,
+            "documents": documents,
+            "connectors": connectors,
         }
+        if citation_quality is not None:
+            json_body["citation_quality"] = citation_quality
         response = self._request(cohere.CHAT_URL, json=json_body, stream=stream)
 
         if stream:
