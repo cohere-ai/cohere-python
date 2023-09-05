@@ -1,5 +1,12 @@
 # Changelog
 
+## 4.22
+- [#292] (https://github.com/cohere-ai/cohere-python/pull/292)
+  - Add search query only parameter
+  - Add documents to generate citations 
+  - Add connectors to generate citations 
+  - Add citation quality
+
 ## 4.21
 - [#287] (https://github.com/cohere-ai/cohere-python/pull/287)
   - Remove deprecated chat "query" parameter including inside chat_history parameter

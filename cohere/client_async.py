@@ -223,6 +223,10 @@ class AsyncClient(Client):
         p: Optional[float] = None,
         k: Optional[float] = None,
         logit_bias: Optional[Dict[int, float]] = None,
+        search_queries_only: Optional[bool] = None,
+        documents: Optional[List[Dict[str, Any]]] = None,
+        citation_quality: Optional[str] = None,
+        connectors: Optional[List[Dict[str, Any]]] = None,
     ) -> Union[AsyncChat, StreamingChat]:
         if message is None:
             raise CohereError("'message' must be provided.")
@@ -243,7 +247,12 @@ class AsyncClient(Client):
             "p": p,
             "k": k,
             "logit_bias": logit_bias,
+            "search_queries_only": search_queries_only,
+            "documents": documents,
+            "connectors": connectors,
         }
+        if citation_quality is not None:
+            json_body["citation_quality"] = citation_quality
 
         response = await self._request(cohere.CHAT_URL, json=json_body, stream=stream)
 
