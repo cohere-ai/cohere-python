@@ -319,12 +319,6 @@ class Client:
                 >>>     return_prompt=True)
                 >>> print(res.text)
                 >>> print(res.prompt)
-            Generate search queries for fetching documents to use in chat:
-                >>> res = co.chat(
-                >>>     "What is the height of Mount Everest?",
-                >>>      search_queries_only=True)
-                >>> if res.is_search_required:
-                >>>      print(res.search_queries)
             Chat message with documents to use to generate the response:
                 >>> res = co.chat(
                 >>>     "How deep in the Mariana Trench",
@@ -352,6 +346,12 @@ class Client:
                 >>> print(res.text)
                 >>> print(res.citations)
                 >>> print(res.documents)
+            Generate search queries for fetching documents to use in chat:
+                >>> res = co.chat(
+                >>>     "What is the height of Mount Everest?",
+                >>>      search_queries_only=True)
+                >>> if res.is_search_required:
+                >>>      print(res.search_queries)
         """
 
         json_body = {

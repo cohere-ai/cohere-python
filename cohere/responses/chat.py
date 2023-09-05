@@ -1,6 +1,6 @@
 import json
 from enum import Enum
-from typing import Any, Dict, Generator, List, Optional
+from typing import Any, Dict, Generator, List, Optional, Union
 
 import requests
 
@@ -91,7 +91,7 @@ class AsyncChat(Chat):
         )
 
 
-class Events(str, Enum):
+class StreamEvent(str, Enum):
     STREAM_START = "stream-start"
     SEARCH_QUERIES_GENERATION = "search-queries-generation"
     SEARCH_RESULTS = "search-results"
@@ -104,7 +104,7 @@ class StreamResponse(CohereObject):
     def __init__(
         self,
         is_finished: bool,
-        event_type: str,
+        event_type: Union[StreamEvent, str],
         index: Optional[int],
         **kwargs,
     ) -> None:
@@ -201,7 +201,7 @@ class StreamingChat(CohereObject):
         streaming_item = json.loads(line)
         event_type = streaming_item.get("event_type")
 
-        if event_type == Events.STREAM_START:
+        if event_type == StreamEvent.STREAM_START:
             self.conversation_id = streaming_item.get("conversation_id")
             self.generation_id = streaming_item.get("generation_id")
             return StreamStart(
@@ -211,12 +211,12 @@ class StreamingChat(CohereObject):
                 event_type=event_type,
                 index=index,
             )
-        elif event_type == Events.SEARCH_QUERIES_GENERATION:
+        elif event_type == StreamEvent.SEARCH_QUERIES_GENERATION:
             search_queries = streaming_item.get("search_queries")
             return StreamQueryGeneration(
                 search_queries=search_queries, is_finished=False, event_type=event_type, index=index
             )
-        elif event_type == Events.SEARCH_RESULTS:
+        elif event_type == StreamEvent.SEARCH_RESULTS:
             search_results = streaming_item.get("search_results")
             documents = streaming_item.get("documents")
             return StreamSearchResults(
@@ -226,13 +226,13 @@ class StreamingChat(CohereObject):
                 event_type=event_type,
                 index=index,
             )
-        elif event_type == Events.TEXT_GENERATION:
+        elif event_type == StreamEvent.TEXT_GENERATION:
             text = streaming_item.get("text")
             return StreamTextGeneration(text=text, is_finished=False, event_type=event_type, index=index)
-        elif event_type == Events.CITATION_GENERATION:
+        elif event_type == StreamEvent.CITATION_GENERATION:
             citations = streaming_item.get("citations")
             return StreamCitationGeneration(citations=citations, is_finished=False, event_type=event_type, index=index)
-        elif event_type == Events.STREAM_END:
+        elif event_type == StreamEvent.STREAM_END:
             response = streaming_item.get("response")
             finish_reason = streaming_item.get("finish_reason")
             self.finish_reason = finish_reason
