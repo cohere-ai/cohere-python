@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.23
+- [#294] (https://github.com/cohere-ai/cohere-python/pull/294)
+  - Allow passing of ParseInfo for datasets
+
 ## 4.22
 - [#292] (https://github.com/cohere-ai/cohere-python/pull/292)
   - Add search query only parameter
