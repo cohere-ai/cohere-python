@@ -54,7 +54,7 @@ from cohere.responses.custom_model import (
     HyperParametersInput,
     ModelMetric,
 )
-from cohere.responses.dataset import AsyncDataset, BaseDataset
+from cohere.responses.dataset import AsyncDataset, BaseDataset, ParseInfo
 from cohere.responses.embed_job import AsyncEmbedJob
 from cohere.utils import async_wait_for_job, is_api_key_valid, np_json_dumps
 
@@ -491,6 +491,7 @@ class AsyncClient(Client):
         dataset_type: str,
         keep_fields: Union[str, List[str]] = None,
         optional_fields: Union[str, List[str]] = None,
+        parse_info: Optional[ParseInfo] = None,
     ) -> AsyncDataset:
         """Returns a Dataset given input data
 
@@ -500,7 +501,7 @@ class AsyncClient(Client):
             dataset_type (str): The type of dataset you want to upload
             keep_fields (Union[str, List[str]]): (optional) A list of fields you want to keep in the dataset that are required
             optional_fields (Union[str, List[str]]): (optional) A list of fields you want to keep in the dataset that are optional
-
+            parse_info: ParseInfo: (optional) information on how to parse the raw data
         Returns:
             AsyncDataset: Dataset object.
         """
@@ -513,6 +514,8 @@ class AsyncClient(Client):
             params["keep_fields"] = keep_fields
         if optional_fields:
             params["optional_fields"] = optional_fields
+        if parse_info:
+            params.update(parse_info.get_params())
 
         logger.warning("uploading file, starting validation...")
         create_response = await self._request(cohere.DATASET_URL, files=files, params=params)

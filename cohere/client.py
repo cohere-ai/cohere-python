@@ -42,7 +42,7 @@ from cohere.responses.custom_model import (
     HyperParametersInput,
     ModelMetric,
 )
-from cohere.responses.dataset import BaseDataset, Dataset
+from cohere.responses.dataset import BaseDataset, Dataset, ParseInfo
 from cohere.responses.detectlang import DetectLanguageResponse, Language
 from cohere.responses.embed_job import EmbedJob
 from cohere.responses.embeddings import Embeddings
@@ -753,6 +753,7 @@ class Client:
         dataset_type: str,
         keep_fields: Union[str, List[str]] = None,
         optional_fields: Union[str, List[str]] = None,
+        parse_info: Optional[ParseInfo] = None,
     ) -> Dataset:
         """Returns a Dataset given input data
 
@@ -762,7 +763,7 @@ class Client:
             dataset_type (str): The type of dataset you want to upload
             keep_fields (Union[str, List[str]]): (optional) A list of fields you want to keep in the dataset that are required
             optional_fields (Union[str, List[str]]): (optional) A list of fields you want to keep in the dataset that are optional
-
+            parse_info: ParseInfo: (optional) information on how to parse the raw data
         Returns:
             Dataset: Dataset object.
         """
@@ -773,6 +774,9 @@ class Client:
             "keep_fields": keep_fields,
             "optional_fields": optional_fields,
         }
+        if parse_info:
+            params.update(parse_info.get_params())
+
         logger.warning("uploading file, starting validation...")
         create_response = self._request(cohere.DATASET_URL, files=files, params=params)
         logger.warning(f"{create_response['id']} was uploaded")

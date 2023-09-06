@@ -1,5 +1,6 @@
 import csv
 import json
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional
 
@@ -141,3 +142,14 @@ class AsyncDataset(BaseDataset):
         updated_job = await self._wait_fn(dataset_id=self.id, timeout=timeout, interval=interval)
         self._update_self(updated_job)
         return updated_job
+
+
+@dataclass
+class ParseInfo:
+    separator: Optional[str]
+
+    def get_params(self) -> Dict[str, str]:
+        params = {}
+        if self.separator:
+            params["text_separator"] = self.separator
+        return params
