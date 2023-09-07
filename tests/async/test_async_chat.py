@@ -1,3 +1,4 @@
+import conftest
 import pytest
 
 import cohere
@@ -13,9 +14,10 @@ from cohere.responses.chat import (
 
 @pytest.mark.asyncio
 async def test_async_multi_replies(async_client):
+    conversation_id = f"test_conv_{conftest.random_word()}"
     num_replies = 3
     prediction = await async_client.chat(
-        "Yo what's up?", return_chatlog=True, max_tokens=5, conversation_id="test_conv_id"
+        "Yo what's up?", return_chatlog=True, max_tokens=5, conversation_id=conversation_id
     )
     assert prediction.chatlog is not None
     for _ in range(num_replies):
@@ -30,10 +32,11 @@ async def test_async_multi_replies(async_client):
 
 @pytest.mark.asyncio
 async def test_async_chat_stream(async_client):
+    conversation_id = f"test_conv_{conftest.random_word()}"
     res = await async_client.chat(
         message="wagmi",
         max_tokens=5,
-        conversation_id="test_conv_id",
+        conversation_id=conversation_id,
         stream=True,
     )
 
