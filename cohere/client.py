@@ -1140,8 +1140,13 @@ class Client:
             }
 
         if isinstance(dataset, Dataset):
+            if not dataset.has_terminal_status():
+                dataset.wait()
             json["settings"]["datasetID"] = dataset.id
         elif isinstance(dataset, str):
+            dataset = self.get_dataset(dataset)
+            if not dataset.has_terminal_status():
+                dataset.wait()
             json["settings"]["datasetID"] = dataset
         elif isinstance(dataset, CustomModelDataset):
             remote_path = self._upload_dataset(
