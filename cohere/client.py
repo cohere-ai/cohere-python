@@ -1081,9 +1081,7 @@ class Client:
         self,
         name: str,
         model_type: CUSTOM_MODEL_TYPE,
-        dataset: Optional[CustomModelDataset] = None,
-        train_dataset: Optional[str] = None,
-        eval_dataset: Optional[str] = None,
+        dataset: Union[Dataset, str, CustomModelDataset],
         hyperparameters: Optional[HyperParametersInput] = None,
     ) -> CustomModel:
         """Create a new custom model
@@ -1091,9 +1089,7 @@ class Client:
         Args:
             name (str): name of your custom model, has to be unique across your organization
             model_type (GENERATIVE, CLASSIFY, RERANK): type of custom model
-            dataset (InMemoryDataset, CsvDataset, JsonlDataset, TextDataset): A dataset for your training. Consists of a train and optional eval file.
-            train_dataset (str): a dataset id for the training data
-            eval_dataset (str): a dataset id for the eval data
+            dataset (Dataset, str, InMemoryDataset, CsvDataset, JsonlDataset, TextDataset): A dataset for your training. Consists of a train and optional eval file.
             hyperparameters (HyperParametersInput): adjust hyperparameters for your custom model. Only for generative custom models.
         Returns:
             str: the id of the custom model that was created
@@ -1143,7 +1139,11 @@ class Client:
                 "learningRate": hyperparameters.get("learning_rate"),
             }
 
-        if dataset:
+        if isinstance(dataset, Dataset):
+            json["settings"]["datasetID"] = dataset.id
+        elif isinstance(dataset, str):
+            json["settings"]["datasetID"] = dataset
+        elif isinstance(dataset, CustomModelDataset):
             remote_path = self._upload_dataset(
                 dataset.get_train_data(), name, dataset.train_file_name(), internal_custom_model_type
             )
@@ -1153,13 +1153,8 @@ class Client:
                     dataset.get_eval_data(), name, dataset.eval_file_name(), internal_custom_model_type
                 )
                 json["settings"]["evalFiles"].append({"path": remote_path, **dataset.file_config()})
-        elif train_dataset:
-            json["settings"]["datasets"] = {
-                "trainDatasetID": train_dataset,
-                "evalDatasetID": eval_dataset,
-            }
         else:
-            raise CohereError("no dataset supplied, use either dataset or train_dataset and eval_dataset")
+            raise CohereError(f"unsupported type for dataset {type(dataset)}")
 
         response = self._request(f"{cohere.CUSTOM_MODEL_URL}/CreateFinetune", method="POST", json=json)
         return CustomModel.from_dict(response["finetune"], self.wait_for_custom_model)
