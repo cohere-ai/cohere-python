@@ -146,10 +146,13 @@ class AsyncDataset(BaseDataset):
 
 @dataclass
 class ParseInfo:
-    separator: Optional[str]
+    separator: Optional[str] = None
+    delimiter: Optional[str] = None
 
     def get_params(self) -> Dict[str, str]:
         params = {}
         if self.separator:
             params["text_separator"] = self.separator
+        if self.delimiter:
+            params["csv_delimiter"] = self.delimiter
         return params

@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.24
+- [#296] (https://github.com/cohere-ai/cohere-python/pull/296)
+  - Allow passing of delimiter for csv
+  
 ## 4.23
 - [#294] (https://github.com/cohere-ai/cohere-python/pull/294)
   - Allow passing of ParseInfo for datasets
