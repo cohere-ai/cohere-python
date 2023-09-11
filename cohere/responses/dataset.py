@@ -1,5 +1,6 @@
 import csv
 import json
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional
 
@@ -21,7 +22,7 @@ class BaseDataset(CohereObject, JobWithStatus):
     validation_error: Optional[str]
     created_at: datetime
     updated_at: datetime
-    urls: List[str]
+    download_urls: List[str]
     size_bytes: int
     _wait_fn: Callable[[], "Dataset"]
 
@@ -34,7 +35,7 @@ class BaseDataset(CohereObject, JobWithStatus):
         created_at: str,
         updated_at: str,
         validation_error: str = None,
-        urls: List[str] = None,
+        download_urls: List[str] = None,
         wait_fn=None,
     ) -> None:
         self.id = id
@@ -43,15 +44,15 @@ class BaseDataset(CohereObject, JobWithStatus):
         self.validation_status = validation_status
         self.created_at = parse_datetime(created_at)
         self.updated_at = parse_datetime(updated_at)
-        self.urls = urls
+        self.download_urls = download_urls
         self._wait_fn = wait_fn
         self.validation_error = validation_error
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any], wait_fn) -> "Dataset":
-        urls = []
+        download_urls = []
         if data["validation_status"] == "validated":
-            urls = [part.get("url") for part in data["dataset_parts"] if part.get("url")]
+            download_urls = [part.get("url") for part in data["dataset_parts"] if part.get("url")]
 
         return cls(
             id=data["id"],
@@ -60,7 +61,7 @@ class BaseDataset(CohereObject, JobWithStatus):
             validation_status=data["validation_status"],
             created_at=data["created_at"],
             updated_at=data["updated_at"],
-            urls=urls,
+            download_urls=download_urls,
             wait_fn=wait_fn,
             validation_error=data.get("validation_error"),
         )
@@ -74,7 +75,7 @@ class BaseDataset(CohereObject, JobWithStatus):
     def open(self):
         if self.validation_status != "validated":
             raise CohereError(message="cannot open non-validated dataset")
-        for url in self.urls:
+        for url in self.download_urls:
             resp = requests.get(url, stream=True)
             for record in reader(resp.raw):
                 yield record
@@ -141,3 +142,17 @@ class AsyncDataset(BaseDataset):
         updated_job = await self._wait_fn(dataset_id=self.id, timeout=timeout, interval=interval)
         self._update_self(updated_job)
         return updated_job
+
+
+@dataclass
+class ParseInfo:
+    separator: Optional[str] = None
+    delimiter: Optional[str] = None
+
+    def get_params(self) -> Dict[str, str]:
+        params = {}
+        if self.separator:
+            params["text_separator"] = self.separator
+        if self.delimiter:
+            params["csv_delimiter"] = self.delimiter
+        return params

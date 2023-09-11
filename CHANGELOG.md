@@ -1,5 +1,40 @@
 # Changelog
 
+## 4.24
+- [#296] (https://github.com/cohere-ai/cohere-python/pull/296)
+  - Allow passing of delimiter for csv
+  
+## 4.23
+- [#294] (https://github.com/cohere-ai/cohere-python/pull/294)
+  - Allow passing of ParseInfo for datasets
+
+## 4.22
+- [#292] (https://github.com/cohere-ai/cohere-python/pull/292)
+  - Add search query only parameter
+  - Add documents to generate citations 
+  - Add connectors to generate citations 
+  - Add citation quality
+
+## 4.21
+- [#287] (https://github.com/cohere-ai/cohere-python/pull/287)
+  - Remove deprecated chat "query" parameter including inside chat_history parameter
+  - Support event-type for chat streaming
+
+## 4.20.2
+- [#284] (https://github.com/cohere-ai/cohere-python/pull/284)
+  - Rename dataset urls to download_urls
+
+## 4.20.1
+- [#279] (https://github.com/cohere-ai/cohere-python/pull/279)
+  - Fix dataset listing key error
+
+## 4.20.0
+
+- [#276] (https://github.com/cohere-ai/cohere-python/pull/276)
+  - Add support for base_model option in create_custom_model
+- [#277] (https://github.com/cohere-ai/cohere-python/pull/277)
+  - Add support for co.loglikelihood endpoint
+
 ## 4.19.1
 
 - [#273] (https://github.com/cohere-ai/cohere-python/pull/273)

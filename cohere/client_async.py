@@ -35,6 +35,7 @@ from cohere.responses import (
     Generations,
     LabelPrediction,
     Language,
+    LogLikelihoods,
     PreferenceRating,
     Reranking,
     StreamingGenerations,
@@ -53,7 +54,7 @@ from cohere.responses.custom_model import (
     HyperParametersInput,
     ModelMetric,
 )
-from cohere.responses.dataset import AsyncDataset, BaseDataset
+from cohere.responses.dataset import AsyncDataset, BaseDataset, ParseInfo
 from cohere.responses.embed_job import AsyncEmbedJob
 from cohere.utils import async_wait_for_job, is_api_key_valid, np_json_dumps
 
@@ -143,6 +144,16 @@ class AsyncClient(Client):
         """
         return {"valid": is_api_key_valid(self.api_key)}
 
+    async def loglikelihood(
+        self,
+        prompt: Optional[str] = None,
+        completion: Optional[str] = None,
+        model: Optional[str] = None,
+    ) -> LogLikelihoods:
+        json_body = {"model": model, "prompt": prompt, "completion": completion}
+        response = await self._request(cohere.LOGLIKELIHOOD_URL, json=json_body)
+        return LogLikelihoods(response["prompt_tokens"], response["completion_tokens"])
+
     async def batch_generate(
         self, prompts: List[str], return_exceptions=False, **kwargs
     ) -> List[Union[Exception, Generations]]:
@@ -198,7 +209,6 @@ class AsyncClient(Client):
     async def chat(
         self,
         message: Optional[str] = None,
-        query: Optional[str] = None,
         conversation_id: Optional[str] = "",
         model: Optional[str] = None,
         return_chatlog: Optional[bool] = False,
@@ -213,29 +223,13 @@ class AsyncClient(Client):
         p: Optional[float] = None,
         k: Optional[float] = None,
         logit_bias: Optional[Dict[int, float]] = None,
+        search_queries_only: Optional[bool] = None,
+        documents: Optional[List[Dict[str, Any]]] = None,
+        citation_quality: Optional[str] = None,
+        connectors: Optional[List[Dict[str, Any]]] = None,
     ) -> Union[AsyncChat, StreamingChat]:
-        if chat_history is not None:
-            should_warn = True
-            for entry in chat_history:
-                if "text" in entry:
-                    entry["message"] = entry["text"]
-
-                if "text" in entry and should_warn:
-                    logger.warning(
-                        "The 'text' parameter is deprecated and will be removed in a future version of this function. "
-                        + "Use 'message' instead.",
-                    )
-                    should_warn = False
-
-        if query is None and message is None:
-            raise CohereError("Either 'query' or 'message' must be provided.")
-
-        if query is not None:
-            logger.warning(
-                "The 'query' parameter is deprecated and will be removed in a future version of this function. "
-                + "Use 'message' instead.",
-            )
-            message = query
+        if message is None:
+            raise CohereError("'message' must be provided.")
 
         json_body = {
             "message": message,
@@ -253,7 +247,12 @@ class AsyncClient(Client):
             "p": p,
             "k": k,
             "logit_bias": logit_bias,
+            "search_queries_only": search_queries_only,
+            "documents": documents,
+            "connectors": connectors,
         }
+        if citation_quality is not None:
+            json_body["citation_quality"] = citation_quality
 
         response = await self._request(cohere.CHAT_URL, json=json_body, stream=stream)
 
@@ -492,6 +491,7 @@ class AsyncClient(Client):
         dataset_type: str,
         keep_fields: Union[str, List[str]] = None,
         optional_fields: Union[str, List[str]] = None,
+        parse_info: Optional[ParseInfo] = None,
     ) -> AsyncDataset:
         """Returns a Dataset given input data
 
@@ -501,7 +501,7 @@ class AsyncClient(Client):
             dataset_type (str): The type of dataset you want to upload
             keep_fields (Union[str, List[str]]): (optional) A list of fields you want to keep in the dataset that are required
             optional_fields (Union[str, List[str]]): (optional) A list of fields you want to keep in the dataset that are optional
-
+            parse_info: ParseInfo: (optional) information on how to parse the raw data
         Returns:
             AsyncDataset: Dataset object.
         """
@@ -514,6 +514,8 @@ class AsyncClient(Client):
             params["keep_fields"] = keep_fields
         if optional_fields:
             params["optional_fields"] = optional_fields
+        if parse_info:
+            params.update(parse_info.get_params())
 
         logger.warning("uploading file, starting validation...")
         create_response = await self._request(cohere.DATASET_URL, files=files, params=params)
@@ -558,7 +560,7 @@ class AsyncClient(Client):
         response = await self._request(f"{cohere.DATASET_URL}", method="GET", params=param_dict)
         return [
             AsyncDataset.from_dict({"meta": response.get("meta"), **r}, wait_fn=self.wait_for_dataset)
-            for r in response["datasets"]
+            for r in (response.get("datasets") or [])
         ]
 
     async def delete_dataset(self, id: str) -> None:
@@ -826,6 +828,7 @@ class AsyncClient(Client):
         name: str,
         model_type: CUSTOM_MODEL_TYPE,
         dataset: CustomModelDataset,
+        base_model: Optional[str] = None,
         hyperparameters: Optional[HyperParametersInput] = None,
     ) -> AsyncCustomModel:
         """Create a new custom model
@@ -834,6 +837,11 @@ class AsyncClient(Client):
             name (str): name of your custom model, has to be unique across your organization
             model_type (GENERATIVE, CLASSIFY, RERANK): type of custom model
             dataset (InMemoryDataset, CsvDataset, JsonlDataset, TextDataset): A dataset for your training. Consists of a train and optional eval file.
+            base_model (str): base model to use for your custom model.
+                For generative and classify models, `base_model` has to be None (no option available for now)
+                For rerank models, you can choose between `english` and `multilingual`. Defaults to `english` if not specified.
+                    The English model is better for English, while the multilingual model should be picked if a non-negligible part of queries/documents
+                    will be in other languages
             hyperparameters (HyperParametersInput): adjust hyperparameters for your custom model. Only for generative custom models.
         Returns:
             str: the id of the custom model that was created
@@ -856,12 +864,13 @@ class AsyncClient(Client):
 
         """
         internal_custom_model_type = CUSTOM_MODEL_PRODUCT_MAPPING[model_type]
+
         json = {
             "name": name,
             "settings": {
                 "trainFiles": [],
                 "evalFiles": [],
-                "baseModel": "medium",
+                "baseModel": base_model,
                 "finetuneType": internal_custom_model_type,
             },
         }

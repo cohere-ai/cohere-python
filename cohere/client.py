@@ -25,6 +25,7 @@ from cohere.responses import (
     Codebook,
     Detokenization,
     Generations,
+    LogLikelihoods,
     StreamingGenerations,
     Tokens,
 )
@@ -41,7 +42,7 @@ from cohere.responses.custom_model import (
     HyperParametersInput,
     ModelMetric,
 )
-from cohere.responses.dataset import BaseDataset, Dataset
+from cohere.responses.dataset import BaseDataset, Dataset, ParseInfo
 from cohere.responses.detectlang import DetectLanguageResponse, Language
 from cohere.responses.embed_job import EmbedJob
 from cohere.responses.embeddings import Embeddings
@@ -104,6 +105,25 @@ class Client:
         """
         return {"valid": is_api_key_valid(self.api_key)}
 
+    def loglikelihood(
+        self,
+        prompt: Optional[str] = None,
+        completion: Optional[str] = None,
+        model: Optional[str] = None,
+    ) -> LogLikelihoods:
+        """Calculates the token log-likelihood for a provided prompt and completion.
+        Using this endpoint instead of co.generate with max_tokens=0 will guarantee that any required tokens such as <EOP_TOKEN>
+        are correctly inserted, and makes it easier to retrieve only the completion log-likelihood.
+
+        Args:
+            prompt (str): The prompt
+            completion (str): (Optional) The completion
+            model (str): (Optional) The model to use for calculating the log-likelihoods
+        """
+        json_body = {"model": model, "prompt": prompt, "completion": completion}
+        response = self._request(cohere.LOGLIKELIHOOD_URL, json=json_body)
+        return LogLikelihoods(response["prompt_tokens"], response["completion_tokens"])
+
     def batch_generate(
         self, prompts: List[str], return_exceptions=False, **kwargs
     ) -> List[Union[Generations, Exception]]:
@@ -152,7 +172,7 @@ class Client:
             num_generations (int): (Optional) The number of generations that will be returned, defaults to 1.
             max_tokens (int): (Optional) The number of tokens to predict per generation, defaults to 20.
             temperature (float): (Optional) The degree of randomness in generations from 0.0 to 5.0, lower is less random.
-            truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.\
+            truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
             stream (bool): Return streaming tokens.
         Returns:
             if stream=False: a Generations object
@@ -207,7 +227,6 @@ class Client:
     def chat(
         self,
         message: Optional[str] = None,
-        query: Optional[str] = None,
         conversation_id: Optional[str] = "",
         model: Optional[str] = None,
         return_chatlog: Optional[bool] = False,
@@ -222,26 +241,53 @@ class Client:
         p: Optional[float] = None,
         k: Optional[float] = None,
         logit_bias: Optional[Dict[int, float]] = None,
+        search_queries_only: Optional[bool] = None,
+        documents: Optional[List[Dict[str, Any]]] = None,
+        citation_quality: Optional[str] = None,
+        connectors: Optional[List[Dict[str, Any]]] = None,
     ) -> Union[Chat, StreamingChat]:
         """Returns a Chat object with the query reply.
 
         Args:
-            query (str): Deprecated. Use message instead.
             message (str): The message to send to the chatbot.
-            conversation_id (str): (Optional) The conversation id to continue the conversation.
-            model (str): (Optional) The model to use for generating the next reply.
-            return_chatlog (bool): (Optional) Whether to return the chatlog.
-            return_prompt (bool): (Optional) Whether to return the prompt.
-            return_preamble (bool): (Optional) Whether to return the preamble.
-            chat_history (List[Dict[str, str]]): (Optional) A list of entries used to construct the conversation. If provided, these messages will be used to build the prompt and the conversation_id will be ignored so no data will be stored to maintain state.
-            preamble_override (str): (Optional) A string to override the preamble.
-            user_name (str): (Optional) A string to override the username.
-            temperature (float): (Optional) The temperature to use for the next reply. The higher the temperature, the more random the reply.
-            max_tokens (int): (Optional) The max tokens generated for the next reply.
+
             stream (bool): Return streaming tokens.
+            conversation_id (str): (Optional) To store a conversation then create a conversation id and use it for every related request.
+
+            preamble_override (str): (Optional) A string to override the preamble.
+            chat_history (List[Dict[str, str]]): (Optional) A list of entries used to construct the conversation. If provided, these messages will be used to build the prompt and the conversation_id will be ignored so no data will be stored to maintain state.
+
+            model (str): (Optional) The model to use for generating the response.
+            temperature (float): (Optional) The temperature to use for the response. The higher the temperature, the more random the response.
             p (float): (Optional) The nucleus sampling probability.
             k (float): (Optional) The top-k sampling probability.
             logit_bias (Dict[int, float]): (Optional) A dictionary of logit bias values to use for the next reply.
+            max_tokens (int): (Optional) The max tokens generated for the next reply.
+
+            return_chatlog (bool): (Optional) Whether to return the chatlog.
+            return_prompt (bool): (Optional) Whether to return the prompt.
+            return_preamble (bool): (Optional) Whether to return the preamble.
+
+            user_name (str): (Optional) A string to override the username.
+
+            search_queries_only (bool) : (Optional) When true, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's message will be generated.
+            documents (List[Dict[str, str]]): (Optional) Documents to use to generate grounded response with citations. Example:
+                documents=[
+                    {
+                        "id": "national_geographic_everest",
+                        "title": "Height of Mount Everest",
+                        "snippet": "The height of Mount Everest is 29,035 feet",
+                        "url": "https://education.nationalgeographic.org/resource/mount-everest/",
+                    },
+                    {
+                        "id": "national_geographic_mariana",
+                        "title": "Depth of the Mariana Trench",
+                        "snippet": "The depth of the Mariana Trench is 36,070 feet",
+                        "url": "https://www.nationalgeographic.org/activity/mariana-trench-deepest-place-earth",
+                    },
+                ],
+            connectors (List[Dict[str, str]]): (Optional) When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG). Example: connectors=[{"id": "web-search"}]
+            citation_quality (str): (Optional) Dictates the approach taken to generating citations by allowing the user to specify whether they want "accurate" results or "fast" results. Defaults to "accurate".
         Returns:
             a Chat object if stream=False, or a StreamingChat object if stream=True
 
@@ -249,7 +295,6 @@ class Client:
             A simple chat message:
                 >>> res = co.chat(message="Hey! How are you doing today?")
                 >>> print(res.text)
-                >>> print(res.conversation_id)
             Continuing a session using a specific model:
                 >>> res = co.chat(
                 >>>     message="Hey! How are you doing today?",
@@ -274,26 +319,40 @@ class Client:
                 >>>     return_prompt=True)
                 >>> print(res.text)
                 >>> print(res.prompt)
+            Chat message with documents to use to generate the response:
+                >>> res = co.chat(
+                >>>     "How deep in the Mariana Trench",
+                >>>     documents=[
+                >>>         {
+                >>>            "id": "national_geographic_everest",
+                >>>            "title": "Height of Mount Everest",
+                >>>            "snippet": "The height of Mount Everest is 29,035 feet",
+                >>>            "url": "https://education.nationalgeographic.org/resource/mount-everest/",
+                >>>         },
+                >>>         {
+                >>>             "id": "national_geographic_mariana",
+                >>>             "title": "Depth of the Mariana Trench",
+                >>>             "snippet": "The depth of the Mariana Trench is 36,070 feet",
+                >>>             "url": "https://www.nationalgeographic.org/activity/mariana-trench-deepest-place-earth",
+                >>>         },
+                >>>       ])
+                >>> print(res.text)
+                >>> print(res.citations)
+                >>> print(res.documents)
+            Chat message with connector to query and use the results to generate the response:
+                >>> res = co.chat(
+                >>>     "What is the height of Mount Everest?",
+                >>>      connectors=[{"id": "web-search"})
+                >>> print(res.text)
+                >>> print(res.citations)
+                >>> print(res.documents)
+            Generate search queries for fetching documents to use in chat:
+                >>> res = co.chat(
+                >>>     "What is the height of Mount Everest?",
+                >>>      search_queries_only=True)
+                >>> if res.is_search_required:
+                >>>      print(res.search_queries)
         """
-        if chat_history is not None:
-            should_warn = True
-            for entry in chat_history:
-                if "text" in entry:
-                    entry["message"] = entry["text"]
-
-                if "text" in entry and should_warn:
-                    logger.warning(
-                        "The 'text' parameter is deprecated and will be removed in a future version of this function. "
-                        + "Use 'message' instead.",
-                    )
-                    should_warn = False
-
-        if query is not None:
-            logger.warning(
-                "The chat_history 'text' key is deprecated and will be removed in a future version of this function. "
-                + "Use 'message' instead.",
-            )
-            message = query
 
         json_body = {
             "message": message,
@@ -311,7 +370,12 @@ class Client:
             "p": p,
             "k": k,
             "logit_bias": logit_bias,
+            "search_queries_only": search_queries_only,
+            "documents": documents,
+            "connectors": connectors,
         }
+        if citation_quality is not None:
+            json_body["citation_quality"] = citation_quality
         response = self._request(cohere.CHAT_URL, json=json_body, stream=stream)
 
         if stream:
@@ -689,6 +753,7 @@ class Client:
         dataset_type: str,
         keep_fields: Union[str, List[str]] = None,
         optional_fields: Union[str, List[str]] = None,
+        parse_info: Optional[ParseInfo] = None,
     ) -> Dataset:
         """Returns a Dataset given input data
 
@@ -698,7 +763,7 @@ class Client:
             dataset_type (str): The type of dataset you want to upload
             keep_fields (Union[str, List[str]]): (optional) A list of fields you want to keep in the dataset that are required
             optional_fields (Union[str, List[str]]): (optional) A list of fields you want to keep in the dataset that are optional
-
+            parse_info: ParseInfo: (optional) information on how to parse the raw data
         Returns:
             Dataset: Dataset object.
         """
@@ -709,6 +774,9 @@ class Client:
             "keep_fields": keep_fields,
             "optional_fields": optional_fields,
         }
+        if parse_info:
+            params.update(parse_info.get_params())
+
         logger.warning("uploading file, starting validation...")
         create_response = self._request(cohere.DATASET_URL, files=files, params=params)
         logger.warning(f"{create_response['id']} was uploaded")
@@ -747,7 +815,7 @@ class Client:
         response = self._request(f"{cohere.DATASET_URL}", method="GET", params=param_dict)
         return [
             Dataset.from_dict({"meta": response.get("meta"), **r}, wait_fn=self.wait_for_dataset)
-            for r in response["datasets"]
+            for r in (response.get("datasets") or [])
         ]
 
     def delete_dataset(self, id: str) -> None:
@@ -1082,6 +1150,7 @@ class Client:
         name: str,
         model_type: CUSTOM_MODEL_TYPE,
         dataset: Union[Dataset, str, CustomModelDataset],
+        base_model: Optional[str] = None,
         hyperparameters: Optional[HyperParametersInput] = None,
     ) -> CustomModel:
         """Create a new custom model
@@ -1090,6 +1159,11 @@ class Client:
             name (str): name of your custom model, has to be unique across your organization
             model_type (GENERATIVE, CLASSIFY, RERANK): type of custom model
             dataset (Dataset, str, InMemoryDataset, CsvDataset, JsonlDataset, TextDataset): A dataset for your training. Consists of a train and optional eval file.
+            base_model (str): base model to use for your custom model.
+                For generative and classify models, `base_model` has to be None (no option available for now)
+                For rerank models, you can choose between `english` and `multilingual`. Defaults to `english` if not specified.
+                    The English model is better for English, while the multilingual model should be picked if a non-negligible part of queries/documents
+                    will be in other languages
             hyperparameters (HyperParametersInput): adjust hyperparameters for your custom model. Only for generative custom models.
         Returns:
             str: the id of the custom model that was created
@@ -1121,12 +1195,13 @@ class Client:
 
         """
         internal_custom_model_type = CUSTOM_MODEL_PRODUCT_MAPPING[model_type]
+
         json = {
             "name": name,
             "settings": {
                 "trainFiles": [],
                 "evalFiles": [],
-                "baseModel": "medium",
+                "baseModel": base_model,
                 "finetuneType": internal_custom_model_type,
             },
         }
