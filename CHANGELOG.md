@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.25 
+- [#303] (https://github.com/cohere-ai/cohere-python/pull/303)
+  - Allow uploading of evaluation data
+
 ## 4.24
 - [#296] (https://github.com/cohere-ai/cohere-python/pull/296)
   - Allow passing of delimiter for csv
