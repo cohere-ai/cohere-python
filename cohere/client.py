@@ -762,6 +762,7 @@ class Client:
             name (str): The name of your dataset
             data (BinaryIO): The data to be uploaded and validated
             dataset_type (str): The type of dataset you want to upload
+            eval_data (BinaryIO): (optional) If the dataset type supports it upload evaluation data
             keep_fields (Union[str, List[str]]): (optional) A list of fields you want to keep in the dataset that are required
             optional_fields (Union[str, List[str]]): (optional) A list of fields you want to keep in the dataset that are optional
             parse_info: ParseInfo: (optional) information on how to parse the raw data
