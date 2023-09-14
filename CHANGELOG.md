@@ -1,9 +1,13 @@
 # Changelog
 
-## 4.25
+## 4.26
 
 - [#296] (https://github.com/cohere-ai/cohere-python/pull/301)
   - Chat: add support for prompt_truncation param
+
+## 4.25 
+- [#303] (https://github.com/cohere-ai/cohere-python/pull/303)
+  - Allow uploading of evaluation data
 
 ## 4.24
 
