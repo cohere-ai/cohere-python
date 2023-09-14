@@ -751,6 +751,7 @@ class Client:
         name: str,
         data: BinaryIO,
         dataset_type: str,
+        eval_data: Optional[BinaryIO] = None,
         keep_fields: Union[str, List[str]] = None,
         optional_fields: Union[str, List[str]] = None,
         parse_info: Optional[ParseInfo] = None,
@@ -768,6 +769,8 @@ class Client:
             Dataset: Dataset object.
         """
         files = {"file": data}
+        if eval_data:
+            files["eval_file"] = eval_data
         params = {
             "name": name,
             "type": dataset_type,
