@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.26.1
+
+- [#306] (https://github.com/cohere-ai/cohere-python/pull/306)
+  - AsyncClient: Fix correctly raising error on connection issues.
+
 ## 4.26
 
 - [#296] (https://github.com/cohere-ai/cohere-python/pull/301)
