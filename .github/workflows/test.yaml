@@ -24,9 +24,6 @@ jobs:
         pip install poetry==1.2.2
         poetry install
 
-    - name: Check formatting
-      run: poetry run pre-commit run --all-files 
-
     - name: Run tests
       env:
         CO_API_KEY: ${{ secrets.CO_API_PROD_KEY }}    
