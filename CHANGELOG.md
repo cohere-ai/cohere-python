@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.27
+- [#308] (https://github.com/cohere-ai/cohere-python/pull/308)
+  - Datasets: add validation_warnings
+
 ## 4.26.1
 
 - [#306] (https://github.com/cohere-ai/cohere-python/pull/306)
