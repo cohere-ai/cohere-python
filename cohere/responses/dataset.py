@@ -20,6 +20,7 @@ class BaseDataset(CohereObject, JobWithStatus):
     dataset_type: str
     validation_status: str
     validation_error: Optional[str]
+    validation_warnings: List[str]
     created_at: datetime
     updated_at: datetime
     download_urls: List[str]
@@ -34,6 +35,7 @@ class BaseDataset(CohereObject, JobWithStatus):
         validation_status: str,
         created_at: str,
         updated_at: str,
+        validation_warnings: List[str],
         validation_error: str = None,
         download_urls: List[str] = None,
         wait_fn=None,
@@ -47,6 +49,7 @@ class BaseDataset(CohereObject, JobWithStatus):
         self.download_urls = download_urls
         self._wait_fn = wait_fn
         self.validation_error = validation_error
+        self.validation_warnings = validation_warnings
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any], wait_fn) -> "Dataset":
@@ -64,6 +67,7 @@ class BaseDataset(CohereObject, JobWithStatus):
             download_urls=download_urls,
             wait_fn=wait_fn,
             validation_error=data.get("validation_error"),
+            validation_warnings=data.get("validation_warnings", []),
         )
 
     def has_terminal_status(self) -> bool:

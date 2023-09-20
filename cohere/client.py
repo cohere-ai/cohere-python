@@ -244,6 +244,7 @@ class Client:
         search_queries_only: Optional[bool] = None,
         documents: Optional[List[Dict[str, Any]]] = None,
         citation_quality: Optional[str] = None,
+        prompt_truncation: Optional[str] = None,
         connectors: Optional[List[Dict[str, Any]]] = None,
     ) -> Union[Chat, StreamingChat]:
         """Returns a Chat object with the query reply.
@@ -288,6 +289,7 @@ class Client:
                 ],
             connectors (List[Dict[str, str]]): (Optional) When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG). Example: connectors=[{"id": "web-search"}]
             citation_quality (str): (Optional) Dictates the approach taken to generating citations by allowing the user to specify whether they want "accurate" results or "fast" results. Defaults to "accurate".
+            prompt_truncation (str): (Optional) Dictates how the prompt will be constructed. With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in attempt to construct a prompt that fits within the model's context length limit. With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
         Returns:
             a Chat object if stream=False, or a StreamingChat object if stream=True
 
@@ -376,6 +378,9 @@ class Client:
         }
         if citation_quality is not None:
             json_body["citation_quality"] = citation_quality
+        if prompt_truncation is not None:
+            json_body["prompt_truncation"] = prompt_truncation
+
         response = self._request(cohere.CHAT_URL, json=json_body, stream=stream)
 
         if stream:
@@ -751,6 +756,7 @@ class Client:
         name: str,
         data: BinaryIO,
         dataset_type: str,
+        eval_data: Optional[BinaryIO] = None,
         keep_fields: Union[str, List[str]] = None,
         optional_fields: Union[str, List[str]] = None,
         parse_info: Optional[ParseInfo] = None,
@@ -761,6 +767,7 @@ class Client:
             name (str): The name of your dataset
             data (BinaryIO): The data to be uploaded and validated
             dataset_type (str): The type of dataset you want to upload
+            eval_data (BinaryIO): (optional) If the dataset type supports it upload evaluation data
             keep_fields (Union[str, List[str]]): (optional) A list of fields you want to keep in the dataset that are required
             optional_fields (Union[str, List[str]]): (optional) A list of fields you want to keep in the dataset that are optional
             parse_info: ParseInfo: (optional) information on how to parse the raw data
@@ -768,6 +775,8 @@ class Client:
             Dataset: Dataset object.
         """
         files = {"file": data}
+        if eval_data:
+            files["eval_file"] = eval_data
         params = {
             "name": name,
             "type": dataset_type,

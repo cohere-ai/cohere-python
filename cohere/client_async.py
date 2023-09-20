@@ -113,11 +113,13 @@ class AsyncClient(Client):
 
         try:
             json_response = await response.json()
-        #   `CohereAPIError.from_response()` will capture the http status code
+        #   `CohereAPIError.from_aio_response()` will capture the http status code
         except jsonlib.decoder.JSONDecodeError:
-            raise CohereAPIError.from_response(response, message=f"Failed to decode json body: {await response.text()}")
+            raise CohereAPIError.from_aio_response(
+                response, message=f"Failed to decode json body: {await response.text()}"
+            )
         except aiohttp.ClientPayloadError as e:
-            raise CohereAPIError.from_response(
+            raise CohereAPIError.from_aio_response(
                 response, message=f"An unexpected error occurred while receiving the response: {e}"
             )
 
@@ -226,6 +228,7 @@ class AsyncClient(Client):
         search_queries_only: Optional[bool] = None,
         documents: Optional[List[Dict[str, Any]]] = None,
         citation_quality: Optional[str] = None,
+        prompt_truncation: Optional[str] = None,
         connectors: Optional[List[Dict[str, Any]]] = None,
     ) -> Union[AsyncChat, StreamingChat]:
         if message is None:
@@ -253,6 +256,8 @@ class AsyncClient(Client):
         }
         if citation_quality is not None:
             json_body["citation_quality"] = citation_quality
+        if prompt_truncation is not None:
+            json_body["prompt_truncation"] = prompt_truncation
 
         response = await self._request(cohere.CHAT_URL, json=json_body, stream=stream)
 
@@ -489,6 +494,7 @@ class AsyncClient(Client):
         name: str,
         data: BinaryIO,
         dataset_type: str,
+        eval_data: Optional[BinaryIO] = None,
         keep_fields: Union[str, List[str]] = None,
         optional_fields: Union[str, List[str]] = None,
         parse_info: Optional[ParseInfo] = None,
@@ -499,6 +505,7 @@ class AsyncClient(Client):
             name (str): The name of your dataset
             data (BinaryIO): The data to be uploaded and validated
             dataset_type (str): The type of dataset you want to upload
+            eval_data (BinaryIO): (optional) If the dataset type supports it upload evaluation data
             keep_fields (Union[str, List[str]]): (optional) A list of fields you want to keep in the dataset that are required
             optional_fields (Union[str, List[str]]): (optional) A list of fields you want to keep in the dataset that are optional
             parse_info: ParseInfo: (optional) information on how to parse the raw data
@@ -506,6 +513,8 @@ class AsyncClient(Client):
             AsyncDataset: Dataset object.
         """
         files = {"file": data}
+        if eval_data:
+            files["eval_file"] = eval_data
         params = {
             "name": name,
             "type": dataset_type,
