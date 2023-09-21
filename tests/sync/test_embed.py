@@ -2,11 +2,9 @@ import random
 import string
 import unittest
 
-import pytest
 from utils import get_api_key
 
 import cohere
-from cohere.error import CohereError
 
 API_KEY = get_api_key()
 co = cohere.Client(API_KEY)
