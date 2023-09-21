@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.28
+ - [#310] (https://github.com/cohere-ai/cohere-python/pull/310)
+   - Embed: add input_type parameter for new embed models
+
 ## 4.27
 - [#308] (https://github.com/cohere-ai/cohere-python/pull/308)
   - Datasets: add validation_warnings
