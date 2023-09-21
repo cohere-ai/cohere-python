@@ -273,6 +273,7 @@ class AsyncClient(Client):
         truncate: Optional[str] = None,
         compress: Optional[bool] = False,
         compression_codebook: Optional[str] = "default",
+        input_type: Optional[str] = None,
     ) -> Embeddings:
         """Returns an Embeddings object for the provided texts. Visit https://cohere.ai/embed to learn about embeddings.
 
@@ -282,6 +283,7 @@ class AsyncClient(Client):
             truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
             compress (bool): (Optional) Whether to compress the embeddings. When True, the compressed_embeddings will be returned as integers in the range [0, 255].
             compression_codebook (str): (Optional) The compression codebook to use for compressed embeddings. Defaults to "default".
+            input_type (str): (Optional) One of "classification", "clustering", "search_document", "search_query". The type of input text provided to embed.
         """
         json_bodys = [
             dict(
@@ -290,6 +292,7 @@ class AsyncClient(Client):
                 truncate=truncate,
                 compress=compress,
                 compression_codebook=compression_codebook,
+                input_type=input_type,
             )
             for i in range(0, len(texts), cohere.COHERE_EMBED_BATCH_SIZE)
         ]
