@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.29
+ - [#311] (https://github.com/cohere-ai/cohere-python/pull/311)
+   - Embed: remove embed input_type tests
+
 ## 4.28
  - [#310] (https://github.com/cohere-ai/cohere-python/pull/310)
    - Embed: add input_type parameter for new embed models
