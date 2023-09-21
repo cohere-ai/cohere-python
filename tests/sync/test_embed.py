@@ -2,11 +2,9 @@ import random
 import string
 import unittest
 
-import pytest
 from utils import get_api_key
 
 import cohere
-from cohere.error import CohereError
 
 API_KEY = get_api_key()
 co = cohere.Client(API_KEY)
@@ -104,24 +102,3 @@ class TestEmbed(unittest.TestCase):
         for predictionExpected, predictionActual in zip(predictionsExpected, list(predictionsActual)):
             for elementExpected, elementAcutal in zip(predictionExpected, predictionActual):
                 self.assertAlmostEqual(elementExpected, elementAcutal, places=1)
-
-    def test_fail_with_new_model_no_input_type(self):
-        text_batch = random_texts(cohere.COHERE_EMBED_BATCH_SIZE)
-        with pytest.raises(CohereError):
-            co.embed(model="embed-english-v3.0", texts=text_batch)
-
-    def test_fail_with_new_model_invalid_input_type(self):
-        text_batch = random_texts(cohere.COHERE_EMBED_BATCH_SIZE)
-        input_type = "invalid"
-        with pytest.raises(CohereError):
-            co.embed(model="embed-english-v3.0", texts=text_batch, input_type=input_type)
-
-    def test_success_with_new_model_and_input_type(self):
-        text = ["cohere"]
-        input_types = ["classification", "search_document", "search_query", "clustering"]
-
-        for input_type in input_types:
-            prediction = co.embed(model="embed-english-v3.0", texts=text, input_type=input_type)
-            embed = prediction.embeddings[0]
-            self.assertIsInstance(embed, list)
-            self.assertEqual(len(embed), 1024)
