@@ -70,7 +70,11 @@ async def test_async_chat_stream(async_client):
 @pytest.mark.asyncio
 async def test_async_chat_with_connectors_stream(async_client):
     res = await async_client.chat(
-        "How deep in the Mariana Trench", temperature=0, stream=True, connectors=[{"id": "web-search"}]
+        "How deep in the Mariana Trench",
+        temperature=0,
+        stream=True,
+        connectors=[{"id": "web-search"}],
+        prompt_truncation="AUTO",
     )
 
     assert isinstance(res, cohere.responses.chat.StreamingChat)
