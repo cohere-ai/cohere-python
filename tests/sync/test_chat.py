@@ -256,7 +256,9 @@ class TestChat(unittest.TestCase):
         self.assertGreater(len(prediction.documents), 0)
 
     def test_with_connectors(self):
-        prediction = co.chat("How deep in the Mariana Trench", temperature=0, connectors=[{"id": "web-search"}])
+        prediction = co.chat(
+            "How deep in the Mariana Trench", temperature=0, connectors=[{"id": "web-search"}], prompt_truncation="AUTO"
+        )
         self.assertIsInstance(prediction.text, str)
         self.assertIsInstance(prediction.citations, list)
         self.assertGreater(len(prediction.citations), 0)
@@ -297,7 +299,11 @@ class TestChat(unittest.TestCase):
 
     def test_stream_with_connectors(self):
         prediction = co.chat(
-            "How deep in the Mariana Trench", temperature=0, stream=True, connectors=[{"id": "web-search"}]
+            "How deep in the Mariana Trench",
+            temperature=0,
+            stream=True,
+            connectors=[{"id": "web-search"}],
+            prompt_truncation="AUTO",
         )
 
         self.assertIsInstance(prediction, cohere.responses.chat.StreamingChat)
