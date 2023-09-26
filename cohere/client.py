@@ -315,8 +315,8 @@ class Client:
                 >>> res = co.chat(
                 >>>     message="Tell me a joke!",
                 >>>     chat_history=[
-                >>>         {'user_name': 'User', message': 'Hey! How are you doing today?'},
-                >>>         {'user_name': 'Bot', message': 'I am doing great! How can I help you?'},
+                >>>         {'role': 'User', message': 'Hey! How are you doing today?'},
+                >>>         {'role': 'Chatbot', message': 'I am doing great! How can I help you?'},
                 >>>     ],
                 >>>     return_prompt=True)
                 >>> print(res.text)
