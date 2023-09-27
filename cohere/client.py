@@ -229,7 +229,7 @@ class Client:
         message: Optional[str] = None,
         conversation_id: Optional[str] = "",
         model: Optional[str] = None,
-        return_chatlog: Optional[bool] = False,
+        return_chat_history: Optional[bool] = False,
         return_prompt: Optional[bool] = False,
         return_preamble: Optional[bool] = False,
         chat_history: Optional[List[Dict[str, str]]] = None,
@@ -265,7 +265,7 @@ class Client:
             logit_bias (Dict[int, float]): (Optional) A dictionary of logit bias values to use for the next reply.
             max_tokens (int): (Optional) The max tokens generated for the next reply.
 
-            return_chatlog (bool): (Optional) Whether to return the chatlog.
+            return_chat_history (bool): (Optional) Whether to return the chat history.
             return_prompt (bool): (Optional) Whether to return the prompt.
             return_preamble (bool): (Optional) Whether to return the preamble.
 
@@ -302,9 +302,9 @@ class Client:
                 >>>     message="Hey! How are you doing today?",
                 >>>     conversation_id="1234",
                 >>>     model="command",
-                >>>     return_chatlog=True)
+                >>>     return_chat_history=True)
                 >>> print(res.text)
-                >>> print(res.chatlog)
+                >>> print(res.chat_history)
             Streaming chat:
                 >>> res = co.chat(
                 >>>     message="Hey! How are you doing today?",
@@ -360,7 +360,7 @@ class Client:
             "message": message,
             "conversation_id": conversation_id,
             "model": model,
-            "return_chatlog": return_chatlog,
+            "return_chat_history": return_chat_history,
             "return_prompt": return_prompt,
             "return_preamble": return_preamble,
             "chat_history": chat_history,
