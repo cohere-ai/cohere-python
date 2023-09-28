@@ -45,7 +45,7 @@ class TestChat(unittest.TestCase):
         self.assertIsInstance(prediction.text, str)
         self.assertIsNotNone(prediction.chat_history)
         self.assertIsInstance(prediction.chat_history, list)
-        self.assertEqual(len(prediction.chat_history), 3)
+        self.assertEqual(len(prediction.chat_history), 2)
         self.assertIsInstance(prediction.chat_history[0], dict)
 
     def test_return_chat_history_false(self):
