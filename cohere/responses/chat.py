@@ -1,31 +1,32 @@
 import json
-import requests
 from enum import Enum
 from typing import Any, Dict, Generator, List, Optional, Union
+
+import requests
 
 from cohere.responses.base import CohereObject
 
 
 class Chat(CohereObject):
     def __init__(
-            self,
-            response_id: str,
-            generation_id: str,
-            message: str,
-            text: str,
-            conversation_id: str,
-            meta: Optional[Dict[str, Any]] = None,
-            prompt: Optional[str] = None,
-            chat_history: Optional[List[Dict[str, Any]]] = None,
-            preamble: Optional[str] = None,
-            token_count: Optional[Dict[str, int]] = None,
-            is_search_required: Optional[bool] = None,
-            citations: Optional[List[Dict[str, Any]]] = None,
-            documents: Optional[List[Dict[str, Any]]] = None,
-            search_results: Optional[List[Dict[str, Any]]] = None,
-            search_queries: Optional[List[Dict[str, Any]]] = None,
-            client=None,
-            **kwargs,
+        self,
+        response_id: str,
+        generation_id: str,
+        message: str,
+        text: str,
+        conversation_id: str,
+        meta: Optional[Dict[str, Any]] = None,
+        prompt: Optional[str] = None,
+        chat_history: Optional[List[Dict[str, Any]]] = None,
+        preamble: Optional[str] = None,
+        token_count: Optional[Dict[str, int]] = None,
+        is_search_required: Optional[bool] = None,
+        citations: Optional[List[Dict[str, Any]]] = None,
+        documents: Optional[List[Dict[str, Any]]] = None,
+        search_results: Optional[List[Dict[str, Any]]] = None,
+        search_queries: Optional[List[Dict[str, Any]]] = None,
+        client=None,
+        **kwargs,
     ) -> None:
         super().__init__(**kwargs)
         self.response_id = response_id
@@ -101,11 +102,11 @@ class StreamEvent(str, Enum):
 
 class StreamResponse(CohereObject):
     def __init__(
-            self,
-            is_finished: bool,
-            event_type: Union[StreamEvent, str],
-            index: Optional[int],
-            **kwargs,
+        self,
+        is_finished: bool,
+        event_type: Union[StreamEvent, str],
+        index: Optional[int],
+        **kwargs,
     ) -> None:
         super().__init__(**kwargs)
         self.is_finished = is_finished
@@ -115,10 +116,10 @@ class StreamResponse(CohereObject):
 
 class StreamStart(StreamResponse):
     def __init__(
-            self,
-            generation_id: str,
-            conversation_id: Optional[str],
-            **kwargs,
+        self,
+        generation_id: str,
+        conversation_id: Optional[str],
+        **kwargs,
     ) -> None:
         super().__init__(**kwargs)
         self.generation_id = generation_id
@@ -127,9 +128,9 @@ class StreamStart(StreamResponse):
 
 class StreamTextGeneration(StreamResponse):
     def __init__(
-            self,
-            text: str,
-            **kwargs,
+        self,
+        text: str,
+        **kwargs,
     ) -> None:
         super().__init__(**kwargs)
         self.text = text
@@ -137,9 +138,9 @@ class StreamTextGeneration(StreamResponse):
 
 class StreamCitationGeneration(StreamResponse):
     def __init__(
-            self,
-            citations: Optional[List[Dict[str, Any]]],
-            **kwargs,
+        self,
+        citations: Optional[List[Dict[str, Any]]],
+        **kwargs,
     ) -> None:
         super().__init__(**kwargs)
         self.citations = citations
@@ -147,9 +148,9 @@ class StreamCitationGeneration(StreamResponse):
 
 class StreamQueryGeneration(StreamResponse):
     def __init__(
-            self,
-            search_queries: Optional[List[Dict[str, Any]]],
-            **kwargs,
+        self,
+        search_queries: Optional[List[Dict[str, Any]]],
+        **kwargs,
     ) -> None:
         super().__init__(**kwargs)
         self.search_queries = search_queries
@@ -157,10 +158,10 @@ class StreamQueryGeneration(StreamResponse):
 
 class StreamSearchResults(StreamResponse):
     def __init__(
-            self,
-            search_results: Optional[List[Dict[str, Any]]],
-            documents: Optional[List[Dict[str, Any]]],
-            **kwargs,
+        self,
+        search_results: Optional[List[Dict[str, Any]]],
+        documents: Optional[List[Dict[str, Any]]],
+        **kwargs,
     ) -> None:
         super().__init__(**kwargs)
         self.search_results = search_results
@@ -169,9 +170,9 @@ class StreamSearchResults(StreamResponse):
 
 class StreamEnd(StreamResponse):
     def __init__(
-            self,
-            finish_reason: str,
-            **kwargs,
+        self,
+        finish_reason: str,
+        **kwargs,
     ) -> None:
         super().__init__(**kwargs)
         self.finish_reason = finish_reason
