@@ -365,7 +365,9 @@ class Client:
             "return_chatlog": return_chatlog,
             "return_prompt": return_prompt,
             "return_preamble": return_preamble,
-            "chat_history": [asdict(chat_history_entry) for chat_history_entry in chat_history] if chat_history else None,
+            "chat_history": [asdict(chat_history_entry) for chat_history_entry in chat_history]
+            if chat_history
+            else None,
             "preamble_override": preamble_override,
             "temperature": temperature,
             "max_tokens": max_tokens,
