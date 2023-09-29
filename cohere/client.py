@@ -572,7 +572,7 @@ class Client:
         """Returns a Tokens object of the provided text, see https://docs.cohere.ai/reference/tokenize for advanced usage.
 
         Args:
-            text (str): Text to summarize.
+            text (str): Text to tokenize.
             model (str): An optional model name that will ensure that the tokenization uses the tokenizer used by that model, which can be critical for counting tokens properly.
         """
         json_body = {"text": text, "model": model}
