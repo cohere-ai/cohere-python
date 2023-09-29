@@ -1,6 +1,7 @@
+from enum import Enum
+
 from cohere.responses.base import CohereObject
 
-from enum import Enum
 
 class Role(str, Enum):
     CHATBOT = "chatbot"

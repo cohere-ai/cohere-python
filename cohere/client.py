@@ -16,6 +16,7 @@ from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
 import cohere
+from cohere.chat import ChatHistoryEntry
 from cohere.custom_model_dataset import CustomModelDataset
 from cohere.error import CohereAPIError, CohereConnectionError, CohereError
 from cohere.logging import logger
@@ -54,7 +55,6 @@ from cohere.responses.feedback import (
 from cohere.responses.rerank import Reranking
 from cohere.responses.summarize import SummarizeResponse
 from cohere.utils import is_api_key_valid, threadpool_map, wait_for_job
-from cohere.chat import ChatHistoryEntry
 
 
 class Client:

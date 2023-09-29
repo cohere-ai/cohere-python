@@ -4,6 +4,7 @@ import pytest
 from utils import get_api_key
 
 import cohere
+from cohere.chat import ChatHistoryEntry, Role
 from cohere.responses.chat import (
     StreamCitationGeneration,
     StreamEnd,
@@ -12,7 +13,6 @@ from cohere.responses.chat import (
     StreamStart,
     StreamTextGeneration,
 )
-from cohere.chat import ChatHistoryEntry, Role
 
 API_KEY = get_api_key()
 co = cohere.Client(API_KEY)

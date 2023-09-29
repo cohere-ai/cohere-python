@@ -8,6 +8,7 @@ from dataclasses import asdict
 from datetime import datetime, timezone
 from functools import partial
 from typing import Any, BinaryIO, Callable, Dict, Iterable, List, Optional, Union
+
 from cohere.chat import ChatHistoryEntry
 
 try:
