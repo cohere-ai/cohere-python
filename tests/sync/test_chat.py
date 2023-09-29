@@ -12,6 +12,7 @@ from cohere.responses.chat import (
     StreamStart,
     StreamTextGeneration,
 )
+from cohere.chat import ChatHistoryEntry, Role
 
 API_KEY = get_api_key()
 co = cohere.Client(API_KEY)
@@ -142,8 +143,8 @@ class TestChat(unittest.TestCase):
         prediction = co.chat(
             "Who are you?",
             chat_history=[
-                {"role": "User", "message": "Hey!"},
-                {"role": "Chatbot", "message": "Hey! How can I help you?"},
+                ChatHistoryEntry(message="Hey!", role=Role.USER),
+                ChatHistoryEntry(message="Hey! How can I help you?", role=Role.CHATBOT),
             ],
             return_prompt=True,
             return_chatlog=True,

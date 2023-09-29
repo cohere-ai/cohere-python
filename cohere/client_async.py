@@ -8,6 +8,7 @@ from dataclasses import asdict
 from datetime import datetime, timezone
 from functools import partial
 from typing import Any, BinaryIO, Callable, Dict, Iterable, List, Optional, Union
+from cohere.chat import ChatHistoryEntry
 
 try:
     from typing import Literal, TypedDict
@@ -216,7 +217,7 @@ class AsyncClient(Client):
         return_chatlog: Optional[bool] = False,
         return_prompt: Optional[bool] = False,
         return_preamble: Optional[bool] = False,
-        chat_history: Optional[List[Dict[str, str]]] = None,
+        chat_history: Optional[List[Union[ChatHistoryEntry, Dict[str,str]]]] = None,
         preamble_override: Optional[str] = None,
         user_name: Optional[str] = None,
         temperature: Optional[float] = 0.8,

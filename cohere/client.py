@@ -54,6 +54,7 @@ from cohere.responses.feedback import (
 from cohere.responses.rerank import Reranking
 from cohere.responses.summarize import SummarizeResponse
 from cohere.utils import is_api_key_valid, threadpool_map, wait_for_job
+from cohere.chat import ChatHistoryEntry
 
 
 class Client:
@@ -232,7 +233,7 @@ class Client:
         return_chatlog: Optional[bool] = False,
         return_prompt: Optional[bool] = False,
         return_preamble: Optional[bool] = False,
-        chat_history: Optional[List[Dict[str, str]]] = None,
+        chat_history: Optional[List[Union[ChatHistoryEntry, Dict[str,str]]]] = None,
         preamble_override: Optional[str] = None,
         user_name: Optional[str] = None,
         temperature: Optional[float] = 0.8,
@@ -312,11 +313,12 @@ class Client:
                 >>> for token in res:
                 >>>     print(token)
             Stateless chat with chat history:
+                >>> from cohere.chat import ChatHistoryEntry, Role
                 >>> res = co.chat(
                 >>>     message="Tell me a joke!",
                 >>>     chat_history=[
-                >>>         {'role': 'User', message': 'Hey! How are you doing today?'},
-                >>>         {'role': 'Chatbot', message': 'I am doing great! How can I help you?'},
+                >>>         ChatHistoryEntry(role=Role.USER, message="Hey! How are you doing today?"),
+                >>>         ChatHistoryEntry(role=Role.CHATBOT, message="I am doing great! How can I help you?"),
                 >>>     ],
                 >>>     return_prompt=True)
                 >>> print(res.text)
@@ -363,7 +365,7 @@ class Client:
             "return_chatlog": return_chatlog,
             "return_prompt": return_prompt,
             "return_preamble": return_preamble,
-            "chat_history": chat_history,
+            "chat_history": [dict(chat_history_entry) for chat_history_entry in chat_history] if chat_history else None,
             "preamble_override": preamble_override,
             "temperature": temperature,
             "max_tokens": max_tokens,
