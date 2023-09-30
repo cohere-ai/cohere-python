@@ -102,6 +102,9 @@ class Client:
         Checks the api key, which happens automatically during Client initialization, but not in AsyncClient.
         check_api_key raises an exception when the key is invalid, but the return value for valid keys is kept for
         backwards compatibility.
+        
+        Returns:
+            A dictionary with a single key "valid" indicating whether the API key is valid (True) or not (False).
         """
         return {"valid": is_api_key_valid(self.api_key)}
 
@@ -116,9 +119,12 @@ class Client:
         are correctly inserted, and makes it easier to retrieve only the completion log-likelihood.
 
         Args:
-            prompt (str): The prompt
-            completion (str): (Optional) The completion
-            model (str): (Optional) The model to use for calculating the log-likelihoods
+            prompt (str): The prompt.
+            completion (str): (Optional) The completion.
+            model (str): (Optional) The model to use for calculating the log-likelihoods.
+
+        Returns:
+            LogLikelihoods: An object containing log-likelihood information for the provided prompt and completion.
         """
         json_body = {"model": model, "prompt": prompt, "completion": completion}
         response = self._request(cohere.LOGLIKELIHOOD_URL, json=json_body)
@@ -127,12 +133,21 @@ class Client:
     def batch_generate(
         self, prompts: List[str], return_exceptions=False, **kwargs
     ) -> List[Union[Generations, Exception]]:
-        """A batched version of generate with multiple prompts.
+        """
+        Generate responses in batch for multiple prompts.
+
+        This method allows you to generate responses for a list of prompts in a batched manner.
 
         Args:
-            prompts: list of prompts
-            return_exceptions (bool): Return exceptions as list items rather than raise them. Ensures your entire batch is not lost on one of the items failing.
-            kwargs: other arguments to `generate`
+            prompts (List[str]): A list of prompts.
+            return_exceptions (bool): Return exceptions as list items rather than 
+                raising them. This ensures that your entire batch is not lost
+                if one of the items fails.
+            kwargs: Other arguments to pass to the `generate` method.
+
+        Returns:
+            List[Union[Generations, Exception]]: A list of generated responses
+                or exceptions (if `return_exceptions` is True).
         """
         return threadpool_map(
             self.generate,
@@ -164,6 +179,8 @@ class Client:
         """Generate endpoint.
         See https://docs.cohere.ai/reference/generate for advanced arguments
 
+        This method generates text based on a provided prompt using various parameters and options.
+
         Args:
             prompt (str): Represents the prompt or text to be completed. Trailing whitespaces will be trimmed.
             model (str): (Optional) The model ID to use for generating the next reply.
@@ -174,6 +191,7 @@ class Client:
             temperature (float): (Optional) The degree of randomness in generations from 0.0 to 5.0, lower is less random.
             truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
             stream (bool): Return streaming tokens.
+
         Returns:
             if stream=False: a Generations object
             if stream=True: a StreamingGenerations object including:
@@ -406,6 +424,9 @@ class Client:
             compress (bool): (Optional) Whether to compress the embeddings. When True, the compressed_embeddings will be returned as integers in the range [0, 255].
             compression_codebook (str): (Optional) The compression codebook to use for compressed embeddings. Defaults to "default".
             input_type (str): (Optional) One of "classification", "clustering", "search_document", "search_query". The type of input text provided to embed.
+        
+        Returns:
+            Embeddings: An Embeddings object containing embeddings for the provided texts.
         """
         responses = {
             "embeddings": [],
@@ -448,6 +469,8 @@ class Client:
         Args:
             model (str): (Optional) The model ID to use for embedding the text.
             compression_codebook (str): (Optional) The compression codebook to use for compressed embeddings. Defaults to "default".
+        Returns:
+            Codebook: A Codebook object containing the compression codebook.
         """
         json_body = {
             "model": model,
@@ -471,6 +494,9 @@ class Client:
             model (str): (Optional) The model ID to use for classifing the inputs.
             examples (List[ClassifyExample]): A list of ClassifyExample objects containing a text and its associated label.
             truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
+        
+        Returns:
+            Classifications: A Classifications object containing the classification results.
         """
         examples_dicts = [{"text": example.text, "label": example.label} for example in examples]
 
@@ -866,6 +892,20 @@ class Client:
         )
 
     def _check_response(self, json_response: Dict, headers: Dict, status_code: int):
+        """
+        Checks the response for errors and warnings.
+
+        This method checks the response for potential errors, warnings, and unexpected status codes and raises corresponding exceptions when necessary.
+
+        Args:
+            json_response (Dict): The JSON response received from the API.
+            headers (Dict): The HTTP headers from the API response.
+            status_code (int): The HTTP status code from the API response.
+
+        Raises:
+            CohereAPIError: If the API response contains an error message.
+            CohereError: If an unexpected server error occurs.
+        """
         if "X-API-Warning" in headers:
             logger.warning(headers["X-API-Warning"])
         if "message" in json_response:  # has errors
@@ -884,6 +924,26 @@ class Client:
             raise CohereError(message=f"Unexpected server error (status {status_code}): {json_response}")
 
     def _request(self, endpoint, json=None, files=None, method="POST", stream=False, params=None) -> Any:
+        """
+        Makes an HTTP request to the Cohere API.
+
+        This method constructs and sends an HTTP request to the Cohere API and handles various aspects of the request, including retries and error handling.
+
+        Args:
+            endpoint (str): The API endpoint to request.
+            json (Any): The JSON data to send in the request body (optional).
+            files (Any): Files to send in the request (optional).
+            method (str): The HTTP method to use (default is "POST").
+            stream (bool): Whether to use streaming for the response (default is False).
+            params (Any): Additional parameters to include in the request (optional).
+
+        Returns:
+            Any: The response data from the API.
+
+        Raises:
+            CohereConnectionError: If there's a connection error.
+            CohereError: If an unexpected exception occurs during the request.
+        """
         headers = {
             "Authorization": "BEARER {}".format(self.api_key),
             "Request-Source": self.request_source,

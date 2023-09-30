@@ -85,6 +85,15 @@ def wait_for_job(
     timeout: Optional[float] = None,
     interval: float = 10,
 ) -> T:
+    """
+    Wait for a job to complete or reach a terminal status.
+
+    :param get_job: A function that retrieves the current job status.
+    :param timeout: Maximum time (in seconds) to wait for the job. If None, it will wait indefinitely.
+    :param interval: Time (in seconds) to wait between checking the job status.
+    :return: The final job status.
+    :raises TimeoutError: If the job doesn't reach a terminal status within the specified timeout.
+    """
     start_time = time.time()
     job = get_job()
 
@@ -104,6 +113,16 @@ async def async_wait_for_job(
     timeout: Optional[float] = None,
     interval: float = 10,
 ) -> T:
+    """
+    Asynchronously wait for a job to complete or reach a terminal status.
+
+    :param get_job: An asynchronous function that retrieves the current job status.
+    :param timeout: Maximum time (in seconds) to wait for the job. If None, it will wait indefinitely.
+    :param interval: Time (in seconds) to wait between checking the job status.
+    :return: The final job status.
+    :raises TimeoutError: If the job doesn't reach a terminal status within the specified timeout.
+    """
+
     start_time = time.time()
     job = await get_job()
 
@@ -118,7 +137,17 @@ async def async_wait_for_job(
 
 
 def threadpool_map(f, call_args: List[Dict], num_workers, return_exceptions: bool = False) -> List:
-    """Helper function similar to futures.ThreadPoolExecutor.map, but allows returning exceptions"""
+    """Helper function similar to futures.ThreadPoolExecutor.map, but allows returning exceptions
+    
+    Map a function to a list of arguments using a thread pool.
+
+    :param f: The function to apply to each set of arguments.
+    :param call_args: A list of dictionaries where each dictionary contains the keyword arguments for the function.
+    :param num_workers: The number of worker threads in the thread pool.
+    :param return_exceptions: If True, exceptions raised during execution are returned in the result list.
+    :return: A list of results from applying the function to the arguments.
+    :raises Exception: If `return_exceptions` is False and an exception occurs during execution.
+    """
     results = []
     with futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
         futures_list = [executor.submit(f, **args) for args in call_args]

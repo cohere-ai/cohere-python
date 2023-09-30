@@ -152,6 +152,19 @@ class AsyncClient(Client):
         completion: Optional[str] = None,
         model: Optional[str] = None,
     ) -> LogLikelihoods:
+        """
+        Calculate token log-likelihood for a provided prompt and completion.
+
+        This asynchronous method calculates token log-likelihood for a given prompt and completion.
+
+        Args:
+            prompt (str): The prompt.
+            completion (str): (Optional) The completion.
+            model (str): (Optional) The model to use for calculating log-likelihoods.
+
+        Returns:
+            LogLikelihoods: An object containing log-likelihood information for the provided prompt and completion.
+        """
         json_body = {"model": model, "prompt": prompt, "completion": completion}
         response = await self._request(cohere.LOGLIKELIHOOD_URL, json=json_body)
         return LogLikelihoods(response["prompt_tokens"], response["completion_tokens"])
@@ -159,6 +172,19 @@ class AsyncClient(Client):
     async def batch_generate(
         self, prompts: List[str], return_exceptions=False, **kwargs
     ) -> List[Union[Exception, Generations]]:
+        """
+        Generate responses in batch for multiple prompts.
+
+        This asynchronous method generates responses for a list of prompts in a batched manner.
+
+        Args:
+            prompts (List[str]): A list of prompts.
+            return_exceptions (bool): Return exceptions as list items rather than raising them. Ensures your entire batch is not lost if one of the items fails.
+            kwargs: Other arguments to pass to the `generate` method.
+
+        Returns:
+            List[Union[Exception, Generations]]: A list of generated responses or exceptions (if `return_exceptions` is True).
+        """
         return await asyncio.gather(
             *[self.generate(prompt, **kwargs) for prompt in prompts], return_exceptions=return_exceptions
         )
@@ -183,6 +209,49 @@ class AsyncClient(Client):
         logit_bias: Dict[int, float] = {},
         stream: bool = False,
     ) -> Union[Generations, StreamingGenerations]:
+        """
+        Generate text based on a given prompt.
+
+        This asynchronous method generates text based on a provided prompt using various parameters and options.
+
+        Args:
+            prompt (str): Represents the prompt or text to be completed. Trailing whitespaces will be trimmed.
+            prompt_vars (object): (Optional) Variables to be used in the prompt.
+            model (str): (Optional) The model ID to use for generating the next reply.
+            return_likelihoods (str): (Optional) One of GENERATION|ALL|NONE to specify how and if the token (log) likelihoods are returned with the response.
+            preset (str): (Optional) The ID of a custom playground preset.
+            num_generations (int): (Optional) The number of generations that will be returned, defaults to 1.
+            max_tokens (int): (Optional) The number of tokens to predict per generation, defaults to 20.
+            temperature (float): (Optional) The degree of randomness in generations from 0.0 to 5.0, lower is less random.
+            truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
+            stream (bool): Return streaming tokens.
+
+        Returns:
+            if stream=False: a Generations object
+            if stream=True: a StreamingGenerations object including:
+                id (str): The id of the whole generation call
+                generations (Generations): same as the response when stream=False
+                finish_reason (string) possible values:
+                    COMPLETE: when the stream successfully completed
+                    ERROR: when an error occurred during streaming
+                    ERROR_TOXIC: when the stream was halted due to toxic output.
+                    ERROR_LIMIT: when the context is too big to generate.
+                    USER_CANCEL: when the user has closed the stream / cancelled the request
+                    MAX_TOKENS: when the max tokens limit was reached.
+                texts (List[str]): list of segments of text streamed back from the API
+
+        Examples:
+            A simple generate message:
+                >>> res = await co.generate(prompt="Hey! How are you doing today?")
+                >>> print(res.text)
+
+            Streaming generate:
+                >>> res = await co.generate(
+                >>>     prompt="Hey! How are you doing today?",
+                >>>     stream=True)
+                >>> for token in res:
+                >>>     print(token)
+        """
         json_body = {
             "model": model,
             "prompt": prompt,
@@ -231,6 +300,43 @@ class AsyncClient(Client):
         prompt_truncation: Optional[str] = None,
         connectors: Optional[List[Dict[str, Any]]] = None,
     ) -> Union[AsyncChat, StreamingChat]:
+        """
+        Start or continue a conversation with the chat model.
+
+        This asynchronous method allows you to engage in a conversation with the chat model, providing a message as input and receiving responses.
+
+        Args:
+            message (str): The message to send as part of the conversation.
+            conversation_id (str): (Optional) The conversation ID if you want to continue an existing conversation.
+            model (str): (Optional) The model ID to use for the chat.
+            return_chatlog (bool): (Optional) Whether to return the chatlog (default is False).
+            return_prompt (bool): (Optional) Whether to return the prompt (default is False).
+            return_preamble (bool): (Optional) Whether to return the preamble (default is False).
+            chat_history (List[Dict[str, str]]): (Optional) Previous chat messages as a list of dictionaries.
+            preamble_override (str): (Optional) Override for the preamble.
+            user_name (str): (Optional) The user's name for the conversation.
+            temperature (float): (Optional) The temperature parameter for generating responses (default is 0.8).
+            max_tokens (int): (Optional) The maximum number of tokens for each response.
+            stream (bool): (Optional) Return streaming tokens (default is False).
+            p (float): (Optional) The nucleus sampling parameter.
+            k (float): (Optional) The top-k sampling parameter.
+            logit_bias (Dict[int, float]): (Optional) Logit bias for customizing response generation.
+            search_queries_only (bool): (Optional) Restrict generated content to search queries only.
+            documents (List[Dict[str, Any]]): (Optional) List of documents for search context.
+            citation_quality (str): (Optional) Control the quality of generated citations.
+            prompt_truncation (str): (Optional) How to handle text truncation within prompts.
+            connectors (List[Dict[str, Any]]): (Optional) List of connectors for structured conversations.
+
+        Returns:
+            Union[AsyncChat, StreamingChat]: An asynchronous chat response object.
+
+        Example:
+            To start a conversation:
+                >>> chat_response = await co.chat(message="Hello, chatbot!")
+
+            To continue an existing conversation:
+                >>> chat_response = await co.chat(message="Tell me more.", conversation_id="1234567890")
+        """
         if message is None:
             raise CohereError("'message' must be provided.")
 
@@ -362,6 +468,24 @@ class AsyncClient(Client):
         additional_command: Optional[str] = None,
         extractiveness: Optional[str] = None,
     ) -> SummarizeResponse:
+        """
+        Generate a summary of the provided text.
+
+        Args:
+            text (str): The input text to be summarized.
+            model (str): (Optional) The model ID to use for summarization.
+            length (str): (Optional) Control the length of the generated summary.
+            format (str): (Optional) Specify the format of the summary.
+            temperature (float): (Optional) Control the randomness of the generated summary.
+            additional_command (str): (Optional) Provide additional commands for summarization.
+            extractiveness (str): (Optional) Control the extractiveness of the generated summary.
+
+        Returns:
+            SummarizeResponse: A response containing the generated summary.
+
+        Example:
+            >>> summary = await co.summarize(text="This is a long article. ...")
+        """
         json_body = {
             "model": model,
             "text": text,
@@ -379,9 +503,36 @@ class AsyncClient(Client):
     async def batch_tokenize(
         self, texts: List[str], return_exceptions=False, **kwargs
     ) -> List[Union[Tokens, Exception]]:
+        """
+        Tokenize a batch of text strings asynchronously.
+
+        Args:
+            texts (List[str]): A list of text strings to be tokenized.
+            return_exceptions (bool): (Optional) Whether to return exceptions for failed tokenization.
+            kwargs: Additional keyword arguments.
+
+        Returns:
+            List[Union[Tokens, Exception]]: A list of tokenization results.
+
+        Example:
+            >>> tokenized_texts = await co.batch_tokenize(texts=["Sentence 1.", "Sentence 2."])
+        """
         return await asyncio.gather(*[self.tokenize(t, **kwargs) for t in texts], return_exceptions=return_exceptions)
 
     async def tokenize(self, text: str, model: Optional[str] = None) -> Tokens:
+        """
+        Tokenize a text string asynchronously.
+
+        Args:
+            text (str): The text string to be tokenized.
+            model (str): (Optional) The model ID to use for tokenization.
+
+        Returns:
+            Tokens: A tokenization result.
+
+        Example:
+            >>> tokens = await co.tokenize(text="This is a sentence.")
+        """
         json_body = {"text": text, "model": model}
         res = await self._request(cohere.TOKENIZE_URL, json_body)
         return Tokens(tokens=res["tokens"], token_strings=res["token_strings"], meta=res["meta"])
@@ -389,16 +540,55 @@ class AsyncClient(Client):
     async def batch_detokenize(
         self, list_of_tokens: List[List[int]], return_exceptions=False, **kwargs
     ) -> List[Union[Detokenization, Exception]]:
+        """
+        Detokenize a batch of tokenized sequences asynchronously.
+
+        Args:
+            list_of_tokens (List[List[int]]): A list of tokenized sequences to be detokenized.
+            return_exceptions (bool): (Optional) Whether to return exceptions for failed detokenization.
+            kwargs: Additional keyword arguments.
+
+        Returns:
+            List[Union[Detokenization, Exception]]: A list of detokenization results.
+
+        Example:
+            >>> detokenized_texts = await co.batch_detokenize(list_of_tokens=[[1, 2, 3], [4, 5, 6]])
+        """
         return await asyncio.gather(
             *[self.detokenize(t, **kwargs) for t in list_of_tokens], return_exceptions=return_exceptions
         )
 
     async def detokenize(self, tokens: List[int], model: Optional[str] = None) -> Detokenization:
+        """
+        Detokenize a tokenized sequence asynchronously.
+
+        Args:
+            tokens (List[int]): A list of token IDs to be detokenized.
+            model (str): (Optional) The model ID to use for detokenization.
+
+        Returns:
+            Detokenization: A detokenization result.
+
+        Example:
+            >>> detokenized_text = await co.detokenize(tokens=[1, 2, 3])
+        """
         json_body = {"tokens": tokens, "model": model}
         res = await self._request(cohere.DETOKENIZE_URL, json_body)
         return Detokenization(text=res["text"], meta=res["meta"])
 
     async def detect_language(self, texts: List[str]) -> DetectLanguageResponse:
+        """
+        Detect the language of a batch of text strings asynchronously.
+
+        Args:
+            texts (List[str]): A list of text strings to be language-detected.
+
+        Returns:
+            DetectLanguageResponse: A response containing language detection results.
+
+        Example:
+            >>> language_results = await co.detect_language(texts=["Hello, world!", "Bonjour!"])
+        """
         json_body = {
             "texts": texts,
         }
@@ -419,6 +609,25 @@ class AsyncClient(Client):
         prompt: str = None,
         annotator_id: str = None,
     ) -> GenerateFeedbackResponse:
+        """
+        Provide feedback on a generated response asynchronously.
+
+        Args:
+            request_id (str): The ID of the request for which feedback is provided.
+            good_response (bool): Whether the response is considered good or not.
+            model (str): (Optional) The model ID associated with the response.
+            desired_response (str): (Optional) The desired response.
+            flagged_response (bool): (Optional) Whether the response is flagged.
+            flagged_reason (str): (Optional) The reason for flagging the response.
+            prompt (str): (Optional) The prompt used for generating the response.
+            annotator_id (str): (Optional) The ID of the annotator providing feedback.
+
+        Returns:
+            GenerateFeedbackResponse: A response indicating the feedback submission status.
+
+        Example:
+            >>> feedback = await co.generate_feedback(request_id="123", good_response=True)
+        """
         json_body = {
             "request_id": request_id,
             "good_response": good_response,
@@ -439,6 +648,21 @@ class AsyncClient(Client):
         prompt: str = None,
         annotator_id: str = None,
     ) -> GeneratePreferenceFeedbackResponse:
+        """
+        Provide preference feedback on a list of ratings asynchronously.
+
+        Args:
+            ratings (List[PreferenceRating]): A list of preference ratings.
+            model (str): (Optional) The model ID associated with the ratings.
+            prompt (str): (Optional) The prompt used for generating the ratings.
+            annotator_id (str): (Optional) The ID of the annotator providing feedback.
+
+        Returns:
+            GeneratePreferenceFeedbackResponse: A response indicating the feedback submission status.
+
+        Example:
+            >>> feedback = await co.generate_preference_feedback(ratings=[rating1, rating2])
+        """
         ratings_dicts = []
         for rating in ratings:
             ratings_dicts.append(asdict(rating))
@@ -512,6 +736,7 @@ class AsyncClient(Client):
             keep_fields (Union[str, List[str]]): (optional) A list of fields you want to keep in the dataset that are required
             optional_fields (Union[str, List[str]]): (optional) A list of fields you want to keep in the dataset that are optional
             parse_info: ParseInfo: (optional) information on how to parse the raw data
+        
         Returns:
             AsyncDataset: Dataset object.
         """
@@ -1067,6 +1292,30 @@ class AIOHTTPBackend:
         params=None,
         **kwargs,
     ) -> JSON:
+        """
+        Make an HTTP request to the specified URL asynchronously.
+
+        Args:
+            url (str): The URL to send the request to.
+            json: (Optional) A JSON payload to include in the request.
+            files: (Optional) Data files to include in the request.
+            method (str): (Optional) The HTTP method to use (default is "post").
+            headers: (Optional) Custom headers to include in the request.
+            session: (Optional) An existing aiohttp ClientSession to use (if not provided, a new session will be created).
+            stream (bool): (Optional) Whether to stream the response.
+            params: (Optional) Query parameters to include in the request.
+            **kwargs: Additional keyword arguments for the request.
+
+        Returns:
+            JSON: The JSON response from the HTTP request.
+
+        Raises:
+            CohereConnectionError: If a connection error occurs.
+            CohereError: If an unexpected error occurs.
+
+        Example:
+            >>> response = await co.request(url="https://example.com/api", json={"key": "value"})
+        """
         session = session or await self.session()
         self.logger.debug(f"Making request to {url} with content {json}")
 
@@ -1092,6 +1341,15 @@ class AIOHTTPBackend:
         return response
 
     async def session(self) -> aiohttp.ClientSession:
+        """
+        Get or create an aiohttp ClientSession for making HTTP requests asynchronously.
+
+        Returns:
+            aiohttp.ClientSession: The aiohttp ClientSession.
+
+        Example:
+            >>> session = await co.session()
+        """
         if self._session is None:
             self._session = aiohttp.ClientSession(
                 json_serialize=np_json_dumps,
