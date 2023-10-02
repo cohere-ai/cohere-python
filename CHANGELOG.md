@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.30
+ - [#317] (https://github.com/cohere-ai/cohere-python/pull/317)
+   - Update `chatlog` to `chat_history`
+
 ## 4.29
  - [#311] (https://github.com/cohere-ai/cohere-python/pull/311)
    - Embed: remove embed input_type tests
@@ -22,7 +26,7 @@
 - [#296] (https://github.com/cohere-ai/cohere-python/pull/301)
   - Chat: add support for prompt_truncation param
 
-## 4.25 
+## 4.25
 - [#303] (https://github.com/cohere-ai/cohere-python/pull/303)
   - Allow uploading of evaluation data
 
