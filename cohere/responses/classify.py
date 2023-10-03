@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, NamedTuple, Optional
+from typing import Any, Dict, List, NamedTuple, Optional, Union
 
 from cohere.responses.base import CohereObject
 
@@ -8,7 +8,7 @@ Example = NamedTuple("Example", [("text", str), ("label", str)])
 
 class Classification(CohereObject):
     def __init__(
-        self, input: str, prediction: str, confidence: float, labels: Dict[str, LabelPrediction], *args, **kwargs
+        self, input: str, prediction: Union[str, List[str]], confidence: Union[float, List[float]], labels: Dict[str, LabelPrediction], *args, **kwargs
     ) -> None:
         super().__init__(*args, **kwargs)
         self.input = input
@@ -20,7 +20,8 @@ class Classification(CohereObject):
         prediction = self.prediction
         confidence = self.confidence
         labels = self.labels
-        return f'Classification<prediction: "{prediction}", confidence: {confidence}, labels: {labels}>'
+        prediction_str = f'"{prediction}"' if isinstance(prediction, str) else prediction
+        return f'Classification<prediction: {prediction_str}, confidence: {confidence}, labels: {labels}>'
 
 
 class Classifications(CohereObject):
