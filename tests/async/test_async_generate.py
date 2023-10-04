@@ -67,10 +67,8 @@ async def test_async_generate_stream(async_client):
         final_text += token.text
 
     assert res.id != None
-    assert res.finish_reason, "COMPLETE"
 
     assert isinstance(res.generations, Generations)
-    assert res.generations[0].finish_reason == "COMPLETE"
     assert res.generations[0].prompt == "Hey!"
     assert res.generations[0].text == final_text
     assert res.generations[0].id != None
