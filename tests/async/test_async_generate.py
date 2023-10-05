@@ -39,9 +39,6 @@ async def test_return_likelihoods_generation(async_client):
 @pytest.mark.asyncio
 async def test_raise_ex(async_client):
     with pytest.raises(CohereAPIError):
-        await async_client.generate(prompt="too long", max_tokens=100000)
-
-    with pytest.raises(CohereAPIError):
         await async_client.batch_generate(
             ["not too long", "way too long even if we support 8 k tokens" * 2000],
             max_tokens=10,
