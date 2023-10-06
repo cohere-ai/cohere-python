@@ -357,10 +357,12 @@ class Client:
                 >>> if res.is_search_required:
                 >>>      print(res.search_queries)
         """
-
-        for chat_history_message in chat_history:
-            if not isinstance(chat_history_message, dict):
+        if chat_history is not None:
+            if not isinstance(chat_history, list):
                 raise CohereError(message="invalid format for chat_history, must be a list of dicts")
+            for chat_history_message in chat_history:
+                if not isinstance(chat_history_message, dict):
+                    raise CohereError(message="invalid format for chat_history, must be a list of dicts")
 
         json_body = {
             "message": message,
