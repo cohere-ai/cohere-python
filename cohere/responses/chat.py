@@ -17,7 +17,7 @@ class Chat(CohereObject):
         conversation_id: str,
         meta: Optional[Dict[str, Any]] = None,
         prompt: Optional[str] = None,
-        chatlog: Optional[List[Dict[str, str]]] = None,
+        chat_history: Optional[List[Dict[str, Any]]] = None,
         preamble: Optional[str] = None,
         token_count: Optional[Dict[str, int]] = None,
         is_search_required: Optional[bool] = None,
@@ -35,7 +35,7 @@ class Chat(CohereObject):
         self.text = text
         self.conversation_id = conversation_id  # optional
         self.prompt = prompt  # optional
-        self.chatlog = chatlog  # optional
+        self.chat_history = chat_history  # optional
         self.preamble = preamble  # optional
         self.client = client
         self.token_count = token_count
@@ -56,7 +56,7 @@ class Chat(CohereObject):
             conversation_id=response.get("conversation_id"),  # optional
             text=response.get("text"),
             prompt=response.get("prompt"),  # optional
-            chatlog=response.get("chatlog"),  # optional
+            chat_history=response.get("chat_history"),  # optional
             preamble=response.get("preamble"),  # optional
             client=client,
             token_count=response.get("token_count"),
@@ -72,7 +72,7 @@ class Chat(CohereObject):
         return self.client.chat(
             message=response,
             conversation_id=self.conversation_id,
-            return_chatlog=self.chatlog is not None,
+            return_chat_history=self.chat_history is not None,
             return_prompt=self.prompt is not None,
             return_preamble=self.preamble is not None,
             max_tokens=max_tokens,
@@ -84,7 +84,7 @@ class AsyncChat(Chat):
         return await self.client.chat(
             message=response,
             conversation_id=self.conversation_id,
-            return_chatlog=self.chatlog is not None,
+            return_chat_history=self.chat_history is not None,
             return_prompt=self.prompt is not None,
             return_preamble=self.preamble is not None,
             max_tokens=max_tokens,
@@ -187,7 +187,7 @@ class StreamingChat(CohereObject):
         self.generation_id = None
         self.preamble = None
         self.prompt = None
-        self.chatlog = None
+        self.chat_history = None
         self.finish_reason = None
         self.token_count = None
         self.meta = None
@@ -246,7 +246,7 @@ class StreamingChat(CohereObject):
             self.generation_id = response.get("generation_id")
             self.preamble = response.get("preamble")
             self.prompt = response.get("prompt")
-            self.chatlog = response.get("chatlog")
+            self.chat_history = response.get("chat_history")
             self.token_count = response.get("token_count")
             self.meta = response.get("meta")
             self.is_search_required = response.get("is_search_required")  # optional
