@@ -32,9 +32,11 @@ class TestChat(unittest.TestCase):
             prediction = prediction.respond("oh that's cool", max_tokens=5)
             self.assertIsInstance(prediction.text, str)
 
-    def test_valid_model(self):
-        prediction = co.chat("Yo what up?", model="command", max_tokens=5)
-        self.assertIsInstance(prediction.text, str)
+    def test_valid_models(self):
+        models_to_test = ["command", "command-light", "command-nightly", "command-light-nightly"]
+        for model in models_to_test:
+            prediction = co.chat("Yo what up?", model=model, max_tokens=5)
+            self.assertIsInstance(prediction.text, str)
 
     def test_invalid_model(self):
         with self.assertRaises(cohere.CohereError):
@@ -86,6 +88,14 @@ class TestChat(unittest.TestCase):
             prediction = co.chat("Yo what up?", temperature=temperature, max_tokens=5)
             self.assertIsInstance(prediction.text, str)
 
+    def test_return_conversation_id(self):
+        specified_conversation_id = "some-conversation-id"
+        prediction = co.chat("Yo what up?", conversation_id=specified_conversation_id, max_tokens=5)
+        self.assertIsInstance(prediction.text, str)
+        self.assertIsNotNone(prediction.conversation_id)
+        self.assertIsInstance(prediction.conversation_id, str)
+        self.assertEqual(prediction.conversation_id, specified_conversation_id)
+
     def test_stream(self):
         prediction = co.chat(
             message="Yo what up?",
@@ -110,6 +120,9 @@ class TestChat(unittest.TestCase):
                 self.assertGreater(len(token.text), 0)
                 expected_text += token.text
                 self.assertFalse(token.is_finished)
+            elif isinstance(token, cohere.responses.chat.StreamEnd):
+                self.assertEqual(token.event_type, "stream-end")
+                self.assertTrue(token.is_finished)
             self.assertIsInstance(token.index, int)
             self.assertEqual(token.index, expected_index)
             expected_index += 1
@@ -226,6 +239,40 @@ class TestChat(unittest.TestCase):
         self.assertFalse(prediction.is_search_required)
         self.assertIsInstance(prediction.search_queries, list)
         self.assertEqual(len(prediction.search_queries), 0)
+
+    def test_invalid_too_many_tokens(self):
+        with self.assertRaises(cohere.error.CohereError) as e:
+            _ = co.chat(
+                "What actually caused the 2008 Financial Crisis?",
+                temperature=0,
+                connectors=[{"id": "web-search"}],
+                prompt_truncation="OFF",
+            )
+        self.assertIn("too many tokens", str(e.exception))
+
+    def test_invalid_with_both_documents_and_connectors(self):
+        with self.assertRaises(cohere.error.CohereError) as e:
+            _ = co.chat(
+                "How deep in the Mariana Trench",
+                temperature=0,
+                documents=[
+                    {
+                        "id": "national_geographic_everest",
+                        "title": "Height of Mount Everest",
+                        "snippet": "The height of Mount Everest is 29,035 feet",
+                        "url": "https://education.nationalgeographic.org/resource/mount-everest/",
+                    },
+                    {
+                        "id": "national_geographic_mariana",
+                        "title": "Depth of the Mariana Trench",
+                        "snippet": "The depth of the Mariana Trench is 36,070 feet",
+                        "url": "https://www.nationalgeographic.org/activity/mariana-trench-deepest-place-earth",
+                    },
+                ],
+                connectors=[{"id": "web-search"}],
+                prompt_truncation="AUTO",
+            )
+        self.assertIn("invalid request: cannot specify both connectors and documents.", str(e.exception))
 
     def test_with_documents(self):
         prediction = co.chat(
