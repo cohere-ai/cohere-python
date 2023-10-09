@@ -66,10 +66,13 @@ For a full breakdown of endpoints and arguments, please consult the [SDK Docs](h
 | ---------------- | -------------------- |
 | /generate        | co.generate()        |
 | /embed           | co.embed()           |
+| /chat            | co.chat()            |
 | /classify        | co.classify()        |
 | /tokenize        | co.tokenize()        |
 | /detokenize      | co.detokenize()      |
 | /detect-language | co.detect_language() |
+| /summarize       | co.summarize()       |
+| /rerank          | co.rerank()          |
 
 ## Models
 
