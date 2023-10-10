@@ -359,10 +359,12 @@ class Client:
         """
         if chat_history is not None:
             if not isinstance(chat_history, list):
-                raise CohereError(message="invalid format for chat_history, must be a list of dicts")
+                raise CohereError(message="invalid format for chat_history, must be a list of dict or ChatHistoryEntry")
             for chat_history_message in chat_history:
-                if not isinstance(chat_history_message, dict):
-                    raise CohereError(message="invalid format for chat_history, must be a list of dicts")
+                if not isinstance(chat_history_message, (ChatHistoryEntry, dict)):
+                    raise CohereError(
+                        message="invalid format for chat_history, must be a list of dict or ChatHistoryEntry"
+                    )
 
         json_body = {
             "message": message,
