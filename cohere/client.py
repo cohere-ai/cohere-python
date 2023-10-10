@@ -362,9 +362,9 @@ class Client:
                 raise CohereError(message="invalid format for chat_history, must be a list of dict or ChatHistoryEntry")
             for i, chat_history_message in enumerate(chat_history):
                 if isinstance(chat_history_message, ChatHistoryEntry):
-                    continue
+                    chat_history[i] = asdict(chat_history_message)
                 elif isinstance(chat_history_message, dict):
-                    chat_history[i] = ChatHistoryEntry(**chat_history_message)
+                    continue
                 else:
                     raise CohereError(
                         message="invalid format for chat_history, must be a list of dict or ChatHistoryEntry"
@@ -377,9 +377,7 @@ class Client:
             "return_chat_history": return_chat_history,
             "return_prompt": return_prompt,
             "return_preamble": return_preamble,
-            "chat_history": [asdict(chat_history_entry) for chat_history_entry in chat_history]
-            if chat_history
-            else None,
+            "chat_history": chat_history if chat_history else None,
             "preamble_override": preamble_override,
             "temperature": temperature,
             "max_tokens": max_tokens,
