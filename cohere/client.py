@@ -360,8 +360,12 @@ class Client:
         if chat_history is not None:
             if not isinstance(chat_history, list):
                 raise CohereError(message="invalid format for chat_history, must be a list of dict or ChatHistoryEntry")
-            for chat_history_message in chat_history:
-                if not isinstance(chat_history_message, (ChatHistoryEntry, dict)):
+            for i, chat_history_message in enumerate(chat_history):
+                if isinstance(chat_history_message, ChatHistoryEntry):
+                    continue
+                elif isinstance(chat_history_message, dict):
+                    chat_history[i] = ChatHistoryEntry(**chat_history_message)
+                else:
                     raise CohereError(
                         message="invalid format for chat_history, must be a list of dict or ChatHistoryEntry"
                     )
