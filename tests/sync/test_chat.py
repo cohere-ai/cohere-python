@@ -40,17 +40,19 @@ class TestChat(unittest.TestCase):
         with self.assertRaises(cohere.CohereError):
             co.chat("Yo what up?", model="NOT_A_VALID_MODEL").text
 
-    def test_return_chatlog(self):
-        prediction = co.chat("Yo what up?", return_chatlog=True, max_tokens=5)
+    def test_return_chat_history(self):
+        prediction = co.chat("Yo what up?", return_chat_history=True, max_tokens=5)
         self.assertIsInstance(prediction.text, str)
-        self.assertIsNotNone(prediction.chatlog)
-        self.assertGreaterEqual(len(prediction.chatlog), len(prediction.text))
+        self.assertIsNotNone(prediction.chat_history)
+        self.assertIsInstance(prediction.chat_history, list)
+        self.assertEqual(len(prediction.chat_history), 2)
+        self.assertIsInstance(prediction.chat_history[0], dict)
 
-    def test_return_chatlog_false(self):
-        prediction = co.chat("Yo what up?", return_chatlog=False, max_tokens=5)
+    def test_return_chat_history_false(self):
+        prediction = co.chat("Yo what up?", return_chat_history=False, max_tokens=5)
         self.assertIsInstance(prediction.text, str)
 
-        assert prediction.chatlog is None
+        assert prediction.chat_history is None
 
     def test_return_prompt(self):
         prediction = co.chat("Yo what up?", return_prompt=True, max_tokens=5)
@@ -146,11 +148,11 @@ class TestChat(unittest.TestCase):
                 {"role": "Chatbot", "message": "Hey! How can I help you?"},
             ],
             return_prompt=True,
-            return_chatlog=True,
+            return_chat_history=True,
             max_tokens=5,
         )
         self.assertIsInstance(prediction.text, str)
-        self.assertIsNotNone(prediction.chatlog)
+        self.assertIsNotNone(prediction.chat_history)
         self.assertIn("User: Hey!", prediction.prompt)
         self.assertIn("Chatbot: Hey! How can I help you?", prediction.prompt)
 
