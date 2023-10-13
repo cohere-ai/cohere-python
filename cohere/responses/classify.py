@@ -8,19 +8,34 @@ Example = NamedTuple("Example", [("text", str), ("label", str)])
 
 class Classification(CohereObject):
     def __init__(
-        self, input: str, prediction: str, confidence: float, labels: Dict[str, LabelPrediction], *args, **kwargs
+        self,
+        input: str,
+        predictions: Optional[List[str]],
+        confidences: Optional[List[float]],
+        prediction: Optional[str],
+        confidence: Optional[float],
+        labels: Dict[str, LabelPrediction],
+        *args,
+        **kwargs,
     ) -> None:
         super().__init__(*args, **kwargs)
         self.input = input
-        self.prediction = prediction
-        self.confidence = confidence
+        self.prediction = prediction  # to be deprecated
+        self.confidence = confidence  # to be deprecated
+        self.predictions = predictions
+        self.confidences = confidences
         self.labels = labels
 
     def __repr__(self) -> str:
-        prediction = self.prediction
-        confidence = self.confidence
-        labels = self.labels
-        return f'Classification<prediction: "{prediction}", confidence: {confidence}, labels: {labels}>'
+        if self.prediction is not None:
+            assert self.confidence is not None
+            return (
+                f'Classification<prediction: "{self.prediction}", confidence: {self.confidence}, labels: {self.labels}>'
+            )
+        else:
+            assert self.predictions is not None
+            assert self.confidences is not None
+            return f'Classification<predictions: "{self.predictions}", confidences: {self.confidences}, labels: {self.labels}>'
 
 
 class Classifications(CohereObject):
