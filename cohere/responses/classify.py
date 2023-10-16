@@ -15,27 +15,43 @@ class Classification(CohereObject):
         prediction: Optional[str],
         confidence: Optional[float],
         labels: Dict[str, LabelPrediction],
+        classification_type: str,
         *args,
         **kwargs,
     ) -> None:
         super().__init__(*args, **kwargs)
         self.input = input
-        self.prediction = prediction  # to be deprecated
-        self.confidence = confidence  # to be deprecated
+        self._prediction = prediction  # to be deprecated
+        self._confidence = confidence  # to be deprecated
         self.predictions = predictions
         self.confidences = confidences
         self.labels = labels
+        self.classification_type = classification_type
+
+        if self._prediction is None or self._confidence is None:
+            if self._prediction is not None or self._confidence is not None:
+                raise ValueError("Cannot have one of prediction and confidence be None and not the other one")
+            if self.predictions is None or self.confidences is None:
+                raise ValueError("Cannot have predictions or confidences be None if prediction is None")
 
     def __repr__(self) -> str:
-        if self.prediction is not None:
-            assert self.confidence is not None
-            return (
-                f'Classification<prediction: "{self.prediction}", confidence: {self.confidence}, labels: {self.labels}>'
-            )
+        if self._prediction is not None:
+            return f'Classification<prediction: "{self._prediction}", confidence: {self._confidence}, labels: {self.labels}>'
         else:
-            assert self.predictions is not None
-            assert self.confidences is not None
             return f'Classification<predictions: "{self.predictions}", confidences: {self.confidences}, labels: {self.labels}>'
+
+    @property
+    def prediction(self):
+        print("`prediction` is deprecated and will be removed soon. Please use `predictions` instead.")
+        return self._prediction
+
+    @property
+    def confidence(self):
+        print("`confidence` is deprecated and will be removed soon. Please use `confidences` instead.")
+        return self._confidence
+
+    def is_multilabel(self) -> bool:
+        return self.classification_type == "multi-label"
 
 
 class Classifications(CohereObject):

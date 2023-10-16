@@ -354,6 +354,7 @@ class AsyncClient(Client):
                     prediction=res.get("prediction", None),
                     confidence=res.get("confidence", None),
                     labels=labelObj,
+                    classification_type=res.get("classification_type", "single-label"),
                     id=res["id"],
                 )
             )
