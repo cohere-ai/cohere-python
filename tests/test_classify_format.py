@@ -1,7 +1,7 @@
 from cohere import Client
 
 
-def test_classifcation_old_single_label_format(mocker):
+def test_classifcation_old_single_label_format(monkeypatch):
     response = {
         "id": "8a2c7187-6c01-41c0-a241-c064ad9618a5",
         "classifications": [
@@ -24,7 +24,7 @@ def test_classifcation_old_single_label_format(mocker):
         ],
         "meta": {"api_version": {"version": "1"}},
     }
-    mocker.patch("cohere.Client._request", return_value=response)
+    monkeypatch.setattr("cohere.Client._request", lambda *args, **kwargs: response)
     co = Client("test_token")
     result = co.classify(["i don't like this movie"], model="sentence classifier single label old")
     # Both deprecated fields (prediction/confidence) and new fields (predictions/confidences) are supported
@@ -35,7 +35,7 @@ def test_classifcation_old_single_label_format(mocker):
     assert not result[0].is_multilabel()
 
 
-def test_classify_new_single_label_format(mocker):
+def test_classify_new_single_label_format(monkeypatch):
     response = {
         "id": "e994e80f-08b1-402f-8653-ced25a946f3a",
         "classifications": [
@@ -58,7 +58,7 @@ def test_classify_new_single_label_format(mocker):
         ],
         "meta": {"api_version": {"version": "1"}},
     }
-    mocker.patch("cohere.Client._request", return_value=response)
+    monkeypatch.setattr("cohere.Client._request", lambda *args, **kwargs: response)
     co = Client("test_token")
     result = co.classify(["i love this movie!"], model="sentence classifier single label new")
     # Both deprecated fields (prediction/confidence) and new fields (predictions/confidences) are supported
@@ -69,7 +69,7 @@ def test_classify_new_single_label_format(mocker):
     assert not result[0].is_multilabel()
 
 
-def test_classify_multilabel_format(mocker):
+def test_classify_multilabel_format(monkeypatch):
     response = {
         "id": "cee2e2c2-83be-4c99-ad46-288448000b3f",
         "classifications": [
@@ -95,7 +95,7 @@ def test_classify_multilabel_format(mocker):
         ],
         "meta": {"api_version": {"version": "1"}},
     }
-    mocker.patch("cohere.Client._request", return_value=response)
+    monkeypatch.setattr("cohere.Client._request", lambda *args, **kwargs: response)
     co = Client("test_token")
     result = co.classify(["i love this movie!"], model="sentence classifier multi label new")
     # prediction/confidence do not make sense for multi-label classification
