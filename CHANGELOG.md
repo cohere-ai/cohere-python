@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.30
+ - [#313] (https://github.com/cohere-ai/cohere-python/pull/313)
+   - change chatlog (string) to chat_history (array of messages) in /chat
+ - [#312] (https://github.com/cohere-ai/cohere-python/pull/312)
+   - add prompt_truncation in chat tests
+ - [#321] (https://github.com/cohere-ai/cohere-python/pull/321)
+   - remove generate finish reason test assertion
+ - [#322] (https://github.com/cohere-ai/cohere-python/pull/322)
+   - remove unneeded max_tokens test case
+
 ## 4.29
  - [#311] (https://github.com/cohere-ai/cohere-python/pull/311)
    - Embed: remove embed input_type tests
