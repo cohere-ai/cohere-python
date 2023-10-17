@@ -31,9 +31,9 @@ class Classification(CohereObject):
 
         if self._prediction is None or self._confidence is None:
             if self._prediction is not None or self._confidence is not None:
-                raise ValueError("Cannot have one of prediction and confidence be None and not the other one")
+                raise ValueError("Cannot have one of `prediction` and `confidence` be None and not the other one")
             if self.predictions is None or self.confidences is None:
-                raise ValueError("Cannot have predictions or confidences be None if prediction is None")
+                raise ValueError("Cannot have `predictions` or `confidences` be None if `prediction` is None")
 
     def __repr__(self) -> str:
         if self._prediction is not None:
