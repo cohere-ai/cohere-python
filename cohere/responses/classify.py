@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, NamedTuple, Optional
 
+from cohere.logging import logger
 from cohere.responses.base import CohereObject
 
 LabelPrediction = NamedTuple("LabelPrediction", [("confidence", float)])
@@ -42,12 +43,12 @@ class Classification(CohereObject):
 
     @property
     def prediction(self):
-        print("`prediction` is deprecated and will be removed soon. Please use `predictions` instead.")
+        logger.warning("`prediction` is deprecated and will be removed soon. Please use `predictions` instead.")
         return self._prediction
 
     @property
     def confidence(self):
-        print("`confidence` is deprecated and will be removed soon. Please use `confidences` instead.")
+        logger.warning("`confidence` is deprecated and will be removed soon. Please use `confidences` instead.")
         return self._confidence
 
     def is_multilabel(self) -> bool:
