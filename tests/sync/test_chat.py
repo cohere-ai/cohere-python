@@ -13,7 +13,8 @@ from cohere.responses.chat import (
     StreamTextGeneration,
 )
 
-API_KEY = get_api_key()
+# API_KEY = get_api_key()
+API_KEY = "oracle"
 co = cohere.Client(API_KEY)
 
 

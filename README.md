@@ -15,6 +15,16 @@ This package provides functionality developed to simplify interfacing with the [
 
 ## Installation
 
+```
+conda create -n oci-cohere-python python==3.10 -y
+conda activate oci-cohere-python
+``` 
+
+```
+poetry export -f requirements.txt -o requirements.txt --without-hashes
+pip install -r requirements.txt
+```
+
 The package can be installed with `pip`:
 
 ```bash

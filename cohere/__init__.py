@@ -4,21 +4,26 @@ from cohere.client import Client
 from cohere.client_async import AsyncClient
 from cohere.error import CohereAPIError, CohereConnectionError, CohereError
 
-COHERE_API_URL = "https://api.cohere.ai"
+# COHERE_API_URL = "https://api.cohere.ai"
+COHERE_API_URL = "https://generativeai.aiservice.us-chicago-1.oci.oraclecloud.com"
 RETRY_STATUS_CODES = [429, 500, 502, 503, 504]
 
-API_VERSION = "1"
+# API_VERSION = "1"
+API_VERSION = "20231130"
 SDK_VERSION = version("cohere")
 COHERE_EMBED_BATCH_SIZE = 96
 CHAT_URL = "chat"
 CLASSIFY_URL = "classify"
 CODEBOOK_URL = "embed-codebook"
 DETECT_LANG_URL = "detect-language"
-EMBED_URL = "embed"
+# EMBED_URL = "embed"
+EMBED_URL = "actions/embedText"
 GENERATE_FEEDBACK_URL = "feedback/generate"
 GENERATE_PREFERENCE_FEEDBACK_URL = "feedback/generate/preference"
-GENERATE_URL = "generate"
-SUMMARIZE_URL = "summarize"
+# GENERATE_URL = "generate"
+GENERATE_URL = "actions/generateText"
+# SUMMARIZE_URL = "summarize"
+SUMMARIZE_URL = "actions/summarizeText"
 RERANK_URL = "rerank"
 DATASET_URL = "dataset"
 
