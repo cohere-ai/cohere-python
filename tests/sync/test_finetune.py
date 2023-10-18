@@ -13,9 +13,14 @@ class TestFinetuneClient(unittest.TestCase):
         self.assertTrue(len(client.list_custom_models()) > 0)
 
     def test_get(self):
-        first = client.list_custom_models()[0]
-        by_id = client.get_custom_model(first.id)
-        self.assertEqual(first.id, by_id.id)
+        custom_models = client.list_custom_models()
+        for model in custom_models:
+            try:
+                by_id = client.get_custom_model(model.id)
+                self.assertEqual(model.id, by_id.id)
+            except cohere.error.CohereAPIError:
+                continue
+        raise self.failureException("no custom finetunes found")
 
     def test_metrics(self):
         models = client.list_custom_models(statuses=["PAUSED", "READY"])
