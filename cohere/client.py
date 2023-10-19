@@ -75,14 +75,17 @@ class Client:
             api_key: str = None,
             num_workers: int = 64,
             request_dict: dict = {},
-            check_api_key: bool = False,
+            check_api_key: bool = True,
             client_name: Optional[str] = None,
             max_retries: int = 3,
             timeout: int = 120,
             api_url: str = None,
     ) -> None:
         self.api_key = api_key or os.getenv("CO_API_KEY")
-        self.api_url = api_url or os.getenv("CO_API_URL", cohere.COHERE_API_URL)
+        if self.api_key != cohere.OCI_API_TYPE:
+            self.api_url = api_url or os.getenv("CO_API_URL", cohere.COHERE_API_URL)
+        else:
+            self.api_url = api_url or os.getenv("CO_API_URL", cohere.OCI_COHERE_API_URL)
         self.batch_size = cohere.COHERE_EMBED_BATCH_SIZE
         self._executor = ThreadPoolExecutor(num_workers)
         self.num_workers = num_workers
@@ -90,8 +93,10 @@ class Client:
         self.request_source = "python-sdk-" + cohere.SDK_VERSION
         self.max_retries = max_retries
         self.timeout = timeout
-        # self.api_version = f"v{cohere.API_VERSION}"
-        self.api_version = f"{cohere.API_VERSION}"
+        if self.api_key != cohere.OCI_API_TYPE:
+            self.api_version = f"v{cohere.API_VERSION}"
+        else:
+            self.api_version = f"{cohere.OCI_API_VERSION}"
         if client_name:
             self.request_source += ":" + client_name
 
@@ -122,8 +127,10 @@ class Client:
             model (str): (Optional) The model to use for calculating the log-likelihoods
         """
         json_body = {"model": model, "prompt": prompt, "completion": completion}
-        # response = self._request(cohere.LOGLIKELIHOOD_URL, json=json_body)
-        response = self._oci_request(cohere.LOGLIKELIHOOD_URL, json=json_body)
+        if self.api_key != cohere.OCI_API_TYPE:
+            response = self._request(cohere.LOGLIKELIHOOD_URL, json=json_body)
+        else:
+            response = self._oci_request(cohere.OCI_LOGLIKELIHOOD_URL, json=json_body)
         return LogLikelihoods(response["prompt_tokens"], response["completion_tokens"])
 
     def batch_generate(
@@ -149,13 +156,13 @@ class Client:
             prompt_vars: object = {},
             model: Optional[str] = None,
             preset: Optional[str] = None,
-            num_generations: Optional[int] = 1,
-            max_tokens: Optional[int] = 20,
-            temperature: Optional[float] = 1.0,
-            k: Optional[int] = 0,
-            p: Optional[float] = 0.75,
-            frequency_penalty: Optional[float] = 0,
-            presence_penalty: Optional[float] = 0,
+            num_generations: Optional[int] = None,
+            max_tokens: Optional[int] = None,
+            temperature: Optional[float] = None,
+            k: Optional[int] = None,
+            p: Optional[float] = None,
+            frequency_penalty: Optional[float] = None,
+            presence_penalty: Optional[float] = None,
             end_sequences: Optional[List[str]] = None,
             stop_sequences: Optional[List[str]] = None,
             return_likelihoods: Optional[str] = None,
@@ -201,29 +208,49 @@ class Client:
                 >>> for token in res:
                 >>>     print(token)
         """
-        json_body = {
-            # "model": model,
-            "prompts": [prompt],
-            # "prompt_vars": prompt_vars,
-            # "preset": preset,
-            "numGenerations": num_generations,
-            "maxTokens": max_tokens,
-            "temperature": temperature,
-            "topK": k,
-            "topP": p,
-            "frequencyPenalty": frequency_penalty,
-            "presencePenalty": presence_penalty,
-            # "end_sequences": end_sequences,
-            "stopSequences": stop_sequences,
-            "returnLikelihoods": return_likelihoods,
-            "truncate": truncate,
-            # "logit_bias": logit_bias,
-            "isStream": stream,
-            "isEcho": True,
-            "servingMode": {"servingType": "ON_DEMAND", "modelId": model},
-        }
-        # response = self._request(cohere.GENERATE_URL, json=json_body, stream=stream)
-        response = self._oci_request(cohere.GENERATE_URL, json=json_body, stream=stream)
+        if self.api_key != cohere.OCI_API_TYPE:
+            json_body = {
+                "model": model,
+                "prompt": prompt,
+                "prompt_vars": prompt_vars,
+                "preset": preset,
+                "num_generations": num_generations,
+                "max_tokens": max_tokens,
+                "temperature": temperature,
+                "k": k,
+                "p": p,
+                "frequency_penalty": frequency_penalty,
+                "presence_penalty": presence_penalty,
+                "end_sequences": end_sequences,
+                "stop_sequences": stop_sequences,
+                "return_likelihoods": return_likelihoods,
+                "truncate": truncate,
+                "logit_bias": logit_bias,
+                "stream": stream,
+            }
+        else:
+            json_body = {
+                "prompts": [prompt],
+                "numGenerations": num_generations,
+                "maxTokens": max_tokens,
+                "temperature": temperature,
+                "topK": k,
+                "topP": p,
+                "frequencyPenalty": frequency_penalty,
+                "presencePenalty": presence_penalty,
+                "stopSequences": stop_sequences,
+                "returnLikelihoods": return_likelihoods,
+                "truncate": truncate,
+                "isStream": stream,
+                "isEcho": True,
+                "servingMode": {"servingType": "ON_DEMAND", "modelId": model},
+            }
+
+        if self.api_key != cohere.OCI_API_TYPE:
+            response = self._request(cohere.GENERATE_URL, json=json_body, stream=stream)
+        else:
+            response = self._oci_request(cohere.OCI_GENERATE_URL, json=json_body, stream=stream)
+
         if stream:
             return StreamingGenerations(response)
         else:
@@ -386,8 +413,10 @@ class Client:
         if prompt_truncation is not None:
             json_body["prompt_truncation"] = prompt_truncation
 
-        # response = self._request(cohere.CHAT_URL, json=json_body, stream=stream)
-        response = self._oci_request(cohere.CHAT_URL, json=json_body, stream=stream)
+        if self.api_key != cohere.OCI_API_TYPE:
+            response = self._request(cohere.CHAT_URL, json=json_body, stream=stream)
+        else:
+            response = self._oci_request(cohere.OCI_CHAT_URL, json=json_body, stream=stream)
 
         if stream:
             return StreamingChat(response)
@@ -421,33 +450,52 @@ class Client:
 
         for i in range(0, len(texts), self.batch_size):
             texts_batch = texts[i: i + self.batch_size]
-            json_bodys.append(
-                {
-                    # "model": model,
-                    "inputs": texts_batch,
-                    "truncate": truncate,
-                    # "compress": compress,
-                    # "compression_codebook": compression_codebook,
-                    # "input_type": input_type,
-                    "isEcho": True,
-                    "servingMode": {"servingType": "ON_DEMAND", "modelId": model},
-                }
-            )
+            if self.api_key != cohere.OCI_API_TYPE:
+                json_bodys.append(
+                    {
+                        "model": model,
+                        "texts": texts_batch,
+                        "truncate": truncate,
+                        "compress": compress,
+                        "compression_codebook": compression_codebook,
+                        "input_type": input_type,
+                    }
+                )
+            else:
+                json_bodys.append(
+                    {
+                        "inputs": texts_batch,
+                        "truncate": truncate,
+                        "isEcho": True,
+                        "servingMode": {"servingType": "ON_DEMAND", "modelId": model},
+                    }
+                )
 
         meta = None
-        # for result in self._executor.map(lambda json_body: self._request(cohere.EMBED_URL, json=json_body), json_bodys):
-        for result in self._executor.map(lambda json_body: self._oci_request(cohere.EMBED_URL, json=json_body),
-                                         json_bodys):
-            print(f"result: {result}")
-            responses["embeddings"].extend(result["embeddings"])
-            # responses["compressed_embeddings"].extend(result.get("compressed_embeddings", []))
-            meta = result["inputs"] if not meta else meta
+        if self.api_key != cohere.OCI_API_TYPE:
+            for result in self._executor.map(lambda json_body: self._request(cohere.EMBED_URL, json=json_body),
+                                             json_bodys):
+                responses["embeddings"].extend(result["embeddings"])
+                responses["compressed_embeddings"].extend(result.get("compressed_embeddings", []))
+                meta = result["meta"] if not meta else meta
+        else:
+            for result in self._executor.map(lambda json_body: self._oci_request(cohere.OCI_EMBED_URL, json=json_body),
+                                             json_bodys):
+                responses["embeddings"].extend(result["embeddings"])
+                meta = result["inputs"] if not meta else meta
 
-        return Embeddings(
-            embeddings=responses["embeddings"],
-            # compressed_embeddings=responses["compressed_embeddings"],
-            meta=meta,
-        )
+        if self.api_key != cohere.OCI_API_TYPE:
+            return Embeddings(
+                embeddings=responses["embeddings"],
+                compressed_embeddings=responses["compressed_embeddings"],
+                meta=meta,
+            )
+        else:
+            return Embeddings(
+                embeddings=responses["embeddings"],
+                # compressed_embeddings=responses["compressed_embeddings"],
+                meta=meta,
+            )
 
     def codebook(
             self,
@@ -464,8 +512,10 @@ class Client:
             "model": model,
             "compression_codebook": compression_codebook,
         }
-        # response = self._request(cohere.CODEBOOK_URL, json=json_body)
-        response = self._oci_request(cohere.CODEBOOK_URL, json=json_body)
+        if self.api_key != cohere.OCI_API_TYPE:
+            response = self._request(cohere.CODEBOOK_URL, json=json_body)
+        else:
+            response = self._oci_request(cohere.OCI_CODEBOOK_URL, json=json_body)
         return Codebook(response["codebook"], response["meta"])
 
     def classify(
@@ -493,8 +543,10 @@ class Client:
             "examples": examples_dicts,
             "truncate": truncate,
         }
-        # response = self._request(cohere.CLASSIFY_URL, json=json_body)
-        response = self._oci_request(cohere.CLASSIFY_URL, json=json_body)
+        if self.api_key != cohere.OCI_API_TYPE:
+            response = self._request(cohere.CLASSIFY_URL, json=json_body)
+        else:
+            response = self._oci_request(cohere.OCI_CLASSIFY_URL, json=json_body)
 
         classifications = []
         for res in response["classifications"]:
@@ -511,11 +563,11 @@ class Client:
             self,
             text: str,
             model: Optional[str] = None,
-            length: Optional[str] = "AUTO",
-            format: Optional[str] = "AUTO",
-            temperature: Optional[float] = 1.0,
+            length: Optional[str] = None,
+            format: Optional[str] = None,
+            temperature: Optional[float] = None,
             additional_command: Optional[str] = None,
-            extractiveness: Optional[str] = "AUTO",
+            extractiveness: Optional[str] = None,
     ) -> SummarizeResponse:
         """Returns a generated summary of the specified length for the provided text.
 
@@ -551,24 +603,37 @@ class Client:
                 >>>     additional_command="focusing on the highest performing stocks")
                 >>> print(res.summary)
         """
-        json_body = {
-            # "model": model,
-            "input": text,
-            "length": length,
-            "format": format,
-            "temperature": temperature,
-            "additionalCommand": additional_command,
-            "extractiveness": extractiveness,
-            "isEcho": True,
-            "servingMode": {"servingType": "ON_DEMAND", "modelId": model},
-        }
+        if self.api_key != cohere.OCI_API_TYPE:
+            json_body = {
+                "model": model,
+                "text": text,
+                "length": length,
+                "format": format,
+                "temperature": temperature,
+                "additional_command": additional_command,
+                "extractiveness": extractiveness,
+            }
+        else:
+            json_body = {
+                "input": text,
+                "length": length,
+                "format": format,
+                "temperature": temperature,
+                "additionalCommand": additional_command,
+                "extractiveness": extractiveness,
+                "isEcho": True,
+                "servingMode": {"servingType": "ON_DEMAND", "modelId": model},
+            }
         # remove None values from the dict
         json_body = {k: v for k, v in json_body.items() if v is not None}
-        # response = self._request(cohere.SUMMARIZE_URL, json=json_body)
-        response = self._oci_request(cohere.SUMMARIZE_URL, json=json_body)
-        print(f"response: {response}")
+        if self.api_key != cohere.OCI_API_TYPE:
+            response = self._request(cohere.SUMMARIZE_URL, json=json_body)
+        else:
+            response = self._oci_request(cohere.OCI_SUMMARIZE_URL, json=json_body)
+            response["meta"] = {"api_version": {"version": "1"}}
 
-        return SummarizeResponse(id=response["id"], summary=response["summary"], meta=response["input"])
+        return SummarizeResponse(id=response["id"], summary=response["summary"], meta=response["meta"])
+
 
     def batch_tokenize(self, texts: List[str], return_exceptions=False, **kwargs) -> List[Union[Tokens, Exception]]:
         """A batched version of tokenize.
@@ -593,8 +658,10 @@ class Client:
             model (str): An optional model name that will ensure that the tokenization uses the tokenizer used by that model, which can be critical for counting tokens properly.
         """
         json_body = {"text": text, "model": model}
-        # res = self._request(cohere.TOKENIZE_URL, json=json_body)
-        res = self._oci_request(cohere.TOKENIZE_URL, json=json_body)
+        if self.api_key != cohere.OCI_API_TYPE:
+            res = self._request(cohere.TOKENIZE_URL, json=json_body)
+        else:
+            res = self._oci_request(cohere.TOKENIZE_URL, json=json_body)
         return Tokens(tokens=res["tokens"], token_strings=res["token_strings"], meta=res.get("meta"))
 
     def batch_detokenize(
@@ -622,8 +689,10 @@ class Client:
             model (str): An optional model name. This will ensure that the detokenization is done by the tokenizer used by that model.
         """
         json_body = {"tokens": tokens, "model": model}
-        # res = self._request(cohere.DETOKENIZE_URL, json=json_body)
-        res = self._oci_request(cohere.DETOKENIZE_URL, json=json_body)
+        if self.api_key != cohere.OCI_API_TYPE:
+            res = self._request(cohere.DETOKENIZE_URL, json=json_body)
+        else:
+            res = self._oci_request(cohere.OCI_DETOKENIZE_URL, json=json_body)
         return Detokenization(text=res["text"], meta=res.get("meta"))
 
     def detect_language(self, texts: List[str]) -> DetectLanguageResponse:
@@ -635,8 +704,10 @@ class Client:
         json_body = {
             "texts": texts,
         }
-        # response = self._request(cohere.DETECT_LANG_URL, json=json_body)
-        response = self._oci_request(cohere.DETECT_LANG_URL, json=json_body)
+        if self.api_key != cohere.OCI_API_TYPE:
+            response = self._request(cohere.DETECT_LANG_URL, json=json_body)
+        else:
+            response = self._oci_request(cohere.OCI_DETECT_LANG_URL, json=json_body)
         results = []
         for result in response["results"]:
             results.append(Language(result["language_code"], result["language_name"]))
@@ -688,8 +759,10 @@ class Client:
             "annotator_id": annotator_id,
             "model": model,
         }
-        # response = self._request(cohere.GENERATE_FEEDBACK_URL, json_body)
-        response = self._oci_request(cohere.GENERATE_FEEDBACK_URL, json_body)
+        if self.api_key != cohere.OCI_API_TYPE:
+            response = self._request(cohere.GENERATE_FEEDBACK_URL, json_body)
+        else:
+            response = self._oci_request(cohere.OCI_GENERATE_FEEDBACK_URL, json_body)
         return GenerateFeedbackResponse(id=response["id"])
 
     def generate_preference_feedback(
@@ -730,8 +803,10 @@ class Client:
             "annotator_id": annotator_id,
             "model": model,
         }
-        # response = self._request(cohere.GENERATE_PREFERENCE_FEEDBACK_URL, json_body)
-        response = self._oci_request(cohere.GENERATE_PREFERENCE_FEEDBACK_URL, json_body)
+        if self.api_key != cohere.OCI_API_TYPE:
+            response = self._request(cohere.GENERATE_PREFERENCE_FEEDBACK_URL, json_body)
+        else:
+            response = self._oci_request(cohere.OCI_GENERATE_PREFERENCE_FEEDBACK_URL, json_body)
         return GenerateFeedbackResponse(id=response["id"])
 
     def rerank(
@@ -771,8 +846,10 @@ class Client:
             "max_chunks_per_doc": max_chunks_per_doc,
         }
 
-        # reranking = Reranking(self._request(cohere.RERANK_URL, json=json_body))
-        reranking = Reranking(self._oci_request(cohere.RERANK_URL, json=json_body))
+        if self.api_key != cohere.OCI_API_TYPE:
+            reranking = Reranking(self._request(cohere.RERANK_URL, json=json_body))
+        else:
+            reranking = Reranking(self._oci_request(cohere.OCI_RERANK_URL, json=json_body))
         for rank in reranking.results:
             rank.document = parsed_docs[rank.index]
         return reranking
@@ -813,8 +890,10 @@ class Client:
             params.update(parse_info.get_params())
 
         logger.warning("uploading file, starting validation...")
-        # create_response = self._request(cohere.DATASET_URL, files=files, params=params)
-        create_response = self._oci_request(cohere.DATASET_URL, files=files, params=params)
+        if self.api_key != cohere.OCI_API_TYPE:
+            create_response = self._request(cohere.DATASET_URL, files=files, params=params)
+        else:
+            create_response = self._oci_request(cohere.OCI_DATASET_URL, files=files, params=params)
         logger.warning(f"{create_response['id']} was uploaded")
         return self.get_dataset(id=create_response["id"])
 
@@ -829,8 +908,10 @@ class Client:
         """
         if not id:
             raise CohereError(message="id must not be empty")
-        # response = self._request(f"{cohere.DATASET_URL}/{id}", method="GET")
-        response = self._oci_request(f"{cohere.DATASET_URL}/{id}", method="GET")
+        if self.api_key != cohere.OCI_API_TYPE:
+            response = self._request(f"{cohere.DATASET_URL}/{id}", method="GET")
+        else:
+            response = self._oci_request(f"{cohere.OCI_DATASET_URL}/{id}", method="GET")
         return Dataset.from_dict(response["dataset"], wait_fn=self.wait_for_dataset)
 
     def list_datasets(self, dataset_type: str = None, limit: int = None, offset: int = None) -> List[Dataset]:
@@ -849,8 +930,10 @@ class Client:
             "limit": limit,
             "offset": offset,
         }
-        # response = self._request(f"{cohere.DATASET_URL}", method="GET", params=param_dict)
-        response = self._oci_request(f"{cohere.DATASET_URL}", method="GET", params=param_dict)
+        if self.api_key != cohere.OCI_API_TYPE:
+            response = self._request(f"{cohere.DATASET_URL}", method="GET", params=param_dict)
+        else:
+            response = self._oci_request(f"{cohere.OCI_DATASET_URL}", method="GET", params=param_dict)
         return [
             Dataset.from_dict({"meta": response.get("meta"), **r}, wait_fn=self.wait_for_dataset)
             for r in (response.get("datasets") or [])
@@ -862,8 +945,10 @@ class Client:
         Args:
             id (str): The id of the dataset to delete
         """
-        # self._request(f"{cohere.DATASET_URL}/{id}", method="DELETE")
-        self._oci_request(f"{cohere.DATASET_URL}/{id}", method="DELETE")
+        if self.api_key != cohere.OCI_API_TYPE:
+            self._request(f"{cohere.DATASET_URL}/{id}", method="DELETE")
+        else:
+            self._oci_request(f"{cohere.OCI_DATASET_URL}/{id}", method="DELETE")
 
     def wait_for_dataset(
             self,
@@ -951,6 +1036,7 @@ class Client:
 
             try:
                 json_response = response.json()
+                print(f"json_response: {json_response}")
             except jsonlib.decoder.JSONDecodeError:  # CohereAPIError will capture status
                 raise CohereAPIError.from_response(response, message=f"Failed to decode json body: {response.text}")
 
@@ -971,11 +1057,8 @@ class Client:
         )
 
         json.setdefault("compartmentId", config['tenancy'])
-        print(f"json: {json}")
-        print(f"stream: {stream}")
 
         url = f"{self.api_url}/{self.api_version}/{endpoint}"
-        print(f"url: {url}")
         with requests.Session() as session:
             retries = Retry(
                 total=self.max_retries,
@@ -992,23 +1075,6 @@ class Client:
                                        auth=auth)
 
             try:
-                # response = session.request(
-                #     method,
-                #     url,
-                #     json=json,
-                #     files=files,
-                #     timeout=self.timeout,
-                #     params=params,
-                #     **self.request_dict,
-                #     auth=auth,
-                # )
-                # json = {
-                #     "compartmentId": config['tenancy'],
-                #     "prompts": ["hello"],
-                #     "isEcho": True,
-                #     "returnLikelihoods": "ALL",
-                #     "servingMode": {"servingType": "ON_DEMAND", "modelId": "cohere.command"},
-                # }
                 response = session.request(
                     method,
                     url,
@@ -1062,9 +1128,10 @@ class Client:
             "is_deterministic": is_deterministic,
             "generate_descriptions": generate_descriptions,
         }
-
-        # response = self._request(cohere.CLUSTER_JOBS_URL, json=json_body)
-        response = self._oci_request(cohere.CLUSTER_JOBS_URL, json=json_body)
+        if self.api_key != cohere.OCI_API_TYPE:
+            response = self._request(cohere.CLUSTER_JOBS_URL, json=json_body)
+        else:
+            response = self._oci_request(cohere.OCI_CLUSTER_JOBS_URL, json=json_body)
         cluster_job = self.get_cluster_job(response.get("job_id"))
         return cluster_job
 
@@ -1087,8 +1154,10 @@ class Client:
         if not job_id.strip():
             raise ValueError('"job_id" is empty')
 
-        # response = self._request(f"{cohere.CLUSTER_JOBS_URL}/{job_id}", method="GET")
-        response = self._oci_request(f"{cohere.CLUSTER_JOBS_URL}/{job_id}", method="GET")
+        if self.api_key != cohere.OCI_API_TYPE:
+            response = self._request(f"{cohere.CLUSTER_JOBS_URL}/{job_id}", method="GET")
+        else:
+            response = self._oci_request(f"{cohere.OCI_CLUSTER_JOBS_URL}/{job_id}", method="GET")
 
         return ClusterJobResult.from_dict(response, wait_fn=self.wait_for_cluster_job)
 
@@ -1099,8 +1168,10 @@ class Client:
             List[ClusterJobResult]: Clustering jobs created.
         """
 
-        # response = self._request(cohere.CLUSTER_JOBS_URL, method="GET")
-        response = self._oci_request(cohere.CLUSTER_JOBS_URL, method="GET")
+        if self.api_key != cohere.OCI_API_TYPE:
+            response = self._request(cohere.CLUSTER_JOBS_URL, method="GET")
+        else:
+            response = self._oci_request(cohere.OCI_CLUSTER_JOBS_URL, method="GET")
         return [
             ClusterJobResult.from_dict({"meta": response.get("meta"), **r}, wait_fn=self.wait_for_cluster_job)
             for r in response["jobs"]
@@ -1176,8 +1247,10 @@ class Client:
             "output_format": "avro",
         }
 
-        # response = self._request(cohere.EMBED_JOBS_URL, json=json_body)
-        response = self._oci_request(cohere.EMBED_JOBS_URL, json=json_body)
+        if self.api_key != cohere.OCI_API_TYPE:
+            response = self._request(cohere.EMBED_JOBS_URL, json=json_body)
+        else:
+            response = self._oci_request(cohere.OCI_EMBED_JOBS_URL, json=json_body)
         embed_job = self.get_embed_job(response.get("job_id"))
 
         return embed_job
@@ -1189,8 +1262,10 @@ class Client:
             List[EmbedJob]: Embed jobs.
         """
 
-        # response = self._request(f"{cohere.EMBED_JOBS_URL}/list", method="GET")
-        response = self._oci_request(f"{cohere.EMBED_JOBS_URL}/list", method="GET")
+        if self.api_key != cohere.OCI_API_TYPE:
+            response = self._request(f"{cohere.EMBED_JOBS_URL}/list", method="GET")
+        else:
+            response = self._oci_request(f"{cohere.OCI_EMBED_JOBS_URL}/list", method="GET")
         return [
             EmbedJob.from_dict({"meta": response.get("meta"), **r}, wait_fn=self.wait_for_embed_job)
             for r in response["bulk_embed_jobs"]
@@ -1212,8 +1287,10 @@ class Client:
         if not job_id.strip():
             raise ValueError('"job_id" is empty')
 
-        # response = self._request(f"{cohere.EMBED_JOBS_URL}/{job_id}", method="GET")
-        response = self._oci_request(f"{cohere.EMBED_JOBS_URL}/{job_id}", method="GET")
+        if self.api_key != cohere.OCI_API_TYPE:
+            response = self._request(f"{cohere.EMBED_JOBS_URL}/{job_id}", method="GET")
+        else:
+            response = self._oci_request(f"{cohere.OCI_EMBED_JOBS_URL}/{job_id}", method="GET")
         job = EmbedJob.from_dict(response, wait_fn=self.wait_for_embed_job)
         if response.get("output_dataset_id"):
             job.output = self.get_dataset(response.get("output_dataset_id"))
@@ -1232,8 +1309,10 @@ class Client:
         if not job_id.strip():
             raise ValueError('"job_id" is empty')
 
-        # self._request(f"{cohere.EMBED_JOBS_URL}/{job_id}/cancel", method="POST", json={})
-        self._oci_request(f"{cohere.EMBED_JOBS_URL}/{job_id}/cancel", method="POST", json={})
+        if self.api_key != cohere.OCI_API_TYPE:
+            self._request(f"{cohere.EMBED_JOBS_URL}/{job_id}/cancel", method="POST", json={})
+        else:
+            self._oci_request(f"{cohere.OCI_EMBED_JOBS_URL}/{job_id}/cancel", method="POST", json={})
 
     def wait_for_embed_job(
             self,
@@ -1332,8 +1411,10 @@ class Client:
             )
             json["settings"]["evalFiles"].append({"path": remote_path, **dataset.file_config()})
 
-        # response = self._request(f"{cohere.CUSTOM_MODEL_URL}/CreateFinetune", method="POST", json=json)
-        response = self._oci_request(f"{cohere.CUSTOM_MODEL_URL}/CreateFinetune", method="POST", json=json)
+        if self.api_key != cohere.OCI_API_TYPE:
+            response = self._request(f"{cohere.CUSTOM_MODEL_URL}/CreateFinetune", method="POST", json=json)
+        else:
+            response = self._oci_request(f"{cohere.OCI_CUSTOM_MODEL_URL}/CreateFinetune", method="POST", json=json)
         return CustomModel.from_dict(response["finetune"], self.wait_for_custom_model)
 
     def wait_for_custom_model(
@@ -1376,8 +1457,11 @@ class Client:
             self, custom_model_name: str, file_name: str, type: INTERNAL_CUSTOM_MODEL_TYPE
     ) -> TypedDict("gcsData", {"url": str, "gcspath": str}):
         json = {"finetuneName": custom_model_name, "fileName": file_name, "finetuneType": type}
-        # return self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneUploadSignedURL", method="POST", json=json)
-        return self._oci_request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneUploadSignedURL", method="POST", json=json)
+        if self.api_key != cohere.OCI_API_TYPE:
+            return self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneUploadSignedURL", method="POST", json=json)
+        else:
+            return self._oci_request(f"{cohere.OCI_CUSTOM_MODEL_URL}/GetFinetuneUploadSignedURL", method="POST",
+                                     json=json)
 
     def get_custom_model(self, custom_model_id: str) -> CustomModel:
         """Get a custom model by id.
@@ -1388,8 +1472,10 @@ class Client:
             CustomModel: the custom model
         """
         json = {"finetuneID": custom_model_id}
-        # response = self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetune", method="POST", json=json)
-        response = self._oci_request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetune", method="POST", json=json)
+        if self.api_key != cohere.OCI_API_TYPE:
+            response = self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetune", method="POST", json=json)
+        else:
+            response = self._oci_request(f"{cohere.OCI_CUSTOM_MODEL_URL}/GetFinetune", method="POST", json=json)
         return CustomModel.from_dict(response["finetune"], self.wait_for_custom_model)
 
     def get_custom_model_by_name(self, name: str) -> CustomModel:
@@ -1401,8 +1487,10 @@ class Client:
             CustomModel: the custom model
         """
         json = {"name": name}
-        # response = self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneByName", method="POST", json=json)
-        response = self._oci_request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneByName", method="POST", json=json)
+        if self.api_key != cohere.OCI_API_TYPE:
+            response = self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneByName", method="POST", json=json)
+        else:
+            response = self._oci_request(f"{cohere.OCI_CUSTOM_MODEL_URL}/GetFinetuneByName", method="POST", json=json)
         return CustomModel.from_dict(response["finetune"], self.wait_for_custom_model)
 
     def get_custom_model_metrics(self, custom_model_id: str) -> List[ModelMetric]:
@@ -1414,8 +1502,10 @@ class Client:
             List[ModelMetric]: a list of model metrics
         """
         json = {"finetuneID": custom_model_id}
-        # response = self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneMetrics", method="POST", json=json)
-        response = self._oci_request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneMetrics", method="POST", json=json)
+        if self.api_key != cohere.OCI_API_TYPE:
+            response = self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneMetrics", method="POST", json=json)
+        else:
+            response = self._oci_request(f"{cohere.OCI_CUSTOM_MODEL_URL}/GetFinetuneMetrics", method="POST", json=json)
         return [ModelMetric.from_dict(metric) for metric in response["metrics"]]
 
     def list_custom_models(
@@ -1449,6 +1539,8 @@ class Client:
             }
         }
 
-        # response = self._request(f"{cohere.CUSTOM_MODEL_URL}/ListFinetunes", method="POST", json=json)
-        response = self._oci_request(f"{cohere.CUSTOM_MODEL_URL}/ListFinetunes", method="POST", json=json)
+        if self.api_key != cohere.OCI_API_TYPE:
+            response = self._request(f"{cohere.CUSTOM_MODEL_URL}/ListFinetunes", method="POST", json=json)
+        else:
+            response = self._oci_request(f"{cohere.OCI_CUSTOM_MODEL_URL}/ListFinetunes", method="POST", json=json)
         return [CustomModel.from_dict(r, self.wait_for_custom_model) for r in response["finetunes"]]

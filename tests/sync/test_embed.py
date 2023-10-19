@@ -7,7 +7,14 @@ from utils import get_api_key
 import cohere
 
 # API_KEY = get_api_key()
-API_KEY = "oracle"
+
+# 1. for oci
+API_KEY = "oci"
+MODEL = "cohere.embed-english-light-v2.0"
+# 2. for cohere
+# API_KEY = "TODO"
+# MODEL = "small"
+
 co = cohere.Client(API_KEY)
 
 
@@ -35,7 +42,7 @@ def random_texts(num_texts, num_words_per_sentence=50):
 
 class TestEmbed(unittest.TestCase):
     def test_success(self):
-        prediction = co.embed(model="cohere.embed-english-light-v2.0", texts=["co:here", "cohere"])
+        prediction = co.embed(model=MODEL, texts=["co:here", "cohere"])
         self.assertEqual(len(prediction.embeddings), 2)
         self.assertIsInstance(prediction.embeddings[0], list)
         self.assertIsInstance(prediction.embeddings[1], list)
@@ -53,7 +60,7 @@ class TestEmbed(unittest.TestCase):
 
     def test_success_multiple_batches(self):
         prediction = co.embed(
-            model="cohere.embed-english-light-v2.0",
+            model=MODEL,
             texts=["co:here", "cohere", "embed", "python", "golang", "typescript", "rust?", "ai", "nlp", "neural"],
         )
         self.assertEqual(len(prediction.embeddings), 10)
@@ -63,7 +70,7 @@ class TestEmbed(unittest.TestCase):
 
     def test_success_longer_multiple_batches_unaligned_batch(self):
         prediction = co.embed(
-            model="cohere.embed-english-light-v2.0",
+            model=MODEL,
             texts=[
                 "co:here",
                 "cohere",
@@ -84,7 +91,7 @@ class TestEmbed(unittest.TestCase):
             self.assertEqual(len(embed), 1024)
 
     def test_success_longer_multiple_batches(self):
-        prediction = co.embed(model="cohere.embed-english-light-v2.0", texts=["co:here", "cohere", "embed", "python", "golang"] * 200)
+        prediction = co.embed(model=MODEL, texts=["co:here", "cohere", "embed", "python", "golang"] * 200)
         self.assertEqual(len(prediction.embeddings), 200 * 5)
         for embed in prediction.embeddings:
             self.assertIsInstance(embed, list)
@@ -96,10 +103,10 @@ class TestEmbed(unittest.TestCase):
 
         for _ in range(3):
             text_batch = random_texts(cohere.COHERE_EMBED_BATCH_SIZE)
-            prediction = co.embed(model="cohere.embed-english-light-v2.0", texts=text_batch)
+            prediction = co.embed(model=MODEL, texts=text_batch)
             textAll.extend(text_batch)
             predictionsExpected.extend(prediction)
-        predictionsActual = co.embed(model="cohere.embed-english-light-v2.0", texts=textAll)
+        predictionsActual = co.embed(model=MODEL, texts=textAll)
         for predictionExpected, predictionActual in zip(predictionsExpected, list(predictionsActual)):
             for elementExpected, elementAcutal in zip(predictionExpected, predictionActual):
                 self.assertAlmostEqual(elementExpected, elementAcutal, places=1)

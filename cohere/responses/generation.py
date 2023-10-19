@@ -98,27 +98,50 @@ class Generations(UserList, CohereObject):
     @classmethod
     def from_dict(cls, response: Dict[str, Any], return_likelihoods: str) -> List[Generation]:
         generations: List[Generation] = []
-        for gen in response["generatedTexts"]:
-            likelihood = None
-            token_likelihoods = None
-            if return_likelihoods in ["GENERATION", "ALL"]:
-                likelihood = gen["likelihood"]
-            for one_gen in gen:
-                if "tokenLikelihoods" in one_gen.keys():
+        if "generations" in response.keys():
+            for gen in response["generations"]:
+                likelihood = None
+                token_likelihoods = None
+                if return_likelihoods in ["GENERATION", "ALL"]:
+                    likelihood = gen["likelihood"]
+                if "token_likelihoods" in gen.keys():
                     token_likelihoods = []
-                    for likelihoods in one_gen["tokenLikelihoods"]:
+                    for likelihoods in gen["token_likelihoods"]:
                         token_likelihood = likelihoods["likelihood"] if "likelihood" in likelihoods.keys() else None
                         token_likelihoods.append(TokenLikelihood(likelihoods["token"], token_likelihood))
                 generations.append(
                     Generation(
-                        one_gen["text"],
+                        gen["text"],
                         likelihood,
                         token_likelihoods,
-                        prompt=response.get("prompts"),
-                        id=one_gen["id"],
-                        finish_reason=one_gen.get("finish_reason"),
+                        prompt=response.get("prompt"),
+                        id=gen["id"],
+                        finish_reason=gen.get("finish_reason"),
                     )
                 )
+        elif "generatedTexts" in response.keys():
+            response.setdefault("meta", {"api_version": {"version": "1"}})
+            for gen in response["generatedTexts"]:
+                likelihood = None
+                token_likelihoods = None
+                if return_likelihoods in ["GENERATION", "ALL"]:
+                    likelihood = gen["likelihood"]
+                for one_gen in gen:
+                    if "tokenLikelihoods" in one_gen.keys():
+                        token_likelihoods = []
+                        for likelihoods in one_gen["tokenLikelihoods"]:
+                            token_likelihood = likelihoods["likelihood"] if "likelihood" in likelihoods.keys() else None
+                            token_likelihoods.append(TokenLikelihood(likelihoods["token"], token_likelihood))
+                    generations.append(
+                        Generation(
+                            one_gen["text"],
+                            likelihood,
+                            token_likelihoods,
+                            prompt=response.get("prompts"),
+                            id=one_gen["id"],
+                            finish_reason=one_gen.get("finish_reason"),
+                        )
+                    )
 
         return cls(generations, return_likelihoods, response.get("meta"))
 
