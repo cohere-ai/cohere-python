@@ -96,9 +96,11 @@ class TestGenerate(unittest.TestCase):
         self.assertIsInstance(prediction.generations[0].text, str)
 
     def test_generate_stream(self):
-        res = co.generate(prompt="Hello [insert name here]", stream=True)
+        res = co.generate(model=MODEL, prompt="Hello [insert name here]", stream=True)
+        print(f"res: {res}")
         final_text = ""
         for token in res:
+            print(f"token: {token}")
             self.assertIsInstance(token.text, str)
             assert len(token.text) > 0
             self.assertEqual(token.index, 0)

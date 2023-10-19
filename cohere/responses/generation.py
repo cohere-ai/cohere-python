@@ -175,6 +175,9 @@ class StreamingGenerations(CohereObject):
         self.texts = []
 
     def _make_response_item(self, line) -> Optional[StreamingText]:
+        print("### in _make_response_item")
+        print(f"line: {line}")
+
         streaming_item = json.loads(line)
         is_finished = streaming_item.get("is_finished")
 
@@ -200,6 +203,8 @@ class StreamingGenerations(CohereObject):
         return None
 
     def __iter__(self) -> Generator[StreamingText, None, None]:
+        print("### in _make_response_item")
+        print(f"StreamingText: {StreamingText}")
         if not isinstance(self.response, requests.Response):
             raise ValueError("For AsyncClient, use `async for` to iterate through the `StreamingGenerations`")
 
