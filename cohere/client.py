@@ -482,7 +482,7 @@ class Client:
             for result in self._executor.map(lambda json_body: self._oci_request(cohere.OCI_EMBED_URL, json=json_body),
                                              json_bodys):
                 responses["embeddings"].extend(result["embeddings"])
-                meta = result["inputs"] if not meta else meta
+                meta = {"api_version": {"version": "1"}}
 
         if self.api_key != cohere.OCI_API_TYPE:
             return Embeddings(
@@ -633,7 +633,6 @@ class Client:
             response["meta"] = {"api_version": {"version": "1"}}
 
         return SummarizeResponse(id=response["id"], summary=response["summary"], meta=response["meta"])
-
 
     def batch_tokenize(self, texts: List[str], return_exceptions=False, **kwargs) -> List[Union[Tokens, Exception]]:
         """A batched version of tokenize.
@@ -1036,7 +1035,6 @@ class Client:
 
             try:
                 json_response = response.json()
-                print(f"json_response: {json_response}")
             except jsonlib.decoder.JSONDecodeError:  # CohereAPIError will capture status
                 raise CohereAPIError.from_response(response, message=f"Failed to decode json body: {response.text}")
 

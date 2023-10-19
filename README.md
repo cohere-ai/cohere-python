@@ -16,7 +16,7 @@ This package provides functionality developed to simplify interfacing with the [
 ## Installation
 
 ```
-conda create -n oci-cohere-python python==3.10 -y
+conda create -n oci-cohere-python python==3.10.12 -y
 conda activate oci-cohere-python
 ``` 
 
@@ -27,15 +27,15 @@ pip install -r requirements.txt
 
 The package can be installed with `pip`:
 
-```bash
-pip install --upgrade cohere
-```
-
 Install from source:
 
 ```bash
 pip install .
 ```
+
+### For OCI Cohere
+
+The value of API_KEY must be set to "oci".
 
 ### Requirements
 

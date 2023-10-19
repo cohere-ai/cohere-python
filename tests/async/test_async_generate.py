@@ -3,12 +3,16 @@ import pytest
 from cohere import CohereAPIError
 from cohere.responses import Generations
 
-TEST_MODEL = "base-light"
+# 1. for oci
+TEST_MODEL = "cohere.command"
+# 2. for cohere
+# TEST_MODEL = "base-light"
 
 
 @pytest.mark.asyncio
 async def test_single_generate(async_client):
     prediction = await async_client.generate(model=TEST_MODEL, prompt="co:here", max_tokens=1)
+    print(prediction)
     assert isinstance(prediction, Generations)
     assert isinstance(prediction[0].text, str)
     assert str(prediction[0]) == prediction[0].text

@@ -8,6 +8,9 @@ from dataclasses import asdict
 from datetime import datetime, timezone
 from functools import partial
 from typing import Any, BinaryIO, Callable, Dict, Iterable, List, Optional, Union
+from urllib.parse import urlparse
+
+import requests
 
 try:
     from typing import Literal, TypedDict
@@ -69,18 +72,21 @@ class AsyncClient(Client):
     or when calling the Cohere API from a server such as FastAPI."""
 
     def __init__(
-        self,
-        api_key: str = None,
-        num_workers: int = 16,
-        request_dict: dict = {},
-        check_api_key: bool = True,
-        client_name: Optional[str] = None,
-        max_retries: int = 3,
-        timeout=120,
-        api_url: str = None,
+            self,
+            api_key: str = None,
+            num_workers: int = 16,
+            request_dict: dict = {},
+            check_api_key: bool = True,
+            client_name: Optional[str] = None,
+            max_retries: int = 3,
+            timeout=120,
+            api_url: str = None,
     ) -> None:
         self.api_key = api_key or os.getenv("CO_API_KEY")
-        self.api_url = api_url or os.getenv("CO_API_URL", cohere.COHERE_API_URL)
+        if self.api_key != cohere.OCI_API_TYPE:
+            self.api_url = api_url or os.getenv("CO_API_URL", cohere.COHERE_API_URL)
+        else:
+            self.api_url = api_url or os.getenv("CO_API_URL", cohere.OCI_COHERE_API_URL)
         self.batch_size = cohere.COHERE_EMBED_BATCH_SIZE
         self.num_workers = num_workers
         self.request_dict = request_dict
@@ -88,12 +94,18 @@ class AsyncClient(Client):
         self.max_retries = max_retries
         if client_name:
             self.request_source += ":" + client_name
-        self.api_version = f"v{cohere.API_VERSION}"
+        if self.api_key != cohere.OCI_API_TYPE:
+            self.api_version = f"v{cohere.API_VERSION}"
+        else:
+            self.api_version = f"{cohere.OCI_API_VERSION}"
         self._check_api_key_on_enter = check_api_key
-        self._backend = AIOHTTPBackend(logger, num_workers, max_retries, timeout)
+        if self.api_key != cohere.OCI_API_TYPE:
+            self._backend = AIOHTTPBackend(logger, num_workers, max_retries, timeout)
+        else:
+            self._backend = OCIAIOHTTPBackend(logger, num_workers, max_retries, timeout)
 
     async def _request(
-        self, endpoint, json=None, files=None, method="POST", full_url=None, stream=False, params=None
+            self, endpoint, json=None, files=None, method="POST", full_url=None, stream=False, params=None
     ) -> JSON:
         headers = {
             "Authorization": f"BEARER {self.api_key}",
@@ -108,6 +120,48 @@ class AsyncClient(Client):
             url = posixpath.join(self.api_url, self.api_version, endpoint)
 
         response = await self._backend.request(url, json, files, method, headers, stream=stream, params=params)
+        if stream:
+            return response
+
+        try:
+            json_response = await response.json()
+        #   `CohereAPIError.from_aio_response()` will capture the http status code
+        except jsonlib.decoder.JSONDecodeError:
+            raise CohereAPIError.from_aio_response(
+                response, message=f"Failed to decode json body: {await response.text()}"
+            )
+        except aiohttp.ClientPayloadError as e:
+            raise CohereAPIError.from_aio_response(
+                response, message=f"An unexpected error occurred while receiving the response: {e}"
+            )
+
+        logger.debug(f"JSON response: {json_response}")
+        self._check_response(json_response, response.headers, response.status)
+        return json_response
+
+    async def _oci_request(
+            self, endpoint, json=None, files=None, method="POST", full_url=None, stream=False, params=None
+    ) -> JSON:
+        """refer: https://docs.oracle.com/en-us/iaas/Content/API/Concepts/signingrequests.htm#seven__Python"""
+        from oci.config import from_file
+        from oci.signer import Signer
+        config = from_file("~/.oci/config")
+        auth = Signer(
+            tenancy=config['tenancy'],
+            user=config['user'],
+            fingerprint=config['fingerprint'],
+            private_key_file_location=config['key_file'],
+            pass_phrase=config['pass_phrase']
+        )
+
+        json.setdefault("compartmentId", config['tenancy'])
+
+        if endpoint is None and full_url is not None:  # api key
+            url = full_url
+        else:
+            url = posixpath.join(self.api_url, self.api_version, endpoint)
+
+        response = await self._backend.request(url=url, json=json, method=method, auth=auth)
         if stream:
             return response
 
@@ -147,89 +201,112 @@ class AsyncClient(Client):
         return {"valid": is_api_key_valid(self.api_key)}
 
     async def loglikelihood(
-        self,
-        prompt: Optional[str] = None,
-        completion: Optional[str] = None,
-        model: Optional[str] = None,
+            self,
+            prompt: Optional[str] = None,
+            completion: Optional[str] = None,
+            model: Optional[str] = None,
     ) -> LogLikelihoods:
         json_body = {"model": model, "prompt": prompt, "completion": completion}
         response = await self._request(cohere.LOGLIKELIHOOD_URL, json=json_body)
         return LogLikelihoods(response["prompt_tokens"], response["completion_tokens"])
 
     async def batch_generate(
-        self, prompts: List[str], return_exceptions=False, **kwargs
+            self, prompts: List[str], return_exceptions=False, **kwargs
     ) -> List[Union[Exception, Generations]]:
         return await asyncio.gather(
             *[self.generate(prompt, **kwargs) for prompt in prompts], return_exceptions=return_exceptions
         )
 
     async def generate(
-        self,
-        prompt: Optional[str] = None,
-        prompt_vars: object = {},
-        model: Optional[str] = None,
-        preset: Optional[str] = None,
-        num_generations: Optional[int] = None,
-        max_tokens: Optional[int] = None,
-        temperature: Optional[float] = None,
-        k: Optional[int] = None,
-        p: Optional[float] = None,
-        frequency_penalty: Optional[float] = None,
-        presence_penalty: Optional[float] = None,
-        end_sequences: Optional[List[str]] = None,
-        stop_sequences: Optional[List[str]] = None,
-        return_likelihoods: Optional[str] = None,
-        truncate: Optional[str] = None,
-        logit_bias: Dict[int, float] = {},
-        stream: bool = False,
+            self,
+            prompt: Optional[str] = None,
+            prompt_vars: object = {},
+            model: Optional[str] = None,
+            preset: Optional[str] = None,
+            num_generations: Optional[int] = None,
+            max_tokens: Optional[int] = None,
+            temperature: Optional[float] = None,
+            k: Optional[int] = None,
+            p: Optional[float] = None,
+            frequency_penalty: Optional[float] = None,
+            presence_penalty: Optional[float] = None,
+            end_sequences: Optional[List[str]] = None,
+            stop_sequences: Optional[List[str]] = None,
+            return_likelihoods: Optional[str] = None,
+            truncate: Optional[str] = None,
+            logit_bias: Dict[int, float] = {},
+            stream: bool = False,
     ) -> Union[Generations, StreamingGenerations]:
-        json_body = {
-            "model": model,
-            "prompt": prompt,
-            "prompt_vars": prompt_vars,
-            "preset": preset,
-            "num_generations": num_generations,
-            "max_tokens": max_tokens,
-            "temperature": temperature,
-            "k": k,
-            "p": p,
-            "frequency_penalty": frequency_penalty,
-            "presence_penalty": presence_penalty,
-            "end_sequences": end_sequences,
-            "stop_sequences": stop_sequences,
-            "return_likelihoods": return_likelihoods,
-            "truncate": truncate,
-            "logit_bias": logit_bias,
-            "stream": stream,
-        }
-        response = await self._request(cohere.GENERATE_URL, json=json_body, stream=stream)
+        if self.api_key != cohere.OCI_API_TYPE:
+            json_body = {
+                "model": model,
+                "prompt": prompt,
+                "prompt_vars": prompt_vars,
+                "preset": preset,
+                "num_generations": num_generations,
+                "max_tokens": max_tokens,
+                "temperature": temperature,
+                "k": k,
+                "p": p,
+                "frequency_penalty": frequency_penalty,
+                "presence_penalty": presence_penalty,
+                "end_sequences": end_sequences,
+                "stop_sequences": stop_sequences,
+                "return_likelihoods": return_likelihoods,
+                "truncate": truncate,
+                "logit_bias": logit_bias,
+                "stream": stream,
+            }
+        else:
+            json_body = {
+                "prompts": [prompt],
+                "numGenerations": num_generations,
+                "maxTokens": max_tokens,
+                "temperature": temperature,
+                "topK": k,
+                "topP": p,
+                "frequencyPenalty": frequency_penalty,
+                "presencePenalty": presence_penalty,
+                "stopSequences": stop_sequences,
+                "returnLikelihoods": return_likelihoods,
+                "truncate": truncate,
+                "isStream": stream,
+                "isEcho": True,
+                "servingMode": {"servingType": "ON_DEMAND", "modelId": model},
+            }
+
+        if self.api_key != cohere.OCI_API_TYPE:
+            response = await self._request(cohere.GENERATE_URL, json=json_body, stream=stream)
+        else:
+            response = await self._oci_request(cohere.OCI_GENERATE_URL, json=json_body, stream=stream)
+
         if stream:
             return StreamingGenerations(response)
         else:
             return Generations.from_dict(response=response, return_likelihoods=return_likelihoods)
 
     async def chat(
-        self,
-        message: Optional[str] = None,
-        conversation_id: Optional[str] = "",
-        model: Optional[str] = None,
-        return_chat_history: Optional[bool] = False,
-        return_prompt: Optional[bool] = False,
-        return_preamble: Optional[bool] = False,
-        chat_history: Optional[List[Dict[str, str]]] = None,
-        preamble_override: Optional[str] = None,
-        user_name: Optional[str] = None,
-        temperature: Optional[float] = 0.8,
-        max_tokens: Optional[int] = None,
-        stream: Optional[bool] = False,
-        p: Optional[float] = None,
-        k: Optional[float] = None,
-        logit_bias: Optional[Dict[int, float]] = None,
-        search_queries_only: Optional[bool] = None,
-        documents: Optional[List[Dict[str, Any]]] = None,
-        citation_quality: Optional[str] = None,
-        prompt_truncation: Optional[str] = None,
-        connectors: Optional[List[Dict[str, Any]]] = None,
+            self,
+            message: Optional[str] = None,
+            conversation_id: Optional[str] = "",
+            model: Optional[str] = None,
+            return_chat_history: Optional[bool] = False,
+            return_prompt: Optional[bool] = False,
+            return_preamble: Optional[bool] = False,
+            chat_history: Optional[List[Dict[str, str]]] = None,
+            preamble_override: Optional[str] = None,
+            user_name: Optional[str] = None,
+            temperature: Optional[float] = 0.8,
+            max_tokens: Optional[int] = None,
+            stream: Optional[bool] = False,
+            p: Optional[float] = None,
+            k: Optional[float] = None,
+            logit_bias: Optional[Dict[int, float]] = None,
+            search_queries_only: Optional[bool] = None,
+            documents: Optional[List[Dict[str, Any]]] = None,
+            citation_quality: Optional[str] = None,
+            prompt_truncation: Optional[str] = None,
+            connectors: Optional[List[Dict[str, Any]]] = None,
     ) -> Union[AsyncChat, StreamingChat]:
         if message is None:
             raise CohereError("'message' must be provided.")
@@ -267,13 +344,13 @@ class AsyncClient(Client):
             return AsyncChat.from_dict(response, message=message, client=self)
 
     async def embed(
-        self,
-        texts: List[str],
-        model: Optional[str] = None,
-        truncate: Optional[str] = None,
-        compress: Optional[bool] = False,
-        compression_codebook: Optional[str] = "default",
-        input_type: Optional[str] = None,
+            self,
+            texts: List[str],
+            model: Optional[str] = None,
+            truncate: Optional[str] = None,
+            compress: Optional[bool] = False,
+            compression_codebook: Optional[str] = "default",
+            input_type: Optional[str] = None,
     ) -> Embeddings:
         """Returns an Embeddings object for the provided texts. Visit https://cohere.ai/embed to learn about embeddings.
 
@@ -285,30 +362,54 @@ class AsyncClient(Client):
             compression_codebook (str): (Optional) The compression codebook to use for compressed embeddings. Defaults to "default".
             input_type (str): (Optional) One of "classification", "clustering", "search_document", "search_query". The type of input text provided to embed.
         """
-        json_bodys = [
-            dict(
-                texts=texts[i : i + cohere.COHERE_EMBED_BATCH_SIZE],
-                model=model,
-                truncate=truncate,
-                compress=compress,
-                compression_codebook=compression_codebook,
-                input_type=input_type,
-            )
-            for i in range(0, len(texts), cohere.COHERE_EMBED_BATCH_SIZE)
-        ]
-        responses = await asyncio.gather(*[self._request(cohere.EMBED_URL, json) for json in json_bodys])
-        meta = responses[0]["meta"] if responses else None
+        if self.api_key != cohere.OCI_API_TYPE:
+            json_bodys = [
+                dict(
+                    texts=texts[i: i + cohere.COHERE_EMBED_BATCH_SIZE],
+                    model=model,
+                    truncate=truncate,
+                    compress=compress,
+                    compression_codebook=compression_codebook,
+                    input_type=input_type,
+                )
+                for i in range(0, len(texts), cohere.COHERE_EMBED_BATCH_SIZE)
+            ]
+        else:
+            json_bodys = [
+                dict(
+                    inputs=texts[i: i + cohere.COHERE_EMBED_BATCH_SIZE],
+                    truncate=truncate,
+                    isEcho=True,
+                    servingMode={"servingType": "ON_DEMAND", "modelId": model},
+                )
+                for i in range(0, len(texts), cohere.COHERE_EMBED_BATCH_SIZE)
+            ]
 
-        return Embeddings(
-            embeddings=[e for res in responses for e in res["embeddings"]],
-            compressed_embeddings=[e for res in responses for e in res["compressed_embeddings"]] if compress else None,
-            meta=meta,
-        )
+        if self.api_key != cohere.OCI_API_TYPE:
+            responses = await asyncio.gather(*[self._request(cohere.EMBED_URL, json) for json in json_bodys])
+        else:
+            responses = await asyncio.gather(*[self._oci_request(cohere.OCI_EMBED_URL, json) for json in json_bodys])
+
+        meta = responses[0]["meta"] if "meta" in responses[0].keys() else {"api_version": {"version": "1"}}
+
+        if self.api_key != cohere.OCI_API_TYPE:
+            return Embeddings(
+                embeddings=[e for res in responses for e in res["embeddings"]],
+                compressed_embeddings=[e for res in responses for e in
+                                       res["compressed_embeddings"]] if compress else None,
+                meta=meta,
+            )
+        else:
+            return Embeddings(
+                embeddings=[e for res in responses for e in res["embeddings"]],
+                # compressed_embeddings=[e for res in responses for e in res["compressed_embeddings"]] if compress else None,
+                meta=meta,
+            )
 
     async def codebook(
-        self,
-        model: Optional[str] = None,
-        compression_codebook: Optional[str] = "default",
+            self,
+            model: Optional[str] = None,
+            compression_codebook: Optional[str] = "default",
     ) -> Codebook:
         """Returns a codebook object for the provided model. Visit https://cohere.ai/embed to learn about compressed embeddings and codebooks.
 
@@ -324,12 +425,12 @@ class AsyncClient(Client):
         return Codebook(response["codebook"], response["meta"])
 
     async def classify(
-        self,
-        inputs: List[str] = [],
-        model: Optional[str] = None,
-        preset: Optional[str] = None,
-        examples: List[ClassifyExample] = [],
-        truncate: Optional[str] = None,
+            self,
+            inputs: List[str] = [],
+            model: Optional[str] = None,
+            preset: Optional[str] = None,
+            examples: List[ClassifyExample] = [],
+            truncate: Optional[str] = None,
     ) -> Classifications:
         examples_dicts = [{"text": example.text, "label": example.label} for example in examples]
 
@@ -353,31 +454,48 @@ class AsyncClient(Client):
         return Classifications(classifications, response["meta"])
 
     async def summarize(
-        self,
-        text: str,
-        model: Optional[str] = None,
-        length: Optional[str] = None,
-        format: Optional[str] = None,
-        temperature: Optional[float] = None,
-        additional_command: Optional[str] = None,
-        extractiveness: Optional[str] = None,
+            self,
+            text: str,
+            model: Optional[str] = None,
+            length: Optional[str] = None,
+            format: Optional[str] = None,
+            temperature: Optional[float] = None,
+            additional_command: Optional[str] = None,
+            extractiveness: Optional[str] = None,
     ) -> SummarizeResponse:
-        json_body = {
-            "model": model,
-            "text": text,
-            "length": length,
-            "format": format,
-            "temperature": temperature,
-            "additional_command": additional_command,
-            "extractiveness": extractiveness,
-        }
+        if self.api_key != cohere.OCI_API_TYPE:
+            json_body = {
+                "model": model,
+                "text": text,
+                "length": length,
+                "format": format,
+                "temperature": temperature,
+                "additional_command": additional_command,
+                "extractiveness": extractiveness,
+            }
+        else:
+            json_body = {
+                "input": text,
+                "length": length,
+                "format": format,
+                "temperature": temperature,
+                "additionalCommand": additional_command,
+                "extractiveness": extractiveness,
+                "isEcho": True,
+                "servingMode": {"servingType": "ON_DEMAND", "modelId": model},
+            }
         # remove None values from the dict
         json_body = {k: v for k, v in json_body.items() if v is not None}
-        response = await self._request(cohere.SUMMARIZE_URL, json=json_body)
+        if self.api_key != cohere.OCI_API_TYPE:
+            response = await self._request(cohere.SUMMARIZE_URL, json=json_body)
+        else:
+            response = await self._oci_request(cohere.OCI_SUMMARIZE_URL, json=json_body)
+            response["meta"] = {"api_version": {"version": "1"}}
+
         return SummarizeResponse(id=response["id"], summary=response["summary"], meta=response["meta"])
 
     async def batch_tokenize(
-        self, texts: List[str], return_exceptions=False, **kwargs
+            self, texts: List[str], return_exceptions=False, **kwargs
     ) -> List[Union[Tokens, Exception]]:
         return await asyncio.gather(*[self.tokenize(t, **kwargs) for t in texts], return_exceptions=return_exceptions)
 
@@ -387,7 +505,7 @@ class AsyncClient(Client):
         return Tokens(tokens=res["tokens"], token_strings=res["token_strings"], meta=res["meta"])
 
     async def batch_detokenize(
-        self, list_of_tokens: List[List[int]], return_exceptions=False, **kwargs
+            self, list_of_tokens: List[List[int]], return_exceptions=False, **kwargs
     ) -> List[Union[Detokenization, Exception]]:
         return await asyncio.gather(
             *[self.detokenize(t, **kwargs) for t in list_of_tokens], return_exceptions=return_exceptions
@@ -409,15 +527,15 @@ class AsyncClient(Client):
         return DetectLanguageResponse(results, response["meta"])
 
     async def generate_feedback(
-        self,
-        request_id: str,
-        good_response: bool,
-        model=None,
-        desired_response: str = None,
-        flagged_response: bool = None,
-        flagged_reason: str = None,
-        prompt: str = None,
-        annotator_id: str = None,
+            self,
+            request_id: str,
+            good_response: bool,
+            model=None,
+            desired_response: str = None,
+            flagged_response: bool = None,
+            flagged_reason: str = None,
+            prompt: str = None,
+            annotator_id: str = None,
     ) -> GenerateFeedbackResponse:
         json_body = {
             "request_id": request_id,
@@ -433,11 +551,11 @@ class AsyncClient(Client):
         return GenerateFeedbackResponse(id=response["id"])
 
     async def generate_preference_feedback(
-        self,
-        ratings: List[PreferenceRating],
-        model=None,
-        prompt: str = None,
-        annotator_id: str = None,
+            self,
+            ratings: List[PreferenceRating],
+            model=None,
+            prompt: str = None,
+            annotator_id: str = None,
     ) -> GeneratePreferenceFeedbackResponse:
         ratings_dicts = []
         for rating in ratings:
@@ -452,12 +570,12 @@ class AsyncClient(Client):
         return GeneratePreferenceFeedbackResponse(id=response["id"])
 
     async def rerank(
-        self,
-        query: str,
-        documents: Union[List[str], List[Dict[str, Any]]],
-        model: str,
-        top_n: Optional[int] = None,
-        max_chunks_per_doc: Optional[int] = None,
+            self,
+            query: str,
+            documents: Union[List[str], List[Dict[str, Any]]],
+            model: str,
+            top_n: Optional[int] = None,
+            max_chunks_per_doc: Optional[int] = None,
     ) -> Reranking:
         """Returns an ordered list of documents ordered by their relevance to the provided query
 
@@ -493,14 +611,14 @@ class AsyncClient(Client):
         return reranking
 
     async def create_dataset(
-        self,
-        name: str,
-        data: BinaryIO,
-        dataset_type: str,
-        eval_data: Optional[BinaryIO] = None,
-        keep_fields: Union[str, List[str]] = None,
-        optional_fields: Union[str, List[str]] = None,
-        parse_info: Optional[ParseInfo] = None,
+            self,
+            name: str,
+            data: BinaryIO,
+            dataset_type: str,
+            eval_data: Optional[BinaryIO] = None,
+            keep_fields: Union[str, List[str]] = None,
+            optional_fields: Union[str, List[str]] = None,
+            parse_info: Optional[ParseInfo] = None,
     ) -> AsyncDataset:
         """Returns a Dataset given input data
 
@@ -549,7 +667,7 @@ class AsyncClient(Client):
         return AsyncDataset.from_dict(response["dataset"], wait_fn=self.wait_for_dataset)
 
     async def list_datasets(
-        self, dataset_type: str = None, limit: int = None, offset: int = None
+            self, dataset_type: str = None, limit: int = None, offset: int = None
     ) -> List[AsyncDataset]:
         """Returns a list of your Datasets
 
@@ -584,10 +702,10 @@ class AsyncClient(Client):
         self._request(f"{cohere.DATASET_URL}/{id}", method="DELETE")
 
     async def wait_for_dataset(
-        self,
-        dataset_id: str,
-        timeout: Optional[float] = None,
-        interval: float = 10,
+            self,
+            dataset_id: str,
+            timeout: Optional[float] = None,
+            interval: float = 10,
     ) -> AsyncDataset:
         """Wait for Dataset validation result.
 
@@ -611,13 +729,13 @@ class AsyncClient(Client):
         )
 
     async def create_cluster_job(
-        self,
-        input_dataset_id: str = None,
-        embeddings_url: str = None,
-        min_cluster_size: Optional[int] = None,
-        n_neighbors: Optional[int] = None,
-        is_deterministic: Optional[bool] = None,
-        generate_descriptions: Optional[bool] = None,
+            self,
+            input_dataset_id: str = None,
+            embeddings_url: str = None,
+            min_cluster_size: Optional[int] = None,
+            n_neighbors: Optional[int] = None,
+            is_deterministic: Optional[bool] = None,
+            generate_descriptions: Optional[bool] = None,
     ) -> AsyncClusterJobResult:
         """Create clustering job.
 
@@ -649,8 +767,8 @@ class AsyncClient(Client):
         return cluster_job
 
     async def get_cluster_job(
-        self,
-        job_id: str,
+            self,
+            job_id: str,
     ) -> ClusterJobResult:
         """Get clustering job results.
 
@@ -684,10 +802,10 @@ class AsyncClient(Client):
         ]
 
     async def wait_for_cluster_job(
-        self,
-        job_id: str,
-        timeout: Optional[float] = None,
-        interval: float = 10,
+            self,
+            job_id: str,
+            timeout: Optional[float] = None,
+            interval: float = 10,
     ) -> ClusterJobResult:
         """Wait for clustering job result.
 
@@ -711,14 +829,14 @@ class AsyncClient(Client):
         )
 
     async def create_embed_job(
-        self,
-        input_dataset: Union[str, BaseDataset],
-        name: Optional[str] = None,
-        model: Optional[str] = None,
-        truncate: Optional[str] = None,
-        compress: Optional[bool] = None,
-        compression_codebook: Optional[str] = None,
-        text_field: Optional[str] = None,
+            self,
+            input_dataset: Union[str, BaseDataset],
+            name: Optional[str] = None,
+            model: Optional[str] = None,
+            truncate: Optional[str] = None,
+            compress: Optional[bool] = None,
+            compression_codebook: Optional[str] = None,
+            text_field: Optional[str] = None,
     ) -> AsyncEmbedJob:
         """Create embed job.
 
@@ -809,10 +927,10 @@ class AsyncClient(Client):
         await self._request(f"{cohere.EMBED_JOBS_URL}/{job_id}/cancel", method="POST", json={})
 
     async def wait_for_embed_job(
-        self,
-        job_id: str,
-        timeout: Optional[float] = None,
-        interval: float = 10,
+            self,
+            job_id: str,
+            timeout: Optional[float] = None,
+            interval: float = 10,
     ) -> AsyncEmbedJob:
         """Wait for embed job completion.
 
@@ -836,12 +954,12 @@ class AsyncClient(Client):
         )
 
     async def create_custom_model(
-        self,
-        name: str,
-        model_type: CUSTOM_MODEL_TYPE,
-        dataset: CustomModelDataset,
-        base_model: Optional[str] = None,
-        hyperparameters: Optional[HyperParametersInput] = None,
+            self,
+            name: str,
+            model_type: CUSTOM_MODEL_TYPE,
+            dataset: CustomModelDataset,
+            base_model: Optional[str] = None,
+            hyperparameters: Optional[HyperParametersInput] = None,
     ) -> AsyncCustomModel:
         """Create a new custom model
 
@@ -909,10 +1027,10 @@ class AsyncClient(Client):
         return AsyncCustomModel.from_dict(response["finetune"], self.wait_for_custom_model)
 
     async def wait_for_custom_model(
-        self,
-        custom_model_id: str,
-        timeout: Optional[float] = None,
-        interval: float = 60,
+            self,
+            custom_model_id: str,
+            timeout: Optional[float] = None,
+            interval: float = 60,
     ) -> AsyncCustomModel:
         """Wait for custom model training completion.
 
@@ -936,7 +1054,7 @@ class AsyncClient(Client):
         )
 
     async def _upload_dataset(
-        self, content: Iterable[bytes], custom_model_name: str, file_name: str, type: INTERNAL_CUSTOM_MODEL_TYPE
+            self, content: Iterable[bytes], custom_model_name: str, file_name: str, type: INTERNAL_CUSTOM_MODEL_TYPE
     ) -> str:
         gcs = await self._create_signed_url(custom_model_name, file_name, type)
         session = await self._backend.session()
@@ -946,7 +1064,7 @@ class AsyncClient(Client):
         return gcs["gcspath"]
 
     async def _create_signed_url(
-        self, custom_model_name: str, file_name: str, type: INTERNAL_CUSTOM_MODEL_TYPE
+            self, custom_model_name: str, file_name: str, type: INTERNAL_CUSTOM_MODEL_TYPE
     ) -> TypedDict("gcsData", {"url": str, "gcspath": str}):
         json = {"finetuneName": custom_model_name, "fileName": file_name, "finetuneType": type}
         return await self._request(f"{cohere.CUSTOM_MODEL_URL}/GetFinetuneUploadSignedURL", method="POST", json=json)
@@ -988,11 +1106,11 @@ class AsyncClient(Client):
         return [ModelMetric.from_dict(metric) for metric in response["metrics"]]
 
     async def list_custom_models(
-        self,
-        statuses: Optional[List[CUSTOM_MODEL_STATUS]] = None,
-        before: Optional[datetime] = None,
-        after: Optional[datetime] = None,
-        order_by: Optional[Literal["asc", "desc"]] = None,
+            self,
+            statuses: Optional[List[CUSTOM_MODEL_STATUS]] = None,
+            before: Optional[datetime] = None,
+            after: Optional[datetime] = None,
+            order_by: Optional[Literal["asc", "desc"]] = None,
     ) -> List[AsyncCustomModel]:
         """List custom models of your organization.
 
@@ -1056,16 +1174,16 @@ class AIOHTTPBackend:
         return make_request_fn
 
     async def request(
-        self,
-        url,
-        json=None,
-        files=None,
-        method: str = "post",
-        headers=None,
-        session=None,
-        stream=False,
-        params=None,
-        **kwargs,
+            self,
+            url,
+            json=None,
+            files=None,
+            method: str = "post",
+            headers=None,
+            session=None,
+            stream=False,
+            params=None,
+            **kwargs,
     ) -> JSON:
         session = session or await self.session()
         self.logger.debug(f"Making request to {url} with content {json}")
@@ -1076,19 +1194,118 @@ class AIOHTTPBackend:
                 session, method, url, headers=headers, json=json, data=files, params=params, **kwargs
             )
         except aiohttp.ClientConnectionError as e:  # ensure the SDK user does not have to deal with knowing aiohttp
-            self.logger.debug(f"Fatal connection error after {time.time()-request_start:.1f}s: {e}")
+            self.logger.debug(f"Fatal connection error after {time.time() - request_start:.1f}s: {e}")
             raise CohereConnectionError(str(e)) from e
         except aiohttp.ClientResponseError as e:  # status 500 or something remains after retries
-            self.logger.debug(f"Fatal ClientResponseError error after {time.time()-request_start:.1f}s: {e}")
+            self.logger.debug(f"Fatal ClientResponseError error after {time.time() - request_start:.1f}s: {e}")
             raise CohereConnectionError(str(e)) from e
         except asyncio.TimeoutError as e:
-            self.logger.debug(f"Fatal timeout error after {time.time()-request_start:.1f}s: {e}")
+            self.logger.debug(f"Fatal timeout error after {time.time() - request_start:.1f}s: {e}")
             raise CohereConnectionError("The request timed out") from e
         except Exception as e:  # Anything caught here should be added above
-            self.logger.debug(f"Unexpected fatal error after {time.time()-request_start:.1f}s: {e}")
+            self.logger.debug(f"Unexpected fatal error after {time.time() - request_start:.1f}s: {e}")
             raise CohereError(f"Unexpected exception ({e.__class__.__name__}): {e}") from e
 
-        self.logger.debug(f"Received response with status {response.status} after {time.time()-request_start:.1f}s")
+        self.logger.debug(f"Received response with status {response.status} after {time.time() - request_start:.1f}s")
+        return response
+
+    async def session(self) -> aiohttp.ClientSession:
+        if self._session is None:
+            self._session = aiohttp.ClientSession(
+                json_serialize=np_json_dumps,
+                timeout=aiohttp.ClientTimeout(self.timeout),
+                connector=aiohttp.TCPConnector(limit=0),
+            )
+            self._semaphore = asyncio.Semaphore(self.max_concurrent_requests)
+            self._requester = self.build_aio_requester()
+        return self._session
+
+    async def close(self):
+        if self._session is not None:
+            await self._session.close()
+            self._session = None
+
+    def __del__(self):
+        # https://stackoverflow.com/questions/54770360/how-can-i-wait-for-an-objects-del-to-finish-before-the-async-loop-closes
+        if self._session:
+            try:
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    loop.create_task(self.close())
+                else:
+                    loop.run_until_complete(self.close())
+            except Exception:
+                pass
+
+
+class OCIAIOHTTPBackend:
+    """HTTP backend which handles retries, concurrency limiting and logging"""
+
+    SLEEP_AFTER_FAILURE = defaultdict(lambda: 0.25, {429: 5})
+
+    def __init__(self, logger, max_concurrent_requests: int = 64, max_retries: int = 5, timeout: int = 120):
+        self.logger = logger
+        self.timeout = timeout
+        self.max_retries = max_retries
+        self.max_concurrent_requests = max_concurrent_requests
+        self._semaphore: asyncio.Semaphore = None
+        self._session: Optional[aiohttp.ClientSession] = None
+        self._requester = None
+
+    def build_aio_requester(self) -> Callable:  # returns a function for retryable requests
+        @backoff.on_exception(
+            backoff.expo,
+            (aiohttp.ClientError, aiohttp.ClientResponseError),
+            max_tries=self.max_retries + 1,
+            max_time=self.timeout,
+        )
+        async def make_request_fn(session, *args, **kwargs):
+            async with self._semaphore:  # this limits total concurrency by the client
+                response = await session.request(*args, **kwargs)
+            if response.status in cohere.RETRY_STATUS_CODES:  # likely temporary, raise to retry
+                self.logger.info(f"Received status {response.status}, retrying...")
+                await asyncio.sleep(self.SLEEP_AFTER_FAILURE[response.status])
+                response.raise_for_status()
+
+            return response
+
+        return make_request_fn
+
+    async def request(
+            self,
+            url,
+            json=None,
+            method: str = "post",
+            session=None,
+            auth=None,
+    ) -> JSON:
+        session = session or await self.session()
+        self.logger.debug(f"Making request to {url} with content {json}")
+
+        request_start = time.time()
+        try:
+            auth_req = requests.Request("POST", url, json=json, auth=auth)
+            auth_req.body = jsonlib.dumps(json)
+            auth_req.path_url = urlparse(url).path
+            auth_req = auth(auth_req)
+
+            response = await self._requester(
+                session=session, method=method, url=url, headers=auth_req.headers, json=json
+            )
+        except aiohttp.ClientConnectionError as e:  # ensure the SDK user does not have to deal with knowing aiohttp
+            self.logger.debug(f"Fatal connection error after {time.time() - request_start:.1f}s: {e}")
+            raise CohereConnectionError(str(e)) from e
+        except aiohttp.ClientResponseError as e:  # status 500 or something remains after retries
+            self.logger.debug(f"Fatal ClientResponseError error after {time.time() - request_start:.1f}s: {e}")
+            raise CohereConnectionError(str(e)) from e
+        except asyncio.TimeoutError as e:
+            self.logger.debug(f"Fatal timeout error after {time.time() - request_start:.1f}s: {e}")
+            raise CohereConnectionError("The request timed out") from e
+        except Exception as e:  # Anything caught here should be added above
+            self.logger.debug(f"Unexpected fatal error after {time.time() - request_start:.1f}s: {e}")
+            raise CohereError(f"Unexpected exception ({e.__class__.__name__}): {e}") from e
+
+        self.logger.debug(f"Received response with status {response.status} after {time.time() - request_start:.1f}s")
         return response
 
     async def session(self) -> aiohttp.ClientSession:

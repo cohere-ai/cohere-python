@@ -10,7 +10,8 @@ from cohere import AsyncClient
 
 @pytest_asyncio.fixture
 async def async_client() -> AsyncClient:
-    api_key = os.getenv("CO_API_KEY")
+    # api_key = os.getenv("CO_API_KEY")
+    api_key = "oci"
     assert api_key, "CO_API_KEY environment variable not set"
     client = AsyncClient(api_key, client_name="unittest")
     yield client

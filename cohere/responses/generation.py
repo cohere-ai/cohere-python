@@ -137,7 +137,7 @@ class Generations(UserList, CohereObject):
                             one_gen["text"],
                             likelihood,
                             token_likelihoods,
-                            prompt=response.get("prompts"),
+                            prompt=response.get("prompts")[0],
                             id=one_gen["id"],
                             finish_reason=one_gen.get("finish_reason"),
                         )

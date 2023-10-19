@@ -18,3 +18,5 @@ urllib3==2.0.4 ; python_version >= "3.7" and python_version < "4.0"
 yarl==1.9.2 ; python_version >= "3.7" and python_version < "4.0"
 zipp==3.15.0 ; python_version >= "3.7" and python_version < "4.0"
 oci
+pytest
+pytest_asyncio
