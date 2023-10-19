@@ -22,8 +22,8 @@ class Classification(CohereObject):
     ) -> None:
         super().__init__(*args, **kwargs)
         self.input = input
-        self._prediction = prediction  # to be deprecated
-        self._confidence = confidence  # to be deprecated
+        self._prediction = prediction  # to be removed
+        self._confidence = confidence  # to be removed
         self.predictions = predictions
         self.confidences = confidences
         self.labels = labels
