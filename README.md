@@ -55,3 +55,20 @@ Support endpoint and function,
 ### For Using Cohere
 
 The value of API_KEY must be set to the key your fetch from cohere.com.
+
+### Sync with fork
+
+refer: [https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/configuring-a-remote-repository-for-a-fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/configuring-a-remote-repository-for-a-fork)
+refer: [https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork)
+
+```
+# once only
+# git remote -v
+# git remote add upstream https://github.com/cohere-ai/cohere-python.git
+```
+
+```
+git fetch upstream
+git checkout main
+git merge upstream/main
+```
