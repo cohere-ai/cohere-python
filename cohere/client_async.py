@@ -347,7 +347,16 @@ class AsyncClient(Client):
             for label, prediction in res["labels"].items():
                 labelObj[label] = LabelPrediction(prediction["confidence"])
             classifications.append(
-                Classification(res["input"], res["prediction"], res["confidence"], labelObj, id=res["id"])
+                Classification(
+                    input=res["input"],
+                    predictions=res.get("predictions", None),
+                    confidences=res.get("confidences", None),
+                    prediction=res.get("prediction", None),
+                    confidence=res.get("confidence", None),
+                    labels=labelObj,
+                    classification_type=res.get("classification_type", "single-label"),
+                    id=res["id"],
+                )
             )
 
         return Classifications(classifications, response["meta"])

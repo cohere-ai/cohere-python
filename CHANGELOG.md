@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.31
+ - [#324] (https://github.com/cohere-ai/cohere-python/pull/324)
+    - Classify:
+      - Deprecate `prediction` and `confidence` attribute
+      - Add new `predictions` and `confidences` attribute for single and multi label classification
+
 ## 4.30
  - [#313] (https://github.com/cohere-ai/cohere-python/pull/313)
    - change chatlog (string) to chat_history (array of messages) in /chat
