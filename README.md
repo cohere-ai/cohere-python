@@ -45,11 +45,11 @@ The value of API_KEY must be set to "oci".
 
 Support endpoint and function,
 
-| OCI Cohere Endpoint            | Function             |
-|--------------------------------|----------------------|
-| 20231130/actions/generateText  | co.generate()        |
-| 20231130/actions/embedText     | co.embed()           |
-| 20231130/actions/summarizeText | co.summarize()       |
+| OCI Cohere Endpoint            | Function             | Model          |
+|--------------------------------|----------------------|----------------|
+| 20231130/actions/generateText  | co.generate()        | cohere.command  |
+| 20231130/actions/embedText     | co.embed()           | cohere.embed-english-light-v2.0     |
+| 20231130/actions/summarizeText | co.summarize()       | cohere.command|
 
 
 ### For Using Cohere
