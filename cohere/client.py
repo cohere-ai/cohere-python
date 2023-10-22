@@ -393,8 +393,7 @@ class Client:
         texts: List[str],
         model: Optional[str] = None,
         truncate: Optional[str] = None,
-        compress: Optional[bool] = False,
-        compression_codebook: Optional[str] = "default",
+        compression: Optional[str] = None,
         input_type: Optional[str] = None,
     ) -> Embeddings:
         """Returns an Embeddings object for the provided texts. Visit https://cohere.ai/embed to learn about embeddings.
@@ -403,8 +402,7 @@ class Client:
             text (List[str]): A list of strings to embed.
             model (str): (Optional) The model ID to use for embedding the text.
             truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
-            compress (bool): (Optional) Whether to compress the embeddings. When True, the compressed_embeddings will be returned as integers in the range [0, 255].
-            compression_codebook (str): (Optional) The compression codebook to use for compressed embeddings. Defaults to "default".
+            compression (str): (Optional) One of "int8" or "binary". The type of compression to use for the embeddings.
             input_type (str): (Optional) One of "classification", "clustering", "search_document", "search_query". The type of input text provided to embed.
         """
         responses = {
@@ -420,8 +418,7 @@ class Client:
                     "model": model,
                     "texts": texts_batch,
                     "truncate": truncate,
-                    "compress": compress,
-                    "compression_codebook": compression_codebook,
+                    "compression": compression,
                     "input_type": input_type,
                 }
             )
