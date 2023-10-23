@@ -213,7 +213,7 @@ class AsyncClient(Client):
         message: Optional[str] = None,
         conversation_id: Optional[str] = "",
         model: Optional[str] = None,
-        return_chatlog: Optional[bool] = False,
+        return_chat_history: Optional[bool] = False,
         return_prompt: Optional[bool] = False,
         return_preamble: Optional[bool] = False,
         chat_history: Optional[List[Dict[str, str]]] = None,
@@ -238,7 +238,7 @@ class AsyncClient(Client):
             "message": message,
             "conversation_id": conversation_id,
             "model": model,
-            "return_chatlog": return_chatlog,
+            "return_chat_history": return_chat_history,
             "return_prompt": return_prompt,
             "return_preamble": return_preamble,
             "chat_history": chat_history,
@@ -273,6 +273,7 @@ class AsyncClient(Client):
         truncate: Optional[str] = None,
         compress: Optional[bool] = False,
         compression_codebook: Optional[str] = "default",
+        input_type: Optional[str] = None,
     ) -> Embeddings:
         """Returns an Embeddings object for the provided texts. Visit https://cohere.ai/embed to learn about embeddings.
 
@@ -282,6 +283,7 @@ class AsyncClient(Client):
             truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
             compress (bool): (Optional) Whether to compress the embeddings. When True, the compressed_embeddings will be returned as integers in the range [0, 255].
             compression_codebook (str): (Optional) The compression codebook to use for compressed embeddings. Defaults to "default".
+            input_type (str): (Optional) One of "classification", "clustering", "search_document", "search_query". The type of input text provided to embed.
         """
         json_bodys = [
             dict(
@@ -290,6 +292,7 @@ class AsyncClient(Client):
                 truncate=truncate,
                 compress=compress,
                 compression_codebook=compression_codebook,
+                input_type=input_type,
             )
             for i in range(0, len(texts), cohere.COHERE_EMBED_BATCH_SIZE)
         ]
@@ -344,7 +347,16 @@ class AsyncClient(Client):
             for label, prediction in res["labels"].items():
                 labelObj[label] = LabelPrediction(prediction["confidence"])
             classifications.append(
-                Classification(res["input"], res["prediction"], res["confidence"], labelObj, id=res["id"])
+                Classification(
+                    input=res["input"],
+                    predictions=res.get("predictions", None),
+                    confidences=res.get("confidences", None),
+                    prediction=res.get("prediction", None),
+                    confidence=res.get("confidence", None),
+                    labels=labelObj,
+                    classification_type=res.get("classification_type", "single-label"),
+                    id=res["id"],
+                )
             )
 
         return Classifications(classifications, response["meta"])
