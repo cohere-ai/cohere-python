@@ -87,7 +87,7 @@ class CsvDataset(LocalFileCustomModelDataset):
     another prompt, another completion
     """
 
-    def __init__(self, train_file: str, delimiter: str, eval_file: Optional[str] = None):
+    def __init__(self, train_file: str, delimiter: str, eval_file: Optional[str] = None, has_header: Optional[bool] = False):
         """
         Args:
             train_file (str): local path to csv with training data
@@ -95,10 +95,12 @@ class CsvDataset(LocalFileCustomModelDataset):
         """
         super().__init__(train_file, eval_file)
         self._delimiter = delimiter
+        self._has_header = has_header
 
     def file_config(self) -> FileConfig:
         config = dict(_empty_file_config)
         config["delimiter"] = self._delimiter
+        config["hasHeader"] = self._has_header
         return config
 
 
