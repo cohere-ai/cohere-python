@@ -722,8 +722,6 @@ class AsyncClient(Client):
         name: Optional[str] = None,
         model: Optional[str] = None,
         truncate: Optional[str] = None,
-        compress: Optional[bool] = None,
-        compression_codebook: Optional[str] = None,
         text_field: Optional[str] = None,
     ) -> AsyncEmbedJob:
         """Create embed job.
@@ -733,8 +731,6 @@ class AsyncClient(Client):
             name (Optional[str], optional): The name of the embed job. Defaults to None.
             model (Optional[str], optional): The model ID to use for embedding the text. Defaults to None.
             truncate (Optional[str], optional): How the API handles text longer than the maximum token length. Defaults to None.
-            compress (Optional[bool], optional): Use embedding compression. Defaults to None.
-            compression_codebook (Optional[str], optional): Embedding compression codebook. Defaults to None.
             text_field (Optional[str], optional): Name of the column containing text to embed. Defaults to None.
 
         Returns:
@@ -753,8 +749,6 @@ class AsyncClient(Client):
             "name": name,
             "model": model,
             "truncate": truncate,
-            "compress": compress,
-            "compression_codebook": compression_codebook,
             "text_field": text_field,
             "output_format": "avro",
         }
