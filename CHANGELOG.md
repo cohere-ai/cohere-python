@@ -1,4 +1,7 @@
 # Changelog
+## 4.32
+ - [#331] (https://github.com/cohere-ai/cohere-python/pull/331)
+    - Embed: add `compression` parameter for embed models
 
 ## 4.31
  - [#324] (https://github.com/cohere-ai/cohere-python/pull/324)
