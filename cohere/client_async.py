@@ -298,7 +298,9 @@ class AsyncClient(Client):
 
         return Embeddings(
             embeddings=[e for res in responses for e in res["embeddings"]],
-            compressed_embeddings=[e for res in responses for e in res["compressed_embeddings"]] if compression else None,
+            compressed_embeddings=[e for res in responses for e in res["compressed_embeddings"]]
+            if compression
+            else None,
             meta=meta,
         )
 
