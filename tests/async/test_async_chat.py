@@ -64,9 +64,11 @@ async def test_async_chat_stream(async_client):
         assert token.index == expected_index
         expected_index += 1
 
-    assert saw_stream_start, "no stream start event"
-    assert res.texts is not None, "no text generated"
-    assert res.texts == [expected_text], "final text generated is not the same as the combined text sent"
+    assert saw_stream_start, f"no stream start event conversation id is {conversation_id}"
+    assert res.texts is not None, f"no text generated conversation id is {conversation_id}"
+    assert res.texts == [
+        expected_text
+    ], f"final text generated is not the same as the combined text sent conversation id is {conversation_id}"
     assert res.conversation_id is not None
     assert res.response_id is not None
 
