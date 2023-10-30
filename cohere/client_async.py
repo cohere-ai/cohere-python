@@ -271,8 +271,7 @@ class AsyncClient(Client):
         texts: List[str],
         model: Optional[str] = None,
         truncate: Optional[str] = None,
-        compress: Optional[bool] = False,
-        compression_codebook: Optional[str] = "default",
+        compression: Optional[str] = None,
         input_type: Optional[str] = None,
     ) -> Embeddings:
         """Returns an Embeddings object for the provided texts. Visit https://cohere.ai/embed to learn about embeddings.
@@ -281,8 +280,7 @@ class AsyncClient(Client):
             text (List[str]): A list of strings to embed.
             model (str): (Optional) The model ID to use for embedding the text.
             truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
-            compress (bool): (Optional) Whether to compress the embeddings. When True, the compressed_embeddings will be returned as integers in the range [0, 255].
-            compression_codebook (str): (Optional) The compression codebook to use for compressed embeddings. Defaults to "default".
+            compression (str): (Optional) One of "int8" or "binary". The type of compression to use for the embeddings.
             input_type (str): (Optional) One of "classification", "clustering", "search_document", "search_query". The type of input text provided to embed.
         """
         json_bodys = [
@@ -290,8 +288,7 @@ class AsyncClient(Client):
                 texts=texts[i : i + cohere.COHERE_EMBED_BATCH_SIZE],
                 model=model,
                 truncate=truncate,
-                compress=compress,
-                compression_codebook=compression_codebook,
+                compression=compression,
                 input_type=input_type,
             )
             for i in range(0, len(texts), cohere.COHERE_EMBED_BATCH_SIZE)
@@ -301,7 +298,9 @@ class AsyncClient(Client):
 
         return Embeddings(
             embeddings=[e for res in responses for e in res["embeddings"]],
-            compressed_embeddings=[e for res in responses for e in res["compressed_embeddings"]] if compress else None,
+            compressed_embeddings=[e for res in responses for e in res["compressed_embeddings"]]
+            if compression
+            else None,
             meta=meta,
         )
 
@@ -347,7 +346,16 @@ class AsyncClient(Client):
             for label, prediction in res["labels"].items():
                 labelObj[label] = LabelPrediction(prediction["confidence"])
             classifications.append(
-                Classification(res["input"], res["prediction"], res["confidence"], labelObj, id=res["id"])
+                Classification(
+                    input=res["input"],
+                    predictions=res.get("predictions", None),
+                    confidences=res.get("confidences", None),
+                    prediction=res.get("prediction", None),
+                    confidence=res.get("confidence", None),
+                    labels=labelObj,
+                    classification_type=res.get("classification_type", "single-label"),
+                    id=res["id"],
+                )
             )
 
         return Classifications(classifications, response["meta"])
@@ -716,8 +724,6 @@ class AsyncClient(Client):
         name: Optional[str] = None,
         model: Optional[str] = None,
         truncate: Optional[str] = None,
-        compress: Optional[bool] = None,
-        compression_codebook: Optional[str] = None,
         text_field: Optional[str] = None,
     ) -> AsyncEmbedJob:
         """Create embed job.
@@ -727,8 +733,6 @@ class AsyncClient(Client):
             name (Optional[str], optional): The name of the embed job. Defaults to None.
             model (Optional[str], optional): The model ID to use for embedding the text. Defaults to None.
             truncate (Optional[str], optional): How the API handles text longer than the maximum token length. Defaults to None.
-            compress (Optional[bool], optional): Use embedding compression. Defaults to None.
-            compression_codebook (Optional[str], optional): Embedding compression codebook. Defaults to None.
             text_field (Optional[str], optional): Name of the column containing text to embed. Defaults to None.
 
         Returns:
@@ -747,8 +751,6 @@ class AsyncClient(Client):
             "name": name,
             "model": model,
             "truncate": truncate,
-            "compress": compress,
-            "compression_codebook": compression_codebook,
             "text_field": text_field,
             "output_format": "avro",
         }
