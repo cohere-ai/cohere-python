@@ -22,4 +22,4 @@ class TestFinetuneClient(unittest.TestCase):
         # there should always be a model, but make sure tests don't randomly break
         if models:
             metrics = client.get_custom_model_metrics(models[0].id)
-            self.assertNotEquals(metrics, [])
+            self.assertNotEqual(metrics, [])
