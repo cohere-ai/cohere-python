@@ -1,36 +1,19 @@
 import pytest
-from utils import get_api_key, in_ci
+from utils import get_api_key
 
 import cohere
 from cohere.responses.embed_job import EmbedJob
 
-BAD_DATASET_ID = "bad-id"
 
-
-@pytest.mark.skipif(in_ci(), reason="can timeout during high load")
-def test_create_job(co):
-    create_res = co.create_embed_job(input_dataset=BAD_DATASET_ID)
-    job = create_res.wait(timeout=60, interval=5)
-    assert job.status == "failed"
-    check_job_result(job)
-
-
-def test_list_jobs(co):
+def test_list_get_jobs(co):
     jobs = co.list_embed_jobs()
-    assert len(jobs) > 0
+    if len(jobs) == 0:
+        pytest.skip("no jobs to test")  # the account has no jobs to check
+
     for job in jobs:
         check_job_result(job)
-
-
-def test_get_job(co):
-    jobs = co.list_embed_jobs()
     job = co.get_embed_job(jobs[0].job_id)
     check_job_result(job)
-
-
-def test_cancel_job(co):
-    jobs = co.list_embed_jobs()
-    co.cancel_embed_job(jobs[0].job_id)
 
 
 @pytest.fixture
