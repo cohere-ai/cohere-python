@@ -34,7 +34,7 @@ async def test_async_multi_replies(async_client):
 async def test_async_chat_stream(async_client):
     conversation_id = f"test_conv_{conftest.random_word()}"
     res = await async_client.chat(
-        message="wagmi",
+        message="How deep in the Mariana Trench?",
         max_tokens=5,
         conversation_id=conversation_id,
         stream=True,
@@ -47,9 +47,11 @@ async def test_async_chat_stream(async_client):
     assert res.response_id is None
 
     expected_index = 0
+    saw_stream_start = False
     expected_text = ""
     async for token in res:
         if isinstance(token, cohere.responses.chat.StreamStart):
+            saw_stream_start = True
             assert token.generation_id is not None
             assert not token.is_finished
         elif isinstance(token, cohere.responses.chat.StreamTextGeneration):
@@ -62,7 +64,11 @@ async def test_async_chat_stream(async_client):
         assert token.index == expected_index
         expected_index += 1
 
-    assert res.texts == [expected_text]
+    assert saw_stream_start, f"no stream start event conversation id is {conversation_id}"
+    assert res.texts is not None, f"no text generated conversation id is {conversation_id}"
+    assert res.texts == [
+        expected_text
+    ], f"final text generated is not the same as the combined text sent conversation id is {conversation_id}"
     assert res.conversation_id is not None
     assert res.response_id is not None
 
