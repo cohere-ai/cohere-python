@@ -1,4 +1,8 @@
 # Changelog
+## 4.33
+ - [#336] (https://github.com/cohere-ai/cohere-python/pull/336)
+    - Dataset: dont error on empty validation_status
+
 ## 4.32
  - [#331] (https://github.com/cohere-ai/cohere-python/pull/331)
     - Embed: add `compression` parameter for embed models
