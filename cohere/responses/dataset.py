@@ -54,14 +54,14 @@ class BaseDataset(CohereObject, JobWithStatus):
     @classmethod
     def from_dict(cls, data: Dict[str, Any], wait_fn) -> "Dataset":
         download_urls = []
-        if data["validation_status"] == "validated":
+        if data.get("validation_status") == "validated":
             download_urls = [part.get("url") for part in data["dataset_parts"] if part.get("url")]
 
         return cls(
             id=data["id"],
             name=data["name"],
             dataset_type=data["dataset_type"],
-            validation_status=data["validation_status"],
+            validation_status=data.get("validation_status"),
             created_at=data["created_at"],
             updated_at=data["updated_at"],
             download_urls=download_urls,
