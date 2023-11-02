@@ -106,7 +106,6 @@ class BaseCustomModel(CohereObject, JobWithStatus):
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any], wait_fn) -> "BaseCustomModel":
-        print(data["settings"])
         return cls(
             wait_fn=wait_fn,
             id=data["id"],
