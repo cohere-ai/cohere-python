@@ -1161,7 +1161,7 @@ class Client:
         self,
         name: str,
         model_type: CUSTOM_MODEL_TYPE,
-        dataset: Union[Dataset, str, CustomModelDataset],
+        dataset: Union[Dataset, str],
         base_model: Optional[str] = None,
         hyperparameters: Optional[HyperParametersInput] = None,
     ) -> CustomModel:
