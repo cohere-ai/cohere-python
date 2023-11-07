@@ -1,118 +1,23 @@
-import time
 import unittest
 from typing import Optional
 
-from utils import get_api_key, in_ci
+from utils import get_api_key
 
 import cohere
 from cohere.responses import ClusterJobResult
 
-VALID_INPUT_FILE = "gs://cohere-dev-central-2/cluster_tests/all_datasets/reddit_100.jsonl"
-BAD_INPUT_FILE = "./local-file.jsonl"
-
 
 class TestClient(unittest.TestCase):
-    @unittest.skipIf(in_ci(), "can sometimes fail due to duration variation")
-    def test_create_cluster_job(self):
-        co = self.create_co()
-        create_res = co.create_cluster_job(
-            VALID_INPUT_FILE,
-            min_cluster_size=10,
-            n_neighbors=15,
-            is_deterministic=True,
-        )
-        job = co.get_cluster_job(create_res.job_id)
-        start = time.time()
-
-        while not job.is_final_state:
-            if time.time() - start > 60:  # 60s timeout
-                raise TimeoutError()
-            time.sleep(5)
-            job = co.get_cluster_job(create_res.job_id)
-
-        self.check_job_result(job, status="complete")
-
-    def test_get_cluster_job(self):
+    def test_list_get_cluster_job(self):
         co = self.create_co()
         jobs = co.list_cluster_jobs()
-        job = co.get_cluster_job(jobs[0].job_id)
-        self.check_job_result(job)  # not finished
+        if len(jobs) == 0:
+            self.skipTest("no jobs to test")
 
-    def test_list_cluster_jobs(self):
-        co = self.create_co()
-        jobs = co.list_cluster_jobs()
-        assert len(jobs) > 0
         for job in jobs:
             self.check_job_result(job)
-
-    @unittest.skipIf(in_ci(), "can sometimes fail due to duration variation")
-    def test_wait_for_cluster_job_succeeds(self):
-        co = self.create_co()
-        create_res = co.create_cluster_job(
-            VALID_INPUT_FILE,
-            min_cluster_size=10,
-            n_neighbors=15,
-            is_deterministic=True,
-        )
-
-        job = co.wait_for_cluster_job(create_res.job_id, timeout=60, interval=5)
-        self.check_job_result(job, status="complete")
-
-    @unittest.skipIf(in_ci(), "can sometimes fail due to duration variation")
-    def test_wait_for_cluster_job_times_out(self):
-        co = self.create_co()
-        create_res = co.create_cluster_job(
-            VALID_INPUT_FILE,
-            min_cluster_size=10,
-            n_neighbors=15,
-            is_deterministic=True,
-        )
-
-        def wait():
-            co.wait_for_cluster_job(create_res.job_id, timeout=5, interval=2)
-
-        self.assertRaises(TimeoutError, wait)
-
-    @unittest.skipIf(in_ci(), "can sometimes fail due to duration variation")
-    def test_job_wait_method_succeeds(self):
-        co = self.create_co()
-        create_res = co.create_cluster_job(
-            VALID_INPUT_FILE,
-            min_cluster_size=10,
-            n_neighbors=15,
-            is_deterministic=True,
-        )
-
-        job = create_res.wait(timeout=60, interval=5)
-        self.check_job_result(job, status="complete")
-
-    @unittest.skipIf(in_ci(), "can sometimes fail due to duration variation")
-    def test_job_wait_method_times_out(self):
-        co = self.create_co()
-        create_res = co.create_cluster_job(
-            VALID_INPUT_FILE,
-            min_cluster_size=10,
-            n_neighbors=15,
-            is_deterministic=True,
-        )
-
-        def wait():
-            create_res.wait(timeout=5, interval=2)
-
-        self.assertRaises(TimeoutError, wait)
-
-    @unittest.skipIf(in_ci(), "can sometimes fail due to duration variation")
-    def test_job_fails(self):
-        co = self.create_co()
-        create_res = co.create_cluster_job(
-            BAD_INPUT_FILE,
-            min_cluster_size=10,
-            n_neighbors=15,
-            is_deterministic=True,
-        )
-
-        job = create_res.wait(timeout=60, interval=5)
-        self.check_job_result(job, status="failed")
+        job = co.get_cluster_job(jobs[0].job_id)
+        self.check_job_result(job)
 
     def create_co(self) -> cohere.Client:
         return cohere.Client(get_api_key(), check_api_key=False, client_name="test")

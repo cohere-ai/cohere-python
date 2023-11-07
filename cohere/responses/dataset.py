@@ -1,5 +1,6 @@
 import csv
 import json
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional
 
@@ -19,6 +20,7 @@ class BaseDataset(CohereObject, JobWithStatus):
     dataset_type: str
     validation_status: str
     validation_error: Optional[str]
+    validation_warnings: List[str]
     created_at: datetime
     updated_at: datetime
     download_urls: List[str]
@@ -33,6 +35,7 @@ class BaseDataset(CohereObject, JobWithStatus):
         validation_status: str,
         created_at: str,
         updated_at: str,
+        validation_warnings: List[str],
         validation_error: str = None,
         download_urls: List[str] = None,
         wait_fn=None,
@@ -46,6 +49,7 @@ class BaseDataset(CohereObject, JobWithStatus):
         self.download_urls = download_urls
         self._wait_fn = wait_fn
         self.validation_error = validation_error
+        self.validation_warnings = validation_warnings
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any], wait_fn) -> "Dataset":
@@ -63,6 +67,7 @@ class BaseDataset(CohereObject, JobWithStatus):
             download_urls=download_urls,
             wait_fn=wait_fn,
             validation_error=data.get("validation_error"),
+            validation_warnings=data.get("validation_warnings", []),
         )
 
     def has_terminal_status(self) -> bool:
@@ -141,3 +146,17 @@ class AsyncDataset(BaseDataset):
         updated_job = await self._wait_fn(dataset_id=self.id, timeout=timeout, interval=interval)
         self._update_self(updated_job)
         return updated_job
+
+
+@dataclass
+class ParseInfo:
+    separator: Optional[str] = None
+    delimiter: Optional[str] = None
+
+    def get_params(self) -> Dict[str, str]:
+        params = {}
+        if self.separator:
+            params["text_separator"] = self.separator
+        if self.delimiter:
+            params["csv_delimiter"] = self.delimiter
+        return params

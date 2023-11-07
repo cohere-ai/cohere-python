@@ -54,7 +54,7 @@ from cohere.responses.custom_model import (
     HyperParametersInput,
     ModelMetric,
 )
-from cohere.responses.dataset import AsyncDataset, BaseDataset
+from cohere.responses.dataset import AsyncDataset, BaseDataset, ParseInfo
 from cohere.responses.embed_job import AsyncEmbedJob
 from cohere.utils import async_wait_for_job, is_api_key_valid, np_json_dumps
 
@@ -113,11 +113,13 @@ class AsyncClient(Client):
 
         try:
             json_response = await response.json()
-        #   `CohereAPIError.from_response()` will capture the http status code
+        #   `CohereAPIError.from_aio_response()` will capture the http status code
         except jsonlib.decoder.JSONDecodeError:
-            raise CohereAPIError.from_response(response, message=f"Failed to decode json body: {await response.text()}")
+            raise CohereAPIError.from_aio_response(
+                response, message=f"Failed to decode json body: {await response.text()}"
+            )
         except aiohttp.ClientPayloadError as e:
-            raise CohereAPIError.from_response(
+            raise CohereAPIError.from_aio_response(
                 response, message=f"An unexpected error occurred while receiving the response: {e}"
             )
 
@@ -211,7 +213,7 @@ class AsyncClient(Client):
         message: Optional[str] = None,
         conversation_id: Optional[str] = "",
         model: Optional[str] = None,
-        return_chatlog: Optional[bool] = False,
+        return_chat_history: Optional[bool] = False,
         return_prompt: Optional[bool] = False,
         return_preamble: Optional[bool] = False,
         chat_history: Optional[List[Dict[str, str]]] = None,
@@ -223,6 +225,11 @@ class AsyncClient(Client):
         p: Optional[float] = None,
         k: Optional[float] = None,
         logit_bias: Optional[Dict[int, float]] = None,
+        search_queries_only: Optional[bool] = None,
+        documents: Optional[List[Dict[str, Any]]] = None,
+        citation_quality: Optional[str] = None,
+        prompt_truncation: Optional[str] = None,
+        connectors: Optional[List[Dict[str, Any]]] = None,
     ) -> Union[AsyncChat, StreamingChat]:
         if message is None:
             raise CohereError("'message' must be provided.")
@@ -231,7 +238,7 @@ class AsyncClient(Client):
             "message": message,
             "conversation_id": conversation_id,
             "model": model,
-            "return_chatlog": return_chatlog,
+            "return_chat_history": return_chat_history,
             "return_prompt": return_prompt,
             "return_preamble": return_preamble,
             "chat_history": chat_history,
@@ -243,7 +250,14 @@ class AsyncClient(Client):
             "p": p,
             "k": k,
             "logit_bias": logit_bias,
+            "search_queries_only": search_queries_only,
+            "documents": documents,
+            "connectors": connectors,
         }
+        if citation_quality is not None:
+            json_body["citation_quality"] = citation_quality
+        if prompt_truncation is not None:
+            json_body["prompt_truncation"] = prompt_truncation
 
         response = await self._request(cohere.CHAT_URL, json=json_body, stream=stream)
 
@@ -257,8 +271,8 @@ class AsyncClient(Client):
         texts: List[str],
         model: Optional[str] = None,
         truncate: Optional[str] = None,
-        compress: Optional[bool] = False,
-        compression_codebook: Optional[str] = "default",
+        compression: Optional[str] = None,
+        input_type: Optional[str] = None,
     ) -> Embeddings:
         """Returns an Embeddings object for the provided texts. Visit https://cohere.ai/embed to learn about embeddings.
 
@@ -266,16 +280,16 @@ class AsyncClient(Client):
             text (List[str]): A list of strings to embed.
             model (str): (Optional) The model ID to use for embedding the text.
             truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
-            compress (bool): (Optional) Whether to compress the embeddings. When True, the compressed_embeddings will be returned as integers in the range [0, 255].
-            compression_codebook (str): (Optional) The compression codebook to use for compressed embeddings. Defaults to "default".
+            compression (str): (Optional) One of "int8" or "binary". The type of compression to use for the embeddings.
+            input_type (str): (Optional) One of "classification", "clustering", "search_document", "search_query". The type of input text provided to embed.
         """
         json_bodys = [
             dict(
                 texts=texts[i : i + cohere.COHERE_EMBED_BATCH_SIZE],
                 model=model,
                 truncate=truncate,
-                compress=compress,
-                compression_codebook=compression_codebook,
+                compression=compression,
+                input_type=input_type,
             )
             for i in range(0, len(texts), cohere.COHERE_EMBED_BATCH_SIZE)
         ]
@@ -284,7 +298,9 @@ class AsyncClient(Client):
 
         return Embeddings(
             embeddings=[e for res in responses for e in res["embeddings"]],
-            compressed_embeddings=[e for res in responses for e in res["compressed_embeddings"]] if compress else None,
+            compressed_embeddings=[e for res in responses for e in res["compressed_embeddings"]]
+            if compression
+            else None,
             meta=meta,
         )
 
@@ -330,7 +346,16 @@ class AsyncClient(Client):
             for label, prediction in res["labels"].items():
                 labelObj[label] = LabelPrediction(prediction["confidence"])
             classifications.append(
-                Classification(res["input"], res["prediction"], res["confidence"], labelObj, id=res["id"])
+                Classification(
+                    input=res["input"],
+                    predictions=res.get("predictions", None),
+                    confidences=res.get("confidences", None),
+                    prediction=res.get("prediction", None),
+                    confidence=res.get("confidence", None),
+                    labels=labelObj,
+                    classification_type=res.get("classification_type", "single-label"),
+                    id=res["id"],
+                )
             )
 
         return Classifications(classifications, response["meta"])
@@ -480,8 +505,10 @@ class AsyncClient(Client):
         name: str,
         data: BinaryIO,
         dataset_type: str,
+        eval_data: Optional[BinaryIO] = None,
         keep_fields: Union[str, List[str]] = None,
         optional_fields: Union[str, List[str]] = None,
+        parse_info: Optional[ParseInfo] = None,
     ) -> AsyncDataset:
         """Returns a Dataset given input data
 
@@ -489,13 +516,16 @@ class AsyncClient(Client):
             name (str): The name of your dataset
             data (BinaryIO): The data to be uploaded and validated
             dataset_type (str): The type of dataset you want to upload
+            eval_data (BinaryIO): (optional) If the dataset type supports it upload evaluation data
             keep_fields (Union[str, List[str]]): (optional) A list of fields you want to keep in the dataset that are required
             optional_fields (Union[str, List[str]]): (optional) A list of fields you want to keep in the dataset that are optional
-
+            parse_info: ParseInfo: (optional) information on how to parse the raw data
         Returns:
             AsyncDataset: Dataset object.
         """
         files = {"file": data}
+        if eval_data:
+            files["eval_file"] = eval_data
         params = {
             "name": name,
             "type": dataset_type,
@@ -504,6 +534,8 @@ class AsyncClient(Client):
             params["keep_fields"] = keep_fields
         if optional_fields:
             params["optional_fields"] = optional_fields
+        if parse_info:
+            params.update(parse_info.get_params())
 
         logger.warning("uploading file, starting validation...")
         create_response = await self._request(cohere.DATASET_URL, files=files, params=params)
@@ -692,8 +724,6 @@ class AsyncClient(Client):
         name: Optional[str] = None,
         model: Optional[str] = None,
         truncate: Optional[str] = None,
-        compress: Optional[bool] = None,
-        compression_codebook: Optional[str] = None,
         text_field: Optional[str] = None,
     ) -> AsyncEmbedJob:
         """Create embed job.
@@ -703,8 +733,6 @@ class AsyncClient(Client):
             name (Optional[str], optional): The name of the embed job. Defaults to None.
             model (Optional[str], optional): The model ID to use for embedding the text. Defaults to None.
             truncate (Optional[str], optional): How the API handles text longer than the maximum token length. Defaults to None.
-            compress (Optional[bool], optional): Use embedding compression. Defaults to None.
-            compression_codebook (Optional[str], optional): Embedding compression codebook. Defaults to None.
             text_field (Optional[str], optional): Name of the column containing text to embed. Defaults to None.
 
         Returns:
@@ -723,8 +751,6 @@ class AsyncClient(Client):
             "name": name,
             "model": model,
             "truncate": truncate,
-            "compress": compress,
-            "compression_codebook": compression_codebook,
             "text_field": text_field,
             "output_format": "avro",
         }

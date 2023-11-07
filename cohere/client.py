@@ -42,7 +42,7 @@ from cohere.responses.custom_model import (
     HyperParametersInput,
     ModelMetric,
 )
-from cohere.responses.dataset import BaseDataset, Dataset
+from cohere.responses.dataset import BaseDataset, Dataset, ParseInfo
 from cohere.responses.detectlang import DetectLanguageResponse, Language
 from cohere.responses.embed_job import EmbedJob
 from cohere.responses.embeddings import Embeddings
@@ -229,7 +229,7 @@ class Client:
         message: Optional[str] = None,
         conversation_id: Optional[str] = "",
         model: Optional[str] = None,
-        return_chatlog: Optional[bool] = False,
+        return_chat_history: Optional[bool] = False,
         return_prompt: Optional[bool] = False,
         return_preamble: Optional[bool] = False,
         chat_history: Optional[List[Dict[str, str]]] = None,
@@ -241,6 +241,11 @@ class Client:
         p: Optional[float] = None,
         k: Optional[float] = None,
         logit_bias: Optional[Dict[int, float]] = None,
+        search_queries_only: Optional[bool] = None,
+        documents: Optional[List[Dict[str, Any]]] = None,
+        citation_quality: Optional[str] = None,
+        prompt_truncation: Optional[str] = None,
+        connectors: Optional[List[Dict[str, Any]]] = None,
     ) -> Union[Chat, StreamingChat]:
         """Returns a Chat object with the query reply.
 
@@ -260,11 +265,31 @@ class Client:
             logit_bias (Dict[int, float]): (Optional) A dictionary of logit bias values to use for the next reply.
             max_tokens (int): (Optional) The max tokens generated for the next reply.
 
-            return_chatlog (bool): (Optional) Whether to return the chatlog.
+            return_chat_history (bool): (Optional) Whether to return the chat history.
             return_prompt (bool): (Optional) Whether to return the prompt.
             return_preamble (bool): (Optional) Whether to return the preamble.
 
             user_name (str): (Optional) A string to override the username.
+
+            search_queries_only (bool) : (Optional) When true, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's message will be generated.
+            documents (List[Dict[str, str]]): (Optional) Documents to use to generate grounded response with citations. Example:
+                documents=[
+                    {
+                        "id": "national_geographic_everest",
+                        "title": "Height of Mount Everest",
+                        "snippet": "The height of Mount Everest is 29,035 feet",
+                        "url": "https://education.nationalgeographic.org/resource/mount-everest/",
+                    },
+                    {
+                        "id": "national_geographic_mariana",
+                        "title": "Depth of the Mariana Trench",
+                        "snippet": "The depth of the Mariana Trench is 36,070 feet",
+                        "url": "https://www.nationalgeographic.org/activity/mariana-trench-deepest-place-earth",
+                    },
+                ],
+            connectors (List[Dict[str, str]]): (Optional) When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG). Example: connectors=[{"id": "web-search"}]
+            citation_quality (str): (Optional) Dictates the approach taken to generating citations by allowing the user to specify whether they want "accurate" results or "fast" results. Defaults to "accurate".
+            prompt_truncation (str): (Optional) Dictates how the prompt will be constructed. With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in attempt to construct a prompt that fits within the model's context length limit. With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
         Returns:
             a Chat object if stream=False, or a StreamingChat object if stream=True
 
@@ -277,9 +302,9 @@ class Client:
                 >>>     message="Hey! How are you doing today?",
                 >>>     conversation_id="1234",
                 >>>     model="command",
-                >>>     return_chatlog=True)
+                >>>     return_chat_history=True)
                 >>> print(res.text)
-                >>> print(res.chatlog)
+                >>> print(res.chat_history)
             Streaming chat:
                 >>> res = co.chat(
                 >>>     message="Hey! How are you doing today?",
@@ -290,19 +315,52 @@ class Client:
                 >>> res = co.chat(
                 >>>     message="Tell me a joke!",
                 >>>     chat_history=[
-                >>>         {'user_name': 'User', message': 'Hey! How are you doing today?'},
-                >>>         {'user_name': 'Bot', message': 'I am doing great! How can I help you?'},
+                >>>         {'role': 'User', message': 'Hey! How are you doing today?'},
+                >>>         {'role': 'Chatbot', message': 'I am doing great! How can I help you?'},
                 >>>     ],
                 >>>     return_prompt=True)
                 >>> print(res.text)
                 >>> print(res.prompt)
+            Chat message with documents to use to generate the response:
+                >>> res = co.chat(
+                >>>     "How deep in the Mariana Trench",
+                >>>     documents=[
+                >>>         {
+                >>>            "id": "national_geographic_everest",
+                >>>            "title": "Height of Mount Everest",
+                >>>            "snippet": "The height of Mount Everest is 29,035 feet",
+                >>>            "url": "https://education.nationalgeographic.org/resource/mount-everest/",
+                >>>         },
+                >>>         {
+                >>>             "id": "national_geographic_mariana",
+                >>>             "title": "Depth of the Mariana Trench",
+                >>>             "snippet": "The depth of the Mariana Trench is 36,070 feet",
+                >>>             "url": "https://www.nationalgeographic.org/activity/mariana-trench-deepest-place-earth",
+                >>>         },
+                >>>       ])
+                >>> print(res.text)
+                >>> print(res.citations)
+                >>> print(res.documents)
+            Chat message with connector to query and use the results to generate the response:
+                >>> res = co.chat(
+                >>>     "What is the height of Mount Everest?",
+                >>>      connectors=[{"id": "web-search"})
+                >>> print(res.text)
+                >>> print(res.citations)
+                >>> print(res.documents)
+            Generate search queries for fetching documents to use in chat:
+                >>> res = co.chat(
+                >>>     "What is the height of Mount Everest?",
+                >>>      search_queries_only=True)
+                >>> if res.is_search_required:
+                >>>      print(res.search_queries)
         """
 
         json_body = {
             "message": message,
             "conversation_id": conversation_id,
             "model": model,
-            "return_chatlog": return_chatlog,
+            "return_chat_history": return_chat_history,
             "return_prompt": return_prompt,
             "return_preamble": return_preamble,
             "chat_history": chat_history,
@@ -314,7 +372,15 @@ class Client:
             "p": p,
             "k": k,
             "logit_bias": logit_bias,
+            "search_queries_only": search_queries_only,
+            "documents": documents,
+            "connectors": connectors,
         }
+        if citation_quality is not None:
+            json_body["citation_quality"] = citation_quality
+        if prompt_truncation is not None:
+            json_body["prompt_truncation"] = prompt_truncation
+
         response = self._request(cohere.CHAT_URL, json=json_body, stream=stream)
 
         if stream:
@@ -327,8 +393,8 @@ class Client:
         texts: List[str],
         model: Optional[str] = None,
         truncate: Optional[str] = None,
-        compress: Optional[bool] = False,
-        compression_codebook: Optional[str] = "default",
+        compression: Optional[str] = None,
+        input_type: Optional[str] = None,
     ) -> Embeddings:
         """Returns an Embeddings object for the provided texts. Visit https://cohere.ai/embed to learn about embeddings.
 
@@ -336,8 +402,8 @@ class Client:
             text (List[str]): A list of strings to embed.
             model (str): (Optional) The model ID to use for embedding the text.
             truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
-            compress (bool): (Optional) Whether to compress the embeddings. When True, the compressed_embeddings will be returned as integers in the range [0, 255].
-            compression_codebook (str): (Optional) The compression codebook to use for compressed embeddings. Defaults to "default".
+            compression (str): (Optional) One of "int8" or "binary". The type of compression to use for the embeddings.
+            input_type (str): (Optional) One of "classification", "clustering", "search_document", "search_query". The type of input text provided to embed.
         """
         responses = {
             "embeddings": [],
@@ -352,8 +418,8 @@ class Client:
                     "model": model,
                     "texts": texts_batch,
                     "truncate": truncate,
-                    "compress": compress,
-                    "compression_codebook": compression_codebook,
+                    "compression": compression,
+                    "input_type": input_type,
                 }
             )
 
@@ -420,7 +486,16 @@ class Client:
             for label, prediction in res["labels"].items():
                 labelObj[label] = LabelPrediction(prediction["confidence"])
             classifications.append(
-                Classification(res["input"], res["prediction"], res["confidence"], labelObj, id=res["id"])
+                Classification(
+                    input=res["input"],
+                    predictions=res.get("predictions", None),
+                    confidences=res.get("confidences", None),
+                    prediction=res.get("prediction", None),
+                    confidence=res.get("confidence", None),
+                    labels=labelObj,
+                    classification_type=res.get("classification_type", "single-label"),
+                    id=res["id"],
+                )
             )
 
         return Classifications(classifications, response.get("meta"))
@@ -690,8 +765,10 @@ class Client:
         name: str,
         data: BinaryIO,
         dataset_type: str,
+        eval_data: Optional[BinaryIO] = None,
         keep_fields: Union[str, List[str]] = None,
         optional_fields: Union[str, List[str]] = None,
+        parse_info: Optional[ParseInfo] = None,
     ) -> Dataset:
         """Returns a Dataset given input data
 
@@ -699,19 +776,25 @@ class Client:
             name (str): The name of your dataset
             data (BinaryIO): The data to be uploaded and validated
             dataset_type (str): The type of dataset you want to upload
+            eval_data (BinaryIO): (optional) If the dataset type supports it upload evaluation data
             keep_fields (Union[str, List[str]]): (optional) A list of fields you want to keep in the dataset that are required
             optional_fields (Union[str, List[str]]): (optional) A list of fields you want to keep in the dataset that are optional
-
+            parse_info: ParseInfo: (optional) information on how to parse the raw data
         Returns:
             Dataset: Dataset object.
         """
         files = {"file": data}
+        if eval_data:
+            files["eval_file"] = eval_data
         params = {
             "name": name,
             "type": dataset_type,
             "keep_fields": keep_fields,
             "optional_fields": optional_fields,
         }
+        if parse_info:
+            params.update(parse_info.get_params())
+
         logger.warning("uploading file, starting validation...")
         create_response = self._request(cohere.DATASET_URL, files=files, params=params)
         logger.warning(f"{create_response['id']} was uploaded")
@@ -961,8 +1044,6 @@ class Client:
         name: Optional[str] = None,
         model: Optional[str] = None,
         truncate: Optional[str] = None,
-        compress: Optional[bool] = None,
-        compression_codebook: Optional[str] = None,
         text_field: Optional[str] = None,
     ) -> EmbedJob:
         """Create embed job.
@@ -972,8 +1053,6 @@ class Client:
             name (Optional[str], optional): The name of the embed job. Defaults to None.
             model (Optional[str], optional): The model ID to use for embedding the text. Defaults to None.
             truncate (Optional[str], optional): How the API handles text longer than the maximum token length. Defaults to None.
-            compress (Optional[bool], optional): Use embedding compression. Defaults to None.
-            compression_codebook (Optional[str], optional): Embedding compression codebook. Defaults to None.
             text_field (Optional[str], optional): Name of the column containing text to embed. Defaults to None.
 
         Returns:
@@ -992,8 +1071,6 @@ class Client:
             "name": name,
             "model": model,
             "truncate": truncate,
-            "compress": compress,
-            "compression_codebook": compression_codebook,
             "text_field": text_field,
             "output_format": "avro",
         }

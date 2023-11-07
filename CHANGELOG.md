@@ -1,15 +1,81 @@
 # Changelog
+## 4.32
+ - [#331] (https://github.com/cohere-ai/cohere-python/pull/331)
+    - Embed: add `compression` parameter for embed models
+
+## 4.31
+ - [#324] (https://github.com/cohere-ai/cohere-python/pull/324)
+    - Classify:
+      - Deprecate `prediction` and `confidence` attribute
+      - Add new `predictions` and `confidences` attribute for single and multi label classification
+
+## 4.30
+ - [#313] (https://github.com/cohere-ai/cohere-python/pull/313)
+   - change chatlog (string) to chat_history (array of messages) in /chat
+ - [#312] (https://github.com/cohere-ai/cohere-python/pull/312)
+   - add prompt_truncation in chat tests
+ - [#321] (https://github.com/cohere-ai/cohere-python/pull/321)
+   - remove generate finish reason test assertion
+ - [#322] (https://github.com/cohere-ai/cohere-python/pull/322)
+   - remove unneeded max_tokens test case
+
+## 4.29
+ - [#311] (https://github.com/cohere-ai/cohere-python/pull/311)
+   - Embed: remove embed input_type tests
+
+## 4.28
+ - [#310] (https://github.com/cohere-ai/cohere-python/pull/310)
+   - Embed: add input_type parameter for new embed models
+
+## 4.27
+- [#308] (https://github.com/cohere-ai/cohere-python/pull/308)
+  - Datasets: add validation_warnings
+
+## 4.26.1
+
+- [#306] (https://github.com/cohere-ai/cohere-python/pull/306)
+  - AsyncClient: Fix correctly raising error on connection issues.
+
+## 4.26
+
+- [#296] (https://github.com/cohere-ai/cohere-python/pull/301)
+  - Chat: add support for prompt_truncation param
+
+## 4.25 
+- [#303] (https://github.com/cohere-ai/cohere-python/pull/303)
+  - Allow uploading of evaluation data
+
+## 4.24
+
+- [#296] (https://github.com/cohere-ai/cohere-python/pull/296)
+  - Allow passing of delimiter for csv
+
+## 4.23
+
+- [#294] (https://github.com/cohere-ai/cohere-python/pull/294)
+  - Allow passing of ParseInfo for datasets
+
+## 4.22
+
+- [#292] (https://github.com/cohere-ai/cohere-python/pull/292)
+  - Add search query only parameter
+  - Add documents to generate citations
+  - Add connectors to generate citations
+  - Add citation quality
 
 ## 4.21
+
 - [#287] (https://github.com/cohere-ai/cohere-python/pull/287)
   - Remove deprecated chat "query" parameter including inside chat_history parameter
   - Support event-type for chat streaming
 
 ## 4.20.2
+
 - [#284] (https://github.com/cohere-ai/cohere-python/pull/284)
   - Rename dataset urls to download_urls
 
 ## 4.20.1
+
 - [#279] (https://github.com/cohere-ai/cohere-python/pull/279)
   - Fix dataset listing key error
 
@@ -45,7 +111,7 @@
 - [#262](https://github.com/cohere-ai/cohere-python/pull/262)
   - Deprecate embed custom models
 
-## 4.15 
+## 4.15
 
 - [#256](https://github.com/cohere-ai/cohere-python/pull/256)
   - Add rerank finetuning endpoint
