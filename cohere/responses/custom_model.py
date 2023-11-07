@@ -119,7 +119,7 @@ class BaseCustomModel(CohereObject, JobWithStatus):
             hyperparameters=HyperParameters.from_response(data["settings"]["hyperparameters"])
             if data["settings"]["hyperparameters"]
             else None,
-            dataset_id=data["settings"].get("datasetID")
+            dataset_id=data["settings"].get("datasetID"),
         )
 
     def has_terminal_status(self) -> bool:

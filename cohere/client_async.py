@@ -52,9 +52,9 @@ from cohere.responses.custom_model import (
     INTERNAL_CUSTOM_MODEL_TYPE,
     AsyncCustomModel,
     HyperParametersInput,
-    ModelMetric, CustomModel,
+    ModelMetric,
 )
-from cohere.responses.dataset import AsyncDataset, BaseDataset, ParseInfo, Dataset
+from cohere.responses.dataset import AsyncDataset, BaseDataset, Dataset, ParseInfo
 from cohere.responses.embed_job import AsyncEmbedJob
 from cohere.utils import async_wait_for_job, is_api_key_valid, np_json_dumps
 
@@ -838,12 +838,12 @@ class AsyncClient(Client):
         )
 
     async def create_custom_model(
-            self,
-            name: str,
-            model_type: CUSTOM_MODEL_TYPE,
-            dataset: Union[Dataset, str, CustomModelDataset],
-            base_model: Optional[str] = None,
-            hyperparameters: Optional[HyperParametersInput] = None,
+        self,
+        name: str,
+        model_type: CUSTOM_MODEL_TYPE,
+        dataset: Union[Dataset, str, CustomModelDataset],
+        base_model: Optional[str] = None,
+        hyperparameters: Optional[HyperParametersInput] = None,
     ) -> AsyncCustomModel:
         """Create a new custom model
 

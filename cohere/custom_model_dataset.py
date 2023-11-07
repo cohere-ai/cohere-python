@@ -87,7 +87,9 @@ class CsvDataset(LocalFileCustomModelDataset):
     another prompt, another completion
     """
 
-    def __init__(self, train_file: str, delimiter: str, eval_file: Optional[str] = None, has_header: Optional[bool] = False):
+    def __init__(
+        self, train_file: str, delimiter: str, eval_file: Optional[str] = None, has_header: Optional[bool] = False
+    ):
         """
         Args:
             train_file (str): local path to csv with training data
