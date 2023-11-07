@@ -903,6 +903,7 @@ class AsyncClient(Client):
                 await dataset.wait()
             json["settings"]["datasetID"] = dataset.id
         elif isinstance(dataset, CustomModelDataset):
+            logger.warning("`CustomModelDataset` is deprecated, use `Dataset` instead.")
             remote_path = self._upload_dataset(
                 dataset.get_train_data(), name, dataset.train_file_name(), internal_custom_model_type
             )
