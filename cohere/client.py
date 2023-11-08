@@ -783,9 +783,9 @@ class Client:
         Returns:
             Dataset: Dataset object.
         """
-        files = {"file": data}
+        files = {"data": data}
         if eval_data:
-            files["eval_file"] = eval_data
+            files["eval_data"] = eval_data
         params = {
             "name": name,
             "type": dataset_type,
