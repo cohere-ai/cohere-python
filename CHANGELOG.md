@@ -1,4 +1,8 @@
 # Changelog
+## 4.34
+ - [#338] (https://github.com/cohere-ai/cohere-python/pull/338)
+    - Dataset: add get usage
+
 ## 4.33
  - [#337] (https://github.com/cohere-ai/cohere-python/pull/337)
     - Dataset: update data param
