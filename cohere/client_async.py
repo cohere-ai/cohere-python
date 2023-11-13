@@ -54,7 +54,7 @@ from cohere.responses.custom_model import (
     HyperParametersInput,
     ModelMetric,
 )
-from cohere.responses.dataset import AsyncDataset, BaseDataset, ParseInfo
+from cohere.responses.dataset import AsyncDataset, BaseDataset, DatasetUsage, ParseInfo
 from cohere.responses.embed_job import AsyncEmbedJob
 from cohere.utils import async_wait_for_job, is_api_key_valid, np_json_dumps
 
@@ -523,9 +523,9 @@ class AsyncClient(Client):
         Returns:
             AsyncDataset: Dataset object.
         """
-        files = {"file": data}
+        files = {"data": data}
         if eval_data:
-            files["eval_file"] = eval_data
+            files["eval_data"] = eval_data
         params = {
             "name": name,
             "type": dataset_type,
@@ -590,6 +590,15 @@ class AsyncClient(Client):
             id (str): The id of the dataset to delete
         """
         self._request(f"{cohere.DATASET_URL}/{id}", method="DELETE")
+
+    async def get_dataset_usage(self) -> DatasetUsage:
+        """Gets your total storage used in datasets
+
+        Returns:
+            DatasetUsage: Object containg current dataset usage
+        """
+        response = self._request(f"{cohere.DATASET_URL}/usage", method="GET")
+        return DatasetUsage.from_dict(response)
 
     async def wait_for_dataset(
         self,

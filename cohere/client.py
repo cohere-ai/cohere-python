@@ -42,7 +42,7 @@ from cohere.responses.custom_model import (
     HyperParametersInput,
     ModelMetric,
 )
-from cohere.responses.dataset import BaseDataset, Dataset, ParseInfo
+from cohere.responses.dataset import BaseDataset, Dataset, DatasetUsage, ParseInfo
 from cohere.responses.detectlang import DetectLanguageResponse, Language
 from cohere.responses.embed_job import EmbedJob
 from cohere.responses.embeddings import Embeddings
@@ -783,9 +783,9 @@ class Client:
         Returns:
             Dataset: Dataset object.
         """
-        files = {"file": data}
+        files = {"data": data}
         if eval_data:
-            files["eval_file"] = eval_data
+            files["eval_data"] = eval_data
         params = {
             "name": name,
             "type": dataset_type,
@@ -843,6 +843,15 @@ class Client:
             id (str): The id of the dataset to delete
         """
         self._request(f"{cohere.DATASET_URL}/{id}", method="DELETE")
+
+    def get_dataset_usage(self) -> DatasetUsage:
+        """Gets your total storage used in datasets
+
+        Returns:
+            DatasetUsage: Object containg current dataset usage
+        """
+        response = self._request(f"{cohere.DATASET_URL}/usage", method="GET")
+        return DatasetUsage.from_dict(response)
 
     def wait_for_dataset(
         self,
