@@ -1,18 +1,9 @@
 [tool.poetry]
 name = "cohere"
 version = "4.34"
-description = ""
+description = "Python SDK for the Cohere API"
 authors = ["Cohere"]
 readme = "README.md"
-
-[tool.black]
-line-length = 120
-target_version = ['py38']
-include = '\.py$'
-
-[tool.isort]
-profile = "black"
-skip_glob = '^((?!py$).)*$' # python files
 
 [tool.poetry.dependencies]
 python = "^3.7, <4.0"
@@ -27,8 +18,8 @@ fastavro = [
 ]
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.2.0"
-pytest-asyncio = "^0.20.2"
+pytest = "^7.4.3"
+pytest-asyncio = "^0.21.1"
 black = "^22.10.0"
 isort = "^5.10.1"
 pre-commit = "^2.20.0"
@@ -36,6 +27,15 @@ autoflake = "^1.7.8"
 Sphinx = "^5.0"
 sphinx-rtd-theme = "^1.2.0"
 
+[tool.black]
+line-length = 120
+target_version = ['py38']
+include = '\.py$'
+
+[tool.isort]
+profile = "black"
+skip_glob = '^((?!py$).)*$' # python files
+
 [build-system]
-requires = ["poetry>=1.0"]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
