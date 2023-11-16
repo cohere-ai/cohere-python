@@ -78,6 +78,24 @@ class HyperParametersInput(TypedDict):
     learning_rate: float
 
 
+@dataclass
+class FinetuneBilling:
+    train_epochs: int
+    num_training_tokens: int
+    unit_price: float
+    total_cost: float
+
+    @staticmethod
+    def from_response(response: Optional[dict]) -> "FinetuneBilling":
+        return FinetuneBilling(
+            train_epochs=response["epochs"],
+            num_training_tokens=response["numTrainingTokens"],
+            unit_price=response["unitPrice"],
+            total_cost=response["totalCost"],
+        )
+
+
+
 class BaseCustomModel(CohereObject, JobWithStatus):
     def __init__(
         self,
@@ -91,6 +109,7 @@ class BaseCustomModel(CohereObject, JobWithStatus):
         base_model: Optional[str] = None,
         model_id: Optional[str] = None,
         hyperparameters: Optional[HyperParameters] = None,
+        billing: Optional[FinetuneBilling] = None,
     ) -> None:
         super().__init__()
         self.id = id
@@ -103,6 +122,7 @@ class BaseCustomModel(CohereObject, JobWithStatus):
         self.model_id = model_id
         self.hyperparameters = hyperparameters
         self._wait_fn = wait_fn
+        self.billing = billing
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any], wait_fn) -> "BaseCustomModel":
@@ -116,7 +136,8 @@ class BaseCustomModel(CohereObject, JobWithStatus):
             completed_at=_parse_date(data["completed_at"]) if "completed_at" in data else None,
             base_model=data["settings"]["baseModel"],
             model_id=data["model"]["route"] if "model" in data else None,
-            hyperparameters=HyperParameters.from_response(data["settings"]["hyperparameters"])
+            hyperparameters=HyperParameters.from_response(data["settings"]["hyperparameters"]),
+            billing=FinetuneBilling.from_response(data["billing"])
             if data["settings"]["hyperparameters"]
             else None,
         )
