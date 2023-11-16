@@ -47,6 +47,7 @@ class HyperParameters:
     early_stopping_threshold: float
     train_batch_size: int
     train_steps: int
+    train_epochs: int
     learning_rate: float
 
     @staticmethod
@@ -56,6 +57,7 @@ class HyperParameters:
             early_stopping_threshold=response["earlyStoppingThreshold"],
             train_batch_size=response["trainBatchSize"],
             train_steps=response["trainSteps"],
+            train_epochs=response["trainEpochs"],
             learning_rate=response["learningRate"],
         )
 
@@ -65,14 +67,14 @@ class HyperParametersInput(TypedDict):
     early_stopping_patience: int (default=6, min=0, max=10)
     early_stopping_threshold: float (default=0.01, min=0, max=0.1)
     train_batch_size: int (default=16, min=2, max=16)
-    train_steps: int (default=2500, min=100, max=20000)
+    train_epochs: int (default=1, min=1, max=10)
     learning_rate: float (default=0.01, min=0.000005, max=0.1)
     """
 
     early_stopping_patience: int
     early_stopping_threshold: float
     train_batch_size: int
-    train_steps: int
+    train_epochs: int
     learning_rate: float
 
 

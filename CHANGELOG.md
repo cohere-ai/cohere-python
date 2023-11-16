@@ -1,4 +1,8 @@
 # Changelog
+## 4.35 
+ - [#339] (https://github.com/cohere-ai/cohere-python/pull/339)
+    - Dataset: default to train epochs
+
 ## 4.34
  - [#338] (https://github.com/cohere-ai/cohere-python/pull/338)
     - Dataset: add get usage
