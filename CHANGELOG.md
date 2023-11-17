@@ -1,4 +1,16 @@
 # Changelog
+## 4.35 
+ - [#339] (https://github.com/cohere-ai/cohere-python/pull/339)
+    - Dataset: default to train epochs
+
+## 4.34
+ - [#338] (https://github.com/cohere-ai/cohere-python/pull/338)
+    - Dataset: add get usage
+
+## 4.33
+ - [#337] (https://github.com/cohere-ai/cohere-python/pull/337)
+    - Dataset: update data param
+
 ## 4.32
  - [#331] (https://github.com/cohere-ai/cohere-python/pull/331)
     - Embed: add `compression` parameter for embed models
