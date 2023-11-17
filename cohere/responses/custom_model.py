@@ -53,12 +53,12 @@ class HyperParameters:
     @staticmethod
     def from_response(response: Optional[dict]) -> "HyperParameters":
         return HyperParameters(
-            early_stopping_patience=response["earlyStoppingPatience"],
-            early_stopping_threshold=response["earlyStoppingThreshold"],
-            train_batch_size=response["trainBatchSize"],
-            train_steps=response["trainSteps"],
-            train_epochs=response["trainEpochs"],
-            learning_rate=response["learningRate"],
+            early_stopping_patience=response.get("earlyStoppingPatience"),
+            early_stopping_threshold=response.get("earlyStoppingThreshold"),
+            train_batch_size=response.get("trainBatchSize"),
+            train_steps=response.get("trainSteps"),
+            train_epochs=response.get("trainEpochs"),
+            learning_rate=response.get("learningRate"),
         )
 
 
