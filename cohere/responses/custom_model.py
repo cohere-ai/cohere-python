@@ -135,7 +135,9 @@ class BaseCustomModel(CohereObject, JobWithStatus):
             completed_at=_parse_date(data["completed_at"]) if "completed_at" in data else None,
             base_model=data["settings"]["baseModel"],
             model_id=data["model"]["route"] if "model" in data else None,
-            hyperparameters=HyperParameters.from_response(data["settings"]["hyperparameters"]),
+            hyperparameters=HyperParameters.from_response(data["settings"]["hyperparameters"])
+            if data.get("settings").get("hyperparameters") is not None
+            else None,
             billing=FinetuneBilling.from_response(data.get("billing")) if data.get("billing") is not None else None,
         )
 
