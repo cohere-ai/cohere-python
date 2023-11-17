@@ -1,11 +1,11 @@
 from datetime import datetime, timezone
 
 from cohere.responses.custom_model import (
+    CustomModel,
+    FinetuneBilling,
+    HyperParameters,
     ModelMetric,
     _parse_date_with_variable_seconds,
-    FinetuneBilling,
-    CustomModel,
-    HyperParameters,
 )
 
 
