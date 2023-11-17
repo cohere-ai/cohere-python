@@ -95,7 +95,6 @@ class FinetuneBilling:
         )
 
 
-
 class BaseCustomModel(CohereObject, JobWithStatus):
     def __init__(
         self,
