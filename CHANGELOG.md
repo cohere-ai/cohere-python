@@ -1,4 +1,8 @@
 # Changelog
+## 4.36
+ - [#309] (https://github.com/cohere-ai/cohere-python/pull/309)
+    - Dataset: use dataset api in creating finet-tuned model
+
 ## 4.35 
  - [#339] (https://github.com/cohere-ai/cohere-python/pull/339)
     - Dataset: default to train epochs
