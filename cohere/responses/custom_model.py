@@ -88,10 +88,10 @@ class FinetuneBilling:
     @staticmethod
     def from_response(response: Optional[dict]) -> "FinetuneBilling":
         return FinetuneBilling(
-            train_epochs=response["epochs"],
-            num_training_tokens=response["numTrainingTokens"],
-            unit_price=response["unitPrice"],
-            total_cost=response["totalCost"],
+            train_epochs=response.get("epochs"),
+            num_training_tokens=response.get("numTrainingTokens"),
+            unit_price=response.get("unitPrice"),
+            total_cost=response.get("totalCost"),
         )
 
 
@@ -136,9 +136,7 @@ class BaseCustomModel(CohereObject, JobWithStatus):
             base_model=data["settings"]["baseModel"],
             model_id=data["model"]["route"] if "model" in data else None,
             hyperparameters=HyperParameters.from_response(data["settings"]["hyperparameters"]),
-            billing=FinetuneBilling.from_response(data["billing"])
-            if data["settings"]["hyperparameters"]
-            else None,
+            billing=FinetuneBilling.from_response(data["billing"]) if data["billing"] is not None else None,
         )
 
     def has_terminal_status(self) -> bool:
