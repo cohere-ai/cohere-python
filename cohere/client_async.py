@@ -902,7 +902,7 @@ class AsyncClient(Client):
                 "earlyStoppingPatience": hyperparameters.get("early_stopping_patience"),
                 "earlyStoppingThreshold": hyperparameters.get("early_stopping_threshold"),
                 "trainBatchSize": hyperparameters.get("train_batch_size"),
-                "trainSteps": hyperparameters.get("train_steps"),
+                "trainEpochs": hyperparameters.get("train_epochs"),
                 "learningRate": hyperparameters.get("learning_rate"),
             }
 
