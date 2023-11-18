@@ -8,6 +8,58 @@ from cohere.responses.custom_model import (
     _parse_date_with_variable_seconds,
 )
 
+sample_finetune_dict = {
+    "id": "dd942318-dac4-44c2-866e-ce95396e3b00",
+    "name": "test-response-2",
+    "creator_id": "91d102b7-b2b9-464a-aa5e-85569a49aa6d",
+    "organization_id": "7e17242a-8489-4650-9631-f9bcb49319bd",
+    "organization_name": "",
+    "status": "QUEUED",
+    "created_at": "2023-11-17T17:24:36.769824Z",
+    "updated_at": "2023-11-17T17:24:36.769824Z",
+    "settings": {
+        "datasetID": "",
+        "trainFiles": [
+            {
+                "path": "gs://cohere-dev/blobheart-uploads/staging/91d102b7-b2b9-464a-aa5e-85569a49aa6d/wnvz7i/GENERATIVE/train.csv",
+                "separator": "",
+                "switchColumns": False,
+                "hasHeader": False,
+                "delimiter": ",",
+            }
+        ],
+        "evalFiles": [],
+        "baseModel": "medium",
+        "finetuneType": "GENERATIVE",
+        "faxOverride": None,
+        "finetuneStrategy": "TFEW",
+        "hyperparameters": {
+            "earlyStoppingPatience": 6,
+            "earlyStoppingThreshold": 0.01,
+            "trainBatchSize": 16,
+            "trainSteps": 2,
+            "trainEpochs": 1,
+            "learningRate": 0.01,
+        },
+        "baseVersion": "14.2.0",
+        "multiLabel": False,
+    },
+    "model": {
+        "name": "mike-test-response-2",
+        "route": "dd942318-dac4-44c2-866e-ce95396e3b00-ft",
+        "endpoints": ["generate"],
+        "isFinetune": True,
+        "isProtected": False,
+        "languages": None,
+    },
+    "data_metrics": {
+        "train_files": [{"name": "train.csv", "totalExamples": 32, "size": 140}],
+        "total_examples": 32,
+        "trainable_token_count": 192,
+    },
+    "billing": {"numTrainingTokens": 192, "epochs": 1, "unitPrice": 0.000001, "totalCost": 0.000192},
+}
+
 
 def test_custom_model_from_dict_with_all_fields_set():
     as_dict = {
@@ -70,59 +122,7 @@ def test_finetune_billing():
 
 
 def test_finetune_response_with_billing():
-    response_dict = {
-        "finetune": {
-            "id": "dd942318-dac4-44c2-866e-ce95396e3b00",
-            "name": "test-response-2",
-            "creator_id": "91d102b7-b2b9-464a-aa5e-85569a49aa6d",
-            "organization_id": "7e17242a-8489-4650-9631-f9bcb49319bd",
-            "organization_name": "",
-            "status": "QUEUED",
-            "created_at": "2023-11-17T17:24:36.769824Z",
-            "updated_at": "2023-11-17T17:24:36.769824Z",
-            "settings": {
-                "datasetID": "",
-                "trainFiles": [
-                    {
-                        "path": "gs://cohere-dev/blobheart-uploads/staging/91d102b7-b2b9-464a-aa5e-85569a49aa6d/wnvz7i/GENERATIVE/train.csv",
-                        "separator": "",
-                        "switchColumns": False,
-                        "hasHeader": False,
-                        "delimiter": ",",
-                    }
-                ],
-                "evalFiles": [],
-                "baseModel": "medium",
-                "finetuneType": "GENERATIVE",
-                "faxOverride": None,
-                "finetuneStrategy": "TFEW",
-                "hyperparameters": {
-                    "earlyStoppingPatience": 6,
-                    "earlyStoppingThreshold": 0.01,
-                    "trainBatchSize": 16,
-                    "trainSteps": 2,
-                    "trainEpochs": 1,
-                    "learningRate": 0.01,
-                },
-                "baseVersion": "14.2.0",
-                "multiLabel": False,
-            },
-            "model": {
-                "name": "mike-test-response-2",
-                "route": "dd942318-dac4-44c2-866e-ce95396e3b00-ft",
-                "endpoints": ["generate"],
-                "isFinetune": True,
-                "isProtected": False,
-                "languages": None,
-            },
-            "data_metrics": {
-                "train_files": [{"name": "train.csv", "totalExamples": 32, "size": 140}],
-                "total_examples": 32,
-                "trainable_token_count": 192,
-            },
-            "billing": {"numTrainingTokens": 192, "epochs": 1, "unitPrice": 0.000001, "totalCost": 0.000192},
-        }
-    }
+    response_dict = {"finetune": sample_finetune_dict}
     actual = CustomModel.from_dict(response_dict["finetune"], None)
     expect = CustomModel(
         id="dd942318-dac4-44c2-866e-ce95396e3b00",
@@ -145,3 +145,13 @@ def test_finetune_response_with_billing():
         wait_fn=None,
     )
     assert actual.__dict__ == expect.__dict__
+
+
+def test_statuses_mapping():
+    sample_finetune_dict["status"] = "FINETUNING"
+    response_dict_training = {"finetune": sample_finetune_dict}
+    actual_training = CustomModel.from_dict(response_dict_training["finetune"], None)
+    sample_finetune_dict["status"] = "DEPLOYING_API"
+    response_dict_deploying = {"finetune": sample_finetune_dict}
+    actual_training = CustomModel.from_dict(response_dict_deploying["finetune"], None)
+    assert actual_training.__dict__.get("status") == "DEPLOYING"
