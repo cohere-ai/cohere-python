@@ -1021,8 +1021,9 @@ class AsyncClient(Client):
         if after:
             after = after.replace(tzinfo=after.tzinfo or timezone.utc)
         internal_statuses = []
-        for status in statuses:
-            internal_statuses.append(CUSTOM_MODEL_INTERNAL_STATUS_MAPPING[status])
+        if statuses:
+            for status in statuses:
+                internal_statuses.append(CUSTOM_MODEL_INTERNAL_STATUS_MAPPING[status])
         json = {
             "query": {
                 "statuses": internal_statuses,
