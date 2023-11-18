@@ -46,6 +46,7 @@ from cohere.responses.chat import AsyncChat, StreamingChat
 from cohere.responses.classify import Example as ClassifyExample
 from cohere.responses.cluster import AsyncClusterJobResult
 from cohere.responses.custom_model import (
+    CUSTOM_MODEL_INTERNAL_STATUS_MAPPING,
     CUSTOM_MODEL_PRODUCT_MAPPING,
     CUSTOM_MODEL_STATUS,
     CUSTOM_MODEL_TYPE,
@@ -1008,7 +1009,7 @@ class AsyncClient(Client):
         """List custom models of your organization.
 
         Args:
-            statuses (CUSTOM_MODEL_STATUS, optional): search for fintunes which are in one of these states
+            statuses (CUSTOM_MODEL_STATUS, optional): search for finetunes which are in one of these states
             before (datetime, optional): search for custom models that were created before this timestamp
             after (datetime, optional): search for custom models that were created after this timestamp
             order_by (Literal["asc", "desc"], optional): sort custom models by created at, either asc or desc
@@ -1019,10 +1020,12 @@ class AsyncClient(Client):
             before = before.replace(tzinfo=before.tzinfo or timezone.utc)
         if after:
             after = after.replace(tzinfo=after.tzinfo or timezone.utc)
-
+        internal_statuses = []
+        for status in statuses:
+            internal_statuses.append(CUSTOM_MODEL_INTERNAL_STATUS_MAPPING[status])
         json = {
             "query": {
-                "statuses": statuses,
+                "statuses": internal_statuses,
                 "before": before.isoformat(timespec="seconds") if before else None,
                 "after": after.isoformat(timespec="seconds") if after else None,
                 "orderBy": order_by,

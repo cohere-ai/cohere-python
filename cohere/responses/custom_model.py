@@ -14,19 +14,40 @@ from cohere.responses.base import CohereObject
 CUSTOM_MODEL_STATUS = Literal[
     "UNKNOWN",
     "CREATED",
-    "DATA_PROCESSING",
-    "FINETUNING",
-    "EXPORTING_MODEL",
-    "DEPLOYING_API",
+    "TRAINING",
+    "DEPLOYING",
     "READY",
     "FAILED",
     "DELETED",
-    "DELETE_FAILED",
-    "CANCELLED",
     "TEMPORARILY_OFFLINE",
     "PAUSED",
     "QUEUED",
 ]
+INTERNAL_CUSTOM_MODEL_STATUS = Literal[
+    "UNKNOWN",
+    "CREATED",
+    "FINETUNING",
+    "DEPLOYING_API",
+    "READY",
+    "FAILED",
+    "DELETED",
+    "TEMPORARILY_OFFLINE",
+    "PAUSED",
+    "QUEUED",
+]
+CUSTOM_MODEL_INTERNAL_STATUS_MAPPING: Dict[CUSTOM_MODEL_STATUS, INTERNAL_CUSTOM_MODEL_STATUS] = {
+    "UNKNOWN": "UNKNOWN",
+    "CREATED": "CREATED",
+    "TRAINING": "FINETUNING",
+    "DEPLOYING": "DEPLOYING_API",
+    "READY": "READY",
+    "FAILED": "FAILED",
+    "DELETED": "DELETED",
+    "TEMPORARILY_OFFLINE": "TEMPORARILY_OFFLINE",
+    "PAUSED": "PAUSED",
+    "QUEUED": "QUEUED",
+}
+REVERSE_CUSTOM_MODEL_INTERNAL_STATUS_MAPPING = {v: k for k, v in CUSTOM_MODEL_INTERNAL_STATUS_MAPPING.items()}
 
 INTERNAL_CUSTOM_MODEL_TYPE = Literal["GENERATIVE", "CLASSIFICATION", "RERANK", "CHAT"]
 CUSTOM_MODEL_TYPE = Literal["GENERATIVE", "CLASSIFY", "RERANK", "CHAT"]
@@ -129,7 +150,7 @@ class BaseCustomModel(CohereObject, JobWithStatus):
             wait_fn=wait_fn,
             id=data["id"],
             name=data["name"],
-            status=data["status"],
+            status=REVERSE_CUSTOM_MODEL_INTERNAL_STATUS_MAPPING[data["status"]],
             model_type=REVERSE_CUSTOM_MODEL_PRODUCT_MAPPING[data["settings"]["finetuneType"]],
             created_at=_parse_date(data["created_at"]),
             completed_at=_parse_date(data["completed_at"]) if "completed_at" in data else None,
