@@ -130,6 +130,7 @@ def test_finetune_response_with_billing():
         status="QUEUED",
         created_at=datetime(2023, 11, 17, 17, 24, 36, 769824, tzinfo=timezone.utc),
         model_id="dd942318-dac4-44c2-866e-ce95396e3b00-ft",
+        dataset_id="",
         base_model="medium",
         hyperparameters=HyperParameters(
             early_stopping_patience=6,
