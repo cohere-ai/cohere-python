@@ -149,16 +149,14 @@ class AsyncDataset(BaseDataset):
 
 
 class DatasetUsage(CohereObject):
-    user_usage: int
     organization_usage: int
 
-    def __init__(self, user_usage: int, organization_usage: int) -> None:
-        self.user_usage = user_usage
+    def __init__(self, organization_usage: int) -> None:
         self.organization_usage = organization_usage
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "DatasetUsage":
-        return cls(user_usage=data.get("user_usage"), organization_usage=data.get("organization_usage"))
+        return cls(organization_usage=data.get("organization_usage"))
 
 
 @dataclass
