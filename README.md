@@ -45,7 +45,7 @@ co = cohere.Client('YOUR_API_KEY')
 prediction = co.chat(message='Howdy! 🤠', model='command')
 
 # print the predicted text
-print(f'Chatbot: {}')
+print(f'Chatbot: {prediction.text}')
 ```
 
 There is also an asyncio compatible client called `cohere.AsyncClient` with an equivalent interface. Consult the [SDK Docs](https://cohere-sdk.readthedocs.io/en/latest/) for more details.
