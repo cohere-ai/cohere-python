@@ -1,4 +1,8 @@
 # Changelog
+## 4.37
+ - [#348] (https://github.com/cohere-ai/cohere-python/pull/348)
+    - Dataset: get usage should not return user usage
+
 ## 4.36
  - [#309] (https://github.com/cohere-ai/cohere-python/pull/309)
     - Dataset: use dataset api in creating fine-tuned model
