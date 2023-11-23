@@ -33,6 +33,7 @@ from cohere.responses.chat import Chat, StreamingChat
 from cohere.responses.classify import Example as ClassifyExample
 from cohere.responses.classify import LabelPrediction
 from cohere.responses.cluster import ClusterJobResult
+from cohere.responses.connector import Connector
 from cohere.responses.custom_model import (
     CUSTOM_MODEL_PRODUCT_MAPPING,
     CUSTOM_MODEL_STATUS,
@@ -1359,3 +1360,34 @@ class Client:
 
         response = self._request(f"{cohere.CUSTOM_MODEL_URL}/ListFinetunes", method="POST", json=json)
         return [CustomModel.from_dict(r, self.wait_for_custom_model) for r in response["finetunes"]]
+
+    def get_connector(self, id: str) -> Connector:
+        """Returns a Connector given an id
+
+        Args:
+            id (str): The id of your connector
+
+        Returns:
+            Connector: Connector object.
+        """
+        if not id:
+            raise CohereError(message="id must not be empty")
+        response = self._request(f"{cohere.CONNECTOR_URL}/{id}", method="GET")
+        return Connector.from_dict(response["connector"])
+
+    def list_connectors(self, limit: int = None, offset: int = None) -> List[Connector]:
+        """Returns a list of your Connectors
+
+        Args:
+            limit (int): (optional) The max number of connectors to return
+            offset (int): (optional) The number of connectors to offset by
+
+        Returns:
+            List[Connector]: List of Connector objects.
+        """
+        param_dict = {
+            "limit": limit,
+            "offset": offset,
+        }
+        response = self._request(f"{cohere.CONNECTOR_URL}", method="GET", params=param_dict)
+        return [Connector.from_dict(r) for r in (response.get("connectors") or [])]
