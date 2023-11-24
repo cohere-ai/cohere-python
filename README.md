@@ -8,9 +8,9 @@ This package provides functionality developed to simplify interfacing with the [
 
 ## Documentation
 
-* SDK Documentation is hosted on [Read the docs](https://cohere-sdk.readthedocs.io/en/latest/).
+* SDK Documentation can be found [here](https://docs.cohere.com/reference/about).
   * You can build SDK documentation locally using `cd docs; make clean html`.
-* For more details on advanced parameters, you can also consult the [API documentation](https://docs.cohere.ai/reference/about).
+* For more details on advanced parameters, you can also consult the [API documentation](https://docs.cohere.com).
 * See the [examples](examples/) directory for examples, including  some additional functionality for visualizations in Jupyter notebooks.
 
 ## Installation
@@ -33,7 +33,7 @@ pip install .
 
 ## Quick Start
 
-To use this library, you must have an API key and specify it as a string when creating the `cohere.Client` object. API keys can be created through the [platform](https://os.cohere.ai). This is a basic example of the creating the client and using the `generate` endpoint.
+To use this library, you must have an API key and specify it as a string when creating the `cohere.Client` object. API keys can be created through the [platform](https://dashboard.cohere.com/). This is a basic example of the creating the client and using the `generate` endpoint.
 
 ```python
 import cohere
@@ -42,13 +42,10 @@ import cohere
 co = cohere.Client('YOUR_API_KEY')
 
 # generate a prediction for a prompt
-prediction = co.generate(
-            model='large',
-            prompt='co:here',
-            max_tokens=10)
+prediction = co.chat(message='Howdy! 🤠', model='command')
 
 # print the predicted text
-print('prediction: {}'.format(prediction.generations[0].text))
+print(f'Chatbot: {prediction.text}')
 ```
 
 There is also an asyncio compatible client called `cohere.AsyncClient` with an equivalent interface. Consult the [SDK Docs](https://cohere-sdk.readthedocs.io/en/latest/) for more details.
@@ -60,12 +57,14 @@ Each SDK release is only compatible with the latest version of the Cohere API at
 
 ## Endpoints
 
-For a full breakdown of endpoints and arguments, please consult the [SDK Docs](https://cohere-sdk.readthedocs.io/en/latest/) and [Cohere API Docs](https://docs.cohere.ai/).
+For a full breakdown of endpoints and arguments, please consult the [SDK Docs](https://docs.cohere.com/reference/about) and [Cohere Docs](https://docs.cohere.com/).
 
 | Cohere Endpoint  | Function             |
 | ---------------- | -------------------- |
+| /chat            | co.chat()            |
 | /generate        | co.generate()        |
 | /embed           | co.embed()           |
+| /rerank          | co.rerank()          |
 | /classify        | co.classify()        |
 | /tokenize        | co.tokenize()        |
 | /detokenize      | co.detokenize()      |
@@ -73,15 +72,15 @@ For a full breakdown of endpoints and arguments, please consult the [SDK Docs](h
 
 ## Models
 
-When you call Cohere's APIs we decide on a good default model for your use-case behind the scenes. The default model is great to get you started, but in production environments we recommend that you specify the model size yourself via the `model` parameter. Learn more about the available models here(https://os.cohere.ai)
+When you call Cohere's APIs we decide on a good default model for your use-case behind the scenes. The default model is great to get you started, but in production environments we recommend that you specify the model size yourself via the `model` parameter. Learn more about the available models here(https://dashboard.cohere.com)
 
 ## Responses
 
-All of the endpoint functions will return a Cohere object corresponding to the endpoint (e.g. for generation, it would be `Generation`). The responses can be found as instance variables of the object (e.g. generation would be `Generation.text`). The names of these instance variables and a detailed breakdown of the response body can be found in the [SDK Docs](https://cohere-sdk.readthedocs.io/en/latest/) and [Cohere Docs](https://docs.cohere.ai/). Printing the Cohere response object itself will display an organized view of the instance variables.
+All of the endpoint functions will return a Cohere object corresponding to the endpoint (e.g. for generation, it would be `Generation`). The responses can be found as instance variables of the object (e.g. generation would be `Generation.text`). The names of these instance variables and a detailed breakdown of the response body can be found in the [SDK Docs](https://docs.cohere.com/reference/about) and [Cohere Docs](https://docs.cohere.com/). Printing the Cohere response object itself will display an organized view of the instance variables.
 
 ## Exceptions
 
-Unsuccessful API calls from the SDK will raise an exception. Please see the documentation's page on [errors](https://docs.cohere.ai/errors-reference) for more information about what the errors mean.
+Unsuccessful API calls from the SDK will raise an exception. Please see the documentation's page on [errors](https://docs.cohere.com/reference/errors) for more information about what the errors mean.
 
 ## Contributing
 
