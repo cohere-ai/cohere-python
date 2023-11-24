@@ -21,3 +21,7 @@ def test_is_api_key_valid(api_key: typing.Optional[str], expect_valid: bool, exp
     else:
         actual = is_api_key_valid(api_key)
         assert expect_valid == actual
+
+
+def test_test():
+    assert True == True
