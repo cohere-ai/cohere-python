@@ -54,7 +54,13 @@ from cohere.responses.custom_model import (
     HyperParametersInput,
     ModelMetric,
 )
-from cohere.responses.dataset import AsyncDataset, BaseDataset, DatasetUsage, ParseInfo
+from cohere.responses.dataset import (
+    AsyncDataset,
+    BaseDataset,
+    Dataset,
+    DatasetUsage,
+    ParseInfo,
+)
 from cohere.responses.embed_job import AsyncEmbedJob
 from cohere.utils import async_wait_for_job, is_api_key_valid, np_json_dumps
 
@@ -850,7 +856,7 @@ class AsyncClient(Client):
         self,
         name: str,
         model_type: CUSTOM_MODEL_TYPE,
-        dataset: CustomModelDataset,
+        dataset: Union[Dataset, str],
         base_model: Optional[str] = None,
         hyperparameters: Optional[HyperParametersInput] = None,
     ) -> AsyncCustomModel:
@@ -859,7 +865,7 @@ class AsyncClient(Client):
         Args:
             name (str): name of your custom model, has to be unique across your organization
             model_type (GENERATIVE, CLASSIFY, RERANK): type of custom model
-            dataset (InMemoryDataset, CsvDataset, JsonlDataset, TextDataset): A dataset for your training. Consists of a train and optional eval file.
+            dataset (Dataset, str): A dataset or dataset id for your training.
             base_model (str): base model to use for your custom model.
                 For generative and classify models, `base_model` has to be None (no option available for now)
                 For rerank models, you can choose between `english` and `multilingual`. Defaults to `english` if not specified.
@@ -867,24 +873,20 @@ class AsyncClient(Client):
                     will be in other languages
             hyperparameters (HyperParametersInput): adjust hyperparameters for your custom model. Only for generative custom models.
         Returns:
-            str: the id of the custom model that was created
+            CustomModel: the custom model that was created
 
         Examples:
-            prompt completion custom model with csv file
-                >>> from cohere.custom_model_dataset import CsvDataset
+             prompt completion custom model with dataset
                 >>> co = cohere.Client("YOUR_API_KEY")
-                >>> dataset = CsvDataset(train_file="/path/to/your/file.csv", delimiter=",")
-                >>> finetune = co.create_custom_model("prompt-completion-ft", dataset=dataset, model_type="GENERATIVE")
+                >>> ds = co.create_dataset(name="prompt-completion-datset", data=open("/path/to/your/file.csv", "rb"), dataset_type="prompt-completion-finetune-input")
+                >>> ds.await_validation()
+                >>> co.create_custom_model("prompt-completion-ft", model_type="GENERATIVE", train_dataset=ds.id)
 
-            prompt completion custom model with in-memory dataset
-                >>> from cohere.custom_model_dataset import InMemoryDataset
+             classification custom model with train and evaluation data
                 >>> co = cohere.Client("YOUR_API_KEY")
-                >>> dataset = InMemoryDataset(training_data=[
-                >>>     ("this is the prompt", "and this is the completion"),
-                >>>     ("another prompt", "and another completion")
-                >>> ])
-                >>> finetune = co.create_custom_model("prompt-completion-ft", dataset=dataset, model_type="GENERATIVE")
-
+                >>> ds = co.create_dataset(name="classify-datset", data=open("train_file.csv", "rb"), eval_data=open("eval_file", "rb"), dataset_type="single-label-classification-finetune-input")
+                >>> ds.await_validation()
+                >>> co.create_custom_model("classify-ft", model_type="CLASSIFY", train_dataset=ds.id)
         """
         internal_custom_model_type = CUSTOM_MODEL_PRODUCT_MAPPING[model_type]
 
@@ -902,19 +904,32 @@ class AsyncClient(Client):
                 "earlyStoppingPatience": hyperparameters.get("early_stopping_patience"),
                 "earlyStoppingThreshold": hyperparameters.get("early_stopping_threshold"),
                 "trainBatchSize": hyperparameters.get("train_batch_size"),
-                "trainSteps": hyperparameters.get("train_steps"),
+                "trainEpochs": hyperparameters.get("train_epochs"),
                 "learningRate": hyperparameters.get("learning_rate"),
             }
 
-        remote_path = await self._upload_dataset(
-            dataset.get_train_data(), name, dataset.train_file_name(), internal_custom_model_type
-        )
-        json["settings"]["trainFiles"].append({"path": remote_path, **dataset.file_config()})
-        if dataset.has_eval_file():
-            remote_path = await self._upload_dataset(
-                dataset.get_eval_data(), name, dataset.eval_file_name(), internal_custom_model_type
+        if isinstance(dataset, Dataset):
+            if not dataset.has_terminal_status():
+                dataset.wait()
+            json["settings"]["datasetID"] = dataset.id
+        elif isinstance(dataset, str):
+            dataset = await self.get_dataset(dataset)
+            if not dataset.has_terminal_status():
+                await dataset.wait()
+            json["settings"]["datasetID"] = dataset.id
+        elif isinstance(dataset, CustomModelDataset):
+            logger.warning("`CustomModelDataset` is deprecated, use `Dataset` instead.")
+            remote_path = self._upload_dataset(
+                dataset.get_train_data(), name, dataset.train_file_name(), internal_custom_model_type
             )
-            json["settings"]["evalFiles"].append({"path": remote_path, **dataset.file_config()})
+            json["settings"]["trainFiles"].append({"path": remote_path, **dataset.file_config()})
+            if dataset.has_eval_file():
+                remote_path = self._upload_dataset(
+                    dataset.get_eval_data(), name, dataset.eval_file_name(), internal_custom_model_type
+                )
+                json["settings"]["evalFiles"].append({"path": remote_path, **dataset.file_config()})
+        else:
+            raise CohereError(f"unsupported type for dataset {type(dataset)}")
 
         response = await self._request(f"{cohere.CUSTOM_MODEL_URL}/CreateFinetune", method="POST", json=json)
         return AsyncCustomModel.from_dict(response["finetune"], self.wait_for_custom_model)

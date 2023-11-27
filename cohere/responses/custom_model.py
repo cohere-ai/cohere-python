@@ -47,16 +47,18 @@ class HyperParameters:
     early_stopping_threshold: float
     train_batch_size: int
     train_steps: int
+    train_epochs: int
     learning_rate: float
 
     @staticmethod
     def from_response(response: Optional[dict]) -> "HyperParameters":
         return HyperParameters(
-            early_stopping_patience=response["earlyStoppingPatience"],
-            early_stopping_threshold=response["earlyStoppingThreshold"],
-            train_batch_size=response["trainBatchSize"],
-            train_steps=response["trainSteps"],
-            learning_rate=response["learningRate"],
+            early_stopping_patience=response.get("earlyStoppingPatience"),
+            early_stopping_threshold=response.get("earlyStoppingThreshold"),
+            train_batch_size=response.get("trainBatchSize"),
+            train_steps=response.get("trainSteps"),
+            train_epochs=response.get("trainEpochs"),
+            learning_rate=response.get("learningRate"),
         )
 
 
@@ -65,15 +67,32 @@ class HyperParametersInput(TypedDict):
     early_stopping_patience: int (default=6, min=0, max=10)
     early_stopping_threshold: float (default=0.01, min=0, max=0.1)
     train_batch_size: int (default=16, min=2, max=16)
-    train_steps: int (default=2500, min=100, max=20000)
+    train_epochs: int (default=1, min=1, max=10)
     learning_rate: float (default=0.01, min=0.000005, max=0.1)
     """
 
     early_stopping_patience: int
     early_stopping_threshold: float
     train_batch_size: int
-    train_steps: int
+    train_epochs: int
     learning_rate: float
+
+
+@dataclass
+class FinetuneBilling:
+    train_epochs: int
+    num_training_tokens: int
+    unit_price: float
+    total_cost: float
+
+    @staticmethod
+    def from_response(response: Optional[dict]) -> "FinetuneBilling":
+        return FinetuneBilling(
+            train_epochs=response.get("epochs"),
+            num_training_tokens=response.get("numTrainingTokens"),
+            unit_price=response.get("unitPrice"),
+            total_cost=response.get("totalCost"),
+        )
 
 
 class BaseCustomModel(CohereObject, JobWithStatus):
@@ -89,6 +108,8 @@ class BaseCustomModel(CohereObject, JobWithStatus):
         base_model: Optional[str] = None,
         model_id: Optional[str] = None,
         hyperparameters: Optional[HyperParameters] = None,
+        dataset_id: Optional[str] = None,
+        billing: Optional[FinetuneBilling] = None,
     ) -> None:
         super().__init__()
         self.id = id
@@ -100,7 +121,9 @@ class BaseCustomModel(CohereObject, JobWithStatus):
         self.base_model = base_model
         self.model_id = model_id
         self.hyperparameters = hyperparameters
+        self.dataset_id = dataset_id
         self._wait_fn = wait_fn
+        self.billing = billing
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any], wait_fn) -> "BaseCustomModel":
@@ -115,8 +138,10 @@ class BaseCustomModel(CohereObject, JobWithStatus):
             base_model=data["settings"]["baseModel"],
             model_id=data["model"]["route"] if "model" in data else None,
             hyperparameters=HyperParameters.from_response(data["settings"]["hyperparameters"])
-            if data["settings"]["hyperparameters"]
+            if data.get("settings").get("hyperparameters") is not None
             else None,
+            dataset_id=data["settings"].get("datasetID"),
+            billing=FinetuneBilling.from_response(data.get("billing")) if data.get("billing") is not None else None,
         )
 
     def has_terminal_status(self) -> bool:
