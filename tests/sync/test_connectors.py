@@ -24,6 +24,7 @@ class TestConnectors(unittest.TestCase):
                 "scope": "some_scope",
             },
         )
+        assert isinstance(created_connector, Connector)
         assert created_connector.name == "ci-test"
         assert created_connector.url == "https://ci-test.com/search"
         assert created_connector.active is True
@@ -33,11 +34,14 @@ class TestConnectors(unittest.TestCase):
         assert created_connector.oauth.authorize_url == "https://someurl.com"
         assert created_connector.oauth.token_url == "https://someurl.com"
         assert created_connector.oauth.scope == "some_scope"
-        id = created_connector.id
+        connector_id = created_connector.id
 
-        updated_connector = co.update_connector(id, name="ci-test2", url="https://ci-test2.com/search", active=False)
-        get_connector = co.get_connector(id)
+        updated_connector = co.update_connector(
+            connector_id, name="ci-test2", url="https://ci-test2.com/search", active=False
+        )
+        get_connector = co.get_connector(connector_id)
         assert pickle.dumps(updated_connector) == pickle.dumps(get_connector)
+        assert isinstance(get_connector, Connector)
         assert get_connector.name == "ci-test2"
         assert get_connector.url == "https://ci-test2.com/search"
         assert get_connector.active is False
@@ -51,6 +55,8 @@ class TestConnectors(unittest.TestCase):
         connectors = co.list_connectors(0, 0)
         found_connector = False
         for connector in connectors:
+            if not isinstance(connector, Connector):
+                continue
             if connector.name != "ci-test":
                 continue
             if connector.url != "https://ci-test.com/search":
@@ -72,7 +78,7 @@ class TestConnectors(unittest.TestCase):
             found_connector = True
         assert found_connector
 
-        co.delete_connector(id)
+        co.delete_connector(connector_id)
 
     def create_co(self) -> cohere.Client:
         return cohere.Client(get_api_key(), check_api_key=False, client_name="test")
