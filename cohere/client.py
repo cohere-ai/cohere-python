@@ -1361,6 +1361,99 @@ class Client:
         response = self._request(f"{cohere.CUSTOM_MODEL_URL}/ListFinetunes", method="POST", json=json)
         return [CustomModel.from_dict(r, self.wait_for_custom_model) for r in response["finetunes"]]
 
+    def create_connector(
+        self,
+        name: str,
+        url: str,
+        active: bool = True,
+        continue_on_failure: bool = False,
+        excludes: Optional[List[str]] = None,
+        oauth: Optional[dict] = None,
+        service_auth: Optional[dict] = None,
+    ) -> Connector:
+        """Creates a Connector with the provided information
+
+        Args:
+            name (str): The name of your connector
+            url (str): The URL of the connector that will be used to search for documents
+            active (bool): (optional) Whether the connector is active or not
+            continue_on_failure (bool): (optional) Whether a chat request should continue or not if the request to this connector fails
+            excludes (List[str]): (optional) A list of fields to exclude from the prompt (fields remain in the document)
+            oauth (dict): (optional) The OAuth 2.0 configuration for the connector.
+            service_auth: (dict): (optional) The service to service authentication configuration for the connector
+        Returns:
+            Connector: Connector object.
+        """
+        json = {
+            "name": name,
+            "url": url,
+            "active": active,
+            "continue_on_failure": continue_on_failure,
+        }
+        if oauth is not None:
+            json["oauth"] = oauth
+
+        if service_auth is not None:
+            json["service_auth"] = service_auth
+
+        if excludes is not None:
+            json["excludes"] = excludes
+
+        create_response = self._request(cohere.CONNECTOR_URL, json=json)
+        return self.get_connector(id=create_response["connector"]["id"])
+
+    def update_connector(
+        self,
+        id: str,
+        name: Optional[str] = None,
+        url: Optional[str] = None,
+        active: Optional[bool] = None,
+        continue_on_failure: Optional[bool] = None,
+        excludes: Optional[List[str]] = None,
+        oauth: Optional[dict] = None,
+        service_auth: Optional[dict] = None,
+    ) -> Connector:
+        """Updates a Connector with the provided id
+
+        Args:
+            id (str): The ID of the connector you wish to update.
+            name (str): (optional) The name of your connector
+            url (str): (optional) The URL of the connector that will be used to search for documents
+            active (bool): (optional) Whether the connector is active or not
+            continue_on_failure (bool): (optional) Whether a chat request should continue or not if the request to this connector fails
+            excludes (List[str]): (optional) A list of fields to exclude from the prompt (fields remain in the document)
+            oauth (dict): (optional) The OAuth 2.0 configuration for the connector.
+            service_auth: (dict): (optional) The service to service authentication configuration for the connector
+        Returns:
+            Connector: Connector object.
+        """
+        if not id:
+            raise CohereError(message="id must not be empty")
+        json = {}
+        if url is not None:
+            json["url"] = url
+
+        if active is not None:
+            json["active"] = active
+
+        if continue_on_failure is not None:
+            json["continue_on_failure"] = continue_on_failure
+
+        if name is not None:
+            json["name"] = name
+
+        if oauth is not None:
+            json["oauth"] = oauth
+
+        if service_auth is not None:
+            json["service_auth"] = service_auth
+
+        if excludes is not None:
+            json["excludes"] = excludes
+
+        update_response = self._request(f"{cohere.CONNECTOR_URL}/{id}", method="PATCH", json=json)
+        return self.get_connector(id=update_response["connector"]["id"])
+
     def get_connector(self, id: str) -> Connector:
         """Returns a Connector given an id
 
@@ -1385,9 +1478,22 @@ class Client:
         Returns:
             List[Connector]: List of Connector objects.
         """
-        param_dict = {
-            "limit": limit,
-            "offset": offset,
-        }
+        param_dict = {}
+
+        if limit is not None:
+            param_dict["limit"] = limit
+
+        if offset is not None:
+            param_dict["offset"] = offset
         response = self._request(f"{cohere.CONNECTOR_URL}", method="GET", params=param_dict)
         return [Connector.from_dict(r) for r in (response.get("connectors") or [])]
+
+    def delete_connector(self, id: str) -> None:
+        """Deletes a Connector given an id
+
+        Args:
+            id (str): The id of your connector
+        """
+        if not id:
+            raise CohereError(message="id must not be empty")
+        self._request(f"{cohere.CONNECTOR_URL}/{id}", method="DELETE")
