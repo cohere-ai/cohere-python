@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from cohere.responses.base import CohereObject
 from cohere.utils import parse_datetime
@@ -44,8 +44,8 @@ class Connector(CohereObject):
         auth_type: str,
         active: bool,
         continue_on_failure: bool,
-        oauth: ConnectorOAuth | None,
-        service_auth: ConnectorServiceAuth | None,
+        oauth: Optional[ConnectorOAuth],
+        service_auth: Optional[ConnectorServiceAuth],
         auth_status: str,
         excludes: List[str],
     ) -> None:
