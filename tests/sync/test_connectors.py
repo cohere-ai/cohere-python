@@ -82,9 +82,3 @@ class TestConnectors(unittest.TestCase):
 
     def create_co(self) -> cohere.Client:
         return cohere.Client(get_api_key(), check_api_key=False, client_name="test")
-
-    def check_result(self, connector: Connector):
-        assert connector.id
-        assert connector.created_at
-        assert connector.connector_type
-        assert connector.name
