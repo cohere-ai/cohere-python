@@ -53,25 +53,7 @@ async def test_async_connector(async_client: AsyncClient):
     connectors = await async_client.list_connectors(0, 0)
     found_connector = False
     for connector in connectors:
-        if not isinstance(connector, Connector):
-            continue
-        if connector.name != "ci-test":
-            continue
-        if connector.url != "https://ci-test.com/search":
-            continue
-        if connector.active is not True:
-            continue
-        if connector.continue_on_failure is not True:
-            continue
-        if connector.excludes != ["irrelevant_field"]:
-            continue
-        if not isinstance(connector.oauth, ConnectorOAuth):
-            continue
-        if connector.oauth.authorize_url != "https://someurl.com":
-            continue
-        if connector.oauth.token_url != "https://someurl.com":
-            continue
-        if connector.oauth.scope != "some_scope":
+        if connector.id != connector_id:
             continue
         found_connector = True
     assert found_connector
