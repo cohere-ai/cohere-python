@@ -75,7 +75,7 @@ class Connector(CohereObject):
             auth_type=data.get("auth_type", ""),
             active=data.get("active", True),
             excludes=data.get("excludes", []),
-            continue_on_failure=data["continue_on_failure"],
+            continue_on_failure=data.get("continue_on_failure", False),
             oauth=ConnectorOAuth.from_dict(data["oauth"]) if "oauth" in data else None,
             service_auth=ConnectorServiceAuth.from_dict(data["service_auth"]) if "service_auth" in data else None,
             auth_status=data.get("auth_status", ""),
