@@ -8,6 +8,4 @@ build:
 
 python:
   install:
-    # Install our python package before building the docs
-    - method: pip
-      path: .
+    - requirements: docs/requirements.txt  
