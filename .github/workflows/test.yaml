@@ -33,6 +33,3 @@ jobs:
 
     - name: Build package
       run: poetry build
-
-    - name: Build docs
-      run: cd docs && poetry run make clean html
