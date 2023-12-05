@@ -48,7 +48,7 @@ prediction = co.chat(message='Howdy! 🤠', model='command')
 print(f'Chatbot: {prediction.text}')
 ```
 
-There is also an asyncio compatible client called `cohere.AsyncClient` with an equivalent interface. Consult the [SDK Docs](https://cohere-sdk.readthedocs.io/en/latest/) for more details.
+There is also an asyncio compatible client called `cohere.AsyncClient` with an equivalent interface.
 
 ## Versioning
 
@@ -59,16 +59,16 @@ Each SDK release is only compatible with the latest version of the Cohere API at
 
 For a full breakdown of endpoints and arguments, please consult the [SDK Docs](https://docs.cohere.com/reference/about) and [Cohere Docs](https://docs.cohere.com/).
 
-| Cohere Endpoint  | Function             |
-| ---------------- | -------------------- |
-| /chat            | co.chat()            |
-| /generate        | co.generate()        |
-| /embed           | co.embed()           |
-| /rerank          | co.rerank()          |
-| /classify        | co.classify()        |
-| /tokenize        | co.tokenize()        |
-| /detokenize      | co.detokenize()      |
-| /detect-language | co.detect_language() |
+| Cohere Endpoint  | Function             | Docs
+| ---------------- | -------------------- | -------------------------------------------------------------------- |
+| /chat            | co.chat()            | [chat](https://docs.cohere.com/reference/chat)                       |
+| /generate        | co.generate()        | [generate](https://docs.cohere.com/reference/generate)               |
+| /embed           | co.embed()           | [embed](https://docs.cohere.com/reference/embed)                     |
+| /rerank          | co.rerank()          | [rerank](https://docs.cohere.com/reference/rerank)                   |
+| /classify        | co.classify()        | [classify](https://docs.cohere.com/reference/classify)               |
+| /tokenize        | co.tokenize()        | [tokenize](https://docs.cohere.com/reference/tokenize)               |
+| /detokenize      | co.detokenize()      | [detokenize](https://docs.cohere.com/reference/detokenize)           |
+| /detect-language | co.detect_language() | [detect-language](https://docs.cohere.com/reference/detect-language) |
 
 ## Models
 
