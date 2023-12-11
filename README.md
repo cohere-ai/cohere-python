@@ -29,7 +29,7 @@ pip install .
 
 ### Requirements
 
-- Python 3.7+
+- Python 3.8+
 
 ## Quick Start
 
@@ -84,9 +84,9 @@ Unsuccessful API calls from the SDK will raise an exception. Please see the docu
 
 ## Contributing
 
-To set up a development environment, run:
+To set up a development environment, first ensure you have [poetry 1.7+ installed](https://python-poetry.org/docs/#installation) and run:
 
-```
+```bash
 poetry shell    # any time you want to run code or tests
 poetry install  # install and update dependencies in your environment, the first time
 ```
@@ -98,7 +98,7 @@ pre-commit install
 ```
 
 You can run tests locally using:
-```
+```bash
 python -m pytest
 ```
 
@@ -106,7 +106,8 @@ You can configure a different base url with:
 ```bash
 CO_API_URL="https://localhost:8050" python3 foo.py
 ```
-or
+or in code using one of:
 ```python
-cohere.COHERE_API_URL = "https://localhost:8050" # Place before client initilization
+cohere.COHERE_API_URL = "https://localhost:8050"    # Place before client initilization
+cohere.Client(...,api_url="https://localhost:8050") # Alternatively, as a parameter to the Client
 ```

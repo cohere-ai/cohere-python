@@ -22,7 +22,7 @@ jobs:
         env:
           PYTHON_KEYRING_BACKEND: keyring.backends.null.Keyring
         run: |
-          pip install twine poetry==1.2.2
+          pip install twine poetry~=1.7.0
           poetry install
 
       - name: Create source distribution
