@@ -3,7 +3,7 @@ import pytest
 from cohere import CohereAPIError
 from cohere.responses import Generations
 
-TEST_MODEL = "base-light"
+TEST_MODEL = "command-light"
 
 
 @pytest.mark.asyncio

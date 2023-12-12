@@ -7,7 +7,7 @@ import cohere
 async def test_async_enter():
     cli = cohere.AsyncClient()
     async with cli as co:
-        await co.generate(model="medium", prompt="co:here", max_tokens=1)
+        await co.generate(model="command-light", prompt="co:here", max_tokens=1)
     assert cli._backend._session is None
 
 

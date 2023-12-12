@@ -129,6 +129,7 @@ class BaseCustomModel(CohereObject, JobWithStatus):
         base_model: Optional[str] = None,
         model_id: Optional[str] = None,
         hyperparameters: Optional[HyperParameters] = None,
+        dataset_id: Optional[str] = None,
         billing: Optional[FinetuneBilling] = None,
     ) -> None:
         super().__init__()
@@ -141,6 +142,7 @@ class BaseCustomModel(CohereObject, JobWithStatus):
         self.base_model = base_model
         self.model_id = model_id
         self.hyperparameters = hyperparameters
+        self.dataset_id = dataset_id
         self._wait_fn = wait_fn
         self.billing = billing
 
@@ -159,6 +161,7 @@ class BaseCustomModel(CohereObject, JobWithStatus):
             hyperparameters=HyperParameters.from_response(data["settings"]["hyperparameters"])
             if data.get("settings").get("hyperparameters") is not None
             else None,
+            dataset_id=data["settings"].get("datasetID"),
             billing=FinetuneBilling.from_response(data.get("billing")) if data.get("billing") is not None else None,
         )
 

@@ -1,4 +1,12 @@
 # Changelog
+## 4.37
+ - [#342] (https://github.com/cohere-ai/cohere-python/pull/342)
+    - Update Poetry, remove Python 3.7 support
+
+## 4.36
+ - [#309] (https://github.com/cohere-ai/cohere-python/pull/309)
+    - Dataset: use dataset api in creating fine-tuned model
+
 ## 4.35 
  - [#339] (https://github.com/cohere-ai/cohere-python/pull/339)
     - Dataset: default to train epochs

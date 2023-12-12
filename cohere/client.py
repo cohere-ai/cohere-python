@@ -33,6 +33,7 @@ from cohere.responses.chat import Chat, StreamingChat
 from cohere.responses.classify import Example as ClassifyExample
 from cohere.responses.classify import LabelPrediction
 from cohere.responses.cluster import ClusterJobResult
+from cohere.responses.connector import Connector
 from cohere.responses.custom_model import (
     CUSTOM_MODEL_INTERNAL_STATUS_MAPPING,
     CUSTOM_MODEL_PRODUCT_MAPPING,
@@ -1171,7 +1172,7 @@ class Client:
         self,
         name: str,
         model_type: CUSTOM_MODEL_TYPE,
-        dataset: CustomModelDataset,
+        dataset: Union[Dataset, str],
         base_model: Optional[str] = None,
         hyperparameters: Optional[HyperParametersInput] = None,
     ) -> CustomModel:
@@ -1180,7 +1181,7 @@ class Client:
         Args:
             name (str): name of your custom model, has to be unique across your organization
             model_type (GENERATIVE, CLASSIFY, RERANK): type of custom model
-            dataset (InMemoryDataset, CsvDataset, JsonlDataset, TextDataset): A dataset for your training. Consists of a train and optional eval file.
+            dataset (Dataset, str): A dataset or dataset id for your training.
             base_model (str): base model to use for your custom model.
                 For generative and classify models, `base_model` has to be None (no option available for now)
                 For rerank models, you can choose between `english` and `multilingual`. Defaults to `english` if not specified.
@@ -1188,24 +1189,20 @@ class Client:
                     will be in other languages
             hyperparameters (HyperParametersInput): adjust hyperparameters for your custom model. Only for generative custom models.
         Returns:
-            str: the id of the custom model that was created
+            CustomModel: the custom model that was created
 
         Examples:
-            prompt completion custom model with csv file
-                >>> from cohere.custom_model_dataset import CsvDataset
+             prompt completion custom model with dataset
                 >>> co = cohere.Client("YOUR_API_KEY")
-                >>> dataset = CsvDataset(train_file="/path/to/your/file.csv", delimiter=",")
-                >>> finetune = co.create_custom_model("prompt-completion-ft", dataset=dataset, model_type="GENERATIVE")
+                >>> ds = co.create_dataset(name="prompt-completion-datset", data=open("/path/to/your/file.csv", "rb"), dataset_type="prompt-completion-finetune-input")
+                >>> ds.await_validation()
+                >>> co.create_custom_model("prompt-completion-ft", model_type="GENERATIVE", train_dataset=ds.id)
 
-            prompt completion custom model with in-memory dataset
-                >>> from cohere.custom_model_dataset import InMemoryDataset
+             classification custom model with train and evaluation data
                 >>> co = cohere.Client("YOUR_API_KEY")
-                >>> dataset = InMemoryDataset(training_data=[
-                >>>     ("this is the prompt", "and this is the completion"),
-                >>>     ("another prompt", "and another completion")
-                >>> ])
-                >>> finetune = co.create_custom_model("prompt-completion-ft", dataset=dataset, model_type="GENERATIVE")
-
+                >>> ds = co.create_dataset(name="classify-datset", data=open("train_file.csv", "rb"), eval_data=open("eval_file", "rb"), dataset_type="single-label-classification-finetune-input")
+                >>> ds.await_validation()
+                >>> co.create_custom_model("classify-ft", model_type="CLASSIFY", train_dataset=ds.id)
         """
         internal_custom_model_type = CUSTOM_MODEL_PRODUCT_MAPPING[model_type]
 
@@ -1227,15 +1224,28 @@ class Client:
                 "learningRate": hyperparameters.get("learning_rate"),
             }
 
-        remote_path = self._upload_dataset(
-            dataset.get_train_data(), name, dataset.train_file_name(), internal_custom_model_type
-        )
-        json["settings"]["trainFiles"].append({"path": remote_path, **dataset.file_config()})
-        if dataset.has_eval_file():
+        if isinstance(dataset, Dataset):
+            if not dataset.has_terminal_status():
+                dataset.wait()
+            json["settings"]["datasetID"] = dataset.id
+        elif isinstance(dataset, str):
+            dataset = self.get_dataset(dataset)
+            if not dataset.has_terminal_status():
+                dataset.wait()
+            json["settings"]["datasetID"] = dataset.id
+        elif isinstance(dataset, CustomModelDataset):
+            logger.warning("`CustomModelDataset` is deprecated, use `Dataset` instead.")
             remote_path = self._upload_dataset(
-                dataset.get_eval_data(), name, dataset.eval_file_name(), internal_custom_model_type
+                dataset.get_train_data(), name, dataset.train_file_name(), internal_custom_model_type
             )
-            json["settings"]["evalFiles"].append({"path": remote_path, **dataset.file_config()})
+            json["settings"]["trainFiles"].append({"path": remote_path, **dataset.file_config()})
+            if dataset.has_eval_file():
+                remote_path = self._upload_dataset(
+                    dataset.get_eval_data(), name, dataset.eval_file_name(), internal_custom_model_type
+                )
+                json["settings"]["evalFiles"].append({"path": remote_path, **dataset.file_config()})
+        else:
+            raise CohereError(f"unsupported type for dataset {type(dataset)}")
 
         response = self._request(f"{cohere.CUSTOM_MODEL_URL}/CreateFinetune", method="POST", json=json)
         return CustomModel.from_dict(response["finetune"], self.wait_for_custom_model)
@@ -1354,3 +1364,160 @@ class Client:
 
         response = self._request(f"{cohere.CUSTOM_MODEL_URL}/ListFinetunes", method="POST", json=json)
         return [CustomModel.from_dict(r, self.wait_for_custom_model) for r in response["finetunes"]]
+
+    def create_connector(
+        self,
+        name: str,
+        url: str,
+        active: bool = True,
+        continue_on_failure: bool = False,
+        excludes: Optional[List[str]] = None,
+        oauth: Optional[dict] = None,
+        service_auth: Optional[dict] = None,
+    ) -> Connector:
+        """Creates a Connector with the provided information
+
+        Args:
+            name (str): The name of your connector
+            url (str): The URL of the connector that will be used to search for documents
+            active (bool): (optional) Whether the connector is active or not
+            continue_on_failure (bool): (optional) Whether a chat request should continue or not if the request to this connector fails
+            excludes (List[str]): (optional) A list of fields to exclude from the prompt (fields remain in the document)
+            oauth (dict): (optional) The OAuth 2.0 configuration for the connector.
+            service_auth: (dict): (optional) The service to service authentication configuration for the connector
+        Returns:
+            Connector: Connector object.
+        """
+        json = {
+            "name": name,
+            "url": url,
+            "active": active,
+            "continue_on_failure": continue_on_failure,
+        }
+        if oauth is not None:
+            json["oauth"] = oauth
+
+        if service_auth is not None:
+            json["service_auth"] = service_auth
+
+        if excludes is not None:
+            json["excludes"] = excludes
+
+        create_response = self._request(cohere.CONNECTOR_URL, json=json)
+        return self.get_connector(id=create_response["connector"]["id"])
+
+    def update_connector(
+        self,
+        id: str,
+        name: Optional[str] = None,
+        url: Optional[str] = None,
+        active: Optional[bool] = None,
+        continue_on_failure: Optional[bool] = None,
+        excludes: Optional[List[str]] = None,
+        oauth: Optional[dict] = None,
+        service_auth: Optional[dict] = None,
+    ) -> Connector:
+        """Updates a Connector with the provided id
+
+        Args:
+            id (str): The ID of the connector you wish to update.
+            name (str): (optional) The name of your connector
+            url (str): (optional) The URL of the connector that will be used to search for documents
+            active (bool): (optional) Whether the connector is active or not
+            continue_on_failure (bool): (optional) Whether a chat request should continue or not if the request to this connector fails
+            excludes (List[str]): (optional) A list of fields to exclude from the prompt (fields remain in the document)
+            oauth (dict): (optional) The OAuth 2.0 configuration for the connector.
+            service_auth: (dict): (optional) The service to service authentication configuration for the connector
+        Returns:
+            Connector: Connector object.
+        """
+        if not id:
+            raise CohereError(message="id must not be empty")
+        json = {}
+        if url is not None:
+            json["url"] = url
+
+        if active is not None:
+            json["active"] = active
+
+        if continue_on_failure is not None:
+            json["continue_on_failure"] = continue_on_failure
+
+        if name is not None:
+            json["name"] = name
+
+        if oauth is not None:
+            json["oauth"] = oauth
+
+        if service_auth is not None:
+            json["service_auth"] = service_auth
+
+        if excludes is not None:
+            json["excludes"] = excludes
+
+        update_response = self._request(f"{cohere.CONNECTOR_URL}/{id}", method="PATCH", json=json)
+        return self.get_connector(id=update_response["connector"]["id"])
+
+    def get_connector(self, id: str) -> Connector:
+        """Returns a Connector given an id
+
+        Args:
+            id (str): The id of your connector
+
+        Returns:
+            Connector: Connector object.
+        """
+        if not id:
+            raise CohereError(message="id must not be empty")
+        response = self._request(f"{cohere.CONNECTOR_URL}/{id}", method="GET")
+        return Connector.from_dict(response["connector"])
+
+    def list_connectors(self, limit: int = None, offset: int = None) -> List[Connector]:
+        """Returns a list of your Connectors
+
+        Args:
+            limit (int): (optional) The max number of connectors to return
+            offset (int): (optional) The number of connectors to offset by
+
+        Returns:
+            List[Connector]: List of Connector objects.
+        """
+        param_dict = {}
+
+        if limit is not None:
+            param_dict["limit"] = limit
+
+        if offset is not None:
+            param_dict["offset"] = offset
+        response = self._request(f"{cohere.CONNECTOR_URL}", method="GET", params=param_dict)
+        return [Connector.from_dict(r) for r in (response.get("connectors") or [])]
+
+    def delete_connector(self, id: str) -> None:
+        """Deletes a Connector given an id
+
+        Args:
+            id (str): The id of your connector
+        """
+        if not id:
+            raise CohereError(message="id must not be empty")
+        self._request(f"{cohere.CONNECTOR_URL}/{id}", method="DELETE")
+
+    def oauth_authorize_connector(self, id: str, after_token_redirect: str = None) -> str:
+        """Returns a URL which when navigated to will start the OAuth 2.0 flow.
+
+        Args:
+            id (str): The id of your connector
+
+        Returns:
+            str: A URL that starts the OAuth 2.0 flow.
+        """
+        if not id:
+            raise CohereError(message="id must not be empty")
+
+        param_dict = {}
+
+        if after_token_redirect is not None:
+            param_dict["after_token_redirect"] = after_token_redirect
+
+        response = self._request(f"{cohere.CONNECTOR_URL}/{id}/oauth/authorize", method="GET", params=param_dict)
+        return response["redirect_url"]
