@@ -741,7 +741,7 @@ class AsyncClient(Client):
         model: Optional[str] = None,
         truncate: Optional[str] = None,
         text_field: Optional[str] = None,
-        input_type: Optional[str] = None,        
+        input_type: Optional[str] = None,
     ) -> AsyncEmbedJob:
         """Create embed job.
 
