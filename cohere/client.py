@@ -1497,3 +1497,23 @@ class Client:
         if not id:
             raise CohereError(message="id must not be empty")
         self._request(f"{cohere.CONNECTOR_URL}/{id}", method="DELETE")
+
+    def oauth_authorize_connector(self, id: str, after_token_redirect: str = None) -> str:
+        """Returns a URL which when navigated to will start the OAuth 2.0 flow.
+
+        Args:
+            id (str): The id of your connector
+
+        Returns:
+            str: A URL that starts the OAuth 2.0 flow.
+        """
+        if not id:
+            raise CohereError(message="id must not be empty")
+
+        param_dict = {}
+
+        if after_token_redirect is not None:
+            param_dict["after_token_redirect"] = after_token_redirect
+
+        response = self._request(f"{cohere.CONNECTOR_URL}/{id}/oauth/authorize", method="GET", params=param_dict)
+        return response["redirect_url"]
