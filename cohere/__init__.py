@@ -21,6 +21,7 @@ GENERATE_URL = "generate"
 SUMMARIZE_URL = "summarize"
 RERANK_URL = "rerank"
 DATASET_URL = "dataset"
+CONNECTOR_URL = "connectors"
 
 CHECK_API_KEY_URL = "check-api-key"
 TOKENIZE_URL = "tokenize"
