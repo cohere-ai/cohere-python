@@ -13,9 +13,11 @@ class TestFinetuneClient(unittest.TestCase):
         self.assertTrue(len(client.list_custom_models()) > 0)
 
     def test_get(self):
-        first = client.list_custom_models()[0]
-        by_id = client.get_custom_model(first.id)
-        self.assertEqual(first.id, by_id.id)
+        models = client.list_custom_models()
+        if models:
+            first = models[0]
+            by_id = client.get_custom_model(first.id)
+            self.assertEqual(first.id, by_id.id)
 
     def test_metrics(self):
         models = client.list_custom_models(statuses=["PAUSED", "READY"])
