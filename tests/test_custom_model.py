@@ -1,3 +1,4 @@
+import copy
 from datetime import datetime, timezone
 
 from cohere.responses.custom_model import (
@@ -148,10 +149,11 @@ def test_finetune_response_with_billing():
 
 
 def test_statuses_mapping():
-    sample_finetune_dict["status"] = "FINETUNING"
-    response_dict_training = {"finetune": sample_finetune_dict}
+    statuses_finetune_dict = copy.deepcopy(sample_finetune_dict)
+    statuses_finetune_dict["status"] = "FINETUNING"
+    response_dict_training = {"finetune": statuses_finetune_dict}
     actual_training = CustomModel.from_dict(response_dict_training["finetune"], None)
-    sample_finetune_dict["status"] = "DEPLOYING_API"
-    response_dict_deploying = {"finetune": sample_finetune_dict}
+    statuses_finetune_dict["status"] = "DEPLOYING_API"
+    response_dict_deploying = {"finetune": statuses_finetune_dict}
     actual_training = CustomModel.from_dict(response_dict_deploying["finetune"], None)
     assert actual_training.__dict__.get("status") == "DEPLOYING"
