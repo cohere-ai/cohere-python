@@ -60,6 +60,9 @@ class TestConnectors(unittest.TestCase):
             found_connector = True
         assert found_connector
 
+        redirect_url = co.oauth_authorize_connector(connector_id, after_token_redirect="https://test.com")
+        assert "https://someurl.com" in redirect_url
+
         co.delete_connector(connector_id)
 
     def create_co(self) -> cohere.Client:
