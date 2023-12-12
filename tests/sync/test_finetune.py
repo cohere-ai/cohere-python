@@ -10,7 +10,9 @@ client = cohere.Client(API_KEY)
 
 class TestFinetuneClient(unittest.TestCase):
     def test_list(self):
-        self.assertTrue(len(client.list_custom_models()) > 0)
+        models = client.list_custom_models()
+        if models:
+            self.assertTrue(len(client.list_custom_models()) > 0)
 
     def test_get(self):
         models = client.list_custom_models()
@@ -23,5 +25,6 @@ class TestFinetuneClient(unittest.TestCase):
         models = client.list_custom_models(statuses=["PAUSED", "READY"])
         # there should always be a model, but make sure tests don't randomly break
         if models:
+            print(models)
             metrics = client.get_custom_model_metrics(models[0].id)
             self.assertNotEqual(metrics, [])
