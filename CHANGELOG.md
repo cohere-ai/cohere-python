@@ -1,4 +1,8 @@
 # Changelog
+## 4.38
+ - [#357] (https://github.com/cohere-ai/cohere-python/pull/357)
+    - Embed: add bulk embed support for embed V3
+
 ## 4.37
  - [#342] (https://github.com/cohere-ai/cohere-python/pull/342)
     - Update Poetry, remove Python 3.7 support
