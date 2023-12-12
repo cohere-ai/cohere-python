@@ -1,5 +1,5 @@
-import unittest
 import os
+import unittest
 
 from utils import get_api_key
 
