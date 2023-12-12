@@ -741,6 +741,7 @@ class AsyncClient(Client):
         model: Optional[str] = None,
         truncate: Optional[str] = None,
         text_field: Optional[str] = None,
+        input_type: Optional[str] = None,        
     ) -> AsyncEmbedJob:
         """Create embed job.
 
@@ -750,6 +751,7 @@ class AsyncClient(Client):
             model (Optional[str], optional): The model ID to use for embedding the text. Defaults to None.
             truncate (Optional[str], optional): How the API handles text longer than the maximum token length. Defaults to None.
             text_field (Optional[str], optional): Name of the column containing text to embed. Defaults to None.
+            input_type (Optional[str], optional): One of "classification", "clustering", "search_document", "search_query". The type of input text provided to embed. Defaults to None.
 
         Returns:
             AsyncEmbedJob: The created embed job
@@ -768,6 +770,7 @@ class AsyncClient(Client):
             "model": model,
             "truncate": truncate,
             "text_field": text_field,
+            "input_type": input_type,
             "output_format": "avro",
         }
 
