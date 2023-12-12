@@ -9,6 +9,7 @@ client = cohere.Client(API_KEY)
 
 IN_CI = os.getenv("CI", "").lower() in ["true", "1"]
 
+
 class TestFinetuneClient(unittest.TestCase):
     def test_list(self):
         self.assertTrue(len(client.list_custom_models()) > 0)
@@ -17,7 +18,6 @@ class TestFinetuneClient(unittest.TestCase):
         first = client.list_custom_models()[0]
         by_id = client.get_custom_model(first.id)
         self.assertEqual(first.id, by_id.id)
-
 
     @pytest.mark.skipif(IN_CI, reason="flaky in CI for some reason")
     def test_metrics(self):
