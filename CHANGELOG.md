@@ -1,4 +1,13 @@
 # Changelog
+
+## 4.38
+ - [#351] (https://github.com/cohere-ai/cohere-python/pull/351)
+    - Add connector support
+ - [#356] (https://github.com/cohere-ai/cohere-python/pull/356)
+    - Add connector oauth authorize support
+ - [#345] (https://github.com/cohere-ai/cohere-python/pull/345)
+    - Add mapping for status events for finetunes
+
 ## 4.37
  - [#342] (https://github.com/cohere-ai/cohere-python/pull/342)
     - Update Poetry, remove Python 3.7 support
