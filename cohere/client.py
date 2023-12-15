@@ -35,6 +35,7 @@ from cohere.responses.classify import LabelPrediction
 from cohere.responses.cluster import ClusterJobResult
 from cohere.responses.connector import Connector
 from cohere.responses.custom_model import (
+    CUSTOM_MODEL_INTERNAL_STATUS_MAPPING,
     CUSTOM_MODEL_PRODUCT_MAPPING,
     CUSTOM_MODEL_STATUS,
     CUSTOM_MODEL_TYPE,
@@ -1351,10 +1352,13 @@ class Client:
             before = before.replace(tzinfo=before.tzinfo or timezone.utc)
         if after:
             after = after.replace(tzinfo=after.tzinfo or timezone.utc)
-
+        internal_statuses = []
+        if statuses:
+            for status in statuses:
+                internal_statuses.append(CUSTOM_MODEL_INTERNAL_STATUS_MAPPING[status])
         json = {
             "query": {
-                "statuses": statuses,
+                "statuses": internal_statuses,
                 "before": before.isoformat(timespec="seconds") if before else None,
                 "after": after.isoformat(timespec="seconds") if after else None,
                 "orderBy": order_by,
@@ -1500,3 +1504,23 @@ class Client:
         if not id:
             raise CohereError(message="id must not be empty")
         self._request(f"{cohere.CONNECTOR_URL}/{id}", method="DELETE")
+
+    def oauth_authorize_connector(self, id: str, after_token_redirect: str = None) -> str:
+        """Returns a URL which when navigated to will start the OAuth 2.0 flow.
+
+        Args:
+            id (str): The id of your connector
+
+        Returns:
+            str: A URL that starts the OAuth 2.0 flow.
+        """
+        if not id:
+            raise CohereError(message="id must not be empty")
+
+        param_dict = {}
+
+        if after_token_redirect is not None:
+            param_dict["after_token_redirect"] = after_token_redirect
+
+        response = self._request(f"{cohere.CONNECTOR_URL}/{id}/oauth/authorize", method="GET", params=param_dict)
+        return response["redirect_url"]

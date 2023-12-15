@@ -58,4 +58,7 @@ async def test_async_connector(async_client: AsyncClient):
         found_connector = True
     assert found_connector
 
+    redirect_url = await async_client.oauth_authorize_connector(connector_id, after_token_redirect="https://test.com")
+    assert "https://someurl.com" in redirect_url
+
     await async_client.delete_connector(connector_id)
