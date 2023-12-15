@@ -1,4 +1,7 @@
 # Changelog
+## 4.39
+ - [#357] (https://github.com/cohere-ai/cohere-python/pull/357)
+    - Embed: add bulk embed support for embed V3
 
 ## 4.38
  - [#351] (https://github.com/cohere-ai/cohere-python/pull/351)
