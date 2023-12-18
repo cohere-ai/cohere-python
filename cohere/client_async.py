@@ -279,8 +279,8 @@ class AsyncClient(Client):
         texts: List[str],
         model: Optional[str] = None,
         truncate: Optional[str] = None,
-        compression: Optional[str] = None,
         input_type: Optional[str] = None,
+        embedding_types: Optional[List[str]] = None,
     ) -> Embeddings:
         """Returns an Embeddings object for the provided texts. Visit https://cohere.ai/embed to learn about embeddings.
 
@@ -288,16 +288,16 @@ class AsyncClient(Client):
             text (List[str]): A list of strings to embed.
             model (str): (Optional) The model ID to use for embedding the text.
             truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
-            compression (str): (Optional) One of "int8" or "binary". The type of compression to use for the embeddings.
             input_type (str): (Optional) One of "classification", "clustering", "search_document", "search_query". The type of input text provided to embed.
+            embedding_types (List[str]): (Optional) Specifies the types of embeddings you want to get back. Not required and default is None, which returns the float embeddings in the response's embeddings field. Can be one or more of the following types: "float", "int8", "uint8", "binary", "ubinary".
         """
         json_bodys = [
             dict(
                 texts=texts[i : i + cohere.COHERE_EMBED_BATCH_SIZE],
                 model=model,
                 truncate=truncate,
-                compression=compression,
                 input_type=input_type,
+                embedding_types=embedding_types,
             )
             for i in range(0, len(texts), cohere.COHERE_EMBED_BATCH_SIZE)
         ]
@@ -306,9 +306,6 @@ class AsyncClient(Client):
 
         return Embeddings(
             embeddings=[e for res in responses for e in res["embeddings"]],
-            compressed_embeddings=[e for res in responses for e in res["compressed_embeddings"]]
-            if compression
-            else None,
             meta=meta,
         )
 
