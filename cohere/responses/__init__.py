@@ -5,7 +5,7 @@ from cohere.responses.codebook import Codebook
 from cohere.responses.connector import Connector, ConnectorOAuth, ConnectorServiceAuth
 from cohere.responses.dataset import AsyncDataset, Dataset
 from cohere.responses.detectlang import DetectLanguageResponse, Language
-from cohere.responses.embeddings import Embeddings
+from cohere.responses.embeddings import EmbeddingResponses, Embeddings
 from cohere.responses.feedback import (
     GenerateFeedbackResponse,
     GeneratePreferenceFeedbackResponse,

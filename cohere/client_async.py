@@ -30,6 +30,7 @@ from cohere.responses import (
     Connector,
     DetectLanguageResponse,
     Detokenization,
+    EmbeddingResponses,
     Embeddings,
     GenerateFeedbackResponse,
     GeneratePreferenceFeedbackResponse,
@@ -303,9 +304,13 @@ class AsyncClient(Client):
         ]
         responses = await asyncio.gather(*[self._request(cohere.EMBED_URL, json) for json in json_bodys])
         meta = responses[0]["meta"] if responses else None
+        embedding_responses = EmbeddingResponses()
+        for response in responses:
+            embedding_responses.add_response(response)
 
         return Embeddings(
-            embeddings=[e for res in responses for e in res["embeddings"]],
+            embeddings=embedding_responses.get_embeddings(),
+            response_type=embedding_responses.response_type,
             meta=meta,
         )
 
