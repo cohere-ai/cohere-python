@@ -51,6 +51,9 @@ class BaseDataset(CohereObject, JobWithStatus):
         self.validation_error = validation_error
         self.validation_warnings = validation_warnings
 
+    def __iter__(self):
+        return self.open()
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any], wait_fn) -> "Dataset":
         download_urls = []
