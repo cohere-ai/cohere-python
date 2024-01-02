@@ -1,4 +1,8 @@
 # Changelog
+## 4.40
+ - [#357] (https://github.com/cohere-ai/cohere-python/pull/361)
+    - Add __iter__ to dataset
+
 ## 4.39
  - [#357] (https://github.com/cohere-ai/cohere-python/pull/357)
     - Embed: add bulk embed support for embed V3
