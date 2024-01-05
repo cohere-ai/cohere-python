@@ -62,14 +62,14 @@ class Client:
     """Cohere Client
 
     Args:
-        api_key (str): Your API key.
+        api_key (str): Your API key. If not specified, the client will use the value from the CO_API_KEY environment variable.
         num_workers (int): Maximal number of threads for parallelized calls.
         request_dict (dict): Additional parameters for calls with the requests library. Currently ignored in AsyncClient
         check_api_key (bool): Whether to check the api key for validity on initialization.
         client_name (str): A string to identify your application for internal analytics purposes.
         max_retries (int): maximal number of retries for requests.
         timeout (int): request timeout in seconds.
-        api_url (str): override the default api url from the default cohere.COHERE_API_URL
+        api_url (str): override the default API url. If not specified, the client will use the value from the optional CO_API_URL environment variable or fall back to the default cohere.COHERE_API_URL. 
     """
 
     def __init__(
