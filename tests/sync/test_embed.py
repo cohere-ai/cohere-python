@@ -6,7 +6,11 @@ from typing import List
 from utils import get_api_key
 
 import cohere
-from cohere.responses.embeddings import EmbeddingsByType
+from cohere.responses.embeddings import (
+    EMBEDDINGS_BY_TYPE_RESPONSE_TYPE,
+    EMBEDDINGS_FLOATS_RESPONSE_TYPE,
+    EmbeddingsByType,
+)
 
 API_KEY = get_api_key()
 co = cohere.Client(API_KEY)
@@ -110,7 +114,7 @@ class TestEmbed(unittest.TestCase):
             model="small",
             texts=["python", "golang", "typescript"],
         )
-        self.assertEqual(prediction.response_type, "embeddings_floats")
+        self.assertEqual(prediction.response_type, EMBEDDINGS_FLOATS_RESPONSE_TYPE)
         assert isinstance(prediction.embeddings, List)
 
     def test_success_embeddings_by_type_response_type(self):
@@ -119,7 +123,7 @@ class TestEmbed(unittest.TestCase):
             texts=["python", "golang", "typescript"],
             embedding_types=["float"],
         )
-        self.assertEqual(prediction.response_type, "embeddings_by_type")
+        self.assertEqual(prediction.response_type, EMBEDDINGS_BY_TYPE_RESPONSE_TYPE)
         assert isinstance(prediction.embeddings, EmbeddingsByType)
         assert prediction.embeddings.float
         assert not prediction.embeddings.int8
