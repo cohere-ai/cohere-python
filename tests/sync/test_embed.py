@@ -117,7 +117,7 @@ class TestEmbed(unittest.TestCase):
         prediction = co.embed(
             model="small",
             texts=["python", "golang", "typescript"],
-            embeddings_by_type=['float'],
+            embeddings_by_type=["float"],
         )
         self.assertEqual(prediction.response_type, "embeddings_by_type")
         assert isinstance(prediction.embeddings, EmbeddingsByType)
