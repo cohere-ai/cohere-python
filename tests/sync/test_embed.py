@@ -1,10 +1,12 @@
 import random
 import string
 import unittest
+from typing import List
 
 from utils import get_api_key
 
 import cohere
+from cohere.responses.embeddings import EmbeddingsByType
 
 API_KEY = get_api_key()
 co = cohere.Client(API_KEY)
@@ -102,3 +104,20 @@ class TestEmbed(unittest.TestCase):
         for predictionExpected, predictionActual in zip(predictionsExpected, list(predictionsActual)):
             for elementExpected, elementAcutal in zip(predictionExpected, predictionActual):
                 self.assertAlmostEqual(elementExpected, elementAcutal, places=1)
+
+    def test_success_embeddings_floats_response_type(self):
+        prediction = co.embed(
+            model="small",
+            texts=["python", "golang", "typescript"],
+        )
+        self.assertEqual(prediction.response_type, "embeddings_floats")
+        assert isinstance(prediction.embeddings, List)
+
+    def test_success_embeddings_by_type_response_type(self):
+        prediction = co.embed(
+            model="small",
+            texts=["python", "golang", "typescript"],
+            embeddings_by_type=['float'],
+        )
+        self.assertEqual(prediction.response_type, "embeddings_by_type")
+        assert isinstance(prediction.embeddings, EmbeddingsByType)
