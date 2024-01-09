@@ -20,7 +20,7 @@ GENERATE_PREFERENCE_FEEDBACK_URL = "feedback/generate/preference"
 GENERATE_URL = "generate"
 SUMMARIZE_URL = "summarize"
 RERANK_URL = "rerank"
-DATASET_URL = "dataset"
+DATASET_URL = "datasets"
 CONNECTOR_URL = "connectors"
 
 CHECK_API_KEY_URL = "check-api-key"
