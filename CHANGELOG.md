@@ -1,4 +1,8 @@
 # Changelog
+## 4.41
+ - [#358] (https://github.com/cohere-ai/cohere-python/pull/363)
+    - Update dataset route to datasets
+
 ## 4.40
  - [#357] (https://github.com/cohere-ai/cohere-python/pull/361)
     - Add __iter__ to dataset
