@@ -47,7 +47,7 @@ from cohere.responses.custom_model import (
 from cohere.responses.dataset import BaseDataset, Dataset, DatasetUsage, ParseInfo
 from cohere.responses.detectlang import DetectLanguageResponse, Language
 from cohere.responses.embed_job import EmbedJob
-from cohere.responses.embeddings import Embeddings
+from cohere.responses.embeddings import EmbeddingResponses, Embeddings
 from cohere.responses.feedback import (
     GenerateFeedbackResponse,
     GeneratePreferenceFeedbackResponse,
@@ -395,8 +395,8 @@ class Client:
         texts: List[str],
         model: Optional[str] = None,
         truncate: Optional[str] = None,
-        compression: Optional[str] = None,
         input_type: Optional[str] = None,
+        embedding_types: Optional[List[str]] = None,
     ) -> Embeddings:
         """Returns an Embeddings object for the provided texts. Visit https://cohere.ai/embed to learn about embeddings.
 
@@ -404,13 +404,10 @@ class Client:
             text (List[str]): A list of strings to embed.
             model (str): (Optional) The model ID to use for embedding the text.
             truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
-            compression (str): (Optional) One of "int8" or "binary". The type of compression to use for the embeddings.
             input_type (str): (Optional) One of "classification", "clustering", "search_document", "search_query". The type of input text provided to embed.
+            embedding_types (List[str]): (Optional) Specifies the types of embeddings you want to get back. Not required and default is None, which returns the float embeddings in the response's embeddings field. Can be one or more of the following types: "float", "int8", "uint8", "binary", "ubinary".
         """
-        responses = {
-            "embeddings": [],
-            "compressed_embeddings": [],
-        }
+        embedding_responses = EmbeddingResponses()
         json_bodys = []
 
         for i in range(0, len(texts), self.batch_size):
@@ -420,20 +417,19 @@ class Client:
                     "model": model,
                     "texts": texts_batch,
                     "truncate": truncate,
-                    "compression": compression,
                     "input_type": input_type,
+                    "embedding_types": embedding_types,
                 }
             )
 
         meta = None
         for result in self._executor.map(lambda json_body: self._request(cohere.EMBED_URL, json=json_body), json_bodys):
-            responses["embeddings"].extend(result["embeddings"])
-            responses["compressed_embeddings"].extend(result.get("compressed_embeddings", []))
+            embedding_responses.add_response(result)
             meta = result["meta"] if not meta else meta
 
         return Embeddings(
-            embeddings=responses["embeddings"],
-            compressed_embeddings=responses["compressed_embeddings"],
+            embeddings=embedding_responses.get_embeddings(),
+            response_type=embedding_responses.response_type,
             meta=meta,
         )
 
