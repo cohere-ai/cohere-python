@@ -1,4 +1,9 @@
 # Changelog
+## 4.42
+ - [#359] (https://github.com/cohere-ai/cohere-python/pull/359)
+    - Add embedding_types to embed request
+    - Update embed response with embeddings_by_types response
+
 ## 4.41
  - [#358] (https://github.com/cohere-ai/cohere-python/pull/363)
     - Update dataset route to datasets
