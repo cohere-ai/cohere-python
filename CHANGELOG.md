@@ -1,4 +1,8 @@
 # Changelog
+## 4.43
+ - [#365] (https://github.com/cohere-ai/cohere-python/pull/365)
+    - Update embed job create input_dataset param to dataset
+
 ## 4.42
  - [#359] (https://github.com/cohere-ai/cohere-python/pull/359)
     - Add embedding_types to embed request
