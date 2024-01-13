@@ -1047,7 +1047,7 @@ class Client:
 
     def create_embed_job(
         self,
-        input_dataset: Union[str, BaseDataset],
+        dataset: Union[str, BaseDataset],
         name: Optional[str] = None,
         model: Optional[str] = None,
         truncate: Optional[str] = None,
@@ -1057,7 +1057,7 @@ class Client:
         """Create embed job.
 
         Args:
-            input_dataset (Union[str, BaseDataset]): Dataset or dataset id with text to embed.
+            dataset (Union[str, BaseDataset]): Dataset or dataset id with text to embed.
             name (Optional[str], optional): The name of the embed job. Defaults to None.
             model (Optional[str], optional): The model ID to use for embedding the text. Defaults to None.
             truncate (Optional[str], optional): How the API handles text longer than the maximum token length. Defaults to None.
@@ -1068,15 +1068,15 @@ class Client:
             EmbedJob: The created embed job
         """
 
-        if isinstance(input_dataset, str):
-            input_dataset_id = input_dataset
-        elif isinstance(input_dataset, Dataset):
-            input_dataset_id = input_dataset.id
+        if isinstance(dataset, str):
+            dataset_id = dataset
+        elif isinstance(dataset, Dataset):
+            dataset_id = dataset.id
         else:
             raise CohereError(message="input_dataset must be either a string or Dataset")
 
         json_body = {
-            "input_dataset_id": input_dataset_id,
+            "dataset_id": dataset_id,
             "name": name,
             "model": model,
             "truncate": truncate,
