@@ -1056,7 +1056,7 @@ class Client:
         """Create embed job.
 
         Args:
-            dataset_id (str): ID of the dataset of text to embed.
+            dataset_id (str): ID of the dataset to embed.
             model (str): ID of the model to use for embedding the text.
             input_type (str): One of "classification", "clustering", "search_document", "search_query". The type of input text provided to embed.
             truncate (Optional[str], optional): How the API handles text longer than the maximum token length. Defaults to None.
