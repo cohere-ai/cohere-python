@@ -1,4 +1,4 @@
-from typing import Any, Awaitable, Callable, Dict, List, Optional, Union
+from typing import Any, Awaitable, Callable, Dict, Optional, Union
 
 from cohere.responses.base import CohereObject
 from cohere.responses.dataset import Dataset
@@ -10,7 +10,6 @@ class BaseEmbedJob(CohereObject, JobWithStatus):
     status: str
     created_at: str
     input_dataset_id: Optional[str]
-    output_urls: Optional[List[str]]
     output: Dataset
     model: str
     truncate: str
@@ -23,8 +22,8 @@ class BaseEmbedJob(CohereObject, JobWithStatus):
         status: str,
         created_at: str,
         input_dataset_id: Optional[str],
-        output_urls: Optional[List[str]],
         model: str,
+        input_type: str,
         truncate: str,
         percent_complete: float,
         wait_fn,
@@ -33,8 +32,8 @@ class BaseEmbedJob(CohereObject, JobWithStatus):
         self.status = status
         self.created_at = created_at
         self.input_dataset_id = input_dataset_id
-        self.output_urls = output_urls
         self.model = model
+        self.input_type = input_type
         self.truncate = truncate
         self.percent_complete = percent_complete
         self._wait_fn = wait_fn
@@ -46,8 +45,8 @@ class BaseEmbedJob(CohereObject, JobWithStatus):
             status=data["status"],
             created_at=data["created_at"],
             input_dataset_id=data.get("input_dataset_id"),
-            output_urls=data.get("output_urls"),
             model=data["model"],
+            input_type=data.get("input_type"),
             truncate=data["truncate"],
             percent_complete=data["percent_complete"],
             wait_fn=wait_fn,

@@ -1100,7 +1100,7 @@ class Client:
         response = self._request(f"{cohere.EMBED_JOBS_URL}/list", method="GET")
         return [
             EmbedJob.from_dict({"meta": response.get("meta"), **r}, wait_fn=self.wait_for_embed_job)
-            for r in response["bulk_embed_jobs"]
+            for r in response["embed_jobs"]
         ]
 
     def get_embed_job(self, job_id: str) -> EmbedJob:
