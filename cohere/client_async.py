@@ -772,7 +772,7 @@ class AsyncClient(Client):
             List[AsyncEmbedJob]: embed jobs.
         """
 
-        response = await self._request(f"{cohere.EMBED_JOBS_URL}/list", method="GET")
+        response = await self._request(f"{cohere.EMBED_JOBS_URL}", method="GET")
         return [
             AsyncEmbedJob.from_dict({"meta": response.get("meta"), **r}, wait_fn=self.wait_for_embed_job)
             for r in response["embed_jobs"]
