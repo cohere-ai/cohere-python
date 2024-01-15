@@ -44,7 +44,7 @@ from cohere.responses.custom_model import (
     HyperParametersInput,
     ModelMetric,
 )
-from cohere.responses.dataset import BaseDataset, Dataset, DatasetUsage, ParseInfo
+from cohere.responses.dataset import Dataset, DatasetUsage, ParseInfo
 from cohere.responses.detectlang import DetectLanguageResponse, Language
 from cohere.responses.embed_job import EmbedJob
 from cohere.responses.embeddings import EmbeddingResponses, Embeddings
@@ -1047,42 +1047,31 @@ class Client:
 
     def create_embed_job(
         self,
-        input_dataset: Union[str, BaseDataset],
+        dataset_id: str,
+        model: str,
+        input_type: str,
         name: Optional[str] = None,
-        model: Optional[str] = None,
         truncate: Optional[str] = None,
-        text_field: Optional[str] = None,
-        input_type: Optional[str] = None,
     ) -> EmbedJob:
         """Create embed job.
 
         Args:
-            input_dataset (Union[str, BaseDataset]): Dataset or dataset id with text to embed.
-            name (Optional[str], optional): The name of the embed job. Defaults to None.
-            model (Optional[str], optional): The model ID to use for embedding the text. Defaults to None.
+            dataset_id (str): ID of the dataset to embed.
+            model (str): ID of the model to use for embedding the text.
+            input_type (str): One of "classification", "clustering", "search_document", "search_query". The type of input text provided to embed.
             truncate (Optional[str], optional): How the API handles text longer than the maximum token length. Defaults to None.
-            text_field (Optional[str], optional): Name of the column containing text to embed. Defaults to None.
-            input_type (Optional[str], optional): One of "classification", "clustering", "search_document", "search_query". The type of input text provided to embed. Defaults to None.
+            name (Optional[str], optional): The name of the embed job. Defaults to None.
 
         Returns:
             EmbedJob: The created embed job
         """
 
-        if isinstance(input_dataset, str):
-            input_dataset_id = input_dataset
-        elif isinstance(input_dataset, Dataset):
-            input_dataset_id = input_dataset.id
-        else:
-            raise CohereError(message="input_dataset must be either a string or Dataset")
-
         json_body = {
-            "input_dataset_id": input_dataset_id,
+            "dataset_id": dataset_id,
             "name": name,
             "model": model,
             "truncate": truncate,
-            "text_field": text_field,
             "input_type": input_type,
-            "output_format": "avro",
         }
 
         response = self._request(cohere.EMBED_JOBS_URL, json=json_body)
@@ -1100,7 +1089,7 @@ class Client:
         response = self._request(f"{cohere.EMBED_JOBS_URL}/list", method="GET")
         return [
             EmbedJob.from_dict({"meta": response.get("meta"), **r}, wait_fn=self.wait_for_embed_job)
-            for r in response["bulk_embed_jobs"]
+            for r in response["embed_jobs"]
         ]
 
     def get_embed_job(self, job_id: str) -> EmbedJob:
