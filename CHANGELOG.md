@@ -1,4 +1,8 @@
 # Changelog
+## 4.44
+ - [#366] (https://github.com/cohere-ai/cohere-python/pull/366)
+    - Update embed job list request
+    
 ## 4.43
  - [#365] (https://github.com/cohere-ai/cohere-python/pull/365)
     - Update embed job parameters
