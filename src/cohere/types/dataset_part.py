@@ -12,15 +12,13 @@ except ImportError:
 
 
 class DatasetPart(pydantic.BaseModel):
-    id: typing.Optional[str] = pydantic.Field(description="The dataset part ID")
-    name: typing.Optional[str] = pydantic.Field(description="The name of the dataset part")
+    id: str = pydantic.Field(description="The dataset part ID")
+    name: str = pydantic.Field(description="The name of the dataset part")
     url: typing.Optional[str] = pydantic.Field(description="The download url of the file")
     index: typing.Optional[int] = pydantic.Field(description="The index of the file")
-    size_bytes: typing.Optional[int] = pydantic.Field(alias="sizeBytes", description="The size of the file in bytes")
-    num_rows: typing.Optional[int] = pydantic.Field(alias="numRows", description="The number of rows in the file")
-    original_url: typing.Optional[str] = pydantic.Field(
-        alias="originalUrl", description="The download url of the original file"
-    )
+    size_bytes: typing.Optional[int] = pydantic.Field(description="The size of the file in bytes")
+    num_rows: typing.Optional[int] = pydantic.Field(description="The number of rows in the file")
+    original_url: typing.Optional[str] = pydantic.Field(description="The download url of the original file")
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -33,5 +31,4 @@ class DatasetPart(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        allow_population_by_field_name = True
         json_encoders = {dt.datetime: serialize_datetime}

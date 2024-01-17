@@ -3,7 +3,8 @@
 import datetime as dt
 import typing
 
-from ....core.datetime_utils import serialize_datetime
+from ..core.datetime_utils import serialize_datetime
+from .embed_job import EmbedJob
 
 try:
     import pydantic.v1 as pydantic  # type: ignore
@@ -11,10 +12,8 @@ except ImportError:
     import pydantic  # type: ignore
 
 
-class DatasetsGetUsageResponse(pydantic.BaseModel):
-    organization_usage: typing.Optional[str] = pydantic.Field(
-        description="The total number of bytes used by the organization."
-    )
+class ListEmbedJobResponse(pydantic.BaseModel):
+    embed_jobs: typing.Optional[typing.List[EmbedJob]]
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

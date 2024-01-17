@@ -10,6 +10,7 @@ from ...core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ...core.datetime_utils import serialize_datetime
 from ...core.jsonable_encoder import jsonable_encoder
 from ...core.remove_none_from_dict import remove_none_from_dict
+from ...types.dataset_type import DatasetType
 from .types.datasets_create_response import DatasetsCreateResponse
 from .types.datasets_get_response import DatasetsGetResponse
 from .types.datasets_get_usage_response import DatasetsGetUsageResponse
@@ -86,8 +87,11 @@ class DatasetsClient:
         self,
         *,
         name: typing.Optional[str] = None,
-        type: typing.Optional[str] = None,
+        type: typing.Optional[DatasetType] = None,
         keep_original_file: typing.Optional[bool] = None,
+        skip_malformed_input: typing.Optional[bool] = None,
+        keep_fields: typing.Optional[typing.Union[str, typing.List[str]]] = None,
+        optional_fields: typing.Optional[typing.Union[str, typing.List[str]]] = None,
         text_separator: typing.Optional[str] = None,
         csv_delimiter: typing.Optional[str] = None,
         data: typing.IO,
@@ -99,9 +103,15 @@ class DatasetsClient:
         Parameters:
             - name: typing.Optional[str]. The name of the uploaded dataset.
 
-            - type: typing.Optional[str]. The dataset type, which is used to validate the data.
+            - type: typing.Optional[DatasetType]. The dataset type, which is used to validate the data.
 
             - keep_original_file: typing.Optional[bool]. Indicates if the original file should be stored.
+
+            - skip_malformed_input: typing.Optional[bool]. Indicates whether rows with malformed input should be dropped (instead of failing the validation check). Dropped rows will be returned in the warnings field.
+
+            - keep_fields: typing.Optional[typing.Union[str, typing.List[str]]]. List of names of fields that will be persisted in the Dataset. By default the Dataset will retain only the required fields indicated in the [schema for the corresponding Dataset type](https://docs.cohere.com/docs/datasets#dataset-types). For example, datasets of type `embed-input` will drop all fields other than the required `text` field. If any of the fields in `keep_fields` are missing from the uploaded file, Dataset validation will fail.
+
+            - optional_fields: typing.Optional[typing.Union[str, typing.List[str]]]. List of names of fields that will be persisted in the Dataset. By default the Dataset will retain only the required fields indicated in the [schema for the corresponding Dataset type](https://docs.cohere.com/docs/datasets#dataset-types). For example, Datasets of type `embed-input` will drop all fields other than the required `text` field. If any of the fields in `optional_fields` are missing from the uploaded file, Dataset validation will pass.
 
             - text_separator: typing.Optional[str]. Raw .txt uploads will be split into entries using the text_separator value.
 
@@ -119,6 +129,9 @@ class DatasetsClient:
                     "name": name,
                     "type": type,
                     "keep_original_file": keep_original_file,
+                    "skip_malformed_input": skip_malformed_input,
+                    "keep_fields": keep_fields,
+                    "optional_fields": optional_fields,
                     "text_separator": text_separator,
                     "csv_delimiter": csv_delimiter,
                 }
@@ -288,8 +301,11 @@ class AsyncDatasetsClient:
         self,
         *,
         name: typing.Optional[str] = None,
-        type: typing.Optional[str] = None,
+        type: typing.Optional[DatasetType] = None,
         keep_original_file: typing.Optional[bool] = None,
+        skip_malformed_input: typing.Optional[bool] = None,
+        keep_fields: typing.Optional[typing.Union[str, typing.List[str]]] = None,
+        optional_fields: typing.Optional[typing.Union[str, typing.List[str]]] = None,
         text_separator: typing.Optional[str] = None,
         csv_delimiter: typing.Optional[str] = None,
         data: typing.IO,
@@ -301,9 +317,15 @@ class AsyncDatasetsClient:
         Parameters:
             - name: typing.Optional[str]. The name of the uploaded dataset.
 
-            - type: typing.Optional[str]. The dataset type, which is used to validate the data.
+            - type: typing.Optional[DatasetType]. The dataset type, which is used to validate the data.
 
             - keep_original_file: typing.Optional[bool]. Indicates if the original file should be stored.
+
+            - skip_malformed_input: typing.Optional[bool]. Indicates whether rows with malformed input should be dropped (instead of failing the validation check). Dropped rows will be returned in the warnings field.
+
+            - keep_fields: typing.Optional[typing.Union[str, typing.List[str]]]. List of names of fields that will be persisted in the Dataset. By default the Dataset will retain only the required fields indicated in the [schema for the corresponding Dataset type](https://docs.cohere.com/docs/datasets#dataset-types). For example, datasets of type `embed-input` will drop all fields other than the required `text` field. If any of the fields in `keep_fields` are missing from the uploaded file, Dataset validation will fail.
+
+            - optional_fields: typing.Optional[typing.Union[str, typing.List[str]]]. List of names of fields that will be persisted in the Dataset. By default the Dataset will retain only the required fields indicated in the [schema for the corresponding Dataset type](https://docs.cohere.com/docs/datasets#dataset-types). For example, Datasets of type `embed-input` will drop all fields other than the required `text` field. If any of the fields in `optional_fields` are missing from the uploaded file, Dataset validation will pass.
 
             - text_separator: typing.Optional[str]. Raw .txt uploads will be split into entries using the text_separator value.
 
@@ -321,6 +343,9 @@ class AsyncDatasetsClient:
                     "name": name,
                     "type": type,
                     "keep_original_file": keep_original_file,
+                    "skip_malformed_input": skip_malformed_input,
+                    "keep_fields": keep_fields,
+                    "optional_fields": optional_fields,
                     "text_separator": text_separator,
                     "csv_delimiter": csv_delimiter,
                 }

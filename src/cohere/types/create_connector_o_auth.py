@@ -12,18 +12,17 @@ except ImportError:
 
 
 class CreateConnectorOAuth(pydantic.BaseModel):
-    client_id: str = pydantic.Field(
-        alias="clientId", description="The OAuth 2.0 client ID. This fields is encrypted at rest."
+    client_id: typing.Optional[str] = pydantic.Field(
+        description="The OAuth 2.0 client ID. This fields is encrypted at rest."
     )
-    client_secret: str = pydantic.Field(
-        alias="clientSecret",
-        description="The OAuth 2.0 client Secret. This field is encrypted at rest and never returned in a response.",
+    client_secret: typing.Optional[str] = pydantic.Field(
+        description="The OAuth 2.0 client Secret. This field is encrypted at rest and never returned in a response."
     )
-    authorize_url: str = pydantic.Field(
-        alias="authorizeUrl", description="The OAuth 2.0 /authorize endpoint to use when users authorize the connector."
+    authorize_url: typing.Optional[str] = pydantic.Field(
+        description="The OAuth 2.0 /authorize endpoint to use when users authorize the connector."
     )
-    token_url: str = pydantic.Field(
-        alias="tokenUrl", description="The OAuth 2.0 /token endpoint to use when users authorize the connector."
+    token_url: typing.Optional[str] = pydantic.Field(
+        description="The OAuth 2.0 /token endpoint to use when users authorize the connector."
     )
     scope: typing.Optional[str] = pydantic.Field(
         description="The OAuth scopes to request when users authorize the connector."
@@ -40,5 +39,4 @@ class CreateConnectorOAuth(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        allow_population_by_field_name = True
         json_encoders = {dt.datetime: serialize_datetime}

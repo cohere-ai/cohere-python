@@ -13,25 +13,19 @@ except ImportError:
 
 
 class Dataset(pydantic.BaseModel):
-    id: typing.Optional[str] = pydantic.Field(description="The dataset ID")
-    name: typing.Optional[str] = pydantic.Field(description="The name of the dataset")
-    created_at: typing.Optional[dt.datetime] = pydantic.Field(alias="createdAt", description="The creation date")
-    updated_at: typing.Optional[dt.datetime] = pydantic.Field(alias="updatedAt", description="The last update date")
-    dataset_type: typing.Optional[str] = pydantic.Field(alias="datasetType", description="The type of the dataset")
-    validation_status: typing.Optional[str] = pydantic.Field(
-        alias="validationStatus", description="The validation status of the dataset"
-    )
-    validation_error: typing.Optional[str] = pydantic.Field(
-        alias="validationError", description="errors found during validation"
-    )
+    id: str = pydantic.Field(description="The dataset ID")
+    name: str = pydantic.Field(description="The name of the dataset")
+    created_at: dt.datetime = pydantic.Field(description="The creation date")
+    updated_at: dt.datetime = pydantic.Field(description="The last update date")
+    validation_error: typing.Optional[str] = pydantic.Field(description="Errors found during validation")
     schema_: typing.Optional[str] = pydantic.Field(alias="schema", description="the avro schema of the dataset")
-    required_fields: typing.Optional[typing.List[str]] = pydantic.Field(alias="requiredFields")
-    preserve_fields: typing.Optional[typing.List[str]] = pydantic.Field(alias="preserveFields")
+    required_fields: typing.Optional[typing.List[str]]
+    preserve_fields: typing.Optional[typing.List[str]]
     dataset_parts: typing.Optional[typing.List[DatasetPart]] = pydantic.Field(
-        alias="datasetParts", description="the underlying files that make up the dataset"
+        description="the underlying files that make up the dataset"
     )
     validation_warnings: typing.Optional[typing.List[str]] = pydantic.Field(
-        alias="validationWarnings", description="warnings found during validation"
+        description="warnings found during validation"
     )
 
     def json(self, **kwargs: typing.Any) -> str:
