@@ -263,12 +263,14 @@ class ConnectorsClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    def o_auth_authorize(self, id: str) -> OAuthAuthorizeResponse:
+    def o_auth_authorize(self, id: str, *, after_token_redirect: typing.Optional[str] = None) -> OAuthAuthorizeResponse:
         """
         Authorize the connector with the given ID for the connector oauth app. See ['Connector Authentication'](https://docs.cohere.com/docs/connector-authentication) for more information.
 
         Parameters:
             - id: str. The ID of the connector to authorize.
+
+            - after_token_redirect: typing.Optional[str]. The URL to redirect to after the connector has been authorized.
         ---
         from cohere.client import Client
 
@@ -283,6 +285,7 @@ class ConnectorsClient:
         _response = self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"v1/connectors/{id}/oauth/authorize"),
+            params=remove_none_from_dict({"after_token_redirect": after_token_redirect}),
             headers=self._client_wrapper.get_headers(),
             timeout=60,
         )
@@ -535,12 +538,16 @@ class AsyncConnectorsClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    async def o_auth_authorize(self, id: str) -> OAuthAuthorizeResponse:
+    async def o_auth_authorize(
+        self, id: str, *, after_token_redirect: typing.Optional[str] = None
+    ) -> OAuthAuthorizeResponse:
         """
         Authorize the connector with the given ID for the connector oauth app. See ['Connector Authentication'](https://docs.cohere.com/docs/connector-authentication) for more information.
 
         Parameters:
             - id: str. The ID of the connector to authorize.
+
+            - after_token_redirect: typing.Optional[str]. The URL to redirect to after the connector has been authorized.
         ---
         from cohere.client import AsyncClient
 
@@ -555,6 +562,7 @@ class AsyncConnectorsClient:
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"v1/connectors/{id}/oauth/authorize"),
+            params=remove_none_from_dict({"after_token_redirect": after_token_redirect}),
             headers=self._client_wrapper.get_headers(),
             timeout=60,
         )

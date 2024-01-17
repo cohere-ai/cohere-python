@@ -37,8 +37,11 @@ from .connector_o_auth import ConnectorOAuth
 from .create_connector_o_auth import CreateConnectorOAuth
 from .create_connector_response import CreateConnectorResponse
 from .create_connector_service_auth import CreateConnectorServiceAuth
+from .create_embed_job_response import CreateEmbedJobResponse
 from .dataset import Dataset
 from .dataset_part import DatasetPart
+from .dataset_type import DatasetType
+from .dataset_validation_status import DatasetValidationStatus
 from .delete_connector_response import DeleteConnectorResponse
 from .detect_language_response import DetectLanguageResponse
 from .detect_language_response_results_item import DetectLanguageResponseResultsItem
@@ -46,6 +49,10 @@ from .detokenize_response import DetokenizeResponse
 from .embed_by_type_response import EmbedByTypeResponse
 from .embed_by_type_response_embeddings import EmbedByTypeResponseEmbeddings
 from .embed_floats_response import EmbedFloatsResponse
+from .embed_input_type import EmbedInputType
+from .embed_job import EmbedJob
+from .embed_job_status import EmbedJobStatus
+from .embed_job_truncate import EmbedJobTruncate
 from .embed_request_truncate import EmbedRequestTruncate
 from .embed_response import EmbedResponse, EmbedResponse_EmbeddingsByType, EmbedResponse_EmbeddingsFloats
 from .finish_reason import FinishReason
@@ -67,6 +74,7 @@ from .generate_streamed_response import (
 from .generation import Generation
 from .get_connector_response import GetConnectorResponse
 from .list_connectors_response import ListConnectorsResponse
+from .list_embed_job_response import ListEmbedJobResponse
 from .non_streamed_chat_response import NonStreamedChatResponse
 from .o_auth_authorize_response import OAuthAuthorizeResponse
 from .rerank_request_documents_item import RerankRequestDocumentsItem
@@ -130,8 +138,11 @@ __all__ = [
     "CreateConnectorOAuth",
     "CreateConnectorResponse",
     "CreateConnectorServiceAuth",
+    "CreateEmbedJobResponse",
     "Dataset",
     "DatasetPart",
+    "DatasetType",
+    "DatasetValidationStatus",
     "DeleteConnectorResponse",
     "DetectLanguageResponse",
     "DetectLanguageResponseResultsItem",
@@ -139,6 +150,10 @@ __all__ = [
     "EmbedByTypeResponse",
     "EmbedByTypeResponseEmbeddings",
     "EmbedFloatsResponse",
+    "EmbedInputType",
+    "EmbedJob",
+    "EmbedJobStatus",
+    "EmbedJobTruncate",
     "EmbedRequestTruncate",
     "EmbedResponse",
     "EmbedResponse_EmbeddingsByType",
@@ -160,6 +175,7 @@ __all__ = [
     "Generation",
     "GetConnectorResponse",
     "ListConnectorsResponse",
+    "ListEmbedJobResponse",
     "NonStreamedChatResponse",
     "OAuthAuthorizeResponse",
     "RerankRequestDocumentsItem",
