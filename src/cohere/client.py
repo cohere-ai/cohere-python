@@ -15,6 +15,7 @@ from .errors.bad_request_error import BadRequestError
 from .errors.internal_server_error import InternalServerError
 from .resources.connectors.client import AsyncConnectorsClient, ConnectorsClient
 from .resources.datasets.client import AsyncDatasetsClient, DatasetsClient
+from .resources.embed_jobs.client import AsyncEmbedJobsClient, EmbedJobsClient
 from .types.chat_connector import ChatConnector
 from .types.chat_document import ChatDocument
 from .types.chat_message import ChatMessage
@@ -73,6 +74,7 @@ class Client:
         )
         self.datasets = DatasetsClient(client_wrapper=self._client_wrapper)
         self.connectors = ConnectorsClient(client_wrapper=self._client_wrapper)
+        self.embed_jobs = EmbedJobsClient(client_wrapper=self._client_wrapper)
 
     def chat_stream(
         self,
@@ -91,14 +93,17 @@ class Client:
     ) -> typing.Iterator[StreamedChatResponse]:
         """
         The `chat` endpoint allows users to have conversations with a Large Language Model (LLM) from Cohere. Users can send messages as part of a persisted conversation using the `conversation_id` parameter, or they can pass in their own conversation history using the `chat_history` parameter.
-        The endpoint features additional parameters such as [connectors](https://docs.cohere.com/docs/connectors) and `documents` that enable conversations enriched by external knowledge. We call this "Retrieval Augmented Generation", or "RAG".
+
+        The endpoint features additional parameters such as [connectors](https://docs.cohere.com/docs/connectors) and `documents` that enable conversations enriched by external knowledge. We call this ["Retrieval Augmented Generation"](https://docs.cohere.com/docs/retrieval-augmented-generation-rag), or "RAG". For a full breakdown of the Chat API endpoint, document and connector modes, and streaming (with code samples), see [this guide](https://docs.cohere.com/docs/cochat-beta).
 
         Parameters:
             - message: str. Accepts a string.
                             The chat message from the user to the model.
 
             - model: typing.Optional[str]. Defaults to `command`.
-                                           The identifier of the model, which can be one of the existing Cohere models or the full ID for a [finetuned custom model](/docs/training-custom-models).
+
+                                           The identifier of the model, which can be one of the existing Cohere models or the full ID for a [fine-tuned custom model](https://docs.cohere.com/docs/chat-fine-tuning).
+
                                            Compatible Cohere models are `command` and `command-light` as well as the experimental `command-nightly` and `command-light-nightly` variants. Read more about [Cohere models](https://docs.cohere.com/docs/models).
 
             - preamble_override: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one.
@@ -106,25 +111,33 @@ class Client:
             - chat_history: typing.Optional[typing.List[ChatMessage]]. A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
 
             - conversation_id: typing.Optional[str]. An alternative to `chat_history`. Previous conversations can be resumed by providing the conversation's identifier. The contents of `message` and the model's response will be stored as part of this conversation.
+
                                                      If a conversation with this id does not already exist, a new conversation will be created.
 
             - prompt_truncation: typing.Optional[ChatStreamRequestPromptTruncation]. Defaults to `AUTO` when `connectors` are specified and `OFF` in all other cases.
+
                                                                                      Dictates how the prompt will be constructed.
+
                                                                                      With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit.
+
                                                                                      With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
 
             - connectors: typing.Optional[typing.List[ChatConnector]]. Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
+
                                                                        When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
 
             - search_queries_only: typing.Optional[bool]. Defaults to `false`.
+
                                                           When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
 
             - documents: typing.Optional[typing.List[ChatDocument]]. A list of relevant documents that the model can use to enrich its reply. See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
 
             - citation_quality: typing.Optional[ChatStreamRequestCitationQuality]. Defaults to `"accurate"`.
+
                                                                                    Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results or `"fast"` results.
 
-            - temperature: typing.Optional[float]. Defaults to `0.3`
+            - temperature: typing.Optional[float]. Defaults to `0.3`.
+
                                                    A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
 
         """
@@ -186,14 +199,17 @@ class Client:
     ) -> NonStreamedChatResponse:
         """
         The `chat` endpoint allows users to have conversations with a Large Language Model (LLM) from Cohere. Users can send messages as part of a persisted conversation using the `conversation_id` parameter, or they can pass in their own conversation history using the `chat_history` parameter.
-        The endpoint features additional parameters such as [connectors](https://docs.cohere.com/docs/connectors) and `documents` that enable conversations enriched by external knowledge. We call this "Retrieval Augmented Generation", or "RAG".
+
+        The endpoint features additional parameters such as [connectors](https://docs.cohere.com/docs/connectors) and `documents` that enable conversations enriched by external knowledge. We call this ["Retrieval Augmented Generation"](https://docs.cohere.com/docs/retrieval-augmented-generation-rag), or "RAG". For a full breakdown of the Chat API endpoint, document and connector modes, and streaming (with code samples), see [this guide](https://docs.cohere.com/docs/cochat-beta).
 
         Parameters:
             - message: str. Accepts a string.
                             The chat message from the user to the model.
 
             - model: typing.Optional[str]. Defaults to `command`.
-                                           The identifier of the model, which can be one of the existing Cohere models or the full ID for a [finetuned custom model](/docs/training-custom-models).
+
+                                           The identifier of the model, which can be one of the existing Cohere models or the full ID for a [fine-tuned custom model](https://docs.cohere.com/docs/chat-fine-tuning).
+
                                            Compatible Cohere models are `command` and `command-light` as well as the experimental `command-nightly` and `command-light-nightly` variants. Read more about [Cohere models](https://docs.cohere.com/docs/models).
 
             - preamble_override: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one.
@@ -201,25 +217,33 @@ class Client:
             - chat_history: typing.Optional[typing.List[ChatMessage]]. A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
 
             - conversation_id: typing.Optional[str]. An alternative to `chat_history`. Previous conversations can be resumed by providing the conversation's identifier. The contents of `message` and the model's response will be stored as part of this conversation.
+
                                                      If a conversation with this id does not already exist, a new conversation will be created.
 
             - prompt_truncation: typing.Optional[ChatRequestPromptTruncation]. Defaults to `AUTO` when `connectors` are specified and `OFF` in all other cases.
+
                                                                                Dictates how the prompt will be constructed.
+
                                                                                With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit.
+
                                                                                With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
 
             - connectors: typing.Optional[typing.List[ChatConnector]]. Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
+
                                                                        When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
 
             - search_queries_only: typing.Optional[bool]. Defaults to `false`.
+
                                                           When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
 
             - documents: typing.Optional[typing.List[ChatDocument]]. A list of relevant documents that the model can use to enrich its reply. See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
 
             - citation_quality: typing.Optional[ChatRequestCitationQuality]. Defaults to `"accurate"`.
+
                                                                              Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results or `"fast"` results.
 
-            - temperature: typing.Optional[float]. Defaults to `0.3`
+            - temperature: typing.Optional[float]. Defaults to `0.3`.
+
                                                    A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
 
         """
@@ -509,7 +533,6 @@ class Client:
         *,
         texts: typing.List[str],
         model: typing.Optional[str] = OMIT,
-        input_type: typing.Optional[str] = OMIT,
         embedding_types: typing.Optional[typing.List[str]] = OMIT,
         truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
     ) -> EmbedResponse:
@@ -537,12 +560,6 @@ class Client:
                                            * `embed-english-v2.0`  4096
                                            * `embed-english-light-v2.0`  1024
                                            * `embed-multilingual-v2.0`  768
-            - input_type: typing.Optional[str]. Specifies the type of input you're giving to the model. Not required for older versions of the embedding models (i.e. anything lower than v3), but is required for more recent versions (i.e. anything bigger than v2).
-
-                                                * `"search_document"`: Use this when you encode documents for embeddings that you store in a vector database for search use-cases.
-                                                * `"search_query"`: Use this when you query your vector DB to find relevant documents.
-                                                * `"classification"`: Use this when you use the embeddings as an input to a text classifier.
-                                                * `"clustering"`: Use this when you want to cluster the embeddings.
             - embedding_types: typing.Optional[typing.List[str]]. Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
                                                                   * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
@@ -559,8 +576,6 @@ class Client:
         _request: typing.Dict[str, typing.Any] = {"texts": texts}
         if model is not OMIT:
             _request["model"] = model
-        if input_type is not OMIT:
-            _request["input_type"] = input_type
         if embedding_types is not OMIT:
             _request["embedding_types"] = embedding_types
         if truncate is not OMIT:
@@ -863,6 +878,7 @@ class AsyncClient:
         )
         self.datasets = AsyncDatasetsClient(client_wrapper=self._client_wrapper)
         self.connectors = AsyncConnectorsClient(client_wrapper=self._client_wrapper)
+        self.embed_jobs = AsyncEmbedJobsClient(client_wrapper=self._client_wrapper)
 
     async def chat_stream(
         self,
@@ -881,14 +897,17 @@ class AsyncClient:
     ) -> typing.AsyncIterator[StreamedChatResponse]:
         """
         The `chat` endpoint allows users to have conversations with a Large Language Model (LLM) from Cohere. Users can send messages as part of a persisted conversation using the `conversation_id` parameter, or they can pass in their own conversation history using the `chat_history` parameter.
-        The endpoint features additional parameters such as [connectors](https://docs.cohere.com/docs/connectors) and `documents` that enable conversations enriched by external knowledge. We call this "Retrieval Augmented Generation", or "RAG".
+
+        The endpoint features additional parameters such as [connectors](https://docs.cohere.com/docs/connectors) and `documents` that enable conversations enriched by external knowledge. We call this ["Retrieval Augmented Generation"](https://docs.cohere.com/docs/retrieval-augmented-generation-rag), or "RAG". For a full breakdown of the Chat API endpoint, document and connector modes, and streaming (with code samples), see [this guide](https://docs.cohere.com/docs/cochat-beta).
 
         Parameters:
             - message: str. Accepts a string.
                             The chat message from the user to the model.
 
             - model: typing.Optional[str]. Defaults to `command`.
-                                           The identifier of the model, which can be one of the existing Cohere models or the full ID for a [finetuned custom model](/docs/training-custom-models).
+
+                                           The identifier of the model, which can be one of the existing Cohere models or the full ID for a [fine-tuned custom model](https://docs.cohere.com/docs/chat-fine-tuning).
+
                                            Compatible Cohere models are `command` and `command-light` as well as the experimental `command-nightly` and `command-light-nightly` variants. Read more about [Cohere models](https://docs.cohere.com/docs/models).
 
             - preamble_override: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one.
@@ -896,25 +915,33 @@ class AsyncClient:
             - chat_history: typing.Optional[typing.List[ChatMessage]]. A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
 
             - conversation_id: typing.Optional[str]. An alternative to `chat_history`. Previous conversations can be resumed by providing the conversation's identifier. The contents of `message` and the model's response will be stored as part of this conversation.
+
                                                      If a conversation with this id does not already exist, a new conversation will be created.
 
             - prompt_truncation: typing.Optional[ChatStreamRequestPromptTruncation]. Defaults to `AUTO` when `connectors` are specified and `OFF` in all other cases.
+
                                                                                      Dictates how the prompt will be constructed.
+
                                                                                      With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit.
+
                                                                                      With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
 
             - connectors: typing.Optional[typing.List[ChatConnector]]. Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
+
                                                                        When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
 
             - search_queries_only: typing.Optional[bool]. Defaults to `false`.
+
                                                           When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
 
             - documents: typing.Optional[typing.List[ChatDocument]]. A list of relevant documents that the model can use to enrich its reply. See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
 
             - citation_quality: typing.Optional[ChatStreamRequestCitationQuality]. Defaults to `"accurate"`.
+
                                                                                    Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results or `"fast"` results.
 
-            - temperature: typing.Optional[float]. Defaults to `0.3`
+            - temperature: typing.Optional[float]. Defaults to `0.3`.
+
                                                    A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
 
         """
@@ -976,14 +1003,17 @@ class AsyncClient:
     ) -> NonStreamedChatResponse:
         """
         The `chat` endpoint allows users to have conversations with a Large Language Model (LLM) from Cohere. Users can send messages as part of a persisted conversation using the `conversation_id` parameter, or they can pass in their own conversation history using the `chat_history` parameter.
-        The endpoint features additional parameters such as [connectors](https://docs.cohere.com/docs/connectors) and `documents` that enable conversations enriched by external knowledge. We call this "Retrieval Augmented Generation", or "RAG".
+
+        The endpoint features additional parameters such as [connectors](https://docs.cohere.com/docs/connectors) and `documents` that enable conversations enriched by external knowledge. We call this ["Retrieval Augmented Generation"](https://docs.cohere.com/docs/retrieval-augmented-generation-rag), or "RAG". For a full breakdown of the Chat API endpoint, document and connector modes, and streaming (with code samples), see [this guide](https://docs.cohere.com/docs/cochat-beta).
 
         Parameters:
             - message: str. Accepts a string.
                             The chat message from the user to the model.
 
             - model: typing.Optional[str]. Defaults to `command`.
-                                           The identifier of the model, which can be one of the existing Cohere models or the full ID for a [finetuned custom model](/docs/training-custom-models).
+
+                                           The identifier of the model, which can be one of the existing Cohere models or the full ID for a [fine-tuned custom model](https://docs.cohere.com/docs/chat-fine-tuning).
+
                                            Compatible Cohere models are `command` and `command-light` as well as the experimental `command-nightly` and `command-light-nightly` variants. Read more about [Cohere models](https://docs.cohere.com/docs/models).
 
             - preamble_override: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one.
@@ -991,25 +1021,33 @@ class AsyncClient:
             - chat_history: typing.Optional[typing.List[ChatMessage]]. A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
 
             - conversation_id: typing.Optional[str]. An alternative to `chat_history`. Previous conversations can be resumed by providing the conversation's identifier. The contents of `message` and the model's response will be stored as part of this conversation.
+
                                                      If a conversation with this id does not already exist, a new conversation will be created.
 
             - prompt_truncation: typing.Optional[ChatRequestPromptTruncation]. Defaults to `AUTO` when `connectors` are specified and `OFF` in all other cases.
+
                                                                                Dictates how the prompt will be constructed.
+
                                                                                With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit.
+
                                                                                With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
 
             - connectors: typing.Optional[typing.List[ChatConnector]]. Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
+
                                                                        When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
 
             - search_queries_only: typing.Optional[bool]. Defaults to `false`.
+
                                                           When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
 
             - documents: typing.Optional[typing.List[ChatDocument]]. A list of relevant documents that the model can use to enrich its reply. See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
 
             - citation_quality: typing.Optional[ChatRequestCitationQuality]. Defaults to `"accurate"`.
+
                                                                              Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results or `"fast"` results.
 
-            - temperature: typing.Optional[float]. Defaults to `0.3`
+            - temperature: typing.Optional[float]. Defaults to `0.3`.
+
                                                    A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
 
         """
@@ -1299,7 +1337,6 @@ class AsyncClient:
         *,
         texts: typing.List[str],
         model: typing.Optional[str] = OMIT,
-        input_type: typing.Optional[str] = OMIT,
         embedding_types: typing.Optional[typing.List[str]] = OMIT,
         truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
     ) -> EmbedResponse:
@@ -1327,12 +1364,6 @@ class AsyncClient:
                                            * `embed-english-v2.0`  4096
                                            * `embed-english-light-v2.0`  1024
                                            * `embed-multilingual-v2.0`  768
-            - input_type: typing.Optional[str]. Specifies the type of input you're giving to the model. Not required for older versions of the embedding models (i.e. anything lower than v3), but is required for more recent versions (i.e. anything bigger than v2).
-
-                                                * `"search_document"`: Use this when you encode documents for embeddings that you store in a vector database for search use-cases.
-                                                * `"search_query"`: Use this when you query your vector DB to find relevant documents.
-                                                * `"classification"`: Use this when you use the embeddings as an input to a text classifier.
-                                                * `"clustering"`: Use this when you want to cluster the embeddings.
             - embedding_types: typing.Optional[typing.List[str]]. Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
                                                                   * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
@@ -1349,8 +1380,6 @@ class AsyncClient:
         _request: typing.Dict[str, typing.Any] = {"texts": texts}
         if model is not OMIT:
             _request["model"] = model
-        if input_type is not OMIT:
-            _request["input_type"] = input_type
         if embedding_types is not OMIT:
             _request["embedding_types"] = embedding_types
         if truncate is not OMIT:
