@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "cohere-ai"
+name = "cohere"
 version = "5.0.0a0"
 description = ""
 readme = "README.md"
