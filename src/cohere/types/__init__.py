@@ -3,6 +3,7 @@
 from .api_meta import ApiMeta
 from .api_meta_api_version import ApiMetaApiVersion
 from .api_meta_billed_units import ApiMetaBilledUnits
+from .auth_token_type import AuthTokenType
 from .chat_citation import ChatCitation
 from .chat_citation_generation_event import ChatCitationGenerationEvent
 from .chat_connector import ChatConnector
@@ -106,6 +107,7 @@ __all__ = [
     "ApiMeta",
     "ApiMetaApiVersion",
     "ApiMetaBilledUnits",
+    "AuthTokenType",
     "ChatCitation",
     "ChatCitationGenerationEvent",
     "ChatConnector",
