@@ -10,7 +10,7 @@ The Cohere Python Library provides convenient access to the Cohere API from appl
 # Installation
 
 ```sh
-pip install --upgrade cohere-ai
+pip install --upgrade cohere
 ```
 <!-- End Installation  -->
 
