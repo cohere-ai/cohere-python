@@ -190,7 +190,7 @@ class DatasetsClient:
             token="YOUR_TOKEN",
         )
         client.datasets.get(
-            id="id",
+            id="string",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -221,7 +221,7 @@ class DatasetsClient:
             token="YOUR_TOKEN",
         )
         client.datasets.delete(
-            id="id",
+            id="string",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -404,7 +404,7 @@ class AsyncDatasetsClient:
             token="YOUR_TOKEN",
         )
         await client.datasets.get(
-            id="id",
+            id="string",
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -435,7 +435,7 @@ class AsyncDatasetsClient:
             token="YOUR_TOKEN",
         )
         await client.datasets.delete(
-            id="id",
+            id="string",
         )
         """
         _response = await self._client_wrapper.httpx_client.request(

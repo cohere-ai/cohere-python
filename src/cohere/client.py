@@ -28,6 +28,7 @@ from .types.classify_request_truncate import ClassifyRequestTruncate
 from .types.classify_response import ClassifyResponse
 from .types.detect_language_response import DetectLanguageResponse
 from .types.detokenize_response import DetokenizeResponse
+from .types.embed_input_type import EmbedInputType
 from .types.embed_request_truncate import EmbedRequestTruncate
 from .types.embed_response import EmbedResponse
 from .types.generate_request_return_likelihoods import GenerateRequestReturnLikelihoods
@@ -72,9 +73,9 @@ class Client:
             token=token,
             httpx_client=httpx.Client(timeout=timeout) if httpx_client is None else httpx_client,
         )
+        self.embed_jobs = EmbedJobsClient(client_wrapper=self._client_wrapper)
         self.datasets = DatasetsClient(client_wrapper=self._client_wrapper)
         self.connectors = ConnectorsClient(client_wrapper=self._client_wrapper)
-        self.embed_jobs = EmbedJobsClient(client_wrapper=self._client_wrapper)
 
     def chat_stream(
         self,
@@ -245,7 +246,37 @@ class Client:
             - temperature: typing.Optional[float]. Defaults to `0.3`.
 
                                                    A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
+                                                   ---
+        from cohere import (
+            ChatConnector,
+            ChatMessage,
+            ChatMessageRole,
+            ChatRequestCitationQuality,
+            ChatRequestPromptTruncation,
+        )
+        from cohere.client import Client
 
+        client = Client(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        client.chat(
+            message="string",
+            stream=False,
+            chat_history=[
+                ChatMessage(
+                    role=ChatMessageRole.CHATBOT,
+                    message="string",
+                )
+            ],
+            prompt_truncation=ChatRequestPromptTruncation.OFF,
+            connectors=[
+                ChatConnector(
+                    id="string",
+                )
+            ],
+            citation_quality=ChatRequestCitationQuality.FAST,
+        )
         """
         _request: typing.Dict[str, typing.Any] = {"message": message}
         if model is not OMIT:
@@ -478,7 +509,21 @@ class Client:
 
                                                                     For example, if the value `{'11': -10}` is provided, the model will be very unlikely to include the token 11 (`"\n"`, the newline character) anywhere in the generated text. In contrast `{'11': 10}` will result in generations that nearly only contain that token. Values between -10 and 10 will proportionally affect the likelihood of the token appearing in the generated text.
 
-                                                                    Note: logit bias may not be supported for all custom models.
+                                                                    Note: logit bias may not be supported for all custom models.---
+        from cohere import GenerateRequestReturnLikelihoods, GenerateRequestTruncate
+        from cohere.client import Client
+
+        client = Client(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        client.generate(
+            prompt="Please explain to me how LLMs work",
+            stream=False,
+            truncate=GenerateRequestTruncate.NONE,
+            preset="my-preset-a58sbd",
+            return_likelihoods=GenerateRequestReturnLikelihoods.GENERATION,
+        )
         """
         _request: typing.Dict[str, typing.Any] = {"prompt": prompt}
         if model is not OMIT:
@@ -533,6 +578,7 @@ class Client:
         *,
         texts: typing.List[str],
         model: typing.Optional[str] = OMIT,
+        input_type: typing.Optional[EmbedInputType] = OMIT,
         embedding_types: typing.Optional[typing.List[str]] = OMIT,
         truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
     ) -> EmbedResponse:
@@ -560,6 +606,8 @@ class Client:
                                            * `embed-english-v2.0`  4096
                                            * `embed-english-light-v2.0`  1024
                                            * `embed-multilingual-v2.0`  768
+            - input_type: typing.Optional[EmbedInputType].
+
             - embedding_types: typing.Optional[typing.List[str]]. Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
                                                                   * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
@@ -576,6 +624,8 @@ class Client:
         _request: typing.Dict[str, typing.Any] = {"texts": texts}
         if model is not OMIT:
             _request["model"] = model
+        if input_type is not OMIT:
+            _request["input_type"] = input_type
         if embedding_types is not OMIT:
             _request["embedding_types"] = embedding_types
         if truncate is not OMIT:
@@ -628,6 +678,17 @@ class Client:
             - return_documents: typing.Optional[bool]. - If false, returns results without the doc text - the api will return a list of {index, relevance score} where index is inferred from the list passed into the request.
                                                        - If true, returns results with the doc text passed in - the api will return an ordered list of {index, text, relevance score} where index + text refers to the list passed into the request.
             - max_chunks_per_doc: typing.Optional[int]. The maximum number of chunks to produce internally from a document
+        ---
+        from cohere.client import Client
+
+        client = Client(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        client.rerank(
+            query="string",
+            documents=[],
+        )
         """
         _request: typing.Dict[str, typing.Any] = {"query": query, "documents": documents}
         if model is not OMIT:
@@ -678,7 +739,20 @@ class Client:
 
             - truncate: typing.Optional[ClassifyRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
                                                                   Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
-                                                                  If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
+                                                                  If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.---
+        from cohere import ClassifyRequestExamplesItem, ClassifyRequestTruncate
+        from cohere.client import Client
+
+        client = Client(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        client.classify(
+            inputs=[],
+            examples=[ClassifyRequestExamplesItem()],
+            preset="my-preset-a58sbd",
+            truncate=ClassifyRequestTruncate.NONE,
+        )
         """
         _request: typing.Dict[str, typing.Any] = {"inputs": inputs, "examples": examples}
         if model is not OMIT:
@@ -771,6 +845,24 @@ class Client:
             - temperature: typing.Optional[float]. Ranges from 0 to 5. Controls the randomness of the output. Lower values tend to generate more “predictable” output, while higher values tend to generate more “creative” output. The sweet spot is typically between 0 and 1.
 
             - additional_command: typing.Optional[str]. A free-form instruction for modifying how the summaries get generated. Should complete the sentence "Generate a summary _". Eg. "focusing on the next steps" or "written by Yoda"
+        ---
+        from cohere import (
+            SummarizeRequestExtractiveness,
+            SummarizeRequestFormat,
+            SummarizeRequestLength,
+        )
+        from cohere.client import Client
+
+        client = Client(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        client.summarize(
+            text="string",
+            length=SummarizeRequestLength.SHORT,
+            format=SummarizeRequestFormat.PARAGRAPH,
+            extractiveness=SummarizeRequestExtractiveness.LOW,
+        )
         """
         _request: typing.Dict[str, typing.Any] = {"text": text}
         if length is not OMIT:
@@ -808,6 +900,16 @@ class Client:
             - text: str. The string to be tokenized, the minimum text length is 1 character, and the maximum text length is 65536 characters.
 
             - model: typing.Optional[str]. An optional parameter to provide the model name. This will ensure that the tokenization uses the tokenizer used by that model.
+        ---
+        from cohere.client import Client
+
+        client = Client(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        client.tokenize(
+            text="string",
+        )
         """
         _request: typing.Dict[str, typing.Any] = {"text": text}
         if model is not OMIT:
@@ -839,6 +941,16 @@ class Client:
             - tokens: typing.List[int]. The list of tokens to be detokenized.
 
             - model: typing.Optional[str]. An optional parameter to provide the model name. This will ensure that the detokenization is done by the tokenizer used by that model.
+        ---
+        from cohere.client import Client
+
+        client = Client(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        client.detokenize(
+            tokens=[],
+        )
         """
         _request: typing.Dict[str, typing.Any] = {"tokens": tokens}
         if model is not OMIT:
@@ -876,9 +988,9 @@ class AsyncClient:
             token=token,
             httpx_client=httpx.AsyncClient(timeout=timeout) if httpx_client is None else httpx_client,
         )
+        self.embed_jobs = AsyncEmbedJobsClient(client_wrapper=self._client_wrapper)
         self.datasets = AsyncDatasetsClient(client_wrapper=self._client_wrapper)
         self.connectors = AsyncConnectorsClient(client_wrapper=self._client_wrapper)
-        self.embed_jobs = AsyncEmbedJobsClient(client_wrapper=self._client_wrapper)
 
     async def chat_stream(
         self,
@@ -1049,7 +1161,37 @@ class AsyncClient:
             - temperature: typing.Optional[float]. Defaults to `0.3`.
 
                                                    A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
+                                                   ---
+        from cohere import (
+            ChatConnector,
+            ChatMessage,
+            ChatMessageRole,
+            ChatRequestCitationQuality,
+            ChatRequestPromptTruncation,
+        )
+        from cohere.client import AsyncClient
 
+        client = AsyncClient(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        await client.chat(
+            message="string",
+            stream=False,
+            chat_history=[
+                ChatMessage(
+                    role=ChatMessageRole.CHATBOT,
+                    message="string",
+                )
+            ],
+            prompt_truncation=ChatRequestPromptTruncation.OFF,
+            connectors=[
+                ChatConnector(
+                    id="string",
+                )
+            ],
+            citation_quality=ChatRequestCitationQuality.FAST,
+        )
         """
         _request: typing.Dict[str, typing.Any] = {"message": message}
         if model is not OMIT:
@@ -1282,7 +1424,21 @@ class AsyncClient:
 
                                                                     For example, if the value `{'11': -10}` is provided, the model will be very unlikely to include the token 11 (`"\n"`, the newline character) anywhere in the generated text. In contrast `{'11': 10}` will result in generations that nearly only contain that token. Values between -10 and 10 will proportionally affect the likelihood of the token appearing in the generated text.
 
-                                                                    Note: logit bias may not be supported for all custom models.
+                                                                    Note: logit bias may not be supported for all custom models.---
+        from cohere import GenerateRequestReturnLikelihoods, GenerateRequestTruncate
+        from cohere.client import AsyncClient
+
+        client = AsyncClient(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        await client.generate(
+            prompt="Please explain to me how LLMs work",
+            stream=False,
+            truncate=GenerateRequestTruncate.NONE,
+            preset="my-preset-a58sbd",
+            return_likelihoods=GenerateRequestReturnLikelihoods.GENERATION,
+        )
         """
         _request: typing.Dict[str, typing.Any] = {"prompt": prompt}
         if model is not OMIT:
@@ -1337,6 +1493,7 @@ class AsyncClient:
         *,
         texts: typing.List[str],
         model: typing.Optional[str] = OMIT,
+        input_type: typing.Optional[EmbedInputType] = OMIT,
         embedding_types: typing.Optional[typing.List[str]] = OMIT,
         truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
     ) -> EmbedResponse:
@@ -1364,6 +1521,8 @@ class AsyncClient:
                                            * `embed-english-v2.0`  4096
                                            * `embed-english-light-v2.0`  1024
                                            * `embed-multilingual-v2.0`  768
+            - input_type: typing.Optional[EmbedInputType].
+
             - embedding_types: typing.Optional[typing.List[str]]. Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
                                                                   * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
@@ -1380,6 +1539,8 @@ class AsyncClient:
         _request: typing.Dict[str, typing.Any] = {"texts": texts}
         if model is not OMIT:
             _request["model"] = model
+        if input_type is not OMIT:
+            _request["input_type"] = input_type
         if embedding_types is not OMIT:
             _request["embedding_types"] = embedding_types
         if truncate is not OMIT:
@@ -1432,6 +1593,17 @@ class AsyncClient:
             - return_documents: typing.Optional[bool]. - If false, returns results without the doc text - the api will return a list of {index, relevance score} where index is inferred from the list passed into the request.
                                                        - If true, returns results with the doc text passed in - the api will return an ordered list of {index, text, relevance score} where index + text refers to the list passed into the request.
             - max_chunks_per_doc: typing.Optional[int]. The maximum number of chunks to produce internally from a document
+        ---
+        from cohere.client import AsyncClient
+
+        client = AsyncClient(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        await client.rerank(
+            query="string",
+            documents=[],
+        )
         """
         _request: typing.Dict[str, typing.Any] = {"query": query, "documents": documents}
         if model is not OMIT:
@@ -1482,7 +1654,20 @@ class AsyncClient:
 
             - truncate: typing.Optional[ClassifyRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
                                                                   Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
-                                                                  If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
+                                                                  If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.---
+        from cohere import ClassifyRequestExamplesItem, ClassifyRequestTruncate
+        from cohere.client import AsyncClient
+
+        client = AsyncClient(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        await client.classify(
+            inputs=[],
+            examples=[ClassifyRequestExamplesItem()],
+            preset="my-preset-a58sbd",
+            truncate=ClassifyRequestTruncate.NONE,
+        )
         """
         _request: typing.Dict[str, typing.Any] = {"inputs": inputs, "examples": examples}
         if model is not OMIT:
@@ -1577,6 +1762,24 @@ class AsyncClient:
             - temperature: typing.Optional[float]. Ranges from 0 to 5. Controls the randomness of the output. Lower values tend to generate more “predictable” output, while higher values tend to generate more “creative” output. The sweet spot is typically between 0 and 1.
 
             - additional_command: typing.Optional[str]. A free-form instruction for modifying how the summaries get generated. Should complete the sentence "Generate a summary _". Eg. "focusing on the next steps" or "written by Yoda"
+        ---
+        from cohere import (
+            SummarizeRequestExtractiveness,
+            SummarizeRequestFormat,
+            SummarizeRequestLength,
+        )
+        from cohere.client import AsyncClient
+
+        client = AsyncClient(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        await client.summarize(
+            text="string",
+            length=SummarizeRequestLength.SHORT,
+            format=SummarizeRequestFormat.PARAGRAPH,
+            extractiveness=SummarizeRequestExtractiveness.LOW,
+        )
         """
         _request: typing.Dict[str, typing.Any] = {"text": text}
         if length is not OMIT:
@@ -1614,6 +1817,16 @@ class AsyncClient:
             - text: str. The string to be tokenized, the minimum text length is 1 character, and the maximum text length is 65536 characters.
 
             - model: typing.Optional[str]. An optional parameter to provide the model name. This will ensure that the tokenization uses the tokenizer used by that model.
+        ---
+        from cohere.client import AsyncClient
+
+        client = AsyncClient(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        await client.tokenize(
+            text="string",
+        )
         """
         _request: typing.Dict[str, typing.Any] = {"text": text}
         if model is not OMIT:
@@ -1645,6 +1858,16 @@ class AsyncClient:
             - tokens: typing.List[int]. The list of tokens to be detokenized.
 
             - model: typing.Optional[str]. An optional parameter to provide the model name. This will ensure that the detokenization is done by the tokenizer used by that model.
+        ---
+        from cohere.client import AsyncClient
+
+        client = AsyncClient(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        await client.detokenize(
+            tokens=[],
+        )
         """
         _request: typing.Dict[str, typing.Any] = {"tokens": tokens}
         if model is not OMIT:
