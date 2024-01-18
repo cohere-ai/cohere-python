@@ -5,6 +5,8 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from .dataset_part import DatasetPart
+from .dataset_type import DatasetType
+from .dataset_validation_status import DatasetValidationStatus
 
 try:
     import pydantic.v1 as pydantic  # type: ignore
@@ -17,6 +19,8 @@ class Dataset(pydantic.BaseModel):
     name: str = pydantic.Field(description="The name of the dataset")
     created_at: dt.datetime = pydantic.Field(description="The creation date")
     updated_at: dt.datetime = pydantic.Field(description="The last update date")
+    dataset_type: DatasetType
+    validation_status: DatasetValidationStatus
     validation_error: typing.Optional[str] = pydantic.Field(description="Errors found during validation")
     schema_: typing.Optional[str] = pydantic.Field(alias="schema", description="the avro schema of the dataset")
     required_fields: typing.Optional[typing.List[str]]

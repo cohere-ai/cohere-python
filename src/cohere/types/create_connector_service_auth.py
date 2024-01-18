@@ -4,6 +4,7 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
+from .auth_token_type import AuthTokenType
 
 try:
     import pydantic.v1 as pydantic  # type: ignore
@@ -12,9 +13,7 @@ except ImportError:
 
 
 class CreateConnectorServiceAuth(pydantic.BaseModel):
-    type: str = pydantic.Field(
-        description='The token_type specifies the way the token is passed in the Authorization header. Valid values are "bearer", "basic", and "noscheme".'
-    )
+    type: AuthTokenType
     token: str = pydantic.Field(
         description="The token that will be used in the HTTP Authorization header when making requests to the connector. This field is encrypted at rest and never returned in a response."
     )

@@ -11,6 +11,7 @@ from ...errors.bad_request_error import BadRequestError
 from ...errors.internal_server_error import InternalServerError
 from ...errors.not_found_error import NotFoundError
 from ...types.create_embed_job_response import CreateEmbedJobResponse
+from ...types.embed_input_type import EmbedInputType
 from ...types.embed_job import EmbedJob
 from ...types.list_embed_job_response import ListEmbedJobResponse
 from .types.create_embed_job_request_truncate import CreateEmbedJobRequestTruncate
@@ -64,6 +65,7 @@ class EmbedJobsClient:
         *,
         model: str,
         dataset_id: str,
+        input_type: EmbedInputType,
         name: typing.Optional[str] = OMIT,
         truncate: typing.Optional[CreateEmbedJobRequestTruncate] = OMIT,
     ) -> CreateEmbedJobResponse:
@@ -82,14 +84,29 @@ class EmbedJobsClient:
 
             - dataset_id: str. ID of a [Dataset](https://docs.cohere.com/docs/datasets). The Dataset must be of type `embed-input` and must have a validation status `Validated`
 
+            - input_type: EmbedInputType.
+
             - name: typing.Optional[str]. The name of the embed job.
 
             - truncate: typing.Optional[CreateEmbedJobRequestTruncate]. One of `START|END` to specify how the API will handle inputs longer than the maximum token length.
 
                                                                         Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
+                                                                        ---
+        from cohere import CreateEmbedJobRequestTruncate, EmbedInputType
+        from cohere.client import Client
 
+        client = Client(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        client.embed_jobs.create(
+            model="string",
+            dataset_id="string",
+            input_type=EmbedInputType.SEARCH_DOCUMENT,
+            truncate=CreateEmbedJobRequestTruncate.START,
+        )
         """
-        _request: typing.Dict[str, typing.Any] = {"model": model, "dataset_id": dataset_id}
+        _request: typing.Dict[str, typing.Any] = {"model": model, "dataset_id": dataset_id, "input_type": input_type}
         if name is not OMIT:
             _request["name"] = name
         if truncate is not OMIT:
@@ -119,6 +136,16 @@ class EmbedJobsClient:
 
         Parameters:
             - id: str. The ID of the embed job to retrieve.
+        ---
+        from cohere.client import Client
+
+        client = Client(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        client.embed_jobs.get(
+            id="string",
+        )
         """
         _response = self._client_wrapper.httpx_client.request(
             "GET",
@@ -154,7 +181,7 @@ class EmbedJobsClient:
             token="YOUR_TOKEN",
         )
         client.embed_jobs.cancel(
-            id="id",
+            id="string",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -218,6 +245,7 @@ class AsyncEmbedJobsClient:
         *,
         model: str,
         dataset_id: str,
+        input_type: EmbedInputType,
         name: typing.Optional[str] = OMIT,
         truncate: typing.Optional[CreateEmbedJobRequestTruncate] = OMIT,
     ) -> CreateEmbedJobResponse:
@@ -236,14 +264,29 @@ class AsyncEmbedJobsClient:
 
             - dataset_id: str. ID of a [Dataset](https://docs.cohere.com/docs/datasets). The Dataset must be of type `embed-input` and must have a validation status `Validated`
 
+            - input_type: EmbedInputType.
+
             - name: typing.Optional[str]. The name of the embed job.
 
             - truncate: typing.Optional[CreateEmbedJobRequestTruncate]. One of `START|END` to specify how the API will handle inputs longer than the maximum token length.
 
                                                                         Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
+                                                                        ---
+        from cohere import CreateEmbedJobRequestTruncate, EmbedInputType
+        from cohere.client import AsyncClient
 
+        client = AsyncClient(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        await client.embed_jobs.create(
+            model="string",
+            dataset_id="string",
+            input_type=EmbedInputType.SEARCH_DOCUMENT,
+            truncate=CreateEmbedJobRequestTruncate.START,
+        )
         """
-        _request: typing.Dict[str, typing.Any] = {"model": model, "dataset_id": dataset_id}
+        _request: typing.Dict[str, typing.Any] = {"model": model, "dataset_id": dataset_id, "input_type": input_type}
         if name is not OMIT:
             _request["name"] = name
         if truncate is not OMIT:
@@ -273,6 +316,16 @@ class AsyncEmbedJobsClient:
 
         Parameters:
             - id: str. The ID of the embed job to retrieve.
+        ---
+        from cohere.client import AsyncClient
+
+        client = AsyncClient(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        await client.embed_jobs.get(
+            id="string",
+        )
         """
         _response = await self._client_wrapper.httpx_client.request(
             "GET",
@@ -308,7 +361,7 @@ class AsyncEmbedJobsClient:
             token="YOUR_TOKEN",
         )
         await client.embed_jobs.cancel(
-            id="id",
+            id="string",
         )
         """
         _response = await self._client_wrapper.httpx_client.request(

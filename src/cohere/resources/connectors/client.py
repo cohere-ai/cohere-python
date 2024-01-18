@@ -14,6 +14,7 @@ from ...errors.internal_server_error import InternalServerError
 from ...errors.not_found_error import NotFoundError
 from ...types.create_connector_o_auth import CreateConnectorOAuth
 from ...types.create_connector_response import CreateConnectorResponse
+from ...types.create_connector_service_auth import CreateConnectorServiceAuth
 from ...types.delete_connector_response import DeleteConnectorResponse
 from ...types.get_connector_response import GetConnectorResponse
 from ...types.list_connectors_response import ListConnectorsResponse
@@ -81,6 +82,7 @@ class ConnectorsClient:
         oauth: typing.Optional[CreateConnectorOAuth] = OMIT,
         active: typing.Optional[bool] = OMIT,
         continue_on_failure: typing.Optional[bool] = OMIT,
+        service_auth: typing.Optional[CreateConnectorServiceAuth] = OMIT,
     ) -> CreateConnectorResponse:
         """
         Creates a new connector. The connector is tested during registration and will cancel registration when the test is unsuccessful. See ['Creating and Deploying a Connector'](https://docs.cohere.com/docs/creating-and-deploying-a-connector) for more information.
@@ -99,6 +101,29 @@ class ConnectorsClient:
             - active: typing.Optional[bool]. Whether the connector is active or not.
 
             - continue_on_failure: typing.Optional[bool]. Whether a chat request should continue or not if the request to this connector fails.
+
+            - service_auth: typing.Optional[CreateConnectorServiceAuth]. The service to service authentication configuration for the connector. Cannot be specified if oauth is specified.
+        ---
+        from cohere import (
+            AuthTokenType,
+            CreateConnectorOAuth,
+            CreateConnectorServiceAuth,
+        )
+        from cohere.client import Client
+
+        client = Client(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        client.connectors.create(
+            name="string",
+            url="string",
+            oauth=CreateConnectorOAuth(),
+            service_auth=CreateConnectorServiceAuth(
+                type=AuthTokenType.BEARER,
+                token="string",
+            ),
+        )
         """
         _request: typing.Dict[str, typing.Any] = {"name": name, "url": url}
         if description is not OMIT:
@@ -111,6 +136,8 @@ class ConnectorsClient:
             _request["active"] = active
         if continue_on_failure is not OMIT:
             _request["continue_on_failure"] = continue_on_failure
+        if service_auth is not OMIT:
+            _request["service_auth"] = service_auth
         _response = self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/connectors"),
@@ -138,6 +165,16 @@ class ConnectorsClient:
 
         Parameters:
             - id: str. The ID of the connector to retrieve.
+        ---
+        from cohere.client import Client
+
+        client = Client(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        client.connectors.get(
+            id="string",
+        )
         """
         _response = self._client_wrapper.httpx_client.request(
             "GET",
@@ -173,7 +210,7 @@ class ConnectorsClient:
             token="YOUR_TOKEN",
         )
         client.connectors.delete(
-            id="id",
+            id="string",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -208,6 +245,7 @@ class ConnectorsClient:
         oauth: typing.Optional[CreateConnectorOAuth] = OMIT,
         active: typing.Optional[bool] = OMIT,
         continue_on_failure: typing.Optional[bool] = OMIT,
+        service_auth: typing.Optional[CreateConnectorServiceAuth] = OMIT,
     ) -> UpdateConnectorResponse:
         """
         Update a connector by ID. Omitted fields will not be updated. See ['Managing your Connector'](https://docs.cohere.com/docs/managing-your-connector) for more information.
@@ -226,6 +264,28 @@ class ConnectorsClient:
             - active: typing.Optional[bool].
 
             - continue_on_failure: typing.Optional[bool].
+
+            - service_auth: typing.Optional[CreateConnectorServiceAuth]. The service to service authentication configuration for the connector. Cannot be specified if oauth is specified.
+        ---
+        from cohere import (
+            AuthTokenType,
+            CreateConnectorOAuth,
+            CreateConnectorServiceAuth,
+        )
+        from cohere.client import Client
+
+        client = Client(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        client.connectors.update(
+            id="string",
+            oauth=CreateConnectorOAuth(),
+            service_auth=CreateConnectorServiceAuth(
+                type=AuthTokenType.BEARER,
+                token="string",
+            ),
+        )
         """
         _request: typing.Dict[str, typing.Any] = {}
         if name is not OMIT:
@@ -240,6 +300,8 @@ class ConnectorsClient:
             _request["active"] = active
         if continue_on_failure is not OMIT:
             _request["continue_on_failure"] = continue_on_failure
+        if service_auth is not OMIT:
+            _request["service_auth"] = service_auth
         _response = self._client_wrapper.httpx_client.request(
             "PATCH",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"v1/connectors/{id}"),
@@ -279,7 +341,7 @@ class ConnectorsClient:
             token="YOUR_TOKEN",
         )
         client.connectors.o_auth_authorize(
-            id="id",
+            id="string",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -356,6 +418,7 @@ class AsyncConnectorsClient:
         oauth: typing.Optional[CreateConnectorOAuth] = OMIT,
         active: typing.Optional[bool] = OMIT,
         continue_on_failure: typing.Optional[bool] = OMIT,
+        service_auth: typing.Optional[CreateConnectorServiceAuth] = OMIT,
     ) -> CreateConnectorResponse:
         """
         Creates a new connector. The connector is tested during registration and will cancel registration when the test is unsuccessful. See ['Creating and Deploying a Connector'](https://docs.cohere.com/docs/creating-and-deploying-a-connector) for more information.
@@ -374,6 +437,29 @@ class AsyncConnectorsClient:
             - active: typing.Optional[bool]. Whether the connector is active or not.
 
             - continue_on_failure: typing.Optional[bool]. Whether a chat request should continue or not if the request to this connector fails.
+
+            - service_auth: typing.Optional[CreateConnectorServiceAuth]. The service to service authentication configuration for the connector. Cannot be specified if oauth is specified.
+        ---
+        from cohere import (
+            AuthTokenType,
+            CreateConnectorOAuth,
+            CreateConnectorServiceAuth,
+        )
+        from cohere.client import AsyncClient
+
+        client = AsyncClient(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        await client.connectors.create(
+            name="string",
+            url="string",
+            oauth=CreateConnectorOAuth(),
+            service_auth=CreateConnectorServiceAuth(
+                type=AuthTokenType.BEARER,
+                token="string",
+            ),
+        )
         """
         _request: typing.Dict[str, typing.Any] = {"name": name, "url": url}
         if description is not OMIT:
@@ -386,6 +472,8 @@ class AsyncConnectorsClient:
             _request["active"] = active
         if continue_on_failure is not OMIT:
             _request["continue_on_failure"] = continue_on_failure
+        if service_auth is not OMIT:
+            _request["service_auth"] = service_auth
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/connectors"),
@@ -413,6 +501,16 @@ class AsyncConnectorsClient:
 
         Parameters:
             - id: str. The ID of the connector to retrieve.
+        ---
+        from cohere.client import AsyncClient
+
+        client = AsyncClient(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        await client.connectors.get(
+            id="string",
+        )
         """
         _response = await self._client_wrapper.httpx_client.request(
             "GET",
@@ -448,7 +546,7 @@ class AsyncConnectorsClient:
             token="YOUR_TOKEN",
         )
         await client.connectors.delete(
-            id="id",
+            id="string",
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -483,6 +581,7 @@ class AsyncConnectorsClient:
         oauth: typing.Optional[CreateConnectorOAuth] = OMIT,
         active: typing.Optional[bool] = OMIT,
         continue_on_failure: typing.Optional[bool] = OMIT,
+        service_auth: typing.Optional[CreateConnectorServiceAuth] = OMIT,
     ) -> UpdateConnectorResponse:
         """
         Update a connector by ID. Omitted fields will not be updated. See ['Managing your Connector'](https://docs.cohere.com/docs/managing-your-connector) for more information.
@@ -501,6 +600,28 @@ class AsyncConnectorsClient:
             - active: typing.Optional[bool].
 
             - continue_on_failure: typing.Optional[bool].
+
+            - service_auth: typing.Optional[CreateConnectorServiceAuth]. The service to service authentication configuration for the connector. Cannot be specified if oauth is specified.
+        ---
+        from cohere import (
+            AuthTokenType,
+            CreateConnectorOAuth,
+            CreateConnectorServiceAuth,
+        )
+        from cohere.client import AsyncClient
+
+        client = AsyncClient(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        await client.connectors.update(
+            id="string",
+            oauth=CreateConnectorOAuth(),
+            service_auth=CreateConnectorServiceAuth(
+                type=AuthTokenType.BEARER,
+                token="string",
+            ),
+        )
         """
         _request: typing.Dict[str, typing.Any] = {}
         if name is not OMIT:
@@ -515,6 +636,8 @@ class AsyncConnectorsClient:
             _request["active"] = active
         if continue_on_failure is not OMIT:
             _request["continue_on_failure"] = continue_on_failure
+        if service_auth is not OMIT:
+            _request["service_auth"] = service_auth
         _response = await self._client_wrapper.httpx_client.request(
             "PATCH",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"v1/connectors/{id}"),
@@ -556,7 +679,7 @@ class AsyncConnectorsClient:
             token="YOUR_TOKEN",
         )
         await client.connectors.o_auth_authorize(
-            id="id",
+            id="string",
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
