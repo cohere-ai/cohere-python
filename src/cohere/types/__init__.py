@@ -44,8 +44,6 @@ from .dataset_part import DatasetPart
 from .dataset_type import DatasetType
 from .dataset_validation_status import DatasetValidationStatus
 from .delete_connector_response import DeleteConnectorResponse
-from .detect_language_response import DetectLanguageResponse
-from .detect_language_response_results_item import DetectLanguageResponseResultsItem
 from .detokenize_response import DetokenizeResponse
 from .embed_by_type_response import EmbedByTypeResponse
 from .embed_by_type_response_embeddings import EmbedByTypeResponseEmbeddings
@@ -146,8 +144,6 @@ __all__ = [
     "DatasetType",
     "DatasetValidationStatus",
     "DeleteConnectorResponse",
-    "DetectLanguageResponse",
-    "DetectLanguageResponseResultsItem",
     "DetokenizeResponse",
     "EmbedByTypeResponse",
     "EmbedByTypeResponseEmbeddings",
