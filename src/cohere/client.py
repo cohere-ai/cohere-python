@@ -26,7 +26,6 @@ from .types.chat_stream_request_prompt_truncation import ChatStreamRequestPrompt
 from .types.classify_request_examples_item import ClassifyRequestExamplesItem
 from .types.classify_request_truncate import ClassifyRequestTruncate
 from .types.classify_response import ClassifyResponse
-from .types.detect_language_response import DetectLanguageResponse
 from .types.detokenize_response import DetokenizeResponse
 from .types.embed_input_type import EmbedInputType
 from .types.embed_request_truncate import EmbedRequestTruncate
@@ -332,6 +331,7 @@ class Client:
         presence_penalty: typing.Optional[float] = OMIT,
         return_likelihoods: typing.Optional[GenerateStreamRequestReturnLikelihoods] = OMIT,
         logit_bias: typing.Optional[typing.Dict[str, float]] = OMIT,
+        raw_prompting: typing.Optional[bool] = OMIT,
     ) -> typing.Iterator[GenerateStreamedResponse]:
         """
         This endpoint generates realistic text conditioned on a given input.
@@ -385,6 +385,7 @@ class Client:
                                                                     For example, if the value `{'11': -10}` is provided, the model will be very unlikely to include the token 11 (`"\n"`, the newline character) anywhere in the generated text. In contrast `{'11': 10}` will result in generations that nearly only contain that token. Values between -10 and 10 will proportionally affect the likelihood of the token appearing in the generated text.
 
                                                                     Note: logit bias may not be supported for all custom models.
+            - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
         """
         _request: typing.Dict[str, typing.Any] = {"prompt": prompt}
         if model is not OMIT:
@@ -415,6 +416,8 @@ class Client:
             _request["return_likelihoods"] = return_likelihoods
         if logit_bias is not OMIT:
             _request["logit_bias"] = logit_bias
+        if raw_prompting is not OMIT:
+            _request["raw_prompting"] = raw_prompting
         with self._client_wrapper.httpx_client.stream(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/generate"),
@@ -457,6 +460,7 @@ class Client:
         presence_penalty: typing.Optional[float] = OMIT,
         return_likelihoods: typing.Optional[GenerateRequestReturnLikelihoods] = OMIT,
         logit_bias: typing.Optional[typing.Dict[str, float]] = OMIT,
+        raw_prompting: typing.Optional[bool] = OMIT,
     ) -> Generation:
         """
         This endpoint generates realistic text conditioned on a given input.
@@ -509,7 +513,9 @@ class Client:
 
                                                                     For example, if the value `{'11': -10}` is provided, the model will be very unlikely to include the token 11 (`"\n"`, the newline character) anywhere in the generated text. In contrast `{'11': 10}` will result in generations that nearly only contain that token. Values between -10 and 10 will proportionally affect the likelihood of the token appearing in the generated text.
 
-                                                                    Note: logit bias may not be supported for all custom models.---
+                                                                    Note: logit bias may not be supported for all custom models.
+            - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
+        ---
         from cohere import GenerateRequestReturnLikelihoods, GenerateRequestTruncate
         from cohere.client import Client
 
@@ -554,6 +560,8 @@ class Client:
             _request["return_likelihoods"] = return_likelihoods
         if logit_bias is not OMIT:
             _request["logit_bias"] = logit_bias
+        if raw_prompting is not OMIT:
+            _request["raw_prompting"] = raw_prompting
         _response = self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/generate"),
@@ -774,43 +782,6 @@ class Client:
             raise BadRequestError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         if _response.status_code == 500:
             raise InternalServerError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
-        try:
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, body=_response.text)
-        raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    def detect_language(self, *, texts: typing.List[str], model: typing.Optional[str] = OMIT) -> DetectLanguageResponse:
-        """
-        This endpoint identifies which language each of the provided texts is written in.
-
-        Parameters:
-            - texts: typing.List[str]. List of strings to run the detection on.
-
-            - model: typing.Optional[str]. The identifier of the model to generate with.
-        ---
-        from cohere.client import Client
-
-        client = Client(
-            client_name="YOUR_CLIENT_NAME",
-            token="YOUR_TOKEN",
-        )
-        client.detect_language(
-            texts=[],
-        )
-        """
-        _request: typing.Dict[str, typing.Any] = {"texts": texts}
-        if model is not OMIT:
-            _request["model"] = model
-        _response = self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/detect-language"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
-        )
-        if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(DetectLanguageResponse, _response.json())  # type: ignore
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -1247,6 +1218,7 @@ class AsyncClient:
         presence_penalty: typing.Optional[float] = OMIT,
         return_likelihoods: typing.Optional[GenerateStreamRequestReturnLikelihoods] = OMIT,
         logit_bias: typing.Optional[typing.Dict[str, float]] = OMIT,
+        raw_prompting: typing.Optional[bool] = OMIT,
     ) -> typing.AsyncIterator[GenerateStreamedResponse]:
         """
         This endpoint generates realistic text conditioned on a given input.
@@ -1300,6 +1272,7 @@ class AsyncClient:
                                                                     For example, if the value `{'11': -10}` is provided, the model will be very unlikely to include the token 11 (`"\n"`, the newline character) anywhere in the generated text. In contrast `{'11': 10}` will result in generations that nearly only contain that token. Values between -10 and 10 will proportionally affect the likelihood of the token appearing in the generated text.
 
                                                                     Note: logit bias may not be supported for all custom models.
+            - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
         """
         _request: typing.Dict[str, typing.Any] = {"prompt": prompt}
         if model is not OMIT:
@@ -1330,6 +1303,8 @@ class AsyncClient:
             _request["return_likelihoods"] = return_likelihoods
         if logit_bias is not OMIT:
             _request["logit_bias"] = logit_bias
+        if raw_prompting is not OMIT:
+            _request["raw_prompting"] = raw_prompting
         async with self._client_wrapper.httpx_client.stream(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/generate"),
@@ -1372,6 +1347,7 @@ class AsyncClient:
         presence_penalty: typing.Optional[float] = OMIT,
         return_likelihoods: typing.Optional[GenerateRequestReturnLikelihoods] = OMIT,
         logit_bias: typing.Optional[typing.Dict[str, float]] = OMIT,
+        raw_prompting: typing.Optional[bool] = OMIT,
     ) -> Generation:
         """
         This endpoint generates realistic text conditioned on a given input.
@@ -1424,7 +1400,9 @@ class AsyncClient:
 
                                                                     For example, if the value `{'11': -10}` is provided, the model will be very unlikely to include the token 11 (`"\n"`, the newline character) anywhere in the generated text. In contrast `{'11': 10}` will result in generations that nearly only contain that token. Values between -10 and 10 will proportionally affect the likelihood of the token appearing in the generated text.
 
-                                                                    Note: logit bias may not be supported for all custom models.---
+                                                                    Note: logit bias may not be supported for all custom models.
+            - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
+        ---
         from cohere import GenerateRequestReturnLikelihoods, GenerateRequestTruncate
         from cohere.client import AsyncClient
 
@@ -1469,6 +1447,8 @@ class AsyncClient:
             _request["return_likelihoods"] = return_likelihoods
         if logit_bias is not OMIT:
             _request["logit_bias"] = logit_bias
+        if raw_prompting is not OMIT:
+            _request["raw_prompting"] = raw_prompting
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/generate"),
@@ -1689,45 +1669,6 @@ class AsyncClient:
             raise BadRequestError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         if _response.status_code == 500:
             raise InternalServerError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
-        try:
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, body=_response.text)
-        raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    async def detect_language(
-        self, *, texts: typing.List[str], model: typing.Optional[str] = OMIT
-    ) -> DetectLanguageResponse:
-        """
-        This endpoint identifies which language each of the provided texts is written in.
-
-        Parameters:
-            - texts: typing.List[str]. List of strings to run the detection on.
-
-            - model: typing.Optional[str]. The identifier of the model to generate with.
-        ---
-        from cohere.client import AsyncClient
-
-        client = AsyncClient(
-            client_name="YOUR_CLIENT_NAME",
-            token="YOUR_TOKEN",
-        )
-        await client.detect_language(
-            texts=[],
-        )
-        """
-        _request: typing.Dict[str, typing.Any] = {"texts": texts}
-        if model is not OMIT:
-            _request["model"] = model
-        _response = await self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/detect-language"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
-        )
-        if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(DetectLanguageResponse, _response.json())  # type: ignore
         try:
             _response_json = _response.json()
         except JSONDecodeError:
