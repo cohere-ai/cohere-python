@@ -346,7 +346,7 @@ class Client:
             Chat message with connector to query and use the results to generate the response:
                 >>> res = co.chat(
                 >>>     "What is the height of Mount Everest?",
-                >>>      connectors=[{"id": "web-search"})
+                >>>      connectors=[{"id": "web-search"}])
                 >>> print(res.text)
                 >>> print(res.citations)
                 >>> print(res.documents)
