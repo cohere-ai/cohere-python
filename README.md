@@ -8,8 +8,6 @@ This package provides functionality developed to simplify interfacing with the [
 
 # 5.0.0 alpha 🚀
 
-![](banner.png)
-
 We're nearing the release of our brand new cohere-python SDK! If you'd like to get a head start by installing the alpha version, please go ahead and use `pip install --pre --upgrade cohere`. Thanks for your patience as we make breaking changes where necessary. If you have any issues using it, we will respond to github issues as soon as possible.
 
 See the [migration guide](https://github.com/cohere-ai/cohere-python/blob/v5/4.0.0-5.0.0-migration-guide.md) for upgrading and the [new README.md](https://github.com/cohere-ai/cohere-python/blob/v5/README.md) for more information and examples.
