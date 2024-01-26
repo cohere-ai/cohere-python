@@ -193,21 +193,6 @@ class TestChat(unittest.TestCase):
         with self.assertRaises(cohere.error.CohereError):
             _ = co.chat("Yo what up?", k="invalid", max_tokens=5)
 
-    def test_logit_bias(self):
-        prediction = co.chat("Yo what up?", logit_bias={42: 10}, max_tokens=5)
-        self.assertIsInstance(prediction.text, str)
-
-    def test_invalid_logit_bias(self):
-        invalid = [
-            "invalid",
-            {"hello": "invalid"},
-            {-42: 10},
-        ]
-
-        for logit_bias in invalid:
-            with self.assertRaises(cohere.error.CohereError):
-                _ = co.chat("Yo what up?", logit_bias=logit_bias, max_tokens=5)
-
     def test_search_queries_only_true(self):
         prediction = co.chat(
             "What is the height of Mount Everest? What is the depth of the Mariana Trench? What is the climate like in Nepal?",

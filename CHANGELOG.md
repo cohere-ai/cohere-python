@@ -1,4 +1,8 @@
 # Changelog
+## 4.45
+- [#372] (https://github.com/cohere-ai/cohere-python/pull/372)
+  - Remove logit_bias parameter from Chat
+
 ## 4.44
  - [#366] (https://github.com/cohere-ai/cohere-python/pull/366)
     - Update embed job list request
