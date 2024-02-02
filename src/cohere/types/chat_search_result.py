@@ -4,8 +4,8 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
-from .chat_connector import ChatConnector
 from .chat_search_query import ChatSearchQuery
+from .chat_search_result_connector import ChatSearchResultConnector
 
 try:
     import pydantic.v1 as pydantic  # type: ignore
@@ -15,7 +15,9 @@ except ImportError:
 
 class ChatSearchResult(pydantic.BaseModel):
     search_query: ChatSearchQuery
-    connector: ChatConnector = pydantic.Field(description="The connector from which this result comes from.")
+    connector: ChatSearchResultConnector = pydantic.Field(
+        description="The connector from which this result comes from."
+    )
     document_ids: typing.List[str] = pydantic.Field(description="Identifiers of documents found by this search query.")
 
     def json(self, **kwargs: typing.Any) -> str:

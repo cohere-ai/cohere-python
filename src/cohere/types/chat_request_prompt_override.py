@@ -3,8 +3,7 @@
 import datetime as dt
 import typing
 
-from ....core.datetime_utils import serialize_datetime
-from ....types.dataset import Dataset
+from ..core.datetime_utils import serialize_datetime
 
 try:
     import pydantic.v1 as pydantic  # type: ignore
@@ -12,8 +11,14 @@ except ImportError:
     import pydantic  # type: ignore
 
 
-class DatasetsGetResponse(pydantic.BaseModel):
-    dataset: Dataset
+class ChatRequestPromptOverride(pydantic.BaseModel):
+    """
+    (internal) Overrides specified parts of the default Chat or RAG preamble. It is recommended that these options only be used in specific scenarios where the defaults are not adequate.
+    """
+
+    preamble: typing.Optional[typing.Any]
+    task_description: typing.Optional[typing.Any]
+    style_guide: typing.Optional[typing.Any]
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

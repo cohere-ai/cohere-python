@@ -11,20 +11,25 @@ from .chat_document import ChatDocument
 from .chat_message import ChatMessage
 from .chat_message_role import ChatMessageRole
 from .chat_request_citation_quality import ChatRequestCitationQuality
+from .chat_request_prompt_override import ChatRequestPromptOverride
 from .chat_request_prompt_truncation import ChatRequestPromptTruncation
+from .chat_request_search_options import ChatRequestSearchOptions
 from .chat_search_queries_generation_event import ChatSearchQueriesGenerationEvent
 from .chat_search_query import ChatSearchQuery
 from .chat_search_result import ChatSearchResult
+from .chat_search_result_connector import ChatSearchResultConnector
 from .chat_search_results_event import ChatSearchResultsEvent
 from .chat_stream_end_event import ChatStreamEndEvent
 from .chat_stream_end_event_finish_reason import ChatStreamEndEventFinishReason
 from .chat_stream_end_event_response import ChatStreamEndEventResponse
 from .chat_stream_event import ChatStreamEvent
 from .chat_stream_request_citation_quality import ChatStreamRequestCitationQuality
+from .chat_stream_request_prompt_override import ChatStreamRequestPromptOverride
 from .chat_stream_request_prompt_truncation import ChatStreamRequestPromptTruncation
+from .chat_stream_request_search_options import ChatStreamRequestSearchOptions
 from .chat_stream_start_event import ChatStreamStartEvent
 from .chat_text_generation_event import ChatTextGenerationEvent
-from .classify_request_examples_item import ClassifyRequestExamplesItem
+from .classify_example import ClassifyExample
 from .classify_request_truncate import ClassifyRequestTruncate
 from .classify_response import ClassifyResponse
 from .classify_response_classifications_item import ClassifyResponseClassificationsItem
@@ -52,6 +57,7 @@ from .embed_input_type import EmbedInputType
 from .embed_job import EmbedJob
 from .embed_job_status import EmbedJobStatus
 from .embed_job_truncate import EmbedJobTruncate
+from .embed_request_embedding_types_item import EmbedRequestEmbeddingTypesItem
 from .embed_request_truncate import EmbedRequestTruncate
 from .embed_response import EmbedResponse, EmbedResponse_EmbeddingsByType, EmbedResponse_EmbeddingsFloats
 from .finish_reason import FinishReason
@@ -76,6 +82,7 @@ from .list_connectors_response import ListConnectorsResponse
 from .list_embed_job_response import ListEmbedJobResponse
 from .non_streamed_chat_response import NonStreamedChatResponse
 from .o_auth_authorize_response import OAuthAuthorizeResponse
+from .parse_info import ParseInfo
 from .rerank_request_documents_item import RerankRequestDocumentsItem
 from .rerank_request_documents_item_text import RerankRequestDocumentsItemText
 from .rerank_response import RerankResponse
@@ -113,20 +120,25 @@ __all__ = [
     "ChatMessage",
     "ChatMessageRole",
     "ChatRequestCitationQuality",
+    "ChatRequestPromptOverride",
     "ChatRequestPromptTruncation",
+    "ChatRequestSearchOptions",
     "ChatSearchQueriesGenerationEvent",
     "ChatSearchQuery",
     "ChatSearchResult",
+    "ChatSearchResultConnector",
     "ChatSearchResultsEvent",
     "ChatStreamEndEvent",
     "ChatStreamEndEventFinishReason",
     "ChatStreamEndEventResponse",
     "ChatStreamEvent",
     "ChatStreamRequestCitationQuality",
+    "ChatStreamRequestPromptOverride",
     "ChatStreamRequestPromptTruncation",
+    "ChatStreamRequestSearchOptions",
     "ChatStreamStartEvent",
     "ChatTextGenerationEvent",
-    "ClassifyRequestExamplesItem",
+    "ClassifyExample",
     "ClassifyRequestTruncate",
     "ClassifyResponse",
     "ClassifyResponseClassificationsItem",
@@ -152,6 +164,7 @@ __all__ = [
     "EmbedJob",
     "EmbedJobStatus",
     "EmbedJobTruncate",
+    "EmbedRequestEmbeddingTypesItem",
     "EmbedRequestTruncate",
     "EmbedResponse",
     "EmbedResponse_EmbeddingsByType",
@@ -176,6 +189,7 @@ __all__ = [
     "ListEmbedJobResponse",
     "NonStreamedChatResponse",
     "OAuthAuthorizeResponse",
+    "ParseInfo",
     "RerankRequestDocumentsItem",
     "RerankRequestDocumentsItemText",
     "RerankResponse",
