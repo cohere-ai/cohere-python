@@ -16,7 +16,7 @@ class ChatConnector(pydantic.BaseModel):
     The connector used for fetching documents.
     """
 
-    id: str = pydantic.Field(description="The identifier of the connector. Currently only 'web-search' is supported.")
+    id: str = pydantic.Field(description="The identifier of the connector.")
     user_access_token: typing.Optional[str] = pydantic.Field(
         description="An optional override to set the token that Cohere passes to the connector in the Authorization header."
     )

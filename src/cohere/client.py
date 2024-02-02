@@ -6,6 +6,7 @@ import urllib.parse
 from json.decoder import JSONDecodeError
 
 import httpx
+import typing_extensions
 
 from .core.api_error import ApiError
 from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
@@ -23,11 +24,12 @@ from .types.chat_request_citation_quality import ChatRequestCitationQuality
 from .types.chat_request_prompt_truncation import ChatRequestPromptTruncation
 from .types.chat_stream_request_citation_quality import ChatStreamRequestCitationQuality
 from .types.chat_stream_request_prompt_truncation import ChatStreamRequestPromptTruncation
-from .types.classify_request_examples_item import ClassifyRequestExamplesItem
+from .types.classify_example import ClassifyExample
 from .types.classify_request_truncate import ClassifyRequestTruncate
 from .types.classify_response import ClassifyResponse
 from .types.detokenize_response import DetokenizeResponse
 from .types.embed_input_type import EmbedInputType
+from .types.embed_request_embedding_types_item import EmbedRequestEmbeddingTypesItem
 from .types.embed_request_truncate import EmbedRequestTruncate
 from .types.embed_response import EmbedResponse
 from .types.generate_request_return_likelihoods import GenerateRequestReturnLikelihoods
@@ -81,6 +83,7 @@ class Client:
         *,
         message: str,
         model: typing.Optional[str] = OMIT,
+        stream: typing_extensions.Literal[True],
         preamble_override: typing.Optional[str] = OMIT,
         chat_history: typing.Optional[typing.List[ChatMessage]] = OMIT,
         conversation_id: typing.Optional[str] = OMIT,
@@ -90,6 +93,11 @@ class Client:
         documents: typing.Optional[typing.List[ChatDocument]] = OMIT,
         citation_quality: typing.Optional[ChatStreamRequestCitationQuality] = OMIT,
         temperature: typing.Optional[float] = OMIT,
+        max_tokens: typing.Optional[int] = OMIT,
+        k: typing.Optional[int] = OMIT,
+        p: typing.Optional[float] = OMIT,
+        frequency_penalty: typing.Optional[float] = OMIT,
+        presence_penalty: typing.Optional[float] = OMIT,
     ) -> typing.Iterator[StreamedChatResponse]:
         """
         The `chat` endpoint allows users to have conversations with a Large Language Model (LLM) from Cohere. Users can send messages as part of a persisted conversation using the `conversation_id` parameter, or they can pass in their own conversation history using the `chat_history` parameter.
@@ -105,6 +113,8 @@ class Client:
                                            The identifier of the model, which can be one of the existing Cohere models or the full ID for a [fine-tuned custom model](https://docs.cohere.com/docs/chat-fine-tuning).
 
                                            Compatible Cohere models are `command` and `command-light` as well as the experimental `command-nightly` and `command-light-nightly` variants. Read more about [Cohere models](https://docs.cohere.com/docs/models).
+
+            - stream: typing_extensions.Literal[True].
 
             - preamble_override: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one.
 
@@ -140,8 +150,21 @@ class Client:
 
                                                    A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
 
+                                                   Randomness can be further maximized by increasing the  value of the `p` parameter.
+
+            - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+
+            - k: typing.Optional[int]. Ensures only the top `k` most likely tokens are considered for generation at each step.
+                                       Defaults to `0`, min value of `0`, max value of `500`.
+
+            - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
+                                         Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
+
+            - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+
+            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`. Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
         """
-        _request: typing.Dict[str, typing.Any] = {"message": message}
+        _request: typing.Dict[str, typing.Any] = {"message": message, "stream": stream}
         if model is not OMIT:
             _request["model"] = model
         if preamble_override is not OMIT:
@@ -162,6 +185,16 @@ class Client:
             _request["citation_quality"] = citation_quality
         if temperature is not OMIT:
             _request["temperature"] = temperature
+        if max_tokens is not OMIT:
+            _request["max_tokens"] = max_tokens
+        if k is not OMIT:
+            _request["k"] = k
+        if p is not OMIT:
+            _request["p"] = p
+        if frequency_penalty is not OMIT:
+            _request["frequency_penalty"] = frequency_penalty
+        if presence_penalty is not OMIT:
+            _request["presence_penalty"] = presence_penalty
         with self._client_wrapper.httpx_client.stream(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/chat"),
@@ -187,6 +220,7 @@ class Client:
         *,
         message: str,
         model: typing.Optional[str] = OMIT,
+        stream: typing_extensions.Literal[False],
         preamble_override: typing.Optional[str] = OMIT,
         chat_history: typing.Optional[typing.List[ChatMessage]] = OMIT,
         conversation_id: typing.Optional[str] = OMIT,
@@ -196,6 +230,11 @@ class Client:
         documents: typing.Optional[typing.List[ChatDocument]] = OMIT,
         citation_quality: typing.Optional[ChatRequestCitationQuality] = OMIT,
         temperature: typing.Optional[float] = OMIT,
+        max_tokens: typing.Optional[int] = OMIT,
+        k: typing.Optional[int] = OMIT,
+        p: typing.Optional[float] = OMIT,
+        frequency_penalty: typing.Optional[float] = OMIT,
+        presence_penalty: typing.Optional[float] = OMIT,
     ) -> NonStreamedChatResponse:
         """
         The `chat` endpoint allows users to have conversations with a Large Language Model (LLM) from Cohere. Users can send messages as part of a persisted conversation using the `conversation_id` parameter, or they can pass in their own conversation history using the `chat_history` parameter.
@@ -211,6 +250,8 @@ class Client:
                                            The identifier of the model, which can be one of the existing Cohere models or the full ID for a [fine-tuned custom model](https://docs.cohere.com/docs/chat-fine-tuning).
 
                                            Compatible Cohere models are `command` and `command-light` as well as the experimental `command-nightly` and `command-light-nightly` variants. Read more about [Cohere models](https://docs.cohere.com/docs/models).
+
+            - stream: typing_extensions.Literal[False].
 
             - preamble_override: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one.
 
@@ -245,13 +286,28 @@ class Client:
             - temperature: typing.Optional[float]. Defaults to `0.3`.
 
                                                    A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
-                                                   ---
+
+                                                   Randomness can be further maximized by increasing the  value of the `p` parameter.
+
+            - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+
+            - k: typing.Optional[int]. Ensures only the top `k` most likely tokens are considered for generation at each step.
+                                       Defaults to `0`, min value of `0`, max value of `500`.
+
+            - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
+                                         Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
+
+            - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+
+            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`. Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+        ---
         from cohere import (
-            ChatConnector,
             ChatMessage,
             ChatMessageRole,
             ChatRequestCitationQuality,
+            ChatRequestPromptOverride,
             ChatRequestPromptTruncation,
+            ChatRequestSearchOptions,
         )
         from cohere.client import Client
 
@@ -260,24 +316,26 @@ class Client:
             token="YOUR_TOKEN",
         )
         client.chat(
-            message="string",
+            message="Can you give me a global market overview of solar panels?",
             stream=False,
             chat_history=[
                 ChatMessage(
                     role=ChatMessageRole.CHATBOT,
-                    message="string",
-                )
+                    message="Hi!",
+                ),
+                ChatMessage(
+                    role=ChatMessageRole.CHATBOT,
+                    message="How can I help you today?",
+                ),
             ],
             prompt_truncation=ChatRequestPromptTruncation.OFF,
-            connectors=[
-                ChatConnector(
-                    id="string",
-                )
-            ],
             citation_quality=ChatRequestCitationQuality.FAST,
+            temperature=0.3,
+            search_options=ChatRequestSearchOptions(),
+            prompt_override=ChatRequestPromptOverride(),
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"message": message}
+        _request: typing.Dict[str, typing.Any] = {"message": message, "stream": stream}
         if model is not OMIT:
             _request["model"] = model
         if preamble_override is not OMIT:
@@ -298,6 +356,16 @@ class Client:
             _request["citation_quality"] = citation_quality
         if temperature is not OMIT:
             _request["temperature"] = temperature
+        if max_tokens is not OMIT:
+            _request["max_tokens"] = max_tokens
+        if k is not OMIT:
+            _request["k"] = k
+        if p is not OMIT:
+            _request["p"] = p
+        if frequency_penalty is not OMIT:
+            _request["frequency_penalty"] = frequency_penalty
+        if presence_penalty is not OMIT:
+            _request["presence_penalty"] = presence_penalty
         _response = self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/chat"),
@@ -319,6 +387,7 @@ class Client:
         prompt: str,
         model: typing.Optional[str] = OMIT,
         num_generations: typing.Optional[int] = OMIT,
+        stream: typing_extensions.Literal[True],
         max_tokens: typing.Optional[int] = OMIT,
         truncate: typing.Optional[GenerateStreamRequestTruncate] = OMIT,
         temperature: typing.Optional[float] = OMIT,
@@ -343,6 +412,8 @@ class Client:
             - model: typing.Optional[str]. The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
                                            Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
             - num_generations: typing.Optional[int]. The maximum number of generations that will be returned. Defaults to `1`, min value of `1`, max value of `5`.
+
+            - stream: typing_extensions.Literal[True].
 
             - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
 
@@ -371,23 +442,29 @@ class Client:
             - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
                                          Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
-            - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.'
+            - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
 
-            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`. Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+                                                         Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
+
+            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+
+                                                        Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+
+                                                        Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
 
             - return_likelihoods: typing.Optional[GenerateStreamRequestReturnLikelihoods]. One of `GENERATION|ALL|NONE` to specify how and if the token likelihoods are returned with the response. Defaults to `NONE`.
 
                                                                                            If `GENERATION` is selected, the token likelihoods will only be provided for generated text.
 
                                                                                            If `ALL` is selected, the token likelihoods will be provided both for the prompt and the generated text.
-            - logit_bias: typing.Optional[typing.Dict[str, float]]. Used to prevent the model from generating unwanted tokens or to incentivize it to include desired tokens. The format is `{token_id: bias}` where bias is a float between -10 and 10. Tokens can be obtained from text using [Tokenize](/reference/tokenize).
+            - logit_bias: typing.Optional[typing.Dict[str, float]]. Certain models support the `logit_bias` parameter.
+
+                                                                    Used to prevent the model from generating unwanted tokens or to incentivize it to include desired tokens. The format is `{token_id: bias}` where bias is a float between -10 and 10. Tokens can be obtained from text using [Tokenize](/reference/tokenize).
 
                                                                     For example, if the value `{'11': -10}` is provided, the model will be very unlikely to include the token 11 (`"\n"`, the newline character) anywhere in the generated text. In contrast `{'11': 10}` will result in generations that nearly only contain that token. Values between -10 and 10 will proportionally affect the likelihood of the token appearing in the generated text.
-
-                                                                    Note: logit bias may not be supported for all custom models.
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
         """
-        _request: typing.Dict[str, typing.Any] = {"prompt": prompt}
+        _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": stream}
         if model is not OMIT:
             _request["model"] = model
         if num_generations is not OMIT:
@@ -448,6 +525,7 @@ class Client:
         prompt: str,
         model: typing.Optional[str] = OMIT,
         num_generations: typing.Optional[int] = OMIT,
+        stream: typing_extensions.Literal[False],
         max_tokens: typing.Optional[int] = OMIT,
         truncate: typing.Optional[GenerateRequestTruncate] = OMIT,
         temperature: typing.Optional[float] = OMIT,
@@ -472,6 +550,8 @@ class Client:
             - model: typing.Optional[str]. The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
                                            Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
             - num_generations: typing.Optional[int]. The maximum number of generations that will be returned. Defaults to `1`, min value of `1`, max value of `5`.
+
+            - stream: typing_extensions.Literal[False].
 
             - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
 
@@ -500,20 +580,26 @@ class Client:
             - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
                                          Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
-            - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.'
+            - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
 
-            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`. Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+                                                         Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
+
+            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+
+                                                        Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+
+                                                        Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
 
             - return_likelihoods: typing.Optional[GenerateRequestReturnLikelihoods]. One of `GENERATION|ALL|NONE` to specify how and if the token likelihoods are returned with the response. Defaults to `NONE`.
 
                                                                                      If `GENERATION` is selected, the token likelihoods will only be provided for generated text.
 
                                                                                      If `ALL` is selected, the token likelihoods will be provided both for the prompt and the generated text.
-            - logit_bias: typing.Optional[typing.Dict[str, float]]. Used to prevent the model from generating unwanted tokens or to incentivize it to include desired tokens. The format is `{token_id: bias}` where bias is a float between -10 and 10. Tokens can be obtained from text using [Tokenize](/reference/tokenize).
+            - logit_bias: typing.Optional[typing.Dict[str, float]]. Certain models support the `logit_bias` parameter.
+
+                                                                    Used to prevent the model from generating unwanted tokens or to incentivize it to include desired tokens. The format is `{token_id: bias}` where bias is a float between -10 and 10. Tokens can be obtained from text using [Tokenize](/reference/tokenize).
 
                                                                     For example, if the value `{'11': -10}` is provided, the model will be very unlikely to include the token 11 (`"\n"`, the newline character) anywhere in the generated text. In contrast `{'11': 10}` will result in generations that nearly only contain that token. Values between -10 and 10 will proportionally affect the likelihood of the token appearing in the generated text.
-
-                                                                    Note: logit bias may not be supported for all custom models.
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
         ---
         from cohere import GenerateRequestReturnLikelihoods, GenerateRequestTruncate
@@ -531,7 +617,7 @@ class Client:
             return_likelihoods=GenerateRequestReturnLikelihoods.GENERATION,
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"prompt": prompt}
+        _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": stream}
         if model is not OMIT:
             _request["model"] = model
         if num_generations is not OMIT:
@@ -587,7 +673,7 @@ class Client:
         texts: typing.List[str],
         model: typing.Optional[str] = OMIT,
         input_type: typing.Optional[EmbedInputType] = OMIT,
-        embedding_types: typing.Optional[typing.List[str]] = OMIT,
+        embedding_types: typing.Optional[typing.List[EmbedRequestEmbeddingTypesItem]] = OMIT,
         truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
     ) -> EmbedResponse:
         """
@@ -616,13 +702,13 @@ class Client:
                                            * `embed-multilingual-v2.0`  768
             - input_type: typing.Optional[EmbedInputType].
 
-            - embedding_types: typing.Optional[typing.List[str]]. Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
+            - embedding_types: typing.Optional[typing.List[EmbedRequestEmbeddingTypesItem]]. Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
-                                                                  * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
-                                                                  * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
-                                                                  * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
-                                                                  * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
-                                                                  * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
+                                                                                             * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
+                                                                                             * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
+                                                                                             * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
+                                                                                             * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
+                                                                                             * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
             - truncate: typing.Optional[EmbedRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
 
                                                                Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
@@ -694,7 +780,8 @@ class Client:
             token="YOUR_TOKEN",
         )
         client.rerank(
-            query="string",
+            model="rerank-english-v2.0",
+            query="What is the capital of the United States?",
             documents=[],
         )
         """
@@ -726,7 +813,7 @@ class Client:
         self,
         *,
         inputs: typing.List[str],
-        examples: typing.List[ClassifyRequestExamplesItem],
+        examples: typing.List[ClassifyExample],
         model: typing.Optional[str] = OMIT,
         preset: typing.Optional[str] = OMIT,
         truncate: typing.Optional[ClassifyRequestTruncate] = OMIT,
@@ -739,8 +826,8 @@ class Client:
             - inputs: typing.List[str]. A list of up to 96 texts to be classified. Each one must be a non-empty string.
                                         There is, however, no consistent, universal limit to the length a particular input can be. We perform classification on the first `x` tokens of each input, and `x` varies depending on which underlying model is powering classification. The maximum token length for each model is listed in the "max tokens" column [here](https://docs.cohere.com/docs/models).
                                         Note: by default the `truncate` parameter is set to `END`, so tokens exceeding the limit will be automatically dropped. This behavior can be disabled by setting `truncate` to `NONE`, which will result in validation errors for longer texts.
-            - examples: typing.List[ClassifyRequestExamplesItem]. An array of examples to provide context to the model. Each example is a text string and its associated label/class. Each unique label requires at least 2 examples associated with it; the maximum number of examples is 2500, and each example has a maximum length of 512 tokens. The values should be structured as `{text: "...",label: "..."}`.
-                                                                  Note: [Fine-tuned Models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
+            - examples: typing.List[ClassifyExample]. An array of examples to provide context to the model. Each example is a text string and its associated label/class. Each unique label requires at least 2 examples associated with it; the maximum number of examples is 2500, and each example has a maximum length of 512 tokens. The values should be structured as `{text: "...",label: "..."}`.
+                                                      Note: [Fine-tuned Models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
             - model: typing.Optional[str]. The identifier of the model. Currently available models are `embed-multilingual-v2.0`, `embed-english-light-v2.0`, and `embed-english-v2.0` (default). Smaller "light" models are faster, while larger models will perform better. [Fine-tuned models](https://docs.cohere.com/docs/fine-tuning) can also be supplied with their full ID.
 
             - preset: typing.Optional[str]. The ID of a custom playground preset. You can create presets in the [playground](https://dashboard.cohere.ai/playground/classify?model=large). If you use a preset, all other parameters become optional, and any included parameters will override the preset's parameters.
@@ -748,7 +835,7 @@ class Client:
             - truncate: typing.Optional[ClassifyRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
                                                                   Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
                                                                   If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.---
-        from cohere import ClassifyRequestExamplesItem, ClassifyRequestTruncate
+        from cohere import ClassifyExample, ClassifyRequestTruncate
         from cohere.client import Client
 
         client = Client(
@@ -756,8 +843,49 @@ class Client:
             token="YOUR_TOKEN",
         )
         client.classify(
-            inputs=[],
-            examples=[ClassifyRequestExamplesItem()],
+            inputs=["Confirm your email address", "hey i need u to send some $"],
+            examples=[
+                ClassifyExample(
+                    text="Dermatologists don't like her!",
+                    label="Spam",
+                ),
+                ClassifyExample(
+                    text="Hello, open to this?",
+                    label="Spam",
+                ),
+                ClassifyExample(
+                    text="I need help please wire me $1000 right now",
+                    label="Spam",
+                ),
+                ClassifyExample(
+                    text="Nice to know you ;)",
+                    label="Spam",
+                ),
+                ClassifyExample(
+                    text="Please help me?",
+                    label="Spam",
+                ),
+                ClassifyExample(
+                    text="Your parcel will be delivered today",
+                    label="Not spam",
+                ),
+                ClassifyExample(
+                    text="Review changes to our Terms and Conditions",
+                    label="Not spam",
+                ),
+                ClassifyExample(
+                    text="Weekly sync notes",
+                    label="Not spam",
+                ),
+                ClassifyExample(
+                    text="Re: Follow up from today’s meeting",
+                    label="Not spam",
+                ),
+                ClassifyExample(
+                    text="Pre-read for tomorrow",
+                    label="Not spam",
+                ),
+            ],
             preset="my-preset-a58sbd",
             truncate=ClassifyRequestTruncate.NONE,
         )
@@ -800,40 +928,32 @@ class Client:
         additional_command: typing.Optional[str] = OMIT,
     ) -> SummarizeResponse:
         """
-        This endpoint generates a summary in English for a given text.
+               This endpoint generates a summary in English for a given text.
 
-        Parameters:
-            - text: str. The text to generate a summary for. Can be up to 100,000 characters long. Currently the only supported language is English.
+               Parameters:
+                   - text: str. The text to generate a summary for. Can be up to 100,000 characters long. Currently the only supported language is English.
 
-            - length: typing.Optional[SummarizeRequestLength]. One of `short`, `medium`, `long`, or `auto` defaults to `auto`. Indicates the approximate length of the summary. If `auto` is selected, the best option will be picked based on the input text.
+                   - length: typing.Optional[SummarizeRequestLength]. One of `short`, `medium`, `long`, or `auto` defaults to `auto`. Indicates the approximate length of the summary. If `auto` is selected, the best option will be picked based on the input text.
 
-            - format: typing.Optional[SummarizeRequestFormat]. One of `paragraph`, `bullets`, or `auto`, defaults to `auto`. Indicates the style in which the summary will be delivered - in a free form paragraph or in bullet points. If `auto` is selected, the best option will be picked based on the input text.
+                   - format: typing.Optional[SummarizeRequestFormat]. One of `paragraph`, `bullets`, or `auto`, defaults to `auto`. Indicates the style in which the summary will be delivered - in a free form paragraph or in bullet points. If `auto` is selected, the best option will be picked based on the input text.
 
-            - model: typing.Optional[str]. The identifier of the model to generate the summary with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental). Smaller, "light" models are faster, while larger models will perform better.
+                   - model: typing.Optional[str]. The identifier of the model to generate the summary with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental). Smaller, "light" models are faster, while larger models will perform better.
 
-            - extractiveness: typing.Optional[SummarizeRequestExtractiveness]. One of `low`, `medium`, `high`, or `auto`, defaults to `auto`. Controls how close to the original text the summary is. `high` extractiveness summaries will lean towards reusing sentences verbatim, while `low` extractiveness summaries will tend to paraphrase more. If `auto` is selected, the best option will be picked based on the input text.
+                   - extractiveness: typing.Optional[SummarizeRequestExtractiveness]. One of `low`, `medium`, `high`, or `auto`, defaults to `auto`. Controls how close to the original text the summary is. `high` extractiveness summaries will lean towards reusing sentences verbatim, while `low` extractiveness summaries will tend to paraphrase more. If `auto` is selected, the best option will be picked based on the input text.
 
-            - temperature: typing.Optional[float]. Ranges from 0 to 5. Controls the randomness of the output. Lower values tend to generate more “predictable” output, while higher values tend to generate more “creative” output. The sweet spot is typically between 0 and 1.
+                   - temperature: typing.Optional[float]. Ranges from 0 to 5. Controls the randomness of the output. Lower values tend to generate more “predictable” output, while higher values tend to generate more “creative” output. The sweet spot is typically between 0 and 1.
 
-            - additional_command: typing.Optional[str]. A free-form instruction for modifying how the summaries get generated. Should complete the sentence "Generate a summary _". Eg. "focusing on the next steps" or "written by Yoda"
-        ---
-        from cohere import (
-            SummarizeRequestExtractiveness,
-            SummarizeRequestFormat,
-            SummarizeRequestLength,
-        )
-        from cohere.client import Client
+                   - additional_command: typing.Optional[str]. A free-form instruction for modifying how the summaries get generated. Should complete the sentence "Generate a summary _". Eg. "focusing on the next steps" or "written by Yoda"
+               ---
+               from cohere import (SummarizeRequestExtractiveness, SummarizeRequestFormat,
+                                   SummarizeRequestLength)
+               from cohere.client import Client
 
-        client = Client(
-            client_name="YOUR_CLIENT_NAME",
-            token="YOUR_TOKEN",
-        )
-        client.summarize(
-            text="string",
-            length=SummarizeRequestLength.SHORT,
-            format=SummarizeRequestFormat.PARAGRAPH,
-            extractiveness=SummarizeRequestExtractiveness.LOW,
-        )
+               client = Client(client_name="YOUR_CLIENT_NAME", token="YOUR_TOKEN", )
+               client.summarize(text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.
+
+               The meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo
+        all variants. Analogues made from dairy alternatives, such as goat"s or sheep"s milk, or milk substitutes (e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are lactose intolerant, allergic to dairy protein or vegan.', length=SummarizeRequestLength.SHORT, format=SummarizeRequestFormat.PARAGRAPH, extractiveness=SummarizeRequestExtractiveness.LOW, )
         """
         _request: typing.Dict[str, typing.Any] = {"text": text}
         if length is not OMIT:
@@ -879,7 +999,8 @@ class Client:
             token="YOUR_TOKEN",
         )
         client.tokenize(
-            text="string",
+            text="tokenize me! :D",
+            model="command",
         )
         """
         _request: typing.Dict[str, typing.Any] = {"text": text}
@@ -920,7 +1041,7 @@ class Client:
             token="YOUR_TOKEN",
         )
         client.detokenize(
-            tokens=[],
+            tokens=[10104, 12221, 1315, 34, 1420, 69],
         )
         """
         _request: typing.Dict[str, typing.Any] = {"tokens": tokens}
@@ -968,6 +1089,7 @@ class AsyncClient:
         *,
         message: str,
         model: typing.Optional[str] = OMIT,
+        stream: typing_extensions.Literal[True],
         preamble_override: typing.Optional[str] = OMIT,
         chat_history: typing.Optional[typing.List[ChatMessage]] = OMIT,
         conversation_id: typing.Optional[str] = OMIT,
@@ -977,6 +1099,11 @@ class AsyncClient:
         documents: typing.Optional[typing.List[ChatDocument]] = OMIT,
         citation_quality: typing.Optional[ChatStreamRequestCitationQuality] = OMIT,
         temperature: typing.Optional[float] = OMIT,
+        max_tokens: typing.Optional[int] = OMIT,
+        k: typing.Optional[int] = OMIT,
+        p: typing.Optional[float] = OMIT,
+        frequency_penalty: typing.Optional[float] = OMIT,
+        presence_penalty: typing.Optional[float] = OMIT,
     ) -> typing.AsyncIterator[StreamedChatResponse]:
         """
         The `chat` endpoint allows users to have conversations with a Large Language Model (LLM) from Cohere. Users can send messages as part of a persisted conversation using the `conversation_id` parameter, or they can pass in their own conversation history using the `chat_history` parameter.
@@ -992,6 +1119,8 @@ class AsyncClient:
                                            The identifier of the model, which can be one of the existing Cohere models or the full ID for a [fine-tuned custom model](https://docs.cohere.com/docs/chat-fine-tuning).
 
                                            Compatible Cohere models are `command` and `command-light` as well as the experimental `command-nightly` and `command-light-nightly` variants. Read more about [Cohere models](https://docs.cohere.com/docs/models).
+
+            - stream: typing_extensions.Literal[True].
 
             - preamble_override: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one.
 
@@ -1027,8 +1156,21 @@ class AsyncClient:
 
                                                    A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
 
+                                                   Randomness can be further maximized by increasing the  value of the `p` parameter.
+
+            - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+
+            - k: typing.Optional[int]. Ensures only the top `k` most likely tokens are considered for generation at each step.
+                                       Defaults to `0`, min value of `0`, max value of `500`.
+
+            - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
+                                         Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
+
+            - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+
+            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`. Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
         """
-        _request: typing.Dict[str, typing.Any] = {"message": message}
+        _request: typing.Dict[str, typing.Any] = {"message": message, "stream": stream}
         if model is not OMIT:
             _request["model"] = model
         if preamble_override is not OMIT:
@@ -1049,6 +1191,16 @@ class AsyncClient:
             _request["citation_quality"] = citation_quality
         if temperature is not OMIT:
             _request["temperature"] = temperature
+        if max_tokens is not OMIT:
+            _request["max_tokens"] = max_tokens
+        if k is not OMIT:
+            _request["k"] = k
+        if p is not OMIT:
+            _request["p"] = p
+        if frequency_penalty is not OMIT:
+            _request["frequency_penalty"] = frequency_penalty
+        if presence_penalty is not OMIT:
+            _request["presence_penalty"] = presence_penalty
         async with self._client_wrapper.httpx_client.stream(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/chat"),
@@ -1074,6 +1226,7 @@ class AsyncClient:
         *,
         message: str,
         model: typing.Optional[str] = OMIT,
+        stream: typing_extensions.Literal[False],
         preamble_override: typing.Optional[str] = OMIT,
         chat_history: typing.Optional[typing.List[ChatMessage]] = OMIT,
         conversation_id: typing.Optional[str] = OMIT,
@@ -1083,6 +1236,11 @@ class AsyncClient:
         documents: typing.Optional[typing.List[ChatDocument]] = OMIT,
         citation_quality: typing.Optional[ChatRequestCitationQuality] = OMIT,
         temperature: typing.Optional[float] = OMIT,
+        max_tokens: typing.Optional[int] = OMIT,
+        k: typing.Optional[int] = OMIT,
+        p: typing.Optional[float] = OMIT,
+        frequency_penalty: typing.Optional[float] = OMIT,
+        presence_penalty: typing.Optional[float] = OMIT,
     ) -> NonStreamedChatResponse:
         """
         The `chat` endpoint allows users to have conversations with a Large Language Model (LLM) from Cohere. Users can send messages as part of a persisted conversation using the `conversation_id` parameter, or they can pass in their own conversation history using the `chat_history` parameter.
@@ -1098,6 +1256,8 @@ class AsyncClient:
                                            The identifier of the model, which can be one of the existing Cohere models or the full ID for a [fine-tuned custom model](https://docs.cohere.com/docs/chat-fine-tuning).
 
                                            Compatible Cohere models are `command` and `command-light` as well as the experimental `command-nightly` and `command-light-nightly` variants. Read more about [Cohere models](https://docs.cohere.com/docs/models).
+
+            - stream: typing_extensions.Literal[False].
 
             - preamble_override: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one.
 
@@ -1132,13 +1292,28 @@ class AsyncClient:
             - temperature: typing.Optional[float]. Defaults to `0.3`.
 
                                                    A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
-                                                   ---
+
+                                                   Randomness can be further maximized by increasing the  value of the `p` parameter.
+
+            - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+
+            - k: typing.Optional[int]. Ensures only the top `k` most likely tokens are considered for generation at each step.
+                                       Defaults to `0`, min value of `0`, max value of `500`.
+
+            - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
+                                         Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
+
+            - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+
+            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`. Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+        ---
         from cohere import (
-            ChatConnector,
             ChatMessage,
             ChatMessageRole,
             ChatRequestCitationQuality,
+            ChatRequestPromptOverride,
             ChatRequestPromptTruncation,
+            ChatRequestSearchOptions,
         )
         from cohere.client import AsyncClient
 
@@ -1147,24 +1322,26 @@ class AsyncClient:
             token="YOUR_TOKEN",
         )
         await client.chat(
-            message="string",
+            message="Can you give me a global market overview of solar panels?",
             stream=False,
             chat_history=[
                 ChatMessage(
                     role=ChatMessageRole.CHATBOT,
-                    message="string",
-                )
+                    message="Hi!",
+                ),
+                ChatMessage(
+                    role=ChatMessageRole.CHATBOT,
+                    message="How can I help you today?",
+                ),
             ],
             prompt_truncation=ChatRequestPromptTruncation.OFF,
-            connectors=[
-                ChatConnector(
-                    id="string",
-                )
-            ],
             citation_quality=ChatRequestCitationQuality.FAST,
+            temperature=0.3,
+            search_options=ChatRequestSearchOptions(),
+            prompt_override=ChatRequestPromptOverride(),
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"message": message}
+        _request: typing.Dict[str, typing.Any] = {"message": message, "stream": stream}
         if model is not OMIT:
             _request["model"] = model
         if preamble_override is not OMIT:
@@ -1185,6 +1362,16 @@ class AsyncClient:
             _request["citation_quality"] = citation_quality
         if temperature is not OMIT:
             _request["temperature"] = temperature
+        if max_tokens is not OMIT:
+            _request["max_tokens"] = max_tokens
+        if k is not OMIT:
+            _request["k"] = k
+        if p is not OMIT:
+            _request["p"] = p
+        if frequency_penalty is not OMIT:
+            _request["frequency_penalty"] = frequency_penalty
+        if presence_penalty is not OMIT:
+            _request["presence_penalty"] = presence_penalty
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/chat"),
@@ -1206,6 +1393,7 @@ class AsyncClient:
         prompt: str,
         model: typing.Optional[str] = OMIT,
         num_generations: typing.Optional[int] = OMIT,
+        stream: typing_extensions.Literal[True],
         max_tokens: typing.Optional[int] = OMIT,
         truncate: typing.Optional[GenerateStreamRequestTruncate] = OMIT,
         temperature: typing.Optional[float] = OMIT,
@@ -1230,6 +1418,8 @@ class AsyncClient:
             - model: typing.Optional[str]. The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
                                            Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
             - num_generations: typing.Optional[int]. The maximum number of generations that will be returned. Defaults to `1`, min value of `1`, max value of `5`.
+
+            - stream: typing_extensions.Literal[True].
 
             - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
 
@@ -1258,23 +1448,29 @@ class AsyncClient:
             - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
                                          Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
-            - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.'
+            - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
 
-            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`. Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+                                                         Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
+
+            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+
+                                                        Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+
+                                                        Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
 
             - return_likelihoods: typing.Optional[GenerateStreamRequestReturnLikelihoods]. One of `GENERATION|ALL|NONE` to specify how and if the token likelihoods are returned with the response. Defaults to `NONE`.
 
                                                                                            If `GENERATION` is selected, the token likelihoods will only be provided for generated text.
 
                                                                                            If `ALL` is selected, the token likelihoods will be provided both for the prompt and the generated text.
-            - logit_bias: typing.Optional[typing.Dict[str, float]]. Used to prevent the model from generating unwanted tokens or to incentivize it to include desired tokens. The format is `{token_id: bias}` where bias is a float between -10 and 10. Tokens can be obtained from text using [Tokenize](/reference/tokenize).
+            - logit_bias: typing.Optional[typing.Dict[str, float]]. Certain models support the `logit_bias` parameter.
+
+                                                                    Used to prevent the model from generating unwanted tokens or to incentivize it to include desired tokens. The format is `{token_id: bias}` where bias is a float between -10 and 10. Tokens can be obtained from text using [Tokenize](/reference/tokenize).
 
                                                                     For example, if the value `{'11': -10}` is provided, the model will be very unlikely to include the token 11 (`"\n"`, the newline character) anywhere in the generated text. In contrast `{'11': 10}` will result in generations that nearly only contain that token. Values between -10 and 10 will proportionally affect the likelihood of the token appearing in the generated text.
-
-                                                                    Note: logit bias may not be supported for all custom models.
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
         """
-        _request: typing.Dict[str, typing.Any] = {"prompt": prompt}
+        _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": stream}
         if model is not OMIT:
             _request["model"] = model
         if num_generations is not OMIT:
@@ -1335,6 +1531,7 @@ class AsyncClient:
         prompt: str,
         model: typing.Optional[str] = OMIT,
         num_generations: typing.Optional[int] = OMIT,
+        stream: typing_extensions.Literal[False],
         max_tokens: typing.Optional[int] = OMIT,
         truncate: typing.Optional[GenerateRequestTruncate] = OMIT,
         temperature: typing.Optional[float] = OMIT,
@@ -1359,6 +1556,8 @@ class AsyncClient:
             - model: typing.Optional[str]. The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
                                            Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
             - num_generations: typing.Optional[int]. The maximum number of generations that will be returned. Defaults to `1`, min value of `1`, max value of `5`.
+
+            - stream: typing_extensions.Literal[False].
 
             - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
 
@@ -1387,20 +1586,26 @@ class AsyncClient:
             - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
                                          Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
-            - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.'
+            - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
 
-            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`. Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+                                                         Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
+
+            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+
+                                                        Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+
+                                                        Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
 
             - return_likelihoods: typing.Optional[GenerateRequestReturnLikelihoods]. One of `GENERATION|ALL|NONE` to specify how and if the token likelihoods are returned with the response. Defaults to `NONE`.
 
                                                                                      If `GENERATION` is selected, the token likelihoods will only be provided for generated text.
 
                                                                                      If `ALL` is selected, the token likelihoods will be provided both for the prompt and the generated text.
-            - logit_bias: typing.Optional[typing.Dict[str, float]]. Used to prevent the model from generating unwanted tokens or to incentivize it to include desired tokens. The format is `{token_id: bias}` where bias is a float between -10 and 10. Tokens can be obtained from text using [Tokenize](/reference/tokenize).
+            - logit_bias: typing.Optional[typing.Dict[str, float]]. Certain models support the `logit_bias` parameter.
+
+                                                                    Used to prevent the model from generating unwanted tokens or to incentivize it to include desired tokens. The format is `{token_id: bias}` where bias is a float between -10 and 10. Tokens can be obtained from text using [Tokenize](/reference/tokenize).
 
                                                                     For example, if the value `{'11': -10}` is provided, the model will be very unlikely to include the token 11 (`"\n"`, the newline character) anywhere in the generated text. In contrast `{'11': 10}` will result in generations that nearly only contain that token. Values between -10 and 10 will proportionally affect the likelihood of the token appearing in the generated text.
-
-                                                                    Note: logit bias may not be supported for all custom models.
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
         ---
         from cohere import GenerateRequestReturnLikelihoods, GenerateRequestTruncate
@@ -1418,7 +1623,7 @@ class AsyncClient:
             return_likelihoods=GenerateRequestReturnLikelihoods.GENERATION,
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"prompt": prompt}
+        _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": stream}
         if model is not OMIT:
             _request["model"] = model
         if num_generations is not OMIT:
@@ -1474,7 +1679,7 @@ class AsyncClient:
         texts: typing.List[str],
         model: typing.Optional[str] = OMIT,
         input_type: typing.Optional[EmbedInputType] = OMIT,
-        embedding_types: typing.Optional[typing.List[str]] = OMIT,
+        embedding_types: typing.Optional[typing.List[EmbedRequestEmbeddingTypesItem]] = OMIT,
         truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
     ) -> EmbedResponse:
         """
@@ -1503,13 +1708,13 @@ class AsyncClient:
                                            * `embed-multilingual-v2.0`  768
             - input_type: typing.Optional[EmbedInputType].
 
-            - embedding_types: typing.Optional[typing.List[str]]. Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
+            - embedding_types: typing.Optional[typing.List[EmbedRequestEmbeddingTypesItem]]. Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
-                                                                  * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
-                                                                  * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
-                                                                  * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
-                                                                  * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
-                                                                  * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
+                                                                                             * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
+                                                                                             * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
+                                                                                             * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
+                                                                                             * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
+                                                                                             * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
             - truncate: typing.Optional[EmbedRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
 
                                                                Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
@@ -1581,7 +1786,8 @@ class AsyncClient:
             token="YOUR_TOKEN",
         )
         await client.rerank(
-            query="string",
+            model="rerank-english-v2.0",
+            query="What is the capital of the United States?",
             documents=[],
         )
         """
@@ -1613,7 +1819,7 @@ class AsyncClient:
         self,
         *,
         inputs: typing.List[str],
-        examples: typing.List[ClassifyRequestExamplesItem],
+        examples: typing.List[ClassifyExample],
         model: typing.Optional[str] = OMIT,
         preset: typing.Optional[str] = OMIT,
         truncate: typing.Optional[ClassifyRequestTruncate] = OMIT,
@@ -1626,8 +1832,8 @@ class AsyncClient:
             - inputs: typing.List[str]. A list of up to 96 texts to be classified. Each one must be a non-empty string.
                                         There is, however, no consistent, universal limit to the length a particular input can be. We perform classification on the first `x` tokens of each input, and `x` varies depending on which underlying model is powering classification. The maximum token length for each model is listed in the "max tokens" column [here](https://docs.cohere.com/docs/models).
                                         Note: by default the `truncate` parameter is set to `END`, so tokens exceeding the limit will be automatically dropped. This behavior can be disabled by setting `truncate` to `NONE`, which will result in validation errors for longer texts.
-            - examples: typing.List[ClassifyRequestExamplesItem]. An array of examples to provide context to the model. Each example is a text string and its associated label/class. Each unique label requires at least 2 examples associated with it; the maximum number of examples is 2500, and each example has a maximum length of 512 tokens. The values should be structured as `{text: "...",label: "..."}`.
-                                                                  Note: [Fine-tuned Models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
+            - examples: typing.List[ClassifyExample]. An array of examples to provide context to the model. Each example is a text string and its associated label/class. Each unique label requires at least 2 examples associated with it; the maximum number of examples is 2500, and each example has a maximum length of 512 tokens. The values should be structured as `{text: "...",label: "..."}`.
+                                                      Note: [Fine-tuned Models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
             - model: typing.Optional[str]. The identifier of the model. Currently available models are `embed-multilingual-v2.0`, `embed-english-light-v2.0`, and `embed-english-v2.0` (default). Smaller "light" models are faster, while larger models will perform better. [Fine-tuned models](https://docs.cohere.com/docs/fine-tuning) can also be supplied with their full ID.
 
             - preset: typing.Optional[str]. The ID of a custom playground preset. You can create presets in the [playground](https://dashboard.cohere.ai/playground/classify?model=large). If you use a preset, all other parameters become optional, and any included parameters will override the preset's parameters.
@@ -1635,7 +1841,7 @@ class AsyncClient:
             - truncate: typing.Optional[ClassifyRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
                                                                   Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
                                                                   If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.---
-        from cohere import ClassifyRequestExamplesItem, ClassifyRequestTruncate
+        from cohere import ClassifyExample, ClassifyRequestTruncate
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -1643,8 +1849,49 @@ class AsyncClient:
             token="YOUR_TOKEN",
         )
         await client.classify(
-            inputs=[],
-            examples=[ClassifyRequestExamplesItem()],
+            inputs=["Confirm your email address", "hey i need u to send some $"],
+            examples=[
+                ClassifyExample(
+                    text="Dermatologists don't like her!",
+                    label="Spam",
+                ),
+                ClassifyExample(
+                    text="Hello, open to this?",
+                    label="Spam",
+                ),
+                ClassifyExample(
+                    text="I need help please wire me $1000 right now",
+                    label="Spam",
+                ),
+                ClassifyExample(
+                    text="Nice to know you ;)",
+                    label="Spam",
+                ),
+                ClassifyExample(
+                    text="Please help me?",
+                    label="Spam",
+                ),
+                ClassifyExample(
+                    text="Your parcel will be delivered today",
+                    label="Not spam",
+                ),
+                ClassifyExample(
+                    text="Review changes to our Terms and Conditions",
+                    label="Not spam",
+                ),
+                ClassifyExample(
+                    text="Weekly sync notes",
+                    label="Not spam",
+                ),
+                ClassifyExample(
+                    text="Re: Follow up from today’s meeting",
+                    label="Not spam",
+                ),
+                ClassifyExample(
+                    text="Pre-read for tomorrow",
+                    label="Not spam",
+                ),
+            ],
             preset="my-preset-a58sbd",
             truncate=ClassifyRequestTruncate.NONE,
         )
@@ -1687,40 +1934,32 @@ class AsyncClient:
         additional_command: typing.Optional[str] = OMIT,
     ) -> SummarizeResponse:
         """
-        This endpoint generates a summary in English for a given text.
+               This endpoint generates a summary in English for a given text.
 
-        Parameters:
-            - text: str. The text to generate a summary for. Can be up to 100,000 characters long. Currently the only supported language is English.
+               Parameters:
+                   - text: str. The text to generate a summary for. Can be up to 100,000 characters long. Currently the only supported language is English.
 
-            - length: typing.Optional[SummarizeRequestLength]. One of `short`, `medium`, `long`, or `auto` defaults to `auto`. Indicates the approximate length of the summary. If `auto` is selected, the best option will be picked based on the input text.
+                   - length: typing.Optional[SummarizeRequestLength]. One of `short`, `medium`, `long`, or `auto` defaults to `auto`. Indicates the approximate length of the summary. If `auto` is selected, the best option will be picked based on the input text.
 
-            - format: typing.Optional[SummarizeRequestFormat]. One of `paragraph`, `bullets`, or `auto`, defaults to `auto`. Indicates the style in which the summary will be delivered - in a free form paragraph or in bullet points. If `auto` is selected, the best option will be picked based on the input text.
+                   - format: typing.Optional[SummarizeRequestFormat]. One of `paragraph`, `bullets`, or `auto`, defaults to `auto`. Indicates the style in which the summary will be delivered - in a free form paragraph or in bullet points. If `auto` is selected, the best option will be picked based on the input text.
 
-            - model: typing.Optional[str]. The identifier of the model to generate the summary with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental). Smaller, "light" models are faster, while larger models will perform better.
+                   - model: typing.Optional[str]. The identifier of the model to generate the summary with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental). Smaller, "light" models are faster, while larger models will perform better.
 
-            - extractiveness: typing.Optional[SummarizeRequestExtractiveness]. One of `low`, `medium`, `high`, or `auto`, defaults to `auto`. Controls how close to the original text the summary is. `high` extractiveness summaries will lean towards reusing sentences verbatim, while `low` extractiveness summaries will tend to paraphrase more. If `auto` is selected, the best option will be picked based on the input text.
+                   - extractiveness: typing.Optional[SummarizeRequestExtractiveness]. One of `low`, `medium`, `high`, or `auto`, defaults to `auto`. Controls how close to the original text the summary is. `high` extractiveness summaries will lean towards reusing sentences verbatim, while `low` extractiveness summaries will tend to paraphrase more. If `auto` is selected, the best option will be picked based on the input text.
 
-            - temperature: typing.Optional[float]. Ranges from 0 to 5. Controls the randomness of the output. Lower values tend to generate more “predictable” output, while higher values tend to generate more “creative” output. The sweet spot is typically between 0 and 1.
+                   - temperature: typing.Optional[float]. Ranges from 0 to 5. Controls the randomness of the output. Lower values tend to generate more “predictable” output, while higher values tend to generate more “creative” output. The sweet spot is typically between 0 and 1.
 
-            - additional_command: typing.Optional[str]. A free-form instruction for modifying how the summaries get generated. Should complete the sentence "Generate a summary _". Eg. "focusing on the next steps" or "written by Yoda"
-        ---
-        from cohere import (
-            SummarizeRequestExtractiveness,
-            SummarizeRequestFormat,
-            SummarizeRequestLength,
-        )
-        from cohere.client import AsyncClient
+                   - additional_command: typing.Optional[str]. A free-form instruction for modifying how the summaries get generated. Should complete the sentence "Generate a summary _". Eg. "focusing on the next steps" or "written by Yoda"
+               ---
+               from cohere import (SummarizeRequestExtractiveness, SummarizeRequestFormat,
+                                   SummarizeRequestLength)
+               from cohere.client import AsyncClient
 
-        client = AsyncClient(
-            client_name="YOUR_CLIENT_NAME",
-            token="YOUR_TOKEN",
-        )
-        await client.summarize(
-            text="string",
-            length=SummarizeRequestLength.SHORT,
-            format=SummarizeRequestFormat.PARAGRAPH,
-            extractiveness=SummarizeRequestExtractiveness.LOW,
-        )
+               client = AsyncClient(client_name="YOUR_CLIENT_NAME", token="YOUR_TOKEN", )
+               await client.summarize(text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.
+
+               The meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo
+        all variants. Analogues made from dairy alternatives, such as goat"s or sheep"s milk, or milk substitutes (e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are lactose intolerant, allergic to dairy protein or vegan.', length=SummarizeRequestLength.SHORT, format=SummarizeRequestFormat.PARAGRAPH, extractiveness=SummarizeRequestExtractiveness.LOW, )
         """
         _request: typing.Dict[str, typing.Any] = {"text": text}
         if length is not OMIT:
@@ -1766,7 +2005,8 @@ class AsyncClient:
             token="YOUR_TOKEN",
         )
         await client.tokenize(
-            text="string",
+            text="tokenize me! :D",
+            model="command",
         )
         """
         _request: typing.Dict[str, typing.Any] = {"text": text}
@@ -1807,7 +2047,7 @@ class AsyncClient:
             token="YOUR_TOKEN",
         )
         await client.detokenize(
-            tokens=[],
+            tokens=[10104, 12221, 1315, 34, 1420, 69],
         )
         """
         _request: typing.Dict[str, typing.Any] = {"tokens": tokens}
