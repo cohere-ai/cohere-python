@@ -3,8 +3,7 @@
 import datetime as dt
 import typing
 
-from ....core.datetime_utils import serialize_datetime
-from ....types.dataset import Dataset
+from ..core.datetime_utils import serialize_datetime
 
 try:
     import pydantic.v1 as pydantic  # type: ignore
@@ -12,8 +11,15 @@ except ImportError:
     import pydantic  # type: ignore
 
 
-class DatasetsGetResponse(pydantic.BaseModel):
-    dataset: Dataset
+class ChatStreamRequestSearchOptions(pydantic.BaseModel):
+    """
+    (internal) Sets inference and model options for RAG search query and tool use generations. Defaults are used when options are not specified here, meaning that other parameters outside of search_options are ignored (such as model= or temperature=).
+    """
+
+    model: typing.Optional[typing.Any]
+    temperature: typing.Optional[typing.Any]
+    max_tokens: typing.Optional[typing.Any]
+    preamble: typing.Optional[typing.Any]
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
