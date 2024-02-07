@@ -1,4 +1,8 @@
 # Changelog
+## 4.46
+ - [#376] (https://github.com/cohere-ai/cohere-python/pull/376)
+    - Adds avro to dataset save formats
+
 ## 4.45
 - [#372] (https://github.com/cohere-ai/cohere-python/pull/372)
   - Remove logit_bias parameter from Chat

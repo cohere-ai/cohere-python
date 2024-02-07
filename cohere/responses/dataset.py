@@ -5,13 +5,13 @@ from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional
 
 import requests
-from fastavro import reader
+from fastavro import parse_schema, reader, writer
 
 from cohere.error import CohereError
 from cohere.responses.base import CohereObject
 from cohere.utils import JobWithStatus, parse_datetime
 
-supported_formats = ["jsonl", "csv"]
+supported_formats = ["jsonl", "csv", "avro"]
 
 
 class BaseDataset(CohereObject, JobWithStatus):
@@ -25,6 +25,7 @@ class BaseDataset(CohereObject, JobWithStatus):
     updated_at: datetime
     download_urls: List[str]
     size_bytes: int
+    schema: str
     _wait_fn: Callable[[], "Dataset"]
 
     def __init__(
@@ -38,6 +39,7 @@ class BaseDataset(CohereObject, JobWithStatus):
         validation_warnings: List[str],
         validation_error: str = None,
         download_urls: List[str] = None,
+        schema: str = None,
         wait_fn=None,
     ) -> None:
         self.id = id
@@ -46,6 +48,7 @@ class BaseDataset(CohereObject, JobWithStatus):
         self.validation_status = validation_status
         self.created_at = parse_datetime(created_at)
         self.updated_at = parse_datetime(updated_at)
+        self.schema = schema
         self.download_urls = download_urls
         self._wait_fn = wait_fn
         self.validation_error = validation_error
@@ -67,6 +70,7 @@ class BaseDataset(CohereObject, JobWithStatus):
             validation_status=data["validation_status"],
             created_at=data["created_at"],
             updated_at=data["updated_at"],
+            schema=data.get("schema"),
             download_urls=download_urls,
             wait_fn=wait_fn,
             validation_error=data.get("validation_error"),
@@ -92,7 +96,14 @@ class BaseDataset(CohereObject, JobWithStatus):
             return self.save_jsonl(filepath)
         if format == "csv":
             return self.save_csv(filepath)
+        if format == "avro":
+            return self.save_avro(filepath)
         raise CohereError(message=f"unsupported format must be one of : {supported_formats}")
+
+    def save_avro(self, filepath: str):
+        schema = parse_schema(json.loads(self.schema))
+        with open(filepath, "wb") as outfile:
+            writer(outfile, schema, self.open())
 
     def save_jsonl(self, filepath: str):
         with open(filepath, "w") as outfile:
