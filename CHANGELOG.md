@@ -1,7 +1,7 @@
 # Changelog
 
-## 4.46
- - [#376] (https://github.com/cohere-ai/cohere-python/pull/376)
+## 4.47
+ - [#377] (https://github.com/cohere-ai/cohere-python/pull/377)
     - Add `raw_prompting` param for Generate
 
 ## 4.46
