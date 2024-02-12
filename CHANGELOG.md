@@ -1,6 +1,6 @@
 # Changelog
 ## 4.47
- - [#377] (https://github.com/cohere-ai/cohere-python/pull/377)
+ - [#378] (https://github.com/cohere-ai/cohere-python/pull/378)
     - Adds embedding_types to embed job
 
 ## 4.46
