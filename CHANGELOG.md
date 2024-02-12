@@ -1,4 +1,8 @@
 # Changelog
+## 4.47
+ - [#378] (https://github.com/cohere-ai/cohere-python/pull/378)
+    - Adds embedding_types to embed job
+
 ## 4.46
  - [#376] (https://github.com/cohere-ai/cohere-python/pull/376)
     - Adds avro to dataset save formats
