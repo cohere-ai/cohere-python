@@ -162,6 +162,7 @@ class Client:
         truncate: Optional[str] = None,
         logit_bias: Dict[int, float] = {},
         stream: bool = False,
+        raw_prompting: bool = False,
     ) -> Union[Generations, StreamingGenerations]:
         """Generate endpoint.
         See https://docs.cohere.ai/reference/generate for advanced arguments
@@ -176,6 +177,7 @@ class Client:
             temperature (float): (Optional) The degree of randomness in generations from 0.0 to 5.0, lower is less random.
             truncate (str): (Optional) One of NONE|START|END, defaults to END. How the API handles text longer than the maximum token length.
             stream (bool): Return streaming tokens.
+            raw_prompting (bool): When enabled, the user's prompt will be sent to the model without any pre-processing.
         Returns:
             if stream=False: a Generations object
             if stream=True: a StreamingGenerations object including:
@@ -219,6 +221,7 @@ class Client:
             "truncate": truncate,
             "logit_bias": logit_bias,
             "stream": stream,
+            "raw_prompting": raw_prompting,
         }
         response = self._request(cohere.GENERATE_URL, json=json_body, stream=stream)
         if stream:
