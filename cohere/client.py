@@ -1050,6 +1050,7 @@ class Client:
         input_type: str,
         name: Optional[str] = None,
         truncate: Optional[str] = None,
+        embedding_types: Optional[List[str]] = None,
     ) -> EmbedJob:
         """Create embed job.
 
@@ -1057,8 +1058,9 @@ class Client:
             dataset_id (str): ID of the dataset to embed.
             model (str): ID of the model to use for embedding the text.
             input_type (str): One of "classification", "clustering", "search_document", "search_query". The type of input text provided to embed.
-            truncate (Optional[str], optional): How the API handles text longer than the maximum token length. Defaults to None.
             name (Optional[str], optional): The name of the embed job. Defaults to None.
+            truncate (Optional[str], optional): How the API handles text longer than the maximum token length. Defaults to None.
+            embedding_types (List[str]): (Optional) Specifies the types of embeddings you want to get back. Not required and default is None, which returns the float embeddings in the response's embeddings field. Can be one or more of the following types: "float", "int8", "uint8", "binary", "ubinary".
 
         Returns:
             EmbedJob: The created embed job
@@ -1070,6 +1072,7 @@ class Client:
             "model": model,
             "truncate": truncate,
             "input_type": input_type,
+            "embedding_types": embedding_types,
         }
 
         response = self._request(cohere.EMBED_JOBS_URL, json=json_body)
