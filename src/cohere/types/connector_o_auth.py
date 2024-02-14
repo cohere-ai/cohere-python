@@ -12,6 +12,12 @@ except ImportError:
 
 
 class ConnectorOAuth(pydantic.BaseModel):
+    client_id: typing.Optional[str] = pydantic.Field(
+        description="The OAuth 2.0 client ID. This field is encrypted at rest."
+    )
+    client_secret: typing.Optional[str] = pydantic.Field(
+        description="The OAuth 2.0 client Secret. This field is encrypted at rest and never returned in a response."
+    )
     authorize_url: str = pydantic.Field(
         description="The OAuth 2.0 /authorize endpoint to use when users authorize the connector."
     )

@@ -22,7 +22,6 @@ from .types import (
     ChatSearchResultsEvent,
     ChatStreamEndEvent,
     ChatStreamEndEventFinishReason,
-    ChatStreamEndEventResponse,
     ChatStreamEvent,
     ChatStreamRequestCitationQuality,
     ChatStreamRequestPromptOverride,
@@ -87,7 +86,6 @@ from .types import (
     RerankResponse,
     RerankResponseResultsItem,
     RerankResponseResultsItemDocument,
-    SearchQueriesOnlyResponse,
     SingleGeneration,
     SingleGenerationInStream,
     SingleGenerationTokenLikelihoodsItem,
@@ -105,7 +103,7 @@ from .types import (
     TokenizeResponse,
     UpdateConnectorResponse,
 )
-from .errors import BadRequestError, ForbiddenError, InternalServerError, NotFoundError
+from .errors import BadRequestError, ForbiddenError, InternalServerError, NotFoundError, TooManyRequestsError
 from .resources import (
     CreateEmbedJobRequestTruncate,
     DatasetsCreateResponse,
@@ -141,7 +139,6 @@ __all__ = [
     "ChatSearchResultsEvent",
     "ChatStreamEndEvent",
     "ChatStreamEndEventFinishReason",
-    "ChatStreamEndEventResponse",
     "ChatStreamEvent",
     "ChatStreamRequestCitationQuality",
     "ChatStreamRequestPromptOverride",
@@ -215,7 +212,6 @@ __all__ = [
     "RerankResponse",
     "RerankResponseResultsItem",
     "RerankResponseResultsItemDocument",
-    "SearchQueriesOnlyResponse",
     "SingleGeneration",
     "SingleGenerationInStream",
     "SingleGenerationTokenLikelihoodsItem",
@@ -231,6 +227,7 @@ __all__ = [
     "SummarizeRequestLength",
     "SummarizeResponse",
     "TokenizeResponse",
+    "TooManyRequestsError",
     "UpdateConnectorResponse",
     "connectors",
     "datasets",

@@ -14,6 +14,7 @@ from .core.jsonable_encoder import jsonable_encoder
 from .environment import ClientEnvironment
 from .errors.bad_request_error import BadRequestError
 from .errors.internal_server_error import InternalServerError
+from .errors.too_many_requests_error import TooManyRequestsError
 from .resources.connectors.client import AsyncConnectorsClient, ConnectorsClient
 from .resources.datasets.client import AsyncDatasetsClient, DatasetsClient
 from .resources.embed_jobs.client import AsyncEmbedJobsClient, EmbedJobsClient
@@ -209,6 +210,8 @@ class Client:
                     yield pydantic.parse_obj_as(StreamedChatResponse, json.loads(_text))  # type: ignore
                 return
             _response.read()
+            if _response.status_code == 429:
+                raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
             try:
                 _response_json = _response.json()
             except JSONDecodeError:
@@ -375,6 +378,8 @@ class Client:
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(NonStreamedChatResponse, _response.json())  # type: ignore
+        if _response.status_code == 429:
+            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -511,6 +516,8 @@ class Client:
             _response.read()
             if _response.status_code == 400:
                 raise BadRequestError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            if _response.status_code == 429:
+                raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
             if _response.status_code == 500:
                 raise InternalServerError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
             try:
@@ -659,6 +666,8 @@ class Client:
             return pydantic.parse_obj_as(Generation, _response.json())  # type: ignore
         if _response.status_code == 400:
             raise BadRequestError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+        if _response.status_code == 429:
+            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         if _response.status_code == 500:
             raise InternalServerError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
@@ -735,6 +744,8 @@ class Client:
             return pydantic.parse_obj_as(EmbedResponse, _response.json())  # type: ignore
         if _response.status_code == 400:
             raise BadRequestError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+        if _response.status_code == 429:
+            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         if _response.status_code == 500:
             raise InternalServerError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
@@ -803,6 +814,8 @@ class Client:
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(RerankResponse, _response.json())  # type: ignore
+        if _response.status_code == 429:
+            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -908,6 +921,8 @@ class Client:
             return pydantic.parse_obj_as(ClassifyResponse, _response.json())  # type: ignore
         if _response.status_code == 400:
             raise BadRequestError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+        if _response.status_code == 429:
+            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         if _response.status_code == 500:
             raise InternalServerError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
@@ -977,6 +992,8 @@ class Client:
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(SummarizeResponse, _response.json())  # type: ignore
+        if _response.status_code == 429:
+            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -1017,6 +1034,8 @@ class Client:
             return pydantic.parse_obj_as(TokenizeResponse, _response.json())  # type: ignore
         if _response.status_code == 400:
             raise BadRequestError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+        if _response.status_code == 429:
+            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         if _response.status_code == 500:
             raise InternalServerError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
@@ -1056,6 +1075,8 @@ class Client:
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(DetokenizeResponse, _response.json())  # type: ignore
+        if _response.status_code == 429:
+            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -1215,6 +1236,8 @@ class AsyncClient:
                     yield pydantic.parse_obj_as(StreamedChatResponse, json.loads(_text))  # type: ignore
                 return
             await _response.aread()
+            if _response.status_code == 429:
+                raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
             try:
                 _response_json = _response.json()
             except JSONDecodeError:
@@ -1381,6 +1404,8 @@ class AsyncClient:
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(NonStreamedChatResponse, _response.json())  # type: ignore
+        if _response.status_code == 429:
+            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -1517,6 +1542,8 @@ class AsyncClient:
             await _response.aread()
             if _response.status_code == 400:
                 raise BadRequestError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            if _response.status_code == 429:
+                raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
             if _response.status_code == 500:
                 raise InternalServerError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
             try:
@@ -1665,6 +1692,8 @@ class AsyncClient:
             return pydantic.parse_obj_as(Generation, _response.json())  # type: ignore
         if _response.status_code == 400:
             raise BadRequestError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+        if _response.status_code == 429:
+            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         if _response.status_code == 500:
             raise InternalServerError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
@@ -1741,6 +1770,8 @@ class AsyncClient:
             return pydantic.parse_obj_as(EmbedResponse, _response.json())  # type: ignore
         if _response.status_code == 400:
             raise BadRequestError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+        if _response.status_code == 429:
+            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         if _response.status_code == 500:
             raise InternalServerError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
@@ -1809,6 +1840,8 @@ class AsyncClient:
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(RerankResponse, _response.json())  # type: ignore
+        if _response.status_code == 429:
+            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -1914,6 +1947,8 @@ class AsyncClient:
             return pydantic.parse_obj_as(ClassifyResponse, _response.json())  # type: ignore
         if _response.status_code == 400:
             raise BadRequestError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+        if _response.status_code == 429:
+            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         if _response.status_code == 500:
             raise InternalServerError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
@@ -1983,6 +2018,8 @@ class AsyncClient:
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(SummarizeResponse, _response.json())  # type: ignore
+        if _response.status_code == 429:
+            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -2023,6 +2060,8 @@ class AsyncClient:
             return pydantic.parse_obj_as(TokenizeResponse, _response.json())  # type: ignore
         if _response.status_code == 400:
             raise BadRequestError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+        if _response.status_code == 429:
+            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         if _response.status_code == 500:
             raise InternalServerError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
@@ -2062,6 +2101,8 @@ class AsyncClient:
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(DetokenizeResponse, _response.json())  # type: ignore
+        if _response.status_code == 429:
+            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
             _response_json = _response.json()
         except JSONDecodeError:

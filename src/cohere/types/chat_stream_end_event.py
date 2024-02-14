@@ -5,8 +5,8 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from .chat_stream_end_event_finish_reason import ChatStreamEndEventFinishReason
-from .chat_stream_end_event_response import ChatStreamEndEventResponse
 from .chat_stream_event import ChatStreamEvent
+from .non_streamed_chat_response import NonStreamedChatResponse
 
 try:
     import pydantic.v1 as pydantic  # type: ignore
@@ -24,7 +24,7 @@ class ChatStreamEndEvent(ChatStreamEvent):
             "- `ERROR_TOXIC` - the model generated a reply that was deemed toxic\n"
         )
     )
-    response: ChatStreamEndEventResponse = pydantic.Field(
+    response: NonStreamedChatResponse = pydantic.Field(
         description="The consolidated response from the model. Contains the generated reply and all the other information streamed back in the previous events."
     )
 

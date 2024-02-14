@@ -20,6 +20,9 @@ class ChatRequestSearchOptions(pydantic.BaseModel):
     temperature: typing.Optional[typing.Any]
     max_tokens: typing.Optional[typing.Any]
     preamble: typing.Optional[typing.Any]
+    seed: typing.Optional[float] = pydantic.Field(
+        description="If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed."
+    )
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
