@@ -10,6 +10,7 @@ from ...core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ...core.datetime_utils import serialize_datetime
 from ...core.jsonable_encoder import jsonable_encoder
 from ...core.remove_none_from_dict import remove_none_from_dict
+from ...core.request_options import RequestOptions
 from ...errors.too_many_requests_error import TooManyRequestsError
 from ...types.dataset_type import DatasetType
 from .types.datasets_create_response import DatasetsCreateResponse
@@ -38,6 +39,7 @@ class DatasetsClient:
         after: typing.Optional[dt.datetime] = None,
         limit: typing.Optional[str] = None,
         offset: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> DatasetsListResponse:
         """
         List datasets that have been created.
@@ -52,6 +54,8 @@ class DatasetsClient:
             - limit: typing.Optional[str]. optional limit to number of results
 
             - offset: typing.Optional[str]. optional offset to start of results
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import Client
 
@@ -63,18 +67,34 @@ class DatasetsClient:
         """
         _response = self._client_wrapper.httpx_client.request(
             "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/datasets"),
-            params=remove_none_from_dict(
-                {
-                    "datasetType": dataset_type,
-                    "before": serialize_datetime(before) if before is not None else None,
-                    "after": serialize_datetime(after) if after is not None else None,
-                    "limit": limit,
-                    "offset": offset,
-                }
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "datasets"),
+            params=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        "datasetType": dataset_type,
+                        "before": serialize_datetime(before) if before is not None else None,
+                        "after": serialize_datetime(after) if after is not None else None,
+                        "limit": limit,
+                        "offset": offset,
+                        **(
+                            request_options.get("additional_query_parameters", {})
+                            if request_options is not None
+                            else {}
+                        ),
+                    }
+                )
             ),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(DatasetsListResponse, _response.json())  # type: ignore
@@ -97,8 +117,9 @@ class DatasetsClient:
         optional_fields: typing.Optional[typing.Union[str, typing.List[str]]] = None,
         text_separator: typing.Optional[str] = None,
         csv_delimiter: typing.Optional[str] = None,
-        data: typing.IO,
-        eval_data: typing.IO,
+        data: typing.Optional[typing.IO] = None,
+        eval_data: typing.Optional[typing.IO] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> DatasetsCreateResponse:
         """
         Create a dataset by uploading a file. See ['Dataset Creation'](https://docs.cohere.com/docs/datasets#dataset-creation) for more information.
@@ -120,29 +141,52 @@ class DatasetsClient:
 
             - csv_delimiter: typing.Optional[str]. The delimiter used for .csv uploads.
 
-            - data: typing.IO.
+            - data: typing.Optional[typing.IO].
 
-            - eval_data: typing.IO.
+            - eval_data: typing.Optional[typing.IO].
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         """
         _response = self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/datasets"),
-            params=remove_none_from_dict(
-                {
-                    "name": name,
-                    "type": type,
-                    "keep_original_file": keep_original_file,
-                    "skip_malformed_input": skip_malformed_input,
-                    "keep_fields": keep_fields,
-                    "optional_fields": optional_fields,
-                    "text_separator": text_separator,
-                    "csv_delimiter": csv_delimiter,
-                }
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "datasets"),
+            params=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        "name": name,
+                        "type": type,
+                        "keep_original_file": keep_original_file,
+                        "skip_malformed_input": skip_malformed_input,
+                        "keep_fields": keep_fields,
+                        "optional_fields": optional_fields,
+                        "text_separator": text_separator,
+                        "csv_delimiter": csv_delimiter,
+                        **(
+                            request_options.get("additional_query_parameters", {})
+                            if request_options is not None
+                            else {}
+                        ),
+                    }
+                )
             ),
-            data=jsonable_encoder({}),
-            files={"data": data, "eval_data": eval_data},
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            data=jsonable_encoder(remove_none_from_dict({}))
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(remove_none_from_dict({})),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            files=remove_none_from_dict({"data": data, "eval_data": eval_data}),
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(DatasetsCreateResponse, _response.json())  # type: ignore
@@ -154,10 +198,12 @@ class DatasetsClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    def get_usage(self) -> DatasetsGetUsageResponse:
+    def get_usage(self, *, request_options: typing.Optional[RequestOptions] = None) -> DatasetsGetUsageResponse:
         """
         View the dataset storage usage for your Organization. Each Organization can have up to 10GB of storage across all their users.
 
+        Parameters:
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import Client
 
@@ -169,9 +215,21 @@ class DatasetsClient:
         """
         _response = self._client_wrapper.httpx_client.request(
             "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/datasets/usage"),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "datasets/usage"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(DatasetsGetUsageResponse, _response.json())  # type: ignore
@@ -183,12 +241,14 @@ class DatasetsClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    def get(self, id: str) -> DatasetsGetResponse:
+    def get(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> DatasetsGetResponse:
         """
         Retrieve a dataset by ID. See ['Datasets'](https://docs.cohere.com/docs/datasets) for more information.
 
         Parameters:
             - id: str.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import Client
 
@@ -197,14 +257,26 @@ class DatasetsClient:
             token="YOUR_TOKEN",
         )
         client.datasets.get(
-            id="string",
+            id="id",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
             "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"v1/datasets/{id}"),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"datasets/{id}"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(DatasetsGetResponse, _response.json())  # type: ignore
@@ -216,12 +288,16 @@ class DatasetsClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    def delete(self, id: str) -> typing.Dict[str, typing.Any]:
+    def delete(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> typing.Dict[str, typing.Any]:
         """
         Delete a dataset by ID. Datasets are automatically deleted after 30 days, but they can also be deleted manually.
 
         Parameters:
             - id: str.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import Client
 
@@ -230,14 +306,26 @@ class DatasetsClient:
             token="YOUR_TOKEN",
         )
         client.datasets.delete(
-            id="string",
+            id="id",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
             "DELETE",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"v1/datasets/{id}"),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"datasets/{id}"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(typing.Dict[str, typing.Any], _response.json())  # type: ignore
@@ -262,6 +350,7 @@ class AsyncDatasetsClient:
         after: typing.Optional[dt.datetime] = None,
         limit: typing.Optional[str] = None,
         offset: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> DatasetsListResponse:
         """
         List datasets that have been created.
@@ -276,6 +365,8 @@ class AsyncDatasetsClient:
             - limit: typing.Optional[str]. optional limit to number of results
 
             - offset: typing.Optional[str]. optional offset to start of results
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import AsyncClient
 
@@ -287,18 +378,34 @@ class AsyncDatasetsClient:
         """
         _response = await self._client_wrapper.httpx_client.request(
             "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/datasets"),
-            params=remove_none_from_dict(
-                {
-                    "datasetType": dataset_type,
-                    "before": serialize_datetime(before) if before is not None else None,
-                    "after": serialize_datetime(after) if after is not None else None,
-                    "limit": limit,
-                    "offset": offset,
-                }
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "datasets"),
+            params=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        "datasetType": dataset_type,
+                        "before": serialize_datetime(before) if before is not None else None,
+                        "after": serialize_datetime(after) if after is not None else None,
+                        "limit": limit,
+                        "offset": offset,
+                        **(
+                            request_options.get("additional_query_parameters", {})
+                            if request_options is not None
+                            else {}
+                        ),
+                    }
+                )
             ),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(DatasetsListResponse, _response.json())  # type: ignore
@@ -321,8 +428,9 @@ class AsyncDatasetsClient:
         optional_fields: typing.Optional[typing.Union[str, typing.List[str]]] = None,
         text_separator: typing.Optional[str] = None,
         csv_delimiter: typing.Optional[str] = None,
-        data: typing.IO,
-        eval_data: typing.IO,
+        data: typing.Optional[typing.IO] = None,
+        eval_data: typing.Optional[typing.IO] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> DatasetsCreateResponse:
         """
         Create a dataset by uploading a file. See ['Dataset Creation'](https://docs.cohere.com/docs/datasets#dataset-creation) for more information.
@@ -344,29 +452,52 @@ class AsyncDatasetsClient:
 
             - csv_delimiter: typing.Optional[str]. The delimiter used for .csv uploads.
 
-            - data: typing.IO.
+            - data: typing.Optional[typing.IO].
 
-            - eval_data: typing.IO.
+            - eval_data: typing.Optional[typing.IO].
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         """
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/datasets"),
-            params=remove_none_from_dict(
-                {
-                    "name": name,
-                    "type": type,
-                    "keep_original_file": keep_original_file,
-                    "skip_malformed_input": skip_malformed_input,
-                    "keep_fields": keep_fields,
-                    "optional_fields": optional_fields,
-                    "text_separator": text_separator,
-                    "csv_delimiter": csv_delimiter,
-                }
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "datasets"),
+            params=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        "name": name,
+                        "type": type,
+                        "keep_original_file": keep_original_file,
+                        "skip_malformed_input": skip_malformed_input,
+                        "keep_fields": keep_fields,
+                        "optional_fields": optional_fields,
+                        "text_separator": text_separator,
+                        "csv_delimiter": csv_delimiter,
+                        **(
+                            request_options.get("additional_query_parameters", {})
+                            if request_options is not None
+                            else {}
+                        ),
+                    }
+                )
             ),
-            data=jsonable_encoder({}),
-            files={"data": data, "eval_data": eval_data},
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            data=jsonable_encoder(remove_none_from_dict({}))
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(remove_none_from_dict({})),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            files=remove_none_from_dict({"data": data, "eval_data": eval_data}),
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(DatasetsCreateResponse, _response.json())  # type: ignore
@@ -378,10 +509,12 @@ class AsyncDatasetsClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    async def get_usage(self) -> DatasetsGetUsageResponse:
+    async def get_usage(self, *, request_options: typing.Optional[RequestOptions] = None) -> DatasetsGetUsageResponse:
         """
         View the dataset storage usage for your Organization. Each Organization can have up to 10GB of storage across all their users.
 
+        Parameters:
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import AsyncClient
 
@@ -393,9 +526,21 @@ class AsyncDatasetsClient:
         """
         _response = await self._client_wrapper.httpx_client.request(
             "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/datasets/usage"),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "datasets/usage"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(DatasetsGetUsageResponse, _response.json())  # type: ignore
@@ -407,12 +552,14 @@ class AsyncDatasetsClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    async def get(self, id: str) -> DatasetsGetResponse:
+    async def get(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> DatasetsGetResponse:
         """
         Retrieve a dataset by ID. See ['Datasets'](https://docs.cohere.com/docs/datasets) for more information.
 
         Parameters:
             - id: str.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import AsyncClient
 
@@ -421,14 +568,26 @@ class AsyncDatasetsClient:
             token="YOUR_TOKEN",
         )
         await client.datasets.get(
-            id="string",
+            id="id",
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
             "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"v1/datasets/{id}"),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"datasets/{id}"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(DatasetsGetResponse, _response.json())  # type: ignore
@@ -440,12 +599,16 @@ class AsyncDatasetsClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    async def delete(self, id: str) -> typing.Dict[str, typing.Any]:
+    async def delete(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> typing.Dict[str, typing.Any]:
         """
         Delete a dataset by ID. Datasets are automatically deleted after 30 days, but they can also be deleted manually.
 
         Parameters:
             - id: str.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import AsyncClient
 
@@ -454,14 +617,26 @@ class AsyncDatasetsClient:
             token="YOUR_TOKEN",
         )
         await client.datasets.delete(
-            id="string",
+            id="id",
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
             "DELETE",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"v1/datasets/{id}"),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"datasets/{id}"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(typing.Dict[str, typing.Any], _response.json())  # type: ignore

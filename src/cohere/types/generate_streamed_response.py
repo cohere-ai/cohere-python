@@ -4,15 +4,13 @@ from __future__ import annotations
 
 import typing
 
-import typing_extensions
-
 from .generate_stream_end import GenerateStreamEnd
 from .generate_stream_error import GenerateStreamError
 from .generate_stream_text import GenerateStreamText
 
 
 class GenerateStreamedResponse_TextGeneration(GenerateStreamText):
-    event_type: typing_extensions.Literal["text-generation"]
+    event_type: typing.Literal["text-generation"]
 
     class Config:
         frozen = True
@@ -21,7 +19,7 @@ class GenerateStreamedResponse_TextGeneration(GenerateStreamText):
 
 
 class GenerateStreamedResponse_StreamEnd(GenerateStreamEnd):
-    event_type: typing_extensions.Literal["stream-end"]
+    event_type: typing.Literal["stream-end"]
 
     class Config:
         frozen = True
@@ -30,7 +28,7 @@ class GenerateStreamedResponse_StreamEnd(GenerateStreamEnd):
 
 
 class GenerateStreamedResponse_StreamError(GenerateStreamError):
-    event_type: typing_extensions.Literal["stream-error"]
+    event_type: typing.Literal["stream-error"]
 
     class Config:
         frozen = True

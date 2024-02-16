@@ -6,11 +6,12 @@ import urllib.parse
 from json.decoder import JSONDecodeError
 
 import httpx
-import typing_extensions
 
 from .core.api_error import ApiError
 from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from .core.jsonable_encoder import jsonable_encoder
+from .core.remove_none_from_dict import remove_none_from_dict
+from .core.request_options import RequestOptions
 from .environment import ClientEnvironment
 from .errors.bad_request_error import BadRequestError
 from .errors.internal_server_error import InternalServerError
@@ -84,7 +85,6 @@ class Client:
         *,
         message: str,
         model: typing.Optional[str] = OMIT,
-        stream: typing_extensions.Literal[True],
         preamble_override: typing.Optional[str] = OMIT,
         chat_history: typing.Optional[typing.List[ChatMessage]] = OMIT,
         conversation_id: typing.Optional[str] = OMIT,
@@ -99,6 +99,7 @@ class Client:
         p: typing.Optional[float] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[StreamedChatResponse]:
         """
         The `chat` endpoint allows users to have conversations with a Large Language Model (LLM) from Cohere. Users can send messages as part of a persisted conversation using the `conversation_id` parameter, or they can pass in their own conversation history using the `chat_history` parameter.
@@ -114,8 +115,6 @@ class Client:
                                            The identifier of the model, which can be one of the existing Cohere models or the full ID for a [fine-tuned custom model](https://docs.cohere.com/docs/chat-fine-tuning).
 
                                            Compatible Cohere models are `command` and `command-light` as well as the experimental `command-nightly` and `command-light-nightly` variants. Read more about [Cohere models](https://docs.cohere.com/docs/models).
-
-            - stream: typing_extensions.Literal[True].
 
             - preamble_override: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one.
 
@@ -164,6 +163,8 @@ class Client:
             - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
 
             - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`. Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         """
         _request: typing.Dict[str, typing.Any] = {"message": message, "stream": stream}
         if model is not OMIT:
@@ -175,7 +176,7 @@ class Client:
         if conversation_id is not OMIT:
             _request["conversation_id"] = conversation_id
         if prompt_truncation is not OMIT:
-            _request["prompt_truncation"] = prompt_truncation
+            _request["prompt_truncation"] = prompt_truncation.value
         if connectors is not OMIT:
             _request["connectors"] = connectors
         if search_queries_only is not OMIT:
@@ -183,7 +184,7 @@ class Client:
         if documents is not OMIT:
             _request["documents"] = documents
         if citation_quality is not OMIT:
-            _request["citation_quality"] = citation_quality
+            _request["citation_quality"] = citation_quality.value
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if max_tokens is not OMIT:
@@ -198,10 +199,27 @@ class Client:
             _request["presence_penalty"] = presence_penalty
         with self._client_wrapper.httpx_client.stream(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/chat"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         ) as _response:
             if 200 <= _response.status_code < 300:
                 for _text in _response.iter_lines():
@@ -223,7 +241,6 @@ class Client:
         *,
         message: str,
         model: typing.Optional[str] = OMIT,
-        stream: typing_extensions.Literal[False],
         preamble_override: typing.Optional[str] = OMIT,
         chat_history: typing.Optional[typing.List[ChatMessage]] = OMIT,
         conversation_id: typing.Optional[str] = OMIT,
@@ -238,6 +255,7 @@ class Client:
         p: typing.Optional[float] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> NonStreamedChatResponse:
         """
         The `chat` endpoint allows users to have conversations with a Large Language Model (LLM) from Cohere. Users can send messages as part of a persisted conversation using the `conversation_id` parameter, or they can pass in their own conversation history using the `chat_history` parameter.
@@ -253,8 +271,6 @@ class Client:
                                            The identifier of the model, which can be one of the existing Cohere models or the full ID for a [fine-tuned custom model](https://docs.cohere.com/docs/chat-fine-tuning).
 
                                            Compatible Cohere models are `command` and `command-light` as well as the experimental `command-nightly` and `command-light-nightly` variants. Read more about [Cohere models](https://docs.cohere.com/docs/models).
-
-            - stream: typing_extensions.Literal[False].
 
             - preamble_override: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one.
 
@@ -303,15 +319,10 @@ class Client:
             - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
 
             - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`. Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere import (
-            ChatMessage,
-            ChatMessageRole,
-            ChatRequestCitationQuality,
-            ChatRequestPromptOverride,
-            ChatRequestPromptTruncation,
-            ChatRequestSearchOptions,
-        )
+        from cohere import ChatMessage, ChatMessageRole, ChatRequestPromptTruncation
         from cohere.client import Client
 
         client = Client(
@@ -330,12 +341,13 @@ class Client:
                     role=ChatMessageRole.CHATBOT,
                     message="How can I help you today?",
                 ),
+                ChatMessage(
+                    role=ChatMessageRole.CHATBOT,
+                    message="message",
+                ),
             ],
             prompt_truncation=ChatRequestPromptTruncation.OFF,
-            citation_quality=ChatRequestCitationQuality.FAST,
             temperature=0.3,
-            search_options=ChatRequestSearchOptions(),
-            prompt_override=ChatRequestPromptOverride(),
         )
         """
         _request: typing.Dict[str, typing.Any] = {"message": message, "stream": stream}
@@ -348,7 +360,7 @@ class Client:
         if conversation_id is not OMIT:
             _request["conversation_id"] = conversation_id
         if prompt_truncation is not OMIT:
-            _request["prompt_truncation"] = prompt_truncation
+            _request["prompt_truncation"] = prompt_truncation.value
         if connectors is not OMIT:
             _request["connectors"] = connectors
         if search_queries_only is not OMIT:
@@ -356,7 +368,7 @@ class Client:
         if documents is not OMIT:
             _request["documents"] = documents
         if citation_quality is not OMIT:
-            _request["citation_quality"] = citation_quality
+            _request["citation_quality"] = citation_quality.value
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if max_tokens is not OMIT:
@@ -371,10 +383,27 @@ class Client:
             _request["presence_penalty"] = presence_penalty
         _response = self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/chat"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(NonStreamedChatResponse, _response.json())  # type: ignore
@@ -392,7 +421,6 @@ class Client:
         prompt: str,
         model: typing.Optional[str] = OMIT,
         num_generations: typing.Optional[int] = OMIT,
-        stream: typing_extensions.Literal[True],
         max_tokens: typing.Optional[int] = OMIT,
         truncate: typing.Optional[GenerateStreamRequestTruncate] = OMIT,
         temperature: typing.Optional[float] = OMIT,
@@ -406,6 +434,7 @@ class Client:
         return_likelihoods: typing.Optional[GenerateStreamRequestReturnLikelihoods] = OMIT,
         logit_bias: typing.Optional[typing.Dict[str, float]] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[GenerateStreamedResponse]:
         """
         This endpoint generates realistic text conditioned on a given input.
@@ -417,8 +446,6 @@ class Client:
             - model: typing.Optional[str]. The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
                                            Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
             - num_generations: typing.Optional[int]. The maximum number of generations that will be returned. Defaults to `1`, min value of `1`, max value of `5`.
-
-            - stream: typing_extensions.Literal[True].
 
             - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
 
@@ -468,6 +495,8 @@ class Client:
 
                                                                     For example, if the value `{'11': -10}` is provided, the model will be very unlikely to include the token 11 (`"\n"`, the newline character) anywhere in the generated text. In contrast `{'11': 10}` will result in generations that nearly only contain that token. Values between -10 and 10 will proportionally affect the likelihood of the token appearing in the generated text.
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         """
         _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": stream}
         if model is not OMIT:
@@ -477,7 +506,7 @@ class Client:
         if max_tokens is not OMIT:
             _request["max_tokens"] = max_tokens
         if truncate is not OMIT:
-            _request["truncate"] = truncate
+            _request["truncate"] = truncate.value
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if preset is not OMIT:
@@ -495,17 +524,34 @@ class Client:
         if presence_penalty is not OMIT:
             _request["presence_penalty"] = presence_penalty
         if return_likelihoods is not OMIT:
-            _request["return_likelihoods"] = return_likelihoods
+            _request["return_likelihoods"] = return_likelihoods.value
         if logit_bias is not OMIT:
             _request["logit_bias"] = logit_bias
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
         with self._client_wrapper.httpx_client.stream(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/generate"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "generate"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         ) as _response:
             if 200 <= _response.status_code < 300:
                 for _text in _response.iter_lines():
@@ -532,7 +578,6 @@ class Client:
         prompt: str,
         model: typing.Optional[str] = OMIT,
         num_generations: typing.Optional[int] = OMIT,
-        stream: typing_extensions.Literal[False],
         max_tokens: typing.Optional[int] = OMIT,
         truncate: typing.Optional[GenerateRequestTruncate] = OMIT,
         temperature: typing.Optional[float] = OMIT,
@@ -546,6 +591,7 @@ class Client:
         return_likelihoods: typing.Optional[GenerateRequestReturnLikelihoods] = OMIT,
         logit_bias: typing.Optional[typing.Dict[str, float]] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> Generation:
         """
         This endpoint generates realistic text conditioned on a given input.
@@ -557,8 +603,6 @@ class Client:
             - model: typing.Optional[str]. The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
                                            Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
             - num_generations: typing.Optional[int]. The maximum number of generations that will be returned. Defaults to `1`, min value of `1`, max value of `5`.
-
-            - stream: typing_extensions.Literal[False].
 
             - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
 
@@ -608,8 +652,9 @@ class Client:
 
                                                                     For example, if the value `{'11': -10}` is provided, the model will be very unlikely to include the token 11 (`"\n"`, the newline character) anywhere in the generated text. In contrast `{'11': 10}` will result in generations that nearly only contain that token. Values between -10 and 10 will proportionally affect the likelihood of the token appearing in the generated text.
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere import GenerateRequestReturnLikelihoods, GenerateRequestTruncate
         from cohere.client import Client
 
         client = Client(
@@ -619,9 +664,7 @@ class Client:
         client.generate(
             prompt="Please explain to me how LLMs work",
             stream=False,
-            truncate=GenerateRequestTruncate.NONE,
             preset="my-preset-a58sbd",
-            return_likelihoods=GenerateRequestReturnLikelihoods.GENERATION,
         )
         """
         _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": stream}
@@ -632,7 +675,7 @@ class Client:
         if max_tokens is not OMIT:
             _request["max_tokens"] = max_tokens
         if truncate is not OMIT:
-            _request["truncate"] = truncate
+            _request["truncate"] = truncate.value
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if preset is not OMIT:
@@ -650,17 +693,34 @@ class Client:
         if presence_penalty is not OMIT:
             _request["presence_penalty"] = presence_penalty
         if return_likelihoods is not OMIT:
-            _request["return_likelihoods"] = return_likelihoods
+            _request["return_likelihoods"] = return_likelihoods.value
         if logit_bias is not OMIT:
             _request["logit_bias"] = logit_bias
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
         _response = self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/generate"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "generate"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(Generation, _response.json())  # type: ignore
@@ -684,6 +744,7 @@ class Client:
         input_type: typing.Optional[EmbedInputType] = OMIT,
         embedding_types: typing.Optional[typing.List[EmbedRequestEmbeddingTypesItem]] = OMIT,
         truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> EmbedResponse:
         """
         This endpoint returns text embeddings. An embedding is a list of floating point numbers that captures semantic information about the text that it represents.
@@ -723,22 +784,40 @@ class Client:
                                                                Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
 
                                                                If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         """
         _request: typing.Dict[str, typing.Any] = {"texts": texts}
         if model is not OMIT:
             _request["model"] = model
         if input_type is not OMIT:
-            _request["input_type"] = input_type
+            _request["input_type"] = input_type.value
         if embedding_types is not OMIT:
             _request["embedding_types"] = embedding_types
         if truncate is not OMIT:
-            _request["truncate"] = truncate
+            _request["truncate"] = truncate.value
         _response = self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/embed"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(EmbedResponse, _response.json())  # type: ignore
@@ -763,6 +842,7 @@ class Client:
         top_n: typing.Optional[int] = OMIT,
         return_documents: typing.Optional[bool] = OMIT,
         max_chunks_per_doc: typing.Optional[int] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> RerankResponse:
         """
         This endpoint takes in a query and a list of texts and produces an ordered array with each text assigned a relevance score.
@@ -783,6 +863,8 @@ class Client:
             - return_documents: typing.Optional[bool]. - If false, returns results without the doc text - the api will return a list of {index, relevance score} where index is inferred from the list passed into the request.
                                                        - If true, returns results with the doc text passed in - the api will return an ordered list of {index, text, relevance score} where index + text refers to the list passed into the request.
             - max_chunks_per_doc: typing.Optional[int]. The maximum number of chunks to produce internally from a document
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import Client
 
@@ -807,10 +889,27 @@ class Client:
             _request["max_chunks_per_doc"] = max_chunks_per_doc
         _response = self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/rerank"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "rerank"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(RerankResponse, _response.json())  # type: ignore
@@ -830,6 +929,7 @@ class Client:
         model: typing.Optional[str] = OMIT,
         preset: typing.Optional[str] = OMIT,
         truncate: typing.Optional[ClassifyRequestTruncate] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> ClassifyResponse:
         """
         This endpoint makes a prediction about which label fits the specified text inputs best. To make a prediction, Classify uses the provided `examples` of text + label pairs as a reference.
@@ -847,8 +947,10 @@ class Client:
 
             - truncate: typing.Optional[ClassifyRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
                                                                   Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
-                                                                  If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.---
-        from cohere import ClassifyExample, ClassifyRequestTruncate
+                                                                  If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
+        ---
+        from cohere import ClassifyExample
         from cohere.client import Client
 
         client = Client(
@@ -856,7 +958,11 @@ class Client:
             token="YOUR_TOKEN",
         )
         client.classify(
-            inputs=["Confirm your email address", "hey i need u to send some $"],
+            inputs=[
+                "Confirm your email address",
+                "hey i need u to send some $",
+                "inputs",
+            ],
             examples=[
                 ClassifyExample(
                     text="Dermatologists don't like her!",
@@ -898,9 +1004,9 @@ class Client:
                     text="Pre-read for tomorrow",
                     label="Not spam",
                 ),
+                ClassifyExample(),
             ],
             preset="my-preset-a58sbd",
-            truncate=ClassifyRequestTruncate.NONE,
         )
         """
         _request: typing.Dict[str, typing.Any] = {"inputs": inputs, "examples": examples}
@@ -909,13 +1015,30 @@ class Client:
         if preset is not OMIT:
             _request["preset"] = preset
         if truncate is not OMIT:
-            _request["truncate"] = truncate
+            _request["truncate"] = truncate.value
         _response = self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/classify"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "classify"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(ClassifyResponse, _response.json())  # type: ignore
@@ -941,6 +1064,7 @@ class Client:
         extractiveness: typing.Optional[SummarizeRequestExtractiveness] = OMIT,
         temperature: typing.Optional[float] = OMIT,
         additional_command: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> SummarizeResponse:
         """
                This endpoint generates a summary in English for a given text.
@@ -959,36 +1083,53 @@ class Client:
                    - temperature: typing.Optional[float]. Ranges from 0 to 5. Controls the randomness of the output. Lower values tend to generate more “predictable” output, while higher values tend to generate more “creative” output. The sweet spot is typically between 0 and 1.
 
                    - additional_command: typing.Optional[str]. A free-form instruction for modifying how the summaries get generated. Should complete the sentence "Generate a summary _". Eg. "focusing on the next steps" or "written by Yoda"
+
+                   - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
                ---
-               from cohere import (SummarizeRequestExtractiveness, SummarizeRequestFormat,
-                                   SummarizeRequestLength)
                from cohere.client import Client
 
                client = Client(client_name="YOUR_CLIENT_NAME", token="YOUR_TOKEN", )
                client.summarize(text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.
 
                The meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo
-        all variants. Analogues made from dairy alternatives, such as goat"s or sheep"s milk, or milk substitutes (e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are lactose intolerant, allergic to dairy protein or vegan.', length=SummarizeRequestLength.SHORT, format=SummarizeRequestFormat.PARAGRAPH, extractiveness=SummarizeRequestExtractiveness.LOW, )
+        all variants. Analogues made from dairy alternatives, such as goat"s or sheep"s milk, or milk substitutes (e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are lactose intolerant, allergic to dairy protein or vegan.', )
         """
         _request: typing.Dict[str, typing.Any] = {"text": text}
         if length is not OMIT:
-            _request["length"] = length
+            _request["length"] = length.value
         if format is not OMIT:
-            _request["format"] = format
+            _request["format"] = format.value
         if model is not OMIT:
             _request["model"] = model
         if extractiveness is not OMIT:
-            _request["extractiveness"] = extractiveness
+            _request["extractiveness"] = extractiveness.value
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if additional_command is not OMIT:
             _request["additional_command"] = additional_command
         _response = self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/summarize"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "summarize"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(SummarizeResponse, _response.json())  # type: ignore
@@ -1000,7 +1141,9 @@ class Client:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    def tokenize(self, *, text: str, model: typing.Optional[str] = OMIT) -> TokenizeResponse:
+    def tokenize(
+        self, *, text: str, model: typing.Optional[str] = OMIT, request_options: typing.Optional[RequestOptions] = None
+    ) -> TokenizeResponse:
         """
         This endpoint splits input text into smaller units called tokens using byte-pair encoding (BPE). To learn more about tokenization and byte pair encoding, see the tokens page.
 
@@ -1008,6 +1151,8 @@ class Client:
             - text: str. The string to be tokenized, the minimum text length is 1 character, and the maximum text length is 65536 characters.
 
             - model: typing.Optional[str]. An optional parameter to provide the model name. This will ensure that the tokenization uses the tokenizer used by that model.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import Client
 
@@ -1025,10 +1170,27 @@ class Client:
             _request["model"] = model
         _response = self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/tokenize"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "tokenize"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(TokenizeResponse, _response.json())  # type: ignore
@@ -1044,7 +1206,13 @@ class Client:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    def detokenize(self, *, tokens: typing.List[int], model: typing.Optional[str] = OMIT) -> DetokenizeResponse:
+    def detokenize(
+        self,
+        *,
+        tokens: typing.List[int],
+        model: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> DetokenizeResponse:
         """
         This endpoint takes tokens using byte-pair encoding and returns their text representation. To learn more about tokenization and byte pair encoding, see the tokens page.
 
@@ -1052,6 +1220,8 @@ class Client:
             - tokens: typing.List[int]. The list of tokens to be detokenized.
 
             - model: typing.Optional[str]. An optional parameter to provide the model name. This will ensure that the detokenization is done by the tokenizer used by that model.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import Client
 
@@ -1060,7 +1230,7 @@ class Client:
             token="YOUR_TOKEN",
         )
         client.detokenize(
-            tokens=[10104, 12221, 1315, 34, 1420, 69],
+            tokens=[10104, 12221, 1315, 34, 1420, 69, 1],
         )
         """
         _request: typing.Dict[str, typing.Any] = {"tokens": tokens}
@@ -1068,10 +1238,27 @@ class Client:
             _request["model"] = model
         _response = self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/detokenize"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "detokenize"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(DetokenizeResponse, _response.json())  # type: ignore
@@ -1110,7 +1297,6 @@ class AsyncClient:
         *,
         message: str,
         model: typing.Optional[str] = OMIT,
-        stream: typing_extensions.Literal[True],
         preamble_override: typing.Optional[str] = OMIT,
         chat_history: typing.Optional[typing.List[ChatMessage]] = OMIT,
         conversation_id: typing.Optional[str] = OMIT,
@@ -1125,6 +1311,7 @@ class AsyncClient:
         p: typing.Optional[float] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[StreamedChatResponse]:
         """
         The `chat` endpoint allows users to have conversations with a Large Language Model (LLM) from Cohere. Users can send messages as part of a persisted conversation using the `conversation_id` parameter, or they can pass in their own conversation history using the `chat_history` parameter.
@@ -1140,8 +1327,6 @@ class AsyncClient:
                                            The identifier of the model, which can be one of the existing Cohere models or the full ID for a [fine-tuned custom model](https://docs.cohere.com/docs/chat-fine-tuning).
 
                                            Compatible Cohere models are `command` and `command-light` as well as the experimental `command-nightly` and `command-light-nightly` variants. Read more about [Cohere models](https://docs.cohere.com/docs/models).
-
-            - stream: typing_extensions.Literal[True].
 
             - preamble_override: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one.
 
@@ -1190,6 +1375,8 @@ class AsyncClient:
             - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
 
             - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`. Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         """
         _request: typing.Dict[str, typing.Any] = {"message": message, "stream": stream}
         if model is not OMIT:
@@ -1201,7 +1388,7 @@ class AsyncClient:
         if conversation_id is not OMIT:
             _request["conversation_id"] = conversation_id
         if prompt_truncation is not OMIT:
-            _request["prompt_truncation"] = prompt_truncation
+            _request["prompt_truncation"] = prompt_truncation.value
         if connectors is not OMIT:
             _request["connectors"] = connectors
         if search_queries_only is not OMIT:
@@ -1209,7 +1396,7 @@ class AsyncClient:
         if documents is not OMIT:
             _request["documents"] = documents
         if citation_quality is not OMIT:
-            _request["citation_quality"] = citation_quality
+            _request["citation_quality"] = citation_quality.value
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if max_tokens is not OMIT:
@@ -1224,10 +1411,27 @@ class AsyncClient:
             _request["presence_penalty"] = presence_penalty
         async with self._client_wrapper.httpx_client.stream(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/chat"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         ) as _response:
             if 200 <= _response.status_code < 300:
                 async for _text in _response.aiter_lines():
@@ -1249,7 +1453,6 @@ class AsyncClient:
         *,
         message: str,
         model: typing.Optional[str] = OMIT,
-        stream: typing_extensions.Literal[False],
         preamble_override: typing.Optional[str] = OMIT,
         chat_history: typing.Optional[typing.List[ChatMessage]] = OMIT,
         conversation_id: typing.Optional[str] = OMIT,
@@ -1264,6 +1467,7 @@ class AsyncClient:
         p: typing.Optional[float] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> NonStreamedChatResponse:
         """
         The `chat` endpoint allows users to have conversations with a Large Language Model (LLM) from Cohere. Users can send messages as part of a persisted conversation using the `conversation_id` parameter, or they can pass in their own conversation history using the `chat_history` parameter.
@@ -1279,8 +1483,6 @@ class AsyncClient:
                                            The identifier of the model, which can be one of the existing Cohere models or the full ID for a [fine-tuned custom model](https://docs.cohere.com/docs/chat-fine-tuning).
 
                                            Compatible Cohere models are `command` and `command-light` as well as the experimental `command-nightly` and `command-light-nightly` variants. Read more about [Cohere models](https://docs.cohere.com/docs/models).
-
-            - stream: typing_extensions.Literal[False].
 
             - preamble_override: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one.
 
@@ -1329,15 +1531,10 @@ class AsyncClient:
             - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
 
             - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`. Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere import (
-            ChatMessage,
-            ChatMessageRole,
-            ChatRequestCitationQuality,
-            ChatRequestPromptOverride,
-            ChatRequestPromptTruncation,
-            ChatRequestSearchOptions,
-        )
+        from cohere import ChatMessage, ChatMessageRole, ChatRequestPromptTruncation
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -1356,12 +1553,13 @@ class AsyncClient:
                     role=ChatMessageRole.CHATBOT,
                     message="How can I help you today?",
                 ),
+                ChatMessage(
+                    role=ChatMessageRole.CHATBOT,
+                    message="message",
+                ),
             ],
             prompt_truncation=ChatRequestPromptTruncation.OFF,
-            citation_quality=ChatRequestCitationQuality.FAST,
             temperature=0.3,
-            search_options=ChatRequestSearchOptions(),
-            prompt_override=ChatRequestPromptOverride(),
         )
         """
         _request: typing.Dict[str, typing.Any] = {"message": message, "stream": stream}
@@ -1374,7 +1572,7 @@ class AsyncClient:
         if conversation_id is not OMIT:
             _request["conversation_id"] = conversation_id
         if prompt_truncation is not OMIT:
-            _request["prompt_truncation"] = prompt_truncation
+            _request["prompt_truncation"] = prompt_truncation.value
         if connectors is not OMIT:
             _request["connectors"] = connectors
         if search_queries_only is not OMIT:
@@ -1382,7 +1580,7 @@ class AsyncClient:
         if documents is not OMIT:
             _request["documents"] = documents
         if citation_quality is not OMIT:
-            _request["citation_quality"] = citation_quality
+            _request["citation_quality"] = citation_quality.value
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if max_tokens is not OMIT:
@@ -1397,10 +1595,27 @@ class AsyncClient:
             _request["presence_penalty"] = presence_penalty
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/chat"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(NonStreamedChatResponse, _response.json())  # type: ignore
@@ -1418,7 +1633,6 @@ class AsyncClient:
         prompt: str,
         model: typing.Optional[str] = OMIT,
         num_generations: typing.Optional[int] = OMIT,
-        stream: typing_extensions.Literal[True],
         max_tokens: typing.Optional[int] = OMIT,
         truncate: typing.Optional[GenerateStreamRequestTruncate] = OMIT,
         temperature: typing.Optional[float] = OMIT,
@@ -1432,6 +1646,7 @@ class AsyncClient:
         return_likelihoods: typing.Optional[GenerateStreamRequestReturnLikelihoods] = OMIT,
         logit_bias: typing.Optional[typing.Dict[str, float]] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[GenerateStreamedResponse]:
         """
         This endpoint generates realistic text conditioned on a given input.
@@ -1443,8 +1658,6 @@ class AsyncClient:
             - model: typing.Optional[str]. The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
                                            Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
             - num_generations: typing.Optional[int]. The maximum number of generations that will be returned. Defaults to `1`, min value of `1`, max value of `5`.
-
-            - stream: typing_extensions.Literal[True].
 
             - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
 
@@ -1494,6 +1707,8 @@ class AsyncClient:
 
                                                                     For example, if the value `{'11': -10}` is provided, the model will be very unlikely to include the token 11 (`"\n"`, the newline character) anywhere in the generated text. In contrast `{'11': 10}` will result in generations that nearly only contain that token. Values between -10 and 10 will proportionally affect the likelihood of the token appearing in the generated text.
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         """
         _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": stream}
         if model is not OMIT:
@@ -1503,7 +1718,7 @@ class AsyncClient:
         if max_tokens is not OMIT:
             _request["max_tokens"] = max_tokens
         if truncate is not OMIT:
-            _request["truncate"] = truncate
+            _request["truncate"] = truncate.value
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if preset is not OMIT:
@@ -1521,17 +1736,34 @@ class AsyncClient:
         if presence_penalty is not OMIT:
             _request["presence_penalty"] = presence_penalty
         if return_likelihoods is not OMIT:
-            _request["return_likelihoods"] = return_likelihoods
+            _request["return_likelihoods"] = return_likelihoods.value
         if logit_bias is not OMIT:
             _request["logit_bias"] = logit_bias
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
         async with self._client_wrapper.httpx_client.stream(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/generate"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "generate"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         ) as _response:
             if 200 <= _response.status_code < 300:
                 async for _text in _response.aiter_lines():
@@ -1558,7 +1790,6 @@ class AsyncClient:
         prompt: str,
         model: typing.Optional[str] = OMIT,
         num_generations: typing.Optional[int] = OMIT,
-        stream: typing_extensions.Literal[False],
         max_tokens: typing.Optional[int] = OMIT,
         truncate: typing.Optional[GenerateRequestTruncate] = OMIT,
         temperature: typing.Optional[float] = OMIT,
@@ -1572,6 +1803,7 @@ class AsyncClient:
         return_likelihoods: typing.Optional[GenerateRequestReturnLikelihoods] = OMIT,
         logit_bias: typing.Optional[typing.Dict[str, float]] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> Generation:
         """
         This endpoint generates realistic text conditioned on a given input.
@@ -1583,8 +1815,6 @@ class AsyncClient:
             - model: typing.Optional[str]. The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
                                            Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
             - num_generations: typing.Optional[int]. The maximum number of generations that will be returned. Defaults to `1`, min value of `1`, max value of `5`.
-
-            - stream: typing_extensions.Literal[False].
 
             - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
 
@@ -1634,8 +1864,9 @@ class AsyncClient:
 
                                                                     For example, if the value `{'11': -10}` is provided, the model will be very unlikely to include the token 11 (`"\n"`, the newline character) anywhere in the generated text. In contrast `{'11': 10}` will result in generations that nearly only contain that token. Values between -10 and 10 will proportionally affect the likelihood of the token appearing in the generated text.
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere import GenerateRequestReturnLikelihoods, GenerateRequestTruncate
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -1645,9 +1876,7 @@ class AsyncClient:
         await client.generate(
             prompt="Please explain to me how LLMs work",
             stream=False,
-            truncate=GenerateRequestTruncate.NONE,
             preset="my-preset-a58sbd",
-            return_likelihoods=GenerateRequestReturnLikelihoods.GENERATION,
         )
         """
         _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": stream}
@@ -1658,7 +1887,7 @@ class AsyncClient:
         if max_tokens is not OMIT:
             _request["max_tokens"] = max_tokens
         if truncate is not OMIT:
-            _request["truncate"] = truncate
+            _request["truncate"] = truncate.value
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if preset is not OMIT:
@@ -1676,17 +1905,34 @@ class AsyncClient:
         if presence_penalty is not OMIT:
             _request["presence_penalty"] = presence_penalty
         if return_likelihoods is not OMIT:
-            _request["return_likelihoods"] = return_likelihoods
+            _request["return_likelihoods"] = return_likelihoods.value
         if logit_bias is not OMIT:
             _request["logit_bias"] = logit_bias
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/generate"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "generate"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(Generation, _response.json())  # type: ignore
@@ -1710,6 +1956,7 @@ class AsyncClient:
         input_type: typing.Optional[EmbedInputType] = OMIT,
         embedding_types: typing.Optional[typing.List[EmbedRequestEmbeddingTypesItem]] = OMIT,
         truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> EmbedResponse:
         """
         This endpoint returns text embeddings. An embedding is a list of floating point numbers that captures semantic information about the text that it represents.
@@ -1749,22 +1996,40 @@ class AsyncClient:
                                                                Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
 
                                                                If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         """
         _request: typing.Dict[str, typing.Any] = {"texts": texts}
         if model is not OMIT:
             _request["model"] = model
         if input_type is not OMIT:
-            _request["input_type"] = input_type
+            _request["input_type"] = input_type.value
         if embedding_types is not OMIT:
             _request["embedding_types"] = embedding_types
         if truncate is not OMIT:
-            _request["truncate"] = truncate
+            _request["truncate"] = truncate.value
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/embed"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(EmbedResponse, _response.json())  # type: ignore
@@ -1789,6 +2054,7 @@ class AsyncClient:
         top_n: typing.Optional[int] = OMIT,
         return_documents: typing.Optional[bool] = OMIT,
         max_chunks_per_doc: typing.Optional[int] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> RerankResponse:
         """
         This endpoint takes in a query and a list of texts and produces an ordered array with each text assigned a relevance score.
@@ -1809,6 +2075,8 @@ class AsyncClient:
             - return_documents: typing.Optional[bool]. - If false, returns results without the doc text - the api will return a list of {index, relevance score} where index is inferred from the list passed into the request.
                                                        - If true, returns results with the doc text passed in - the api will return an ordered list of {index, text, relevance score} where index + text refers to the list passed into the request.
             - max_chunks_per_doc: typing.Optional[int]. The maximum number of chunks to produce internally from a document
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import AsyncClient
 
@@ -1833,10 +2101,27 @@ class AsyncClient:
             _request["max_chunks_per_doc"] = max_chunks_per_doc
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/rerank"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "rerank"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(RerankResponse, _response.json())  # type: ignore
@@ -1856,6 +2141,7 @@ class AsyncClient:
         model: typing.Optional[str] = OMIT,
         preset: typing.Optional[str] = OMIT,
         truncate: typing.Optional[ClassifyRequestTruncate] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> ClassifyResponse:
         """
         This endpoint makes a prediction about which label fits the specified text inputs best. To make a prediction, Classify uses the provided `examples` of text + label pairs as a reference.
@@ -1873,8 +2159,10 @@ class AsyncClient:
 
             - truncate: typing.Optional[ClassifyRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
                                                                   Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
-                                                                  If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.---
-        from cohere import ClassifyExample, ClassifyRequestTruncate
+                                                                  If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
+        ---
+        from cohere import ClassifyExample
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -1882,7 +2170,11 @@ class AsyncClient:
             token="YOUR_TOKEN",
         )
         await client.classify(
-            inputs=["Confirm your email address", "hey i need u to send some $"],
+            inputs=[
+                "Confirm your email address",
+                "hey i need u to send some $",
+                "inputs",
+            ],
             examples=[
                 ClassifyExample(
                     text="Dermatologists don't like her!",
@@ -1924,9 +2216,9 @@ class AsyncClient:
                     text="Pre-read for tomorrow",
                     label="Not spam",
                 ),
+                ClassifyExample(),
             ],
             preset="my-preset-a58sbd",
-            truncate=ClassifyRequestTruncate.NONE,
         )
         """
         _request: typing.Dict[str, typing.Any] = {"inputs": inputs, "examples": examples}
@@ -1935,13 +2227,30 @@ class AsyncClient:
         if preset is not OMIT:
             _request["preset"] = preset
         if truncate is not OMIT:
-            _request["truncate"] = truncate
+            _request["truncate"] = truncate.value
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/classify"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "classify"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(ClassifyResponse, _response.json())  # type: ignore
@@ -1967,6 +2276,7 @@ class AsyncClient:
         extractiveness: typing.Optional[SummarizeRequestExtractiveness] = OMIT,
         temperature: typing.Optional[float] = OMIT,
         additional_command: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> SummarizeResponse:
         """
                This endpoint generates a summary in English for a given text.
@@ -1985,36 +2295,53 @@ class AsyncClient:
                    - temperature: typing.Optional[float]. Ranges from 0 to 5. Controls the randomness of the output. Lower values tend to generate more “predictable” output, while higher values tend to generate more “creative” output. The sweet spot is typically between 0 and 1.
 
                    - additional_command: typing.Optional[str]. A free-form instruction for modifying how the summaries get generated. Should complete the sentence "Generate a summary _". Eg. "focusing on the next steps" or "written by Yoda"
+
+                   - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
                ---
-               from cohere import (SummarizeRequestExtractiveness, SummarizeRequestFormat,
-                                   SummarizeRequestLength)
                from cohere.client import AsyncClient
 
                client = AsyncClient(client_name="YOUR_CLIENT_NAME", token="YOUR_TOKEN", )
                await client.summarize(text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.
 
                The meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo
-        all variants. Analogues made from dairy alternatives, such as goat"s or sheep"s milk, or milk substitutes (e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are lactose intolerant, allergic to dairy protein or vegan.', length=SummarizeRequestLength.SHORT, format=SummarizeRequestFormat.PARAGRAPH, extractiveness=SummarizeRequestExtractiveness.LOW, )
+        all variants. Analogues made from dairy alternatives, such as goat"s or sheep"s milk, or milk substitutes (e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are lactose intolerant, allergic to dairy protein or vegan.', )
         """
         _request: typing.Dict[str, typing.Any] = {"text": text}
         if length is not OMIT:
-            _request["length"] = length
+            _request["length"] = length.value
         if format is not OMIT:
-            _request["format"] = format
+            _request["format"] = format.value
         if model is not OMIT:
             _request["model"] = model
         if extractiveness is not OMIT:
-            _request["extractiveness"] = extractiveness
+            _request["extractiveness"] = extractiveness.value
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if additional_command is not OMIT:
             _request["additional_command"] = additional_command
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/summarize"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "summarize"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(SummarizeResponse, _response.json())  # type: ignore
@@ -2026,7 +2353,9 @@ class AsyncClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    async def tokenize(self, *, text: str, model: typing.Optional[str] = OMIT) -> TokenizeResponse:
+    async def tokenize(
+        self, *, text: str, model: typing.Optional[str] = OMIT, request_options: typing.Optional[RequestOptions] = None
+    ) -> TokenizeResponse:
         """
         This endpoint splits input text into smaller units called tokens using byte-pair encoding (BPE). To learn more about tokenization and byte pair encoding, see the tokens page.
 
@@ -2034,6 +2363,8 @@ class AsyncClient:
             - text: str. The string to be tokenized, the minimum text length is 1 character, and the maximum text length is 65536 characters.
 
             - model: typing.Optional[str]. An optional parameter to provide the model name. This will ensure that the tokenization uses the tokenizer used by that model.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import AsyncClient
 
@@ -2051,10 +2382,27 @@ class AsyncClient:
             _request["model"] = model
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/tokenize"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "tokenize"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(TokenizeResponse, _response.json())  # type: ignore
@@ -2070,7 +2418,13 @@ class AsyncClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    async def detokenize(self, *, tokens: typing.List[int], model: typing.Optional[str] = OMIT) -> DetokenizeResponse:
+    async def detokenize(
+        self,
+        *,
+        tokens: typing.List[int],
+        model: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> DetokenizeResponse:
         """
         This endpoint takes tokens using byte-pair encoding and returns their text representation. To learn more about tokenization and byte pair encoding, see the tokens page.
 
@@ -2078,6 +2432,8 @@ class AsyncClient:
             - tokens: typing.List[int]. The list of tokens to be detokenized.
 
             - model: typing.Optional[str]. An optional parameter to provide the model name. This will ensure that the detokenization is done by the tokenizer used by that model.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import AsyncClient
 
@@ -2086,7 +2442,7 @@ class AsyncClient:
             token="YOUR_TOKEN",
         )
         await client.detokenize(
-            tokens=[10104, 12221, 1315, 34, 1420, 69],
+            tokens=[10104, 12221, 1315, 34, 1420, 69, 1],
         )
         """
         _request: typing.Dict[str, typing.Any] = {"tokens": tokens}
@@ -2094,10 +2450,27 @@ class AsyncClient:
             _request["model"] = model
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/detokenize"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "detokenize"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(DetokenizeResponse, _response.json())  # type: ignore
