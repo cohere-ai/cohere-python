@@ -7,6 +7,8 @@ from json.decoder import JSONDecodeError
 from ...core.api_error import ApiError
 from ...core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ...core.jsonable_encoder import jsonable_encoder
+from ...core.remove_none_from_dict import remove_none_from_dict
+from ...core.request_options import RequestOptions
 from ...errors.bad_request_error import BadRequestError
 from ...errors.internal_server_error import InternalServerError
 from ...errors.not_found_error import NotFoundError
@@ -30,10 +32,12 @@ class EmbedJobsClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def list(self) -> ListEmbedJobResponse:
+    def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> ListEmbedJobResponse:
         """
         The list embed job endpoint allows users to view all embed jobs history for that specific user.
 
+        Parameters:
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import Client
 
@@ -45,9 +49,21 @@ class EmbedJobsClient:
         """
         _response = self._client_wrapper.httpx_client.request(
             "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/embed-jobs"),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed-jobs"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(ListEmbedJobResponse, _response.json())  # type: ignore
@@ -71,6 +87,7 @@ class EmbedJobsClient:
         input_type: EmbedInputType,
         name: typing.Optional[str] = OMIT,
         truncate: typing.Optional[CreateEmbedJobRequestTruncate] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateEmbedJobResponse:
         """
         This API launches an async Embed job for a [Dataset](https://docs.cohere.com/docs/datasets) of type `embed-input`. The result of a completed embed job is new Dataset of type `embed-output`, which contains the original text entries and the corresponding embeddings.
@@ -94,8 +111,10 @@ class EmbedJobsClient:
             - truncate: typing.Optional[CreateEmbedJobRequestTruncate]. One of `START|END` to specify how the API will handle inputs longer than the maximum token length.
 
                                                                         Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
-                                                                        ---
-        from cohere import CreateEmbedJobRequestTruncate, EmbedInputType
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
+        ---
+        from cohere import EmbedInputType
         from cohere.client import Client
 
         client = Client(
@@ -103,23 +122,43 @@ class EmbedJobsClient:
             token="YOUR_TOKEN",
         )
         client.embed_jobs.create(
-            model="string",
-            dataset_id="string",
+            model="model",
+            dataset_id="dataset_id",
             input_type=EmbedInputType.SEARCH_DOCUMENT,
-            truncate=CreateEmbedJobRequestTruncate.START,
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"model": model, "dataset_id": dataset_id, "input_type": input_type}
+        _request: typing.Dict[str, typing.Any] = {
+            "model": model,
+            "dataset_id": dataset_id,
+            "input_type": input_type.value,
+        }
         if name is not OMIT:
             _request["name"] = name
         if truncate is not OMIT:
-            _request["truncate"] = truncate
+            _request["truncate"] = truncate.value
         _response = self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/embed-jobs"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed-jobs"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(CreateEmbedJobResponse, _response.json())  # type: ignore
@@ -135,12 +174,14 @@ class EmbedJobsClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    def get(self, id: str) -> EmbedJob:
+    def get(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> EmbedJob:
         """
         This API retrieves the details about an embed job started by the same user.
 
         Parameters:
             - id: str. The ID of the embed job to retrieve.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import Client
 
@@ -149,14 +190,26 @@ class EmbedJobsClient:
             token="YOUR_TOKEN",
         )
         client.embed_jobs.get(
-            id="string",
+            id="id",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
             "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"v1/embed-jobs/{id}"),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"embed-jobs/{id}"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(EmbedJob, _response.json())  # type: ignore
@@ -174,12 +227,14 @@ class EmbedJobsClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    def cancel(self, id: str) -> None:
+    def cancel(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> None:
         """
         This API allows users to cancel an active embed job. Once invoked, the embedding process will be terminated, and users will be charged for the embeddings processed up to the cancellation point. It's important to note that partial results will not be available to users after cancellation.
 
         Parameters:
             - id: str. The ID of the embed job to cancel.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import Client
 
@@ -188,14 +243,29 @@ class EmbedJobsClient:
             token="YOUR_TOKEN",
         )
         client.embed_jobs.cancel(
-            id="string",
+            id="id",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"v1/embed-jobs/{id}/cancel"),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"embed-jobs/{id}/cancel"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))
+            if request_options is not None
+            else None,
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return
@@ -218,10 +288,12 @@ class AsyncEmbedJobsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def list(self) -> ListEmbedJobResponse:
+    async def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> ListEmbedJobResponse:
         """
         The list embed job endpoint allows users to view all embed jobs history for that specific user.
 
+        Parameters:
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import AsyncClient
 
@@ -233,9 +305,21 @@ class AsyncEmbedJobsClient:
         """
         _response = await self._client_wrapper.httpx_client.request(
             "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/embed-jobs"),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed-jobs"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(ListEmbedJobResponse, _response.json())  # type: ignore
@@ -259,6 +343,7 @@ class AsyncEmbedJobsClient:
         input_type: EmbedInputType,
         name: typing.Optional[str] = OMIT,
         truncate: typing.Optional[CreateEmbedJobRequestTruncate] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateEmbedJobResponse:
         """
         This API launches an async Embed job for a [Dataset](https://docs.cohere.com/docs/datasets) of type `embed-input`. The result of a completed embed job is new Dataset of type `embed-output`, which contains the original text entries and the corresponding embeddings.
@@ -282,8 +367,10 @@ class AsyncEmbedJobsClient:
             - truncate: typing.Optional[CreateEmbedJobRequestTruncate]. One of `START|END` to specify how the API will handle inputs longer than the maximum token length.
 
                                                                         Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
-                                                                        ---
-        from cohere import CreateEmbedJobRequestTruncate, EmbedInputType
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
+        ---
+        from cohere import EmbedInputType
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -291,23 +378,43 @@ class AsyncEmbedJobsClient:
             token="YOUR_TOKEN",
         )
         await client.embed_jobs.create(
-            model="string",
-            dataset_id="string",
+            model="model",
+            dataset_id="dataset_id",
             input_type=EmbedInputType.SEARCH_DOCUMENT,
-            truncate=CreateEmbedJobRequestTruncate.START,
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"model": model, "dataset_id": dataset_id, "input_type": input_type}
+        _request: typing.Dict[str, typing.Any] = {
+            "model": model,
+            "dataset_id": dataset_id,
+            "input_type": input_type.value,
+        }
         if name is not OMIT:
             _request["name"] = name
         if truncate is not OMIT:
-            _request["truncate"] = truncate
+            _request["truncate"] = truncate.value
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/embed-jobs"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed-jobs"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(CreateEmbedJobResponse, _response.json())  # type: ignore
@@ -323,12 +430,14 @@ class AsyncEmbedJobsClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    async def get(self, id: str) -> EmbedJob:
+    async def get(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> EmbedJob:
         """
         This API retrieves the details about an embed job started by the same user.
 
         Parameters:
             - id: str. The ID of the embed job to retrieve.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import AsyncClient
 
@@ -337,14 +446,26 @@ class AsyncEmbedJobsClient:
             token="YOUR_TOKEN",
         )
         await client.embed_jobs.get(
-            id="string",
+            id="id",
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
             "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"v1/embed-jobs/{id}"),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"embed-jobs/{id}"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(EmbedJob, _response.json())  # type: ignore
@@ -362,12 +483,14 @@ class AsyncEmbedJobsClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    async def cancel(self, id: str) -> None:
+    async def cancel(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> None:
         """
         This API allows users to cancel an active embed job. Once invoked, the embedding process will be terminated, and users will be charged for the embeddings processed up to the cancellation point. It's important to note that partial results will not be available to users after cancellation.
 
         Parameters:
             - id: str. The ID of the embed job to cancel.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import AsyncClient
 
@@ -376,14 +499,29 @@ class AsyncEmbedJobsClient:
             token="YOUR_TOKEN",
         )
         await client.embed_jobs.cancel(
-            id="string",
+            id="id",
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"v1/embed-jobs/{id}/cancel"),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"embed-jobs/{id}/cancel"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))
+            if request_options is not None
+            else None,
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return

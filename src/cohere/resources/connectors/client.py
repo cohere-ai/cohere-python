@@ -8,6 +8,7 @@ from ...core.api_error import ApiError
 from ...core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ...core.jsonable_encoder import jsonable_encoder
 from ...core.remove_none_from_dict import remove_none_from_dict
+from ...core.request_options import RequestOptions
 from ...errors.bad_request_error import BadRequestError
 from ...errors.forbidden_error import ForbiddenError
 from ...errors.internal_server_error import InternalServerError
@@ -36,7 +37,11 @@ class ConnectorsClient:
         self._client_wrapper = client_wrapper
 
     def list(
-        self, *, limit: typing.Optional[float] = None, offset: typing.Optional[float] = None
+        self,
+        *,
+        limit: typing.Optional[float] = None,
+        offset: typing.Optional[float] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> ListConnectorsResponse:
         """
         Returns a list of connectors ordered by descending creation date (newer first). See ['Managing your Connector'](https://docs.cohere.com/docs/managing-your-connector) for more information.
@@ -45,6 +50,8 @@ class ConnectorsClient:
             - limit: typing.Optional[float]. Maximum number of connectors to return [0, 100].
 
             - offset: typing.Optional[float]. Number of connectors to skip before returning results [0, inf].
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import Client
 
@@ -56,10 +63,31 @@ class ConnectorsClient:
         """
         _response = self._client_wrapper.httpx_client.request(
             "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/connectors"),
-            params=remove_none_from_dict({"limit": limit, "offset": offset}),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "connectors"),
+            params=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        "limit": limit,
+                        "offset": offset,
+                        **(
+                            request_options.get("additional_query_parameters", {})
+                            if request_options is not None
+                            else {}
+                        ),
+                    }
+                )
+            ),
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(ListConnectorsResponse, _response.json())  # type: ignore
@@ -86,6 +114,7 @@ class ConnectorsClient:
         active: typing.Optional[bool] = OMIT,
         continue_on_failure: typing.Optional[bool] = OMIT,
         service_auth: typing.Optional[CreateConnectorServiceAuth] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateConnectorResponse:
         """
         Creates a new connector. The connector is tested during registration and will cancel registration when the test is unsuccessful. See ['Creating and Deploying a Connector'](https://docs.cohere.com/docs/creating-and-deploying-a-connector) for more information.
@@ -106,12 +135,9 @@ class ConnectorsClient:
             - continue_on_failure: typing.Optional[bool]. Whether a chat request should continue or not if the request to this connector fails.
 
             - service_auth: typing.Optional[CreateConnectorServiceAuth]. The service to service authentication configuration for the connector. Cannot be specified if oauth is specified.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere import (
-            AuthTokenType,
-            CreateConnectorOAuth,
-            CreateConnectorServiceAuth,
-        )
         from cohere.client import Client
 
         client = Client(
@@ -119,13 +145,8 @@ class ConnectorsClient:
             token="YOUR_TOKEN",
         )
         client.connectors.create(
-            name="string",
-            url="string",
-            oauth=CreateConnectorOAuth(),
-            service_auth=CreateConnectorServiceAuth(
-                type=AuthTokenType.BEARER,
-                token="string",
-            ),
+            name="name",
+            url="url",
         )
         """
         _request: typing.Dict[str, typing.Any] = {"name": name, "url": url}
@@ -143,10 +164,27 @@ class ConnectorsClient:
             _request["service_auth"] = service_auth
         _response = self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/connectors"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "connectors"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(CreateConnectorResponse, _response.json())  # type: ignore
@@ -164,12 +202,14 @@ class ConnectorsClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    def get(self, id: str) -> GetConnectorResponse:
+    def get(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> GetConnectorResponse:
         """
         Retrieve a connector by ID. See ['Connectors'](https://docs.cohere.com/docs/connectors) for more information.
 
         Parameters:
             - id: str. The ID of the connector to retrieve.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import Client
 
@@ -178,14 +218,26 @@ class ConnectorsClient:
             token="YOUR_TOKEN",
         )
         client.connectors.get(
-            id="string",
+            id="id",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
             "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"v1/connectors/{id}"),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{id}"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(GetConnectorResponse, _response.json())  # type: ignore
@@ -203,12 +255,14 @@ class ConnectorsClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    def delete(self, id: str) -> DeleteConnectorResponse:
+    def delete(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> DeleteConnectorResponse:
         """
         Delete a connector by ID. See ['Connectors'](https://docs.cohere.com/docs/connectors) for more information.
 
         Parameters:
             - id: str. The ID of the connector to delete.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import Client
 
@@ -217,14 +271,26 @@ class ConnectorsClient:
             token="YOUR_TOKEN",
         )
         client.connectors.delete(
-            id="string",
+            id="id",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
             "DELETE",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"v1/connectors/{id}"),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{id}"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(DeleteConnectorResponse, _response.json())  # type: ignore
@@ -255,6 +321,7 @@ class ConnectorsClient:
         active: typing.Optional[bool] = OMIT,
         continue_on_failure: typing.Optional[bool] = OMIT,
         service_auth: typing.Optional[CreateConnectorServiceAuth] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> UpdateConnectorResponse:
         """
         Update a connector by ID. Omitted fields will not be updated. See ['Managing your Connector'](https://docs.cohere.com/docs/managing-your-connector) for more information.
@@ -275,12 +342,9 @@ class ConnectorsClient:
             - continue_on_failure: typing.Optional[bool].
 
             - service_auth: typing.Optional[CreateConnectorServiceAuth]. The service to service authentication configuration for the connector. Cannot be specified if oauth is specified.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere import (
-            AuthTokenType,
-            CreateConnectorOAuth,
-            CreateConnectorServiceAuth,
-        )
         from cohere.client import Client
 
         client = Client(
@@ -288,12 +352,7 @@ class ConnectorsClient:
             token="YOUR_TOKEN",
         )
         client.connectors.update(
-            id="string",
-            oauth=CreateConnectorOAuth(),
-            service_auth=CreateConnectorServiceAuth(
-                type=AuthTokenType.BEARER,
-                token="string",
-            ),
+            id="id",
         )
         """
         _request: typing.Dict[str, typing.Any] = {}
@@ -313,10 +372,27 @@ class ConnectorsClient:
             _request["service_auth"] = service_auth
         _response = self._client_wrapper.httpx_client.request(
             "PATCH",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"v1/connectors/{id}"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{id}"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(UpdateConnectorResponse, _response.json())  # type: ignore
@@ -336,7 +412,13 @@ class ConnectorsClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    def o_auth_authorize(self, id: str, *, after_token_redirect: typing.Optional[str] = None) -> OAuthAuthorizeResponse:
+    def o_auth_authorize(
+        self,
+        id: str,
+        *,
+        after_token_redirect: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> OAuthAuthorizeResponse:
         """
         Authorize the connector with the given ID for the connector oauth app. See ['Connector Authentication'](https://docs.cohere.com/docs/connector-authentication) for more information.
 
@@ -344,6 +426,8 @@ class ConnectorsClient:
             - id: str. The ID of the connector to authorize.
 
             - after_token_redirect: typing.Optional[str]. The URL to redirect to after the connector has been authorized.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import Client
 
@@ -352,15 +436,38 @@ class ConnectorsClient:
             token="YOUR_TOKEN",
         )
         client.connectors.o_auth_authorize(
-            id="string",
+            id="id",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"v1/connectors/{id}/oauth/authorize"),
-            params=remove_none_from_dict({"after_token_redirect": after_token_redirect}),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{id}/oauth/authorize"),
+            params=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        "after_token_redirect": after_token_redirect,
+                        **(
+                            request_options.get("additional_query_parameters", {})
+                            if request_options is not None
+                            else {}
+                        ),
+                    }
+                )
+            ),
+            json=jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))
+            if request_options is not None
+            else None,
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(OAuthAuthorizeResponse, _response.json())  # type: ignore
@@ -384,7 +491,11 @@ class AsyncConnectorsClient:
         self._client_wrapper = client_wrapper
 
     async def list(
-        self, *, limit: typing.Optional[float] = None, offset: typing.Optional[float] = None
+        self,
+        *,
+        limit: typing.Optional[float] = None,
+        offset: typing.Optional[float] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> ListConnectorsResponse:
         """
         Returns a list of connectors ordered by descending creation date (newer first). See ['Managing your Connector'](https://docs.cohere.com/docs/managing-your-connector) for more information.
@@ -393,6 +504,8 @@ class AsyncConnectorsClient:
             - limit: typing.Optional[float]. Maximum number of connectors to return [0, 100].
 
             - offset: typing.Optional[float]. Number of connectors to skip before returning results [0, inf].
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import AsyncClient
 
@@ -404,10 +517,31 @@ class AsyncConnectorsClient:
         """
         _response = await self._client_wrapper.httpx_client.request(
             "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/connectors"),
-            params=remove_none_from_dict({"limit": limit, "offset": offset}),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "connectors"),
+            params=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        "limit": limit,
+                        "offset": offset,
+                        **(
+                            request_options.get("additional_query_parameters", {})
+                            if request_options is not None
+                            else {}
+                        ),
+                    }
+                )
+            ),
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(ListConnectorsResponse, _response.json())  # type: ignore
@@ -434,6 +568,7 @@ class AsyncConnectorsClient:
         active: typing.Optional[bool] = OMIT,
         continue_on_failure: typing.Optional[bool] = OMIT,
         service_auth: typing.Optional[CreateConnectorServiceAuth] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateConnectorResponse:
         """
         Creates a new connector. The connector is tested during registration and will cancel registration when the test is unsuccessful. See ['Creating and Deploying a Connector'](https://docs.cohere.com/docs/creating-and-deploying-a-connector) for more information.
@@ -454,12 +589,9 @@ class AsyncConnectorsClient:
             - continue_on_failure: typing.Optional[bool]. Whether a chat request should continue or not if the request to this connector fails.
 
             - service_auth: typing.Optional[CreateConnectorServiceAuth]. The service to service authentication configuration for the connector. Cannot be specified if oauth is specified.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere import (
-            AuthTokenType,
-            CreateConnectorOAuth,
-            CreateConnectorServiceAuth,
-        )
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -467,13 +599,8 @@ class AsyncConnectorsClient:
             token="YOUR_TOKEN",
         )
         await client.connectors.create(
-            name="string",
-            url="string",
-            oauth=CreateConnectorOAuth(),
-            service_auth=CreateConnectorServiceAuth(
-                type=AuthTokenType.BEARER,
-                token="string",
-            ),
+            name="name",
+            url="url",
         )
         """
         _request: typing.Dict[str, typing.Any] = {"name": name, "url": url}
@@ -491,10 +618,27 @@ class AsyncConnectorsClient:
             _request["service_auth"] = service_auth
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "v1/connectors"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "connectors"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(CreateConnectorResponse, _response.json())  # type: ignore
@@ -512,12 +656,14 @@ class AsyncConnectorsClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    async def get(self, id: str) -> GetConnectorResponse:
+    async def get(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> GetConnectorResponse:
         """
         Retrieve a connector by ID. See ['Connectors'](https://docs.cohere.com/docs/connectors) for more information.
 
         Parameters:
             - id: str. The ID of the connector to retrieve.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import AsyncClient
 
@@ -526,14 +672,26 @@ class AsyncConnectorsClient:
             token="YOUR_TOKEN",
         )
         await client.connectors.get(
-            id="string",
+            id="id",
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
             "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"v1/connectors/{id}"),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{id}"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(GetConnectorResponse, _response.json())  # type: ignore
@@ -551,12 +709,16 @@ class AsyncConnectorsClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    async def delete(self, id: str) -> DeleteConnectorResponse:
+    async def delete(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> DeleteConnectorResponse:
         """
         Delete a connector by ID. See ['Connectors'](https://docs.cohere.com/docs/connectors) for more information.
 
         Parameters:
             - id: str. The ID of the connector to delete.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import AsyncClient
 
@@ -565,14 +727,26 @@ class AsyncConnectorsClient:
             token="YOUR_TOKEN",
         )
         await client.connectors.delete(
-            id="string",
+            id="id",
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
             "DELETE",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"v1/connectors/{id}"),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{id}"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(DeleteConnectorResponse, _response.json())  # type: ignore
@@ -603,6 +777,7 @@ class AsyncConnectorsClient:
         active: typing.Optional[bool] = OMIT,
         continue_on_failure: typing.Optional[bool] = OMIT,
         service_auth: typing.Optional[CreateConnectorServiceAuth] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> UpdateConnectorResponse:
         """
         Update a connector by ID. Omitted fields will not be updated. See ['Managing your Connector'](https://docs.cohere.com/docs/managing-your-connector) for more information.
@@ -623,12 +798,9 @@ class AsyncConnectorsClient:
             - continue_on_failure: typing.Optional[bool].
 
             - service_auth: typing.Optional[CreateConnectorServiceAuth]. The service to service authentication configuration for the connector. Cannot be specified if oauth is specified.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere import (
-            AuthTokenType,
-            CreateConnectorOAuth,
-            CreateConnectorServiceAuth,
-        )
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -636,12 +808,7 @@ class AsyncConnectorsClient:
             token="YOUR_TOKEN",
         )
         await client.connectors.update(
-            id="string",
-            oauth=CreateConnectorOAuth(),
-            service_auth=CreateConnectorServiceAuth(
-                type=AuthTokenType.BEARER,
-                token="string",
-            ),
+            id="id",
         )
         """
         _request: typing.Dict[str, typing.Any] = {}
@@ -661,10 +828,27 @@ class AsyncConnectorsClient:
             _request["service_auth"] = service_auth
         _response = await self._client_wrapper.httpx_client.request(
             "PATCH",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"v1/connectors/{id}"),
-            json=jsonable_encoder(_request),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{id}"),
+            params=jsonable_encoder(
+                request_options.get("additional_query_parameters") if request_options is not None else None
+            ),
+            json=jsonable_encoder(_request)
+            if request_options is None or request_options.get("additional_body_parameters") is None
+            else {
+                **jsonable_encoder(_request),
+                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            },
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(UpdateConnectorResponse, _response.json())  # type: ignore
@@ -685,7 +869,11 @@ class AsyncConnectorsClient:
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
     async def o_auth_authorize(
-        self, id: str, *, after_token_redirect: typing.Optional[str] = None
+        self,
+        id: str,
+        *,
+        after_token_redirect: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> OAuthAuthorizeResponse:
         """
         Authorize the connector with the given ID for the connector oauth app. See ['Connector Authentication'](https://docs.cohere.com/docs/connector-authentication) for more information.
@@ -694,6 +882,8 @@ class AsyncConnectorsClient:
             - id: str. The ID of the connector to authorize.
 
             - after_token_redirect: typing.Optional[str]. The URL to redirect to after the connector has been authorized.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import AsyncClient
 
@@ -702,15 +892,38 @@ class AsyncConnectorsClient:
             token="YOUR_TOKEN",
         )
         await client.connectors.o_auth_authorize(
-            id="string",
+            id="id",
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"v1/connectors/{id}/oauth/authorize"),
-            params=remove_none_from_dict({"after_token_redirect": after_token_redirect}),
-            headers=self._client_wrapper.get_headers(),
-            timeout=60,
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{id}/oauth/authorize"),
+            params=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        "after_token_redirect": after_token_redirect,
+                        **(
+                            request_options.get("additional_query_parameters", {})
+                            if request_options is not None
+                            else {}
+                        ),
+                    }
+                )
+            ),
+            json=jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))
+            if request_options is not None
+            else None,
+            headers=jsonable_encoder(
+                remove_none_from_dict(
+                    {
+                        **self._client_wrapper.get_headers(),
+                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                    }
+                )
+            ),
+            timeout=request_options.get("timeout_in_seconds")
+            if request_options is not None and request_options.get("timeout_in_seconds") is not None
+            else 60,
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(OAuthAuthorizeResponse, _response.json())  # type: ignore

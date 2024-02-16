@@ -4,4 +4,4 @@ import enum
 
 
 class ClientEnvironment(enum.Enum):
-    PRODUCTION = "https://api.cohere.ai"
+    PRODUCTION = "https://api.cohere.ai/v1"
