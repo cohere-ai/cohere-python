@@ -183,7 +183,6 @@ class AsyncClient(Client):
         stop_sequences: Optional[List[str]] = None,
         return_likelihoods: Optional[str] = None,
         truncate: Optional[str] = None,
-        logit_bias: Dict[int, float] = {},
         stream: bool = False,
     ) -> Union[Generations, StreamingGenerations]:
         json_body = {
@@ -202,7 +201,6 @@ class AsyncClient(Client):
             "stop_sequences": stop_sequences,
             "return_likelihoods": return_likelihoods,
             "truncate": truncate,
-            "logit_bias": logit_bias,
             "stream": stream,
         }
         response = await self._request(cohere.GENERATE_URL, json=json_body, stream=stream)

@@ -78,12 +78,6 @@ class TestGenerate(unittest.TestCase):
         prediction = co.generate(preset="SDK-PRESET-TEST-t94jfm")
         self.assertIsInstance(prediction.generations[0].text, str)
 
-    def test_logit_bias(self):
-        prediction = co.generate(model="command-light", prompt="co:here", logit_bias={11: -5.5}, max_tokens=1)
-        self.assertIsInstance(prediction.generations[0].text, str)
-        self.assertIsNone(prediction.generations[0].token_likelihoods)
-        self.assertEqual(prediction.return_likelihoods, None)
-
     def test_prompt_vars(self):
         prediction = co.generate(prompt="Hello {{ name }}", prompt_vars={"name": "Aidan"})
         self.assertIsInstance(prediction.generations[0].text, str)
