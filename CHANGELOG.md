@@ -1,6 +1,6 @@
 # Changelog
 ## 4.48
-- [#?] (https://github.com/cohere-ai/cohere-python/pull/?)
+- [#380] (https://github.com/cohere-ai/cohere-python/pull/380)
   - Remove logit_bias parameter from Generate
 
 ## 4.47
