@@ -5,6 +5,7 @@ import httpx
 from . import BaseCohereEnvironment
 from .base_client import BaseCohere
 
+
 class Client(BaseCohere):
     def __init__(
             self,
@@ -16,7 +17,8 @@ class Client(BaseCohere):
             timeout: typing.Optional[float] = 60,
             httpx_client: typing.Optional[httpx.Client] = None,
     ):
-        super(BaseCohere, self).__init__(
+        BaseCohere.__init__(
+            self,
             base_url=base_url,
             environment=environment,
             client_name=client_name,
