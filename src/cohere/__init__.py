@@ -114,7 +114,7 @@ from .resources import (
     datasets,
     embed_jobs,
 )
-from .environment import ClientEnvironment
+from .environment import BaseCohereEnvironment
 
 __all__ = [
     "ApiMeta",
@@ -122,6 +122,7 @@ __all__ = [
     "ApiMetaBilledUnits",
     "AuthTokenType",
     "BadRequestError",
+    "BaseCohereEnvironment",
     "ChatCitation",
     "ChatCitationGenerationEvent",
     "ChatConnector",
@@ -152,7 +153,6 @@ __all__ = [
     "ClassifyResponseClassificationsItem",
     "ClassifyResponseClassificationsItemClassificationType",
     "ClassifyResponseClassificationsItemLabelsValue",
-    "ClientEnvironment",
     "Connector",
     "ConnectorAuthStatus",
     "ConnectorOAuth",
