@@ -1,4 +1,8 @@
 # Changelog
+## 4.48
+- [#380] (https://github.com/cohere-ai/cohere-python/pull/380)
+  - Remove logit_bias parameter from Generate
+
 ## 4.47
  - [#378] (https://github.com/cohere-ai/cohere-python/pull/378)
     - Adds embedding_types to embed job

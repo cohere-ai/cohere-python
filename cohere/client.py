@@ -160,7 +160,6 @@ class Client:
         stop_sequences: Optional[List[str]] = None,
         return_likelihoods: Optional[str] = None,
         truncate: Optional[str] = None,
-        logit_bias: Dict[int, float] = {},
         stream: bool = False,
     ) -> Union[Generations, StreamingGenerations]:
         """Generate endpoint.
@@ -217,7 +216,6 @@ class Client:
             "stop_sequences": stop_sequences,
             "return_likelihoods": return_likelihoods,
             "truncate": truncate,
-            "logit_bias": logit_bias,
             "stream": stream,
         }
         response = self._request(cohere.GENERATE_URL, json=json_body, stream=stream)
@@ -263,7 +261,6 @@ class Client:
             temperature (float): (Optional) The temperature to use for the response. The higher the temperature, the more random the response.
             p (float): (Optional) The nucleus sampling probability.
             k (float): (Optional) The top-k sampling probability.
-            logit_bias (Dict[int, float]): (Optional) A dictionary of logit bias values to use for the next reply.
             max_tokens (int): (Optional) The max tokens generated for the next reply.
 
             return_chat_history (bool): (Optional) Whether to return the chat history.
