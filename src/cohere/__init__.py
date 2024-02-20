@@ -115,6 +115,7 @@ from .resources import (
     embed_jobs,
 )
 from .environment import BaseCohereEnvironment
+from .client import Client
 
 __all__ = [
     "ApiMeta",
