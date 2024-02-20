@@ -12,7 +12,7 @@ from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from .core.jsonable_encoder import jsonable_encoder
 from .core.remove_none_from_dict import remove_none_from_dict
 from .core.request_options import RequestOptions
-from .environment import ClientEnvironment
+from .environment import BaseCohereEnvironment
 from .errors.bad_request_error import BadRequestError
 from .errors.internal_server_error import InternalServerError
 from .errors.too_many_requests_error import TooManyRequestsError
@@ -59,12 +59,12 @@ except ImportError:
 OMIT = typing.cast(typing.Any, ...)
 
 
-class Client:
+class BaseCohere:
     def __init__(
         self,
         *,
         base_url: typing.Optional[str] = None,
-        environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
+        environment: BaseCohereEnvironment = BaseCohereEnvironment.PRODUCTION,
         client_name: typing.Optional[str] = None,
         token: typing.Union[str, typing.Callable[[], str]],
         timeout: typing.Optional[float] = 60,
@@ -166,7 +166,7 @@ class Client:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         """
-        _request: typing.Dict[str, typing.Any] = {"message": message, "stream": stream}
+        _request: typing.Dict[str, typing.Any] = {"message": message, "stream": True}
         if model is not OMIT:
             _request["model"] = model
         if preamble_override is not OMIT:
@@ -176,7 +176,7 @@ class Client:
         if conversation_id is not OMIT:
             _request["conversation_id"] = conversation_id
         if prompt_truncation is not OMIT:
-            _request["prompt_truncation"] = prompt_truncation.value
+            _request["prompt_truncation"] = prompt_truncation.value if prompt_truncation is not None else None
         if connectors is not OMIT:
             _request["connectors"] = connectors
         if search_queries_only is not OMIT:
@@ -184,7 +184,7 @@ class Client:
         if documents is not OMIT:
             _request["documents"] = documents
         if citation_quality is not OMIT:
-            _request["citation_quality"] = citation_quality.value
+            _request["citation_quality"] = citation_quality.value if citation_quality is not None else None
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if max_tokens is not OMIT:
@@ -323,15 +323,14 @@ class Client:
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere import ChatMessage, ChatMessageRole, ChatRequestPromptTruncation
-        from cohere.client import Client
+        from cohere.base_client import BaseCohere
 
-        client = Client(
+        client = BaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
         client.chat(
             message="Can you give me a global market overview of solar panels?",
-            stream=False,
             chat_history=[
                 ChatMessage(
                     role=ChatMessageRole.CHATBOT,
@@ -350,7 +349,7 @@ class Client:
             temperature=0.3,
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"message": message, "stream": stream}
+        _request: typing.Dict[str, typing.Any] = {"message": message, "stream": False}
         if model is not OMIT:
             _request["model"] = model
         if preamble_override is not OMIT:
@@ -360,7 +359,7 @@ class Client:
         if conversation_id is not OMIT:
             _request["conversation_id"] = conversation_id
         if prompt_truncation is not OMIT:
-            _request["prompt_truncation"] = prompt_truncation.value
+            _request["prompt_truncation"] = prompt_truncation.value if prompt_truncation is not None else None
         if connectors is not OMIT:
             _request["connectors"] = connectors
         if search_queries_only is not OMIT:
@@ -368,7 +367,7 @@ class Client:
         if documents is not OMIT:
             _request["documents"] = documents
         if citation_quality is not OMIT:
-            _request["citation_quality"] = citation_quality.value
+            _request["citation_quality"] = citation_quality.value if citation_quality is not None else None
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if max_tokens is not OMIT:
@@ -498,7 +497,7 @@ class Client:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         """
-        _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": stream}
+        _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": True}
         if model is not OMIT:
             _request["model"] = model
         if num_generations is not OMIT:
@@ -506,7 +505,7 @@ class Client:
         if max_tokens is not OMIT:
             _request["max_tokens"] = max_tokens
         if truncate is not OMIT:
-            _request["truncate"] = truncate.value
+            _request["truncate"] = truncate.value if truncate is not None else None
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if preset is not OMIT:
@@ -524,7 +523,7 @@ class Client:
         if presence_penalty is not OMIT:
             _request["presence_penalty"] = presence_penalty
         if return_likelihoods is not OMIT:
-            _request["return_likelihoods"] = return_likelihoods.value
+            _request["return_likelihoods"] = return_likelihoods.value if return_likelihoods is not None else None
         if logit_bias is not OMIT:
             _request["logit_bias"] = logit_bias
         if raw_prompting is not OMIT:
@@ -655,19 +654,18 @@ class Client:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Client
+        from cohere.base_client import BaseCohere
 
-        client = Client(
+        client = BaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
         client.generate(
             prompt="Please explain to me how LLMs work",
-            stream=False,
             preset="my-preset-a58sbd",
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": stream}
+        _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": False}
         if model is not OMIT:
             _request["model"] = model
         if num_generations is not OMIT:
@@ -675,7 +673,7 @@ class Client:
         if max_tokens is not OMIT:
             _request["max_tokens"] = max_tokens
         if truncate is not OMIT:
-            _request["truncate"] = truncate.value
+            _request["truncate"] = truncate.value if truncate is not None else None
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if preset is not OMIT:
@@ -693,7 +691,7 @@ class Client:
         if presence_penalty is not OMIT:
             _request["presence_penalty"] = presence_penalty
         if return_likelihoods is not OMIT:
-            _request["return_likelihoods"] = return_likelihoods.value
+            _request["return_likelihoods"] = return_likelihoods.value if return_likelihoods is not None else None
         if logit_bias is not OMIT:
             _request["logit_bias"] = logit_bias
         if raw_prompting is not OMIT:
@@ -790,11 +788,11 @@ class Client:
         if model is not OMIT:
             _request["model"] = model
         if input_type is not OMIT:
-            _request["input_type"] = input_type.value
+            _request["input_type"] = input_type.value if input_type is not None else None
         if embedding_types is not OMIT:
             _request["embedding_types"] = embedding_types
         if truncate is not OMIT:
-            _request["truncate"] = truncate.value
+            _request["truncate"] = truncate.value if truncate is not None else None
         _response = self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed"),
@@ -866,9 +864,9 @@ class Client:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Client
+        from cohere.base_client import BaseCohere
 
-        client = Client(
+        client = BaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -951,9 +949,9 @@ class Client:
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere import ClassifyExample
-        from cohere.client import Client
+        from cohere.base_client import BaseCohere
 
-        client = Client(
+        client = BaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -1015,7 +1013,7 @@ class Client:
         if preset is not OMIT:
             _request["preset"] = preset
         if truncate is not OMIT:
-            _request["truncate"] = truncate.value
+            _request["truncate"] = truncate.value if truncate is not None else None
         _response = self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "classify"),
@@ -1086,9 +1084,9 @@ class Client:
 
                    - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
                ---
-               from cohere.client import Client
+               from cohere.base_client import BaseCohere
 
-               client = Client(client_name="YOUR_CLIENT_NAME", token="YOUR_TOKEN", )
+               client = BaseCohere(client_name="YOUR_CLIENT_NAME", token="YOUR_TOKEN", )
                client.summarize(text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.
 
                The meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo
@@ -1096,13 +1094,13 @@ class Client:
         """
         _request: typing.Dict[str, typing.Any] = {"text": text}
         if length is not OMIT:
-            _request["length"] = length.value
+            _request["length"] = length.value if length is not None else None
         if format is not OMIT:
-            _request["format"] = format.value
+            _request["format"] = format.value if format is not None else None
         if model is not OMIT:
             _request["model"] = model
         if extractiveness is not OMIT:
-            _request["extractiveness"] = extractiveness.value
+            _request["extractiveness"] = extractiveness.value if extractiveness is not None else None
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if additional_command is not OMIT:
@@ -1154,9 +1152,9 @@ class Client:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Client
+        from cohere.base_client import BaseCohere
 
-        client = Client(
+        client = BaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -1223,9 +1221,9 @@ class Client:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Client
+        from cohere.base_client import BaseCohere
 
-        client = Client(
+        client = BaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -1271,12 +1269,12 @@ class Client:
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
 
-class AsyncClient:
+class AsyncBaseCohere:
     def __init__(
         self,
         *,
         base_url: typing.Optional[str] = None,
-        environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
+        environment: BaseCohereEnvironment = BaseCohereEnvironment.PRODUCTION,
         client_name: typing.Optional[str] = None,
         token: typing.Union[str, typing.Callable[[], str]],
         timeout: typing.Optional[float] = 60,
@@ -1378,7 +1376,7 @@ class AsyncClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         """
-        _request: typing.Dict[str, typing.Any] = {"message": message, "stream": stream}
+        _request: typing.Dict[str, typing.Any] = {"message": message, "stream": True}
         if model is not OMIT:
             _request["model"] = model
         if preamble_override is not OMIT:
@@ -1388,7 +1386,7 @@ class AsyncClient:
         if conversation_id is not OMIT:
             _request["conversation_id"] = conversation_id
         if prompt_truncation is not OMIT:
-            _request["prompt_truncation"] = prompt_truncation.value
+            _request["prompt_truncation"] = prompt_truncation.value if prompt_truncation is not None else None
         if connectors is not OMIT:
             _request["connectors"] = connectors
         if search_queries_only is not OMIT:
@@ -1396,7 +1394,7 @@ class AsyncClient:
         if documents is not OMIT:
             _request["documents"] = documents
         if citation_quality is not OMIT:
-            _request["citation_quality"] = citation_quality.value
+            _request["citation_quality"] = citation_quality.value if citation_quality is not None else None
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if max_tokens is not OMIT:
@@ -1535,15 +1533,14 @@ class AsyncClient:
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere import ChatMessage, ChatMessageRole, ChatRequestPromptTruncation
-        from cohere.client import AsyncClient
+        from cohere.base_client import AsyncBaseCohere
 
-        client = AsyncClient(
+        client = AsyncBaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
         await client.chat(
             message="Can you give me a global market overview of solar panels?",
-            stream=False,
             chat_history=[
                 ChatMessage(
                     role=ChatMessageRole.CHATBOT,
@@ -1562,7 +1559,7 @@ class AsyncClient:
             temperature=0.3,
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"message": message, "stream": stream}
+        _request: typing.Dict[str, typing.Any] = {"message": message, "stream": False}
         if model is not OMIT:
             _request["model"] = model
         if preamble_override is not OMIT:
@@ -1572,7 +1569,7 @@ class AsyncClient:
         if conversation_id is not OMIT:
             _request["conversation_id"] = conversation_id
         if prompt_truncation is not OMIT:
-            _request["prompt_truncation"] = prompt_truncation.value
+            _request["prompt_truncation"] = prompt_truncation.value if prompt_truncation is not None else None
         if connectors is not OMIT:
             _request["connectors"] = connectors
         if search_queries_only is not OMIT:
@@ -1580,7 +1577,7 @@ class AsyncClient:
         if documents is not OMIT:
             _request["documents"] = documents
         if citation_quality is not OMIT:
-            _request["citation_quality"] = citation_quality.value
+            _request["citation_quality"] = citation_quality.value if citation_quality is not None else None
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if max_tokens is not OMIT:
@@ -1710,7 +1707,7 @@ class AsyncClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         """
-        _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": stream}
+        _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": True}
         if model is not OMIT:
             _request["model"] = model
         if num_generations is not OMIT:
@@ -1718,7 +1715,7 @@ class AsyncClient:
         if max_tokens is not OMIT:
             _request["max_tokens"] = max_tokens
         if truncate is not OMIT:
-            _request["truncate"] = truncate.value
+            _request["truncate"] = truncate.value if truncate is not None else None
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if preset is not OMIT:
@@ -1736,7 +1733,7 @@ class AsyncClient:
         if presence_penalty is not OMIT:
             _request["presence_penalty"] = presence_penalty
         if return_likelihoods is not OMIT:
-            _request["return_likelihoods"] = return_likelihoods.value
+            _request["return_likelihoods"] = return_likelihoods.value if return_likelihoods is not None else None
         if logit_bias is not OMIT:
             _request["logit_bias"] = logit_bias
         if raw_prompting is not OMIT:
@@ -1867,19 +1864,18 @@ class AsyncClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncClient
+        from cohere.base_client import AsyncBaseCohere
 
-        client = AsyncClient(
+        client = AsyncBaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
         await client.generate(
             prompt="Please explain to me how LLMs work",
-            stream=False,
             preset="my-preset-a58sbd",
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": stream}
+        _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": False}
         if model is not OMIT:
             _request["model"] = model
         if num_generations is not OMIT:
@@ -1887,7 +1883,7 @@ class AsyncClient:
         if max_tokens is not OMIT:
             _request["max_tokens"] = max_tokens
         if truncate is not OMIT:
-            _request["truncate"] = truncate.value
+            _request["truncate"] = truncate.value if truncate is not None else None
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if preset is not OMIT:
@@ -1905,7 +1901,7 @@ class AsyncClient:
         if presence_penalty is not OMIT:
             _request["presence_penalty"] = presence_penalty
         if return_likelihoods is not OMIT:
-            _request["return_likelihoods"] = return_likelihoods.value
+            _request["return_likelihoods"] = return_likelihoods.value if return_likelihoods is not None else None
         if logit_bias is not OMIT:
             _request["logit_bias"] = logit_bias
         if raw_prompting is not OMIT:
@@ -2002,11 +1998,11 @@ class AsyncClient:
         if model is not OMIT:
             _request["model"] = model
         if input_type is not OMIT:
-            _request["input_type"] = input_type.value
+            _request["input_type"] = input_type.value if input_type is not None else None
         if embedding_types is not OMIT:
             _request["embedding_types"] = embedding_types
         if truncate is not OMIT:
-            _request["truncate"] = truncate.value
+            _request["truncate"] = truncate.value if truncate is not None else None
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed"),
@@ -2078,9 +2074,9 @@ class AsyncClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncClient
+        from cohere.base_client import AsyncBaseCohere
 
-        client = AsyncClient(
+        client = AsyncBaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -2163,9 +2159,9 @@ class AsyncClient:
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere import ClassifyExample
-        from cohere.client import AsyncClient
+        from cohere.base_client import AsyncBaseCohere
 
-        client = AsyncClient(
+        client = AsyncBaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -2227,7 +2223,7 @@ class AsyncClient:
         if preset is not OMIT:
             _request["preset"] = preset
         if truncate is not OMIT:
-            _request["truncate"] = truncate.value
+            _request["truncate"] = truncate.value if truncate is not None else None
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "classify"),
@@ -2298,9 +2294,9 @@ class AsyncClient:
 
                    - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
                ---
-               from cohere.client import AsyncClient
+               from cohere.base_client import AsyncBaseCohere
 
-               client = AsyncClient(client_name="YOUR_CLIENT_NAME", token="YOUR_TOKEN", )
+               client = AsyncBaseCohere(client_name="YOUR_CLIENT_NAME", token="YOUR_TOKEN", )
                await client.summarize(text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.
 
                The meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo
@@ -2308,13 +2304,13 @@ class AsyncClient:
         """
         _request: typing.Dict[str, typing.Any] = {"text": text}
         if length is not OMIT:
-            _request["length"] = length.value
+            _request["length"] = length.value if length is not None else None
         if format is not OMIT:
-            _request["format"] = format.value
+            _request["format"] = format.value if format is not None else None
         if model is not OMIT:
             _request["model"] = model
         if extractiveness is not OMIT:
-            _request["extractiveness"] = extractiveness.value
+            _request["extractiveness"] = extractiveness.value if extractiveness is not None else None
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if additional_command is not OMIT:
@@ -2366,9 +2362,9 @@ class AsyncClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncClient
+        from cohere.base_client import AsyncBaseCohere
 
-        client = AsyncClient(
+        client = AsyncBaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -2435,9 +2431,9 @@ class AsyncClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncClient
+        from cohere.base_client import AsyncBaseCohere
 
-        client = AsyncClient(
+        client = AsyncBaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -2483,7 +2479,7 @@ class AsyncClient:
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
 
-def _get_base_url(*, base_url: typing.Optional[str] = None, environment: ClientEnvironment) -> str:
+def _get_base_url(*, base_url: typing.Optional[str] = None, environment: BaseCohereEnvironment) -> str:
     if base_url is not None:
         return base_url
     elif environment is not None:
