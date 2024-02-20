@@ -8,6 +8,7 @@ from .chat_citation import ChatCitation
 from .chat_document import ChatDocument
 from .chat_search_query import ChatSearchQuery
 from .chat_search_result import ChatSearchResult
+from .finish_reason import FinishReason
 
 try:
     import pydantic.v1 as pydantic  # type: ignore
@@ -35,6 +36,7 @@ class NonStreamedChatResponse(pydantic.BaseModel):
     search_results: typing.Optional[typing.List[ChatSearchResult]] = pydantic.Field(
         description="Documents retrieved from each of the conducted searches."
     )
+    finish_reason: typing.Optional[FinishReason]
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

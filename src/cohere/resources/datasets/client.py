@@ -57,9 +57,9 @@ class DatasetsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Client
+        from cohere.base_client import BaseCohere
 
-        client = Client(
+        client = BaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -154,7 +154,7 @@ class DatasetsClient:
                 remove_none_from_dict(
                     {
                         "name": name,
-                        "type": type,
+                        "type": type.value if type is not None else None,
                         "keep_original_file": keep_original_file,
                         "skip_malformed_input": skip_malformed_input,
                         "keep_fields": keep_fields,
@@ -205,9 +205,9 @@ class DatasetsClient:
         Parameters:
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Client
+        from cohere.base_client import BaseCohere
 
-        client = Client(
+        client = BaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -250,9 +250,9 @@ class DatasetsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Client
+        from cohere.base_client import BaseCohere
 
-        client = Client(
+        client = BaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -299,9 +299,9 @@ class DatasetsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Client
+        from cohere.base_client import BaseCohere
 
-        client = Client(
+        client = BaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -368,9 +368,9 @@ class AsyncDatasetsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncClient
+        from cohere.base_client import AsyncBaseCohere
 
-        client = AsyncClient(
+        client = AsyncBaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -465,7 +465,7 @@ class AsyncDatasetsClient:
                 remove_none_from_dict(
                     {
                         "name": name,
-                        "type": type,
+                        "type": type.value if type is not None else None,
                         "keep_original_file": keep_original_file,
                         "skip_malformed_input": skip_malformed_input,
                         "keep_fields": keep_fields,
@@ -516,9 +516,9 @@ class AsyncDatasetsClient:
         Parameters:
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncClient
+        from cohere.base_client import AsyncBaseCohere
 
-        client = AsyncClient(
+        client = AsyncBaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -561,9 +561,9 @@ class AsyncDatasetsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncClient
+        from cohere.base_client import AsyncBaseCohere
 
-        client = AsyncClient(
+        client = AsyncBaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -610,9 +610,9 @@ class AsyncDatasetsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncClient
+        from cohere.base_client import AsyncBaseCohere
 
-        client = AsyncClient(
+        client = AsyncBaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )

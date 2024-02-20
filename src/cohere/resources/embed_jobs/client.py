@@ -39,9 +39,9 @@ class EmbedJobsClient:
         Parameters:
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Client
+        from cohere.base_client import BaseCohere
 
-        client = Client(
+        client = BaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -115,9 +115,9 @@ class EmbedJobsClient:
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere import EmbedInputType
-        from cohere.client import Client
+        from cohere.base_client import BaseCohere
 
-        client = Client(
+        client = BaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -135,7 +135,7 @@ class EmbedJobsClient:
         if name is not OMIT:
             _request["name"] = name
         if truncate is not OMIT:
-            _request["truncate"] = truncate.value
+            _request["truncate"] = truncate.value if truncate is not None else None
         _response = self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed-jobs"),
@@ -183,9 +183,9 @@ class EmbedJobsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Client
+        from cohere.base_client import BaseCohere
 
-        client = Client(
+        client = BaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -236,9 +236,9 @@ class EmbedJobsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Client
+        from cohere.base_client import BaseCohere
 
-        client = Client(
+        client = BaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -295,9 +295,9 @@ class AsyncEmbedJobsClient:
         Parameters:
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncClient
+        from cohere.base_client import AsyncBaseCohere
 
-        client = AsyncClient(
+        client = AsyncBaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -371,9 +371,9 @@ class AsyncEmbedJobsClient:
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere import EmbedInputType
-        from cohere.client import AsyncClient
+        from cohere.base_client import AsyncBaseCohere
 
-        client = AsyncClient(
+        client = AsyncBaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -391,7 +391,7 @@ class AsyncEmbedJobsClient:
         if name is not OMIT:
             _request["name"] = name
         if truncate is not OMIT:
-            _request["truncate"] = truncate.value
+            _request["truncate"] = truncate.value if truncate is not None else None
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed-jobs"),
@@ -439,9 +439,9 @@ class AsyncEmbedJobsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncClient
+        from cohere.base_client import AsyncBaseCohere
 
-        client = AsyncClient(
+        client = AsyncBaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -492,9 +492,9 @@ class AsyncEmbedJobsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncClient
+        from cohere.base_client import AsyncBaseCohere
 
-        client = AsyncClient(
+        client = AsyncBaseCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
