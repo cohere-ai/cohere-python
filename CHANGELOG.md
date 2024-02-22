@@ -1,6 +1,6 @@
 # Changelog
 ## 4.49
-- [#381] (https://github.com/cohere-ai/cohere-python/pull/381)
+- [#384] (https://github.com/cohere-ai/cohere-python/pull/384)
   - Add finish_reason to non stream chat
 
 ## 4.48
