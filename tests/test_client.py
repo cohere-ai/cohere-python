@@ -1,4 +1,5 @@
 import os
+import typing
 from time import sleep
 
 import cohere
@@ -80,7 +81,7 @@ def test_embed_job_crud() -> None:
 
 
 def test_rerank() -> None:
-    docs: list[str | RerankRequestDocumentsItemText] = [
+    docs: typing.List[str | RerankRequestDocumentsItemText] = [
         'Carson City is the capital city of the American state of Nevada.',
         'The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.',
         'Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.',
