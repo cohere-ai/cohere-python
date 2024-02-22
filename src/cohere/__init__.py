@@ -260,3 +260,4 @@ __all__ = [
     "models",
 ]
 from .client import Client
+from .client import AsyncClient
