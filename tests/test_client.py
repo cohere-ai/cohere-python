@@ -3,7 +3,7 @@ from time import sleep
 
 import cohere
 from cohere import ChatMessage, ChatMessageRole, ChatConnector, EmbedInputType, ClassifyExample, DatasetType, \
-    DatasetValidationStatus, EmbedJobStatus, CreateConnectorServiceAuth
+    DatasetValidationStatus, EmbedJobStatus, CreateConnectorServiceAuth, RerankRequestDocumentsItemText, AuthTokenType
 
 co = cohere.Client(os.environ['COHERE_API_KEY'], timeout=10000)
 
@@ -17,7 +17,8 @@ def test_chat() -> None:
                                                               "gravity is Sir Isaac Newton")
         ],
         message="What year was he born?",
-        connectors=[ChatConnector(id="web-search")]
+        connectors=[ChatConnector(
+            id="web-search", user_access_token="", continue_on_failure=False, options={})]
     )
 
     print(chat)
@@ -47,7 +48,7 @@ def test_embed_job_crud() -> None:
     )
 
     while True:
-        ds = co.datasets.get(dataset.id)
+        ds = co.datasets.get(dataset.id or "")
         sleep(2)
         print(ds, flush=True)
         if ds.dataset.validation_status != DatasetValidationStatus.PROCESSING:
@@ -55,7 +56,7 @@ def test_embed_job_crud() -> None:
 
     # start an embed job
     job = co.embed_jobs.create(
-        dataset_id=dataset.id,
+        dataset_id=dataset.id or "",
         input_type=EmbedInputType.SEARCH_DOCUMENT,
         model='embed-english-v3.0')
 
@@ -75,14 +76,15 @@ def test_embed_job_crud() -> None:
 
     co.embed_jobs.cancel(job.job_id)
 
-    co.datasets.delete(dataset.id)
+    co.datasets.delete(dataset.id or "")
 
 
 def test_rerank() -> None:
-    docs = ['Carson City is the capital city of the American state of Nevada.',
-            'The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.',
-            'Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.',
-            'Capital punishment (the death penalty) has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states.']
+    docs: list[str | RerankRequestDocumentsItemText] = [
+        'Carson City is the capital city of the American state of Nevada.',
+        'The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.',
+        'Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.',
+        'Capital punishment (the death penalty) has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states.']
 
     response = co.rerank(
         model='rerank-english-v2.0',
@@ -135,11 +137,11 @@ def test_datasets_crud() -> None:
 
     print(my_datasets)
 
-    dataset = co.datasets.get(my_dataset.id)
+    dataset = co.datasets.get(my_dataset.id or "")
 
     print(dataset)
 
-    co.datasets.delete(my_dataset.id)
+    co.datasets.delete(my_dataset.id or "")
 
 
 def test_summarize() -> None:
@@ -195,7 +197,7 @@ def test_connectors_crud() -> None:
         url="https://dummy-connector-o5btz7ucgq-uc.a.run.app/search",
         service_auth=CreateConnectorServiceAuth(
             token="dummy-connector-token",
-            type="bearer",
+            type=AuthTokenType.BEARER,
         )
     )
     print(created_connector)
