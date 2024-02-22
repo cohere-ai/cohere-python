@@ -1,4 +1,8 @@
 # Changelog
+## 4.49
+- [#381] (https://github.com/cohere-ai/cohere-python/pull/381)
+  - Add finish_reason to non stream chat
+
 ## 4.48
 - [#380] (https://github.com/cohere-ai/cohere-python/pull/380)
   - Remove logit_bias parameter from Generate

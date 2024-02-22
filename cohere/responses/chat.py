@@ -25,6 +25,7 @@ class Chat(CohereObject):
         documents: Optional[List[Dict[str, Any]]] = None,
         search_results: Optional[List[Dict[str, Any]]] = None,
         search_queries: Optional[List[Dict[str, Any]]] = None,
+        finish_reason: Optional[str] = None,
         client=None,
         **kwargs,
     ) -> None:
@@ -45,6 +46,7 @@ class Chat(CohereObject):
         self.documents = documents  # optional
         self.search_results = search_results  # optional
         self.search_queries = search_queries  # optional
+        self.finish_reason = finish_reason
 
     @classmethod
     def from_dict(cls, response: Dict[str, Any], message: str, client) -> "Chat":
@@ -66,6 +68,7 @@ class Chat(CohereObject):
             documents=response.get("documents"),  # optional
             search_results=response.get("search_results"),  # optional
             search_queries=response.get("search_queries"),  # optional
+            finish_reason=response.get("finish_reason"),
         )
 
     def respond(self, response: str, max_tokens: int = None) -> "Chat":
