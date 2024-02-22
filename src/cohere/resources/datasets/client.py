@@ -5,6 +5,7 @@ import typing
 import urllib.parse
 from json.decoder import JSONDecodeError
 
+from ... import core
 from ...core.api_error import ApiError
 from ...core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ...core.datetime_utils import serialize_datetime
@@ -117,8 +118,8 @@ class DatasetsClient:
         optional_fields: typing.Optional[typing.Union[str, typing.List[str]]] = None,
         text_separator: typing.Optional[str] = None,
         csv_delimiter: typing.Optional[str] = None,
-        data: typing.IO,
-        eval_data: typing.Optional[typing.IO] = None,
+        data: core.File,
+        eval_data: typing.Optional[core.File] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> DatasetsCreateResponse:
         """
@@ -141,9 +142,9 @@ class DatasetsClient:
 
             - csv_delimiter: typing.Optional[str]. The delimiter used for .csv uploads.
 
-            - data: typing.IO.
+            - data: core.File. See core.File for more documentation
 
-            - eval_data: typing.Optional[typing.IO].
+            - eval_data: typing.Optional[core.File]. See core.File for more documentation
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         """
@@ -175,7 +176,7 @@ class DatasetsClient:
                 **jsonable_encoder(remove_none_from_dict({})),
                 **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
             },
-            files=remove_none_from_dict({"data": data, "eval_data": eval_data}),
+            files=core.convert_file_dict_to_httpx_tuples(remove_none_from_dict({"data": data, "eval_data": eval_data})),
             headers=jsonable_encoder(
                 remove_none_from_dict(
                     {
@@ -428,8 +429,8 @@ class AsyncDatasetsClient:
         optional_fields: typing.Optional[typing.Union[str, typing.List[str]]] = None,
         text_separator: typing.Optional[str] = None,
         csv_delimiter: typing.Optional[str] = None,
-        data: typing.IO,
-        eval_data: typing.Optional[typing.IO] = None,
+        data: core.File,
+        eval_data: typing.Optional[core.File] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> DatasetsCreateResponse:
         """
@@ -452,9 +453,9 @@ class AsyncDatasetsClient:
 
             - csv_delimiter: typing.Optional[str]. The delimiter used for .csv uploads.
 
-            - data: typing.IO.
+            - data: core.File. See core.File for more documentation
 
-            - eval_data: typing.Optional[typing.IO].
+            - eval_data: typing.Optional[core.File]. See core.File for more documentation
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         """
@@ -486,7 +487,7 @@ class AsyncDatasetsClient:
                 **jsonable_encoder(remove_none_from_dict({})),
                 **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
             },
-            files=remove_none_from_dict({"data": data, "eval_data": eval_data}),
+            files=core.convert_file_dict_to_httpx_tuples(remove_none_from_dict({"data": data, "eval_data": eval_data})),
             headers=jsonable_encoder(
                 remove_none_from_dict(
                     {
