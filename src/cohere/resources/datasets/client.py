@@ -117,7 +117,7 @@ class DatasetsClient:
         optional_fields: typing.Optional[typing.Union[str, typing.List[str]]] = None,
         text_separator: typing.Optional[str] = None,
         csv_delimiter: typing.Optional[str] = None,
-        data: typing.Optional[typing.IO] = None,
+        data: typing.IO,
         eval_data: typing.Optional[typing.IO] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> DatasetsCreateResponse:
@@ -141,7 +141,7 @@ class DatasetsClient:
 
             - csv_delimiter: typing.Optional[str]. The delimiter used for .csv uploads.
 
-            - data: typing.Optional[typing.IO].
+            - data: typing.IO.
 
             - eval_data: typing.Optional[typing.IO].
 
@@ -428,7 +428,7 @@ class AsyncDatasetsClient:
         optional_fields: typing.Optional[typing.Union[str, typing.List[str]]] = None,
         text_separator: typing.Optional[str] = None,
         csv_delimiter: typing.Optional[str] = None,
-        data: typing.Optional[typing.IO] = None,
+        data: typing.IO,
         eval_data: typing.Optional[typing.IO] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> DatasetsCreateResponse:
@@ -452,7 +452,7 @@ class AsyncDatasetsClient:
 
             - csv_delimiter: typing.Optional[str]. The delimiter used for .csv uploads.
 
-            - data: typing.Optional[typing.IO].
+            - data: typing.IO.
 
             - eval_data: typing.Optional[typing.IO].
 

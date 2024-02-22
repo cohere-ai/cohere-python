@@ -7,6 +7,10 @@ T_Result = typing.TypeVar("T_Result")
 
 
 class ChatMessageRole(str, enum.Enum):
+    """
+    One of CHATBOT|USER to identify who the message is coming from.
+    """
+
     CHATBOT = "CHATBOT"
     USER = "USER"
 

@@ -19,12 +19,11 @@ from .errors.too_many_requests_error import TooManyRequestsError
 from .resources.connectors.client import AsyncConnectorsClient, ConnectorsClient
 from .resources.datasets.client import AsyncDatasetsClient, DatasetsClient
 from .resources.embed_jobs.client import AsyncEmbedJobsClient, EmbedJobsClient
+from .resources.models.client import AsyncModelsClient, ModelsClient
 from .types.chat_connector import ChatConnector
 from .types.chat_document import ChatDocument
 from .types.chat_message import ChatMessage
-from .types.chat_request_citation_quality import ChatRequestCitationQuality
 from .types.chat_request_prompt_truncation import ChatRequestPromptTruncation
-from .types.chat_stream_request_citation_quality import ChatStreamRequestCitationQuality
 from .types.chat_stream_request_prompt_truncation import ChatStreamRequestPromptTruncation
 from .types.classify_example import ClassifyExample
 from .types.classify_request_truncate import ClassifyRequestTruncate
@@ -79,6 +78,7 @@ class BaseCohere:
         self.embed_jobs = EmbedJobsClient(client_wrapper=self._client_wrapper)
         self.datasets = DatasetsClient(client_wrapper=self._client_wrapper)
         self.connectors = ConnectorsClient(client_wrapper=self._client_wrapper)
+        self.models = ModelsClient(client_wrapper=self._client_wrapper)
 
     def chat_stream(
         self,
@@ -92,7 +92,6 @@ class BaseCohere:
         connectors: typing.Optional[typing.List[ChatConnector]] = OMIT,
         search_queries_only: typing.Optional[bool] = OMIT,
         documents: typing.Optional[typing.List[ChatDocument]] = OMIT,
-        citation_quality: typing.Optional[ChatStreamRequestCitationQuality] = OMIT,
         temperature: typing.Optional[float] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         k: typing.Optional[int] = OMIT,
@@ -102,27 +101,23 @@ class BaseCohere:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[StreamedChatResponse]:
         """
-        The `chat` endpoint allows users to have conversations with a Large Language Model (LLM) from Cohere. Users can send messages as part of a persisted conversation using the `conversation_id` parameter, or they can pass in their own conversation history using the `chat_history` parameter.
-
-        The endpoint features additional parameters such as [connectors](https://docs.cohere.com/docs/connectors) and `documents` that enable conversations enriched by external knowledge. We call this ["Retrieval Augmented Generation"](https://docs.cohere.com/docs/retrieval-augmented-generation-rag), or "RAG". For a full breakdown of the Chat API endpoint, document and connector modes, and streaming (with code samples), see [this guide](https://docs.cohere.com/docs/cochat-beta).
+        Generates a text response to a user message.
+        To learn how to use Chat with Streaming and RAG follow [this guide](https://docs.cohere.com/docs/cochat-beta#various-ways-of-using-the-chat-endpoint).
 
         Parameters:
-            - message: str. Accepts a string.
-                            The chat message from the user to the model.
+            - message: str. Text input for the model to respond to.
 
             - model: typing.Optional[str]. Defaults to `command`.
 
-                                           The identifier of the model, which can be one of the existing Cohere models or the full ID for a [fine-tuned custom model](https://docs.cohere.com/docs/chat-fine-tuning).
+                                           The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
-                                           Compatible Cohere models are `command` and `command-light` as well as the experimental `command-nightly` and `command-light-nightly` variants. Read more about [Cohere models](https://docs.cohere.com/docs/models).
-
-            - preamble_override: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one.
+            - preamble_override: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style.
 
             - chat_history: typing.Optional[typing.List[ChatMessage]]. A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
 
-            - conversation_id: typing.Optional[str]. An alternative to `chat_history`. Previous conversations can be resumed by providing the conversation's identifier. The contents of `message` and the model's response will be stored as part of this conversation.
+            - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
 
-                                                     If a conversation with this id does not already exist, a new conversation will be created.
+                                                     Providing a `conversation_id` creates or resumes a persisted conversation with the specified ID. The ID can be any non empty string.
 
             - prompt_truncation: typing.Optional[ChatStreamRequestPromptTruncation]. Defaults to `AUTO` when `connectors` are specified and `OFF` in all other cases.
 
@@ -140,11 +135,23 @@ class BaseCohere:
 
                                                           When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
 
-            - documents: typing.Optional[typing.List[ChatDocument]]. A list of relevant documents that the model can use to enrich its reply. See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
+            - documents: typing.Optional[typing.List[ChatDocument]]. A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
 
-            - citation_quality: typing.Optional[ChatStreamRequestCitationQuality]. Defaults to `"accurate"`.
+                                                                     Example:
+                                                                     `[
+                                                                       { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
+                                                                       { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
+                                                                     ]`
 
-                                                                                   Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results or `"fast"` results.
+                                                                     Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
+
+                                                                     Some suggested keys are "text", "author", and "date". For better generation quality, it is recommended to keep the total word count of the strings in the dictionary to under 300 words.
+
+                                                                     An `id` field (string) can be optionally supplied to identify the document in the citations. This field will not be passed to the model.
+
+                                                                     An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
+
+                                                                     See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
 
             - temperature: typing.Optional[float]. Defaults to `0.3`.
 
@@ -160,9 +167,13 @@ class BaseCohere:
             - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
                                          Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
-            - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+            - frequency_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
-            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`. Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+                                                         Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+
+            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+
+                                                        Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         """
@@ -183,8 +194,6 @@ class BaseCohere:
             _request["search_queries_only"] = search_queries_only
         if documents is not OMIT:
             _request["documents"] = documents
-        if citation_quality is not OMIT:
-            _request["citation_quality"] = citation_quality.value if citation_quality is not None else None
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if max_tokens is not OMIT:
@@ -248,7 +257,6 @@ class BaseCohere:
         connectors: typing.Optional[typing.List[ChatConnector]] = OMIT,
         search_queries_only: typing.Optional[bool] = OMIT,
         documents: typing.Optional[typing.List[ChatDocument]] = OMIT,
-        citation_quality: typing.Optional[ChatRequestCitationQuality] = OMIT,
         temperature: typing.Optional[float] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         k: typing.Optional[int] = OMIT,
@@ -258,27 +266,23 @@ class BaseCohere:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> NonStreamedChatResponse:
         """
-        The `chat` endpoint allows users to have conversations with a Large Language Model (LLM) from Cohere. Users can send messages as part of a persisted conversation using the `conversation_id` parameter, or they can pass in their own conversation history using the `chat_history` parameter.
-
-        The endpoint features additional parameters such as [connectors](https://docs.cohere.com/docs/connectors) and `documents` that enable conversations enriched by external knowledge. We call this ["Retrieval Augmented Generation"](https://docs.cohere.com/docs/retrieval-augmented-generation-rag), or "RAG". For a full breakdown of the Chat API endpoint, document and connector modes, and streaming (with code samples), see [this guide](https://docs.cohere.com/docs/cochat-beta).
+        Generates a text response to a user message.
+        To learn how to use Chat with Streaming and RAG follow [this guide](https://docs.cohere.com/docs/cochat-beta#various-ways-of-using-the-chat-endpoint).
 
         Parameters:
-            - message: str. Accepts a string.
-                            The chat message from the user to the model.
+            - message: str. Text input for the model to respond to.
 
             - model: typing.Optional[str]. Defaults to `command`.
 
-                                           The identifier of the model, which can be one of the existing Cohere models or the full ID for a [fine-tuned custom model](https://docs.cohere.com/docs/chat-fine-tuning).
+                                           The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
-                                           Compatible Cohere models are `command` and `command-light` as well as the experimental `command-nightly` and `command-light-nightly` variants. Read more about [Cohere models](https://docs.cohere.com/docs/models).
-
-            - preamble_override: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one.
+            - preamble_override: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style.
 
             - chat_history: typing.Optional[typing.List[ChatMessage]]. A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
 
-            - conversation_id: typing.Optional[str]. An alternative to `chat_history`. Previous conversations can be resumed by providing the conversation's identifier. The contents of `message` and the model's response will be stored as part of this conversation.
+            - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
 
-                                                     If a conversation with this id does not already exist, a new conversation will be created.
+                                                     Providing a `conversation_id` creates or resumes a persisted conversation with the specified ID. The ID can be any non empty string.
 
             - prompt_truncation: typing.Optional[ChatRequestPromptTruncation]. Defaults to `AUTO` when `connectors` are specified and `OFF` in all other cases.
 
@@ -296,11 +300,23 @@ class BaseCohere:
 
                                                           When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
 
-            - documents: typing.Optional[typing.List[ChatDocument]]. A list of relevant documents that the model can use to enrich its reply. See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
+            - documents: typing.Optional[typing.List[ChatDocument]]. A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
 
-            - citation_quality: typing.Optional[ChatRequestCitationQuality]. Defaults to `"accurate"`.
+                                                                     Example:
+                                                                     `[
+                                                                       { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
+                                                                       { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
+                                                                     ]`
 
-                                                                             Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results or `"fast"` results.
+                                                                     Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
+
+                                                                     Some suggested keys are "text", "author", and "date". For better generation quality, it is recommended to keep the total word count of the strings in the dictionary to under 300 words.
+
+                                                                     An `id` field (string) can be optionally supplied to identify the document in the citations. This field will not be passed to the model.
+
+                                                                     An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
+
+                                                                     See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
 
             - temperature: typing.Optional[float]. Defaults to `0.3`.
 
@@ -316,9 +332,13 @@ class BaseCohere:
             - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
                                          Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
-            - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+            - frequency_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
-            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`. Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+                                                         Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+
+            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+
+                                                        Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
@@ -366,8 +386,6 @@ class BaseCohere:
             _request["search_queries_only"] = search_queries_only
         if documents is not OMIT:
             _request["documents"] = documents
-        if citation_quality is not OMIT:
-            _request["citation_quality"] = citation_quality.value if citation_quality is not None else None
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if max_tokens is not OMIT:
@@ -431,7 +449,6 @@ class BaseCohere:
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
         return_likelihoods: typing.Optional[GenerateStreamRequestReturnLikelihoods] = OMIT,
-        logit_bias: typing.Optional[typing.Dict[str, float]] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[GenerateStreamedResponse]:
@@ -488,11 +505,6 @@ class BaseCohere:
                                                                                            If `GENERATION` is selected, the token likelihoods will only be provided for generated text.
 
                                                                                            If `ALL` is selected, the token likelihoods will be provided both for the prompt and the generated text.
-            - logit_bias: typing.Optional[typing.Dict[str, float]]. Certain models support the `logit_bias` parameter.
-
-                                                                    Used to prevent the model from generating unwanted tokens or to incentivize it to include desired tokens. The format is `{token_id: bias}` where bias is a float between -10 and 10. Tokens can be obtained from text using [Tokenize](/reference/tokenize).
-
-                                                                    For example, if the value `{'11': -10}` is provided, the model will be very unlikely to include the token 11 (`"\n"`, the newline character) anywhere in the generated text. In contrast `{'11': 10}` will result in generations that nearly only contain that token. Values between -10 and 10 will proportionally affect the likelihood of the token appearing in the generated text.
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
@@ -524,8 +536,6 @@ class BaseCohere:
             _request["presence_penalty"] = presence_penalty
         if return_likelihoods is not OMIT:
             _request["return_likelihoods"] = return_likelihoods.value if return_likelihoods is not None else None
-        if logit_bias is not OMIT:
-            _request["logit_bias"] = logit_bias
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
         with self._client_wrapper.httpx_client.stream(
@@ -588,7 +598,6 @@ class BaseCohere:
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
         return_likelihoods: typing.Optional[GenerateRequestReturnLikelihoods] = OMIT,
-        logit_bias: typing.Optional[typing.Dict[str, float]] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Generation:
@@ -645,11 +654,6 @@ class BaseCohere:
                                                                                      If `GENERATION` is selected, the token likelihoods will only be provided for generated text.
 
                                                                                      If `ALL` is selected, the token likelihoods will be provided both for the prompt and the generated text.
-            - logit_bias: typing.Optional[typing.Dict[str, float]]. Certain models support the `logit_bias` parameter.
-
-                                                                    Used to prevent the model from generating unwanted tokens or to incentivize it to include desired tokens. The format is `{token_id: bias}` where bias is a float between -10 and 10. Tokens can be obtained from text using [Tokenize](/reference/tokenize).
-
-                                                                    For example, if the value `{'11': -10}` is provided, the model will be very unlikely to include the token 11 (`"\n"`, the newline character) anywhere in the generated text. In contrast `{'11': 10}` will result in generations that nearly only contain that token. Values between -10 and 10 will proportionally affect the likelihood of the token appearing in the generated text.
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
@@ -692,8 +696,6 @@ class BaseCohere:
             _request["presence_penalty"] = presence_penalty
         if return_likelihoods is not OMIT:
             _request["return_likelihoods"] = return_likelihoods.value if return_likelihoods is not None else None
-        if logit_bias is not OMIT:
-            _request["logit_bias"] = logit_bias
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
         _response = self._client_wrapper.httpx_client.request(
@@ -1289,6 +1291,7 @@ class AsyncBaseCohere:
         self.embed_jobs = AsyncEmbedJobsClient(client_wrapper=self._client_wrapper)
         self.datasets = AsyncDatasetsClient(client_wrapper=self._client_wrapper)
         self.connectors = AsyncConnectorsClient(client_wrapper=self._client_wrapper)
+        self.models = AsyncModelsClient(client_wrapper=self._client_wrapper)
 
     async def chat_stream(
         self,
@@ -1302,7 +1305,6 @@ class AsyncBaseCohere:
         connectors: typing.Optional[typing.List[ChatConnector]] = OMIT,
         search_queries_only: typing.Optional[bool] = OMIT,
         documents: typing.Optional[typing.List[ChatDocument]] = OMIT,
-        citation_quality: typing.Optional[ChatStreamRequestCitationQuality] = OMIT,
         temperature: typing.Optional[float] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         k: typing.Optional[int] = OMIT,
@@ -1312,27 +1314,23 @@ class AsyncBaseCohere:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[StreamedChatResponse]:
         """
-        The `chat` endpoint allows users to have conversations with a Large Language Model (LLM) from Cohere. Users can send messages as part of a persisted conversation using the `conversation_id` parameter, or they can pass in their own conversation history using the `chat_history` parameter.
-
-        The endpoint features additional parameters such as [connectors](https://docs.cohere.com/docs/connectors) and `documents` that enable conversations enriched by external knowledge. We call this ["Retrieval Augmented Generation"](https://docs.cohere.com/docs/retrieval-augmented-generation-rag), or "RAG". For a full breakdown of the Chat API endpoint, document and connector modes, and streaming (with code samples), see [this guide](https://docs.cohere.com/docs/cochat-beta).
+        Generates a text response to a user message.
+        To learn how to use Chat with Streaming and RAG follow [this guide](https://docs.cohere.com/docs/cochat-beta#various-ways-of-using-the-chat-endpoint).
 
         Parameters:
-            - message: str. Accepts a string.
-                            The chat message from the user to the model.
+            - message: str. Text input for the model to respond to.
 
             - model: typing.Optional[str]. Defaults to `command`.
 
-                                           The identifier of the model, which can be one of the existing Cohere models or the full ID for a [fine-tuned custom model](https://docs.cohere.com/docs/chat-fine-tuning).
+                                           The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
-                                           Compatible Cohere models are `command` and `command-light` as well as the experimental `command-nightly` and `command-light-nightly` variants. Read more about [Cohere models](https://docs.cohere.com/docs/models).
-
-            - preamble_override: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one.
+            - preamble_override: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style.
 
             - chat_history: typing.Optional[typing.List[ChatMessage]]. A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
 
-            - conversation_id: typing.Optional[str]. An alternative to `chat_history`. Previous conversations can be resumed by providing the conversation's identifier. The contents of `message` and the model's response will be stored as part of this conversation.
+            - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
 
-                                                     If a conversation with this id does not already exist, a new conversation will be created.
+                                                     Providing a `conversation_id` creates or resumes a persisted conversation with the specified ID. The ID can be any non empty string.
 
             - prompt_truncation: typing.Optional[ChatStreamRequestPromptTruncation]. Defaults to `AUTO` when `connectors` are specified and `OFF` in all other cases.
 
@@ -1350,11 +1348,23 @@ class AsyncBaseCohere:
 
                                                           When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
 
-            - documents: typing.Optional[typing.List[ChatDocument]]. A list of relevant documents that the model can use to enrich its reply. See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
+            - documents: typing.Optional[typing.List[ChatDocument]]. A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
 
-            - citation_quality: typing.Optional[ChatStreamRequestCitationQuality]. Defaults to `"accurate"`.
+                                                                     Example:
+                                                                     `[
+                                                                       { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
+                                                                       { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
+                                                                     ]`
 
-                                                                                   Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results or `"fast"` results.
+                                                                     Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
+
+                                                                     Some suggested keys are "text", "author", and "date". For better generation quality, it is recommended to keep the total word count of the strings in the dictionary to under 300 words.
+
+                                                                     An `id` field (string) can be optionally supplied to identify the document in the citations. This field will not be passed to the model.
+
+                                                                     An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
+
+                                                                     See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
 
             - temperature: typing.Optional[float]. Defaults to `0.3`.
 
@@ -1370,9 +1380,13 @@ class AsyncBaseCohere:
             - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
                                          Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
-            - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+            - frequency_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
-            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`. Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+                                                         Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+
+            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+
+                                                        Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         """
@@ -1393,8 +1407,6 @@ class AsyncBaseCohere:
             _request["search_queries_only"] = search_queries_only
         if documents is not OMIT:
             _request["documents"] = documents
-        if citation_quality is not OMIT:
-            _request["citation_quality"] = citation_quality.value if citation_quality is not None else None
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if max_tokens is not OMIT:
@@ -1458,7 +1470,6 @@ class AsyncBaseCohere:
         connectors: typing.Optional[typing.List[ChatConnector]] = OMIT,
         search_queries_only: typing.Optional[bool] = OMIT,
         documents: typing.Optional[typing.List[ChatDocument]] = OMIT,
-        citation_quality: typing.Optional[ChatRequestCitationQuality] = OMIT,
         temperature: typing.Optional[float] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         k: typing.Optional[int] = OMIT,
@@ -1468,27 +1479,23 @@ class AsyncBaseCohere:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> NonStreamedChatResponse:
         """
-        The `chat` endpoint allows users to have conversations with a Large Language Model (LLM) from Cohere. Users can send messages as part of a persisted conversation using the `conversation_id` parameter, or they can pass in their own conversation history using the `chat_history` parameter.
-
-        The endpoint features additional parameters such as [connectors](https://docs.cohere.com/docs/connectors) and `documents` that enable conversations enriched by external knowledge. We call this ["Retrieval Augmented Generation"](https://docs.cohere.com/docs/retrieval-augmented-generation-rag), or "RAG". For a full breakdown of the Chat API endpoint, document and connector modes, and streaming (with code samples), see [this guide](https://docs.cohere.com/docs/cochat-beta).
+        Generates a text response to a user message.
+        To learn how to use Chat with Streaming and RAG follow [this guide](https://docs.cohere.com/docs/cochat-beta#various-ways-of-using-the-chat-endpoint).
 
         Parameters:
-            - message: str. Accepts a string.
-                            The chat message from the user to the model.
+            - message: str. Text input for the model to respond to.
 
             - model: typing.Optional[str]. Defaults to `command`.
 
-                                           The identifier of the model, which can be one of the existing Cohere models or the full ID for a [fine-tuned custom model](https://docs.cohere.com/docs/chat-fine-tuning).
+                                           The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
-                                           Compatible Cohere models are `command` and `command-light` as well as the experimental `command-nightly` and `command-light-nightly` variants. Read more about [Cohere models](https://docs.cohere.com/docs/models).
-
-            - preamble_override: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one.
+            - preamble_override: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style.
 
             - chat_history: typing.Optional[typing.List[ChatMessage]]. A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
 
-            - conversation_id: typing.Optional[str]. An alternative to `chat_history`. Previous conversations can be resumed by providing the conversation's identifier. The contents of `message` and the model's response will be stored as part of this conversation.
+            - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
 
-                                                     If a conversation with this id does not already exist, a new conversation will be created.
+                                                     Providing a `conversation_id` creates or resumes a persisted conversation with the specified ID. The ID can be any non empty string.
 
             - prompt_truncation: typing.Optional[ChatRequestPromptTruncation]. Defaults to `AUTO` when `connectors` are specified and `OFF` in all other cases.
 
@@ -1506,11 +1513,23 @@ class AsyncBaseCohere:
 
                                                           When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
 
-            - documents: typing.Optional[typing.List[ChatDocument]]. A list of relevant documents that the model can use to enrich its reply. See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
+            - documents: typing.Optional[typing.List[ChatDocument]]. A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
 
-            - citation_quality: typing.Optional[ChatRequestCitationQuality]. Defaults to `"accurate"`.
+                                                                     Example:
+                                                                     `[
+                                                                       { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
+                                                                       { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
+                                                                     ]`
 
-                                                                             Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results or `"fast"` results.
+                                                                     Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
+
+                                                                     Some suggested keys are "text", "author", and "date". For better generation quality, it is recommended to keep the total word count of the strings in the dictionary to under 300 words.
+
+                                                                     An `id` field (string) can be optionally supplied to identify the document in the citations. This field will not be passed to the model.
+
+                                                                     An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
+
+                                                                     See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
 
             - temperature: typing.Optional[float]. Defaults to `0.3`.
 
@@ -1526,9 +1545,13 @@ class AsyncBaseCohere:
             - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
                                          Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
-            - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+            - frequency_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
-            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`. Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+                                                         Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+
+            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+
+                                                        Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
@@ -1576,8 +1599,6 @@ class AsyncBaseCohere:
             _request["search_queries_only"] = search_queries_only
         if documents is not OMIT:
             _request["documents"] = documents
-        if citation_quality is not OMIT:
-            _request["citation_quality"] = citation_quality.value if citation_quality is not None else None
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if max_tokens is not OMIT:
@@ -1641,7 +1662,6 @@ class AsyncBaseCohere:
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
         return_likelihoods: typing.Optional[GenerateStreamRequestReturnLikelihoods] = OMIT,
-        logit_bias: typing.Optional[typing.Dict[str, float]] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[GenerateStreamedResponse]:
@@ -1698,11 +1718,6 @@ class AsyncBaseCohere:
                                                                                            If `GENERATION` is selected, the token likelihoods will only be provided for generated text.
 
                                                                                            If `ALL` is selected, the token likelihoods will be provided both for the prompt and the generated text.
-            - logit_bias: typing.Optional[typing.Dict[str, float]]. Certain models support the `logit_bias` parameter.
-
-                                                                    Used to prevent the model from generating unwanted tokens or to incentivize it to include desired tokens. The format is `{token_id: bias}` where bias is a float between -10 and 10. Tokens can be obtained from text using [Tokenize](/reference/tokenize).
-
-                                                                    For example, if the value `{'11': -10}` is provided, the model will be very unlikely to include the token 11 (`"\n"`, the newline character) anywhere in the generated text. In contrast `{'11': 10}` will result in generations that nearly only contain that token. Values between -10 and 10 will proportionally affect the likelihood of the token appearing in the generated text.
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
@@ -1734,8 +1749,6 @@ class AsyncBaseCohere:
             _request["presence_penalty"] = presence_penalty
         if return_likelihoods is not OMIT:
             _request["return_likelihoods"] = return_likelihoods.value if return_likelihoods is not None else None
-        if logit_bias is not OMIT:
-            _request["logit_bias"] = logit_bias
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
         async with self._client_wrapper.httpx_client.stream(
@@ -1798,7 +1811,6 @@ class AsyncBaseCohere:
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
         return_likelihoods: typing.Optional[GenerateRequestReturnLikelihoods] = OMIT,
-        logit_bias: typing.Optional[typing.Dict[str, float]] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Generation:
@@ -1855,11 +1867,6 @@ class AsyncBaseCohere:
                                                                                      If `GENERATION` is selected, the token likelihoods will only be provided for generated text.
 
                                                                                      If `ALL` is selected, the token likelihoods will be provided both for the prompt and the generated text.
-            - logit_bias: typing.Optional[typing.Dict[str, float]]. Certain models support the `logit_bias` parameter.
-
-                                                                    Used to prevent the model from generating unwanted tokens or to incentivize it to include desired tokens. The format is `{token_id: bias}` where bias is a float between -10 and 10. Tokens can be obtained from text using [Tokenize](/reference/tokenize).
-
-                                                                    For example, if the value `{'11': -10}` is provided, the model will be very unlikely to include the token 11 (`"\n"`, the newline character) anywhere in the generated text. In contrast `{'11': 10}` will result in generations that nearly only contain that token. Values between -10 and 10 will proportionally affect the likelihood of the token appearing in the generated text.
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
@@ -1902,8 +1909,6 @@ class AsyncBaseCohere:
             _request["presence_penalty"] = presence_penalty
         if return_likelihoods is not OMIT:
             _request["return_likelihoods"] = return_likelihoods.value if return_likelihoods is not None else None
-        if logit_bias is not OMIT:
-            _request["logit_bias"] = logit_bias
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
         _response = await self._client_wrapper.httpx_client.request(
