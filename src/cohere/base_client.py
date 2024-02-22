@@ -85,7 +85,7 @@ class BaseCohere:
         *,
         message: str,
         model: typing.Optional[str] = OMIT,
-        preamble_override: typing.Optional[str] = OMIT,
+        preamble: typing.Optional[str] = OMIT,
         chat_history: typing.Optional[typing.List[ChatMessage]] = OMIT,
         conversation_id: typing.Optional[str] = OMIT,
         prompt_truncation: typing.Optional[ChatStreamRequestPromptTruncation] = OMIT,
@@ -111,7 +111,7 @@ class BaseCohere:
 
                                            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
-            - preamble_override: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style.
+            - preamble: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style.
 
             - chat_history: typing.Optional[typing.List[ChatMessage]]. A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
 
@@ -180,8 +180,8 @@ class BaseCohere:
         _request: typing.Dict[str, typing.Any] = {"message": message, "stream": True}
         if model is not OMIT:
             _request["model"] = model
-        if preamble_override is not OMIT:
-            _request["preamble_override"] = preamble_override
+        if preamble is not OMIT:
+            _request["preamble"] = preamble
         if chat_history is not OMIT:
             _request["chat_history"] = chat_history
         if conversation_id is not OMIT:
@@ -250,7 +250,7 @@ class BaseCohere:
         *,
         message: str,
         model: typing.Optional[str] = OMIT,
-        preamble_override: typing.Optional[str] = OMIT,
+        preamble: typing.Optional[str] = OMIT,
         chat_history: typing.Optional[typing.List[ChatMessage]] = OMIT,
         conversation_id: typing.Optional[str] = OMIT,
         prompt_truncation: typing.Optional[ChatRequestPromptTruncation] = OMIT,
@@ -276,7 +276,7 @@ class BaseCohere:
 
                                            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
-            - preamble_override: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style.
+            - preamble: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style.
 
             - chat_history: typing.Optional[typing.List[ChatMessage]]. A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
 
@@ -372,8 +372,8 @@ class BaseCohere:
         _request: typing.Dict[str, typing.Any] = {"message": message, "stream": False}
         if model is not OMIT:
             _request["model"] = model
-        if preamble_override is not OMIT:
-            _request["preamble_override"] = preamble_override
+        if preamble is not OMIT:
+            _request["preamble"] = preamble
         if chat_history is not OMIT:
             _request["chat_history"] = chat_history
         if conversation_id is not OMIT:
@@ -1298,7 +1298,7 @@ class AsyncBaseCohere:
         *,
         message: str,
         model: typing.Optional[str] = OMIT,
-        preamble_override: typing.Optional[str] = OMIT,
+        preamble: typing.Optional[str] = OMIT,
         chat_history: typing.Optional[typing.List[ChatMessage]] = OMIT,
         conversation_id: typing.Optional[str] = OMIT,
         prompt_truncation: typing.Optional[ChatStreamRequestPromptTruncation] = OMIT,
@@ -1324,7 +1324,7 @@ class AsyncBaseCohere:
 
                                            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
-            - preamble_override: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style.
+            - preamble: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style.
 
             - chat_history: typing.Optional[typing.List[ChatMessage]]. A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
 
@@ -1393,8 +1393,8 @@ class AsyncBaseCohere:
         _request: typing.Dict[str, typing.Any] = {"message": message, "stream": True}
         if model is not OMIT:
             _request["model"] = model
-        if preamble_override is not OMIT:
-            _request["preamble_override"] = preamble_override
+        if preamble is not OMIT:
+            _request["preamble"] = preamble
         if chat_history is not OMIT:
             _request["chat_history"] = chat_history
         if conversation_id is not OMIT:
@@ -1463,7 +1463,7 @@ class AsyncBaseCohere:
         *,
         message: str,
         model: typing.Optional[str] = OMIT,
-        preamble_override: typing.Optional[str] = OMIT,
+        preamble: typing.Optional[str] = OMIT,
         chat_history: typing.Optional[typing.List[ChatMessage]] = OMIT,
         conversation_id: typing.Optional[str] = OMIT,
         prompt_truncation: typing.Optional[ChatRequestPromptTruncation] = OMIT,
@@ -1489,7 +1489,7 @@ class AsyncBaseCohere:
 
                                            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
-            - preamble_override: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style.
+            - preamble: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style.
 
             - chat_history: typing.Optional[typing.List[ChatMessage]]. A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
 
@@ -1585,8 +1585,8 @@ class AsyncBaseCohere:
         _request: typing.Dict[str, typing.Any] = {"message": message, "stream": False}
         if model is not OMIT:
             _request["model"] = model
-        if preamble_override is not OMIT:
-            _request["preamble_override"] = preamble_override
+        if preamble is not OMIT:
+            _request["preamble"] = preamble
         if chat_history is not OMIT:
             _request["chat_history"] = chat_history
         if conversation_id is not OMIT:

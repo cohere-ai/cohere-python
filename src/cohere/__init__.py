@@ -259,5 +259,3 @@ __all__ = [
     "embed_jobs",
     "models",
 ]
-from .client import Client
-from .client import AsyncClient
