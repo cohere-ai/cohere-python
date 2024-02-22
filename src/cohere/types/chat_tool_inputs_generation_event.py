@@ -4,23 +4,12 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
-from .chat_message_role import ChatMessageRole
-
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
+from .chat_stream_event import ChatStreamEvent
+from .tool_input import ToolInput
 
 
-class ChatMessage(pydantic.BaseModel):
-    """
-    A single message in a chat history. Contains the role of the sender, the text contents of the message.
-    """
-
-    role: ChatMessageRole = pydantic.Field(
-        description=("One of CHATBOT\n" "USER to identify who the message is coming from.\n")
-    )
-    message: str = pydantic.Field(description="Contents of the chat message.")
+class ChatToolInputsGenerationEvent(ChatStreamEvent):
+    tool_inputs: typing.List[ToolInput]
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -33,4 +22,5 @@ class ChatMessage(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        allow_population_by_field_name = True
         json_encoders = {dt.datetime: serialize_datetime}

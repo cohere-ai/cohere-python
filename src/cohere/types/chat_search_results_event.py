@@ -15,7 +15,7 @@ except ImportError:
 
 
 class ChatSearchResultsEvent(ChatStreamEvent):
-    search_results: typing.List[ChatSearchResult] = pydantic.Field(
+    search_results: typing.Optional[typing.List[ChatSearchResult]] = pydantic.Field(
         description="Conducted searches and the ids of documents retrieved from each of them."
     )
     documents: typing.List[ChatDocument] = pydantic.Field(
