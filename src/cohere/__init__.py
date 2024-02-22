@@ -127,12 +127,14 @@ from .resources import (
     embed_jobs,
     models,
 )
+from .client import AsyncClient, Client
 from .environment import BaseCohereEnvironment
 
 __all__ = [
     "ApiMeta",
     "ApiMetaApiVersion",
     "ApiMetaBilledUnits",
+    "AsyncClient",
     "AuthTokenType",
     "BadRequestError",
     "BaseCohereEnvironment",
@@ -169,6 +171,7 @@ __all__ = [
     "ClassifyResponseClassificationsItem",
     "ClassifyResponseClassificationsItemClassificationType",
     "ClassifyResponseClassificationsItemLabelsValue",
+    "Client",
     "CompatibleEndpoint",
     "Connector",
     "ConnectorAuthStatus",
