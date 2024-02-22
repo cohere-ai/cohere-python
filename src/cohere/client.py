@@ -37,7 +37,7 @@ class AsyncClient(AsyncBaseCohere):
             environment: BaseCohereEnvironment = BaseCohereEnvironment.PRODUCTION,
             client_name: typing.Optional[str] = None,
             timeout: typing.Optional[float] = 60,
-            httpx_client: typing.Optional[httpx.Client] = None,
+            httpx_client: typing.Optional[httpx.AsyncClient] = None,
     ):
         AsyncBaseCohere.__init__(
             self,
