@@ -34,6 +34,9 @@ jobs:
         run: poetry install
       - name: Test
         run: poetry run pytest .
+        env:
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+  
 
   publish:
     needs: [compile, test]
