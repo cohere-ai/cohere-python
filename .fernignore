@@ -1,3 +1,5 @@
 4.0.0-5.0.0-migration-guide.md
 banner.png
 README.md
+src/cohere/client.py
+tests
