@@ -18,24 +18,20 @@ class ChatConnector(pydantic.BaseModel):
 
     id: str = pydantic.Field(description="The identifier of the connector.")
     user_access_token: typing.Optional[str] = pydantic.Field(
-        description="An optional override to set the token that Cohere passes to the connector in the Authorization header."
+        description="When specified, this user access token will be passed to the connector in the Authorization header instead of the Cohere generated one."
     )
     continue_on_failure: typing.Optional[bool] = pydantic.Field(
-        description="An optional override to set whether or not the request continues if this connector fails."
+        description=(
+            "Defaults to `false`.\n"
+            "\n"
+            "When `true`, the request will continue if this connector returned an error.\n"
+        )
     )
     options: typing.Optional[typing.Dict[str, typing.Any]] = pydantic.Field(
         description=(
             "Provides the connector with different settings at request time. The key/value pairs of this object are specific to each connector.\n"
             "\n"
-            "The supported options are:\n"
-            "\n"
-            "**web-search**\n"
-            "\n"
-            "**site** - The web search results will be restricted to this domain (and TLD) when specified. Only a single domain is specified, and subdomains are also accepted.\n"
-            "Examples:\n"
-            "\n"
-            '- `{"options": {"site": "cohere.com"}}` would restrict the results to all subdomains at cohere.com\n'
-            '- `{"options": {"site": "txt.cohere.com"}}` would restrict the results to `txt.cohere.com`\n'
+            "For example, the connector `web-search` supports the `site` option, which limits search results to the specified domain.\n"
         )
     )
 

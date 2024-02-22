@@ -14,6 +14,7 @@ from .chat_request_citation_quality import ChatRequestCitationQuality
 from .chat_request_prompt_override import ChatRequestPromptOverride
 from .chat_request_prompt_truncation import ChatRequestPromptTruncation
 from .chat_request_search_options import ChatRequestSearchOptions
+from .chat_request_tool_results_item import ChatRequestToolResultsItem
 from .chat_search_queries_generation_event import ChatSearchQueriesGenerationEvent
 from .chat_search_query import ChatSearchQuery
 from .chat_search_result import ChatSearchResult
@@ -26,8 +27,10 @@ from .chat_stream_request_citation_quality import ChatStreamRequestCitationQuali
 from .chat_stream_request_prompt_override import ChatStreamRequestPromptOverride
 from .chat_stream_request_prompt_truncation import ChatStreamRequestPromptTruncation
 from .chat_stream_request_search_options import ChatStreamRequestSearchOptions
+from .chat_stream_request_tool_results_item import ChatStreamRequestToolResultsItem
 from .chat_stream_start_event import ChatStreamStartEvent
 from .chat_text_generation_event import ChatTextGenerationEvent
+from .chat_tool_inputs_generation_event import ChatToolInputsGenerationEvent
 from .classify_example import ClassifyExample
 from .classify_request_truncate import ClassifyRequestTruncate
 from .classify_response import ClassifyResponse
@@ -36,6 +39,7 @@ from .classify_response_classifications_item_classification_type import (
     ClassifyResponseClassificationsItemClassificationType,
 )
 from .classify_response_classifications_item_labels_value import ClassifyResponseClassificationsItemLabelsValue
+from .compatible_endpoint import CompatibleEndpoint
 from .connector import Connector
 from .connector_auth_status import ConnectorAuthStatus
 from .connector_o_auth import ConnectorOAuth
@@ -79,6 +83,8 @@ from .generation import Generation
 from .get_connector_response import GetConnectorResponse
 from .list_connectors_response import ListConnectorsResponse
 from .list_embed_job_response import ListEmbedJobResponse
+from .list_models_response import ListModelsResponse
+from .model import Model
 from .non_streamed_chat_response import NonStreamedChatResponse
 from .o_auth_authorize_response import OAuthAuthorizeResponse
 from .parse_info import ParseInfo
@@ -98,12 +104,18 @@ from .streamed_chat_response import (
     StreamedChatResponse_StreamEnd,
     StreamedChatResponse_StreamStart,
     StreamedChatResponse_TextGeneration,
+    StreamedChatResponse_ToolInputsGeneration,
 )
 from .summarize_request_extractiveness import SummarizeRequestExtractiveness
 from .summarize_request_format import SummarizeRequestFormat
 from .summarize_request_length import SummarizeRequestLength
 from .summarize_response import SummarizeResponse
 from .tokenize_response import TokenizeResponse
+from .tool import Tool
+from .tool_definition import ToolDefinition
+from .tool_definition_inputs_item import ToolDefinitionInputsItem
+from .tool_definition_outputs_item import ToolDefinitionOutputsItem
+from .tool_input import ToolInput
 from .update_connector_response import UpdateConnectorResponse
 
 __all__ = [
@@ -121,6 +133,7 @@ __all__ = [
     "ChatRequestPromptOverride",
     "ChatRequestPromptTruncation",
     "ChatRequestSearchOptions",
+    "ChatRequestToolResultsItem",
     "ChatSearchQueriesGenerationEvent",
     "ChatSearchQuery",
     "ChatSearchResult",
@@ -133,14 +146,17 @@ __all__ = [
     "ChatStreamRequestPromptOverride",
     "ChatStreamRequestPromptTruncation",
     "ChatStreamRequestSearchOptions",
+    "ChatStreamRequestToolResultsItem",
     "ChatStreamStartEvent",
     "ChatTextGenerationEvent",
+    "ChatToolInputsGenerationEvent",
     "ClassifyExample",
     "ClassifyRequestTruncate",
     "ClassifyResponse",
     "ClassifyResponseClassificationsItem",
     "ClassifyResponseClassificationsItemClassificationType",
     "ClassifyResponseClassificationsItemLabelsValue",
+    "CompatibleEndpoint",
     "Connector",
     "ConnectorAuthStatus",
     "ConnectorOAuth",
@@ -184,6 +200,8 @@ __all__ = [
     "GetConnectorResponse",
     "ListConnectorsResponse",
     "ListEmbedJobResponse",
+    "ListModelsResponse",
+    "Model",
     "NonStreamedChatResponse",
     "OAuthAuthorizeResponse",
     "ParseInfo",
@@ -202,10 +220,16 @@ __all__ = [
     "StreamedChatResponse_StreamEnd",
     "StreamedChatResponse_StreamStart",
     "StreamedChatResponse_TextGeneration",
+    "StreamedChatResponse_ToolInputsGeneration",
     "SummarizeRequestExtractiveness",
     "SummarizeRequestFormat",
     "SummarizeRequestLength",
     "SummarizeResponse",
     "TokenizeResponse",
+    "Tool",
+    "ToolDefinition",
+    "ToolDefinitionInputsItem",
+    "ToolDefinitionOutputsItem",
+    "ToolInput",
     "UpdateConnectorResponse",
 ]
