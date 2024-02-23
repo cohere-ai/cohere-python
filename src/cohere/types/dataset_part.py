@@ -14,11 +14,13 @@ except ImportError:
 class DatasetPart(pydantic.BaseModel):
     id: str = pydantic.Field(description="The dataset part ID")
     name: str = pydantic.Field(description="The name of the dataset part")
-    url: typing.Optional[str] = pydantic.Field(description="The download url of the file")
-    index: typing.Optional[int] = pydantic.Field(description="The index of the file")
-    size_bytes: typing.Optional[int] = pydantic.Field(description="The size of the file in bytes")
-    num_rows: typing.Optional[int] = pydantic.Field(description="The number of rows in the file")
-    original_url: typing.Optional[str] = pydantic.Field(description="The download url of the original file")
+    url: typing.Optional[str] = pydantic.Field(default=None, description="The download url of the file")
+    index: typing.Optional[int] = pydantic.Field(default=None, description="The index of the file")
+    size_bytes: typing.Optional[int] = pydantic.Field(default=None, description="The size of the file in bytes")
+    num_rows: typing.Optional[int] = pydantic.Field(default=None, description="The number of rows in the file")
+    original_url: typing.Optional[str] = pydantic.Field(
+        default=None, description="The download url of the original file"
+    )
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

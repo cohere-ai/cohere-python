@@ -18,21 +18,24 @@ class ChatConnector(pydantic.BaseModel):
 
     id: str = pydantic.Field(description="The identifier of the connector.")
     user_access_token: typing.Optional[str] = pydantic.Field(
-        description="When specified, this user access token will be passed to the connector in the Authorization header instead of the Cohere generated one."
+        default=None,
+        description="When specified, this user access token will be passed to the connector in the Authorization header instead of the Cohere generated one.",
     )
     continue_on_failure: typing.Optional[bool] = pydantic.Field(
+        default=None,
         description=(
             "Defaults to `false`.\n"
             "\n"
             "When `true`, the request will continue if this connector returned an error.\n"
-        )
+        ),
     )
     options: typing.Optional[typing.Dict[str, typing.Any]] = pydantic.Field(
+        default=None,
         description=(
             "Provides the connector with different settings at request time. The key/value pairs of this object are specific to each connector.\n"
             "\n"
             "For example, the connector `web-search` supports the `site` option, which limits search results to the specified domain.\n"
-        )
+        ),
     )
 
     def json(self, **kwargs: typing.Any) -> str:

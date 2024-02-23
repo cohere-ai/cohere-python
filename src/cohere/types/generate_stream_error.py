@@ -15,7 +15,8 @@ except ImportError:
 
 class GenerateStreamError(GenerateStreamEvent):
     index: typing.Optional[int] = pydantic.Field(
-        description="Refers to the nth generation. Only present when `num_generations` is greater than zero."
+        default=None,
+        description="Refers to the nth generation. Only present when `num_generations` is greater than zero.",
     )
     is_finished: bool
     finish_reason: FinishReason

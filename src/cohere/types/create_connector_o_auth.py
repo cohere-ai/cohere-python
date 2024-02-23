@@ -13,19 +13,20 @@ except ImportError:
 
 class CreateConnectorOAuth(pydantic.BaseModel):
     client_id: typing.Optional[str] = pydantic.Field(
-        description="The OAuth 2.0 client ID. This fields is encrypted at rest."
+        default=None, description="The OAuth 2.0 client ID. This fields is encrypted at rest."
     )
     client_secret: typing.Optional[str] = pydantic.Field(
-        description="The OAuth 2.0 client Secret. This field is encrypted at rest and never returned in a response."
+        default=None,
+        description="The OAuth 2.0 client Secret. This field is encrypted at rest and never returned in a response.",
     )
     authorize_url: typing.Optional[str] = pydantic.Field(
-        description="The OAuth 2.0 /authorize endpoint to use when users authorize the connector."
+        default=None, description="The OAuth 2.0 /authorize endpoint to use when users authorize the connector."
     )
     token_url: typing.Optional[str] = pydantic.Field(
-        description="The OAuth 2.0 /token endpoint to use when users authorize the connector."
+        default=None, description="The OAuth 2.0 /token endpoint to use when users authorize the connector."
     )
     scope: typing.Optional[str] = pydantic.Field(
-        description="The OAuth scopes to request when users authorize the connector."
+        default=None, description="The OAuth scopes to request when users authorize the connector."
     )
 
     def json(self, **kwargs: typing.Any) -> str:

@@ -13,7 +13,7 @@ except ImportError:
 
 class DatasetsGetUsageResponse(pydantic.BaseModel):
     organization_usage: typing.Optional[str] = pydantic.Field(
-        description="The total number of bytes used by the organization."
+        default=None, description="The total number of bytes used by the organization."
     )
 
     def json(self, **kwargs: typing.Any) -> str:

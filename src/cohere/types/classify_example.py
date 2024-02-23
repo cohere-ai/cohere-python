@@ -12,8 +12,8 @@ except ImportError:
 
 
 class ClassifyExample(pydantic.BaseModel):
-    text: typing.Optional[str]
-    label: typing.Optional[str]
+    text: typing.Optional[str] = None
+    label: typing.Optional[str] = None
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

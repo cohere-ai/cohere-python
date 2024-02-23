@@ -15,7 +15,7 @@ class ToolDefinitionInputsItem(pydantic.BaseModel):
     name: str
     description: str
     type: str
-    required: typing.Optional[bool]
+    required: typing.Optional[bool] = None
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

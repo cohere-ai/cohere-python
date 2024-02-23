@@ -13,9 +13,9 @@ except ImportError:
 
 
 class SummarizeResponse(pydantic.BaseModel):
-    id: typing.Optional[str] = pydantic.Field(description="Generated ID for the summary")
-    summary: typing.Optional[str] = pydantic.Field(description="Generated summary for the text")
-    meta: typing.Optional[ApiMeta]
+    id: typing.Optional[str] = pydantic.Field(default=None, description="Generated ID for the summary")
+    summary: typing.Optional[str] = pydantic.Field(default=None, description="Generated summary for the text")
+    meta: typing.Optional[ApiMeta] = None
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

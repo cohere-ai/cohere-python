@@ -14,7 +14,7 @@ except ImportError:
 
 class RerankResponseResultsItem(pydantic.BaseModel):
     document: typing.Optional[RerankResponseResultsItemDocument] = pydantic.Field(
-        description="The doc object which was ranked"
+        default=None, description="The doc object which was ranked"
     )
     index: int = pydantic.Field(description="The index of the input document")
     relevance_score: float = pydantic.Field(description="A relevance score assigned to the ranking")
