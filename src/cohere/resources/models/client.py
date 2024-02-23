@@ -59,7 +59,7 @@ class ModelsClient:
                     {
                         "page_size": page_size,
                         "page_token": page_token,
-                        "endpoint": endpoint.value if endpoint is not None else None,
+                        "endpoint": endpoint,
                         **(
                             request_options.get("additional_query_parameters", {})
                             if request_options is not None
@@ -131,7 +131,7 @@ class AsyncModelsClient:
                     {
                         "page_size": page_size,
                         "page_token": page_token,
-                        "endpoint": endpoint.value if endpoint is not None else None,
+                        "endpoint": endpoint,
                         **(
                             request_options.get("additional_query_parameters", {})
                             if request_options is not None
