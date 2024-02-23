@@ -45,7 +45,7 @@ from cohere.responses.custom_model import (
     ModelMetric,
 )
 from cohere.responses.dataset import Dataset, DatasetUsage, ParseInfo
-from cohere.responses.detectlang import DetectLanguageResponse, Language
+from cohere.responses.detectlang import DetectLanguageResponse
 from cohere.responses.embed_job import EmbedJob
 from cohere.responses.embeddings import EmbeddingResponses, Embeddings
 from cohere.responses.feedback import (
