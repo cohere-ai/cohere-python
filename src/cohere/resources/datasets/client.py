@@ -114,8 +114,8 @@ class DatasetsClient:
         type: typing.Optional[DatasetType] = None,
         keep_original_file: typing.Optional[bool] = None,
         skip_malformed_input: typing.Optional[bool] = None,
-        keep_fields: typing.Optional[typing.Union[str, typing.List[str]]] = None,
-        optional_fields: typing.Optional[typing.Union[str, typing.List[str]]] = None,
+        keep_fields: typing.Optional[typing.Union[str, typing.Sequence[str]]] = None,
+        optional_fields: typing.Optional[typing.Union[str, typing.Sequence[str]]] = None,
         text_separator: typing.Optional[str] = None,
         csv_delimiter: typing.Optional[str] = None,
         data: core.File,
@@ -134,9 +134,9 @@ class DatasetsClient:
 
             - skip_malformed_input: typing.Optional[bool]. Indicates whether rows with malformed input should be dropped (instead of failing the validation check). Dropped rows will be returned in the warnings field.
 
-            - keep_fields: typing.Optional[typing.Union[str, typing.List[str]]]. List of names of fields that will be persisted in the Dataset. By default the Dataset will retain only the required fields indicated in the [schema for the corresponding Dataset type](https://docs.cohere.com/docs/datasets#dataset-types). For example, datasets of type `embed-input` will drop all fields other than the required `text` field. If any of the fields in `keep_fields` are missing from the uploaded file, Dataset validation will fail.
+            - keep_fields: typing.Optional[typing.Union[str, typing.Sequence[str]]]. List of names of fields that will be persisted in the Dataset. By default the Dataset will retain only the required fields indicated in the [schema for the corresponding Dataset type](https://docs.cohere.com/docs/datasets#dataset-types). For example, datasets of type `embed-input` will drop all fields other than the required `text` field. If any of the fields in `keep_fields` are missing from the uploaded file, Dataset validation will fail.
 
-            - optional_fields: typing.Optional[typing.Union[str, typing.List[str]]]. List of names of fields that will be persisted in the Dataset. By default the Dataset will retain only the required fields indicated in the [schema for the corresponding Dataset type](https://docs.cohere.com/docs/datasets#dataset-types). For example, Datasets of type `embed-input` will drop all fields other than the required `text` field. If any of the fields in `optional_fields` are missing from the uploaded file, Dataset validation will pass.
+            - optional_fields: typing.Optional[typing.Union[str, typing.Sequence[str]]]. List of names of fields that will be persisted in the Dataset. By default the Dataset will retain only the required fields indicated in the [schema for the corresponding Dataset type](https://docs.cohere.com/docs/datasets#dataset-types). For example, Datasets of type `embed-input` will drop all fields other than the required `text` field. If any of the fields in `optional_fields` are missing from the uploaded file, Dataset validation will pass.
 
             - text_separator: typing.Optional[str]. Raw .txt uploads will be split into entries using the text_separator value.
 
@@ -155,7 +155,7 @@ class DatasetsClient:
                 remove_none_from_dict(
                     {
                         "name": name,
-                        "type": type.value if type is not None else None,
+                        "type": type,
                         "keep_original_file": keep_original_file,
                         "skip_malformed_input": skip_malformed_input,
                         "keep_fields": keep_fields,
@@ -263,7 +263,7 @@ class DatasetsClient:
         """
         _response = self._client_wrapper.httpx_client.request(
             "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"datasets/{id}"),
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"datasets/{jsonable_encoder(id)}"),
             params=jsonable_encoder(
                 request_options.get("additional_query_parameters") if request_options is not None else None
             ),
@@ -312,7 +312,7 @@ class DatasetsClient:
         """
         _response = self._client_wrapper.httpx_client.request(
             "DELETE",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"datasets/{id}"),
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"datasets/{jsonable_encoder(id)}"),
             params=jsonable_encoder(
                 request_options.get("additional_query_parameters") if request_options is not None else None
             ),
@@ -425,8 +425,8 @@ class AsyncDatasetsClient:
         type: typing.Optional[DatasetType] = None,
         keep_original_file: typing.Optional[bool] = None,
         skip_malformed_input: typing.Optional[bool] = None,
-        keep_fields: typing.Optional[typing.Union[str, typing.List[str]]] = None,
-        optional_fields: typing.Optional[typing.Union[str, typing.List[str]]] = None,
+        keep_fields: typing.Optional[typing.Union[str, typing.Sequence[str]]] = None,
+        optional_fields: typing.Optional[typing.Union[str, typing.Sequence[str]]] = None,
         text_separator: typing.Optional[str] = None,
         csv_delimiter: typing.Optional[str] = None,
         data: core.File,
@@ -445,9 +445,9 @@ class AsyncDatasetsClient:
 
             - skip_malformed_input: typing.Optional[bool]. Indicates whether rows with malformed input should be dropped (instead of failing the validation check). Dropped rows will be returned in the warnings field.
 
-            - keep_fields: typing.Optional[typing.Union[str, typing.List[str]]]. List of names of fields that will be persisted in the Dataset. By default the Dataset will retain only the required fields indicated in the [schema for the corresponding Dataset type](https://docs.cohere.com/docs/datasets#dataset-types). For example, datasets of type `embed-input` will drop all fields other than the required `text` field. If any of the fields in `keep_fields` are missing from the uploaded file, Dataset validation will fail.
+            - keep_fields: typing.Optional[typing.Union[str, typing.Sequence[str]]]. List of names of fields that will be persisted in the Dataset. By default the Dataset will retain only the required fields indicated in the [schema for the corresponding Dataset type](https://docs.cohere.com/docs/datasets#dataset-types). For example, datasets of type `embed-input` will drop all fields other than the required `text` field. If any of the fields in `keep_fields` are missing from the uploaded file, Dataset validation will fail.
 
-            - optional_fields: typing.Optional[typing.Union[str, typing.List[str]]]. List of names of fields that will be persisted in the Dataset. By default the Dataset will retain only the required fields indicated in the [schema for the corresponding Dataset type](https://docs.cohere.com/docs/datasets#dataset-types). For example, Datasets of type `embed-input` will drop all fields other than the required `text` field. If any of the fields in `optional_fields` are missing from the uploaded file, Dataset validation will pass.
+            - optional_fields: typing.Optional[typing.Union[str, typing.Sequence[str]]]. List of names of fields that will be persisted in the Dataset. By default the Dataset will retain only the required fields indicated in the [schema for the corresponding Dataset type](https://docs.cohere.com/docs/datasets#dataset-types). For example, Datasets of type `embed-input` will drop all fields other than the required `text` field. If any of the fields in `optional_fields` are missing from the uploaded file, Dataset validation will pass.
 
             - text_separator: typing.Optional[str]. Raw .txt uploads will be split into entries using the text_separator value.
 
@@ -466,7 +466,7 @@ class AsyncDatasetsClient:
                 remove_none_from_dict(
                     {
                         "name": name,
-                        "type": type.value if type is not None else None,
+                        "type": type,
                         "keep_original_file": keep_original_file,
                         "skip_malformed_input": skip_malformed_input,
                         "keep_fields": keep_fields,
@@ -574,7 +574,7 @@ class AsyncDatasetsClient:
         """
         _response = await self._client_wrapper.httpx_client.request(
             "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"datasets/{id}"),
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"datasets/{jsonable_encoder(id)}"),
             params=jsonable_encoder(
                 request_options.get("additional_query_parameters") if request_options is not None else None
             ),
@@ -623,7 +623,7 @@ class AsyncDatasetsClient:
         """
         _response = await self._client_wrapper.httpx_client.request(
             "DELETE",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"datasets/{id}"),
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"datasets/{jsonable_encoder(id)}"),
             params=jsonable_encoder(
                 request_options.get("additional_query_parameters") if request_options is not None else None
             ),

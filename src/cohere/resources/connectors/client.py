@@ -109,7 +109,7 @@ class ConnectorsClient:
         name: str,
         description: typing.Optional[str] = OMIT,
         url: str,
-        excludes: typing.Optional[typing.List[str]] = OMIT,
+        excludes: typing.Optional[typing.Sequence[str]] = OMIT,
         oauth: typing.Optional[CreateConnectorOAuth] = OMIT,
         active: typing.Optional[bool] = OMIT,
         continue_on_failure: typing.Optional[bool] = OMIT,
@@ -126,7 +126,7 @@ class ConnectorsClient:
 
             - url: str. The URL of the connector that will be used to search for documents.
 
-            - excludes: typing.Optional[typing.List[str]]. A list of fields to exclude from the prompt (fields remain in the document).
+            - excludes: typing.Optional[typing.Sequence[str]]. A list of fields to exclude from the prompt (fields remain in the document).
 
             - oauth: typing.Optional[CreateConnectorOAuth]. The OAuth 2.0 configuration for the connector. Cannot be specified if service_auth is specified.
 
@@ -223,7 +223,7 @@ class ConnectorsClient:
         """
         _response = self._client_wrapper.httpx_client.request(
             "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{id}"),
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{jsonable_encoder(id)}"),
             params=jsonable_encoder(
                 request_options.get("additional_query_parameters") if request_options is not None else None
             ),
@@ -276,7 +276,7 @@ class ConnectorsClient:
         """
         _response = self._client_wrapper.httpx_client.request(
             "DELETE",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{id}"),
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{jsonable_encoder(id)}"),
             params=jsonable_encoder(
                 request_options.get("additional_query_parameters") if request_options is not None else None
             ),
@@ -316,7 +316,7 @@ class ConnectorsClient:
         *,
         name: typing.Optional[str] = OMIT,
         url: typing.Optional[str] = OMIT,
-        excludes: typing.Optional[typing.List[str]] = OMIT,
+        excludes: typing.Optional[typing.Sequence[str]] = OMIT,
         oauth: typing.Optional[CreateConnectorOAuth] = OMIT,
         active: typing.Optional[bool] = OMIT,
         continue_on_failure: typing.Optional[bool] = OMIT,
@@ -333,7 +333,7 @@ class ConnectorsClient:
 
             - url: typing.Optional[str]. The URL of the connector that will be used to search for documents.
 
-            - excludes: typing.Optional[typing.List[str]]. A list of fields to exclude from the prompt (fields remain in the document).
+            - excludes: typing.Optional[typing.Sequence[str]]. A list of fields to exclude from the prompt (fields remain in the document).
 
             - oauth: typing.Optional[CreateConnectorOAuth]. The OAuth 2.0 configuration for the connector. Cannot be specified if service_auth is specified.
 
@@ -372,7 +372,7 @@ class ConnectorsClient:
             _request["service_auth"] = service_auth
         _response = self._client_wrapper.httpx_client.request(
             "PATCH",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{id}"),
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{jsonable_encoder(id)}"),
             params=jsonable_encoder(
                 request_options.get("additional_query_parameters") if request_options is not None else None
             ),
@@ -441,7 +441,9 @@ class ConnectorsClient:
         """
         _response = self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{id}/oauth/authorize"),
+            urllib.parse.urljoin(
+                f"{self._client_wrapper.get_base_url()}/", f"connectors/{jsonable_encoder(id)}/oauth/authorize"
+            ),
             params=jsonable_encoder(
                 remove_none_from_dict(
                     {
@@ -563,7 +565,7 @@ class AsyncConnectorsClient:
         name: str,
         description: typing.Optional[str] = OMIT,
         url: str,
-        excludes: typing.Optional[typing.List[str]] = OMIT,
+        excludes: typing.Optional[typing.Sequence[str]] = OMIT,
         oauth: typing.Optional[CreateConnectorOAuth] = OMIT,
         active: typing.Optional[bool] = OMIT,
         continue_on_failure: typing.Optional[bool] = OMIT,
@@ -580,7 +582,7 @@ class AsyncConnectorsClient:
 
             - url: str. The URL of the connector that will be used to search for documents.
 
-            - excludes: typing.Optional[typing.List[str]]. A list of fields to exclude from the prompt (fields remain in the document).
+            - excludes: typing.Optional[typing.Sequence[str]]. A list of fields to exclude from the prompt (fields remain in the document).
 
             - oauth: typing.Optional[CreateConnectorOAuth]. The OAuth 2.0 configuration for the connector. Cannot be specified if service_auth is specified.
 
@@ -677,7 +679,7 @@ class AsyncConnectorsClient:
         """
         _response = await self._client_wrapper.httpx_client.request(
             "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{id}"),
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{jsonable_encoder(id)}"),
             params=jsonable_encoder(
                 request_options.get("additional_query_parameters") if request_options is not None else None
             ),
@@ -732,7 +734,7 @@ class AsyncConnectorsClient:
         """
         _response = await self._client_wrapper.httpx_client.request(
             "DELETE",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{id}"),
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{jsonable_encoder(id)}"),
             params=jsonable_encoder(
                 request_options.get("additional_query_parameters") if request_options is not None else None
             ),
@@ -772,7 +774,7 @@ class AsyncConnectorsClient:
         *,
         name: typing.Optional[str] = OMIT,
         url: typing.Optional[str] = OMIT,
-        excludes: typing.Optional[typing.List[str]] = OMIT,
+        excludes: typing.Optional[typing.Sequence[str]] = OMIT,
         oauth: typing.Optional[CreateConnectorOAuth] = OMIT,
         active: typing.Optional[bool] = OMIT,
         continue_on_failure: typing.Optional[bool] = OMIT,
@@ -789,7 +791,7 @@ class AsyncConnectorsClient:
 
             - url: typing.Optional[str]. The URL of the connector that will be used to search for documents.
 
-            - excludes: typing.Optional[typing.List[str]]. A list of fields to exclude from the prompt (fields remain in the document).
+            - excludes: typing.Optional[typing.Sequence[str]]. A list of fields to exclude from the prompt (fields remain in the document).
 
             - oauth: typing.Optional[CreateConnectorOAuth]. The OAuth 2.0 configuration for the connector. Cannot be specified if service_auth is specified.
 
@@ -828,7 +830,7 @@ class AsyncConnectorsClient:
             _request["service_auth"] = service_auth
         _response = await self._client_wrapper.httpx_client.request(
             "PATCH",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{id}"),
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{jsonable_encoder(id)}"),
             params=jsonable_encoder(
                 request_options.get("additional_query_parameters") if request_options is not None else None
             ),
@@ -897,7 +899,9 @@ class AsyncConnectorsClient:
         """
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{id}/oauth/authorize"),
+            urllib.parse.urljoin(
+                f"{self._client_wrapper.get_base_url()}/", f"connectors/{jsonable_encoder(id)}/oauth/authorize"
+            ),
             params=jsonable_encoder(
                 remove_none_from_dict(
                     {

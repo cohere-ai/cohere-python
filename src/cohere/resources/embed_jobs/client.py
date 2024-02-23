@@ -127,11 +127,7 @@ class EmbedJobsClient:
             input_type=EmbedInputType.SEARCH_DOCUMENT,
         )
         """
-        _request: typing.Dict[str, typing.Any] = {
-            "model": model,
-            "dataset_id": dataset_id,
-            "input_type": input_type.value,
-        }
+        _request: typing.Dict[str, typing.Any] = {"model": model, "dataset_id": dataset_id, "input_type": input_type}
         if name is not OMIT:
             _request["name"] = name
         if truncate is not OMIT:
@@ -195,7 +191,7 @@ class EmbedJobsClient:
         """
         _response = self._client_wrapper.httpx_client.request(
             "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"embed-jobs/{id}"),
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"embed-jobs/{jsonable_encoder(id)}"),
             params=jsonable_encoder(
                 request_options.get("additional_query_parameters") if request_options is not None else None
             ),
@@ -248,7 +244,9 @@ class EmbedJobsClient:
         """
         _response = self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"embed-jobs/{id}/cancel"),
+            urllib.parse.urljoin(
+                f"{self._client_wrapper.get_base_url()}/", f"embed-jobs/{jsonable_encoder(id)}/cancel"
+            ),
             params=jsonable_encoder(
                 request_options.get("additional_query_parameters") if request_options is not None else None
             ),
@@ -383,11 +381,7 @@ class AsyncEmbedJobsClient:
             input_type=EmbedInputType.SEARCH_DOCUMENT,
         )
         """
-        _request: typing.Dict[str, typing.Any] = {
-            "model": model,
-            "dataset_id": dataset_id,
-            "input_type": input_type.value,
-        }
+        _request: typing.Dict[str, typing.Any] = {"model": model, "dataset_id": dataset_id, "input_type": input_type}
         if name is not OMIT:
             _request["name"] = name
         if truncate is not OMIT:
@@ -451,7 +445,7 @@ class AsyncEmbedJobsClient:
         """
         _response = await self._client_wrapper.httpx_client.request(
             "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"embed-jobs/{id}"),
+            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"embed-jobs/{jsonable_encoder(id)}"),
             params=jsonable_encoder(
                 request_options.get("additional_query_parameters") if request_options is not None else None
             ),
@@ -504,7 +498,9 @@ class AsyncEmbedJobsClient:
         """
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"embed-jobs/{id}/cancel"),
+            urllib.parse.urljoin(
+                f"{self._client_wrapper.get_base_url()}/", f"embed-jobs/{jsonable_encoder(id)}/cancel"
+            ),
             params=jsonable_encoder(
                 request_options.get("additional_query_parameters") if request_options is not None else None
             ),
