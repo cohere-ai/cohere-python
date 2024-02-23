@@ -18,8 +18,7 @@ def test_chat() -> None:
                                                               "gravity is Sir Isaac Newton")
         ],
         message="What year was he born?",
-        connectors=[ChatConnector(
-            id="web-search", user_access_token="", continue_on_failure=False, options={})]
+        connectors=[ChatConnector(id="web-search")]
     )
 
     print(chat)
@@ -81,7 +80,7 @@ def test_embed_job_crud() -> None:
 
 
 def test_rerank() -> None:
-    docs: typing.List[str | RerankRequestDocumentsItemText] = [
+    docs = [
         'Carson City is the capital city of the American state of Nevada.',
         'The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.',
         'Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.',
@@ -90,7 +89,8 @@ def test_rerank() -> None:
     response = co.rerank(
         model='rerank-english-v2.0',
         query='What is the capital of the United States?',
-        documents=docs,
+        # Fern are working on fixing this type issue
+        documents=docs,  # type: ignore
         top_n=3,
     )
 
