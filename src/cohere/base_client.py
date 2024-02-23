@@ -97,7 +97,7 @@ class BaseCohere:
         httpx_client: typing.Optional[httpx.Client] = None,
     ):
         if token is None:
-            raise ApiError(message="The client must be instantiated be either passing in token or setting CO_API_KEY")
+            raise ApiError(body="The client must be instantiated be either passing in token or setting CO_API_KEY")
         self._client_wrapper = SyncClientWrapper(
             base_url=_get_base_url(base_url=base_url, environment=environment),
             client_name=client_name,
@@ -115,12 +115,12 @@ class BaseCohere:
         message: str,
         model: typing.Optional[str] = OMIT,
         preamble: typing.Optional[str] = OMIT,
-        chat_history: typing.Optional[typing.List[ChatMessage]] = OMIT,
+        chat_history: typing.Optional[typing.Sequence[ChatMessage]] = OMIT,
         conversation_id: typing.Optional[str] = OMIT,
         prompt_truncation: typing.Optional[ChatStreamRequestPromptTruncation] = OMIT,
-        connectors: typing.Optional[typing.List[ChatConnector]] = OMIT,
+        connectors: typing.Optional[typing.Sequence[ChatConnector]] = OMIT,
         search_queries_only: typing.Optional[bool] = OMIT,
-        documents: typing.Optional[typing.List[ChatDocument]] = OMIT,
+        documents: typing.Optional[typing.Sequence[ChatDocument]] = OMIT,
         temperature: typing.Optional[float] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         k: typing.Optional[int] = OMIT,
@@ -142,7 +142,7 @@ class BaseCohere:
 
             - preamble: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style.
 
-            - chat_history: typing.Optional[typing.List[ChatMessage]]. A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
+            - chat_history: typing.Optional[typing.Sequence[ChatMessage]]. A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
 
             - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
 
@@ -156,31 +156,31 @@ class BaseCohere:
 
                                                                                      With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
 
-            - connectors: typing.Optional[typing.List[ChatConnector]]. Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
+            - connectors: typing.Optional[typing.Sequence[ChatConnector]]. Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
 
-                                                                       When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
+                                                                           When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
 
             - search_queries_only: typing.Optional[bool]. Defaults to `false`.
 
                                                           When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
 
-            - documents: typing.Optional[typing.List[ChatDocument]]. A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
+            - documents: typing.Optional[typing.Sequence[ChatDocument]]. A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
 
-                                                                     Example:
-                                                                     `[
-                                                                       { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
-                                                                       { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
-                                                                     ]`
+                                                                         Example:
+                                                                         `[
+                                                                           { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
+                                                                           { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
+                                                                         ]`
 
-                                                                     Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
+                                                                         Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
 
-                                                                     Some suggested keys are "text", "author", and "date". For better generation quality, it is recommended to keep the total word count of the strings in the dictionary to under 300 words.
+                                                                         Some suggested keys are "text", "author", and "date". For better generation quality, it is recommended to keep the total word count of the strings in the dictionary to under 300 words.
 
-                                                                     An `id` field (string) can be optionally supplied to identify the document in the citations. This field will not be passed to the model.
+                                                                         An `id` field (string) can be optionally supplied to identify the document in the citations. This field will not be passed to the model.
 
-                                                                     An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
+                                                                         An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
 
-                                                                     See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
+                                                                         See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
 
             - temperature: typing.Optional[float]. Defaults to `0.3`.
 
@@ -280,12 +280,12 @@ class BaseCohere:
         message: str,
         model: typing.Optional[str] = OMIT,
         preamble: typing.Optional[str] = OMIT,
-        chat_history: typing.Optional[typing.List[ChatMessage]] = OMIT,
+        chat_history: typing.Optional[typing.Sequence[ChatMessage]] = OMIT,
         conversation_id: typing.Optional[str] = OMIT,
         prompt_truncation: typing.Optional[ChatRequestPromptTruncation] = OMIT,
-        connectors: typing.Optional[typing.List[ChatConnector]] = OMIT,
+        connectors: typing.Optional[typing.Sequence[ChatConnector]] = OMIT,
         search_queries_only: typing.Optional[bool] = OMIT,
-        documents: typing.Optional[typing.List[ChatDocument]] = OMIT,
+        documents: typing.Optional[typing.Sequence[ChatDocument]] = OMIT,
         temperature: typing.Optional[float] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         k: typing.Optional[int] = OMIT,
@@ -307,7 +307,7 @@ class BaseCohere:
 
             - preamble: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style.
 
-            - chat_history: typing.Optional[typing.List[ChatMessage]]. A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
+            - chat_history: typing.Optional[typing.Sequence[ChatMessage]]. A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
 
             - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
 
@@ -321,31 +321,31 @@ class BaseCohere:
 
                                                                                With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
 
-            - connectors: typing.Optional[typing.List[ChatConnector]]. Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
+            - connectors: typing.Optional[typing.Sequence[ChatConnector]]. Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
 
-                                                                       When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
+                                                                           When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
 
             - search_queries_only: typing.Optional[bool]. Defaults to `false`.
 
                                                           When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
 
-            - documents: typing.Optional[typing.List[ChatDocument]]. A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
+            - documents: typing.Optional[typing.Sequence[ChatDocument]]. A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
 
-                                                                     Example:
-                                                                     `[
-                                                                       { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
-                                                                       { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
-                                                                     ]`
+                                                                         Example:
+                                                                         `[
+                                                                           { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
+                                                                           { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
+                                                                         ]`
 
-                                                                     Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
+                                                                         Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
 
-                                                                     Some suggested keys are "text", "author", and "date". For better generation quality, it is recommended to keep the total word count of the strings in the dictionary to under 300 words.
+                                                                         Some suggested keys are "text", "author", and "date". For better generation quality, it is recommended to keep the total word count of the strings in the dictionary to under 300 words.
 
-                                                                     An `id` field (string) can be optionally supplied to identify the document in the citations. This field will not be passed to the model.
+                                                                         An `id` field (string) can be optionally supplied to identify the document in the citations. This field will not be passed to the model.
 
-                                                                     An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
+                                                                         An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
 
-                                                                     See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
+                                                                         See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
 
             - temperature: typing.Optional[float]. Defaults to `0.3`.
 
@@ -471,8 +471,8 @@ class BaseCohere:
         truncate: typing.Optional[GenerateStreamRequestTruncate] = OMIT,
         temperature: typing.Optional[float] = OMIT,
         preset: typing.Optional[str] = OMIT,
-        end_sequences: typing.Optional[typing.List[str]] = OMIT,
-        stop_sequences: typing.Optional[typing.List[str]] = OMIT,
+        end_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
+        stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         k: typing.Optional[int] = OMIT,
         p: typing.Optional[float] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
@@ -509,9 +509,9 @@ class BaseCohere:
             - preset: typing.Optional[str]. Identifier of a custom preset. A preset is a combination of parameters, such as prompt, temperature etc. You can create presets in the [playground](https://dashboard.cohere.ai/playground/generate).
                                             When a preset is specified, the `prompt` parameter becomes optional, and any included parameters will override the preset's parameters.
 
-            - end_sequences: typing.Optional[typing.List[str]]. The generated text will be cut at the beginning of the earliest occurrence of an end sequence. The sequence will be excluded from the text.
+            - end_sequences: typing.Optional[typing.Sequence[str]]. The generated text will be cut at the beginning of the earliest occurrence of an end sequence. The sequence will be excluded from the text.
 
-            - stop_sequences: typing.Optional[typing.List[str]]. The generated text will be cut at the end of the earliest occurrence of a stop sequence. The sequence will be included the text.
+            - stop_sequences: typing.Optional[typing.Sequence[str]]. The generated text will be cut at the end of the earliest occurrence of a stop sequence. The sequence will be included the text.
 
             - k: typing.Optional[int]. Ensures only the top `k` most likely tokens are considered for generation at each step.
                                        Defaults to `0`, min value of `0`, max value of `500`.
@@ -620,8 +620,8 @@ class BaseCohere:
         truncate: typing.Optional[GenerateRequestTruncate] = OMIT,
         temperature: typing.Optional[float] = OMIT,
         preset: typing.Optional[str] = OMIT,
-        end_sequences: typing.Optional[typing.List[str]] = OMIT,
-        stop_sequences: typing.Optional[typing.List[str]] = OMIT,
+        end_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
+        stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         k: typing.Optional[int] = OMIT,
         p: typing.Optional[float] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
@@ -658,9 +658,9 @@ class BaseCohere:
             - preset: typing.Optional[str]. Identifier of a custom preset. A preset is a combination of parameters, such as prompt, temperature etc. You can create presets in the [playground](https://dashboard.cohere.ai/playground/generate).
                                             When a preset is specified, the `prompt` parameter becomes optional, and any included parameters will override the preset's parameters.
 
-            - end_sequences: typing.Optional[typing.List[str]]. The generated text will be cut at the beginning of the earliest occurrence of an end sequence. The sequence will be excluded from the text.
+            - end_sequences: typing.Optional[typing.Sequence[str]]. The generated text will be cut at the beginning of the earliest occurrence of an end sequence. The sequence will be excluded from the text.
 
-            - stop_sequences: typing.Optional[typing.List[str]]. The generated text will be cut at the end of the earliest occurrence of a stop sequence. The sequence will be included the text.
+            - stop_sequences: typing.Optional[typing.Sequence[str]]. The generated text will be cut at the end of the earliest occurrence of a stop sequence. The sequence will be included the text.
 
             - k: typing.Optional[int]. Ensures only the top `k` most likely tokens are considered for generation at each step.
                                        Defaults to `0`, min value of `0`, max value of `500`.
@@ -768,10 +768,10 @@ class BaseCohere:
     def embed(
         self,
         *,
-        texts: typing.List[str],
+        texts: typing.Sequence[str],
         model: typing.Optional[str] = OMIT,
         input_type: typing.Optional[EmbedInputType] = OMIT,
-        embedding_types: typing.Optional[typing.List[EmbedRequestEmbeddingTypesItem]] = OMIT,
+        embedding_types: typing.Optional[typing.Sequence[EmbedRequestEmbeddingTypesItem]] = OMIT,
         truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> EmbedResponse:
@@ -783,7 +783,7 @@ class BaseCohere:
         If you want to learn more how to use the embedding model, have a look at the [Semantic Search Guide](/docs/semantic-search).
 
         Parameters:
-            - texts: typing.List[str]. An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
+            - texts: typing.Sequence[str]. An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
 
             - model: typing.Optional[str]. Defaults to embed-english-v2.0
 
@@ -801,13 +801,13 @@ class BaseCohere:
                                            * `embed-multilingual-v2.0`  768
             - input_type: typing.Optional[EmbedInputType].
 
-            - embedding_types: typing.Optional[typing.List[EmbedRequestEmbeddingTypesItem]]. Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
+            - embedding_types: typing.Optional[typing.Sequence[EmbedRequestEmbeddingTypesItem]]. Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
-                                                                                             * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
-                                                                                             * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
-                                                                                             * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
-                                                                                             * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
-                                                                                             * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
+                                                                                                 * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
+                                                                                                 * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
+                                                                                                 * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
+                                                                                                 * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
+                                                                                                 * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
             - truncate: typing.Optional[EmbedRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
 
                                                                Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
@@ -867,7 +867,7 @@ class BaseCohere:
         *,
         model: typing.Optional[str] = OMIT,
         query: str,
-        documents: typing.List[RerankRequestDocumentsItem],
+        documents: typing.Sequence[RerankRequestDocumentsItem],
         top_n: typing.Optional[int] = OMIT,
         return_documents: typing.Optional[bool] = OMIT,
         max_chunks_per_doc: typing.Optional[int] = OMIT,
@@ -881,12 +881,12 @@ class BaseCohere:
 
             - query: str. The search query
 
-            - documents: typing.List[RerankRequestDocumentsItem]. A list of document objects or strings to rerank.
-                                                                  If a document is provided the text fields is required and all other fields will be preserved in the response.
+            - documents: typing.Sequence[RerankRequestDocumentsItem]. A list of document objects or strings to rerank.
+                                                                      If a document is provided the text fields is required and all other fields will be preserved in the response.
 
-                                                                  The total max chunks (length of documents * max_chunks_per_doc) must be less than 10000.
+                                                                      The total max chunks (length of documents * max_chunks_per_doc) must be less than 10000.
 
-                                                                  We recommend a maximum of 1,000 documents for optimal endpoint performance.
+                                                                      We recommend a maximum of 1,000 documents for optimal endpoint performance.
             - top_n: typing.Optional[int]. The number of most relevant documents or indices to return, defaults to the length of the documents
 
             - return_documents: typing.Optional[bool]. - If false, returns results without the doc text - the api will return a list of {index, relevance score} where index is inferred from the list passed into the request.
@@ -953,8 +953,8 @@ class BaseCohere:
     def classify(
         self,
         *,
-        inputs: typing.List[str],
-        examples: typing.List[ClassifyExample],
+        inputs: typing.Sequence[str],
+        examples: typing.Sequence[ClassifyExample],
         model: typing.Optional[str] = OMIT,
         preset: typing.Optional[str] = OMIT,
         truncate: typing.Optional[ClassifyRequestTruncate] = OMIT,
@@ -965,11 +965,11 @@ class BaseCohere:
         Note: [Fine-tuned models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
 
         Parameters:
-            - inputs: typing.List[str]. A list of up to 96 texts to be classified. Each one must be a non-empty string.
-                                        There is, however, no consistent, universal limit to the length a particular input can be. We perform classification on the first `x` tokens of each input, and `x` varies depending on which underlying model is powering classification. The maximum token length for each model is listed in the "max tokens" column [here](https://docs.cohere.com/docs/models).
-                                        Note: by default the `truncate` parameter is set to `END`, so tokens exceeding the limit will be automatically dropped. This behavior can be disabled by setting `truncate` to `NONE`, which will result in validation errors for longer texts.
-            - examples: typing.List[ClassifyExample]. An array of examples to provide context to the model. Each example is a text string and its associated label/class. Each unique label requires at least 2 examples associated with it; the maximum number of examples is 2500, and each example has a maximum length of 512 tokens. The values should be structured as `{text: "...",label: "..."}`.
-                                                      Note: [Fine-tuned Models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
+            - inputs: typing.Sequence[str]. A list of up to 96 texts to be classified. Each one must be a non-empty string.
+                                            There is, however, no consistent, universal limit to the length a particular input can be. We perform classification on the first `x` tokens of each input, and `x` varies depending on which underlying model is powering classification. The maximum token length for each model is listed in the "max tokens" column [here](https://docs.cohere.com/docs/models).
+                                            Note: by default the `truncate` parameter is set to `END`, so tokens exceeding the limit will be automatically dropped. This behavior can be disabled by setting `truncate` to `NONE`, which will result in validation errors for longer texts.
+            - examples: typing.Sequence[ClassifyExample]. An array of examples to provide context to the model. Each example is a text string and its associated label/class. Each unique label requires at least 2 examples associated with it; the maximum number of examples is 2500, and each example has a maximum length of 512 tokens. The values should be structured as `{text: "...",label: "..."}`.
+                                                          Note: [Fine-tuned Models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
             - model: typing.Optional[str]. The identifier of the model. Currently available models are `embed-multilingual-v2.0`, `embed-english-light-v2.0`, and `embed-english-v2.0` (default). Smaller "light" models are faster, while larger models will perform better. [Fine-tuned models](https://docs.cohere.com/docs/fine-tuning) can also be supplied with their full ID.
 
             - preset: typing.Optional[str]. The ID of a custom playground preset. You can create presets in the [playground](https://dashboard.cohere.ai/playground/classify?model=large). If you use a preset, all other parameters become optional, and any included parameters will override the preset's parameters.
@@ -1238,7 +1238,7 @@ class BaseCohere:
     def detokenize(
         self,
         *,
-        tokens: typing.List[int],
+        tokens: typing.Sequence[int],
         model: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> DetokenizeResponse:
@@ -1246,7 +1246,7 @@ class BaseCohere:
         This endpoint takes tokens using byte-pair encoding and returns their text representation. To learn more about tokenization and byte pair encoding, see the tokens page.
 
         Parameters:
-            - tokens: typing.List[int]. The list of tokens to be detokenized.
+            - tokens: typing.Sequence[int]. The list of tokens to be detokenized.
 
             - model: typing.Optional[str]. An optional parameter to provide the model name. This will ensure that the detokenization is done by the tokenizer used by that model.
 
@@ -1338,7 +1338,7 @@ class AsyncBaseCohere:
         httpx_client: typing.Optional[httpx.AsyncClient] = None,
     ):
         if token is None:
-            raise ApiError(message="The client must be instantiated be either passing in token or setting CO_API_KEY")
+            raise ApiError(body="The client must be instantiated be either passing in token or setting CO_API_KEY")
         self._client_wrapper = AsyncClientWrapper(
             base_url=_get_base_url(base_url=base_url, environment=environment),
             client_name=client_name,
@@ -1356,12 +1356,12 @@ class AsyncBaseCohere:
         message: str,
         model: typing.Optional[str] = OMIT,
         preamble: typing.Optional[str] = OMIT,
-        chat_history: typing.Optional[typing.List[ChatMessage]] = OMIT,
+        chat_history: typing.Optional[typing.Sequence[ChatMessage]] = OMIT,
         conversation_id: typing.Optional[str] = OMIT,
         prompt_truncation: typing.Optional[ChatStreamRequestPromptTruncation] = OMIT,
-        connectors: typing.Optional[typing.List[ChatConnector]] = OMIT,
+        connectors: typing.Optional[typing.Sequence[ChatConnector]] = OMIT,
         search_queries_only: typing.Optional[bool] = OMIT,
-        documents: typing.Optional[typing.List[ChatDocument]] = OMIT,
+        documents: typing.Optional[typing.Sequence[ChatDocument]] = OMIT,
         temperature: typing.Optional[float] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         k: typing.Optional[int] = OMIT,
@@ -1383,7 +1383,7 @@ class AsyncBaseCohere:
 
             - preamble: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style.
 
-            - chat_history: typing.Optional[typing.List[ChatMessage]]. A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
+            - chat_history: typing.Optional[typing.Sequence[ChatMessage]]. A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
 
             - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
 
@@ -1397,31 +1397,31 @@ class AsyncBaseCohere:
 
                                                                                      With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
 
-            - connectors: typing.Optional[typing.List[ChatConnector]]. Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
+            - connectors: typing.Optional[typing.Sequence[ChatConnector]]. Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
 
-                                                                       When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
+                                                                           When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
 
             - search_queries_only: typing.Optional[bool]. Defaults to `false`.
 
                                                           When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
 
-            - documents: typing.Optional[typing.List[ChatDocument]]. A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
+            - documents: typing.Optional[typing.Sequence[ChatDocument]]. A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
 
-                                                                     Example:
-                                                                     `[
-                                                                       { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
-                                                                       { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
-                                                                     ]`
+                                                                         Example:
+                                                                         `[
+                                                                           { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
+                                                                           { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
+                                                                         ]`
 
-                                                                     Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
+                                                                         Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
 
-                                                                     Some suggested keys are "text", "author", and "date". For better generation quality, it is recommended to keep the total word count of the strings in the dictionary to under 300 words.
+                                                                         Some suggested keys are "text", "author", and "date". For better generation quality, it is recommended to keep the total word count of the strings in the dictionary to under 300 words.
 
-                                                                     An `id` field (string) can be optionally supplied to identify the document in the citations. This field will not be passed to the model.
+                                                                         An `id` field (string) can be optionally supplied to identify the document in the citations. This field will not be passed to the model.
 
-                                                                     An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
+                                                                         An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
 
-                                                                     See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
+                                                                         See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
 
             - temperature: typing.Optional[float]. Defaults to `0.3`.
 
@@ -1521,12 +1521,12 @@ class AsyncBaseCohere:
         message: str,
         model: typing.Optional[str] = OMIT,
         preamble: typing.Optional[str] = OMIT,
-        chat_history: typing.Optional[typing.List[ChatMessage]] = OMIT,
+        chat_history: typing.Optional[typing.Sequence[ChatMessage]] = OMIT,
         conversation_id: typing.Optional[str] = OMIT,
         prompt_truncation: typing.Optional[ChatRequestPromptTruncation] = OMIT,
-        connectors: typing.Optional[typing.List[ChatConnector]] = OMIT,
+        connectors: typing.Optional[typing.Sequence[ChatConnector]] = OMIT,
         search_queries_only: typing.Optional[bool] = OMIT,
-        documents: typing.Optional[typing.List[ChatDocument]] = OMIT,
+        documents: typing.Optional[typing.Sequence[ChatDocument]] = OMIT,
         temperature: typing.Optional[float] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         k: typing.Optional[int] = OMIT,
@@ -1548,7 +1548,7 @@ class AsyncBaseCohere:
 
             - preamble: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style.
 
-            - chat_history: typing.Optional[typing.List[ChatMessage]]. A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
+            - chat_history: typing.Optional[typing.Sequence[ChatMessage]]. A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
 
             - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
 
@@ -1562,31 +1562,31 @@ class AsyncBaseCohere:
 
                                                                                With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
 
-            - connectors: typing.Optional[typing.List[ChatConnector]]. Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
+            - connectors: typing.Optional[typing.Sequence[ChatConnector]]. Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
 
-                                                                       When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
+                                                                           When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
 
             - search_queries_only: typing.Optional[bool]. Defaults to `false`.
 
                                                           When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
 
-            - documents: typing.Optional[typing.List[ChatDocument]]. A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
+            - documents: typing.Optional[typing.Sequence[ChatDocument]]. A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
 
-                                                                     Example:
-                                                                     `[
-                                                                       { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
-                                                                       { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
-                                                                     ]`
+                                                                         Example:
+                                                                         `[
+                                                                           { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
+                                                                           { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
+                                                                         ]`
 
-                                                                     Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
+                                                                         Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
 
-                                                                     Some suggested keys are "text", "author", and "date". For better generation quality, it is recommended to keep the total word count of the strings in the dictionary to under 300 words.
+                                                                         Some suggested keys are "text", "author", and "date". For better generation quality, it is recommended to keep the total word count of the strings in the dictionary to under 300 words.
 
-                                                                     An `id` field (string) can be optionally supplied to identify the document in the citations. This field will not be passed to the model.
+                                                                         An `id` field (string) can be optionally supplied to identify the document in the citations. This field will not be passed to the model.
 
-                                                                     An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
+                                                                         An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
 
-                                                                     See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
+                                                                         See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
 
             - temperature: typing.Optional[float]. Defaults to `0.3`.
 
@@ -1712,8 +1712,8 @@ class AsyncBaseCohere:
         truncate: typing.Optional[GenerateStreamRequestTruncate] = OMIT,
         temperature: typing.Optional[float] = OMIT,
         preset: typing.Optional[str] = OMIT,
-        end_sequences: typing.Optional[typing.List[str]] = OMIT,
-        stop_sequences: typing.Optional[typing.List[str]] = OMIT,
+        end_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
+        stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         k: typing.Optional[int] = OMIT,
         p: typing.Optional[float] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
@@ -1750,9 +1750,9 @@ class AsyncBaseCohere:
             - preset: typing.Optional[str]. Identifier of a custom preset. A preset is a combination of parameters, such as prompt, temperature etc. You can create presets in the [playground](https://dashboard.cohere.ai/playground/generate).
                                             When a preset is specified, the `prompt` parameter becomes optional, and any included parameters will override the preset's parameters.
 
-            - end_sequences: typing.Optional[typing.List[str]]. The generated text will be cut at the beginning of the earliest occurrence of an end sequence. The sequence will be excluded from the text.
+            - end_sequences: typing.Optional[typing.Sequence[str]]. The generated text will be cut at the beginning of the earliest occurrence of an end sequence. The sequence will be excluded from the text.
 
-            - stop_sequences: typing.Optional[typing.List[str]]. The generated text will be cut at the end of the earliest occurrence of a stop sequence. The sequence will be included the text.
+            - stop_sequences: typing.Optional[typing.Sequence[str]]. The generated text will be cut at the end of the earliest occurrence of a stop sequence. The sequence will be included the text.
 
             - k: typing.Optional[int]. Ensures only the top `k` most likely tokens are considered for generation at each step.
                                        Defaults to `0`, min value of `0`, max value of `500`.
@@ -1861,8 +1861,8 @@ class AsyncBaseCohere:
         truncate: typing.Optional[GenerateRequestTruncate] = OMIT,
         temperature: typing.Optional[float] = OMIT,
         preset: typing.Optional[str] = OMIT,
-        end_sequences: typing.Optional[typing.List[str]] = OMIT,
-        stop_sequences: typing.Optional[typing.List[str]] = OMIT,
+        end_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
+        stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         k: typing.Optional[int] = OMIT,
         p: typing.Optional[float] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
@@ -1899,9 +1899,9 @@ class AsyncBaseCohere:
             - preset: typing.Optional[str]. Identifier of a custom preset. A preset is a combination of parameters, such as prompt, temperature etc. You can create presets in the [playground](https://dashboard.cohere.ai/playground/generate).
                                             When a preset is specified, the `prompt` parameter becomes optional, and any included parameters will override the preset's parameters.
 
-            - end_sequences: typing.Optional[typing.List[str]]. The generated text will be cut at the beginning of the earliest occurrence of an end sequence. The sequence will be excluded from the text.
+            - end_sequences: typing.Optional[typing.Sequence[str]]. The generated text will be cut at the beginning of the earliest occurrence of an end sequence. The sequence will be excluded from the text.
 
-            - stop_sequences: typing.Optional[typing.List[str]]. The generated text will be cut at the end of the earliest occurrence of a stop sequence. The sequence will be included the text.
+            - stop_sequences: typing.Optional[typing.Sequence[str]]. The generated text will be cut at the end of the earliest occurrence of a stop sequence. The sequence will be included the text.
 
             - k: typing.Optional[int]. Ensures only the top `k` most likely tokens are considered for generation at each step.
                                        Defaults to `0`, min value of `0`, max value of `500`.
@@ -2009,10 +2009,10 @@ class AsyncBaseCohere:
     async def embed(
         self,
         *,
-        texts: typing.List[str],
+        texts: typing.Sequence[str],
         model: typing.Optional[str] = OMIT,
         input_type: typing.Optional[EmbedInputType] = OMIT,
-        embedding_types: typing.Optional[typing.List[EmbedRequestEmbeddingTypesItem]] = OMIT,
+        embedding_types: typing.Optional[typing.Sequence[EmbedRequestEmbeddingTypesItem]] = OMIT,
         truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> EmbedResponse:
@@ -2024,7 +2024,7 @@ class AsyncBaseCohere:
         If you want to learn more how to use the embedding model, have a look at the [Semantic Search Guide](/docs/semantic-search).
 
         Parameters:
-            - texts: typing.List[str]. An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
+            - texts: typing.Sequence[str]. An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
 
             - model: typing.Optional[str]. Defaults to embed-english-v2.0
 
@@ -2042,13 +2042,13 @@ class AsyncBaseCohere:
                                            * `embed-multilingual-v2.0`  768
             - input_type: typing.Optional[EmbedInputType].
 
-            - embedding_types: typing.Optional[typing.List[EmbedRequestEmbeddingTypesItem]]. Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
+            - embedding_types: typing.Optional[typing.Sequence[EmbedRequestEmbeddingTypesItem]]. Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
-                                                                                             * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
-                                                                                             * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
-                                                                                             * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
-                                                                                             * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
-                                                                                             * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
+                                                                                                 * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
+                                                                                                 * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
+                                                                                                 * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
+                                                                                                 * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
+                                                                                                 * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
             - truncate: typing.Optional[EmbedRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
 
                                                                Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
@@ -2108,7 +2108,7 @@ class AsyncBaseCohere:
         *,
         model: typing.Optional[str] = OMIT,
         query: str,
-        documents: typing.List[RerankRequestDocumentsItem],
+        documents: typing.Sequence[RerankRequestDocumentsItem],
         top_n: typing.Optional[int] = OMIT,
         return_documents: typing.Optional[bool] = OMIT,
         max_chunks_per_doc: typing.Optional[int] = OMIT,
@@ -2122,12 +2122,12 @@ class AsyncBaseCohere:
 
             - query: str. The search query
 
-            - documents: typing.List[RerankRequestDocumentsItem]. A list of document objects or strings to rerank.
-                                                                  If a document is provided the text fields is required and all other fields will be preserved in the response.
+            - documents: typing.Sequence[RerankRequestDocumentsItem]. A list of document objects or strings to rerank.
+                                                                      If a document is provided the text fields is required and all other fields will be preserved in the response.
 
-                                                                  The total max chunks (length of documents * max_chunks_per_doc) must be less than 10000.
+                                                                      The total max chunks (length of documents * max_chunks_per_doc) must be less than 10000.
 
-                                                                  We recommend a maximum of 1,000 documents for optimal endpoint performance.
+                                                                      We recommend a maximum of 1,000 documents for optimal endpoint performance.
             - top_n: typing.Optional[int]. The number of most relevant documents or indices to return, defaults to the length of the documents
 
             - return_documents: typing.Optional[bool]. - If false, returns results without the doc text - the api will return a list of {index, relevance score} where index is inferred from the list passed into the request.
@@ -2194,8 +2194,8 @@ class AsyncBaseCohere:
     async def classify(
         self,
         *,
-        inputs: typing.List[str],
-        examples: typing.List[ClassifyExample],
+        inputs: typing.Sequence[str],
+        examples: typing.Sequence[ClassifyExample],
         model: typing.Optional[str] = OMIT,
         preset: typing.Optional[str] = OMIT,
         truncate: typing.Optional[ClassifyRequestTruncate] = OMIT,
@@ -2206,11 +2206,11 @@ class AsyncBaseCohere:
         Note: [Fine-tuned models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
 
         Parameters:
-            - inputs: typing.List[str]. A list of up to 96 texts to be classified. Each one must be a non-empty string.
-                                        There is, however, no consistent, universal limit to the length a particular input can be. We perform classification on the first `x` tokens of each input, and `x` varies depending on which underlying model is powering classification. The maximum token length for each model is listed in the "max tokens" column [here](https://docs.cohere.com/docs/models).
-                                        Note: by default the `truncate` parameter is set to `END`, so tokens exceeding the limit will be automatically dropped. This behavior can be disabled by setting `truncate` to `NONE`, which will result in validation errors for longer texts.
-            - examples: typing.List[ClassifyExample]. An array of examples to provide context to the model. Each example is a text string and its associated label/class. Each unique label requires at least 2 examples associated with it; the maximum number of examples is 2500, and each example has a maximum length of 512 tokens. The values should be structured as `{text: "...",label: "..."}`.
-                                                      Note: [Fine-tuned Models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
+            - inputs: typing.Sequence[str]. A list of up to 96 texts to be classified. Each one must be a non-empty string.
+                                            There is, however, no consistent, universal limit to the length a particular input can be. We perform classification on the first `x` tokens of each input, and `x` varies depending on which underlying model is powering classification. The maximum token length for each model is listed in the "max tokens" column [here](https://docs.cohere.com/docs/models).
+                                            Note: by default the `truncate` parameter is set to `END`, so tokens exceeding the limit will be automatically dropped. This behavior can be disabled by setting `truncate` to `NONE`, which will result in validation errors for longer texts.
+            - examples: typing.Sequence[ClassifyExample]. An array of examples to provide context to the model. Each example is a text string and its associated label/class. Each unique label requires at least 2 examples associated with it; the maximum number of examples is 2500, and each example has a maximum length of 512 tokens. The values should be structured as `{text: "...",label: "..."}`.
+                                                          Note: [Fine-tuned Models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
             - model: typing.Optional[str]. The identifier of the model. Currently available models are `embed-multilingual-v2.0`, `embed-english-light-v2.0`, and `embed-english-v2.0` (default). Smaller "light" models are faster, while larger models will perform better. [Fine-tuned models](https://docs.cohere.com/docs/fine-tuning) can also be supplied with their full ID.
 
             - preset: typing.Optional[str]. The ID of a custom playground preset. You can create presets in the [playground](https://dashboard.cohere.ai/playground/classify?model=large). If you use a preset, all other parameters become optional, and any included parameters will override the preset's parameters.
@@ -2479,7 +2479,7 @@ class AsyncBaseCohere:
     async def detokenize(
         self,
         *,
-        tokens: typing.List[int],
+        tokens: typing.Sequence[int],
         model: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> DetokenizeResponse:
@@ -2487,7 +2487,7 @@ class AsyncBaseCohere:
         This endpoint takes tokens using byte-pair encoding and returns their text representation. To learn more about tokenization and byte pair encoding, see the tokens page.
 
         Parameters:
-            - tokens: typing.List[int]. The list of tokens to be detokenized.
+            - tokens: typing.Sequence[int]. The list of tokens to be detokenized.
 
             - model: typing.Optional[str]. An optional parameter to provide the model name. This will ensure that the detokenization is done by the tokenizer used by that model.
 
