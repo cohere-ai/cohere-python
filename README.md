@@ -74,7 +74,6 @@ For a full breakdown of endpoints and arguments, please consult the [SDK Docs](h
 | /classify        | co.classify()        |
 | /tokenize        | co.tokenize()        |
 | /detokenize      | co.detokenize()      |
-| /detect-language | co.detect_language() |
 
 ## Models
 

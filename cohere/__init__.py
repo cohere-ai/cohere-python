@@ -13,7 +13,6 @@ COHERE_EMBED_BATCH_SIZE = 96
 CHAT_URL = "chat"
 CLASSIFY_URL = "classify"
 CODEBOOK_URL = "embed-codebook"
-DETECT_LANG_URL = "detect-language"
 EMBED_URL = "embed"
 GENERATE_FEEDBACK_URL = "feedback/generate"
 GENERATE_PREFERENCE_FEEDBACK_URL = "feedback/generate/preference"
