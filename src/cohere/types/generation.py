@@ -15,9 +15,9 @@ except ImportError:
 
 class Generation(pydantic.BaseModel):
     id: str
-    prompt: typing.Optional[str] = pydantic.Field(description="Prompt used for generations.")
+    prompt: typing.Optional[str] = pydantic.Field(default=None, description="Prompt used for generations.")
     generations: typing.List[SingleGeneration] = pydantic.Field(description="List of generated results")
-    meta: typing.Optional[ApiMeta]
+    meta: typing.Optional[ApiMeta] = None
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

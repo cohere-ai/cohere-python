@@ -14,9 +14,9 @@ except ImportError:
 
 
 class RerankResponse(pydantic.BaseModel):
-    id: typing.Optional[str]
+    id: typing.Optional[str] = None
     results: typing.List[RerankResponseResultsItem] = pydantic.Field(description="An ordered list of ranked documents")
-    meta: typing.Optional[ApiMeta]
+    meta: typing.Optional[ApiMeta] = None
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

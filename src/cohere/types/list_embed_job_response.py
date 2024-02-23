@@ -13,7 +13,7 @@ except ImportError:
 
 
 class ListEmbedJobResponse(pydantic.BaseModel):
-    embed_jobs: typing.Optional[typing.List[EmbedJob]]
+    embed_jobs: typing.Optional[typing.List[EmbedJob]] = None
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

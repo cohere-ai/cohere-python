@@ -15,7 +15,8 @@ except ImportError:
 class ListModelsResponse(pydantic.BaseModel):
     models: typing.List[Model]
     next_page_token: typing.Optional[str] = pydantic.Field(
-        description="A token to retrieve the next page of results. Provide in the page_token parameter of the next request."
+        default=None,
+        description="A token to retrieve the next page of results. Provide in the page_token parameter of the next request.",
     )
 
     def json(self, **kwargs: typing.Any) -> str:

@@ -14,8 +14,8 @@ except ImportError:
 
 class GenerateStreamEndResponse(pydantic.BaseModel):
     id: str
-    prompt: typing.Optional[str]
-    generations: typing.Optional[typing.List[SingleGenerationInStream]]
+    prompt: typing.Optional[str] = None
+    generations: typing.Optional[typing.List[SingleGenerationInStream]] = None
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

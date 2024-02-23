@@ -16,14 +16,16 @@ except ImportError:
 
 class EmbedJob(pydantic.BaseModel):
     job_id: str = pydantic.Field(description="ID of the embed job")
-    name: typing.Optional[str] = pydantic.Field(description="The name of the embed job")
+    name: typing.Optional[str] = pydantic.Field(default=None, description="The name of the embed job")
     status: EmbedJobStatus = pydantic.Field(description="The status of the embed job")
     created_at: dt.datetime = pydantic.Field(description="The creation date of the embed job")
     input_dataset_id: str = pydantic.Field(description="ID of the input dataset")
-    output_dataset_id: typing.Optional[str] = pydantic.Field(description="ID of the resulting output dataset")
+    output_dataset_id: typing.Optional[str] = pydantic.Field(
+        default=None, description="ID of the resulting output dataset"
+    )
     model: str = pydantic.Field(description="ID of the model used to embed")
     truncate: EmbedJobTruncate = pydantic.Field(description="The truncation option used")
-    meta: typing.Optional[ApiMeta]
+    meta: typing.Optional[ApiMeta] = None
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

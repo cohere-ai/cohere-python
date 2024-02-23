@@ -17,15 +17,16 @@ except ImportError:
 
 class ClassifyResponseClassificationsItem(pydantic.BaseModel):
     id: str
-    input: typing.Optional[str] = pydantic.Field(description="The input text that was classified")
+    input: typing.Optional[str] = pydantic.Field(default=None, description="The input text that was classified")
     prediction: typing.Optional[str] = pydantic.Field(
-        description="The predicted label for the associated query (only filled for single-label models)"
+        default=None, description="The predicted label for the associated query (only filled for single-label models)"
     )
     predictions: typing.List[str] = pydantic.Field(
         description="An array containing the predicted labels for the associated query (only filled for single-label classification)"
     )
     confidence: typing.Optional[float] = pydantic.Field(
-        description="The confidence score for the top predicted class (only filled for single-label classification)"
+        default=None,
+        description="The confidence score for the top predicted class (only filled for single-label classification)",
     )
     confidences: typing.List[float] = pydantic.Field(
         description="An array containing the confidence scores of all the predictions in the same order"

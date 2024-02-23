@@ -11,7 +11,7 @@ from .generate_stream_event import GenerateStreamEvent
 
 class GenerateStreamEnd(GenerateStreamEvent):
     is_finished: bool
-    finish_reason: typing.Optional[FinishReason]
+    finish_reason: typing.Optional[FinishReason] = None
     response: GenerateStreamEndResponse
 
     def json(self, **kwargs: typing.Any) -> str:

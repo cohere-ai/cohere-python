@@ -15,7 +15,7 @@ except ImportError:
 class TokenizeResponse(pydantic.BaseModel):
     tokens: typing.List[int] = pydantic.Field(description="An array of tokens, where each token is an integer.")
     token_strings: typing.List[str]
-    meta: typing.Optional[ApiMeta]
+    meta: typing.Optional[ApiMeta] = None
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

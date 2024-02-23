@@ -17,19 +17,25 @@ class EmbedByTypeResponseEmbeddings(pydantic.BaseModel):
     """
 
     float_: typing.Optional[typing.List[typing.List[float]]] = pydantic.Field(
-        alias="float", description="An array of float embeddings."
+        alias="float", default=None, description="An array of float embeddings."
     )
     int_8: typing.Optional[typing.List[typing.List[float]]] = pydantic.Field(
-        alias="int8", description="An array of signed int8 embeddings. Each value is between -128 and 127."
+        alias="int8",
+        default=None,
+        description="An array of signed int8 embeddings. Each value is between -128 and 127.",
     )
     uint_8: typing.Optional[typing.List[typing.List[float]]] = pydantic.Field(
-        alias="uint8", description="An array of unsigned int8 embeddings. Each value is between 0 and 255."
+        alias="uint8",
+        default=None,
+        description="An array of unsigned int8 embeddings. Each value is between 0 and 255.",
     )
     binary: typing.Optional[typing.List[typing.List[float]]] = pydantic.Field(
-        description="An array of packed signed binary embeddings. The length of each binary embedding is 1/8 the length of the float embeddings of the provided model. Each value is between -128 and 127."
+        default=None,
+        description="An array of packed signed binary embeddings. The length of each binary embedding is 1/8 the length of the float embeddings of the provided model. Each value is between -128 and 127.",
     )
     ubinary: typing.Optional[typing.List[typing.List[float]]] = pydantic.Field(
-        description="An array of packed unsigned binary embeddings. The length of each binary embedding is 1/8 the length of the float embeddings of the provided model. Each value is between 0 and 255."
+        default=None,
+        description="An array of packed unsigned binary embeddings. The length of each binary embedding is 1/8 the length of the float embeddings of the provided model. Each value is between 0 and 255.",
     )
 
     def json(self, **kwargs: typing.Any) -> str:

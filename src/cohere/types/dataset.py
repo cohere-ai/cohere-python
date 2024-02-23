@@ -21,15 +21,17 @@ class Dataset(pydantic.BaseModel):
     updated_at: dt.datetime = pydantic.Field(description="The last update date")
     dataset_type: DatasetType
     validation_status: DatasetValidationStatus
-    validation_error: typing.Optional[str] = pydantic.Field(description="Errors found during validation")
-    schema_: typing.Optional[str] = pydantic.Field(alias="schema", description="the avro schema of the dataset")
-    required_fields: typing.Optional[typing.List[str]]
-    preserve_fields: typing.Optional[typing.List[str]]
+    validation_error: typing.Optional[str] = pydantic.Field(default=None, description="Errors found during validation")
+    schema_: typing.Optional[str] = pydantic.Field(
+        alias="schema", default=None, description="the avro schema of the dataset"
+    )
+    required_fields: typing.Optional[typing.List[str]] = None
+    preserve_fields: typing.Optional[typing.List[str]] = None
     dataset_parts: typing.Optional[typing.List[DatasetPart]] = pydantic.Field(
-        description="the underlying files that make up the dataset"
+        default=None, description="the underlying files that make up the dataset"
     )
     validation_warnings: typing.Optional[typing.List[str]] = pydantic.Field(
-        description="warnings found during validation"
+        default=None, description="warnings found during validation"
     )
 
     def json(self, **kwargs: typing.Any) -> str:

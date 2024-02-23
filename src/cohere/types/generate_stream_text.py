@@ -15,7 +15,8 @@ except ImportError:
 class GenerateStreamText(GenerateStreamEvent):
     text: str = pydantic.Field(description="A segment of text of the generation.")
     index: typing.Optional[int] = pydantic.Field(
-        description="Refers to the nth generation. Only present when `num_generations` is greater than zero, and only when text responses are being streamed."
+        default=None,
+        description="Refers to the nth generation. Only present when `num_generations` is greater than zero, and only when text responses are being streamed.",
     )
     is_finished: bool
 
