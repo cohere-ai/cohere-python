@@ -8,6 +8,9 @@ from cohere import ChatMessage, ChatMessageRole, ChatConnector, EmbedInputType, 
 
 co = cohere.Client(os.environ['COHERE_API_KEY'], timeout=10000)
 
+package_dir = os.path.dirname(os.path.abspath(__file__))
+embed_job = os.path.join(package_dir, 'embed_job.jsonl')
+
 
 def test_chat() -> None:
     chat = co.chat(
@@ -44,7 +47,7 @@ def test_embed_job_crud() -> None:
     dataset = co.datasets.create(
         name="test",
         type=DatasetType.EMBED_INPUT,
-        data=open('embed_job.jsonl', 'rb'),
+        data=open(embed_job, 'rb'),
     )
 
     while True:
@@ -128,7 +131,7 @@ def test_datasets_crud() -> None:
     my_dataset = co.datasets.create(
         name="test",
         type=DatasetType.EMBED_INPUT,
-        data=open('embed_job.jsonl', 'rb'),
+        data=open(embed_job, 'rb'),
     )
 
     print(my_dataset)
