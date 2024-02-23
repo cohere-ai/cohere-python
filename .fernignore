@@ -3,3 +3,4 @@ banner.png
 README.md
 src/cohere/client.py
 tests
+.github/workflows/ci.yml
