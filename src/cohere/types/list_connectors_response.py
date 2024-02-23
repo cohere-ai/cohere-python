@@ -14,7 +14,7 @@ except ImportError:
 
 class ListConnectorsResponse(pydantic.BaseModel):
     connectors: typing.List[Connector]
-    total_count: typing.Optional[float] = pydantic.Field(description="Total number of connectors.")
+    total_count: typing.Optional[float] = pydantic.Field(default=None, description="Total number of connectors.")
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

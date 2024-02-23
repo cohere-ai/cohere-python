@@ -18,14 +18,17 @@ class Model(pydantic.BaseModel):
     """
 
     name: typing.Optional[str] = pydantic.Field(
-        description="Specify this name in the `model` parameter of API requests to use your chosen model."
+        default=None, description="Specify this name in the `model` parameter of API requests to use your chosen model."
     )
     endpoints: typing.Optional[typing.List[CompatibleEndpoint]] = pydantic.Field(
-        description="The API endpoints that the model is compatible with."
+        default=None, description="The API endpoints that the model is compatible with."
     )
-    finetuned: typing.Optional[bool] = pydantic.Field(description="Whether the model has been fine-tuned or not.")
+    finetuned: typing.Optional[bool] = pydantic.Field(
+        default=None, description="Whether the model has been fine-tuned or not."
+    )
     context_length: typing.Optional[float] = pydantic.Field(
-        description="The maximum number of tokens that the model can process in a single request. Note that not all of these tokens are always available due to special tokens and preambles that Cohere has added by default."
+        default=None,
+        description="The maximum number of tokens that the model can process in a single request. Note that not all of these tokens are always available due to special tokens and preambles that Cohere has added by default.",
     )
 
     def json(self, **kwargs: typing.Any) -> str:

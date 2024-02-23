@@ -15,8 +15,8 @@ except ImportError:
 
 class ToolDefinition(pydantic.BaseModel):
     description: str
-    inputs: typing.Optional[typing.List[ToolDefinitionInputsItem]]
-    outputs: typing.Optional[typing.List[ToolDefinitionOutputsItem]]
+    inputs: typing.Optional[typing.List[ToolDefinitionInputsItem]] = None
+    outputs: typing.Optional[typing.List[ToolDefinitionOutputsItem]] = None
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

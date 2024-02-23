@@ -18,7 +18,7 @@ class CreateEmbedJobResponse(pydantic.BaseModel):
     """
 
     job_id: str
-    meta: typing.Optional[ApiMeta]
+    meta: typing.Optional[ApiMeta] = None
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

@@ -18,7 +18,7 @@ class EmbedFloatsResponse(pydantic.BaseModel):
         description="An array of embeddings, where each embedding is an array of floats. The length of the `embeddings` array will be the same as the length of the original `texts` array."
     )
     texts: typing.List[str] = pydantic.Field(description="The text entries for which embeddings were returned.")
-    meta: typing.Optional[ApiMeta]
+    meta: typing.Optional[ApiMeta] = None
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

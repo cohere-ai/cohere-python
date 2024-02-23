@@ -12,7 +12,7 @@ except ImportError:
 
 
 class DatasetsCreateResponse(pydantic.BaseModel):
-    id: typing.Optional[str] = pydantic.Field(description="The dataset ID")
+    id: typing.Optional[str] = pydantic.Field(default=None, description="The dataset ID")
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

@@ -13,8 +13,8 @@ except ImportError:
 
 class ApiMetaApiVersion(pydantic.BaseModel):
     version: str
-    is_deprecated: typing.Optional[bool]
-    is_experimental: typing.Optional[bool]
+    is_deprecated: typing.Optional[bool] = None
+    is_experimental: typing.Optional[bool] = None
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

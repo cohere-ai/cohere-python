@@ -13,7 +13,8 @@ except ImportError:
 
 class OAuthAuthorizeResponse(pydantic.BaseModel):
     redirect_url: typing.Optional[str] = pydantic.Field(
-        description="The OAuth 2.0 redirect url. Redirect the user to this url to authorize the connector."
+        default=None,
+        description="The OAuth 2.0 redirect url. Redirect the user to this url to authorize the connector.",
     )
 
     def json(self, **kwargs: typing.Any) -> str:

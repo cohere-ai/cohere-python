@@ -14,9 +14,9 @@ except ImportError:
 
 
 class ApiMeta(pydantic.BaseModel):
-    api_version: typing.Optional[ApiMetaApiVersion]
-    billed_units: typing.Optional[ApiMetaBilledUnits]
-    warnings: typing.Optional[typing.List[str]]
+    api_version: typing.Optional[ApiMetaApiVersion] = None
+    billed_units: typing.Optional[ApiMetaBilledUnits] = None
+    warnings: typing.Optional[typing.List[str]] = None
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
