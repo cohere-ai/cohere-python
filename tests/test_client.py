@@ -89,8 +89,7 @@ def test_rerank() -> None:
     response = co.rerank(
         model='rerank-english-v2.0',
         query='What is the capital of the United States?',
-        # Fern are working on fixing this type issue
-        documents=docs,  # type: ignore
+        documents=docs,
         top_n=3,
     )
 
