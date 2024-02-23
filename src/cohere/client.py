@@ -2,7 +2,7 @@ import typing
 
 import httpx
 
-from . import BaseCohereEnvironment
+from .environment import BaseCohereEnvironment
 from .base_client import BaseCohere, AsyncBaseCohere
 
 
