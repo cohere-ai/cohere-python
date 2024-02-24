@@ -45,7 +45,7 @@ from cohere.responses.custom_model import (
     ModelMetric,
 )
 from cohere.responses.dataset import Dataset, DatasetUsage, ParseInfo
-from cohere.responses.detectlang import DetectLanguageResponse, Language
+from cohere.responses.detectlang import DetectLanguageResponse
 from cohere.responses.embed_job import EmbedJob
 from cohere.responses.embeddings import EmbeddingResponses, Embeddings
 from cohere.responses.feedback import (
@@ -607,19 +607,10 @@ class Client:
         return Detokenization(text=res["text"], meta=res.get("meta"))
 
     def detect_language(self, texts: List[str]) -> DetectLanguageResponse:
-        """Returns a DetectLanguageResponse object of the provided texts, see https://docs.cohere.ai/reference/detect-language-1 for advanced usage.
-
-        Args:
-            texts (List[str]): A list of texts to identify language for
         """
-        json_body = {
-            "texts": texts,
-        }
-        response = self._request(cohere.DETECT_LANG_URL, json=json_body)
-        results = []
-        for result in response["results"]:
-            results.append(Language(result["language_code"], result["language_name"]))
-        return DetectLanguageResponse(results, response["meta"])
+        This API is deprecated.
+        """
+        raise DeprecationWarning("The detect_language API is no longer supported")
 
     def generate_feedback(
         self,

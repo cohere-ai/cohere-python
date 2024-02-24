@@ -1,4 +1,8 @@
 # Changelog
+## 4.50
+- [#384] (https://github.com/cohere-ai/cohere-python/pull/386)
+  - Remove deprecated Detect Language API
+
 ## 4.49
 - [#384] (https://github.com/cohere-ai/cohere-python/pull/384)
   - Add finish_reason to non stream chat

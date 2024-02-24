@@ -75,10 +75,6 @@ API response objects
     :members:
     :member-order: bysource
 
-.. automodule:: cohere.responses.detectlang
-    :members:
-    :member-order: bysource
-
 .. automodule:: cohere.responses.feedback
     :members:
     :member-order: bysource

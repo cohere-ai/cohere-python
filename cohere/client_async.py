@@ -36,7 +36,6 @@ from cohere.responses import (
     GeneratePreferenceFeedbackResponse,
     Generations,
     LabelPrediction,
-    Language,
     LogLikelihoods,
     PreferenceRating,
     Reranking,
@@ -407,14 +406,10 @@ class AsyncClient(Client):
         return Detokenization(text=res["text"], meta=res["meta"])
 
     async def detect_language(self, texts: List[str]) -> DetectLanguageResponse:
-        json_body = {
-            "texts": texts,
-        }
-        response = await self._request(cohere.DETECT_LANG_URL, json=json_body)
-        results = []
-        for result in response["results"]:
-            results.append(Language(result["language_code"], result["language_name"]))
-        return DetectLanguageResponse(results, response["meta"])
+        """
+        This API is deprecated.
+        """
+        raise DeprecationWarning("The detect_language API is no longer supported")
 
     async def generate_feedback(
         self,
