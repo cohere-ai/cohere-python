@@ -746,7 +746,7 @@ class AsyncClient(Client):
         """
 
         json_body = {
-            "dataset_id": dataset_id,
+            "input_dataset_id": dataset_id,
             "name": name,
             "model": model,
             "truncate": truncate,
