@@ -27,7 +27,7 @@ class TestDataset(unittest.TestCase):
 
         start = time.time()
         while not dataset.has_terminal_status():
-            if time.time() - start > 120:  # 120s timeout
+            if time.time() - start > 300:  # 300s timeout
                 raise TimeoutError()
             time.sleep(5)
             dataset = co.get_dataset(dataset.id)
@@ -50,7 +50,7 @@ class TestDataset(unittest.TestCase):
 
         start = time.time()
         while not dataset.has_terminal_status():
-            if time.time() - start > 120:  # 120s timeout
+            if time.time() - start > 300:  # 300s timeout
                 raise TimeoutError()
             time.sleep(5)
             dataset = co.get_dataset(dataset.id)

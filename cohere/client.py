@@ -80,7 +80,7 @@ class Client:
         check_api_key: bool = True,
         client_name: Optional[str] = None,
         max_retries: int = 3,
-        timeout: int = 120,
+        timeout: int = 300,
         api_url: str = None,
     ) -> None:
         self.api_key = api_key or os.getenv("CO_API_KEY")

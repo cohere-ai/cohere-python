@@ -1,4 +1,8 @@
 # Changelog
+## 4.51
+- [#388] (https://github.com/cohere-ai/cohere-python/pull/388)
+  - Increase timeout to 300s
+
 ## 4.50
 - [#384] (https://github.com/cohere-ai/cohere-python/pull/386)
   - Remove deprecated Detect Language API

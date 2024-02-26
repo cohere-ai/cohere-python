@@ -30,7 +30,7 @@ async def test_async_create_dataset(async_client: AsyncClient):
 
     start = time.time()
     while not dataset.has_terminal_status():
-        if time.time() - start > 120:  # 120s timeout
+        if time.time() - start > 300:  # 300s timeout
             raise TimeoutError()
         await asyncio.sleep(5)
         dataset = await async_client.get_dataset(dataset.id)
@@ -55,7 +55,7 @@ async def test_async_create_invalid_dataset(async_client: AsyncClient):
 
     start = time.time()
     while not dataset.has_terminal_status():
-        if time.time() - start > 120:  # 120s timeout
+        if time.time() - start > 300:  # 300s timeout
             raise TimeoutError()
         await asyncio.sleep(5)
         dataset = await async_client.get_dataset(dataset.id)
