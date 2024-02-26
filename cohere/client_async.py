@@ -78,7 +78,7 @@ class AsyncClient(Client):
         check_api_key: bool = True,
         client_name: Optional[str] = None,
         max_retries: int = 3,
-        timeout=120,
+        timeout=300,
         api_url: str = None,
     ) -> None:
         self.api_key = api_key or os.getenv("CO_API_KEY")
@@ -1197,7 +1197,7 @@ class AIOHTTPBackend:
 
     SLEEP_AFTER_FAILURE = defaultdict(lambda: 0.25, {429: 5})
 
-    def __init__(self, logger, max_concurrent_requests: int = 64, max_retries: int = 5, timeout: int = 120):
+    def __init__(self, logger, max_concurrent_requests: int = 64, max_retries: int = 5, timeout: int = 300):
         self.logger = logger
         self.timeout = timeout
         self.max_retries = max_retries
