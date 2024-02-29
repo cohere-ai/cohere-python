@@ -127,6 +127,7 @@ class BaseCohere:
         p: typing.Optional[float] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
+        raw_prompting: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[StreamedChatResponse]:
         """
@@ -204,6 +205,8 @@ class BaseCohere:
 
                                                         Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
 
+            - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
+
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         """
         _request: typing.Dict[str, typing.Any] = {"message": message, "stream": True}
@@ -235,6 +238,8 @@ class BaseCohere:
             _request["frequency_penalty"] = frequency_penalty
         if presence_penalty is not OMIT:
             _request["presence_penalty"] = presence_penalty
+        if raw_prompting is not OMIT:
+            _request["raw_prompting"] = raw_prompting
         with self._client_wrapper.httpx_client.stream(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
@@ -292,6 +297,7 @@ class BaseCohere:
         p: typing.Optional[float] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
+        raw_prompting: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> NonStreamedChatResponse:
         """
@@ -369,6 +375,8 @@ class BaseCohere:
 
                                                         Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
 
+            - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
+
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere import ChatMessage, ChatMessageRole, ChatRequestPromptTruncation
@@ -427,6 +435,8 @@ class BaseCohere:
             _request["frequency_penalty"] = frequency_penalty
         if presence_penalty is not OMIT:
             _request["presence_penalty"] = presence_penalty
+        if raw_prompting is not OMIT:
+            _request["raw_prompting"] = raw_prompting
         _response = self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
@@ -1368,6 +1378,7 @@ class AsyncBaseCohere:
         p: typing.Optional[float] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
+        raw_prompting: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[StreamedChatResponse]:
         """
@@ -1445,6 +1456,8 @@ class AsyncBaseCohere:
 
                                                         Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
 
+            - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
+
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         """
         _request: typing.Dict[str, typing.Any] = {"message": message, "stream": True}
@@ -1476,6 +1489,8 @@ class AsyncBaseCohere:
             _request["frequency_penalty"] = frequency_penalty
         if presence_penalty is not OMIT:
             _request["presence_penalty"] = presence_penalty
+        if raw_prompting is not OMIT:
+            _request["raw_prompting"] = raw_prompting
         async with self._client_wrapper.httpx_client.stream(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
@@ -1533,6 +1548,7 @@ class AsyncBaseCohere:
         p: typing.Optional[float] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
+        raw_prompting: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> NonStreamedChatResponse:
         """
@@ -1610,6 +1626,8 @@ class AsyncBaseCohere:
 
                                                         Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
 
+            - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
+
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere import ChatMessage, ChatMessageRole, ChatRequestPromptTruncation
@@ -1668,6 +1686,8 @@ class AsyncBaseCohere:
             _request["frequency_penalty"] = frequency_penalty
         if presence_penalty is not OMIT:
             _request["presence_penalty"] = presence_penalty
+        if raw_prompting is not OMIT:
+            _request["raw_prompting"] = raw_prompting
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),

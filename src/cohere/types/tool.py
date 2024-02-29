@@ -4,7 +4,7 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
-from .tool_definition import ToolDefinition
+from .tool_parameter_definitions_value import ToolParameterDefinitionsValue
 
 try:
     import pydantic.v1 as pydantic  # type: ignore
@@ -14,7 +14,8 @@ except ImportError:
 
 class Tool(pydantic.BaseModel):
     name: str
-    definition: typing.Optional[ToolDefinition] = None
+    description: str
+    parameter_definitions: typing.Optional[typing.Dict[str, ToolParameterDefinitionsValue]] = None
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

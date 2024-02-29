@@ -11,8 +11,7 @@ except ImportError:
     import pydantic  # type: ignore
 
 
-class ToolDefinitionInputsItem(pydantic.BaseModel):
-    name: str
+class ToolParameterDefinitionsValue(pydantic.BaseModel):
     description: str
     type: str
     required: typing.Optional[bool] = None

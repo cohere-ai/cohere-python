@@ -109,10 +109,8 @@ from .types import (
     SummarizeResponse,
     TokenizeResponse,
     Tool,
-    ToolDefinition,
-    ToolDefinitionInputsItem,
-    ToolDefinitionOutputsItem,
     ToolInput,
+    ToolParameterDefinitionsValue,
     UpdateConnectorResponse,
 )
 from .errors import BadRequestError, ForbiddenError, InternalServerError, NotFoundError, TooManyRequestsError
@@ -252,10 +250,8 @@ __all__ = [
     "TokenizeResponse",
     "TooManyRequestsError",
     "Tool",
-    "ToolDefinition",
-    "ToolDefinitionInputsItem",
-    "ToolDefinitionOutputsItem",
     "ToolInput",
+    "ToolParameterDefinitionsValue",
     "UpdateConnectorResponse",
     "connectors",
     "datasets",
