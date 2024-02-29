@@ -112,10 +112,8 @@ from .summarize_request_length import SummarizeRequestLength
 from .summarize_response import SummarizeResponse
 from .tokenize_response import TokenizeResponse
 from .tool import Tool
-from .tool_definition import ToolDefinition
-from .tool_definition_inputs_item import ToolDefinitionInputsItem
-from .tool_definition_outputs_item import ToolDefinitionOutputsItem
 from .tool_input import ToolInput
+from .tool_parameter_definitions_value import ToolParameterDefinitionsValue
 from .update_connector_response import UpdateConnectorResponse
 
 __all__ = [
@@ -227,9 +225,7 @@ __all__ = [
     "SummarizeResponse",
     "TokenizeResponse",
     "Tool",
-    "ToolDefinition",
-    "ToolDefinitionInputsItem",
-    "ToolDefinitionOutputsItem",
     "ToolInput",
+    "ToolParameterDefinitionsValue",
     "UpdateConnectorResponse",
 ]
