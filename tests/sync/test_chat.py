@@ -58,9 +58,7 @@ class TestChat(unittest.TestCase):
 
     def test_preamble(self):
         preamble = "You are a dog who mostly barks"
-        prediction = co.chat(
-            "Yo what up?", preamble=preamble, return_prompt=True, return_preamble=True, max_tokens=5
-        )
+        prediction = co.chat("Yo what up?", preamble=preamble, return_prompt=True, return_preamble=True, max_tokens=5)
         self.assertIsInstance(prediction.text, str)
         self.assertIn(preamble, prediction.prompt)
         self.assertEqual(preamble, prediction.preamble)
