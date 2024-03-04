@@ -233,7 +233,7 @@ class Client:
         return_prompt: Optional[bool] = False,
         return_preamble: Optional[bool] = False,
         chat_history: Optional[List[Dict[str, str]]] = None,
-        preamble_override: Optional[str] = None,
+        preamble: Optional[str] = None,
         user_name: Optional[str] = None,
         temperature: Optional[float] = 0.8,
         max_tokens: Optional[int] = None,
@@ -254,7 +254,7 @@ class Client:
             stream (bool): Return streaming tokens.
             conversation_id (str): (Optional) To store a conversation then create a conversation id and use it for every related request.
 
-            preamble_override (str): (Optional) A string to override the preamble.
+            preamble (str): (Optional) A string to override the preamble.
             chat_history (List[Dict[str, str]]): (Optional) A list of entries used to construct the conversation. If provided, these messages will be used to build the prompt and the conversation_id will be ignored so no data will be stored to maintain state.
 
             model (str): (Optional) The model to use for generating the response.
@@ -362,7 +362,7 @@ class Client:
             "return_prompt": return_prompt,
             "return_preamble": return_preamble,
             "chat_history": chat_history,
-            "preamble_override": preamble_override,
+            "preamble": preamble,
             "temperature": temperature,
             "max_tokens": max_tokens,
             "stream": stream,

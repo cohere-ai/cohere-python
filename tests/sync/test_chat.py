@@ -56,18 +56,16 @@ class TestChat(unittest.TestCase):
         self.assertIsInstance(prediction.text, str)
         assert prediction.prompt is None
 
-    def test_preamble_override(self):
+    def test_preamble(self):
         preamble = "You are a dog who mostly barks"
-        prediction = co.chat(
-            "Yo what up?", preamble_override=preamble, return_prompt=True, return_preamble=True, max_tokens=5
-        )
+        prediction = co.chat("Yo what up?", preamble=preamble, return_prompt=True, return_preamble=True, max_tokens=5)
         self.assertIsInstance(prediction.text, str)
         self.assertIn(preamble, prediction.prompt)
         self.assertEqual(preamble, prediction.preamble)
 
-    def test_invalid_preamble_override(self):
+    def test_invalid_preamble(self):
         with self.assertRaises(cohere.CohereError) as e:
-            co.chat("Yo what up?", preamble_override=123).text
+            co.chat("Yo what up?", preamble=123).text
         self.assertIn("invalid type", str(e.exception))
 
     def test_valid_temperatures(self):
