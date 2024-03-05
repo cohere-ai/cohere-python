@@ -1,4 +1,8 @@
 # Changelog
+## 4.52
+- [#389] (https://github.com/cohere-ai/cohere-python/pull/389)
+  - Rename preamble_override to preamble in chat parameters
+
 ## 4.51
 - [#388] (https://github.com/cohere-ai/cohere-python/pull/388)
   - Increase timeout to 300s
@@ -30,7 +34,7 @@
 ## 4.44
  - [#366] (https://github.com/cohere-ai/cohere-python/pull/366)
     - Update embed job list request
-    
+
 ## 4.43
  - [#365] (https://github.com/cohere-ai/cohere-python/pull/365)
     - Update embed job parameters
@@ -68,7 +72,7 @@
  - [#309] (https://github.com/cohere-ai/cohere-python/pull/309)
     - Dataset: use dataset api in creating fine-tuned model
 
-## 4.35 
+## 4.35
  - [#339] (https://github.com/cohere-ai/cohere-python/pull/339)
     - Dataset: default to train epochs
 
@@ -122,7 +126,7 @@
 - [#296] (https://github.com/cohere-ai/cohere-python/pull/301)
   - Chat: add support for prompt_truncation param
 
-## 4.25 
+## 4.25
 - [#303] (https://github.com/cohere-ai/cohere-python/pull/303)
   - Allow uploading of evaluation data
 
