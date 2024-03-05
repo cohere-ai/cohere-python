@@ -54,6 +54,10 @@ prediction = co.chat(message='Howdy! 🤠', model='command')
 print(f'Chatbot: {prediction.text}')
 ```
 
+> [!TIP]
+> You can set a system environment variable `CO_API_KEY` to avoid writing your api key within your code, e.g. `export CO_API_KEY=theapikeyforyouraccount` in your ~/.zshrc or ~/.bashrc,
+> then calling `cohere.Client()` will read this key.
+
 There is also an asyncio compatible client called `cohere.AsyncClient` with an equivalent interface. Consult the [SDK Docs](https://cohere-sdk.readthedocs.io/en/latest/) for more details.
 
 ## Versioning
