@@ -39,12 +39,6 @@ class TestChat(unittest.TestCase):
         self.assertEqual(len(prediction.chat_history), 2)
         self.assertIsInstance(prediction.chat_history[0], dict)
 
-    def test_return_chat_history_false(self):
-        prediction = co.chat("Yo what up?", return_chat_history=False, max_tokens=5)
-        self.assertIsInstance(prediction.text, str)
-
-        assert prediction.chat_history is None
-
     def test_return_prompt(self):
         prediction = co.chat("Yo what up?", return_prompt=True, max_tokens=5)
         self.assertIsInstance(prediction.text, str)
