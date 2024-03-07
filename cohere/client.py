@@ -245,6 +245,8 @@ class Client:
         citation_quality: Optional[str] = None,
         prompt_truncation: Optional[str] = None,
         connectors: Optional[List[Dict[str, Any]]] = None,
+        tools: Optional[List[Dict[str, Any]]] = None,
+        tool_results: Optional[List[Dict[str, Any]]] = None,
     ) -> Union[Chat, StreamingChat]:
         """Returns a Chat object with the query reply.
 
@@ -372,6 +374,8 @@ class Client:
             "search_queries_only": search_queries_only,
             "documents": documents,
             "connectors": connectors,
+            "tools": tools,
+            "tool_results": tool_results,
         }
         if citation_quality is not None:
             json_body["citation_quality"] = citation_quality

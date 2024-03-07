@@ -224,6 +224,64 @@ class TestChat(unittest.TestCase):
         self.assertIsInstance(prediction.documents, list)
         self.assertGreater(len(prediction.documents), 0)
 
+    def test_with_tools(self):
+        prediction = co.chat(
+            "What is 5 + 9",
+            temperature=0,
+            model="command-nightly",
+            tools=[
+                {
+                    "name": "calctool",
+                    "description": "performs basic arithmetic",
+                    "parameter_definitions": {
+                        "expression": {"description": "a mathematical expression to solve", "type": "str"}
+                    },
+                }
+            ],
+        )
+        print(prediction.text)
+        self.assertIsInstance(prediction.text, str)
+        self.assertIsInstance(prediction.tool_calls, list)
+        self.assertGreater(len(prediction.tool_calls), 0)
+        self.assertIsInstance(prediction.tool_calls[0], dict)
+        self.assertEqual(prediction.tool_calls[0]["name"], "calctool")
+        self.assertIsInstance(prediction.tool_calls[0]["parameters"], dict)
+        self.assertEqual(prediction.tool_calls[0]["parameters"]["expression"], "5+9")
+        self.assertIsInstance(prediction.tool_calls[0]["generation_id"], str)
+
+    def test_with_tool_results(self):
+        prediction = co.chat(
+            "What is 5 + 9",
+            temperature=0,
+            model="command-nightly",
+            tools=[
+                {
+                    "name": "calctool",
+                    "description": "performs basic arithmetic",
+                    "parameter_definitions": {
+                        "expression": {"description": "a mathematical expression to solve", "type": "str"}
+                    },
+                }
+            ],
+            tool_results=[
+                {
+                    "call": {"name": "calctool", "generation_id": "xxx-yyy-zzz", "parameters": {"expression": "5+9"}},
+                    "outputs": [{"result": "14"}],
+                },
+            ],
+        )
+        self.assertIsInstance(prediction.text, str)
+        self.assertIsInstance(prediction.citations, list)
+        self.assertGreater(len(prediction.citations), 0)
+        self.assertIsInstance(prediction.citations[0]["start"], int)
+        self.assertIsInstance(prediction.citations[0]["end"], int)
+        self.assertIsInstance(prediction.citations[0]["text"], str)
+        self.assertIsInstance(prediction.citations[0]["document_ids"], list)
+        self.assertGreater(len(prediction.citations[0]["document_ids"]), 0)
+        self.assertIsInstance(prediction.documents, list)
+        self.assertGreater(len(prediction.documents), 0)
+        self.assertEqual(prediction.documents[0], {"result": "14"})
+
     def test_with_connectors(self):
         prediction = co.chat(
             "How deep in the Mariana Trench", temperature=0, connectors=[{"id": "web-search"}], prompt_truncation="AUTO"

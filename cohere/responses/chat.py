@@ -26,6 +26,7 @@ class Chat(CohereObject):
         search_results: Optional[List[Dict[str, Any]]] = None,
         search_queries: Optional[List[Dict[str, Any]]] = None,
         finish_reason: Optional[str] = None,
+        tool_calls: Optional[List[Dict[str, Any]]] = None,
         client=None,
         **kwargs,
     ) -> None:
@@ -46,6 +47,7 @@ class Chat(CohereObject):
         self.documents = documents  # optional
         self.search_results = search_results  # optional
         self.search_queries = search_queries  # optional
+        self.tool_calls = tool_calls  # optional
         self.finish_reason = finish_reason
 
     @classmethod
@@ -69,6 +71,7 @@ class Chat(CohereObject):
             search_results=response.get("search_results"),  # optional
             search_queries=response.get("search_queries"),  # optional
             finish_reason=response.get("finish_reason"),
+            tool_calls=response.get("tool_calls"),  # optional
         )
 
     def respond(self, response: str, max_tokens: int = None) -> "Chat":
@@ -99,6 +102,7 @@ class StreamEvent(str, Enum):
     SEARCH_QUERIES_GENERATION = "search-queries-generation"
     SEARCH_RESULTS = "search-results"
     TEXT_GENERATION = "text-generation"
+    TOOL_CALLS_GENERATION = "tool-calls-generation"
     CITATION_GENERATION = "citation-generation"
     STREAM_END = "stream-end"
 
@@ -181,6 +185,16 @@ class StreamEnd(StreamResponse):
         self.finish_reason = finish_reason
 
 
+class ChatToolCallsGenerationEvent(StreamResponse):
+    def __init__(
+        self,
+        tool_calls: Optional[List[Dict[str, Any]]],
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.tool_calls = tool_calls
+
+
 class StreamingChat(CohereObject):
     def __init__(self, response):
         self.response = response
@@ -199,6 +213,7 @@ class StreamingChat(CohereObject):
         self.documents = None
         self.search_results = None
         self.search_queries = None
+        self.tool_calls = None
 
     def _make_response_item(self, index, line) -> Any:
         streaming_item = json.loads(line)
@@ -235,6 +250,11 @@ class StreamingChat(CohereObject):
         elif event_type == StreamEvent.CITATION_GENERATION:
             citations = streaming_item.get("citations")
             return StreamCitationGeneration(citations=citations, is_finished=False, event_type=event_type, index=index)
+        elif event_type == StreamEvent.TOOL_CALLS_GENERATION:
+            tool_calls = streaming_item.get("tool_calls")
+            return ChatToolCallsGenerationEvent(
+                tool_calls=tool_calls, is_finished=False, event_type=event_type, index=index
+            )
         elif event_type == StreamEvent.STREAM_END:
             response = streaming_item.get("response")
             finish_reason = streaming_item.get("finish_reason")
@@ -257,6 +277,7 @@ class StreamingChat(CohereObject):
             self.documents = response.get("documents")  # optional
             self.search_results = response.get("search_results")  # optional
             self.search_queries = response.get("search_queries")  # optional
+            self.tool_calls = response.get("tool_calls")  # optional
             return StreamEnd(finish_reason=finish_reason, is_finished=True, event_type=event_type, index=index)
         return None
 
