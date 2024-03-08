@@ -3,6 +3,7 @@ import unittest
 from utils import get_api_key
 
 import cohere
+from cohere.responses.chat import ParameterDefinition, Tool, ToolCall, ToolResult
 
 API_KEY = get_api_key()
 co = cohere.Client(API_KEY)
@@ -230,24 +231,23 @@ class TestChat(unittest.TestCase):
             temperature=0,
             model="command-nightly",
             tools=[
-                {
-                    "name": "calctool",
-                    "description": "performs basic arithmetic",
-                    "parameter_definitions": {
-                        "expression": {"description": "a mathematical expression to solve", "type": "str"}
+                Tool(
+                    name="calctool",
+                    description="performs basic arithmetic",
+                    parameter_definitions={
+                        "expression": ParameterDefinition(type="str", description="a mathematical expression to solve")
                     },
-                }
+                )
             ],
         )
-        print(prediction.text)
         self.assertIsInstance(prediction.text, str)
         self.assertIsInstance(prediction.tool_calls, list)
         self.assertGreater(len(prediction.tool_calls), 0)
-        self.assertIsInstance(prediction.tool_calls[0], dict)
-        self.assertEqual(prediction.tool_calls[0]["name"], "calctool")
-        self.assertIsInstance(prediction.tool_calls[0]["parameters"], dict)
-        self.assertEqual(prediction.tool_calls[0]["parameters"]["expression"], "5+9")
-        self.assertIsInstance(prediction.tool_calls[0]["generation_id"], str)
+        self.assertIsInstance(prediction.tool_calls[0], ToolCall)
+        self.assertEqual(prediction.tool_calls[0].name, "calctool")
+        self.assertIsInstance(prediction.tool_calls[0].parameters, dict)
+        self.assertEqual(prediction.tool_calls[0].parameters["expression"], "5+9")
+        self.assertIsInstance(prediction.tool_calls[0].generation_id, str)
 
     def test_with_tool_results(self):
         prediction = co.chat(
@@ -255,19 +255,19 @@ class TestChat(unittest.TestCase):
             temperature=0,
             model="command-nightly",
             tools=[
-                {
-                    "name": "calctool",
-                    "description": "performs basic arithmetic",
-                    "parameter_definitions": {
-                        "expression": {"description": "a mathematical expression to solve", "type": "str"}
+                Tool(
+                    name="calctool",
+                    description="performs basic arithmetic",
+                    parameter_definitions={
+                        "expression": ParameterDefinition(description="a mathematical expression to solve", type="str")
                     },
-                }
+                )
             ],
             tool_results=[
-                {
-                    "call": {"name": "calctool", "generation_id": "xxx-yyy-zzz", "parameters": {"expression": "5+9"}},
-                    "outputs": [{"result": "14"}],
-                },
+                ToolResult(
+                    call=ToolCall(name="calctool", parameters={"expression": "5+9"}, generation_id="xxx-yyy-zzz"),
+                    outputs=[{"result": 14}],
+                )
             ],
         )
         self.assertIsInstance(prediction.text, str)
@@ -280,7 +280,7 @@ class TestChat(unittest.TestCase):
         self.assertGreater(len(prediction.citations[0]["document_ids"]), 0)
         self.assertIsInstance(prediction.documents, list)
         self.assertGreater(len(prediction.documents), 0)
-        self.assertEqual(prediction.documents[0], {"result": "14"})
+        self.assertEqual(prediction.documents[0]["result"], "14")
 
     def test_with_connectors(self):
         prediction = co.chat(

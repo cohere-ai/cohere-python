@@ -7,6 +7,81 @@ import requests
 from cohere.responses.base import CohereObject
 
 
+class ParameterDefinition(CohereObject, dict):
+    def __init__(
+        self,
+        type: str,
+        description: str,
+        required: Optional[bool] = None,
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.__dict__ = self
+        self.type = type
+        self.description = description
+        if required is not None:
+            self.required = required
+
+
+class Tool(CohereObject, dict):
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        parameter_definitions: Optional[Dict[str, ParameterDefinition]] = None,
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.__dict__ = self
+        self.name = name
+        self.description = description
+        if parameter_definitions is not None:
+            self.parameter_definitions = parameter_definitions
+
+
+class ToolCall(CohereObject, dict):
+    def __init__(
+        self,
+        name: str,
+        parameters: Dict[str, Any],
+        generation_id: str,
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.__dict__ = self
+        self.name = name
+        self.parameters = parameters
+        self.generation_id = generation_id
+
+    @classmethod
+    def from_dict(cls, tool_call_res: Dict[str, Any]) -> "ToolCall":
+        return cls(
+            name=tool_call_res.get("name"),
+            parameters=tool_call_res.get("parameters"),
+            generation_id=tool_call_res.get("generation_id"),
+        )
+
+    @classmethod
+    def from_list(cls, tool_calls_res: Optional[List[Dict[str, Any]]]) -> Optional[List["ToolCall"]]:
+        if tool_calls_res is None or not isinstance(tool_calls_res, list):
+            return None
+
+        return [ToolCall.from_dict(tc) for tc in tool_calls_res]
+
+
+class ToolResult(CohereObject, dict):
+    def __init__(
+        self,
+        call: ToolCall,
+        outputs: List[Dict[str, Any]],
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.__dict__ = self
+        self.call = call
+        self.outputs = outputs
+
+
 class Chat(CohereObject):
     def __init__(
         self,
@@ -26,7 +101,7 @@ class Chat(CohereObject):
         search_results: Optional[List[Dict[str, Any]]] = None,
         search_queries: Optional[List[Dict[str, Any]]] = None,
         finish_reason: Optional[str] = None,
-        tool_calls: Optional[List[Dict[str, Any]]] = None,
+        tool_calls: Optional[List[ToolCall]] = None,
         client=None,
         **kwargs,
     ) -> None:
@@ -71,7 +146,7 @@ class Chat(CohereObject):
             search_results=response.get("search_results"),  # optional
             search_queries=response.get("search_queries"),  # optional
             finish_reason=response.get("finish_reason"),
-            tool_calls=response.get("tool_calls"),  # optional
+            tool_calls=ToolCall.from_list(response.get("tool_calls")),  # optional
         )
 
     def respond(self, response: str, max_tokens: int = None) -> "Chat":
@@ -188,7 +263,7 @@ class StreamEnd(StreamResponse):
 class ChatToolCallsGenerationEvent(StreamResponse):
     def __init__(
         self,
-        tool_calls: Optional[List[Dict[str, Any]]],
+        tool_calls: Optional[List[ToolCall]],
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -251,7 +326,7 @@ class StreamingChat(CohereObject):
             citations = streaming_item.get("citations")
             return StreamCitationGeneration(citations=citations, is_finished=False, event_type=event_type, index=index)
         elif event_type == StreamEvent.TOOL_CALLS_GENERATION:
-            tool_calls = streaming_item.get("tool_calls")
+            tool_calls = ToolCall.from_list(streaming_item.get("tool_calls"))
             return ChatToolCallsGenerationEvent(
                 tool_calls=tool_calls, is_finished=False, event_type=event_type, index=index
             )
@@ -277,7 +352,7 @@ class StreamingChat(CohereObject):
             self.documents = response.get("documents")  # optional
             self.search_results = response.get("search_results")  # optional
             self.search_queries = response.get("search_queries")  # optional
-            self.tool_calls = response.get("tool_calls")  # optional
+            self.tool_calls = ToolCall.from_list(response.get("tool_calls"))  # optional
             return StreamEnd(finish_reason=finish_reason, is_finished=True, event_type=event_type, index=index)
         return None
 

@@ -29,7 +29,7 @@ from cohere.responses import (
     StreamingGenerations,
     Tokens,
 )
-from cohere.responses.chat import Chat, StreamingChat
+from cohere.responses.chat import Chat, StreamingChat, Tool, ToolResult
 from cohere.responses.classify import Example as ClassifyExample
 from cohere.responses.classify import LabelPrediction
 from cohere.responses.cluster import ClusterJobResult
@@ -245,8 +245,8 @@ class Client:
         citation_quality: Optional[str] = None,
         prompt_truncation: Optional[str] = None,
         connectors: Optional[List[Dict[str, Any]]] = None,
-        tools: Optional[List[Dict[str, Any]]] = None,
-        tool_results: Optional[List[Dict[str, Any]]] = None,
+        tools: Optional[List[Tool]] = None,
+        tool_results: Optional[List[ToolResult]] = None,
     ) -> Union[Chat, StreamingChat]:
         """Returns a Chat object with the query reply.
 

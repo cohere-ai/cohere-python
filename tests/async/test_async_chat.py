@@ -2,6 +2,7 @@ import conftest
 import pytest
 
 import cohere
+from cohere.responses.chat import ParameterDefinition, Tool, ToolCall, ToolResult
 
 
 @pytest.mark.asyncio
@@ -73,13 +74,13 @@ async def test_async_with_tools(async_client):
         model="command-nightly",
         stream=True,
         tools=[
-            {
-                "name": "calctool",
-                "description": "performs basic arithmetic",
-                "parameter_definitions": {
-                    "expression": {"description": "a mathematical expression to solve", "type": "str"}
+            Tool(
+                name="calctool",
+                description="performs basic arithmetic",
+                parameter_definitions={
+                    "expression": ParameterDefinition(description="a mathematical expression to solve", type="str")
                 },
-            }
+            )
         ],
     )
 
@@ -101,11 +102,11 @@ async def test_async_with_tools(async_client):
             assert not token.is_finished
             assert isinstance(token.tool_calls, list)
             assert len(token.tool_calls) > 0
-            assert isinstance(token.tool_calls[0], dict)
-            assert token.tool_calls[0]["name"] == "calctool"
-            assert isinstance(token.tool_calls[0]["parameters"], dict)
-            assert token.tool_calls[0]["parameters"]["expression"] == "5+9"
-            assert isinstance(token.tool_calls[0]["generation_id"], str)
+            assert isinstance(token.tool_calls[0], ToolCall)
+            assert token.tool_calls[0].name == "calctool"
+            assert isinstance(token.tool_calls[0].parameters, dict)
+            assert token.tool_calls[0].parameters["expression"] == "5+9"
+            assert isinstance(token.tool_calls[0].generation_id, str)
         elif isinstance(token, cohere.responses.chat.StreamTextGeneration):
             assert isinstance(token.text, str)
             assert len(token.text) > 0
@@ -123,10 +124,10 @@ async def test_async_with_tools(async_client):
 
     assert isinstance(res.tool_calls, list)
     assert len(res.tool_calls) > 0
-    assert isinstance(res.tool_calls[0], dict)
-    assert res.tool_calls[0]["name"] == "calctool"
-    assert isinstance(res.tool_calls[0]["parameters"], dict)
-    assert res.tool_calls[0]["parameters"]["expression"] == "5+9"
+    assert isinstance(res.tool_calls[0], ToolCall)
+    assert res.tool_calls[0].name == "calctool"
+    assert isinstance(res.tool_calls[0].parameters, dict)
+    assert res.tool_calls[0].parameters["expression"] == "5+9"
 
 
 @pytest.mark.asyncio
@@ -137,16 +138,19 @@ async def test_async_with_tool_results(async_client):
         model="command-nightly",
         stream=True,
         tools=[
-            {
-                "name": "calctool",
-                "description": "performs basic arithmetic",
-                "parameter_definitions": {
-                    "expression": {"description": "a mathematical expression to solve", "type": "str"}
+            Tool(
+                name="calctool",
+                description="performs basic arithmetic",
+                parameter_definitions={
+                    "expression": ParameterDefinition(description="a mathematical expression to solve", type="str")
                 },
-            }
+            )
         ],
         tool_results=[
-            {"call": {"name": "calctool", "parameters": {"expression": "5+9"}}, "outputs": [{"result": "14"}]},
+            ToolResult(
+                call=ToolCall(name="calctool", parameters={"expression": "5+9"}, generation_id="xxx-yyy-zzz"),
+                outputs=[{"result": 14}],
+            )
         ],
     )
 
@@ -190,7 +194,7 @@ async def test_async_with_tool_results(async_client):
     assert len(res.citations[0]["document_ids"]) > 0
     assert isinstance(res.documents, list)
     assert len(res.documents) > 0
-    assert res.documents[0] == {"result": "14"}
+    assert res.documents[0]["result"] == "14"
 
 
 @pytest.mark.asyncio
