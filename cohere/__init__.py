@@ -3,6 +3,12 @@ from importlib_metadata import version  # use package to support python 3.7
 from cohere.client import Client
 from cohere.client_async import AsyncClient
 from cohere.error import CohereAPIError, CohereConnectionError, CohereError
+from cohere.responses.chat import (
+    ChatRequestToolResultsItem,
+    Tool,
+    ToolCall,
+    ToolParameterDefinitionsValue,
+)
 
 COHERE_API_URL = "https://api.cohere.ai"
 RETRY_STATUS_CODES = [429, 500, 502, 503, 504]

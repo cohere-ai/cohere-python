@@ -43,7 +43,12 @@ from cohere.responses import (
     SummarizeResponse,
     Tokens,
 )
-from cohere.responses.chat import AsyncChat, StreamingChat
+from cohere.responses.chat import (
+    AsyncChat,
+    ChatRequestToolResultsItem,
+    StreamingChat,
+    Tool,
+)
 from cohere.responses.classify import Example as ClassifyExample
 from cohere.responses.cluster import AsyncClusterJobResult
 from cohere.responses.custom_model import (
@@ -229,6 +234,8 @@ class AsyncClient(Client):
         citation_quality: Optional[str] = None,
         prompt_truncation: Optional[str] = None,
         connectors: Optional[List[Dict[str, Any]]] = None,
+        tools: Optional[List[Tool]] = None,
+        tool_results: Optional[List[ChatRequestToolResultsItem]] = None,
     ) -> Union[AsyncChat, StreamingChat]:
         if message is None:
             raise CohereError("'message' must be provided.")
@@ -251,6 +258,8 @@ class AsyncClient(Client):
             "search_queries_only": search_queries_only,
             "documents": documents,
             "connectors": connectors,
+            "tools": tools,
+            "tool_results": tool_results,
         }
         if citation_quality is not None:
             json_body["citation_quality"] = citation_quality

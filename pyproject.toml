@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cohere"
-version = "4.52"
+version = "4.53"
 description = "Python SDK for the Cohere API"
 authors = ["Cohere"]
 readme = "README.md"

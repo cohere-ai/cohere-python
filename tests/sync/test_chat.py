@@ -1,8 +1,15 @@
 import unittest
 
+import pytest
 from utils import get_api_key
 
 import cohere
+from cohere import (
+    ChatRequestToolResultsItem,
+    Tool,
+    ToolCall,
+    ToolParameterDefinitionsValue,
+)
 
 API_KEY = get_api_key()
 co = cohere.Client(API_KEY)
@@ -223,6 +230,69 @@ class TestChat(unittest.TestCase):
         self.assertGreater(len(prediction.citations[0]["document_ids"]), 0)
         self.assertIsInstance(prediction.documents, list)
         self.assertGreater(len(prediction.documents), 0)
+
+    @pytest.mark.skip  # skipping so we don't block things - mostly just useful locally
+    def test_with_tools(self):
+        prediction = co.chat(
+            "What is 5 + 9",
+            temperature=0,
+            model="command-nightly",
+            tools=[
+                Tool(
+                    name="calctool",
+                    description="performs basic arithmetic",
+                    parameter_definitions={
+                        "expression": ToolParameterDefinitionsValue(
+                            type="str", description="a mathematical expression to solve"
+                        )
+                    },
+                )
+            ],
+        )
+        self.assertIsInstance(prediction.text, str)
+        self.assertIsInstance(prediction.tool_calls, list)
+        self.assertGreater(len(prediction.tool_calls), 0)
+        self.assertIsInstance(prediction.tool_calls[0], ToolCall)
+        self.assertEqual(prediction.tool_calls[0].name, "calctool")
+        self.assertIsInstance(prediction.tool_calls[0].parameters, dict)
+        self.assertEqual(prediction.tool_calls[0].parameters["expression"], "5+9")
+        self.assertIsInstance(prediction.tool_calls[0].generation_id, str)
+
+    @pytest.mark.skip  # skipping so we don't block things - mostly just useful locally
+    def test_with_tool_results(self):
+        prediction = co.chat(
+            "What is 5 + 9",
+            temperature=0,
+            model="command-nightly",
+            tools=[
+                Tool(
+                    name="calctool",
+                    description="performs basic arithmetic",
+                    parameter_definitions={
+                        "expression": ToolParameterDefinitionsValue(
+                            description="a mathematical expression to solve", type="str"
+                        )
+                    },
+                )
+            ],
+            tool_results=[
+                ChatRequestToolResultsItem(
+                    call=ToolCall(name="calctool", parameters={"expression": "5+9"}, generation_id="xxx-yyy-zzz"),
+                    outputs=[{"result": 14}],
+                )
+            ],
+        )
+        self.assertIsInstance(prediction.text, str)
+        self.assertIsInstance(prediction.citations, list)
+        self.assertGreater(len(prediction.citations), 0)
+        self.assertIsInstance(prediction.citations[0]["start"], int)
+        self.assertIsInstance(prediction.citations[0]["end"], int)
+        self.assertIsInstance(prediction.citations[0]["text"], str)
+        self.assertIsInstance(prediction.citations[0]["document_ids"], list)
+        self.assertGreater(len(prediction.citations[0]["document_ids"]), 0)
+        self.assertIsInstance(prediction.documents, list)
+        self.assertGreater(len(prediction.documents), 0)
+        self.assertEqual(prediction.documents[0]["result"], "14")
 
     def test_with_connectors(self):
         prediction = co.chat(
