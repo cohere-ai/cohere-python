@@ -7,7 +7,7 @@ import requests
 from cohere.responses.base import CohereObject
 
 
-class ParameterDefinition(CohereObject, dict):
+class ToolParameterDefinitionsValue(CohereObject, dict):
     def __init__(
         self,
         type: str,
@@ -28,7 +28,7 @@ class Tool(CohereObject, dict):
         self,
         name: str,
         description: str,
-        parameter_definitions: Optional[Dict[str, ParameterDefinition]] = None,
+        parameter_definitions: Optional[Dict[str, ToolParameterDefinitionsValue]] = None,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -69,7 +69,7 @@ class ToolCall(CohereObject, dict):
         return [ToolCall.from_dict(tc) for tc in tool_calls_res]
 
 
-class ToolResult(CohereObject, dict):
+class ChatRequestToolResultsItem(CohereObject, dict):
     def __init__(
         self,
         call: ToolCall,
