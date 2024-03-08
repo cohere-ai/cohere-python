@@ -1,4 +1,8 @@
 # Changelog
+## 4.53
+- [#389] (https://github.com/cohere-ai/cohere-python/pull/392)
+  - Add tools and tool_results to chat
+
 ## 4.52
 - [#389] (https://github.com/cohere-ai/cohere-python/pull/389)
   - Rename preamble_override to preamble in chat parameters
