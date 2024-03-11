@@ -234,6 +234,7 @@ class Client:
         return_preamble: Optional[bool] = False,
         chat_history: Optional[List[Dict[str, str]]] = None,
         preamble: Optional[str] = None,
+        preamble_override: Optional[str] = None,  # backwards compatibility
         user_name: Optional[str] = None,
         temperature: Optional[float] = 0.8,
         max_tokens: Optional[int] = None,
@@ -355,6 +356,8 @@ class Client:
                 >>> if res.is_search_required:
                 >>>      print(res.search_queries)
         """
+        if preamble_override is not None:
+            logger.warning("The 'preamble_override' parameter is deprecated. Use 'preamble' instead.")
 
         json_body = {
             "message": message,
@@ -364,7 +367,7 @@ class Client:
             "return_prompt": return_prompt,
             "return_preamble": return_preamble,
             "chat_history": chat_history,
-            "preamble": preamble,
+            "preamble": preamble or preamble_override,
             "temperature": temperature,
             "max_tokens": max_tokens,
             "stream": stream,
