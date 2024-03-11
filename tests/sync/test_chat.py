@@ -117,7 +117,6 @@ class TestChat(unittest.TestCase):
 
         self.assertNotEqual(prediction1.response_id, prediction2.response_id)
 
-
     def test_chat_history(self):
         prediction = co.chat(
             "Who are you?",
