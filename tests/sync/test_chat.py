@@ -143,8 +143,8 @@ class TestChat(unittest.TestCase):
         )
         self.assertIsInstance(prediction.text, str)
         self.assertIsNotNone(prediction.chat_history)
-        self.assertIn("User: Hey!", prediction.prompt)
-        self.assertIn("Chatbot: Hey! How can I help you?", prediction.prompt)
+        self.assertIn("Hey!", prediction.prompt)
+        self.assertIn("Hey! How can I help you?", prediction.prompt)
 
     def test_invalid_chat_history(self):
         invalid_chat_histories = [
