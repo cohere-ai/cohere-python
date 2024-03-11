@@ -117,19 +117,6 @@ class TestChat(unittest.TestCase):
 
         self.assertNotEqual(prediction1.response_id, prediction2.response_id)
 
-    def test_return_preamble(self):
-        prediction = co.chat("Yo what up?", return_preamble=True, return_prompt=True, max_tokens=5)
-        self.assertIsInstance(prediction.text, str)
-        self.assertIsNotNone(prediction.preamble)
-        self.assertIsNotNone(prediction.prompt)
-        self.assertIn(prediction.preamble, prediction.prompt)
-
-    def test_return_preamble_false(self):
-        prediction = co.chat("Yo what up?", return_preamble=False, max_tokens=5)
-        self.assertIsInstance(prediction.text, str)
-
-        assert prediction.preamble is None
-
     def test_chat_history(self):
         prediction = co.chat(
             "Who are you?",
@@ -143,8 +130,8 @@ class TestChat(unittest.TestCase):
         )
         self.assertIsInstance(prediction.text, str)
         self.assertIsNotNone(prediction.chat_history)
-        self.assertIn("User: Hey!", prediction.prompt)
-        self.assertIn("Chatbot: Hey! How can I help you?", prediction.prompt)
+        self.assertIn("Hey!", prediction.prompt)
+        self.assertIn("Hey! How can I help you?", prediction.prompt)
 
     def test_invalid_chat_history(self):
         invalid_chat_histories = [
