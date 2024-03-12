@@ -1,4 +1,8 @@
 # Changelog
+## 4.54
+- [#389] (https://github.com/cohere-ai/cohere-python/pull/397)
+  - Add raw_prompting param to chat
+
 ## 4.53
 - [#389] (https://github.com/cohere-ai/cohere-python/pull/392)
   - Add tools and tool_results to chat
