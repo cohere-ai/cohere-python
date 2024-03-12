@@ -236,6 +236,7 @@ class AsyncClient(Client):
         connectors: Optional[List[Dict[str, Any]]] = None,
         tools: Optional[List[Tool]] = None,
         tool_results: Optional[List[ChatRequestToolResultsItem]] = None,
+        raw_prompting: Optional[bool] = False,
     ) -> Union[AsyncChat, StreamingChat]:
         if message is None:
             raise CohereError("'message' must be provided.")
@@ -260,6 +261,7 @@ class AsyncClient(Client):
             "connectors": connectors,
             "tools": tools,
             "tool_results": tool_results,
+            "raw_prompting": raw_prompting,
         }
         if citation_quality is not None:
             json_body["citation_quality"] = citation_quality
