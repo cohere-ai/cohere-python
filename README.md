@@ -26,7 +26,6 @@ pip install --pre --upgrade cohere
 
 ```Python
 import cohere
-from cohere import ClassifyExample, ParseInfo
 
 co = cohere.Client(
     api_key="YOUR_API_KEY",
@@ -47,7 +46,6 @@ use `chat_stream`.
 
 ```Python
 import cohere
-from cohere import ClassifyExample, ParseInfo
 
 co = cohere.Client(
     api_key="YOUR_API_KEY",
