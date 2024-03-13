@@ -8,9 +8,13 @@
 
 The Cohere Python SDK provides access to the Cohere API from Python.
 
-## ✨🪩✨ Announcing Cohere's new Python SDK ✨🪩✨
+<!--- ## ✨🪩✨ Announcing Cohere's new Python SDK ✨🪩✨
 
-We are very excited to publish this brand new Python SDK. We will continuously update this library with all of the latest features in our API. Please create issues where you have feedback so that we can continue to improve the developer experience!
+We are very excited to publish this brand new Python SDK. We will continuously update this library with all of the latest features in our API. Please create issues where you have feedback so that we can continue to improve the developer experience! --->
+
+## 5.0.0 alpha 🚀
+
+We will release our brand new cohere-python SDK on the 18th of March 2024! If you'd like to get a head start by installing the alpha version, please go ahead and use pip install --pre --upgrade cohere. Thanks for your patience as we make breaking changes where necessary. If you have any issues using it, we will respond to github issues as soon as possible.
 
 ## Documentation
 
