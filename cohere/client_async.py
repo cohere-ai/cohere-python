@@ -224,7 +224,7 @@ class AsyncClient(Client):
         chat_history: Optional[List[Dict[str, str]]] = None,
         preamble: Optional[str] = None,
         user_name: Optional[str] = None,
-        temperature: Optional[float] = 0.8,
+        temperature: Optional[float] = None,
         max_tokens: Optional[int] = None,
         stream: Optional[bool] = False,
         p: Optional[float] = None,

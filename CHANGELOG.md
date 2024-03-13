@@ -1,4 +1,8 @@
 # Changelog
+## 4.55
+- [#?] (https://github.com/cohere-ai/cohere-python/pull/?)
+  - Update to API temperature defaults in chat
+
 ## 4.54
 - [#389] (https://github.com/cohere-ai/cohere-python/pull/397)
   - Add raw_prompting param to chat
