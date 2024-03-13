@@ -153,9 +153,7 @@ class Chat(CohereObject):
         return self.client.chat(
             message=response,
             conversation_id=self.conversation_id,
-            return_chat_history=self.chat_history is not None,
             return_prompt=self.prompt is not None,
-            return_preamble=self.preamble is not None,
             max_tokens=max_tokens,
         )
 
@@ -165,9 +163,7 @@ class AsyncChat(Chat):
         return await self.client.chat(
             message=response,
             conversation_id=self.conversation_id,
-            return_chat_history=self.chat_history is not None,
             return_prompt=self.prompt is not None,
-            return_preamble=self.preamble is not None,
             max_tokens=max_tokens,
         )
 

@@ -39,7 +39,7 @@ class TestChat(unittest.TestCase):
             co.chat("Yo what up?", model="NOT_A_VALID_MODEL").text
 
     def test_return_chat_history(self):
-        prediction = co.chat("Yo what up?", return_chat_history=True, max_tokens=5)
+        prediction = co.chat("Yo what up?", max_tokens=5)
         self.assertIsInstance(prediction.text, str)
         self.assertIsNotNone(prediction.chat_history)
         self.assertIsInstance(prediction.chat_history, list)
@@ -56,13 +56,6 @@ class TestChat(unittest.TestCase):
         prediction = co.chat("Yo what up?", return_prompt=False, max_tokens=5)
         self.assertIsInstance(prediction.text, str)
         assert prediction.prompt is None
-
-    def test_preamble(self):
-        preamble = "You are a dog who mostly barks"
-        prediction = co.chat("Yo what up?", preamble=preamble, return_prompt=True, return_preamble=True, max_tokens=5)
-        self.assertIsInstance(prediction.text, str)
-        self.assertIn(preamble, prediction.prompt)
-        self.assertEqual(preamble, prediction.preamble)
 
     def test_invalid_preamble(self):
         with self.assertRaises(cohere.CohereError) as e:
@@ -116,35 +109,6 @@ class TestChat(unittest.TestCase):
         self.assertIsNotNone(prediction2.response_id)
 
         self.assertNotEqual(prediction1.response_id, prediction2.response_id)
-
-    def test_return_preamble(self):
-        prediction = co.chat("Yo what up?", return_preamble=True, return_prompt=True, max_tokens=5)
-        self.assertIsInstance(prediction.text, str)
-        self.assertIsNotNone(prediction.preamble)
-        self.assertIsNotNone(prediction.prompt)
-        self.assertIn(prediction.preamble, prediction.prompt)
-
-    def test_return_preamble_false(self):
-        prediction = co.chat("Yo what up?", return_preamble=False, max_tokens=5)
-        self.assertIsInstance(prediction.text, str)
-
-        assert prediction.preamble is None
-
-    def test_chat_history(self):
-        prediction = co.chat(
-            "Who are you?",
-            chat_history=[
-                {"role": "User", "message": "Hey!"},
-                {"role": "Chatbot", "message": "Hey! How can I help you?"},
-            ],
-            return_prompt=True,
-            return_chat_history=True,
-            max_tokens=5,
-        )
-        self.assertIsInstance(prediction.text, str)
-        self.assertIsNotNone(prediction.chat_history)
-        self.assertIn("User: Hey!", prediction.prompt)
-        self.assertIn("Chatbot: Hey! How can I help you?", prediction.prompt)
 
     def test_invalid_chat_history(self):
         invalid_chat_histories = [

@@ -229,9 +229,7 @@ class Client:
         message: Optional[str] = None,
         conversation_id: Optional[str] = "",
         model: Optional[str] = None,
-        return_chat_history: Optional[bool] = False,
         return_prompt: Optional[bool] = False,
-        return_preamble: Optional[bool] = False,
         chat_history: Optional[List[Dict[str, str]]] = None,
         preamble: Optional[str] = None,
         preamble_override: Optional[str] = None,  # backwards compatibility
@@ -266,9 +264,7 @@ class Client:
             k (float): (Optional) The top-k sampling probability.
             max_tokens (int): (Optional) The max tokens generated for the next reply.
 
-            return_chat_history (bool): (Optional) Whether to return the chat history.
             return_prompt (bool): (Optional) Whether to return the prompt.
-            return_preamble (bool): (Optional) Whether to return the preamble.
 
             user_name (str): (Optional) A string to override the username.
 
@@ -302,8 +298,7 @@ class Client:
                 >>> res = co.chat(
                 >>>     message="Hey! How are you doing today?",
                 >>>     conversation_id="1234",
-                >>>     model="command",
-                >>>     return_chat_history=True)
+                >>>     model="command")
                 >>> print(res.text)
                 >>> print(res.chat_history)
             Streaming chat:
@@ -363,9 +358,7 @@ class Client:
             "message": message,
             "conversation_id": conversation_id,
             "model": model,
-            "return_chat_history": return_chat_history,
             "return_prompt": return_prompt,
-            "return_preamble": return_preamble,
             "chat_history": chat_history,
             "preamble": preamble or preamble_override,
             "temperature": temperature,

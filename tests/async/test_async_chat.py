@@ -14,9 +14,7 @@ from cohere import (
 async def test_async_multi_replies(async_client):
     conversation_id = f"test_conv_{conftest.random_word()}"
     num_replies = 3
-    prediction = await async_client.chat(
-        "Yo what's up?", return_chat_history=True, max_tokens=5, conversation_id=conversation_id
-    )
+    prediction = await async_client.chat("Yo what's up?", max_tokens=5, conversation_id=conversation_id)
     assert prediction.chat_history is not None
     for _ in range(num_replies):
         prediction = await prediction.respond("oh that's cool", max_tokens=5)
