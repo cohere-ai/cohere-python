@@ -110,6 +110,21 @@ class TestChat(unittest.TestCase):
 
         self.assertNotEqual(prediction1.response_id, prediction2.response_id)
 
+    def test_returns_chat_history_and_prompt(self):
+        prediction = co.chat(
+            "Who are you?",
+            chat_history=[
+                {"role": "User", "message": "Hey!"},
+                {"role": "Chatbot", "message": "Hey! How can I help you?"},
+            ],
+            return_prompt=True,
+            max_tokens=5,
+        )
+        self.assertIsInstance(prediction.text, str)
+        self.assertIsNotNone(prediction.chat_history)
+        self.assertIn("Hey!", prediction.prompt)
+        self.assertIn("Hey! How can I help you?", prediction.prompt)
+
     def test_invalid_chat_history(self):
         invalid_chat_histories = [
             "invalid",

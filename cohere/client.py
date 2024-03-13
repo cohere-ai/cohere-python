@@ -245,6 +245,7 @@ class Client:
         connectors: Optional[List[Dict[str, Any]]] = None,
         tools: Optional[List[Tool]] = None,
         tool_results: Optional[List[ChatRequestToolResultsItem]] = None,
+        raw_prompting: Optional[bool] = False,
     ) -> Union[Chat, StreamingChat]:
         """Returns a Chat object with the query reply.
 
@@ -264,8 +265,6 @@ class Client:
             max_tokens (int): (Optional) The max tokens generated for the next reply.
 
             return_prompt (bool): (Optional) Whether to return the prompt.
-
-            user_name (str): (Optional) A string to override the username.
 
             search_queries_only (bool) : (Optional) When true, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's message will be generated.
             documents (List[Dict[str, str]]): (Optional) Documents to use to generate grounded response with citations. Example:
@@ -369,6 +368,7 @@ class Client:
             "connectors": connectors,
             "tools": tools,
             "tool_results": tool_results,
+            "raw_prompting": raw_prompting,
         }
         if citation_quality is not None:
             json_body["citation_quality"] = citation_quality
