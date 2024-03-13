@@ -3,7 +3,8 @@ import unittest
 from time import sleep
 
 import cohere
-from cohere import ChatMessage, ChatConnector, ClassifyExample, CreateConnectorServiceAuth
+from cohere import ChatMessage, ChatConnector, ClassifyExample, CreateConnectorServiceAuth, Tool, \
+    ToolParameterDefinitionsValue, ChatRequestToolResultsItem
 
 co = cohere.Client(os.environ['COHERE_API_KEY'], timeout=10000)
 
@@ -209,17 +210,16 @@ class TestClient(unittest.TestCase):
 
     def test_tool_use(self) -> None:
         tools = [
-            {
-                "name": "sales_database",
-                "description": "Connects to a database about sales volumes",
-                "parameter_definitions": {
-                    "day": {
-                        "description": "Retrieves sales data from this day, formatted as YYYY-MM-DD.",
-                        "type": "str",
-                        "required": True
-                    }
-                }
-            }
+            Tool(
+                name="sales_database",
+                description="Connects to a database about sales volumes",
+                parameter_definitions={
+                    "day": ToolParameterDefinitionsValue(
+                        description="Retrieves sales data from this day, formatted as YYYY-MM-DD.",
+                        type="str",
+                        required=True
+                    )}
+            )
         ]
 
         tool_parameters_response = co.chat(
@@ -235,8 +235,11 @@ class TestClient(unittest.TestCase):
             """
         )
 
-        self.assertEqual(tool_parameters_response.tool_calls[0].name, "sales_database")
-        self.assertEqual(tool_parameters_response.tool_calls[0].parameters, {"day": "2023-09-29"})
+        if tool_parameters_response.tool_calls is not None:
+            self.assertEqual(tool_parameters_response.tool_calls[0].name, "sales_database")
+            self.assertEqual(tool_parameters_response.tool_calls[0].parameters, {"day": "2023-09-29"})
+        else:
+            raise ValueError("Expected tool calls to be present")
 
         local_tools = {
             "sales_database": lambda day: {
@@ -252,10 +255,10 @@ class TestClient(unittest.TestCase):
             output = local_tools[tool_call.name](**tool_call.parameters)
             outputs = [output]
 
-            tool_results.append({
-                "call": tool_call,
-                "outputs": outputs
-            })
+            tool_results.append(ChatRequestToolResultsItem(
+                call=tool_call,
+                outputs=outputs
+            ))
 
         cited_response = co.chat(
             message="How good were the sales on September 29?",
