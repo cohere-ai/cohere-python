@@ -1,9 +1,9 @@
 import os
+import unittest
 from time import sleep
 
 import cohere
 from cohere import ChatMessage, ChatConnector, ClassifyExample, CreateConnectorServiceAuth
-import unittest
 
 co = cohere.Client(os.environ['COHERE_API_KEY'], timeout=10000)
 
