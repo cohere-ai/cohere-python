@@ -1,4 +1,8 @@
 # Changelog
+## 4.55
+- [#400] (https://github.com/cohere-ai/cohere-python/pull/400)
+  - Remove unsupported chat parameters
+
 ## 4.54
 - [#389] (https://github.com/cohere-ai/cohere-python/pull/397)
   - Add raw_prompting param to chat
