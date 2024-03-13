@@ -3,8 +3,8 @@
 import datetime as dt
 import typing
 
-from ....core.datetime_utils import serialize_datetime
-from ....types.dataset import Dataset
+from ...core.datetime_utils import serialize_datetime
+from ...types.dataset import Dataset
 
 try:
     import pydantic.v1 as pydantic  # type: ignore
@@ -26,4 +26,5 @@ class DatasetsGetResponse(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

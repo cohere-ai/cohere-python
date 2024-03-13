@@ -7,13 +7,14 @@ from .auth_token_type import AuthTokenType
 from .chat_citation import ChatCitation
 from .chat_citation_generation_event import ChatCitationGenerationEvent
 from .chat_connector import ChatConnector
+from .chat_data_metrics import ChatDataMetrics
 from .chat_document import ChatDocument
 from .chat_message import ChatMessage
 from .chat_message_role import ChatMessageRole
 from .chat_request_citation_quality import ChatRequestCitationQuality
+from .chat_request_connectors_search_options import ChatRequestConnectorsSearchOptions
 from .chat_request_prompt_override import ChatRequestPromptOverride
 from .chat_request_prompt_truncation import ChatRequestPromptTruncation
-from .chat_request_search_options import ChatRequestSearchOptions
 from .chat_request_tool_results_item import ChatRequestToolResultsItem
 from .chat_search_queries_generation_event import ChatSearchQueriesGenerationEvent
 from .chat_search_query import ChatSearchQuery
@@ -24,13 +25,14 @@ from .chat_stream_end_event import ChatStreamEndEvent
 from .chat_stream_end_event_finish_reason import ChatStreamEndEventFinishReason
 from .chat_stream_event import ChatStreamEvent
 from .chat_stream_request_citation_quality import ChatStreamRequestCitationQuality
+from .chat_stream_request_connectors_search_options import ChatStreamRequestConnectorsSearchOptions
 from .chat_stream_request_prompt_override import ChatStreamRequestPromptOverride
 from .chat_stream_request_prompt_truncation import ChatStreamRequestPromptTruncation
-from .chat_stream_request_search_options import ChatStreamRequestSearchOptions
 from .chat_stream_request_tool_results_item import ChatStreamRequestToolResultsItem
 from .chat_stream_start_event import ChatStreamStartEvent
 from .chat_text_generation_event import ChatTextGenerationEvent
-from .chat_tool_inputs_generation_event import ChatToolInputsGenerationEvent
+from .chat_tool_calls_generation_event import ChatToolCallsGenerationEvent
+from .classify_data_metrics import ClassifyDataMetrics
 from .classify_example import ClassifyExample
 from .classify_request_truncate import ClassifyRequestTruncate
 from .classify_response import ClassifyResponse
@@ -63,6 +65,7 @@ from .embed_job_truncate import EmbedJobTruncate
 from .embed_request_embedding_types_item import EmbedRequestEmbeddingTypesItem
 from .embed_request_truncate import EmbedRequestTruncate
 from .embed_response import EmbedResponse, EmbedResponse_EmbeddingsByType, EmbedResponse_EmbeddingsFloats
+from .finetune_dataset_metrics import FinetuneDatasetMetrics
 from .finish_reason import FinishReason
 from .generate_request_return_likelihoods import GenerateRequestReturnLikelihoods
 from .generate_request_truncate import GenerateRequestTruncate
@@ -81,9 +84,11 @@ from .generate_streamed_response import (
 )
 from .generation import Generation
 from .get_connector_response import GetConnectorResponse
+from .label_metric import LabelMetric
 from .list_connectors_response import ListConnectorsResponse
 from .list_embed_job_response import ListEmbedJobResponse
 from .list_models_response import ListModelsResponse
+from .metrics import Metrics
 from .model import Model
 from .non_streamed_chat_response import NonStreamedChatResponse
 from .o_auth_authorize_response import OAuthAuthorizeResponse
@@ -93,6 +98,7 @@ from .rerank_request_documents_item_text import RerankRequestDocumentsItemText
 from .rerank_response import RerankResponse
 from .rerank_response_results_item import RerankResponseResultsItem
 from .rerank_response_results_item_document import RerankResponseResultsItemDocument
+from .reranker_data_metrics import RerankerDataMetrics
 from .single_generation import SingleGeneration
 from .single_generation_in_stream import SingleGenerationInStream
 from .single_generation_token_likelihoods_item import SingleGenerationTokenLikelihoodsItem
@@ -104,7 +110,7 @@ from .streamed_chat_response import (
     StreamedChatResponse_StreamEnd,
     StreamedChatResponse_StreamStart,
     StreamedChatResponse_TextGeneration,
-    StreamedChatResponse_ToolInputsGeneration,
+    StreamedChatResponse_ToolCallsGeneration,
 )
 from .summarize_request_extractiveness import SummarizeRequestExtractiveness
 from .summarize_request_format import SummarizeRequestFormat
@@ -112,7 +118,7 @@ from .summarize_request_length import SummarizeRequestLength
 from .summarize_response import SummarizeResponse
 from .tokenize_response import TokenizeResponse
 from .tool import Tool
-from .tool_input import ToolInput
+from .tool_call import ToolCall
 from .tool_parameter_definitions_value import ToolParameterDefinitionsValue
 from .update_connector_response import UpdateConnectorResponse
 
@@ -124,13 +130,14 @@ __all__ = [
     "ChatCitation",
     "ChatCitationGenerationEvent",
     "ChatConnector",
+    "ChatDataMetrics",
     "ChatDocument",
     "ChatMessage",
     "ChatMessageRole",
     "ChatRequestCitationQuality",
+    "ChatRequestConnectorsSearchOptions",
     "ChatRequestPromptOverride",
     "ChatRequestPromptTruncation",
-    "ChatRequestSearchOptions",
     "ChatRequestToolResultsItem",
     "ChatSearchQueriesGenerationEvent",
     "ChatSearchQuery",
@@ -141,13 +148,14 @@ __all__ = [
     "ChatStreamEndEventFinishReason",
     "ChatStreamEvent",
     "ChatStreamRequestCitationQuality",
+    "ChatStreamRequestConnectorsSearchOptions",
     "ChatStreamRequestPromptOverride",
     "ChatStreamRequestPromptTruncation",
-    "ChatStreamRequestSearchOptions",
     "ChatStreamRequestToolResultsItem",
     "ChatStreamStartEvent",
     "ChatTextGenerationEvent",
-    "ChatToolInputsGenerationEvent",
+    "ChatToolCallsGenerationEvent",
+    "ClassifyDataMetrics",
     "ClassifyExample",
     "ClassifyRequestTruncate",
     "ClassifyResponse",
@@ -180,6 +188,7 @@ __all__ = [
     "EmbedResponse",
     "EmbedResponse_EmbeddingsByType",
     "EmbedResponse_EmbeddingsFloats",
+    "FinetuneDatasetMetrics",
     "FinishReason",
     "GenerateRequestReturnLikelihoods",
     "GenerateRequestTruncate",
@@ -196,9 +205,11 @@ __all__ = [
     "GenerateStreamedResponse_TextGeneration",
     "Generation",
     "GetConnectorResponse",
+    "LabelMetric",
     "ListConnectorsResponse",
     "ListEmbedJobResponse",
     "ListModelsResponse",
+    "Metrics",
     "Model",
     "NonStreamedChatResponse",
     "OAuthAuthorizeResponse",
@@ -208,6 +219,7 @@ __all__ = [
     "RerankResponse",
     "RerankResponseResultsItem",
     "RerankResponseResultsItemDocument",
+    "RerankerDataMetrics",
     "SingleGeneration",
     "SingleGenerationInStream",
     "SingleGenerationTokenLikelihoodsItem",
@@ -218,14 +230,14 @@ __all__ = [
     "StreamedChatResponse_StreamEnd",
     "StreamedChatResponse_StreamStart",
     "StreamedChatResponse_TextGeneration",
-    "StreamedChatResponse_ToolInputsGeneration",
+    "StreamedChatResponse_ToolCallsGeneration",
     "SummarizeRequestExtractiveness",
     "SummarizeRequestFormat",
     "SummarizeRequestLength",
     "SummarizeResponse",
     "TokenizeResponse",
     "Tool",
-    "ToolInput",
+    "ToolCall",
     "ToolParameterDefinitionsValue",
     "UpdateConnectorResponse",
 ]

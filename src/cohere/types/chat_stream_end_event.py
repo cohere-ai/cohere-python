@@ -15,18 +15,19 @@ except ImportError:
 
 
 class ChatStreamEndEvent(ChatStreamEvent):
-    finish_reason: ChatStreamEndEventFinishReason = pydantic.Field(
-        description=(
-            "- `COMPLETE` - the model sent back a finished reply\n"
-            "- `ERROR_LIMIT` - the reply was cut off because the model reached the maximum number of tokens for its context length\n"
-            "- `MAX_TOKENS` - the reply was cut off because the model reached the maximum number of tokens specified by the max_tokens parameter\n"
-            "- `ERROR` - something went wrong when generating the reply\n"
-            "- `ERROR_TOXIC` - the model generated a reply that was deemed toxic\n"
-        )
-    )
-    response: NonStreamedChatResponse = pydantic.Field(
-        description="The consolidated response from the model. Contains the generated reply and all the other information streamed back in the previous events."
-    )
+    finish_reason: ChatStreamEndEventFinishReason = pydantic.Field()
+    """
+    - `COMPLETE` - the model sent back a finished reply
+    - `ERROR_LIMIT` - the reply was cut off because the model reached the maximum number of tokens for its context length
+    - `MAX_TOKENS` - the reply was cut off because the model reached the maximum number of tokens specified by the max_tokens parameter
+    - `ERROR` - something went wrong when generating the reply
+    - `ERROR_TOXIC` - the model generated a reply that was deemed toxic
+    """
+
+    response: NonStreamedChatResponse = pydantic.Field()
+    """
+    The consolidated response from the model. Contains the generated reply and all the other information streamed back in the previous events.
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -40,4 +41,5 @@ class ChatStreamEndEvent(ChatStreamEvent):
         frozen = True
         smart_union = True
         allow_population_by_field_name = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

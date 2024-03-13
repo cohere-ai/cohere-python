@@ -10,7 +10,7 @@ from .chat_search_results_event import ChatSearchResultsEvent
 from .chat_stream_end_event import ChatStreamEndEvent
 from .chat_stream_start_event import ChatStreamStartEvent
 from .chat_text_generation_event import ChatTextGenerationEvent
-from .chat_tool_inputs_generation_event import ChatToolInputsGenerationEvent
+from .chat_tool_calls_generation_event import ChatToolCallsGenerationEvent
 
 
 class StreamedChatResponse_StreamStart(ChatStreamStartEvent):
@@ -58,8 +58,8 @@ class StreamedChatResponse_CitationGeneration(ChatCitationGenerationEvent):
         allow_population_by_field_name = True
 
 
-class StreamedChatResponse_ToolInputsGeneration(ChatToolInputsGenerationEvent):
-    event_type: typing.Literal["tool-inputs-generation"]
+class StreamedChatResponse_ToolCallsGeneration(ChatToolCallsGenerationEvent):
+    event_type: typing.Literal["tool-calls-generation"]
 
     class Config:
         frozen = True
@@ -82,6 +82,6 @@ StreamedChatResponse = typing.Union[
     StreamedChatResponse_SearchResults,
     StreamedChatResponse_TextGeneration,
     StreamedChatResponse_CitationGeneration,
-    StreamedChatResponse_ToolInputsGeneration,
+    StreamedChatResponse_ToolCallsGeneration,
     StreamedChatResponse_StreamEnd,
 ]

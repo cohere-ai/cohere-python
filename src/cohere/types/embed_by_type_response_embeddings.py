@@ -16,27 +16,30 @@ class EmbedByTypeResponseEmbeddings(pydantic.BaseModel):
     An object with different embedding types. The length of each embedding type array will be the same as the length of the original `texts` array.
     """
 
-    float_: typing.Optional[typing.List[typing.List[float]]] = pydantic.Field(
-        alias="float", default=None, description="An array of float embeddings."
-    )
-    int_8: typing.Optional[typing.List[typing.List[float]]] = pydantic.Field(
-        alias="int8",
-        default=None,
-        description="An array of signed int8 embeddings. Each value is between -128 and 127.",
-    )
-    uint_8: typing.Optional[typing.List[typing.List[float]]] = pydantic.Field(
-        alias="uint8",
-        default=None,
-        description="An array of unsigned int8 embeddings. Each value is between 0 and 255.",
-    )
-    binary: typing.Optional[typing.List[typing.List[float]]] = pydantic.Field(
-        default=None,
-        description="An array of packed signed binary embeddings. The length of each binary embedding is 1/8 the length of the float embeddings of the provided model. Each value is between -128 and 127.",
-    )
-    ubinary: typing.Optional[typing.List[typing.List[float]]] = pydantic.Field(
-        default=None,
-        description="An array of packed unsigned binary embeddings. The length of each binary embedding is 1/8 the length of the float embeddings of the provided model. Each value is between 0 and 255.",
-    )
+    float_: typing.Optional[typing.List[typing.List[float]]] = pydantic.Field(alias="float", default=None)
+    """
+    An array of float embeddings.
+    """
+
+    int_8: typing.Optional[typing.List[typing.List[float]]] = pydantic.Field(alias="int8", default=None)
+    """
+    An array of signed int8 embeddings. Each value is between -128 and 127.
+    """
+
+    uint_8: typing.Optional[typing.List[typing.List[float]]] = pydantic.Field(alias="uint8", default=None)
+    """
+    An array of unsigned int8 embeddings. Each value is between 0 and 255.
+    """
+
+    binary: typing.Optional[typing.List[typing.List[float]]] = pydantic.Field(default=None)
+    """
+    An array of packed signed binary embeddings. The length of each binary embedding is 1/8 the length of the float embeddings of the provided model. Each value is between -128 and 127.
+    """
+
+    ubinary: typing.Optional[typing.List[typing.List[float]]] = pydantic.Field(default=None)
+    """
+    An array of packed unsigned binary embeddings. The length of each binary embedding is 1/8 the length of the float embeddings of the provided model. Each value is between 0 and 255.
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -50,4 +53,5 @@ class EmbedByTypeResponseEmbeddings(pydantic.BaseModel):
         frozen = True
         smart_union = True
         allow_population_by_field_name = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

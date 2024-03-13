@@ -14,10 +14,10 @@ except ImportError:
 
 class ListModelsResponse(pydantic.BaseModel):
     models: typing.List[Model]
-    next_page_token: typing.Optional[str] = pydantic.Field(
-        default=None,
-        description="A token to retrieve the next page of results. Provide in the page_token parameter of the next request.",
-    )
+    next_page_token: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    A token to retrieve the next page of results. Provide in the page_token parameter of the next request.
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -30,4 +30,5 @@ class ListModelsResponse(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

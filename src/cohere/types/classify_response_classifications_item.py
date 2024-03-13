@@ -17,26 +17,40 @@ except ImportError:
 
 class ClassifyResponseClassificationsItem(pydantic.BaseModel):
     id: str
-    input: typing.Optional[str] = pydantic.Field(default=None, description="The input text that was classified")
-    prediction: typing.Optional[str] = pydantic.Field(
-        default=None, description="The predicted label for the associated query (only filled for single-label models)"
-    )
-    predictions: typing.List[str] = pydantic.Field(
-        description="An array containing the predicted labels for the associated query (only filled for single-label classification)"
-    )
-    confidence: typing.Optional[float] = pydantic.Field(
-        default=None,
-        description="The confidence score for the top predicted class (only filled for single-label classification)",
-    )
-    confidences: typing.List[float] = pydantic.Field(
-        description="An array containing the confidence scores of all the predictions in the same order"
-    )
-    labels: typing.Dict[str, ClassifyResponseClassificationsItemLabelsValue] = pydantic.Field(
-        description="A map containing each label and its confidence score according to the classifier. All the confidence scores add up to 1 for single-label classification. For multi-label classification the label confidences are independent of each other, so they don't have to sum up to 1."
-    )
-    classification_type: ClassifyResponseClassificationsItemClassificationType = pydantic.Field(
-        description="The type of classification performed"
-    )
+    input: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    The input text that was classified
+    """
+
+    prediction: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    The predicted label for the associated query (only filled for single-label models)
+    """
+
+    predictions: typing.List[str] = pydantic.Field()
+    """
+    An array containing the predicted labels for the associated query (only filled for single-label classification)
+    """
+
+    confidence: typing.Optional[float] = pydantic.Field(default=None)
+    """
+    The confidence score for the top predicted class (only filled for single-label classification)
+    """
+
+    confidences: typing.List[float] = pydantic.Field()
+    """
+    An array containing the confidence scores of all the predictions in the same order
+    """
+
+    labels: typing.Dict[str, ClassifyResponseClassificationsItemLabelsValue] = pydantic.Field()
+    """
+    A map containing each label and its confidence score according to the classifier. All the confidence scores add up to 1 for single-label classification. For multi-label classification the label confidences are independent of each other, so they don't have to sum up to 1.
+    """
+
+    classification_type: ClassifyResponseClassificationsItemClassificationType = pydantic.Field()
+    """
+    The type of classification performed
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -49,4 +63,5 @@ class ClassifyResponseClassificationsItem(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

@@ -12,9 +12,20 @@ except ImportError:
 
 
 class ToolParameterDefinitionsValue(pydantic.BaseModel):
-    description: str
-    type: str
-    required: typing.Optional[bool] = None
+    description: str = pydantic.Field()
+    """
+    The description of the parameter.
+    """
+
+    type: str = pydantic.Field()
+    """
+    The type of the parameter. Must be a valid Python type.
+    """
+
+    required: typing.Optional[bool] = pydantic.Field(default=None)
+    """
+    Denotes whether the parameter is always present (required) or not. Defaults to not required.
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -27,4 +38,5 @@ class ToolParameterDefinitionsValue(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

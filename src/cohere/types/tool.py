@@ -13,9 +13,32 @@ except ImportError:
 
 
 class Tool(pydantic.BaseModel):
-    name: str
-    description: str
-    parameter_definitions: typing.Optional[typing.Dict[str, ToolParameterDefinitionsValue]] = None
+    name: str = pydantic.Field()
+    """
+    The name of the tool to be called. Valid names contain only the characters `a-z`, `A-Z`, `0-9`, `_` and must not begin with a digit.
+    """
+
+    description: str = pydantic.Field()
+    """
+    The description of what the tool does, the model uses the description to choose when and how to call the function.
+    """
+
+    parameter_definitions: typing.Optional[typing.Dict[str, ToolParameterDefinitionsValue]] = pydantic.Field(
+        default=None
+    )
+    """
+    The input parameters of the tool. Accepts a dictionary where the key is the name of the parameter and the value is the parameter spec. Valid parameter names contain only the characters `a-z`, `A-Z`, `0-9`, `_` and must not begin with a digit.
+    
+    ```
+    {
+      "my_param": {
+        "description": <string>,
+        "type": <string>, // any python data type, such as 'str', 'bool'
+        "required": <boolean>
+      }
+    }
+    ```
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -28,4 +51,5 @@ class Tool(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

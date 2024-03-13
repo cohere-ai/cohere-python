@@ -15,10 +15,16 @@ except ImportError:
 
 class EmbedByTypeResponse(pydantic.BaseModel):
     id: str
-    embeddings: EmbedByTypeResponseEmbeddings = pydantic.Field(
-        description="An object with different embedding types. The length of each embedding type array will be the same as the length of the original `texts` array."
-    )
-    texts: typing.List[str] = pydantic.Field(description="The text entries for which embeddings were returned.")
+    embeddings: EmbedByTypeResponseEmbeddings = pydantic.Field()
+    """
+    An object with different embedding types. The length of each embedding type array will be the same as the length of the original `texts` array.
+    """
+
+    texts: typing.List[str] = pydantic.Field()
+    """
+    The text entries for which embeddings were returned.
+    """
+
     meta: typing.Optional[ApiMeta] = None
 
     def json(self, **kwargs: typing.Any) -> str:
@@ -32,4 +38,5 @@ class EmbedByTypeResponse(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

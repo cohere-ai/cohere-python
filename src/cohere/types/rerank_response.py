@@ -15,7 +15,11 @@ except ImportError:
 
 class RerankResponse(pydantic.BaseModel):
     id: typing.Optional[str] = None
-    results: typing.List[RerankResponseResultsItem] = pydantic.Field(description="An ordered list of ranked documents")
+    results: typing.List[RerankResponseResultsItem] = pydantic.Field()
+    """
+    An ordered list of ranked documents
+    """
+
     meta: typing.Optional[ApiMeta] = None
 
     def json(self, **kwargs: typing.Any) -> str:
@@ -29,4 +33,5 @@ class RerankResponse(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

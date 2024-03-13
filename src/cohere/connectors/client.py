@@ -4,24 +4,24 @@ import typing
 import urllib.parse
 from json.decoder import JSONDecodeError
 
-from ...core.api_error import ApiError
-from ...core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
-from ...core.jsonable_encoder import jsonable_encoder
-from ...core.remove_none_from_dict import remove_none_from_dict
-from ...core.request_options import RequestOptions
-from ...errors.bad_request_error import BadRequestError
-from ...errors.forbidden_error import ForbiddenError
-from ...errors.internal_server_error import InternalServerError
-from ...errors.not_found_error import NotFoundError
-from ...errors.too_many_requests_error import TooManyRequestsError
-from ...types.create_connector_o_auth import CreateConnectorOAuth
-from ...types.create_connector_response import CreateConnectorResponse
-from ...types.create_connector_service_auth import CreateConnectorServiceAuth
-from ...types.delete_connector_response import DeleteConnectorResponse
-from ...types.get_connector_response import GetConnectorResponse
-from ...types.list_connectors_response import ListConnectorsResponse
-from ...types.o_auth_authorize_response import OAuthAuthorizeResponse
-from ...types.update_connector_response import UpdateConnectorResponse
+from ..core.api_error import ApiError
+from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
+from ..core.jsonable_encoder import jsonable_encoder
+from ..core.remove_none_from_dict import remove_none_from_dict
+from ..core.request_options import RequestOptions
+from ..errors.bad_request_error import BadRequestError
+from ..errors.forbidden_error import ForbiddenError
+from ..errors.internal_server_error import InternalServerError
+from ..errors.not_found_error import NotFoundError
+from ..errors.too_many_requests_error import TooManyRequestsError
+from ..types.create_connector_o_auth import CreateConnectorOAuth
+from ..types.create_connector_response import CreateConnectorResponse
+from ..types.create_connector_service_auth import CreateConnectorServiceAuth
+from ..types.delete_connector_response import DeleteConnectorResponse
+from ..types.get_connector_response import GetConnectorResponse
+from ..types.list_connectors_response import ListConnectorsResponse
+from ..types.o_auth_authorize_response import OAuthAuthorizeResponse
+from ..types.update_connector_response import UpdateConnectorResponse
 
 try:
     import pydantic.v1 as pydantic  # type: ignore
@@ -53,9 +53,9 @@ class ConnectorsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import BaseCohere
+        from cohere.client import Cohere
 
-        client = BaseCohere(
+        client = Cohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -88,6 +88,8 @@ class ConnectorsClient:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(ListConnectorsResponse, _response.json())  # type: ignore
@@ -138,9 +140,9 @@ class ConnectorsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import BaseCohere
+        from cohere.client import Cohere
 
-        client = BaseCohere(
+        client = Cohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -185,6 +187,8 @@ class ConnectorsClient:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(CreateConnectorResponse, _response.json())  # type: ignore
@@ -211,9 +215,9 @@ class ConnectorsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import BaseCohere
+        from cohere.client import Cohere
 
-        client = BaseCohere(
+        client = Cohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -238,6 +242,8 @@ class ConnectorsClient:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(GetConnectorResponse, _response.json())  # type: ignore
@@ -264,9 +270,9 @@ class ConnectorsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import BaseCohere
+        from cohere.client import Cohere
 
-        client = BaseCohere(
+        client = Cohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -291,6 +297,8 @@ class ConnectorsClient:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(DeleteConnectorResponse, _response.json())  # type: ignore
@@ -345,9 +353,9 @@ class ConnectorsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import BaseCohere
+        from cohere.client import Cohere
 
-        client = BaseCohere(
+        client = Cohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -393,6 +401,8 @@ class ConnectorsClient:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(UpdateConnectorResponse, _response.json())  # type: ignore
@@ -429,9 +439,9 @@ class ConnectorsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import BaseCohere
+        from cohere.client import Cohere
 
-        client = BaseCohere(
+        client = Cohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -470,6 +480,8 @@ class ConnectorsClient:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(OAuthAuthorizeResponse, _response.json())  # type: ignore
@@ -509,9 +521,9 @@ class AsyncConnectorsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import AsyncBaseCohere
+        from cohere.client import AsyncCohere
 
-        client = AsyncBaseCohere(
+        client = AsyncCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -544,6 +556,8 @@ class AsyncConnectorsClient:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(ListConnectorsResponse, _response.json())  # type: ignore
@@ -594,9 +608,9 @@ class AsyncConnectorsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import AsyncBaseCohere
+        from cohere.client import AsyncCohere
 
-        client = AsyncBaseCohere(
+        client = AsyncCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -641,6 +655,8 @@ class AsyncConnectorsClient:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(CreateConnectorResponse, _response.json())  # type: ignore
@@ -667,9 +683,9 @@ class AsyncConnectorsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import AsyncBaseCohere
+        from cohere.client import AsyncCohere
 
-        client = AsyncBaseCohere(
+        client = AsyncCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -694,6 +710,8 @@ class AsyncConnectorsClient:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(GetConnectorResponse, _response.json())  # type: ignore
@@ -722,9 +740,9 @@ class AsyncConnectorsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import AsyncBaseCohere
+        from cohere.client import AsyncCohere
 
-        client = AsyncBaseCohere(
+        client = AsyncCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -749,6 +767,8 @@ class AsyncConnectorsClient:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(DeleteConnectorResponse, _response.json())  # type: ignore
@@ -803,9 +823,9 @@ class AsyncConnectorsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import AsyncBaseCohere
+        from cohere.client import AsyncCohere
 
-        client = AsyncBaseCohere(
+        client = AsyncCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -851,6 +871,8 @@ class AsyncConnectorsClient:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(UpdateConnectorResponse, _response.json())  # type: ignore
@@ -887,9 +909,9 @@ class AsyncConnectorsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import AsyncBaseCohere
+        from cohere.client import AsyncCohere
 
-        client = AsyncBaseCohere(
+        client = AsyncCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -928,6 +950,8 @@ class AsyncConnectorsClient:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(OAuthAuthorizeResponse, _response.json())  # type: ignore

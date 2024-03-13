@@ -16,18 +16,25 @@ class ChatCitation(pydantic.BaseModel):
     A section of the generated reply which cites external knowledge.
     """
 
-    start: int = pydantic.Field(
-        description="The index of text that the citation starts at, counting from zero. For example, a generation of `Hello, world!` with a citation on `world` would have a start value of `7`. This is because the citation starts at `w`, which is the seventh character."
-    )
-    end: int = pydantic.Field(
-        description="The index of text that the citation ends after, counting from zero. For example, a generation of `Hello, world!` with a citation on `world` would have an end value of `11`. This is because the citation ends after `d`, which is the eleventh character."
-    )
-    text: str = pydantic.Field(
-        description="The text of the citation. For example, a generation of `Hello, world!` with a citation of `world` would have a text value of `world`."
-    )
-    document_ids: typing.List[str] = pydantic.Field(
-        description="Identifiers of documents cited by this section of the generated reply."
-    )
+    start: int = pydantic.Field()
+    """
+    The index of text that the citation starts at, counting from zero. For example, a generation of `Hello, world!` with a citation on `world` would have a start value of `7`. This is because the citation starts at `w`, which is the seventh character.
+    """
+
+    end: int = pydantic.Field()
+    """
+    The index of text that the citation ends after, counting from zero. For example, a generation of `Hello, world!` with a citation on `world` would have an end value of `11`. This is because the citation ends after `d`, which is the eleventh character.
+    """
+
+    text: str = pydantic.Field()
+    """
+    The text of the citation. For example, a generation of `Hello, world!` with a citation of `world` would have a text value of `world`.
+    """
+
+    document_ids: typing.List[str] = pydantic.Field()
+    """
+    Identifiers of documents cited by this section of the generated reply.
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -40,4 +47,5 @@ class ChatCitation(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}
