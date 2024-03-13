@@ -1,6 +1,6 @@
 # Changelog
 ## 4.55
-- [#?] (https://github.com/cohere-ai/cohere-python/pull/?)
+- [#401] (https://github.com/cohere-ai/cohere-python/pull/401)
   - Update to API temperature defaults in chat
 
 ## 4.54
