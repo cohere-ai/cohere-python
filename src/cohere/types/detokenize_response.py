@@ -13,7 +13,11 @@ except ImportError:
 
 
 class DetokenizeResponse(pydantic.BaseModel):
-    text: str = pydantic.Field(description="A string representing the list of tokens.")
+    text: str = pydantic.Field()
+    """
+    A string representing the list of tokens.
+    """
+
     meta: typing.Optional[ApiMeta] = None
 
     def json(self, **kwargs: typing.Any) -> str:
@@ -27,4 +31,5 @@ class DetokenizeResponse(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

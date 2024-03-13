@@ -15,24 +15,49 @@ except ImportError:
 
 
 class Dataset(pydantic.BaseModel):
-    id: str = pydantic.Field(description="The dataset ID")
-    name: str = pydantic.Field(description="The name of the dataset")
-    created_at: dt.datetime = pydantic.Field(description="The creation date")
-    updated_at: dt.datetime = pydantic.Field(description="The last update date")
+    id: str = pydantic.Field()
+    """
+    The dataset ID
+    """
+
+    name: str = pydantic.Field()
+    """
+    The name of the dataset
+    """
+
+    created_at: dt.datetime = pydantic.Field()
+    """
+    The creation date
+    """
+
+    updated_at: dt.datetime = pydantic.Field()
+    """
+    The last update date
+    """
+
     dataset_type: DatasetType
     validation_status: DatasetValidationStatus
-    validation_error: typing.Optional[str] = pydantic.Field(default=None, description="Errors found during validation")
-    schema_: typing.Optional[str] = pydantic.Field(
-        alias="schema", default=None, description="the avro schema of the dataset"
-    )
+    validation_error: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Errors found during validation
+    """
+
+    schema_: typing.Optional[str] = pydantic.Field(alias="schema", default=None)
+    """
+    the avro schema of the dataset
+    """
+
     required_fields: typing.Optional[typing.List[str]] = None
     preserve_fields: typing.Optional[typing.List[str]] = None
-    dataset_parts: typing.Optional[typing.List[DatasetPart]] = pydantic.Field(
-        default=None, description="the underlying files that make up the dataset"
-    )
-    validation_warnings: typing.Optional[typing.List[str]] = pydantic.Field(
-        default=None, description="warnings found during validation"
-    )
+    dataset_parts: typing.Optional[typing.List[DatasetPart]] = pydantic.Field(default=None)
+    """
+    the underlying files that make up the dataset
+    """
+
+    validation_warnings: typing.Optional[typing.List[str]] = pydantic.Field(default=None)
+    """
+    warnings found during validation
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -46,4 +71,5 @@ class Dataset(pydantic.BaseModel):
         frozen = True
         smart_union = True
         allow_population_by_field_name = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

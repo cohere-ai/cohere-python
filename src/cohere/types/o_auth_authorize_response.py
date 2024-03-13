@@ -12,10 +12,10 @@ except ImportError:
 
 
 class OAuthAuthorizeResponse(pydantic.BaseModel):
-    redirect_url: typing.Optional[str] = pydantic.Field(
-        default=None,
-        description="The OAuth 2.0 redirect url. Redirect the user to this url to authorize the connector.",
-    )
+    redirect_url: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    The OAuth 2.0 redirect url. Redirect the user to this url to authorize the connector.
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -28,4 +28,5 @@ class OAuthAuthorizeResponse(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

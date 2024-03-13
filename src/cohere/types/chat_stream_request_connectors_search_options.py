@@ -11,19 +11,19 @@ except ImportError:
     import pydantic  # type: ignore
 
 
-class ChatRequestSearchOptions(pydantic.BaseModel):
+class ChatStreamRequestConnectorsSearchOptions(pydantic.BaseModel):
     """
-    (internal) Sets inference and model options for RAG search query and tool use generations. Defaults are used when options are not specified here, meaning that other parameters outside of search_options are ignored (such as model= or temperature=).
+    (internal) Sets inference and model options for RAG search query and tool use generations. Defaults are used when options are not specified here, meaning that other parameters outside of connectors_search_options are ignored (such as model= or temperature=).
     """
 
     model: typing.Optional[typing.Any] = None
     temperature: typing.Optional[typing.Any] = None
     max_tokens: typing.Optional[typing.Any] = None
     preamble: typing.Optional[typing.Any] = None
-    seed: typing.Optional[float] = pydantic.Field(
-        default=None,
-        description="If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed.",
-    )
+    seed: typing.Optional[float] = pydantic.Field(default=None)
+    """
+    If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed.
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -36,4 +36,5 @@ class ChatRequestSearchOptions(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

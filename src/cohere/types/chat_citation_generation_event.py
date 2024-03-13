@@ -14,7 +14,10 @@ except ImportError:
 
 
 class ChatCitationGenerationEvent(ChatStreamEvent):
-    citations: typing.List[ChatCitation] = pydantic.Field(description="Citations for the generated reply.")
+    citations: typing.List[ChatCitation] = pydantic.Field()
+    """
+    Citations for the generated reply.
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -28,4 +31,5 @@ class ChatCitationGenerationEvent(ChatStreamEvent):
         frozen = True
         smart_union = True
         allow_population_by_field_name = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

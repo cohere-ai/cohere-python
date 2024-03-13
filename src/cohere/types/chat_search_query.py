@@ -16,10 +16,15 @@ class ChatSearchQuery(pydantic.BaseModel):
     The generated search query. Contains the text of the query and a unique identifier for the query.
     """
 
-    text: str = pydantic.Field(description="The text of the search query.")
-    generation_id: str = pydantic.Field(
-        description="Unique identifier for the generated search query. Useful for submitting feedback."
-    )
+    text: str = pydantic.Field()
+    """
+    The text of the search query.
+    """
+
+    generation_id: str = pydantic.Field()
+    """
+    Unique identifier for the generated search query. Useful for submitting feedback.
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -32,4 +37,5 @@ class ChatSearchQuery(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

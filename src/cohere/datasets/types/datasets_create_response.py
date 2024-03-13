@@ -3,7 +3,7 @@
 import datetime as dt
 import typing
 
-from ....core.datetime_utils import serialize_datetime
+from ...core.datetime_utils import serialize_datetime
 
 try:
     import pydantic.v1 as pydantic  # type: ignore
@@ -12,7 +12,10 @@ except ImportError:
 
 
 class DatasetsCreateResponse(pydantic.BaseModel):
-    id: typing.Optional[str] = pydantic.Field(default=None, description="The dataset ID")
+    id: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    The dataset ID
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -25,4 +28,5 @@ class DatasetsCreateResponse(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

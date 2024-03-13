@@ -4,14 +4,14 @@ import typing
 import urllib.parse
 from json.decoder import JSONDecodeError
 
-from ...core.api_error import ApiError
-from ...core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
-from ...core.jsonable_encoder import jsonable_encoder
-from ...core.remove_none_from_dict import remove_none_from_dict
-from ...core.request_options import RequestOptions
-from ...errors.too_many_requests_error import TooManyRequestsError
-from ...types.compatible_endpoint import CompatibleEndpoint
-from ...types.list_models_response import ListModelsResponse
+from ..core.api_error import ApiError
+from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
+from ..core.jsonable_encoder import jsonable_encoder
+from ..core.remove_none_from_dict import remove_none_from_dict
+from ..core.request_options import RequestOptions
+from ..errors.too_many_requests_error import TooManyRequestsError
+from ..types.compatible_endpoint import CompatibleEndpoint
+from ..types.list_models_response import ListModelsResponse
 
 try:
     import pydantic.v1 as pydantic  # type: ignore
@@ -43,9 +43,9 @@ class ModelsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import BaseCohere
+        from cohere.client import Cohere
 
-        client = BaseCohere(
+        client = Cohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -79,6 +79,8 @@ class ModelsClient:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(ListModelsResponse, _response.json())  # type: ignore
@@ -115,9 +117,9 @@ class AsyncModelsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import AsyncBaseCohere
+        from cohere.client import AsyncCohere
 
-        client = AsyncBaseCohere(
+        client = AsyncCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -151,6 +153,8 @@ class AsyncModelsClient:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(ListModelsResponse, _response.json())  # type: ignore

@@ -16,27 +16,29 @@ class ChatConnector(pydantic.BaseModel):
     The connector used for fetching documents.
     """
 
-    id: str = pydantic.Field(description="The identifier of the connector.")
-    user_access_token: typing.Optional[str] = pydantic.Field(
-        default=None,
-        description="When specified, this user access token will be passed to the connector in the Authorization header instead of the Cohere generated one.",
-    )
-    continue_on_failure: typing.Optional[bool] = pydantic.Field(
-        default=None,
-        description=(
-            "Defaults to `false`.\n"
-            "\n"
-            "When `true`, the request will continue if this connector returned an error.\n"
-        ),
-    )
-    options: typing.Optional[typing.Dict[str, typing.Any]] = pydantic.Field(
-        default=None,
-        description=(
-            "Provides the connector with different settings at request time. The key/value pairs of this object are specific to each connector.\n"
-            "\n"
-            "For example, the connector `web-search` supports the `site` option, which limits search results to the specified domain.\n"
-        ),
-    )
+    id: str = pydantic.Field()
+    """
+    The identifier of the connector.
+    """
+
+    user_access_token: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    When specified, this user access token will be passed to the connector in the Authorization header instead of the Cohere generated one.
+    """
+
+    continue_on_failure: typing.Optional[bool] = pydantic.Field(default=None)
+    """
+    Defaults to `false`.
+    
+    When `true`, the request will continue if this connector returned an error.
+    """
+
+    options: typing.Optional[typing.Dict[str, typing.Any]] = pydantic.Field(default=None)
+    """
+    Provides the connector with different settings at request time. The key/value pairs of this object are specific to each connector.
+    
+    For example, the connector `web-search` supports the `site` option, which limits search results to the specified domain.
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -49,4 +51,5 @@ class ChatConnector(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

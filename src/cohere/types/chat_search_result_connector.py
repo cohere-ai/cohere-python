@@ -16,7 +16,10 @@ class ChatSearchResultConnector(pydantic.BaseModel):
     The connector used for fetching documents.
     """
 
-    id: str = pydantic.Field(description="The identifier of the connector.")
+    id: str = pydantic.Field()
+    """
+    The identifier of the connector.
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -29,4 +32,5 @@ class ChatSearchResultConnector(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

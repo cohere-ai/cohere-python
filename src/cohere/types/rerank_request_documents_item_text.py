@@ -12,7 +12,10 @@ except ImportError:
 
 
 class RerankRequestDocumentsItemText(pydantic.BaseModel):
-    text: str = pydantic.Field(description="The text of the document to rerank.")
+    text: str = pydantic.Field()
+    """
+    The text of the document to rerank.
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -25,4 +28,5 @@ class RerankRequestDocumentsItemText(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

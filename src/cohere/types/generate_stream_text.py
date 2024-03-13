@@ -13,11 +13,16 @@ except ImportError:
 
 
 class GenerateStreamText(GenerateStreamEvent):
-    text: str = pydantic.Field(description="A segment of text of the generation.")
-    index: typing.Optional[int] = pydantic.Field(
-        default=None,
-        description="Refers to the nth generation. Only present when `num_generations` is greater than zero, and only when text responses are being streamed.",
-    )
+    text: str = pydantic.Field()
+    """
+    A segment of text of the generation.
+    """
+
+    index: typing.Optional[int] = pydantic.Field(default=None)
+    """
+    Refers to the nth generation. Only present when `num_generations` is greater than zero, and only when text responses are being streamed.
+    """
+
     is_finished: bool
 
     def json(self, **kwargs: typing.Any) -> str:
@@ -32,4 +37,5 @@ class GenerateStreamText(GenerateStreamEvent):
         frozen = True
         smart_union = True
         allow_population_by_field_name = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

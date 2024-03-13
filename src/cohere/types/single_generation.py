@@ -15,15 +15,16 @@ except ImportError:
 class SingleGeneration(pydantic.BaseModel):
     id: str
     text: str
-    index: typing.Optional[int] = pydantic.Field(
-        default=None,
-        description="Refers to the nth generation. Only present when `num_generations` is greater than zero.",
-    )
+    index: typing.Optional[int] = pydantic.Field(default=None)
+    """
+    Refers to the nth generation. Only present when `num_generations` is greater than zero.
+    """
+
     likelihood: typing.Optional[float] = None
-    token_likelihoods: typing.Optional[typing.List[SingleGenerationTokenLikelihoodsItem]] = pydantic.Field(
-        default=None,
-        description="Only returned if `return_likelihoods` is set to `GENERATION` or `ALL`. The likelihood refers to the average log-likelihood of the entire specified string, which is useful for [evaluating the performance of your model](likelihood-eval), especially if you've created a [custom model](/docs/training-custom-models). Individual token likelihoods provide the log-likelihood of each token. The first token will not have a likelihood.",
-    )
+    token_likelihoods: typing.Optional[typing.List[SingleGenerationTokenLikelihoodsItem]] = pydantic.Field(default=None)
+    """
+    Only returned if `return_likelihoods` is set to `GENERATION` or `ALL`. The likelihood refers to the average log-likelihood of the entire specified string, which is useful for [evaluating the performance of your model](likelihood-eval), especially if you've created a [custom model](/docs/training-custom-models). Individual token likelihoods provide the log-likelihood of each token. The first token will not have a likelihood.
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -36,4 +37,5 @@ class SingleGeneration(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

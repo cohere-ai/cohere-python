@@ -13,8 +13,16 @@ except ImportError:
 
 
 class SummarizeResponse(pydantic.BaseModel):
-    id: typing.Optional[str] = pydantic.Field(default=None, description="Generated ID for the summary")
-    summary: typing.Optional[str] = pydantic.Field(default=None, description="Generated summary for the text")
+    id: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Generated ID for the summary
+    """
+
+    summary: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Generated summary for the text
+    """
+
     meta: typing.Optional[ApiMeta] = None
 
     def json(self, **kwargs: typing.Any) -> str:
@@ -28,4 +36,5 @@ class SummarizeResponse(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}
