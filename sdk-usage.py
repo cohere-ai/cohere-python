@@ -1,13 +1,13 @@
-from cohere.client import Client
-from cohere import GenerateRequestReturnLikelihoods, GenerateRequestTruncate, ChatMessage, ChatMessageRole, ClassifyRequestExamplesItem, ClassifyRequestTruncate, SummarizeRequestLength, SummarizeRequestFormat, SummarizeRequestExtractiveness, EmbedInputType, EmbedRequestTruncate, EmbedInputType, CreateEmbedJobRequestTruncate, ChatRequestCitationQuality, ChatRequestPromptTruncation, DatasetType, ChatConnector
+import cohere
+from cohere import CreateConnectorServiceAuth, CreateConnectorOAuth, ChatMessage, ChatConnector, ClassifyExample
 
-co = Client(
-    token="xxx",
+co = cohere.Client(
+    api_key="xxx",
     # num_workers=64, not supported
     # request_dict={}, not supported
     # check_api_key=True, not supported
     client_name="langchain",
-    # max_retries=3, not supported
+    # max_retries=3, not supported via constructor
     timeout=120,
     base_url="https://api.cohere.com",
 )
@@ -26,9 +26,9 @@ prediction = co.generate(
     presence_penalty=1,
     end_sequences=["\n"],
     stop_sequences=["\n"],
-    return_likelihoods=GenerateRequestReturnLikelihoods.NONE,
-    truncate=GenerateRequestTruncate.END,
-    logit_bias={"1": 1},
+    return_likelihoods="ALL",
+    truncate="END",
+    # logit_bias={1: 1}, not supported
 )
 
 chat = co.chat(
@@ -38,25 +38,25 @@ chat = co.chat(
     # return_prompt=True, not supported
     # return_preamble=True, not supported
     chat_history=[
-        ChatMessage(role=ChatMessageRole.USER, message="Count with me!"),
-        ChatMessage(role=ChatMessageRole.USER, message="1")
+        ChatMessage(role="USER", message="Count with me!"),
+        ChatMessage(role="USER", message="1")
     ],
-    preamble_override="Preamble!!",
-    # user_name=None,
+    preamble=None,
+    # user_name=None, not supported
     temperature=0.8,
     # max_tokens=None, not supported
     # p=None, not supported
     # k=None, not supported
     # logit_bias=None, not supported
-    search_queries_only=False,
+    search_queries_only=True,
     documents=[
         {
             "id": "1",
             "text": "The quick brown fox jumped over the lazy dog.",
         }
     ],
-    citation_quality=ChatRequestCitationQuality.ACCURATE,
-    prompt_truncation=ChatRequestPromptTruncation.AUTO,
+    # citation_quality="ACCURATE", not supported
+    prompt_truncation="AUTO",
     connectors=[
         ChatConnector(
             id="web-search",
@@ -71,17 +71,17 @@ print('chat: {}'.format(chat.text))
 
 classifies = co.classify(
     examples=[
-        ClassifyRequestExamplesItem(text="orange", label="fruit"),
-        ClassifyRequestExamplesItem(text="pear", label="fruit"),
-        ClassifyRequestExamplesItem(text="lettuce", label="vegetable"),
-        ClassifyRequestExamplesItem(text="cauliflower", label="vegetable"),
+        ClassifyExample(text="orange", label="fruit"),
+        ClassifyExample(text="pear", label="fruit"),
+        ClassifyExample(text="lettuce", label="vegetable"),
+        ClassifyExample(text="cauliflower", label="vegetable")
     ],
     inputs=[
         "Abiu",
     ],
     model="embed-multilingual-v2.0",
     preset="id",
-    truncate=ClassifyRequestTruncate.END,
+    truncate="END",
 )
 
 print('classifies: {}'.format(classifies.classifications[0].prediction))
@@ -103,11 +103,11 @@ print('detokenise: {}'.format(detokenise.text))
 summarise = co.summarize(
     text="the quick brown fox jumped over the lazy dog and then the dog jumped over the fox the quick brown fox jumped over the lazy dog the quick brown fox jumped over the lazy dog the quick brown fox jumped over the lazy dog the quick brown fox jumped over the lazy dog",
     model="command",
-    length=SummarizeRequestLength.SHORT,
-    format=SummarizeRequestFormat.PARAGRAPH,
+    length="short",
+    format="paragraph",
     temperature=1,
     additional_command=None,
-    extractiveness=SummarizeRequestExtractiveness.LOW,
+    extractiveness="low",
 )
 
 print('summarise: {}'.format(summarise))
@@ -130,8 +130,8 @@ print('rerank: {}'.format(rerank.results[0].index))
 embed = co.embed(
     texts=['hello', 'goodbye'],
     model='embed-english-v3.0',
-    truncate=EmbedRequestTruncate.NONE,
-    input_type=EmbedInputType.SEARCH_DOCUMENT,
+    truncate="NONE",
+    input_type="search_document",
     embedding_types=['uint8'],
 )
 
@@ -140,7 +140,7 @@ print(embed)
 my_dataset = co.datasets.create(
     name="prompt-completion-dataset",
     data=open("./dataset.jsonl", "rb"),
-    type=DatasetType.EMBED_INPUT,
+    type="embed-input",
     # eval_data=open("./prompt-completion.jsonl", "rb"),
     keep_fields="all",
     optional_fields="all",
@@ -151,8 +151,8 @@ print(my_dataset)
 
 my_datasets = co.datasets.list(
     dataset_type="embed",
-    limit=10,
-    offset=0,
+    limit="10",
+    offset="0",
 )
 
 print(my_datasets)
@@ -161,22 +161,22 @@ dataset_usage = co.datasets.get_usage()
 
 print(dataset_usage)
 
-my_dataset = co.datasets.get(
-    my_dataset.id
+ds = co.datasets.get(
+    my_dataset.id or ""
 )
 
-print(my_dataset)
+print(ds)
 
 co.datasets.delete(
-    my_dataset.id
+    ds.dataset.id
 )
 
 # start an embed job
 job = co.embed_jobs.create(
-    dataset_id=my_dataset.id,
-    input_type=EmbedInputType.SEARCH_DOCUMENT,
+    dataset_id=ds.dataset.id,
+    input_type="search_document",
     model='embed-english-v3.0',
-    truncate=CreateEmbedJobRequestTruncate.END,
+    truncate="END",
     name='my embed job',
 )
 
@@ -187,14 +187,14 @@ my_embed_jobs = co.embed_jobs.list()
 print(my_embed_jobs)
 
 my_embed_job = co.embed_jobs.get(
-    job.id
+    job.job_id
 )
 
 print(my_embed_job)
 
 # cancel an embed job
 co.embed_jobs.cancel(
-    my_embed_job.id
+    my_embed_job.job_id
 )
 
 created_connector = co.connectors.create(
@@ -203,27 +203,27 @@ created_connector = co.connectors.create(
     active=True,
     continue_on_failure=False,
     excludes=["excluded"],
-    oauth={"client_id": "client_id", "client_secret": "client_secret"},
-    service_auth={"username": "username", "password": "password"},
+    oauth=CreateConnectorOAuth(client_id="client_id", client_secret="client_secret"),
+    service_auth=CreateConnectorServiceAuth(type="bearer", token="password"),
 )
 
 print(created_connector)
 
 updated_connector = co.connectors.update(
-    id=created_connector.id,
+    id=created_connector.connector.id,
     name="Example connector",
     url="http://connector-example.com/search",
     active=True,
     continue_on_failure=False,
     excludes=["excluded"],
-    oauth={"client_id": "client_id", "client_secret": "client_secret"},
-    service_auth={"username": "username", "password": "password"}
+    oauth=CreateConnectorOAuth(client_id="client_id", client_secret="client_secret"),
+    service_auth=CreateConnectorServiceAuth(type="bearer", token="password"),
 )
 
 print(updated_connector)
 
 connector = co.connectors.get(
-    id=created_connector.id
+    id=created_connector.connector.id
 )
 
 print(connector)
@@ -236,11 +236,11 @@ connectors = co.connectors.list(
 print(connectors)
 
 co.connectors.delete(
-    id=created_connector.id
+    id=created_connector.connector.id
 )
 
 redirect_url = co.connectors.o_auth_authorize(
-    id=created_connector.id,
+    id=created_connector.connector.id,
     after_token_redirect="https://test.com"
 )
 
