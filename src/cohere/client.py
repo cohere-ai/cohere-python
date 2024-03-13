@@ -2,8 +2,8 @@ import typing
 
 import httpx
 
-from .environment import BaseCohereEnvironment
 from .base_client import BaseCohere, AsyncBaseCohere
+from .environment import CohereEnvironment
 
 
 class Client(BaseCohere):
@@ -12,7 +12,7 @@ class Client(BaseCohere):
             api_key: typing.Union[str, typing.Callable[[], str]],
             *,
             base_url: typing.Optional[str] = None,
-            environment: BaseCohereEnvironment = BaseCohereEnvironment.PRODUCTION,
+            environment: CohereEnvironment = CohereEnvironment.PRODUCTION,
             client_name: typing.Optional[str] = None,
             timeout: typing.Optional[float] = 60,
             httpx_client: typing.Optional[httpx.Client] = None,
@@ -34,7 +34,7 @@ class AsyncClient(AsyncBaseCohere):
             api_key: typing.Union[str, typing.Callable[[], str]],
             *,
             base_url: typing.Optional[str] = None,
-            environment: BaseCohereEnvironment = BaseCohereEnvironment.PRODUCTION,
+            environment: CohereEnvironment = CohereEnvironment.PRODUCTION,
             client_name: typing.Optional[str] = None,
             timeout: typing.Optional[float] = 60,
             httpx_client: typing.Optional[httpx.AsyncClient] = None,
