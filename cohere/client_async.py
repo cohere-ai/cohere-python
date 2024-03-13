@@ -221,7 +221,6 @@ class AsyncClient(Client):
         return_prompt: Optional[bool] = False,
         chat_history: Optional[List[Dict[str, str]]] = None,
         preamble: Optional[str] = None,
-        preamble_override: Optional[str] = None,  # backwards compatibility
         user_name: Optional[str] = None,
         temperature: Optional[float] = 0.8,
         max_tokens: Optional[int] = None,
@@ -238,8 +237,6 @@ class AsyncClient(Client):
     ) -> Union[AsyncChat, StreamingChat]:
         if message is None:
             raise CohereError("'message' must be provided.")
-        if preamble_override is not None:
-            logger.warning("The 'preamble_override' parameter is deprecated. Use 'preamble' instead.")
 
         json_body = {
             "message": message,
@@ -247,7 +244,7 @@ class AsyncClient(Client):
             "model": model,
             "return_prompt": return_prompt,
             "chat_history": chat_history,
-            "preamble": preamble or preamble_override,
+            "preamble": preamble,
             "temperature": temperature,
             "max_tokens": max_tokens,
             "stream": stream,
