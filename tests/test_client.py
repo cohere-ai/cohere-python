@@ -1,10 +1,8 @@
 import os
-import typing
 from time import sleep
 
 import cohere
-from cohere import ChatMessage, ChatMessageRole, ChatConnector, EmbedInputType, ClassifyExample, DatasetType, \
-    DatasetValidationStatus, EmbedJobStatus, CreateConnectorServiceAuth, RerankRequestDocumentsItemText, AuthTokenType
+from cohere import ChatMessage, ChatConnector, ClassifyExample, CreateConnectorServiceAuth
 
 co = cohere.Client(os.environ['COHERE_API_KEY'], timeout=10000)
 
@@ -15,9 +13,9 @@ embed_job = os.path.join(package_dir, 'embed_job.jsonl')
 def test_chat() -> None:
     chat = co.chat(
         chat_history=[
-            ChatMessage(role=ChatMessageRole.USER,
+            ChatMessage(role="USER",
                         message="Who discovered gravity?"),
-            ChatMessage(role=ChatMessageRole.CHATBOT, message="The man who is widely credited with discovering "
+            ChatMessage(role="CHATBOT", message="The man who is widely credited with discovering "
                                                               "gravity is Sir Isaac Newton")
         ],
         message="What year was he born?",
@@ -38,7 +36,7 @@ def test_embed() -> None:
     response = co.embed(
         texts=['hello', 'goodbye'],
         model='embed-english-v3.0',
-        input_type=EmbedInputType.CLASSIFICATION
+        input_type="classification"
     )
     print(response)
 
@@ -46,7 +44,7 @@ def test_embed() -> None:
 def test_embed_job_crud() -> None:
     dataset = co.datasets.create(
         name="test",
-        type=DatasetType.EMBED_INPUT,
+        type="embed-input",
         data=open(embed_job, 'rb'),
     )
 
@@ -54,13 +52,13 @@ def test_embed_job_crud() -> None:
         ds = co.datasets.get(dataset.id or "")
         sleep(2)
         print(ds, flush=True)
-        if ds.dataset.validation_status != DatasetValidationStatus.PROCESSING:
+        if ds.dataset.validation_status != "PROCESSING":
             break
 
     # start an embed job
     job = co.embed_jobs.create(
         dataset_id=dataset.id or "",
-        input_type=EmbedInputType.SEARCH_DOCUMENT,
+        input_type="search_document",
         model='embed-english-v3.0')
 
     print(job)
@@ -74,7 +72,7 @@ def test_embed_job_crud() -> None:
         em = co.embed_jobs.get(job.job_id)
         sleep(2)
         print(em, flush=True)
-        if em.status != EmbedJobStatus.PROCESSING:
+        if em.status != "PROCESSING":
             break
 
     co.embed_jobs.cancel(job.job_id)
@@ -130,7 +128,7 @@ def test_classify() -> None:
 def test_datasets_crud() -> None:
     my_dataset = co.datasets.create(
         name="test",
-        type=DatasetType.EMBED_INPUT,
+        type="embed-input",
         data=open(embed_job, 'rb'),
     )
 
@@ -200,7 +198,7 @@ def test_connectors_crud() -> None:
         url="https://dummy-connector-o5btz7ucgq-uc.a.run.app/search",
         service_auth=CreateConnectorServiceAuth(
             token="dummy-connector-token",
-            type=AuthTokenType.BEARER,
+            type="bearer",
         )
     )
     print(created_connector)
