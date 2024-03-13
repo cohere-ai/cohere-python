@@ -13,11 +13,20 @@ except ImportError:
 
 
 class RerankResponseResultsItem(pydantic.BaseModel):
-    document: typing.Optional[RerankResponseResultsItemDocument] = pydantic.Field(
-        default=None, description="The doc object which was ranked"
-    )
-    index: int = pydantic.Field(description="The index of the input document")
-    relevance_score: float = pydantic.Field(description="A relevance score assigned to the ranking")
+    document: typing.Optional[RerankResponseResultsItemDocument] = pydantic.Field(default=None)
+    """
+    The doc object which was ranked
+    """
+
+    index: int = pydantic.Field()
+    """
+    The index of the input document
+    """
+
+    relevance_score: float = pydantic.Field()
+    """
+    A relevance score assigned to the ranking
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -30,4 +39,5 @@ class RerankResponseResultsItem(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

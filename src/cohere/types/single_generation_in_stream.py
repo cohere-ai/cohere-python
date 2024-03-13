@@ -14,11 +14,16 @@ except ImportError:
 
 class SingleGenerationInStream(pydantic.BaseModel):
     id: str
-    text: str = pydantic.Field(description="Full text of the generation.")
-    index: typing.Optional[int] = pydantic.Field(
-        default=None,
-        description="Refers to the nth generation. Only present when `num_generations` is greater than zero.",
-    )
+    text: str = pydantic.Field()
+    """
+    Full text of the generation.
+    """
+
+    index: typing.Optional[int] = pydantic.Field(default=None)
+    """
+    Refers to the nth generation. Only present when `num_generations` is greater than zero.
+    """
+
     finish_reason: FinishReason
 
     def json(self, **kwargs: typing.Any) -> str:
@@ -32,4 +37,5 @@ class SingleGenerationInStream(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

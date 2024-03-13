@@ -4,7 +4,7 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
-from .tool_input import ToolInput
+from .tool_call import ToolCall
 
 try:
     import pydantic.v1 as pydantic  # type: ignore
@@ -13,8 +13,8 @@ except ImportError:
 
 
 class ChatRequestToolResultsItem(pydantic.BaseModel):
-    input: ToolInput
-    result: typing.Dict[str, typing.Any]
+    call: ToolCall
+    outputs: typing.List[typing.Dict[str, typing.Any]]
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -27,4 +27,5 @@ class ChatRequestToolResultsItem(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

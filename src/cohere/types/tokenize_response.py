@@ -13,7 +13,11 @@ except ImportError:
 
 
 class TokenizeResponse(pydantic.BaseModel):
-    tokens: typing.List[int] = pydantic.Field(description="An array of tokens, where each token is an integer.")
+    tokens: typing.List[int] = pydantic.Field()
+    """
+    An array of tokens, where each token is an integer.
+    """
+
     token_strings: typing.List[str]
     meta: typing.Optional[ApiMeta] = None
 
@@ -28,4 +32,5 @@ class TokenizeResponse(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

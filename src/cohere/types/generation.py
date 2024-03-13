@@ -15,8 +15,16 @@ except ImportError:
 
 class Generation(pydantic.BaseModel):
     id: str
-    prompt: typing.Optional[str] = pydantic.Field(default=None, description="Prompt used for generations.")
-    generations: typing.List[SingleGeneration] = pydantic.Field(description="List of generated results")
+    prompt: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Prompt used for generations.
+    """
+
+    generations: typing.List[SingleGeneration] = pydantic.Field()
+    """
+    List of generated results
+    """
+
     meta: typing.Optional[ApiMeta] = None
 
     def json(self, **kwargs: typing.Any) -> str:
@@ -30,4 +38,5 @@ class Generation(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

@@ -12,18 +12,25 @@ except ImportError:
 
 
 class ApiMetaBilledUnits(pydantic.BaseModel):
-    input_tokens: typing.Optional[float] = pydantic.Field(
-        default=None, description="The number of billed input tokens."
-    )
-    output_tokens: typing.Optional[float] = pydantic.Field(
-        default=None, description="The number of billed output tokens."
-    )
-    search_units: typing.Optional[float] = pydantic.Field(
-        default=None, description="The number of billed search units."
-    )
-    classifications: typing.Optional[float] = pydantic.Field(
-        default=None, description="The number of billed classifications units."
-    )
+    input_tokens: typing.Optional[float] = pydantic.Field(default=None)
+    """
+    The number of billed input tokens.
+    """
+
+    output_tokens: typing.Optional[float] = pydantic.Field(default=None)
+    """
+    The number of billed output tokens.
+    """
+
+    search_units: typing.Optional[float] = pydantic.Field(default=None)
+    """
+    The number of billed search units.
+    """
+
+    classifications: typing.Optional[float] = pydantic.Field(default=None)
+    """
+    The number of billed classifications units.
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -36,4 +43,5 @@ class ApiMetaBilledUnits(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

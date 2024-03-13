@@ -8,24 +8,26 @@ from json.decoder import JSONDecodeError
 
 import httpx
 
+from .connectors.client import AsyncConnectorsClient, ConnectorsClient
 from .core.api_error import ApiError
 from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from .core.jsonable_encoder import jsonable_encoder
 from .core.remove_none_from_dict import remove_none_from_dict
 from .core.request_options import RequestOptions
-from .environment import BaseCohereEnvironment
+from .datasets.client import AsyncDatasetsClient, DatasetsClient
+from .embed_jobs.client import AsyncEmbedJobsClient, EmbedJobsClient
+from .environment import CohereEnvironment
 from .errors.bad_request_error import BadRequestError
 from .errors.internal_server_error import InternalServerError
 from .errors.too_many_requests_error import TooManyRequestsError
-from .resources.connectors.client import AsyncConnectorsClient, ConnectorsClient
-from .resources.datasets.client import AsyncDatasetsClient, DatasetsClient
-from .resources.embed_jobs.client import AsyncEmbedJobsClient, EmbedJobsClient
-from .resources.models.client import AsyncModelsClient, ModelsClient
+from .models.client import AsyncModelsClient, ModelsClient
 from .types.chat_connector import ChatConnector
 from .types.chat_document import ChatDocument
 from .types.chat_message import ChatMessage
 from .types.chat_request_prompt_truncation import ChatRequestPromptTruncation
+from .types.chat_request_tool_results_item import ChatRequestToolResultsItem
 from .types.chat_stream_request_prompt_truncation import ChatStreamRequestPromptTruncation
+from .types.chat_stream_request_tool_results_item import ChatStreamRequestToolResultsItem
 from .types.classify_example import ClassifyExample
 from .types.classify_request_truncate import ClassifyRequestTruncate
 from .types.classify_response import ClassifyResponse
@@ -49,6 +51,7 @@ from .types.summarize_request_format import SummarizeRequestFormat
 from .types.summarize_request_length import SummarizeRequestLength
 from .types.summarize_response import SummarizeResponse
 from .types.tokenize_response import TokenizeResponse
+from .types.tool import Tool
 
 try:
     import pydantic.v1 as pydantic  # type: ignore
@@ -66,9 +69,9 @@ class BaseCohere:
     Parameters:
         - base_url: typing.Optional[str]. The base url to use for requests from the client.
 
-        - environment: BaseCohereEnvironment. The environment to use for requests from the client. from .environment import BaseCohereEnvironment
+        - environment: CohereEnvironment. The environment to use for requests from the client. from .environment import CohereEnvironment
 
-                                              Defaults to BaseCohereEnvironment.PRODUCTION
+                                          Defaults to CohereEnvironment.PRODUCTION
 
         - client_name: typing.Optional[str].
 
@@ -78,9 +81,9 @@ class BaseCohere:
 
         - httpx_client: typing.Optional[httpx.Client]. The httpx client to use for making requests, a preconfigured client is used by default, however this is useful should you want to pass in any custom httpx configuration.
     ---
-    from cohere.base_client import BaseCohere
+    from cohere.client import Cohere
 
-    client = BaseCohere(
+    client = Cohere(
         client_name="YOUR_CLIENT_NAME",
         token="YOUR_TOKEN",
     )
@@ -90,7 +93,7 @@ class BaseCohere:
         self,
         *,
         base_url: typing.Optional[str] = None,
-        environment: BaseCohereEnvironment = BaseCohereEnvironment.PRODUCTION,
+        environment: CohereEnvironment = CohereEnvironment.PRODUCTION,
         client_name: typing.Optional[str] = None,
         token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"),
         timeout: typing.Optional[float] = 60,
@@ -128,6 +131,8 @@ class BaseCohere:
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
+        tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
+        tool_results: typing.Optional[typing.Sequence[ChatStreamRequestToolResultsItem]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[StreamedChatResponse]:
         """
@@ -153,7 +158,9 @@ class BaseCohere:
 
                                                                                      Dictates how the prompt will be constructed.
 
-                                                                                     With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit.
+                                                                                     With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be changed and ranked by relevance.
+
+                                                                                     With `prompt_truncation` set to "AUTO_PRESERVE_ORDER", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be preserved as they are inputted into the API.
 
                                                                                      With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
 
@@ -207,6 +214,31 @@ class BaseCohere:
 
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
 
+            - tools: typing.Optional[typing.Sequence[Tool]]. A list of available tools (functions) that the model may suggest invoking before producing a text response.
+
+                                                             When `tools` is passed, The `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made
+                                                             the `tool_calls` array will be empty.
+
+            - tool_results: typing.Optional[typing.Sequence[ChatStreamRequestToolResultsItem]]. A list of results from invoking tools. Results are used to generate text and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
+                                                                                                Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
+
+                                                                                                ```
+                                                                                                tool_results = [
+                                                                                                  {
+                                                                                                    "call": {
+                                                                                                        "name": <tool name>,
+                                                                                                        "parameters": {
+                                                                                                            <param name>: <param value>
+                                                                                                        }
+                                                                                                    },
+                                                                                                    "outputs": [{
+                                                                                                      <key>: <value>
+                                                                                                    }]
+                                                                                                  },
+                                                                                                  ...
+                                                                                                ]
+                                                                                                ```
+
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         """
         _request: typing.Dict[str, typing.Any] = {"message": message, "stream": True}
@@ -219,7 +251,7 @@ class BaseCohere:
         if conversation_id is not OMIT:
             _request["conversation_id"] = conversation_id
         if prompt_truncation is not OMIT:
-            _request["prompt_truncation"] = prompt_truncation.value if prompt_truncation is not None else None
+            _request["prompt_truncation"] = prompt_truncation
         if connectors is not OMIT:
             _request["connectors"] = connectors
         if search_queries_only is not OMIT:
@@ -240,6 +272,10 @@ class BaseCohere:
             _request["presence_penalty"] = presence_penalty
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
+        if tools is not OMIT:
+            _request["tools"] = tools
+        if tool_results is not OMIT:
+            _request["tool_results"] = tool_results
         with self._client_wrapper.httpx_client.stream(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
@@ -263,6 +299,8 @@ class BaseCohere:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         ) as _response:
             if 200 <= _response.status_code < 300:
                 for _text in _response.iter_lines():
@@ -298,6 +336,8 @@ class BaseCohere:
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
+        tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
+        tool_results: typing.Optional[typing.Sequence[ChatRequestToolResultsItem]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> NonStreamedChatResponse:
         """
@@ -323,7 +363,9 @@ class BaseCohere:
 
                                                                                Dictates how the prompt will be constructed.
 
-                                                                               With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit.
+                                                                               With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be changed and ranked by relevance.
+
+                                                                               With `prompt_truncation` set to "AUTO_PRESERVE_ORDER", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be preserved as they are inputted into the API.
 
                                                                                With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
 
@@ -377,12 +419,37 @@ class BaseCohere:
 
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
 
+            - tools: typing.Optional[typing.Sequence[Tool]]. A list of available tools (functions) that the model may suggest invoking before producing a text response.
+
+                                                             When `tools` is passed, The `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made
+                                                             the `tool_calls` array will be empty.
+
+            - tool_results: typing.Optional[typing.Sequence[ChatRequestToolResultsItem]]. A list of results from invoking tools. Results are used to generate text and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
+                                                                                          Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
+
+                                                                                          ```
+                                                                                          tool_results = [
+                                                                                            {
+                                                                                              "call": {
+                                                                                                  "name": <tool name>,
+                                                                                                  "parameters": {
+                                                                                                      <param name>: <param value>
+                                                                                                  }
+                                                                                              },
+                                                                                              "outputs": [{
+                                                                                                <key>: <value>
+                                                                                              }]
+                                                                                            },
+                                                                                            ...
+                                                                                          ]
+                                                                                          ```
+
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere import ChatMessage, ChatMessageRole, ChatRequestPromptTruncation
-        from cohere.base_client import BaseCohere
+        from cohere import ChatMessage
+        from cohere.client import Cohere
 
-        client = BaseCohere(
+        client = Cohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -390,19 +457,15 @@ class BaseCohere:
             message="Can you give me a global market overview of solar panels?",
             chat_history=[
                 ChatMessage(
-                    role=ChatMessageRole.CHATBOT,
+                    role="CHATBOT",
                     message="Hi!",
                 ),
                 ChatMessage(
-                    role=ChatMessageRole.CHATBOT,
+                    role="CHATBOT",
                     message="How can I help you today?",
                 ),
-                ChatMessage(
-                    role=ChatMessageRole.CHATBOT,
-                    message="message",
-                ),
             ],
-            prompt_truncation=ChatRequestPromptTruncation.OFF,
+            prompt_truncation="OFF",
             temperature=0.3,
         )
         """
@@ -416,7 +479,7 @@ class BaseCohere:
         if conversation_id is not OMIT:
             _request["conversation_id"] = conversation_id
         if prompt_truncation is not OMIT:
-            _request["prompt_truncation"] = prompt_truncation.value if prompt_truncation is not None else None
+            _request["prompt_truncation"] = prompt_truncation
         if connectors is not OMIT:
             _request["connectors"] = connectors
         if search_queries_only is not OMIT:
@@ -437,6 +500,10 @@ class BaseCohere:
             _request["presence_penalty"] = presence_penalty
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
+        if tools is not OMIT:
+            _request["tools"] = tools
+        if tool_results is not OMIT:
+            _request["tool_results"] = tool_results
         _response = self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
@@ -460,6 +527,8 @@ class BaseCohere:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(NonStreamedChatResponse, _response.json())  # type: ignore
@@ -556,7 +625,7 @@ class BaseCohere:
         if max_tokens is not OMIT:
             _request["max_tokens"] = max_tokens
         if truncate is not OMIT:
-            _request["truncate"] = truncate.value if truncate is not None else None
+            _request["truncate"] = truncate
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if preset is not OMIT:
@@ -574,7 +643,7 @@ class BaseCohere:
         if presence_penalty is not OMIT:
             _request["presence_penalty"] = presence_penalty
         if return_likelihoods is not OMIT:
-            _request["return_likelihoods"] = return_likelihoods.value if return_likelihoods is not None else None
+            _request["return_likelihoods"] = return_likelihoods
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
         with self._client_wrapper.httpx_client.stream(
@@ -600,6 +669,8 @@ class BaseCohere:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         ) as _response:
             if 200 <= _response.status_code < 300:
                 for _text in _response.iter_lines():
@@ -697,9 +768,9 @@ class BaseCohere:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import BaseCohere
+        from cohere.client import Cohere
 
-        client = BaseCohere(
+        client = Cohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -716,7 +787,7 @@ class BaseCohere:
         if max_tokens is not OMIT:
             _request["max_tokens"] = max_tokens
         if truncate is not OMIT:
-            _request["truncate"] = truncate.value if truncate is not None else None
+            _request["truncate"] = truncate
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if preset is not OMIT:
@@ -734,7 +805,7 @@ class BaseCohere:
         if presence_penalty is not OMIT:
             _request["presence_penalty"] = presence_penalty
         if return_likelihoods is not OMIT:
-            _request["return_likelihoods"] = return_likelihoods.value if return_likelihoods is not None else None
+            _request["return_likelihoods"] = return_likelihoods
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
         _response = self._client_wrapper.httpx_client.request(
@@ -760,6 +831,8 @@ class BaseCohere:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(Generation, _response.json())  # type: ignore
@@ -829,11 +902,11 @@ class BaseCohere:
         if model is not OMIT:
             _request["model"] = model
         if input_type is not OMIT:
-            _request["input_type"] = input_type.value if input_type is not None else None
+            _request["input_type"] = input_type
         if embedding_types is not OMIT:
             _request["embedding_types"] = embedding_types
         if truncate is not OMIT:
-            _request["truncate"] = truncate.value if truncate is not None else None
+            _request["truncate"] = truncate
         _response = self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed"),
@@ -857,6 +930,8 @@ class BaseCohere:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(EmbedResponse, _response.json())  # type: ignore
@@ -905,9 +980,9 @@ class BaseCohere:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import BaseCohere
+        from cohere.client import Cohere
 
-        client = BaseCohere(
+        client = Cohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -949,6 +1024,8 @@ class BaseCohere:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(RerankResponse, _response.json())  # type: ignore
@@ -990,18 +1067,14 @@ class BaseCohere:
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere import ClassifyExample
-        from cohere.base_client import BaseCohere
+        from cohere.client import Cohere
 
-        client = BaseCohere(
+        client = Cohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
         client.classify(
-            inputs=[
-                "Confirm your email address",
-                "hey i need u to send some $",
-                "inputs",
-            ],
+            inputs=["Confirm your email address", "hey i need u to send some $"],
             examples=[
                 ClassifyExample(
                     text="Dermatologists don't like her!",
@@ -1043,7 +1116,6 @@ class BaseCohere:
                     text="Pre-read for tomorrow",
                     label="Not spam",
                 ),
-                ClassifyExample(),
             ],
             preset="my-preset-a58sbd",
         )
@@ -1054,7 +1126,7 @@ class BaseCohere:
         if preset is not OMIT:
             _request["preset"] = preset
         if truncate is not OMIT:
-            _request["truncate"] = truncate.value if truncate is not None else None
+            _request["truncate"] = truncate
         _response = self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "classify"),
@@ -1078,6 +1150,8 @@ class BaseCohere:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(ClassifyResponse, _response.json())  # type: ignore
@@ -1125,9 +1199,9 @@ class BaseCohere:
 
                    - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
                ---
-               from cohere.base_client import BaseCohere
+               from cohere.client import Cohere
 
-               client = BaseCohere(client_name="YOUR_CLIENT_NAME", token="YOUR_TOKEN", )
+               client = Cohere(client_name="YOUR_CLIENT_NAME", token="YOUR_TOKEN", )
                client.summarize(text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.
 
                The meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo
@@ -1135,13 +1209,13 @@ class BaseCohere:
         """
         _request: typing.Dict[str, typing.Any] = {"text": text}
         if length is not OMIT:
-            _request["length"] = length.value if length is not None else None
+            _request["length"] = length
         if format is not OMIT:
-            _request["format"] = format.value if format is not None else None
+            _request["format"] = format
         if model is not OMIT:
             _request["model"] = model
         if extractiveness is not OMIT:
-            _request["extractiveness"] = extractiveness.value if extractiveness is not None else None
+            _request["extractiveness"] = extractiveness
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if additional_command is not OMIT:
@@ -1169,6 +1243,8 @@ class BaseCohere:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(SummarizeResponse, _response.json())  # type: ignore
@@ -1193,9 +1269,9 @@ class BaseCohere:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import BaseCohere
+        from cohere.client import Cohere
 
-        client = BaseCohere(
+        client = Cohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -1230,6 +1306,8 @@ class BaseCohere:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(TokenizeResponse, _response.json())  # type: ignore
@@ -1262,14 +1340,14 @@ class BaseCohere:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import BaseCohere
+        from cohere.client import Cohere
 
-        client = BaseCohere(
+        client = Cohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
         client.detokenize(
-            tokens=[10104, 12221, 1315, 34, 1420, 69, 1],
+            tokens=[10104, 12221, 1315, 34, 1420, 69],
         )
         """
         _request: typing.Dict[str, typing.Any] = {"tokens": tokens}
@@ -1298,6 +1376,8 @@ class BaseCohere:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(DetokenizeResponse, _response.json())  # type: ignore
@@ -1317,9 +1397,9 @@ class AsyncBaseCohere:
     Parameters:
         - base_url: typing.Optional[str]. The base url to use for requests from the client.
 
-        - environment: BaseCohereEnvironment. The environment to use for requests from the client. from .environment import BaseCohereEnvironment
+        - environment: CohereEnvironment. The environment to use for requests from the client. from .environment import CohereEnvironment
 
-                                              Defaults to BaseCohereEnvironment.PRODUCTION
+                                          Defaults to CohereEnvironment.PRODUCTION
 
         - client_name: typing.Optional[str].
 
@@ -1329,9 +1409,9 @@ class AsyncBaseCohere:
 
         - httpx_client: typing.Optional[httpx.AsyncClient]. The httpx client to use for making requests, a preconfigured client is used by default, however this is useful should you want to pass in any custom httpx configuration.
     ---
-    from cohere.base_client import AsyncBaseCohere
+    from cohere.client import AsyncCohere
 
-    client = AsyncBaseCohere(
+    client = AsyncCohere(
         client_name="YOUR_CLIENT_NAME",
         token="YOUR_TOKEN",
     )
@@ -1341,7 +1421,7 @@ class AsyncBaseCohere:
         self,
         *,
         base_url: typing.Optional[str] = None,
-        environment: BaseCohereEnvironment = BaseCohereEnvironment.PRODUCTION,
+        environment: CohereEnvironment = CohereEnvironment.PRODUCTION,
         client_name: typing.Optional[str] = None,
         token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"),
         timeout: typing.Optional[float] = 60,
@@ -1379,6 +1459,8 @@ class AsyncBaseCohere:
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
+        tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
+        tool_results: typing.Optional[typing.Sequence[ChatStreamRequestToolResultsItem]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[StreamedChatResponse]:
         """
@@ -1404,7 +1486,9 @@ class AsyncBaseCohere:
 
                                                                                      Dictates how the prompt will be constructed.
 
-                                                                                     With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit.
+                                                                                     With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be changed and ranked by relevance.
+
+                                                                                     With `prompt_truncation` set to "AUTO_PRESERVE_ORDER", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be preserved as they are inputted into the API.
 
                                                                                      With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
 
@@ -1458,6 +1542,31 @@ class AsyncBaseCohere:
 
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
 
+            - tools: typing.Optional[typing.Sequence[Tool]]. A list of available tools (functions) that the model may suggest invoking before producing a text response.
+
+                                                             When `tools` is passed, The `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made
+                                                             the `tool_calls` array will be empty.
+
+            - tool_results: typing.Optional[typing.Sequence[ChatStreamRequestToolResultsItem]]. A list of results from invoking tools. Results are used to generate text and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
+                                                                                                Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
+
+                                                                                                ```
+                                                                                                tool_results = [
+                                                                                                  {
+                                                                                                    "call": {
+                                                                                                        "name": <tool name>,
+                                                                                                        "parameters": {
+                                                                                                            <param name>: <param value>
+                                                                                                        }
+                                                                                                    },
+                                                                                                    "outputs": [{
+                                                                                                      <key>: <value>
+                                                                                                    }]
+                                                                                                  },
+                                                                                                  ...
+                                                                                                ]
+                                                                                                ```
+
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         """
         _request: typing.Dict[str, typing.Any] = {"message": message, "stream": True}
@@ -1470,7 +1579,7 @@ class AsyncBaseCohere:
         if conversation_id is not OMIT:
             _request["conversation_id"] = conversation_id
         if prompt_truncation is not OMIT:
-            _request["prompt_truncation"] = prompt_truncation.value if prompt_truncation is not None else None
+            _request["prompt_truncation"] = prompt_truncation
         if connectors is not OMIT:
             _request["connectors"] = connectors
         if search_queries_only is not OMIT:
@@ -1491,6 +1600,10 @@ class AsyncBaseCohere:
             _request["presence_penalty"] = presence_penalty
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
+        if tools is not OMIT:
+            _request["tools"] = tools
+        if tool_results is not OMIT:
+            _request["tool_results"] = tool_results
         async with self._client_wrapper.httpx_client.stream(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
@@ -1514,6 +1627,8 @@ class AsyncBaseCohere:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         ) as _response:
             if 200 <= _response.status_code < 300:
                 async for _text in _response.aiter_lines():
@@ -1549,6 +1664,8 @@ class AsyncBaseCohere:
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
+        tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
+        tool_results: typing.Optional[typing.Sequence[ChatRequestToolResultsItem]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> NonStreamedChatResponse:
         """
@@ -1574,7 +1691,9 @@ class AsyncBaseCohere:
 
                                                                                Dictates how the prompt will be constructed.
 
-                                                                               With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit.
+                                                                               With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be changed and ranked by relevance.
+
+                                                                               With `prompt_truncation` set to "AUTO_PRESERVE_ORDER", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be preserved as they are inputted into the API.
 
                                                                                With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
 
@@ -1628,12 +1747,37 @@ class AsyncBaseCohere:
 
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
 
+            - tools: typing.Optional[typing.Sequence[Tool]]. A list of available tools (functions) that the model may suggest invoking before producing a text response.
+
+                                                             When `tools` is passed, The `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made
+                                                             the `tool_calls` array will be empty.
+
+            - tool_results: typing.Optional[typing.Sequence[ChatRequestToolResultsItem]]. A list of results from invoking tools. Results are used to generate text and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
+                                                                                          Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
+
+                                                                                          ```
+                                                                                          tool_results = [
+                                                                                            {
+                                                                                              "call": {
+                                                                                                  "name": <tool name>,
+                                                                                                  "parameters": {
+                                                                                                      <param name>: <param value>
+                                                                                                  }
+                                                                                              },
+                                                                                              "outputs": [{
+                                                                                                <key>: <value>
+                                                                                              }]
+                                                                                            },
+                                                                                            ...
+                                                                                          ]
+                                                                                          ```
+
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere import ChatMessage, ChatMessageRole, ChatRequestPromptTruncation
-        from cohere.base_client import AsyncBaseCohere
+        from cohere import ChatMessage
+        from cohere.client import AsyncCohere
 
-        client = AsyncBaseCohere(
+        client = AsyncCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -1641,19 +1785,15 @@ class AsyncBaseCohere:
             message="Can you give me a global market overview of solar panels?",
             chat_history=[
                 ChatMessage(
-                    role=ChatMessageRole.CHATBOT,
+                    role="CHATBOT",
                     message="Hi!",
                 ),
                 ChatMessage(
-                    role=ChatMessageRole.CHATBOT,
+                    role="CHATBOT",
                     message="How can I help you today?",
                 ),
-                ChatMessage(
-                    role=ChatMessageRole.CHATBOT,
-                    message="message",
-                ),
             ],
-            prompt_truncation=ChatRequestPromptTruncation.OFF,
+            prompt_truncation="OFF",
             temperature=0.3,
         )
         """
@@ -1667,7 +1807,7 @@ class AsyncBaseCohere:
         if conversation_id is not OMIT:
             _request["conversation_id"] = conversation_id
         if prompt_truncation is not OMIT:
-            _request["prompt_truncation"] = prompt_truncation.value if prompt_truncation is not None else None
+            _request["prompt_truncation"] = prompt_truncation
         if connectors is not OMIT:
             _request["connectors"] = connectors
         if search_queries_only is not OMIT:
@@ -1688,6 +1828,10 @@ class AsyncBaseCohere:
             _request["presence_penalty"] = presence_penalty
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
+        if tools is not OMIT:
+            _request["tools"] = tools
+        if tool_results is not OMIT:
+            _request["tool_results"] = tool_results
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
@@ -1711,6 +1855,8 @@ class AsyncBaseCohere:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(NonStreamedChatResponse, _response.json())  # type: ignore
@@ -1807,7 +1953,7 @@ class AsyncBaseCohere:
         if max_tokens is not OMIT:
             _request["max_tokens"] = max_tokens
         if truncate is not OMIT:
-            _request["truncate"] = truncate.value if truncate is not None else None
+            _request["truncate"] = truncate
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if preset is not OMIT:
@@ -1825,7 +1971,7 @@ class AsyncBaseCohere:
         if presence_penalty is not OMIT:
             _request["presence_penalty"] = presence_penalty
         if return_likelihoods is not OMIT:
-            _request["return_likelihoods"] = return_likelihoods.value if return_likelihoods is not None else None
+            _request["return_likelihoods"] = return_likelihoods
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
         async with self._client_wrapper.httpx_client.stream(
@@ -1851,6 +1997,8 @@ class AsyncBaseCohere:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         ) as _response:
             if 200 <= _response.status_code < 300:
                 async for _text in _response.aiter_lines():
@@ -1948,9 +2096,9 @@ class AsyncBaseCohere:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import AsyncBaseCohere
+        from cohere.client import AsyncCohere
 
-        client = AsyncBaseCohere(
+        client = AsyncCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -1967,7 +2115,7 @@ class AsyncBaseCohere:
         if max_tokens is not OMIT:
             _request["max_tokens"] = max_tokens
         if truncate is not OMIT:
-            _request["truncate"] = truncate.value if truncate is not None else None
+            _request["truncate"] = truncate
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if preset is not OMIT:
@@ -1985,7 +2133,7 @@ class AsyncBaseCohere:
         if presence_penalty is not OMIT:
             _request["presence_penalty"] = presence_penalty
         if return_likelihoods is not OMIT:
-            _request["return_likelihoods"] = return_likelihoods.value if return_likelihoods is not None else None
+            _request["return_likelihoods"] = return_likelihoods
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
         _response = await self._client_wrapper.httpx_client.request(
@@ -2011,6 +2159,8 @@ class AsyncBaseCohere:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(Generation, _response.json())  # type: ignore
@@ -2080,11 +2230,11 @@ class AsyncBaseCohere:
         if model is not OMIT:
             _request["model"] = model
         if input_type is not OMIT:
-            _request["input_type"] = input_type.value if input_type is not None else None
+            _request["input_type"] = input_type
         if embedding_types is not OMIT:
             _request["embedding_types"] = embedding_types
         if truncate is not OMIT:
-            _request["truncate"] = truncate.value if truncate is not None else None
+            _request["truncate"] = truncate
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed"),
@@ -2108,6 +2258,8 @@ class AsyncBaseCohere:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(EmbedResponse, _response.json())  # type: ignore
@@ -2156,9 +2308,9 @@ class AsyncBaseCohere:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import AsyncBaseCohere
+        from cohere.client import AsyncCohere
 
-        client = AsyncBaseCohere(
+        client = AsyncCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -2200,6 +2352,8 @@ class AsyncBaseCohere:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(RerankResponse, _response.json())  # type: ignore
@@ -2241,18 +2395,14 @@ class AsyncBaseCohere:
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere import ClassifyExample
-        from cohere.base_client import AsyncBaseCohere
+        from cohere.client import AsyncCohere
 
-        client = AsyncBaseCohere(
+        client = AsyncCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
         await client.classify(
-            inputs=[
-                "Confirm your email address",
-                "hey i need u to send some $",
-                "inputs",
-            ],
+            inputs=["Confirm your email address", "hey i need u to send some $"],
             examples=[
                 ClassifyExample(
                     text="Dermatologists don't like her!",
@@ -2294,7 +2444,6 @@ class AsyncBaseCohere:
                     text="Pre-read for tomorrow",
                     label="Not spam",
                 ),
-                ClassifyExample(),
             ],
             preset="my-preset-a58sbd",
         )
@@ -2305,7 +2454,7 @@ class AsyncBaseCohere:
         if preset is not OMIT:
             _request["preset"] = preset
         if truncate is not OMIT:
-            _request["truncate"] = truncate.value if truncate is not None else None
+            _request["truncate"] = truncate
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "classify"),
@@ -2329,6 +2478,8 @@ class AsyncBaseCohere:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(ClassifyResponse, _response.json())  # type: ignore
@@ -2376,9 +2527,9 @@ class AsyncBaseCohere:
 
                    - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
                ---
-               from cohere.base_client import AsyncBaseCohere
+               from cohere.client import AsyncCohere
 
-               client = AsyncBaseCohere(client_name="YOUR_CLIENT_NAME", token="YOUR_TOKEN", )
+               client = AsyncCohere(client_name="YOUR_CLIENT_NAME", token="YOUR_TOKEN", )
                await client.summarize(text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.
 
                The meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo
@@ -2386,13 +2537,13 @@ class AsyncBaseCohere:
         """
         _request: typing.Dict[str, typing.Any] = {"text": text}
         if length is not OMIT:
-            _request["length"] = length.value if length is not None else None
+            _request["length"] = length
         if format is not OMIT:
-            _request["format"] = format.value if format is not None else None
+            _request["format"] = format
         if model is not OMIT:
             _request["model"] = model
         if extractiveness is not OMIT:
-            _request["extractiveness"] = extractiveness.value if extractiveness is not None else None
+            _request["extractiveness"] = extractiveness
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if additional_command is not OMIT:
@@ -2420,6 +2571,8 @@ class AsyncBaseCohere:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(SummarizeResponse, _response.json())  # type: ignore
@@ -2444,9 +2597,9 @@ class AsyncBaseCohere:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import AsyncBaseCohere
+        from cohere.client import AsyncCohere
 
-        client = AsyncBaseCohere(
+        client = AsyncCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -2481,6 +2634,8 @@ class AsyncBaseCohere:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(TokenizeResponse, _response.json())  # type: ignore
@@ -2513,14 +2668,14 @@ class AsyncBaseCohere:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import AsyncBaseCohere
+        from cohere.client import AsyncCohere
 
-        client = AsyncBaseCohere(
+        client = AsyncCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
         await client.detokenize(
-            tokens=[10104, 12221, 1315, 34, 1420, 69, 1],
+            tokens=[10104, 12221, 1315, 34, 1420, 69],
         )
         """
         _request: typing.Dict[str, typing.Any] = {"tokens": tokens}
@@ -2549,6 +2704,8 @@ class AsyncBaseCohere:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(DetokenizeResponse, _response.json())  # type: ignore
@@ -2561,7 +2718,7 @@ class AsyncBaseCohere:
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
 
-def _get_base_url(*, base_url: typing.Optional[str] = None, environment: BaseCohereEnvironment) -> str:
+def _get_base_url(*, base_url: typing.Optional[str] = None, environment: CohereEnvironment) -> str:
     if base_url is not None:
         return base_url
     elif environment is not None:

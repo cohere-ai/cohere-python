@@ -14,9 +14,10 @@ except ImportError:
 
 class CreateConnectorServiceAuth(pydantic.BaseModel):
     type: AuthTokenType
-    token: str = pydantic.Field(
-        description="The token that will be used in the HTTP Authorization header when making requests to the connector. This field is encrypted at rest and never returned in a response."
-    )
+    token: str = pydantic.Field()
+    """
+    The token that will be used in the HTTP Authorization header when making requests to the connector. This field is encrypted at rest and never returned in a response.
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -29,4 +30,5 @@ class CreateConnectorServiceAuth(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

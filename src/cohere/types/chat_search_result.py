@@ -15,10 +15,15 @@ except ImportError:
 
 class ChatSearchResult(pydantic.BaseModel):
     search_query: ChatSearchQuery
-    connector: ChatSearchResultConnector = pydantic.Field(
-        description="The connector from which this result comes from."
-    )
-    document_ids: typing.List[str] = pydantic.Field(description="Identifiers of documents found by this search query.")
+    connector: ChatSearchResultConnector = pydantic.Field()
+    """
+    The connector from which this result comes from.
+    """
+
+    document_ids: typing.List[str] = pydantic.Field()
+    """
+    Identifiers of documents found by this search query.
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -31,4 +36,5 @@ class ChatSearchResult(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

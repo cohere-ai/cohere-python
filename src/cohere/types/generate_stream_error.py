@@ -14,13 +14,17 @@ except ImportError:
 
 
 class GenerateStreamError(GenerateStreamEvent):
-    index: typing.Optional[int] = pydantic.Field(
-        default=None,
-        description="Refers to the nth generation. Only present when `num_generations` is greater than zero.",
-    )
+    index: typing.Optional[int] = pydantic.Field(default=None)
+    """
+    Refers to the nth generation. Only present when `num_generations` is greater than zero.
+    """
+
     is_finished: bool
     finish_reason: FinishReason
-    err: str = pydantic.Field(description="Error message")
+    err: str = pydantic.Field()
+    """
+    Error message
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -34,4 +38,5 @@ class GenerateStreamError(GenerateStreamEvent):
         frozen = True
         smart_union = True
         allow_population_by_field_name = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

@@ -4,19 +4,19 @@ import typing
 import urllib.parse
 from json.decoder import JSONDecodeError
 
-from ...core.api_error import ApiError
-from ...core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
-from ...core.jsonable_encoder import jsonable_encoder
-from ...core.remove_none_from_dict import remove_none_from_dict
-from ...core.request_options import RequestOptions
-from ...errors.bad_request_error import BadRequestError
-from ...errors.internal_server_error import InternalServerError
-from ...errors.not_found_error import NotFoundError
-from ...errors.too_many_requests_error import TooManyRequestsError
-from ...types.create_embed_job_response import CreateEmbedJobResponse
-from ...types.embed_input_type import EmbedInputType
-from ...types.embed_job import EmbedJob
-from ...types.list_embed_job_response import ListEmbedJobResponse
+from ..core.api_error import ApiError
+from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
+from ..core.jsonable_encoder import jsonable_encoder
+from ..core.remove_none_from_dict import remove_none_from_dict
+from ..core.request_options import RequestOptions
+from ..errors.bad_request_error import BadRequestError
+from ..errors.internal_server_error import InternalServerError
+from ..errors.not_found_error import NotFoundError
+from ..errors.too_many_requests_error import TooManyRequestsError
+from ..types.create_embed_job_response import CreateEmbedJobResponse
+from ..types.embed_input_type import EmbedInputType
+from ..types.embed_job import EmbedJob
+from ..types.list_embed_job_response import ListEmbedJobResponse
 from .types.create_embed_job_request_truncate import CreateEmbedJobRequestTruncate
 
 try:
@@ -39,9 +39,9 @@ class EmbedJobsClient:
         Parameters:
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import BaseCohere
+        from cohere.client import Cohere
 
-        client = BaseCohere(
+        client = Cohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -64,6 +64,8 @@ class EmbedJobsClient:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(ListEmbedJobResponse, _response.json())  # type: ignore
@@ -114,24 +116,23 @@ class EmbedJobsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere import EmbedInputType
-        from cohere.base_client import BaseCohere
+        from cohere.client import Cohere
 
-        client = BaseCohere(
+        client = Cohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
         client.embed_jobs.create(
             model="model",
             dataset_id="dataset_id",
-            input_type=EmbedInputType.SEARCH_DOCUMENT,
+            input_type="search_document",
         )
         """
         _request: typing.Dict[str, typing.Any] = {"model": model, "dataset_id": dataset_id, "input_type": input_type}
         if name is not OMIT:
             _request["name"] = name
         if truncate is not OMIT:
-            _request["truncate"] = truncate.value if truncate is not None else None
+            _request["truncate"] = truncate
         _response = self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed-jobs"),
@@ -155,6 +156,8 @@ class EmbedJobsClient:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(CreateEmbedJobResponse, _response.json())  # type: ignore
@@ -179,9 +182,9 @@ class EmbedJobsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import BaseCohere
+        from cohere.client import Cohere
 
-        client = BaseCohere(
+        client = Cohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -206,6 +209,8 @@ class EmbedJobsClient:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(EmbedJob, _response.json())  # type: ignore
@@ -232,9 +237,9 @@ class EmbedJobsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import BaseCohere
+        from cohere.client import Cohere
 
-        client = BaseCohere(
+        client = Cohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -264,6 +269,8 @@ class EmbedJobsClient:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return
@@ -293,9 +300,9 @@ class AsyncEmbedJobsClient:
         Parameters:
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import AsyncBaseCohere
+        from cohere.client import AsyncCohere
 
-        client = AsyncBaseCohere(
+        client = AsyncCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -318,6 +325,8 @@ class AsyncEmbedJobsClient:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(ListEmbedJobResponse, _response.json())  # type: ignore
@@ -368,24 +377,23 @@ class AsyncEmbedJobsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere import EmbedInputType
-        from cohere.base_client import AsyncBaseCohere
+        from cohere.client import AsyncCohere
 
-        client = AsyncBaseCohere(
+        client = AsyncCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
         await client.embed_jobs.create(
             model="model",
             dataset_id="dataset_id",
-            input_type=EmbedInputType.SEARCH_DOCUMENT,
+            input_type="search_document",
         )
         """
         _request: typing.Dict[str, typing.Any] = {"model": model, "dataset_id": dataset_id, "input_type": input_type}
         if name is not OMIT:
             _request["name"] = name
         if truncate is not OMIT:
-            _request["truncate"] = truncate.value if truncate is not None else None
+            _request["truncate"] = truncate
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed-jobs"),
@@ -409,6 +417,8 @@ class AsyncEmbedJobsClient:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(CreateEmbedJobResponse, _response.json())  # type: ignore
@@ -433,9 +443,9 @@ class AsyncEmbedJobsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import AsyncBaseCohere
+        from cohere.client import AsyncCohere
 
-        client = AsyncBaseCohere(
+        client = AsyncCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -460,6 +470,8 @@ class AsyncEmbedJobsClient:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return pydantic.parse_obj_as(EmbedJob, _response.json())  # type: ignore
@@ -486,9 +498,9 @@ class AsyncEmbedJobsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.base_client import AsyncBaseCohere
+        from cohere.client import AsyncCohere
 
-        client = AsyncBaseCohere(
+        client = AsyncCohere(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -518,6 +530,8 @@ class AsyncEmbedJobsClient:
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else 60,
+            retries=0,
+            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
             return

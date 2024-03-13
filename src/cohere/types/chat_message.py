@@ -17,10 +17,25 @@ class ChatMessage(pydantic.BaseModel):
     A single message in a chat history. Contains the role of the sender, the text contents of the message.
     """
 
-    role: ChatMessageRole = pydantic.Field(
-        description=("One of CHATBOT\n" "USER to identify who the message is coming from.\n")
-    )
-    message: str = pydantic.Field(description="Contents of the chat message.")
+    role: ChatMessageRole = pydantic.Field()
+    """
+    One of CHATBOT|USER to identify who the message is coming from.
+    """
+
+    message: str = pydantic.Field()
+    """
+    Contents of the chat message.
+    """
+
+    generation_id: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Unique identifier for the generated reply. Useful for submitting feedback.
+    """
+
+    response_id: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Unique identifier for the response.
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -33,4 +48,5 @@ class ChatMessage(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

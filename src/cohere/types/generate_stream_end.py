@@ -8,6 +8,11 @@ from .finish_reason import FinishReason
 from .generate_stream_end_response import GenerateStreamEndResponse
 from .generate_stream_event import GenerateStreamEvent
 
+try:
+    import pydantic.v1 as pydantic  # type: ignore
+except ImportError:
+    import pydantic  # type: ignore
+
 
 class GenerateStreamEnd(GenerateStreamEvent):
     is_finished: bool
@@ -26,4 +31,5 @@ class GenerateStreamEnd(GenerateStreamEvent):
         frozen = True
         smart_union = True
         allow_population_by_field_name = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

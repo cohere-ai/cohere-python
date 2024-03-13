@@ -15,12 +15,15 @@ except ImportError:
 
 
 class ChatSearchResultsEvent(ChatStreamEvent):
-    search_results: typing.Optional[typing.List[ChatSearchResult]] = pydantic.Field(
-        default=None, description="Conducted searches and the ids of documents retrieved from each of them."
-    )
-    documents: typing.List[ChatDocument] = pydantic.Field(
-        description="Documents fetched from searches or provided by the user."
-    )
+    search_results: typing.Optional[typing.List[ChatSearchResult]] = pydantic.Field(default=None)
+    """
+    Conducted searches and the ids of documents retrieved from each of them.
+    """
+
+    documents: typing.List[ChatDocument] = pydantic.Field()
+    """
+    Documents fetched from searches or provided by the user.
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -34,4 +37,5 @@ class ChatSearchResultsEvent(ChatStreamEvent):
         frozen = True
         smart_union = True
         allow_population_by_field_name = True
+        extra = pydantic.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}
