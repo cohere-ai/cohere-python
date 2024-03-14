@@ -1,4 +1,8 @@
 # Changelog
+## 4.56
+- [#400] (https://github.com/cohere-ai/cohere-python/pull/400)
+  - Remove unsupported chat parameters
+
 ## 4.55
 - [#401] (https://github.com/cohere-ai/cohere-python/pull/401)
   - Update to API temperature defaults in chat
