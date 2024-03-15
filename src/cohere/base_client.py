@@ -146,9 +146,11 @@ class BaseCohere:
 
                                            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
-            - preamble: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style.
+            - preamble: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style, and use the `SYSTEM` role.
 
-            - chat_history: typing.Optional[typing.Sequence[ChatMessage]]. A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
+                                              The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
+
+            - chat_history: typing.Optional[typing.Sequence[ChatMessage]]. A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
 
             - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
 
@@ -219,7 +221,7 @@ class BaseCohere:
                                                              When `tools` is passed, The `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made
                                                              the `tool_calls` array will be empty.
 
-            - tool_results: typing.Optional[typing.Sequence[ChatStreamRequestToolResultsItem]]. A list of results from invoking tools. Results are used to generate text and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
+            - tool_results: typing.Optional[typing.Sequence[ChatStreamRequestToolResultsItem]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to generate text and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
                                                                                                 Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
 
                                                                                                 ```
@@ -238,6 +240,7 @@ class BaseCohere:
                                                                                                   ...
                                                                                                 ]
                                                                                                 ```
+                                                                                                **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         """
@@ -351,9 +354,11 @@ class BaseCohere:
 
                                            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
-            - preamble: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style.
+            - preamble: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style, and use the `SYSTEM` role.
 
-            - chat_history: typing.Optional[typing.Sequence[ChatMessage]]. A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
+                                              The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
+
+            - chat_history: typing.Optional[typing.Sequence[ChatMessage]]. A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
 
             - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
 
@@ -424,7 +429,7 @@ class BaseCohere:
                                                              When `tools` is passed, The `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made
                                                              the `tool_calls` array will be empty.
 
-            - tool_results: typing.Optional[typing.Sequence[ChatRequestToolResultsItem]]. A list of results from invoking tools. Results are used to generate text and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
+            - tool_results: typing.Optional[typing.Sequence[ChatRequestToolResultsItem]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to generate text and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
                                                                                           Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
 
                                                                                           ```
@@ -443,6 +448,7 @@ class BaseCohere:
                                                                                             ...
                                                                                           ]
                                                                                           ```
+                                                                                          **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
@@ -561,7 +567,11 @@ class BaseCohere:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[GenerateStreamedResponse]:
         """
-        This endpoint generates realistic text conditioned on a given input.
+        > 🚧 Warning
+        >
+        > This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+
+        Generates realistic text conditioned on a given input.
 
         Parameters:
             - prompt: str. The input text that serves as the starting point for generating the response.
@@ -712,7 +722,11 @@ class BaseCohere:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Generation:
         """
-        This endpoint generates realistic text conditioned on a given input.
+        > 🚧 Warning
+        >
+        > This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+
+        Generates realistic text conditioned on a given input.
 
         Parameters:
             - prompt: str. The input text that serves as the starting point for generating the response.
@@ -1180,7 +1194,11 @@ class BaseCohere:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> SummarizeResponse:
         """
-               This endpoint generates a summary in English for a given text.
+               > 🚧 Warning
+               >
+               > This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+
+               Generates a summary in English for a given text.
 
                Parameters:
                    - text: str. The text to generate a summary for. Can be up to 100,000 characters long. Currently the only supported language is English.
@@ -1474,9 +1492,11 @@ class AsyncBaseCohere:
 
                                            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
-            - preamble: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style.
+            - preamble: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style, and use the `SYSTEM` role.
 
-            - chat_history: typing.Optional[typing.Sequence[ChatMessage]]. A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
+                                              The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
+
+            - chat_history: typing.Optional[typing.Sequence[ChatMessage]]. A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
 
             - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
 
@@ -1547,7 +1567,7 @@ class AsyncBaseCohere:
                                                              When `tools` is passed, The `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made
                                                              the `tool_calls` array will be empty.
 
-            - tool_results: typing.Optional[typing.Sequence[ChatStreamRequestToolResultsItem]]. A list of results from invoking tools. Results are used to generate text and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
+            - tool_results: typing.Optional[typing.Sequence[ChatStreamRequestToolResultsItem]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to generate text and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
                                                                                                 Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
 
                                                                                                 ```
@@ -1566,6 +1586,7 @@ class AsyncBaseCohere:
                                                                                                   ...
                                                                                                 ]
                                                                                                 ```
+                                                                                                **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         """
@@ -1679,9 +1700,11 @@ class AsyncBaseCohere:
 
                                            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
-            - preamble: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style.
+            - preamble: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style, and use the `SYSTEM` role.
 
-            - chat_history: typing.Optional[typing.Sequence[ChatMessage]]. A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
+                                              The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
+
+            - chat_history: typing.Optional[typing.Sequence[ChatMessage]]. A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
 
             - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
 
@@ -1752,7 +1775,7 @@ class AsyncBaseCohere:
                                                              When `tools` is passed, The `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made
                                                              the `tool_calls` array will be empty.
 
-            - tool_results: typing.Optional[typing.Sequence[ChatRequestToolResultsItem]]. A list of results from invoking tools. Results are used to generate text and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
+            - tool_results: typing.Optional[typing.Sequence[ChatRequestToolResultsItem]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to generate text and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
                                                                                           Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
 
                                                                                           ```
@@ -1771,6 +1794,7 @@ class AsyncBaseCohere:
                                                                                             ...
                                                                                           ]
                                                                                           ```
+                                                                                          **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
@@ -1889,7 +1913,11 @@ class AsyncBaseCohere:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[GenerateStreamedResponse]:
         """
-        This endpoint generates realistic text conditioned on a given input.
+        > 🚧 Warning
+        >
+        > This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+
+        Generates realistic text conditioned on a given input.
 
         Parameters:
             - prompt: str. The input text that serves as the starting point for generating the response.
@@ -2040,7 +2068,11 @@ class AsyncBaseCohere:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Generation:
         """
-        This endpoint generates realistic text conditioned on a given input.
+        > 🚧 Warning
+        >
+        > This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+
+        Generates realistic text conditioned on a given input.
 
         Parameters:
             - prompt: str. The input text that serves as the starting point for generating the response.
@@ -2508,7 +2540,11 @@ class AsyncBaseCohere:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> SummarizeResponse:
         """
-               This endpoint generates a summary in English for a given text.
+               > 🚧 Warning
+               >
+               > This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+
+               Generates a summary in English for a given text.
 
                Parameters:
                    - text: str. The text to generate a summary for. Can be up to 100,000 characters long. Currently the only supported language is English.
