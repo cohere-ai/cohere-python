@@ -14,27 +14,19 @@ except ImportError:
 
 class ChatMessage(pydantic.BaseModel):
     """
-    A single message in a chat history. Contains the role of the sender, the text contents of the message.
+    Represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
+
+    The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
     """
 
     role: ChatMessageRole = pydantic.Field()
     """
-    One of CHATBOT|USER to identify who the message is coming from.
+    One of `CHATBOT`, `SYSTEM`, or `USER` to identify who the message is coming from.
     """
 
     message: str = pydantic.Field()
     """
     Contents of the chat message.
-    """
-
-    generation_id: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    Unique identifier for the generated reply. Useful for submitting feedback.
-    """
-
-    response_id: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    Unique identifier for the response.
     """
 
     def json(self, **kwargs: typing.Any) -> str:

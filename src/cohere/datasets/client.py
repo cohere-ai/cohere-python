@@ -38,8 +38,8 @@ class DatasetsClient:
         dataset_type: typing.Optional[str] = None,
         before: typing.Optional[dt.datetime] = None,
         after: typing.Optional[dt.datetime] = None,
-        limit: typing.Optional[str] = None,
-        offset: typing.Optional[str] = None,
+        limit: typing.Optional[float] = None,
+        offset: typing.Optional[float] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> DatasetsListResponse:
         """
@@ -52,9 +52,9 @@ class DatasetsClient:
 
             - after: typing.Optional[dt.datetime]. optional filter after a date
 
-            - limit: typing.Optional[str]. optional limit to number of results
+            - limit: typing.Optional[float]. optional limit to number of results
 
-            - offset: typing.Optional[str]. optional offset to start of results
+            - offset: typing.Optional[float]. optional offset to start of results
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
@@ -359,8 +359,8 @@ class AsyncDatasetsClient:
         dataset_type: typing.Optional[str] = None,
         before: typing.Optional[dt.datetime] = None,
         after: typing.Optional[dt.datetime] = None,
-        limit: typing.Optional[str] = None,
-        offset: typing.Optional[str] = None,
+        limit: typing.Optional[float] = None,
+        offset: typing.Optional[float] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> DatasetsListResponse:
         """
@@ -373,9 +373,9 @@ class AsyncDatasetsClient:
 
             - after: typing.Optional[dt.datetime]. optional filter after a date
 
-            - limit: typing.Optional[str]. optional limit to number of results
+            - limit: typing.Optional[float]. optional limit to number of results
 
-            - offset: typing.Optional[str]. optional offset to start of results
+            - offset: typing.Optional[float]. optional offset to start of results
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---

@@ -26,8 +26,6 @@ class ToolCall(pydantic.BaseModel):
     The name and value of the parameters to use when invoking a tool.
     """
 
-    generation_id: str
-
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
         return super().json(**kwargs_with_defaults)
