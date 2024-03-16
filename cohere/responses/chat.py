@@ -44,21 +44,18 @@ class ToolCall(CohereObject, dict):
         self,
         name: str,
         parameters: Dict[str, Any],
-        generation_id: str,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
         self.__dict__ = self
         self.name = name
         self.parameters = parameters
-        self.generation_id = generation_id
 
     @classmethod
     def from_dict(cls, tool_call_res: Dict[str, Any]) -> "ToolCall":
         return cls(
             name=tool_call_res.get("name"),
             parameters=tool_call_res.get("parameters"),
-            generation_id=tool_call_res.get("generation_id"),
         )
 
     @classmethod
