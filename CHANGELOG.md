@@ -1,4 +1,9 @@
 # Changelog
+
+## 4.57
+- [#400] (https://github.com/cohere-ai/cohere-python/pull/403)
+  - Remove generation_id from ToolCall object
+
 ## 4.56
 - [#400] (https://github.com/cohere-ai/cohere-python/pull/400)
   - Remove unsupported chat parameters
