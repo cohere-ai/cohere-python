@@ -35,6 +35,14 @@ class TestClient(unittest.TestCase):
                 message="What year was he born?",
             )
 
+    def test_deprecated_fn(self) -> None:
+        with self.assertRaises(ValueError):
+            co.check_api_key("dummy", dummy="dummy") # type: ignore
+
+    def test_moved_fn(self) -> None:
+        with self.assertRaises(ValueError):
+            co.list_connectors("dummy", dummy="dummy") # type: ignore
+
     def test_generate(self) -> None:
         response = co.generate(
             prompt='Please explain to me how LLMs work',
