@@ -6,7 +6,7 @@ from .base_client import BaseCohere, AsyncBaseCohere
 from .environment import CohereEnvironment
 
 
-def validate_args(obj: typing.Any, method_name: str, check_fn) -> typing.Any:
+def validate_args(obj: typing.Any, method_name: str, check_fn: typing.Callable[[typing.Any], typing.Any]) -> None:
     method = getattr(obj, method_name)
 
     def wrapped(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
