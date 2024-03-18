@@ -16,6 +16,7 @@ class GenerateStreamedResponse_TextGeneration(GenerateStreamText):
         frozen = True
         smart_union = True
         allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class GenerateStreamedResponse_StreamEnd(GenerateStreamEnd):
@@ -25,6 +26,7 @@ class GenerateStreamedResponse_StreamEnd(GenerateStreamEnd):
         frozen = True
         smart_union = True
         allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class GenerateStreamedResponse_StreamError(GenerateStreamError):
@@ -34,6 +36,7 @@ class GenerateStreamedResponse_StreamError(GenerateStreamError):
         frozen = True
         smart_union = True
         allow_population_by_field_name = True
+        populate_by_name = True
 
 
 GenerateStreamedResponse = typing.Union[

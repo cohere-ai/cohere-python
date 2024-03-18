@@ -58,9 +58,9 @@ class DatasetsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Cohere
+        from cohere.client import Client
 
-        client = Cohere(
+        client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -149,6 +149,23 @@ class DatasetsClient:
             - eval_data: typing.Optional[core.File]. See core.File for more documentation
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
+        ---
+        from cohere.client import Client
+
+        client = Client(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        client.datasets.create(
+            name="string",
+            type="embed-input",
+            keep_original_file=True,
+            skip_malformed_input=True,
+            keep_fields="string",
+            optional_fields="string",
+            text_separator="string",
+            csv_delimiter="string",
+        )
         """
         _response = self._client_wrapper.httpx_client.request(
             "POST",
@@ -210,9 +227,9 @@ class DatasetsClient:
         Parameters:
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Cohere
+        from cohere.client import Client
 
-        client = Cohere(
+        client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -257,9 +274,9 @@ class DatasetsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Cohere
+        from cohere.client import Client
 
-        client = Cohere(
+        client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -308,9 +325,9 @@ class DatasetsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Cohere
+        from cohere.client import Client
 
-        client = Cohere(
+        client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -379,9 +396,9 @@ class AsyncDatasetsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncCohere
+        from cohere.client import AsyncClient
 
-        client = AsyncCohere(
+        client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -470,6 +487,23 @@ class AsyncDatasetsClient:
             - eval_data: typing.Optional[core.File]. See core.File for more documentation
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
+        ---
+        from cohere.client import AsyncClient
+
+        client = AsyncClient(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        await client.datasets.create(
+            name="string",
+            type="embed-input",
+            keep_original_file=True,
+            skip_malformed_input=True,
+            keep_fields="string",
+            optional_fields="string",
+            text_separator="string",
+            csv_delimiter="string",
+        )
         """
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
@@ -531,9 +565,9 @@ class AsyncDatasetsClient:
         Parameters:
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncCohere
+        from cohere.client import AsyncClient
 
-        client = AsyncCohere(
+        client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -578,9 +612,9 @@ class AsyncDatasetsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncCohere
+        from cohere.client import AsyncClient
 
-        client = AsyncCohere(
+        client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -629,9 +663,9 @@ class AsyncDatasetsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncCohere
+        from cohere.client import AsyncClient
 
-        client = AsyncCohere(
+        client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )

@@ -20,6 +20,7 @@ class StreamedChatResponse_StreamStart(ChatStreamStartEvent):
         frozen = True
         smart_union = True
         allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class StreamedChatResponse_SearchQueriesGeneration(ChatSearchQueriesGenerationEvent):
@@ -29,6 +30,7 @@ class StreamedChatResponse_SearchQueriesGeneration(ChatSearchQueriesGenerationEv
         frozen = True
         smart_union = True
         allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class StreamedChatResponse_SearchResults(ChatSearchResultsEvent):
@@ -38,6 +40,7 @@ class StreamedChatResponse_SearchResults(ChatSearchResultsEvent):
         frozen = True
         smart_union = True
         allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class StreamedChatResponse_TextGeneration(ChatTextGenerationEvent):
@@ -47,6 +50,7 @@ class StreamedChatResponse_TextGeneration(ChatTextGenerationEvent):
         frozen = True
         smart_union = True
         allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class StreamedChatResponse_CitationGeneration(ChatCitationGenerationEvent):
@@ -56,6 +60,7 @@ class StreamedChatResponse_CitationGeneration(ChatCitationGenerationEvent):
         frozen = True
         smart_union = True
         allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class StreamedChatResponse_ToolCallsGeneration(ChatToolCallsGenerationEvent):
@@ -65,6 +70,7 @@ class StreamedChatResponse_ToolCallsGeneration(ChatToolCallsGenerationEvent):
         frozen = True
         smart_union = True
         allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class StreamedChatResponse_StreamEnd(ChatStreamEndEvent):
@@ -74,6 +80,7 @@ class StreamedChatResponse_StreamEnd(ChatStreamEndEvent):
         frozen = True
         smart_union = True
         allow_population_by_field_name = True
+        populate_by_name = True
 
 
 StreamedChatResponse = typing.Union[

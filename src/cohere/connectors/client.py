@@ -53,9 +53,9 @@ class ConnectorsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Cohere
+        from cohere.client import Client
 
-        client = Cohere(
+        client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -140,9 +140,9 @@ class ConnectorsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Cohere
+        from cohere.client import Client
 
-        client = Cohere(
+        client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -215,9 +215,9 @@ class ConnectorsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Cohere
+        from cohere.client import Client
 
-        client = Cohere(
+        client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -270,9 +270,9 @@ class ConnectorsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Cohere
+        from cohere.client import Client
 
-        client = Cohere(
+        client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -353,9 +353,9 @@ class ConnectorsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Cohere
+        from cohere.client import Client
 
-        client = Cohere(
+        client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -439,9 +439,9 @@ class ConnectorsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Cohere
+        from cohere.client import Client
 
-        client = Cohere(
+        client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -521,9 +521,9 @@ class AsyncConnectorsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncCohere
+        from cohere.client import AsyncClient
 
-        client = AsyncCohere(
+        client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -608,9 +608,9 @@ class AsyncConnectorsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncCohere
+        from cohere.client import AsyncClient
 
-        client = AsyncCohere(
+        client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -683,9 +683,9 @@ class AsyncConnectorsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncCohere
+        from cohere.client import AsyncClient
 
-        client = AsyncCohere(
+        client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -740,9 +740,9 @@ class AsyncConnectorsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncCohere
+        from cohere.client import AsyncClient
 
-        client = AsyncCohere(
+        client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -823,9 +823,9 @@ class AsyncConnectorsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncCohere
+        from cohere.client import AsyncClient
 
-        client = AsyncCohere(
+        client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -909,9 +909,9 @@ class AsyncConnectorsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncCohere
+        from cohere.client import AsyncClient
 
-        client = AsyncCohere(
+        client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
