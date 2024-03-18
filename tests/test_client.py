@@ -28,6 +28,13 @@ class TestClient(unittest.TestCase):
 
         print(chat)
 
+    def test_stream_equals_true(self) -> None:
+        with self.assertRaises(ValueError):
+            co.chat(
+                stream=True, # type: ignore
+                message="What year was he born?",
+            )
+
     def test_generate(self) -> None:
         response = co.generate(
             prompt='Please explain to me how LLMs work',

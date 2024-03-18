@@ -6,6 +6,23 @@ from .base_client import BaseCohere, AsyncBaseCohere
 from .environment import CohereEnvironment
 
 
+def validate_args(obj: typing.Any, method_name: str, check_fn) -> typing.Any:
+    method = getattr(obj, method_name)
+
+    def wrapped(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
+        check_fn(*args, **kwargs)
+        return method(*args, **kwargs)
+
+    setattr(obj, method_name, wrapped)
+
+
+def throw_if_stream_is_true(*args, **kwargs) -> None:
+    if kwargs.get("stream") is True:
+        raise ValueError(
+            "Since python sdk cohere==5.0.0, you must now use chat_stream(...) instead of chat(stream=True, ...)"
+        )
+
+
 class Client(BaseCohere):
     def __init__(
             self,
@@ -26,6 +43,8 @@ class Client(BaseCohere):
             timeout=timeout,
             httpx_client=httpx_client,
         )
+
+        validate_args(self, "chat", throw_if_stream_is_true)
 
 
 class AsyncClient(AsyncBaseCohere):
@@ -48,3 +67,5 @@ class AsyncClient(AsyncBaseCohere):
             timeout=timeout,
             httpx_client=httpx_client,
         )
+
+        validate_args(self, "chat", throw_if_stream_is_true)
