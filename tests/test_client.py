@@ -13,8 +13,7 @@ package_dir = os.path.dirname(os.path.abspath(__file__))
 embed_job = os.path.join(package_dir, 'embed_job.jsonl')
 
 
-
-def test_chat(self) -> None:
+def test_chat() -> None:
     chat = co.chat(
         chat_history=[
             ChatMessage(role="USER",
@@ -28,28 +27,33 @@ def test_chat(self) -> None:
 
     print(chat)
 
-def test_stream_equals_true(self) -> None:
+
+def test_stream_equals_true() -> None:
     with pytest.raises(ValueError):
         co.chat(
             stream=True, # type: ignore
             message="What year was he born?",
         )
 
-def test_deprecated_fn(self) -> None:
+
+def test_deprecated_fn() -> None:
     with pytest.raises(ValueError):
         co.check_api_key("dummy", dummy="dummy") # type: ignore
 
-def test_moved_fn(self) -> None:
+
+def test_moved_fn() -> None:
     with pytest.raises(ValueError):
         co.list_connectors("dummy", dummy="dummy") # type: ignore
 
-def test_generate(self) -> None:
+
+def test_generate() -> None:
     response = co.generate(
         prompt='Please explain to me how LLMs work',
     )
     print(response)
 
-def test_embed(self) -> None:
+
+def test_embed() -> None:
     response = co.embed(
         texts=['hello', 'goodbye'],
         model='embed-english-v3.0',
@@ -57,7 +61,8 @@ def test_embed(self) -> None:
     )
     print(response)
 
-def test_embed_job_crud(self) -> None:
+
+def test_embed_job_crud() -> None:
     dataset = co.datasets.create(
         name="test",
         type="embed-input",
@@ -95,7 +100,8 @@ def test_embed_job_crud(self) -> None:
 
     co.datasets.delete(dataset.id or "")
 
-def test_rerank(self) -> None:
+
+def test_rerank() -> None:
     docs = [
         'Carson City is the capital city of the American state of Nevada.',
         'The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.',
@@ -111,7 +117,8 @@ def test_rerank(self) -> None:
 
     print(response)
 
-def test_classify(self) -> None:
+
+def test_classify() -> None:
     examples = [
         ClassifyExample(text="Dermatologists don't like her!", label="Spam"),
         ClassifyExample(text="'Hello, open to this?'", label="Spam"),
@@ -138,7 +145,8 @@ def test_classify(self) -> None:
     )
     print(response)
 
-def test_datasets_crud(self) -> None:
+
+def test_datasets_crud() -> None:
     my_dataset = co.datasets.create(
         name="test",
         type="embed-input",
@@ -157,7 +165,8 @@ def test_datasets_crud(self) -> None:
 
     co.datasets.delete(my_dataset.id or "")
 
-def test_summarize(self) -> None:
+
+def test_summarize() -> None:
     text = (
         "Ice cream is a sweetened frozen food typically eaten as a snack or dessert. "
         "It may be made from milk or cream and is flavoured with a sweetener, "
@@ -187,21 +196,24 @@ def test_summarize(self) -> None:
 
     print(response)
 
-def test_tokenize(self) -> None:
+
+def test_tokenize() -> None:
     response = co.tokenize(
         text='tokenize me! :D',
         model='command'
     )
     print(response)
 
-def test_detokenize(self) -> None:
+
+def test_detokenize() -> None:
     response = co.detokenize(
         tokens=[10104, 12221, 1315, 34, 1420, 69],
         model="command"
     )
     print(response)
 
-def test_connectors_crud(self) -> None:
+
+def test_connectors_crud() -> None:
     created_connector = co.connectors.create(
         name="Example connector",
         url="https://dummy-connector-o5btz7ucgq-uc.a.run.app/search",
@@ -223,7 +235,8 @@ def test_connectors_crud(self) -> None:
 
     co.connectors.delete(created_connector.connector.id)
 
-def test_tool_use(self) -> None:
+
+def test_tool_use() -> None:
     tools = [
         Tool(
             name="sales_database",
