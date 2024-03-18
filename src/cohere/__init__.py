@@ -124,7 +124,7 @@ from . import connectors, datasets, embed_jobs, models
 from .client import AsyncClient, Client
 from .datasets import DatasetsCreateResponse, DatasetsGetResponse, DatasetsGetUsageResponse, DatasetsListResponse
 from .embed_jobs import CreateEmbedJobRequestTruncate
-from .environment import CohereEnvironment
+from .environment import ClientEnvironment
 
 __all__ = [
     "ApiMeta",
@@ -169,7 +169,7 @@ __all__ = [
     "ClassifyResponseClassificationsItemClassificationType",
     "ClassifyResponseClassificationsItemLabelsValue",
     "Client",
-    "CohereEnvironment",
+    "ClientEnvironment",
     "CompatibleEndpoint",
     "Connector",
     "ConnectorAuthStatus",
