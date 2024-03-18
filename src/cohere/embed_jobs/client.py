@@ -39,9 +39,9 @@ class EmbedJobsClient:
         Parameters:
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Cohere
+        from cohere.client import Client
 
-        client = Cohere(
+        client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -116,9 +116,9 @@ class EmbedJobsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Cohere
+        from cohere.client import Client
 
-        client = Cohere(
+        client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -182,9 +182,9 @@ class EmbedJobsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Cohere
+        from cohere.client import Client
 
-        client = Cohere(
+        client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -237,9 +237,9 @@ class EmbedJobsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Cohere
+        from cohere.client import Client
 
-        client = Cohere(
+        client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -300,9 +300,9 @@ class AsyncEmbedJobsClient:
         Parameters:
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncCohere
+        from cohere.client import AsyncClient
 
-        client = AsyncCohere(
+        client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -377,9 +377,9 @@ class AsyncEmbedJobsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncCohere
+        from cohere.client import AsyncClient
 
-        client = AsyncCohere(
+        client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -443,9 +443,9 @@ class AsyncEmbedJobsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncCohere
+        from cohere.client import AsyncClient
 
-        client = AsyncCohere(
+        client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -498,9 +498,9 @@ class AsyncEmbedJobsClient:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncCohere
+        from cohere.client import AsyncClient
 
-        client = AsyncCohere(
+        client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )

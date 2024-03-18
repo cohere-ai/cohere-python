@@ -15,6 +15,7 @@ class EmbedResponse_EmbeddingsFloats(EmbedFloatsResponse):
         frozen = True
         smart_union = True
         allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class EmbedResponse_EmbeddingsByType(EmbedByTypeResponse):
@@ -24,6 +25,7 @@ class EmbedResponse_EmbeddingsByType(EmbedByTypeResponse):
         frozen = True
         smart_union = True
         allow_population_by_field_name = True
+        populate_by_name = True
 
 
 EmbedResponse = typing.Union[EmbedResponse_EmbeddingsFloats, EmbedResponse_EmbeddingsByType]

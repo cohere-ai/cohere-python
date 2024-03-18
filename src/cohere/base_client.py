@@ -16,7 +16,7 @@ from .core.remove_none_from_dict import remove_none_from_dict
 from .core.request_options import RequestOptions
 from .datasets.client import AsyncDatasetsClient, DatasetsClient
 from .embed_jobs.client import AsyncEmbedJobsClient, EmbedJobsClient
-from .environment import CohereEnvironment
+from .environment import ClientEnvironment
 from .errors.bad_request_error import BadRequestError
 from .errors.internal_server_error import InternalServerError
 from .errors.too_many_requests_error import TooManyRequestsError
@@ -69,9 +69,9 @@ class BaseCohere:
     Parameters:
         - base_url: typing.Optional[str]. The base url to use for requests from the client.
 
-        - environment: CohereEnvironment. The environment to use for requests from the client. from .environment import CohereEnvironment
+        - environment: ClientEnvironment. The environment to use for requests from the client. from .environment import ClientEnvironment
 
-                                          Defaults to CohereEnvironment.PRODUCTION
+                                          Defaults to ClientEnvironment.PRODUCTION
 
         - client_name: typing.Optional[str].
 
@@ -81,9 +81,9 @@ class BaseCohere:
 
         - httpx_client: typing.Optional[httpx.Client]. The httpx client to use for making requests, a preconfigured client is used by default, however this is useful should you want to pass in any custom httpx configuration.
     ---
-    from cohere.client import Cohere
+    from cohere.client import Client
 
-    client = Cohere(
+    client = Client(
         client_name="YOUR_CLIENT_NAME",
         token="YOUR_TOKEN",
     )
@@ -93,7 +93,7 @@ class BaseCohere:
         self,
         *,
         base_url: typing.Optional[str] = None,
-        environment: CohereEnvironment = CohereEnvironment.PRODUCTION,
+        environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
         client_name: typing.Optional[str] = None,
         token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"),
         timeout: typing.Optional[float] = 60,
@@ -151,6 +151,10 @@ class BaseCohere:
                                               The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
 
             - chat_history: typing.Optional[typing.Sequence[ChatMessage]]. A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
+
+                                                                           Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
+
+                                                                           The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
 
             - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
 
@@ -218,20 +222,20 @@ class BaseCohere:
 
             - tools: typing.Optional[typing.Sequence[Tool]]. A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
-                                                             When `tools` is passed, The `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made
-                                                             the `tool_calls` array will be empty.
+                                                             When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
 
-            - tool_results: typing.Optional[typing.Sequence[ChatStreamRequestToolResultsItem]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to generate text and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
+            - tool_results: typing.Optional[typing.Sequence[ChatStreamRequestToolResultsItem]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
                                                                                                 Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
 
+                                                                                                **Note**: `outputs` must be a list of objects. If your tool returns a single object (eg `{"status": 200}`), make sure to wrap it in a list.
                                                                                                 ```
                                                                                                 tool_results = [
                                                                                                   {
                                                                                                     "call": {
-                                                                                                        "name": <tool name>,
-                                                                                                        "parameters": {
-                                                                                                            <param name>: <param value>
-                                                                                                        }
+                                                                                                      "name": <tool name>,
+                                                                                                      "parameters": {
+                                                                                                        <param name>: <param value>
+                                                                                                      }
                                                                                                     },
                                                                                                     "outputs": [{
                                                                                                       <key>: <value>
@@ -243,6 +247,86 @@ class BaseCohere:
                                                                                                 **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
+        ---
+        from cohere import (
+            ChatConnector,
+            ChatMessage,
+            ChatStreamRequestConnectorsSearchOptions,
+            ChatStreamRequestPromptOverride,
+            ChatStreamRequestToolResultsItem,
+            Tool,
+            ToolCall,
+            ToolParameterDefinitionsValue,
+        )
+        from cohere.client import Client
+
+        client = Client(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        client.chat_stream(
+            message="string",
+            model="string",
+            preamble="string",
+            chat_history=[
+                ChatMessage(
+                    role="CHATBOT",
+                    message="string",
+                )
+            ],
+            conversation_id="string",
+            prompt_truncation="OFF",
+            connectors=[
+                ChatConnector(
+                    id="string",
+                    user_access_token="string",
+                    continue_on_failure=True,
+                    options={"string": {"key": "value"}},
+                )
+            ],
+            search_queries_only=True,
+            documents=[{"string": "string"}],
+            citation_quality="fast",
+            temperature=1.1,
+            max_tokens=1,
+            k=1,
+            p=1.1,
+            seed=1.1,
+            connectors_search_options=ChatStreamRequestConnectorsSearchOptions(
+                model={"key": "value"},
+                temperature={"key": "value"},
+                max_tokens={"key": "value"},
+                preamble={"key": "value"},
+                seed=1.1,
+            ),
+            prompt_override=ChatStreamRequestPromptOverride(
+                preamble={"key": "value"},
+                task_description={"key": "value"},
+                style_guide={"key": "value"},
+            ),
+            frequency_penalty=1.1,
+            presence_penalty=1.1,
+            raw_prompting=True,
+            tools=[
+                Tool(
+                    name="string",
+                    description="string",
+                    parameter_definitions={
+                        "string": ToolParameterDefinitionsValue(
+                            description="string",
+                            type="string",
+                            required=True,
+                        )
+                    },
+                )
+            ],
+            tool_results=[
+                ChatStreamRequestToolResultsItem(
+                    call=ToolCall(),
+                    outputs=[{"string": {"key": "value"}}],
+                )
+            ],
+        )
         """
         _request: typing.Dict[str, typing.Any] = {"message": message, "stream": True}
         if model is not OMIT:
@@ -360,6 +444,10 @@ class BaseCohere:
 
             - chat_history: typing.Optional[typing.Sequence[ChatMessage]]. A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
 
+                                                                           Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
+
+                                                                           The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
+
             - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
 
                                                      Providing a `conversation_id` creates or resumes a persisted conversation with the specified ID. The ID can be any non empty string.
@@ -426,20 +514,20 @@ class BaseCohere:
 
             - tools: typing.Optional[typing.Sequence[Tool]]. A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
-                                                             When `tools` is passed, The `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made
-                                                             the `tool_calls` array will be empty.
+                                                             When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
 
-            - tool_results: typing.Optional[typing.Sequence[ChatRequestToolResultsItem]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to generate text and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
+            - tool_results: typing.Optional[typing.Sequence[ChatRequestToolResultsItem]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
                                                                                           Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
 
+                                                                                          **Note**: `outputs` must be a list of objects. If your tool returns a single object (eg `{"status": 200}`), make sure to wrap it in a list.
                                                                                           ```
                                                                                           tool_results = [
                                                                                             {
                                                                                               "call": {
-                                                                                                  "name": <tool name>,
-                                                                                                  "parameters": {
-                                                                                                      <param name>: <param value>
-                                                                                                  }
+                                                                                                "name": <tool name>,
+                                                                                                "parameters": {
+                                                                                                  <param name>: <param value>
+                                                                                                }
                                                                                               },
                                                                                               "outputs": [{
                                                                                                 <key>: <value>
@@ -453,9 +541,9 @@ class BaseCohere:
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere import ChatMessage
-        from cohere.client import Cohere
+        from cohere.client import Client
 
-        client = Cohere(
+        client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -626,6 +714,31 @@ class BaseCohere:
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
+        ---
+        from cohere.client import Client
+
+        client = Client(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        client.generate_stream(
+            prompt="string",
+            model="string",
+            num_generations=1,
+            max_tokens=1,
+            truncate="NONE",
+            temperature=1.1,
+            seed=1.1,
+            preset="string",
+            end_sequences=["string"],
+            stop_sequences=["string"],
+            k=1,
+            p=1.1,
+            frequency_penalty=1.1,
+            presence_penalty=1.1,
+            return_likelihoods="GENERATION",
+            raw_prompting=True,
+        )
         """
         _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": True}
         if model is not OMIT:
@@ -782,9 +895,9 @@ class BaseCohere:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Cohere
+        from cohere.client import Client
 
-        client = Cohere(
+        client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -911,6 +1024,20 @@ class BaseCohere:
 
                                                                If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
+        ---
+        from cohere.client import Client
+
+        client = Client(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        client.embed(
+            texts=["string"],
+            model="string",
+            input_type="search_document",
+            embedding_types=["float"],
+            truncate="NONE",
+        )
         """
         _request: typing.Dict[str, typing.Any] = {"texts": texts}
         if model is not OMIT:
@@ -994,16 +1121,21 @@ class BaseCohere:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Cohere
+        from cohere.client import Client
 
-        client = Cohere(
+        client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
         client.rerank(
             model="rerank-english-v2.0",
             query="What is the capital of the United States?",
-            documents=[],
+            documents=[
+                "Carson City is the capital city of the American state of Nevada.",
+                "The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.",
+                "Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.",
+                "Capital punishment (the death penalty) has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states.",
+            ],
         )
         """
         _request: typing.Dict[str, typing.Any] = {"query": query, "documents": documents}
@@ -1081,9 +1213,9 @@ class BaseCohere:
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere import ClassifyExample
-        from cohere.client import Cohere
+        from cohere.client import Client
 
-        client = Cohere(
+        client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -1194,36 +1326,38 @@ class BaseCohere:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> SummarizeResponse:
         """
-               > 🚧 Warning
-               >
-               > This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+        > 🚧 Warning
+        >
+        > This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
 
-               Generates a summary in English for a given text.
+        Generates a summary in English for a given text.
 
-               Parameters:
-                   - text: str. The text to generate a summary for. Can be up to 100,000 characters long. Currently the only supported language is English.
+        Parameters:
+            - text: str. The text to generate a summary for. Can be up to 100,000 characters long. Currently the only supported language is English.
 
-                   - length: typing.Optional[SummarizeRequestLength]. One of `short`, `medium`, `long`, or `auto` defaults to `auto`. Indicates the approximate length of the summary. If `auto` is selected, the best option will be picked based on the input text.
+            - length: typing.Optional[SummarizeRequestLength]. One of `short`, `medium`, `long`, or `auto` defaults to `auto`. Indicates the approximate length of the summary. If `auto` is selected, the best option will be picked based on the input text.
 
-                   - format: typing.Optional[SummarizeRequestFormat]. One of `paragraph`, `bullets`, or `auto`, defaults to `auto`. Indicates the style in which the summary will be delivered - in a free form paragraph or in bullet points. If `auto` is selected, the best option will be picked based on the input text.
+            - format: typing.Optional[SummarizeRequestFormat]. One of `paragraph`, `bullets`, or `auto`, defaults to `auto`. Indicates the style in which the summary will be delivered - in a free form paragraph or in bullet points. If `auto` is selected, the best option will be picked based on the input text.
 
-                   - model: typing.Optional[str]. The identifier of the model to generate the summary with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental). Smaller, "light" models are faster, while larger models will perform better.
+            - model: typing.Optional[str]. The identifier of the model to generate the summary with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental). Smaller, "light" models are faster, while larger models will perform better.
 
-                   - extractiveness: typing.Optional[SummarizeRequestExtractiveness]. One of `low`, `medium`, `high`, or `auto`, defaults to `auto`. Controls how close to the original text the summary is. `high` extractiveness summaries will lean towards reusing sentences verbatim, while `low` extractiveness summaries will tend to paraphrase more. If `auto` is selected, the best option will be picked based on the input text.
+            - extractiveness: typing.Optional[SummarizeRequestExtractiveness]. One of `low`, `medium`, `high`, or `auto`, defaults to `auto`. Controls how close to the original text the summary is. `high` extractiveness summaries will lean towards reusing sentences verbatim, while `low` extractiveness summaries will tend to paraphrase more. If `auto` is selected, the best option will be picked based on the input text.
 
-                   - temperature: typing.Optional[float]. Ranges from 0 to 5. Controls the randomness of the output. Lower values tend to generate more “predictable” output, while higher values tend to generate more “creative” output. The sweet spot is typically between 0 and 1.
+            - temperature: typing.Optional[float]. Ranges from 0 to 5. Controls the randomness of the output. Lower values tend to generate more “predictable” output, while higher values tend to generate more “creative” output. The sweet spot is typically between 0 and 1.
 
-                   - additional_command: typing.Optional[str]. A free-form instruction for modifying how the summaries get generated. Should complete the sentence "Generate a summary _". Eg. "focusing on the next steps" or "written by Yoda"
+            - additional_command: typing.Optional[str]. A free-form instruction for modifying how the summaries get generated. Should complete the sentence "Generate a summary _". Eg. "focusing on the next steps" or "written by Yoda"
 
-                   - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-               ---
-               from cohere.client import Cohere
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
+        ---
+        from cohere.client import Client
 
-               client = Cohere(client_name="YOUR_CLIENT_NAME", token="YOUR_TOKEN", )
-               client.summarize(text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.
-
-               The meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo
-        all variants. Analogues made from dairy alternatives, such as goat"s or sheep"s milk, or milk substitutes (e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are lactose intolerant, allergic to dairy protein or vegan.', )
+        client = Client(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        client.summarize(
+            text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.\n\nThe meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo\r all variants. Analogues made from dairy alternatives, such as goat\'s or sheep\'s milk, or milk substitutes (e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are lactose intolerant, allergic to dairy protein or vegan.',
+        )
         """
         _request: typing.Dict[str, typing.Any] = {"text": text}
         if length is not OMIT:
@@ -1287,9 +1421,9 @@ class BaseCohere:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Cohere
+        from cohere.client import Client
 
-        client = Cohere(
+        client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -1358,9 +1492,9 @@ class BaseCohere:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import Cohere
+        from cohere.client import Client
 
-        client = Cohere(
+        client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -1415,9 +1549,9 @@ class AsyncBaseCohere:
     Parameters:
         - base_url: typing.Optional[str]. The base url to use for requests from the client.
 
-        - environment: CohereEnvironment. The environment to use for requests from the client. from .environment import CohereEnvironment
+        - environment: ClientEnvironment. The environment to use for requests from the client. from .environment import ClientEnvironment
 
-                                          Defaults to CohereEnvironment.PRODUCTION
+                                          Defaults to ClientEnvironment.PRODUCTION
 
         - client_name: typing.Optional[str].
 
@@ -1427,9 +1561,9 @@ class AsyncBaseCohere:
 
         - httpx_client: typing.Optional[httpx.AsyncClient]. The httpx client to use for making requests, a preconfigured client is used by default, however this is useful should you want to pass in any custom httpx configuration.
     ---
-    from cohere.client import AsyncCohere
+    from cohere.client import AsyncClient
 
-    client = AsyncCohere(
+    client = AsyncClient(
         client_name="YOUR_CLIENT_NAME",
         token="YOUR_TOKEN",
     )
@@ -1439,7 +1573,7 @@ class AsyncBaseCohere:
         self,
         *,
         base_url: typing.Optional[str] = None,
-        environment: CohereEnvironment = CohereEnvironment.PRODUCTION,
+        environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
         client_name: typing.Optional[str] = None,
         token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"),
         timeout: typing.Optional[float] = 60,
@@ -1497,6 +1631,10 @@ class AsyncBaseCohere:
                                               The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
 
             - chat_history: typing.Optional[typing.Sequence[ChatMessage]]. A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
+
+                                                                           Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
+
+                                                                           The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
 
             - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
 
@@ -1564,20 +1702,20 @@ class AsyncBaseCohere:
 
             - tools: typing.Optional[typing.Sequence[Tool]]. A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
-                                                             When `tools` is passed, The `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made
-                                                             the `tool_calls` array will be empty.
+                                                             When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
 
-            - tool_results: typing.Optional[typing.Sequence[ChatStreamRequestToolResultsItem]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to generate text and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
+            - tool_results: typing.Optional[typing.Sequence[ChatStreamRequestToolResultsItem]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
                                                                                                 Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
 
+                                                                                                **Note**: `outputs` must be a list of objects. If your tool returns a single object (eg `{"status": 200}`), make sure to wrap it in a list.
                                                                                                 ```
                                                                                                 tool_results = [
                                                                                                   {
                                                                                                     "call": {
-                                                                                                        "name": <tool name>,
-                                                                                                        "parameters": {
-                                                                                                            <param name>: <param value>
-                                                                                                        }
+                                                                                                      "name": <tool name>,
+                                                                                                      "parameters": {
+                                                                                                        <param name>: <param value>
+                                                                                                      }
                                                                                                     },
                                                                                                     "outputs": [{
                                                                                                       <key>: <value>
@@ -1589,6 +1727,86 @@ class AsyncBaseCohere:
                                                                                                 **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
+        ---
+        from cohere import (
+            ChatConnector,
+            ChatMessage,
+            ChatStreamRequestConnectorsSearchOptions,
+            ChatStreamRequestPromptOverride,
+            ChatStreamRequestToolResultsItem,
+            Tool,
+            ToolCall,
+            ToolParameterDefinitionsValue,
+        )
+        from cohere.client import AsyncClient
+
+        client = AsyncClient(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        await client.chat_stream(
+            message="string",
+            model="string",
+            preamble="string",
+            chat_history=[
+                ChatMessage(
+                    role="CHATBOT",
+                    message="string",
+                )
+            ],
+            conversation_id="string",
+            prompt_truncation="OFF",
+            connectors=[
+                ChatConnector(
+                    id="string",
+                    user_access_token="string",
+                    continue_on_failure=True,
+                    options={"string": {"key": "value"}},
+                )
+            ],
+            search_queries_only=True,
+            documents=[{"string": "string"}],
+            citation_quality="fast",
+            temperature=1.1,
+            max_tokens=1,
+            k=1,
+            p=1.1,
+            seed=1.1,
+            connectors_search_options=ChatStreamRequestConnectorsSearchOptions(
+                model={"key": "value"},
+                temperature={"key": "value"},
+                max_tokens={"key": "value"},
+                preamble={"key": "value"},
+                seed=1.1,
+            ),
+            prompt_override=ChatStreamRequestPromptOverride(
+                preamble={"key": "value"},
+                task_description={"key": "value"},
+                style_guide={"key": "value"},
+            ),
+            frequency_penalty=1.1,
+            presence_penalty=1.1,
+            raw_prompting=True,
+            tools=[
+                Tool(
+                    name="string",
+                    description="string",
+                    parameter_definitions={
+                        "string": ToolParameterDefinitionsValue(
+                            description="string",
+                            type="string",
+                            required=True,
+                        )
+                    },
+                )
+            ],
+            tool_results=[
+                ChatStreamRequestToolResultsItem(
+                    call=ToolCall(),
+                    outputs=[{"string": {"key": "value"}}],
+                )
+            ],
+        )
         """
         _request: typing.Dict[str, typing.Any] = {"message": message, "stream": True}
         if model is not OMIT:
@@ -1706,6 +1924,10 @@ class AsyncBaseCohere:
 
             - chat_history: typing.Optional[typing.Sequence[ChatMessage]]. A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
 
+                                                                           Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
+
+                                                                           The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
+
             - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
 
                                                      Providing a `conversation_id` creates or resumes a persisted conversation with the specified ID. The ID can be any non empty string.
@@ -1772,20 +1994,20 @@ class AsyncBaseCohere:
 
             - tools: typing.Optional[typing.Sequence[Tool]]. A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
-                                                             When `tools` is passed, The `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made
-                                                             the `tool_calls` array will be empty.
+                                                             When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
 
-            - tool_results: typing.Optional[typing.Sequence[ChatRequestToolResultsItem]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to generate text and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
+            - tool_results: typing.Optional[typing.Sequence[ChatRequestToolResultsItem]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
                                                                                           Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
 
+                                                                                          **Note**: `outputs` must be a list of objects. If your tool returns a single object (eg `{"status": 200}`), make sure to wrap it in a list.
                                                                                           ```
                                                                                           tool_results = [
                                                                                             {
                                                                                               "call": {
-                                                                                                  "name": <tool name>,
-                                                                                                  "parameters": {
-                                                                                                      <param name>: <param value>
-                                                                                                  }
+                                                                                                "name": <tool name>,
+                                                                                                "parameters": {
+                                                                                                  <param name>: <param value>
+                                                                                                }
                                                                                               },
                                                                                               "outputs": [{
                                                                                                 <key>: <value>
@@ -1799,9 +2021,9 @@ class AsyncBaseCohere:
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere import ChatMessage
-        from cohere.client import AsyncCohere
+        from cohere.client import AsyncClient
 
-        client = AsyncCohere(
+        client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -1972,6 +2194,31 @@ class AsyncBaseCohere:
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
+        ---
+        from cohere.client import AsyncClient
+
+        client = AsyncClient(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        await client.generate_stream(
+            prompt="string",
+            model="string",
+            num_generations=1,
+            max_tokens=1,
+            truncate="NONE",
+            temperature=1.1,
+            seed=1.1,
+            preset="string",
+            end_sequences=["string"],
+            stop_sequences=["string"],
+            k=1,
+            p=1.1,
+            frequency_penalty=1.1,
+            presence_penalty=1.1,
+            return_likelihoods="GENERATION",
+            raw_prompting=True,
+        )
         """
         _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": True}
         if model is not OMIT:
@@ -2128,9 +2375,9 @@ class AsyncBaseCohere:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncCohere
+        from cohere.client import AsyncClient
 
-        client = AsyncCohere(
+        client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -2257,6 +2504,20 @@ class AsyncBaseCohere:
 
                                                                If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
+        ---
+        from cohere.client import AsyncClient
+
+        client = AsyncClient(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        await client.embed(
+            texts=["string"],
+            model="string",
+            input_type="search_document",
+            embedding_types=["float"],
+            truncate="NONE",
+        )
         """
         _request: typing.Dict[str, typing.Any] = {"texts": texts}
         if model is not OMIT:
@@ -2340,16 +2601,21 @@ class AsyncBaseCohere:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncCohere
+        from cohere.client import AsyncClient
 
-        client = AsyncCohere(
+        client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
         await client.rerank(
             model="rerank-english-v2.0",
             query="What is the capital of the United States?",
-            documents=[],
+            documents=[
+                "Carson City is the capital city of the American state of Nevada.",
+                "The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.",
+                "Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.",
+                "Capital punishment (the death penalty) has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states.",
+            ],
         )
         """
         _request: typing.Dict[str, typing.Any] = {"query": query, "documents": documents}
@@ -2427,9 +2693,9 @@ class AsyncBaseCohere:
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere import ClassifyExample
-        from cohere.client import AsyncCohere
+        from cohere.client import AsyncClient
 
-        client = AsyncCohere(
+        client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -2540,36 +2806,38 @@ class AsyncBaseCohere:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> SummarizeResponse:
         """
-               > 🚧 Warning
-               >
-               > This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+        > 🚧 Warning
+        >
+        > This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
 
-               Generates a summary in English for a given text.
+        Generates a summary in English for a given text.
 
-               Parameters:
-                   - text: str. The text to generate a summary for. Can be up to 100,000 characters long. Currently the only supported language is English.
+        Parameters:
+            - text: str. The text to generate a summary for. Can be up to 100,000 characters long. Currently the only supported language is English.
 
-                   - length: typing.Optional[SummarizeRequestLength]. One of `short`, `medium`, `long`, or `auto` defaults to `auto`. Indicates the approximate length of the summary. If `auto` is selected, the best option will be picked based on the input text.
+            - length: typing.Optional[SummarizeRequestLength]. One of `short`, `medium`, `long`, or `auto` defaults to `auto`. Indicates the approximate length of the summary. If `auto` is selected, the best option will be picked based on the input text.
 
-                   - format: typing.Optional[SummarizeRequestFormat]. One of `paragraph`, `bullets`, or `auto`, defaults to `auto`. Indicates the style in which the summary will be delivered - in a free form paragraph or in bullet points. If `auto` is selected, the best option will be picked based on the input text.
+            - format: typing.Optional[SummarizeRequestFormat]. One of `paragraph`, `bullets`, or `auto`, defaults to `auto`. Indicates the style in which the summary will be delivered - in a free form paragraph or in bullet points. If `auto` is selected, the best option will be picked based on the input text.
 
-                   - model: typing.Optional[str]. The identifier of the model to generate the summary with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental). Smaller, "light" models are faster, while larger models will perform better.
+            - model: typing.Optional[str]. The identifier of the model to generate the summary with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental). Smaller, "light" models are faster, while larger models will perform better.
 
-                   - extractiveness: typing.Optional[SummarizeRequestExtractiveness]. One of `low`, `medium`, `high`, or `auto`, defaults to `auto`. Controls how close to the original text the summary is. `high` extractiveness summaries will lean towards reusing sentences verbatim, while `low` extractiveness summaries will tend to paraphrase more. If `auto` is selected, the best option will be picked based on the input text.
+            - extractiveness: typing.Optional[SummarizeRequestExtractiveness]. One of `low`, `medium`, `high`, or `auto`, defaults to `auto`. Controls how close to the original text the summary is. `high` extractiveness summaries will lean towards reusing sentences verbatim, while `low` extractiveness summaries will tend to paraphrase more. If `auto` is selected, the best option will be picked based on the input text.
 
-                   - temperature: typing.Optional[float]. Ranges from 0 to 5. Controls the randomness of the output. Lower values tend to generate more “predictable” output, while higher values tend to generate more “creative” output. The sweet spot is typically between 0 and 1.
+            - temperature: typing.Optional[float]. Ranges from 0 to 5. Controls the randomness of the output. Lower values tend to generate more “predictable” output, while higher values tend to generate more “creative” output. The sweet spot is typically between 0 and 1.
 
-                   - additional_command: typing.Optional[str]. A free-form instruction for modifying how the summaries get generated. Should complete the sentence "Generate a summary _". Eg. "focusing on the next steps" or "written by Yoda"
+            - additional_command: typing.Optional[str]. A free-form instruction for modifying how the summaries get generated. Should complete the sentence "Generate a summary _". Eg. "focusing on the next steps" or "written by Yoda"
 
-                   - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-               ---
-               from cohere.client import AsyncCohere
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
+        ---
+        from cohere.client import AsyncClient
 
-               client = AsyncCohere(client_name="YOUR_CLIENT_NAME", token="YOUR_TOKEN", )
-               await client.summarize(text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.
-
-               The meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo
-        all variants. Analogues made from dairy alternatives, such as goat"s or sheep"s milk, or milk substitutes (e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are lactose intolerant, allergic to dairy protein or vegan.', )
+        client = AsyncClient(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        await client.summarize(
+            text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.\n\nThe meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo\r all variants. Analogues made from dairy alternatives, such as goat\'s or sheep\'s milk, or milk substitutes (e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are lactose intolerant, allergic to dairy protein or vegan.',
+        )
         """
         _request: typing.Dict[str, typing.Any] = {"text": text}
         if length is not OMIT:
@@ -2633,9 +2901,9 @@ class AsyncBaseCohere:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncCohere
+        from cohere.client import AsyncClient
 
-        client = AsyncCohere(
+        client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -2704,9 +2972,9 @@ class AsyncBaseCohere:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere.client import AsyncCohere
+        from cohere.client import AsyncClient
 
-        client = AsyncCohere(
+        client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
@@ -2754,7 +3022,7 @@ class AsyncBaseCohere:
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
 
-def _get_base_url(*, base_url: typing.Optional[str] = None, environment: CohereEnvironment) -> str:
+def _get_base_url(*, base_url: typing.Optional[str] = None, environment: ClientEnvironment) -> str:
     if base_url is not None:
         return base_url
     elif environment is not None:
