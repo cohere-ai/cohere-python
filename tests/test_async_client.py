@@ -28,20 +28,36 @@ class TestClient(unittest.TestCase):
 
         print(chat)
 
+    async def test_chat_stream(self) -> None:
+        stream = co.chat_stream(
+            chat_history=[
+                ChatMessage(role="USER",
+                            message="Who discovered gravity?"),
+                ChatMessage(role="CHATBOT", message="The man who is widely credited with discovering "
+                                                    "gravity is Sir Isaac Newton")
+            ],
+            message="What year was he born?",
+            connectors=[ChatConnector(id="web-search")]
+        )
+
+        async for chat_event in stream:
+            if chat_event.event_type == "text-generation":
+                print(chat_event.text)
+
     async def test_stream_equals_true(self) -> None:
         with self.assertRaises(ValueError):
             await co.chat(
-                stream=True, # type: ignore
+                stream=True,  # type: ignore
                 message="What year was he born?",
             )
 
     async def test_deprecated_fn(self) -> None:
         with self.assertRaises(ValueError):
-            await co.check_api_key("dummy", dummy="dummy") # type: ignore
+            await co.check_api_key("dummy", dummy="dummy")  # type: ignore
 
     async def test_moved_fn(self) -> None:
         with self.assertRaises(ValueError):
-            await co.list_connectors("dummy", dummy="dummy") # type: ignore
+            await co.list_connectors("dummy", dummy="dummy")  # type: ignore
 
     async def test_generate(self) -> None:
         response = await co.generate(

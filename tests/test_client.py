@@ -28,6 +28,23 @@ class TestClient(unittest.TestCase):
 
         print(chat)
 
+    def test_chat_stream(self) -> None:
+        stream = co.chat_stream(
+            chat_history=[
+                ChatMessage(role="USER",
+                            message="Who discovered gravity?"),
+                ChatMessage(role="CHATBOT", message="The man who is widely credited with discovering "
+                                                    "gravity is Sir Isaac Newton")
+            ],
+            message="What year was he born?",
+            connectors=[ChatConnector(id="web-search")]
+        )
+
+        for chat_event in stream:
+            if chat_event.event_type == "text-generation":
+                print(chat_event.text)
+
+
     def test_stream_equals_true(self) -> None:
         with self.assertRaises(ValueError):
             co.chat(
