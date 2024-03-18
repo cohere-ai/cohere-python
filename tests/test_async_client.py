@@ -6,7 +6,7 @@ import cohere
 from cohere import ChatMessage, ChatConnector, ClassifyExample, CreateConnectorServiceAuth, Tool, \
     ToolParameterDefinitionsValue, ChatRequestToolResultsItem
 
-co = cohere.Client(os.environ['COHERE_API_KEY'], timeout=10000)
+co = cohere.AsyncClient(os.environ['COHERE_API_KEY'], timeout=10000)
 
 package_dir = os.path.dirname(os.path.abspath(__file__))
 embed_job = os.path.join(package_dir, 'embed_job.jsonl')
@@ -14,8 +14,8 @@ embed_job = os.path.join(package_dir, 'embed_job.jsonl')
 
 class TestClient(unittest.TestCase):
 
-    def test_chat(self) -> None:
-        chat = co.chat(
+    async def test_chat(self) -> None:
+        chat = await co.chat(
             chat_history=[
                 ChatMessage(role="USER",
                             message="Who discovered gravity?"),
@@ -28,7 +28,7 @@ class TestClient(unittest.TestCase):
 
         print(chat)
 
-    def test_chat_stream(self) -> None:
+    async def test_chat_stream(self) -> None:
         stream = co.chat_stream(
             chat_history=[
                 ChatMessage(role="USER",
@@ -40,56 +40,55 @@ class TestClient(unittest.TestCase):
             connectors=[ChatConnector(id="web-search")]
         )
 
-        for chat_event in stream:
+        async for chat_event in stream:
             if chat_event.event_type == "text-generation":
                 print(chat_event.text)
 
-
-    def test_stream_equals_true(self) -> None:
+    async def test_stream_equals_true(self) -> None:
         with self.assertRaises(ValueError):
-            co.chat(
-                stream=True, # type: ignore
+            await co.chat(
+                stream=True,  # type: ignore
                 message="What year was he born?",
             )
 
-    def test_deprecated_fn(self) -> None:
+    async def test_deprecated_fn(self) -> None:
         with self.assertRaises(ValueError):
-            co.check_api_key("dummy", dummy="dummy") # type: ignore
+            await co.check_api_key("dummy", dummy="dummy")  # type: ignore
 
-    def test_moved_fn(self) -> None:
+    async def test_moved_fn(self) -> None:
         with self.assertRaises(ValueError):
-            co.list_connectors("dummy", dummy="dummy") # type: ignore
+            await co.list_connectors("dummy", dummy="dummy")  # type: ignore
 
-    def test_generate(self) -> None:
-        response = co.generate(
+    async def test_generate(self) -> None:
+        response = await co.generate(
             prompt='Please explain to me how LLMs work',
         )
         print(response)
 
-    def test_embed(self) -> None:
-        response = co.embed(
+    async def test_embed(self) -> None:
+        response = await co.embed(
             texts=['hello', 'goodbye'],
             model='embed-english-v3.0',
             input_type="classification"
         )
         print(response)
 
-    def test_embed_job_crud(self) -> None:
-        dataset = co.datasets.create(
+    async def test_embed_job_crud(self) -> None:
+        dataset = await co.datasets.create(
             name="test",
             type="embed-input",
             data=open(embed_job, 'rb'),
         )
 
         while True:
-            ds = co.datasets.get(dataset.id or "")
+            ds = await co.datasets.get(dataset.id or "")
             sleep(2)
             print(ds, flush=True)
             if ds.dataset.validation_status != "processing":
                 break
 
         # start an embed job
-        job = co.embed_jobs.create(
+        job = await co.embed_jobs.create(
             dataset_id=dataset.id or "",
             input_type="search_document",
             model='embed-english-v3.0')
@@ -97,29 +96,29 @@ class TestClient(unittest.TestCase):
         print(job)
 
         # list embed jobs
-        my_embed_jobs = co.embed_jobs.list()
+        my_embed_jobs = await co.embed_jobs.list()
 
         print(my_embed_jobs)
 
         while True:
-            em = co.embed_jobs.get(job.job_id)
+            em = await co.embed_jobs.get(job.job_id)
             sleep(2)
             print(em, flush=True)
             if em.status != "processing":
                 break
 
-        co.embed_jobs.cancel(job.job_id)
+        await co.embed_jobs.cancel(job.job_id)
 
-        co.datasets.delete(dataset.id or "")
+        await co.datasets.delete(dataset.id or "")
 
-    def test_rerank(self) -> None:
+    async def test_rerank(self) -> None:
         docs = [
             'Carson City is the capital city of the American state of Nevada.',
             'The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.',
             'Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.',
             'Capital punishment (the death penalty) has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states.']
 
-        response = co.rerank(
+        response = await co.rerank(
             model='rerank-english-v2.0',
             query='What is the capital of the United States?',
             documents=docs,
@@ -128,7 +127,7 @@ class TestClient(unittest.TestCase):
 
         print(response)
 
-    def test_classify(self) -> None:
+    async def test_classify(self) -> None:
         examples = [
             ClassifyExample(text="Dermatologists don't like her!", label="Spam"),
             ClassifyExample(text="'Hello, open to this?'", label="Spam"),
@@ -149,14 +148,14 @@ class TestClient(unittest.TestCase):
             "Confirm your email address",
             "hey i need u to send some $",
         ]
-        response = co.classify(
+        response = await co.classify(
             inputs=inputs,
             examples=examples,
         )
         print(response)
 
-    def test_datasets_crud(self) -> None:
-        my_dataset = co.datasets.create(
+    async def test_datasets_crud(self) -> None:
+        my_dataset = await co.datasets.create(
             name="test",
             type="embed-input",
             data=open(embed_job, 'rb'),
@@ -164,17 +163,17 @@ class TestClient(unittest.TestCase):
 
         print(my_dataset)
 
-        my_datasets = co.datasets.list()
+        my_datasets = await co.datasets.list()
 
         print(my_datasets)
 
-        dataset = co.datasets.get(my_dataset.id or "")
+        dataset = await co.datasets.get(my_dataset.id or "")
 
         print(dataset)
 
-        co.datasets.delete(my_dataset.id or "")
+        await co.datasets.delete(my_dataset.id or "")
 
-    def test_summarize(self) -> None:
+    async def test_summarize(self) -> None:
         text = (
             "Ice cream is a sweetened frozen food typically eaten as a snack or dessert. "
             "It may be made from milk or cream and is flavoured with a sweetener, "
@@ -198,28 +197,28 @@ class TestClient(unittest.TestCase):
             "lactose intolerant, allergic to dairy protein or vegan."
         )
 
-        response = co.summarize(
+        response = await co.summarize(
             text=text,
         )
 
         print(response)
 
-    def test_tokenize(self) -> None:
-        response = co.tokenize(
+    async def test_tokenize(self) -> None:
+        response = await co.tokenize(
             text='tokenize me! :D',
             model='command'
         )
         print(response)
 
-    def test_detokenize(self) -> None:
-        response = co.detokenize(
+    async def test_detokenize(self) -> None:
+        response = await co.detokenize(
             tokens=[10104, 12221, 1315, 34, 1420, 69],
             model="command"
         )
         print(response)
 
-    def test_connectors_crud(self) -> None:
-        created_connector = co.connectors.create(
+    async def test_connectors_crud(self) -> None:
+        created_connector = await co.connectors.create(
             name="Example connector",
             url="https://dummy-connector-o5btz7ucgq-uc.a.run.app/search",
             service_auth=CreateConnectorServiceAuth(
@@ -229,18 +228,18 @@ class TestClient(unittest.TestCase):
         )
         print(created_connector)
 
-        connector = co.connectors.get(created_connector.connector.id)
+        connector = await co.connectors.get(created_connector.connector.id)
 
         print(connector)
 
-        updated_connector = co.connectors.update(
+        updated_connector = await co.connectors.update(
             id=connector.connector.id, name="new name")
 
         print(updated_connector)
 
-        co.connectors.delete(created_connector.connector.id)
+        await co.connectors.delete(created_connector.connector.id)
 
-    def test_tool_use(self) -> None:
+    async def test_tool_use(self) -> None:
         tools = [
             Tool(
                 name="sales_database",
@@ -254,7 +253,7 @@ class TestClient(unittest.TestCase):
             )
         ]
 
-        tool_parameters_response = co.chat(
+        tool_parameters_response = await co.chat(
             message="How good were the sales on September 29?",
             tools=tools,
             model="command-nightly",
@@ -292,7 +291,7 @@ class TestClient(unittest.TestCase):
                 outputs=outputs
             ))
 
-        cited_response = co.chat(
+        cited_response = await co.chat(
             message="How good were the sales on September 29?",
             tools=tools,
             tool_results=tool_results,

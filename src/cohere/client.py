@@ -3,7 +3,7 @@ import typing
 import httpx
 
 from .base_client import BaseCohere, AsyncBaseCohere
-from .environment import CohereEnvironment
+from .environment import ClientEnvironment
 
 # Use NoReturn as Never type for compatibility
 Never = typing.NoReturn
@@ -59,7 +59,7 @@ class Client(BaseCohere):
             api_key: typing.Union[str, typing.Callable[[], str]],
             *,
             base_url: typing.Optional[str] = None,
-            environment: CohereEnvironment = CohereEnvironment.PRODUCTION,
+            environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
             client_name: typing.Optional[str] = None,
             timeout: typing.Optional[float] = 60,
             httpx_client: typing.Optional[httpx.Client] = None,
@@ -128,7 +128,7 @@ class AsyncClient(AsyncBaseCohere):
             api_key: typing.Union[str, typing.Callable[[], str]],
             *,
             base_url: typing.Optional[str] = None,
-            environment: CohereEnvironment = CohereEnvironment.PRODUCTION,
+            environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
             client_name: typing.Optional[str] = None,
             timeout: typing.Optional[float] = 60,
             httpx_client: typing.Optional[httpx.AsyncClient] = None,

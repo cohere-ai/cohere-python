@@ -5,3 +5,4 @@ src/cohere/client.py
 tests
 .github/workflows/ci.yml
 LICENSE
+.github/workflows/tests.yml
