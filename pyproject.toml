@@ -18,6 +18,12 @@ typing_extensions = ">= 4.0.0"
 mypy = "^1.8.0"
 pytest = "^7.4.0"
 
+[tool.poetry.group.dev.dependencies]
+pytest-asyncio = "^0.23.5.post1"
+
+[tool.pytest.ini_options]
+asyncio_mode = "strict"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
