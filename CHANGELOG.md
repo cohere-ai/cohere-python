@@ -1,4 +1,8 @@
 # Changelog
+## 4.57
+- [#409] (https://github.com/cohere-ai/cohere-python/pull/409)
+  - Increase buffer in async client when streaming
+
 ## 4.56
 - [#400] (https://github.com/cohere-ai/cohere-python/pull/400)
   - Remove unsupported chat parameters
