@@ -16,6 +16,8 @@ except ImportError:
 
 import aiohttp
 import backoff
+
+import cohere
 from cohere.client import Client
 from cohere.custom_model_dataset import CustomModelDataset
 from cohere.error import CohereAPIError, CohereConnectionError, CohereError
@@ -62,8 +64,6 @@ from cohere.responses.custom_model import (
 from cohere.responses.dataset import AsyncDataset, Dataset, DatasetUsage, ParseInfo
 from cohere.responses.embed_job import AsyncEmbedJob
 from cohere.utils import async_wait_for_job, is_api_key_valid, np_json_dumps
-
-import cohere
 
 JSON = Union[Dict, List]
 

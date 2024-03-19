@@ -3,6 +3,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Union
 
 import requests
+
 from cohere.responses.base import CohereObject
 
 if TYPE_CHECKING:
