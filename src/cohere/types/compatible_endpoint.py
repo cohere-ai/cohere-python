@@ -2,4 +2,6 @@
 
 import typing
 
-CompatibleEndpoint = typing.Literal["chat", "embed", "classify", "summarize", "rerank", "rate", "generate"]
+CompatibleEndpoint = typing.Union[
+    typing.AnyStr, typing.Literal["chat", "embed", "classify", "summarize", "rerank", "rate", "generate"]
+]

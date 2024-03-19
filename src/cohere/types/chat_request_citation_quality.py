@@ -2,4 +2,4 @@
 
 import typing
 
-ChatRequestCitationQuality = typing.Literal["fast", "accurate"]
+ChatRequestCitationQuality = typing.Union[typing.AnyStr, typing.Literal["fast", "accurate"]]

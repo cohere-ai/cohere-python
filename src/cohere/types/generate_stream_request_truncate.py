@@ -2,4 +2,4 @@
 
 import typing
 
-GenerateStreamRequestTruncate = typing.Literal["NONE", "START", "END"]
+GenerateStreamRequestTruncate = typing.Union[typing.AnyStr, typing.Literal["NONE", "START", "END"]]

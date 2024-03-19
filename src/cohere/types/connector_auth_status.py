@@ -2,4 +2,4 @@
 
 import typing
 
-ConnectorAuthStatus = typing.Literal["valid", "expired"]
+ConnectorAuthStatus = typing.Union[typing.AnyStr, typing.Literal["valid", "expired"]]
