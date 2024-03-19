@@ -4,12 +4,9 @@ import time
 import typing
 from typing import Awaitable, Optional
 
+from . import EmbedJob, DatasetsGetResponse
 from .types import EmbedJob, CreateEmbedJobResponse
 from .datasets import DatasetsCreateResponse, DatasetsGetResponse
-
-
-def is_dataset_create_response(awaitable: typing.Union[CreateEmbedJobResponse, DatasetsCreateResponse]) -> bool:
-    return isinstance(awaitable, "DatasetsCreateResponse")
 
 
 def get_terminal_states():
@@ -25,12 +22,12 @@ def get_failed_states():
 
 
 def get_id(
-        awaitable: typing.Union[CreateEmbedJobResponse, DatasetsCreateResponse, EmbedJob, DatasetsGetResponse]) -> str:
+        awaitable: typing.Union[CreateEmbedJobResponse, DatasetsCreateResponse, EmbedJob, DatasetsGetResponse]):
     return getattr(awaitable, "job_id", None) or getattr(awaitable, "id", None) or getattr(
         getattr(awaitable, "dataset", None), "id", None)
 
 
-def get_validation_status(awaitable: typing.Union[EmbedJob, DatasetsGetResponse]) -> str:
+def get_validation_status(awaitable: typing.Union[EmbedJob, DatasetsGetResponse]):
     return getattr(awaitable, "status", None) or getattr(getattr(awaitable, "dataset", None), "validation_status", None)
 
 
@@ -112,22 +109,22 @@ def wait(
 
 
 @typing.overload
-def async_wait(
+async def async_wait(
         cohere: typing.Any,
         awaitable: CreateEmbedJobResponse,
         timeout: Optional[float] = None,
         interval: float = 10,
-) -> Awaitable[EmbedJob]:
+) -> EmbedJob:
     ...
 
 
 @typing.overload
-def async_wait(
+async def async_wait(
         cohere: typing.Any,
         awaitable: DatasetsCreateResponse,
         timeout: Optional[float] = None,
         interval: float = 10,
-) -> Awaitable[DatasetsGetResponse]:
+) -> DatasetsGetResponse:
     ...
 
 

@@ -98,9 +98,9 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
 
         print(my_embed_jobs)
 
-        result = await self.co.wait(job)
+        emb_result = await self.co.wait(job)
 
-        self.assertEqual(result.status, "complete")
+        self.assertEqual(emb_result.status, "complete")
 
         await self.co.embed_jobs.cancel(job.job_id)
 

@@ -97,9 +97,9 @@ class TestClient(unittest.TestCase):
 
         print(my_embed_jobs)
 
-        result = co.wait(job)
+        emb_result = co.wait(job)
 
-        self.assertEqual(result.status, "complete")
+        self.assertEqual(emb_result.status, "complete")
 
         co.embed_jobs.cancel(job.job_id)
 
