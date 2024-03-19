@@ -6,3 +6,4 @@ tests
 .github/workflows/ci.yml
 LICENSE
 .github/workflows/tests.yml
+src/cohere/utils.py
