@@ -1,6 +1,5 @@
 import os
 import unittest
-from time import sleep
 
 import cohere
 from cohere import ChatMessage, ChatConnector, ClassifyExample, CreateConnectorServiceAuth, Tool, \
@@ -81,12 +80,9 @@ class TestClient(unittest.TestCase):
             data=open(embed_job, 'rb'),
         )
 
-        while True:
-            ds = co.datasets.get(dataset.id or "")
-            sleep(2)
-            print(ds, flush=True)
-            if ds.dataset.validation_status != "processing":
-                break
+        result = co.wait(dataset)
+
+        self.assertEqual(result.dataset.validation_status, "validated")
 
         # start an embed job
         job = co.embed_jobs.create(
@@ -101,12 +97,9 @@ class TestClient(unittest.TestCase):
 
         print(my_embed_jobs)
 
-        while True:
-            em = co.embed_jobs.get(job.job_id)
-            sleep(2)
-            print(em, flush=True)
-            if em.status != "processing":
-                break
+        emb_result = co.wait(job)
+
+        self.assertEqual(emb_result.status, "complete")
 
         co.embed_jobs.cancel(job.job_id)
 

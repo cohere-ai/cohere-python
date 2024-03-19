@@ -4,6 +4,8 @@ import httpx
 
 from .base_client import BaseCohere, AsyncBaseCohere
 from .environment import ClientEnvironment
+from .utils import wait, async_wait
+
 
 # Use NoReturn as Never type for compatibility
 Never = typing.NoReturn
@@ -24,6 +26,7 @@ def throw_if_stream_is_true(*args, **kwargs) -> None:
         raise ValueError(
             "Since python sdk cohere==5.0.0, you must now use chat_stream(...) instead of chat(stream=True, ...)"
         )
+
 
 def moved_function(fn_name: str, new_fn_name: str) -> typing.Any:
     """
@@ -56,7 +59,7 @@ def deprecated_function(fn_name: str) -> typing.Any:
 class Client(BaseCohere):
     def __init__(
             self,
-            api_key: typing.Union[str, typing.Callable[[], str]],
+            api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
             *,
             base_url: typing.Optional[str] = None,
             environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
@@ -75,6 +78,8 @@ class Client(BaseCohere):
         )
 
         validate_args(self, "chat", throw_if_stream_is_true)
+
+    wait = wait
 
     """
     The following methods have been moved or deprecated in cohere==5.0.0. Please update your usage.
@@ -125,7 +130,7 @@ class Client(BaseCohere):
 class AsyncClient(AsyncBaseCohere):
     def __init__(
             self,
-            api_key: typing.Union[str, typing.Callable[[], str]],
+            api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
             *,
             base_url: typing.Optional[str] = None,
             environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
@@ -144,6 +149,8 @@ class AsyncClient(AsyncBaseCohere):
         )
 
         validate_args(self, "chat", throw_if_stream_is_true)
+
+    wait = async_wait
 
     """
     The following methods have been moved or deprecated in cohere==5.0.0. Please update your usage.
