@@ -2,4 +2,6 @@
 
 import typing
 
-EmbedRequestEmbeddingTypesItem = typing.Literal["float", "int8", "uint8", "binary", "ubinary"]
+EmbedRequestEmbeddingTypesItem = typing.Union[
+    typing.AnyStr, typing.Literal["float", "int8", "uint8", "binary", "ubinary"]
+]

@@ -2,4 +2,4 @@
 
 import typing
 
-AuthTokenType = typing.Literal["bearer", "basic", "noscheme"]
+AuthTokenType = typing.Union[typing.AnyStr, typing.Literal["bearer", "basic", "noscheme"]]

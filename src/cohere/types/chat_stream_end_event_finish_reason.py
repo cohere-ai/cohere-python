@@ -2,4 +2,6 @@
 
 import typing
 
-ChatStreamEndEventFinishReason = typing.Literal["COMPLETE", "ERROR_LIMIT", "MAX_TOKENS", "ERROR", "ERROR_TOXIC"]
+ChatStreamEndEventFinishReason = typing.Union[
+    typing.AnyStr, typing.Literal["COMPLETE", "ERROR_LIMIT", "MAX_TOKENS", "ERROR", "ERROR_TOXIC"]
+]
