@@ -85,7 +85,7 @@ def wait(
         awaitable: typing.Union[CreateEmbedJobResponse, DatasetsCreateResponse],
         timeout: Optional[float] = None,
         interval: float = 2,
-) -> EmbedJob | DatasetsGetResponse:
+) -> typing.Union[EmbedJob, DatasetsGetResponse]:
     start_time = time.time()
     terminal_states = get_terminal_states()
     failed_states = get_failed_states()
@@ -131,7 +131,7 @@ async def async_wait(
         awaitable: typing.Union[CreateEmbedJobResponse, DatasetsCreateResponse],
         timeout: Optional[float] = None,
         interval: float = 10,
-) -> EmbedJob | DatasetsGetResponse:
+) -> typing.Union[EmbedJob, DatasetsGetResponse]:
     start_time = time.time()
     terminal_states = get_terminal_states()
     failed_states = get_failed_states()
