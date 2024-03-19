@@ -1,9 +1,12 @@
+from .types.tokenize_response import TokenizeResponse
+# from .types.detokenize_response import DetokenizeResponse
 import typing
 
 import httpx
 
 from .base_client import BaseCohere, AsyncBaseCohere
 from .environment import ClientEnvironment
+from .manually_maintained.cache import CacheMixin
 
 # Use NoReturn as Never type for compatibility
 Never = typing.NoReturn
@@ -53,7 +56,7 @@ def deprecated_function(fn_name: str) -> typing.Any:
     return fn
 
 
-class Client(BaseCohere):
+class Client(BaseCohere, CacheMixin):
     def __init__(
             self,
             api_key: typing.Union[str, typing.Callable[[], str]],
@@ -120,6 +123,19 @@ class Client(BaseCohere):
     list_connectors: Never = moved_function("list_connectors", ".connectors.list")
     delete_connector: Never = moved_function("delete_connector", ".connectors.delete")
     oauth_authorize_connector: Never = moved_function("oauth_authorize_connector", ".connectors.o_auth_authorize")
+
+    def local_tokenize(self, *, text: str, model: str) -> TokenizeResponse:
+        from .manually_maintained.tokenizers import local_tokenize
+        # TODO: parse into TokenizeResponse()? or should remain decoupled from the API responses?
+        return local_tokenize(self, model, text)
+
+    # def detokenize(
+    #     self,
+    #     *,
+    #     tokens: typing.Sequence[int],
+    #     model: typing.Optional[str] = OMIT,
+    # ) -> DetokenizeResponse:
+    #     return None
 
 
 class AsyncClient(AsyncBaseCohere):
