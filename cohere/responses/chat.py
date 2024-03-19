@@ -1,10 +1,12 @@
 import json
 from enum import Enum
-from typing import Any, Dict, Generator, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Union
 
 import requests
-
 from cohere.responses.base import CohereObject
+
+if TYPE_CHECKING:
+    import aiohttp
 
 
 class ToolParameterDefinitionsValue(CohereObject, dict):
@@ -268,7 +270,7 @@ class ChatToolCallsGenerationEvent(StreamResponse):
 
 class StreamingChat(CohereObject):
     def __init__(self, response):
-        self.response = response
+        self.response: "typing.Optional[aiohttp.ClientResponse]" = response
         self.texts = []
         self.response_id = None
         self.conversation_id = None

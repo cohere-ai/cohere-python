@@ -16,8 +16,6 @@ except ImportError:
 
 import aiohttp
 import backoff
-
-import cohere
 from cohere.client import Client
 from cohere.custom_model_dataset import CustomModelDataset
 from cohere.error import CohereAPIError, CohereConnectionError, CohereError
@@ -64,6 +62,8 @@ from cohere.responses.custom_model import (
 from cohere.responses.dataset import AsyncDataset, Dataset, DatasetUsage, ParseInfo
 from cohere.responses.embed_job import AsyncEmbedJob
 from cohere.utils import async_wait_for_job, is_api_key_valid, np_json_dumps
+
+import cohere
 
 JSON = Union[Dict, List]
 
@@ -1220,7 +1220,7 @@ class AIOHTTPBackend:
             max_tries=self.max_retries + 1,
             max_time=self.timeout,
         )
-        async def make_request_fn(session, *args, **kwargs):
+        async def make_request_fn(session: aiohttp.ClientSession, *args, **kwargs):
             async with self._semaphore:  # this limits total concurrency by the client
                 response = await session.request(*args, **kwargs)
             if response.status in cohere.RETRY_STATUS_CODES:  # likely temporary, raise to retry
@@ -1274,6 +1274,9 @@ class AIOHTTPBackend:
                 json_serialize=np_json_dumps,
                 timeout=aiohttp.ClientTimeout(self.timeout),
                 connector=aiohttp.TCPConnector(limit=0),
+                # 256 KiB, affects the limit for reading a single line of streamed response.
+                # The value chosen here should be high enough to consume a long API response.
+                read_bufsize=1024 * 256,
             )
             self._semaphore = asyncio.Semaphore(self.max_concurrent_requests)
             self._requester = self.build_aio_requester()
