@@ -2,4 +2,4 @@
 
 import typing
 
-GenerateRequestReturnLikelihoods = typing.Literal["GENERATION", "ALL", "NONE"]
+GenerateRequestReturnLikelihoods = typing.Union[typing.AnyStr, typing.Literal["GENERATION", "ALL", "NONE"]]

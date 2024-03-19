@@ -2,4 +2,4 @@
 
 import typing
 
-ClassifyRequestTruncate = typing.Literal["NONE", "START", "END"]
+ClassifyRequestTruncate = typing.Union[typing.AnyStr, typing.Literal["NONE", "START", "END"]]

@@ -2,4 +2,4 @@
 
 import typing
 
-SummarizeRequestFormat = typing.Literal["paragraph", "bullets"]
+SummarizeRequestFormat = typing.Union[typing.AnyStr, typing.Literal["paragraph", "bullets"]]
