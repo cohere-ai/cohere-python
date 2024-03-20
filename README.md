@@ -43,6 +43,11 @@ chat = co.chat(
 print(chat)
 ```
 
+> [!TIP]
+> You can set a system environment variable `CO_API_KEY` to avoid writing your api key within your code, e.g. add `export CO_API_KEY=theapikeyforyouraccount`
+> in your ~/.zshrc or ~/.bashrc, open a new terminal, then code calling `cohere.Client()` will read this key.
+
+
 ## Streaming
 
 The SDK supports streaming endpoints. To take advantage of this feature for chat,
