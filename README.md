@@ -23,7 +23,7 @@ Cohere documentation and API reference is available [here](https://docs.cohere.c
 ## Installation
 
 ```
-pip install --pre --upgrade cohere
+pip install cohere
 ```
 
 ## Usage
@@ -63,10 +63,6 @@ for event in stream:
     if event.event_type == "text-generation":
         print(event.text, end='')
 ```
-
-## Alpha status
-
-This SDK is in alpha, and while we will try to avoid it, there may be breaking changes between versions without a major version update. Therefore, we recommend pinning the package version to a specific version in your package.json file. This way, you can install the same version each time without breaking changes unless you are intentionally looking for the latest version.
 
 ## Contributing
 
