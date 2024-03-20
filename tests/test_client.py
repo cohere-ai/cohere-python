@@ -5,7 +5,7 @@ import cohere
 from cohere import ChatMessage, ChatConnector, ClassifyExample, CreateConnectorServiceAuth, Tool, \
     ToolParameterDefinitionsValue, ChatRequestToolResultsItem
 
-co = cohere.Client(os.environ['COHERE_API_KEY'], timeout=10000)
+co = cohere.Client(timeout=10000)
 
 package_dir = os.path.dirname(os.path.abspath(__file__))
 embed_job = os.path.join(package_dir, 'embed_job.jsonl')

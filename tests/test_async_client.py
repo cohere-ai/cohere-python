@@ -13,7 +13,7 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
     co: cohere.AsyncClient
 
     def setUp(self) -> None:
-        self.co = cohere.AsyncClient(os.environ['COHERE_API_KEY'], timeout=10000)
+        self.co = cohere.AsyncClient(timeout=10000)
 
     async def test_chat(self) -> None:
         chat = await self.co.chat(
