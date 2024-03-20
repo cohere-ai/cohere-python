@@ -35,7 +35,7 @@ jobs:
       - name: Test
         run: poetry run pytest .
         env:
-          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+          CO_API_KEY: ${{ secrets.COHERE_API_KEY }}
   
 
   publish:
