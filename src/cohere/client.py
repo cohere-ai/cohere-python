@@ -5,7 +5,7 @@ import httpx
 from .base_client import BaseCohere, AsyncBaseCohere
 from .environment import ClientEnvironment
 from .utils import wait, async_wait
-
+import os
 
 # Use NoReturn as Never type for compatibility
 Never = typing.NoReturn
@@ -59,9 +59,9 @@ def deprecated_function(fn_name: str) -> typing.Any:
 class Client(BaseCohere):
     def __init__(
             self,
-            api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
+            api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"),
             *,
-            base_url: typing.Optional[str] = None,
+            base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
             environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
             client_name: typing.Optional[str] = None,
             timeout: typing.Optional[float] = 60,
@@ -130,9 +130,9 @@ class Client(BaseCohere):
 class AsyncClient(AsyncBaseCohere):
     def __init__(
             self,
-            api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
+            api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"),
             *,
-            base_url: typing.Optional[str] = None,
+            base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
             environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
             client_name: typing.Optional[str] = None,
             timeout: typing.Optional[float] = 60,
