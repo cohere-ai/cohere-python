@@ -59,7 +59,7 @@ def deprecated_function(fn_name: str) -> typing.Any:
 class Client(BaseCohere):
     def __init__(
             self,
-            api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"),
+            api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
             *,
             base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
             environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
@@ -67,6 +67,9 @@ class Client(BaseCohere):
             timeout: typing.Optional[float] = 60,
             httpx_client: typing.Optional[httpx.Client] = None,
     ):
+        if api_key is None:
+            api_key = os.getenv("CO_API_KEY")
+
         BaseCohere.__init__(
             self,
             base_url=base_url,
@@ -130,7 +133,7 @@ class Client(BaseCohere):
 class AsyncClient(AsyncBaseCohere):
     def __init__(
             self,
-            api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"),
+            api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
             *,
             base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
             environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
@@ -138,6 +141,9 @@ class AsyncClient(AsyncBaseCohere):
             timeout: typing.Optional[float] = 60,
             httpx_client: typing.Optional[httpx.AsyncClient] = None,
     ):
+        if api_key is None:
+            api_key = os.getenv("CO_API_KEY")
+
         AsyncBaseCohere.__init__(
             self,
             base_url=base_url,

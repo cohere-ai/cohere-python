@@ -13,6 +13,10 @@ embed_job = os.path.join(package_dir, 'embed_job.jsonl')
 
 class TestClient(unittest.TestCase):
 
+    def test_token_falls_back_on_env_variable(self) -> None:
+        cohere.Client(api_key=None)
+        cohere.Client(None)
+
     def test_chat(self) -> None:
         chat = co.chat(
             chat_history=[
