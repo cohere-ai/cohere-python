@@ -119,8 +119,16 @@ from .types import (
     ToolParameterDefinitionsValue,
     UpdateConnectorResponse,
 )
-from .errors import BadRequestError, ForbiddenError, InternalServerError, NotFoundError, TooManyRequestsError
-from . import connectors, datasets, embed_jobs, models
+from .errors import (
+    BadRequestError,
+    ForbiddenError,
+    InternalServerError,
+    NotFoundError,
+    ServiceUnavailableError,
+    TooManyRequestsError,
+    UnauthorizedError,
+)
+from . import connectors, datasets, embed_jobs, finetuning, models
 from .client import AsyncClient, Client
 from .datasets import DatasetsCreateResponse, DatasetsGetResponse, DatasetsGetUsageResponse, DatasetsListResponse
 from .embed_jobs import CreateEmbedJobRequestTruncate
@@ -236,6 +244,7 @@ __all__ = [
     "RerankResponseResultsItem",
     "RerankResponseResultsItemDocument",
     "RerankerDataMetrics",
+    "ServiceUnavailableError",
     "SingleGeneration",
     "SingleGenerationInStream",
     "SingleGenerationTokenLikelihoodsItem",
@@ -256,9 +265,11 @@ __all__ = [
     "Tool",
     "ToolCall",
     "ToolParameterDefinitionsValue",
+    "UnauthorizedError",
     "UpdateConnectorResponse",
     "connectors",
     "datasets",
     "embed_jobs",
+    "finetuning",
     "models",
 ]
