@@ -15,9 +15,9 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         self.co = cohere.AsyncClient(timeout=10000)
 
-    async def token_falls_back_on_env_variable(self) -> None:
-        co = cohere.AsyncClient(api_key=None)
-        co = cohere.AsyncClient(None)
+    async def test_token_falls_back_on_env_variable(self) -> None:
+        cohere.AsyncClient(api_key=None)
+        cohere.AsyncClient(None)
 
     async def test_chat(self) -> None:
         chat = await self.co.chat(
