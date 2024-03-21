@@ -1,5 +1,3 @@
-from .types.tokenize_response import TokenizeResponse
-# from .types.detokenize_response import DetokenizeResponse
 import typing
 
 import httpx
@@ -7,6 +5,8 @@ import httpx
 from .base_client import BaseCohere, AsyncBaseCohere
 from .environment import ClientEnvironment
 from .manually_maintained.cache import CacheMixin
+from .utils import wait, async_wait
+import os
 
 # Use NoReturn as Never type for compatibility
 Never = typing.NoReturn
@@ -27,6 +27,7 @@ def throw_if_stream_is_true(*args, **kwargs) -> None:
         raise ValueError(
             "Since python sdk cohere==5.0.0, you must now use chat_stream(...) instead of chat(stream=True, ...)"
         )
+
 
 def moved_function(fn_name: str, new_fn_name: str) -> typing.Any:
     """
@@ -58,14 +59,14 @@ def deprecated_function(fn_name: str) -> typing.Any:
 
 class Client(BaseCohere, CacheMixin):
     def __init__(
-            self,
-            api_key: typing.Union[str, typing.Callable[[], str]],
-            *,
-            base_url: typing.Optional[str] = None,
-            environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
-            client_name: typing.Optional[str] = None,
-            timeout: typing.Optional[float] = 60,
-            httpx_client: typing.Optional[httpx.Client] = None,
+        self,
+        api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"),
+        *,
+        base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
+        environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
+        client_name: typing.Optional[str] = None,
+        timeout: typing.Optional[float] = 60,
+        httpx_client: typing.Optional[httpx.Client] = None,
     ):
         BaseCohere.__init__(
             self,
@@ -78,6 +79,8 @@ class Client(BaseCohere, CacheMixin):
         )
 
         validate_args(self, "chat", throw_if_stream_is_true)
+
+    wait = wait
 
     """
     The following methods have been moved or deprecated in cohere==5.0.0. Please update your usage.
@@ -97,7 +100,7 @@ class Client(BaseCohere, CacheMixin):
     list_datasets: Never = moved_function("list_datasets", ".datasets.list")
     delete_dataset: Never = moved_function("delete_dataset", ".datasets.delete")
     get_dataset_usage: Never = moved_function("get_dataset_usage", ".datasets.get_usage")
-    wait_for_dataset: Never = deprecated_function("wait_for_dataset")
+    wait_for_dataset: Never = moved_function("wait_for_dataset", ".wait")
     _check_response: Never = deprecated_function("_check_response")
     _request: Never = deprecated_function("_request")
     create_cluster_job: Never = deprecated_function("create_cluster_job")
@@ -108,7 +111,7 @@ class Client(BaseCohere, CacheMixin):
     list_embed_jobs: Never = moved_function("list_embed_jobs", ".embed_jobs.list")
     get_embed_job: Never = moved_function("get_embed_job", ".embed_jobs.get")
     cancel_embed_job: Never = moved_function("cancel_embed_job", ".embed_jobs.cancel")
-    wait_for_embed_job: Never = deprecated_function("wait_for_embed_job")
+    wait_for_embed_job: Never = moved_function("wait_for_embed_job", ".wait")
     create_custom_model: Never = deprecated_function("create_custom_model")
     wait_for_custom_model: Never = deprecated_function("wait_for_custom_model")
     _upload_dataset: Never = deprecated_function("_upload_dataset")
@@ -124,30 +127,38 @@ class Client(BaseCohere, CacheMixin):
     delete_connector: Never = moved_function("delete_connector", ".connectors.delete")
     oauth_authorize_connector: Never = moved_function("oauth_authorize_connector", ".connectors.o_auth_authorize")
 
-    def local_tokenize(self, *, text: str, model: str) -> TokenizeResponse:
+    def local_tokenize(self, *, text: str, model: str) -> typing.List[int]:
         from .manually_maintained.tokenizers import local_tokenize
-        # TODO: parse into TokenizeResponse()? or should remain decoupled from the API responses?
+
         return local_tokenize(self, model, text)
 
-    # def detokenize(
-    #     self,
-    #     *,
-    #     tokens: typing.Sequence[int],
-    #     model: typing.Optional[str] = OMIT,
-    # ) -> DetokenizeResponse:
-    #     return None
+    def local_detokenize(
+        self,
+        *,
+        tokens: typing.Sequence[int],
+        model: str,
+    ) -> str:
+        from .manually_maintained.tokenizers import local_detokenize
+
+        return local_detokenize(self, model, tokens)
+
+    # TODO: how to type hint without the package being installed?
+    def fetch_tokenizer(self, *, model: str) -> typing.Any:
+        from .manually_maintained.tokenizers import get_hf_tokenizer
+
+        return get_hf_tokenizer(self, model)
 
 
 class AsyncClient(AsyncBaseCohere):
     def __init__(
-            self,
-            api_key: typing.Union[str, typing.Callable[[], str]],
-            *,
-            base_url: typing.Optional[str] = None,
-            environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
-            client_name: typing.Optional[str] = None,
-            timeout: typing.Optional[float] = 60,
-            httpx_client: typing.Optional[httpx.AsyncClient] = None,
+        self,
+        api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"),
+        *,
+        base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
+        environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
+        client_name: typing.Optional[str] = None,
+        timeout: typing.Optional[float] = 60,
+        httpx_client: typing.Optional[httpx.AsyncClient] = None,
     ):
         AsyncBaseCohere.__init__(
             self,
@@ -160,6 +171,8 @@ class AsyncClient(AsyncBaseCohere):
         )
 
         validate_args(self, "chat", throw_if_stream_is_true)
+
+    wait = async_wait
 
     """
     The following methods have been moved or deprecated in cohere==5.0.0. Please update your usage.
@@ -179,7 +192,7 @@ class AsyncClient(AsyncBaseCohere):
     list_datasets: Never = moved_function("list_datasets", ".datasets.list")
     delete_dataset: Never = moved_function("delete_dataset", ".datasets.delete")
     get_dataset_usage: Never = moved_function("get_dataset_usage", ".datasets.get_usage")
-    wait_for_dataset: Never = deprecated_function("wait_for_dataset")
+    wait_for_dataset: Never = moved_function("wait_for_dataset", ".wait")
     _check_response: Never = deprecated_function("_check_response")
     _request: Never = deprecated_function("_request")
     create_cluster_job: Never = deprecated_function("create_cluster_job")
@@ -190,7 +203,7 @@ class AsyncClient(AsyncBaseCohere):
     list_embed_jobs: Never = moved_function("list_embed_jobs", ".embed_jobs.list")
     get_embed_job: Never = moved_function("get_embed_job", ".embed_jobs.get")
     cancel_embed_job: Never = moved_function("cancel_embed_job", ".embed_jobs.cancel")
-    wait_for_embed_job: Never = deprecated_function("wait_for_embed_job")
+    wait_for_embed_job: Never = moved_function("wait_for_embed_job", ".wait")
     create_custom_model: Never = deprecated_function("create_custom_model")
     wait_for_custom_model: Never = deprecated_function("wait_for_custom_model")
     _upload_dataset: Never = deprecated_function("_upload_dataset")

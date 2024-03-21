@@ -1,12 +1,11 @@
 import os
 import unittest
-from time import sleep
 
 import cohere
 from cohere import ChatMessage, ChatConnector, ClassifyExample, CreateConnectorServiceAuth, Tool, \
     ToolParameterDefinitionsValue, ChatRequestToolResultsItem
 
-co = cohere.Client(os.environ['COHERE_API_KEY'], timeout=10000)
+co = cohere.Client(timeout=10000)
 
 package_dir = os.path.dirname(os.path.abspath(__file__))
 embed_job = os.path.join(package_dir, 'embed_job.jsonl')
@@ -60,6 +59,7 @@ class TestClient(unittest.TestCase):
         with self.assertRaises(ValueError):
             co.list_connectors("dummy", dummy="dummy") # type: ignore
 
+    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     def test_generate(self) -> None:
         response = co.generate(
             prompt='Please explain to me how LLMs work',
@@ -74,6 +74,7 @@ class TestClient(unittest.TestCase):
         )
         print(response)
 
+    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     def test_embed_job_crud(self) -> None:
         dataset = co.datasets.create(
             name="test",
@@ -81,12 +82,9 @@ class TestClient(unittest.TestCase):
             data=open(embed_job, 'rb'),
         )
 
-        while True:
-            ds = co.datasets.get(dataset.id or "")
-            sleep(2)
-            print(ds, flush=True)
-            if ds.dataset.validation_status != "processing":
-                break
+        result = co.wait(dataset)
+
+        self.assertEqual(result.dataset.validation_status, "validated")
 
         # start an embed job
         job = co.embed_jobs.create(
@@ -101,12 +99,9 @@ class TestClient(unittest.TestCase):
 
         print(my_embed_jobs)
 
-        while True:
-            em = co.embed_jobs.get(job.job_id)
-            sleep(2)
-            print(em, flush=True)
-            if em.status != "processing":
-                break
+        emb_result = co.wait(job)
+
+        self.assertEqual(emb_result.status, "complete")
 
         co.embed_jobs.cancel(job.job_id)
 
@@ -128,6 +123,7 @@ class TestClient(unittest.TestCase):
 
         print(response)
 
+    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     def test_classify(self) -> None:
         examples = [
             ClassifyExample(text="Dermatologists don't like her!", label="Spam"),
@@ -155,6 +151,7 @@ class TestClient(unittest.TestCase):
         )
         print(response)
 
+    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     def test_datasets_crud(self) -> None:
         my_dataset = co.datasets.create(
             name="test",
@@ -218,6 +215,7 @@ class TestClient(unittest.TestCase):
         )
         print(response)
 
+    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     def test_connectors_crud(self) -> None:
         created_connector = co.connectors.create(
             name="Example connector",
@@ -240,6 +238,7 @@ class TestClient(unittest.TestCase):
 
         co.connectors.delete(created_connector.connector.id)
 
+    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     def test_tool_use(self) -> None:
         tools = [
             Tool(

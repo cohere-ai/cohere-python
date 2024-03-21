@@ -128,6 +128,7 @@ class BaseCohere:
         max_tokens: typing.Optional[int] = OMIT,
         k: typing.Optional[int] = OMIT,
         p: typing.Optional[float] = OMIT,
+        seed: typing.Optional[float] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
@@ -209,6 +210,8 @@ class BaseCohere:
 
             - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
                                          Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
+
+            - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinism cannot be totally guaranteed.
 
             - frequency_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
@@ -353,6 +356,8 @@ class BaseCohere:
             _request["k"] = k
         if p is not OMIT:
             _request["p"] = p
+        if seed is not OMIT:
+            _request["seed"] = seed
         if frequency_penalty is not OMIT:
             _request["frequency_penalty"] = frequency_penalty
         if presence_penalty is not OMIT:
@@ -420,6 +425,7 @@ class BaseCohere:
         max_tokens: typing.Optional[int] = OMIT,
         k: typing.Optional[int] = OMIT,
         p: typing.Optional[float] = OMIT,
+        seed: typing.Optional[float] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
@@ -501,6 +507,8 @@ class BaseCohere:
 
             - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
                                          Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
+
+            - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinism cannot be totally guaranteed.
 
             - frequency_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
@@ -588,6 +596,8 @@ class BaseCohere:
             _request["k"] = k
         if p is not OMIT:
             _request["p"] = p
+        if seed is not OMIT:
+            _request["seed"] = seed
         if frequency_penalty is not OMIT:
             _request["frequency_penalty"] = frequency_penalty
         if presence_penalty is not OMIT:
@@ -643,6 +653,7 @@ class BaseCohere:
         max_tokens: typing.Optional[int] = OMIT,
         truncate: typing.Optional[GenerateStreamRequestTruncate] = OMIT,
         temperature: typing.Optional[float] = OMIT,
+        seed: typing.Optional[float] = OMIT,
         preset: typing.Optional[str] = OMIT,
         end_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
@@ -682,6 +693,8 @@ class BaseCohere:
                                                                         If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
             - temperature: typing.Optional[float]. A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations. See [Temperature](/temperature-wiki) for more details.
                                                    Defaults to `0.75`, min value of `0.0`, max value of `5.0`.
+
+            - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed.
 
             - preset: typing.Optional[str]. Identifier of a custom preset. A preset is a combination of parameters, such as prompt, temperature etc. You can create presets in the [playground](https://dashboard.cohere.ai/playground/generate).
                                             When a preset is specified, the `prompt` parameter becomes optional, and any included parameters will override the preset's parameters.
@@ -751,6 +764,8 @@ class BaseCohere:
             _request["truncate"] = truncate
         if temperature is not OMIT:
             _request["temperature"] = temperature
+        if seed is not OMIT:
+            _request["seed"] = seed
         if preset is not OMIT:
             _request["preset"] = preset
         if end_sequences is not OMIT:
@@ -823,6 +838,7 @@ class BaseCohere:
         max_tokens: typing.Optional[int] = OMIT,
         truncate: typing.Optional[GenerateRequestTruncate] = OMIT,
         temperature: typing.Optional[float] = OMIT,
+        seed: typing.Optional[float] = OMIT,
         preset: typing.Optional[str] = OMIT,
         end_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
@@ -862,6 +878,8 @@ class BaseCohere:
                                                                   If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
             - temperature: typing.Optional[float]. A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations. See [Temperature](/temperature-wiki) for more details.
                                                    Defaults to `0.75`, min value of `0.0`, max value of `5.0`.
+
+            - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed.
 
             - preset: typing.Optional[str]. Identifier of a custom preset. A preset is a combination of parameters, such as prompt, temperature etc. You can create presets in the [playground](https://dashboard.cohere.ai/playground/generate).
                                             When a preset is specified, the `prompt` parameter becomes optional, and any included parameters will override the preset's parameters.
@@ -917,6 +935,8 @@ class BaseCohere:
             _request["truncate"] = truncate
         if temperature is not OMIT:
             _request["temperature"] = temperature
+        if seed is not OMIT:
+            _request["seed"] = seed
         if preset is not OMIT:
             _request["preset"] = preset
         if end_sequences is not OMIT:
@@ -1608,6 +1628,7 @@ class AsyncBaseCohere:
         max_tokens: typing.Optional[int] = OMIT,
         k: typing.Optional[int] = OMIT,
         p: typing.Optional[float] = OMIT,
+        seed: typing.Optional[float] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
@@ -1689,6 +1710,8 @@ class AsyncBaseCohere:
 
             - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
                                          Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
+
+            - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinism cannot be totally guaranteed.
 
             - frequency_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
@@ -1833,6 +1856,8 @@ class AsyncBaseCohere:
             _request["k"] = k
         if p is not OMIT:
             _request["p"] = p
+        if seed is not OMIT:
+            _request["seed"] = seed
         if frequency_penalty is not OMIT:
             _request["frequency_penalty"] = frequency_penalty
         if presence_penalty is not OMIT:
@@ -1900,6 +1925,7 @@ class AsyncBaseCohere:
         max_tokens: typing.Optional[int] = OMIT,
         k: typing.Optional[int] = OMIT,
         p: typing.Optional[float] = OMIT,
+        seed: typing.Optional[float] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
@@ -1981,6 +2007,8 @@ class AsyncBaseCohere:
 
             - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
                                          Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
+
+            - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinism cannot be totally guaranteed.
 
             - frequency_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
@@ -2068,6 +2096,8 @@ class AsyncBaseCohere:
             _request["k"] = k
         if p is not OMIT:
             _request["p"] = p
+        if seed is not OMIT:
+            _request["seed"] = seed
         if frequency_penalty is not OMIT:
             _request["frequency_penalty"] = frequency_penalty
         if presence_penalty is not OMIT:
@@ -2123,6 +2153,7 @@ class AsyncBaseCohere:
         max_tokens: typing.Optional[int] = OMIT,
         truncate: typing.Optional[GenerateStreamRequestTruncate] = OMIT,
         temperature: typing.Optional[float] = OMIT,
+        seed: typing.Optional[float] = OMIT,
         preset: typing.Optional[str] = OMIT,
         end_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
@@ -2162,6 +2193,8 @@ class AsyncBaseCohere:
                                                                         If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
             - temperature: typing.Optional[float]. A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations. See [Temperature](/temperature-wiki) for more details.
                                                    Defaults to `0.75`, min value of `0.0`, max value of `5.0`.
+
+            - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed.
 
             - preset: typing.Optional[str]. Identifier of a custom preset. A preset is a combination of parameters, such as prompt, temperature etc. You can create presets in the [playground](https://dashboard.cohere.ai/playground/generate).
                                             When a preset is specified, the `prompt` parameter becomes optional, and any included parameters will override the preset's parameters.
@@ -2231,6 +2264,8 @@ class AsyncBaseCohere:
             _request["truncate"] = truncate
         if temperature is not OMIT:
             _request["temperature"] = temperature
+        if seed is not OMIT:
+            _request["seed"] = seed
         if preset is not OMIT:
             _request["preset"] = preset
         if end_sequences is not OMIT:
@@ -2303,6 +2338,7 @@ class AsyncBaseCohere:
         max_tokens: typing.Optional[int] = OMIT,
         truncate: typing.Optional[GenerateRequestTruncate] = OMIT,
         temperature: typing.Optional[float] = OMIT,
+        seed: typing.Optional[float] = OMIT,
         preset: typing.Optional[str] = OMIT,
         end_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
@@ -2342,6 +2378,8 @@ class AsyncBaseCohere:
                                                                   If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
             - temperature: typing.Optional[float]. A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations. See [Temperature](/temperature-wiki) for more details.
                                                    Defaults to `0.75`, min value of `0.0`, max value of `5.0`.
+
+            - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed.
 
             - preset: typing.Optional[str]. Identifier of a custom preset. A preset is a combination of parameters, such as prompt, temperature etc. You can create presets in the [playground](https://dashboard.cohere.ai/playground/generate).
                                             When a preset is specified, the `prompt` parameter becomes optional, and any included parameters will override the preset's parameters.
@@ -2397,6 +2435,8 @@ class AsyncBaseCohere:
             _request["truncate"] = truncate
         if temperature is not OMIT:
             _request["temperature"] = temperature
+        if seed is not OMIT:
+            _request["seed"] = seed
         if preset is not OMIT:
             _request["preset"] = preset
         if end_sequences is not OMIT:

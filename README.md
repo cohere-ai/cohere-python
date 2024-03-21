@@ -8,13 +8,13 @@
 
 The Cohere Python SDK provides access to the Cohere API from Python.
 
-<!--- ## ✨🪩✨ Announcing Cohere's new Python SDK ✨🪩✨
+## ✨🪩✨ Announcing Cohere's new Python SDK ✨🪩✨
 
-We are very excited to publish this brand new Python SDK. We will continuously update this library with all of the latest features in our API. Please create issues where you have feedback so that we can continue to improve the developer experience! --->
+We are very excited to publish this brand-new Python SDK. We will continuously update this library with all the latest features in our API. Please create issues where you have feedback so that we can continue to improve the developer experience!
 
-## 5.0.0 alpha 🚀
+## cohere==5.0.0 Migration Guide
 
-We will release our brand new cohere-python SDK on the 18th of March 2024! If you'd like to get a head start by installing the alpha version, please go ahead and use pip install --pre --upgrade cohere. Thanks for your patience as we make breaking changes where necessary. If you have any issues using it, we will respond to github issues as soon as possible.
+We have created a [migration guide](4.0.0-5.0.0-migration-guide.md) to help you through the process. If you have any questions, please feel free to open an issue and we will respond to you asap.
 
 ## Documentation
 
@@ -23,7 +23,7 @@ Cohere documentation and API reference is available [here](https://docs.cohere.c
 ## Installation
 
 ```
-pip install --pre --upgrade cohere
+pip install cohere
 ```
 
 ## Usage
@@ -63,10 +63,6 @@ for event in stream:
     if event.event_type == "text-generation":
         print(event.text, end='')
 ```
-
-## Alpha status
-
-This SDK is in alpha, and while we will try to avoid it, there may be breaking changes between versions without a major version update. Therefore, we recommend pinning the package version to a specific version in your package.json file. This way, you can install the same version each time without breaking changes unless you are intentionally looking for the latest version.
 
 ## Contributing
 

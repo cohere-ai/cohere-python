@@ -2,4 +2,4 @@
 
 import typing
 
-CreateEmbedJobRequestTruncate = typing.Literal["START", "END"]
+CreateEmbedJobRequestTruncate = typing.Union[typing.AnyStr, typing.Literal["START", "END"]]
