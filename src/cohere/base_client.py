@@ -20,6 +20,7 @@ from .environment import ClientEnvironment
 from .errors.bad_request_error import BadRequestError
 from .errors.internal_server_error import InternalServerError
 from .errors.too_many_requests_error import TooManyRequestsError
+from .finetuning.client import AsyncFinetuningClient, FinetuningClient
 from .models.client import AsyncModelsClient, ModelsClient
 from .types.chat_connector import ChatConnector
 from .types.chat_document import ChatDocument
@@ -111,6 +112,7 @@ class BaseCohere:
         self.datasets = DatasetsClient(client_wrapper=self._client_wrapper)
         self.connectors = ConnectorsClient(client_wrapper=self._client_wrapper)
         self.models = ModelsClient(client_wrapper=self._client_wrapper)
+        self.finetuning = FinetuningClient(client_wrapper=self._client_wrapper)
 
     def chat_stream(
         self,
@@ -1622,6 +1624,7 @@ class AsyncBaseCohere:
         self.datasets = AsyncDatasetsClient(client_wrapper=self._client_wrapper)
         self.connectors = AsyncConnectorsClient(client_wrapper=self._client_wrapper)
         self.models = AsyncModelsClient(client_wrapper=self._client_wrapper)
+        self.finetuning = AsyncFinetuningClient(client_wrapper=self._client_wrapper)
 
     async def chat_stream(
         self,
