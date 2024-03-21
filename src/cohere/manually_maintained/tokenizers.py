@@ -26,7 +26,7 @@ def tokenizer_cache_key(model_name: str) -> str:
 
 def get_hf_tokenizer(co: Client, model_name: str) -> Tokenizer:
     """Returns a HF tokenizer from a given tokenizer config URL."""
-    tokenizer = co.cache_get(tokenizer_cache_key(model_name))
+    tokenizer = co._cache_get(tokenizer_cache_key(model_name))
     if tokenizer is not None:
         return tokenizer
 
@@ -52,7 +52,7 @@ def get_hf_tokenizer(co: Client, model_name: str) -> Tokenizer:
     response.raise_for_status()
     tokenizer = Tokenizer.from_str(response.text)
 
-    co.cache_set(tokenizer_cache_key(model_name), tokenizer)
+    co._cache_set(tokenizer_cache_key(model_name), tokenizer)
     return tokenizer
 
 
