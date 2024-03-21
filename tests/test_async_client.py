@@ -240,6 +240,7 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
 
         await self.co.connectors.delete(created_connector.connector.id)
 
+    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     async def test_tool_use(self) -> None:
         tools = [
             Tool(
