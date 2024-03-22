@@ -3,9 +3,7 @@ import unittest
 
 import cohere
 from cohere import ChatMessage, ChatConnector, ClassifyExample, CreateConnectorServiceAuth, Tool, \
-    ToolParameterDefinitionsValue, ChatRequestToolResultsItem
-
-from src.cohere import EmbedResponse_EmbeddingsByType
+    ToolParameterDefinitionsValue, ChatRequestToolResultsItem, EmbedResponse_EmbeddingsByType
 
 co = cohere.Client(timeout=10000)
 
