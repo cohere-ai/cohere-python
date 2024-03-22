@@ -12,7 +12,7 @@ except ImportError:
     import pydantic  # type: ignore
 
 
-class Model(pydantic.BaseModel):
+class GetModelResponse(pydantic.BaseModel):
     """
     Contains information about the model and which API endpoints it can be used with.
     """
