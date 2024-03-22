@@ -12,8 +12,10 @@ packages = [
 python = "^3.8"
 httpx = ">=0.21.2"
 pydantic = ">= 1.9.2"
-tokenizers = "^0.15.2"
+# tokenizers = "^0.15.2"
 typing_extensions = ">= 4.0.0"
+tokenizers = {version="^0.15.2", optional=true}
+
 
 [tool.poetry.dev-dependencies]
 mypy = "^1.8.0"
@@ -32,3 +34,7 @@ plugins = ["pydantic.mypy"]
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.extras]
+# used for local tokenization
+tokenizers = ["tokenizers"]

@@ -4,6 +4,7 @@ import httpx
 
 from .base_client import BaseCohere, AsyncBaseCohere
 from .environment import ClientEnvironment
+from .manually_maintained.cache import CacheMixin
 from .utils import wait, async_wait
 import os
 
@@ -56,7 +57,7 @@ def deprecated_function(fn_name: str) -> typing.Any:
     return fn
 
 
-class Client(BaseCohere):
+class Client(BaseCohere, CacheMixin):
     def __init__(
             self,
             api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
@@ -129,8 +130,24 @@ class Client(BaseCohere):
     delete_connector: Never = moved_function("delete_connector", ".connectors.delete")
     oauth_authorize_connector: Never = moved_function("oauth_authorize_connector", ".connectors.o_auth_authorize")
 
+    def local_tokenize(self, *, text: str, model: str) -> typing.List[int]:
+        from .manually_maintained.tokenizers import local_tokenize
 
-class AsyncClient(AsyncBaseCohere):
+        return local_tokenize(self, model, text)
+
+    def local_detokenize(self, *, tokens: typing.List[int], model: str) -> str:
+        from .manually_maintained.tokenizers import local_detokenize
+
+        return local_detokenize(self, model, tokens)
+
+    # TODO: how to type hint without the package being installed?
+    def fetch_tokenizer(self, *, model: str) -> typing.Any:
+        from .manually_maintained.tokenizers import get_hf_tokenizer
+
+        return get_hf_tokenizer(self, model)
+
+
+class AsyncClient(AsyncBaseCohere, CacheMixin):
     def __init__(
             self,
             api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
@@ -202,3 +219,18 @@ class AsyncClient(AsyncBaseCohere):
     list_connectors: Never = moved_function("list_connectors", ".connectors.list")
     delete_connector: Never = moved_function("delete_connector", ".connectors.delete")
     oauth_authorize_connector: Never = moved_function("oauth_authorize_connector", ".connectors.o_auth_authorize")
+
+    async def local_tokenize(self, *, text: str, model: str) -> typing.List[int]:
+        from .manually_maintained.tokenizers import async_local_tokenize
+
+        return await async_local_tokenize(self, model, text)
+
+    async def local_detokenize(self, *, tokens: typing.List[int], model: str) -> str:
+        from .manually_maintained.tokenizers import async_local_detokenize
+
+        return await async_local_detokenize(self, model, tokens)
+
+    async def fetch_tokenizer(self, *, model: str) -> typing.Any:
+        from .manually_maintained.tokenizers import async_get_hf_tokenizer
+
+        return await async_get_hf_tokenizer(self, model)
