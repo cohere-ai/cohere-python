@@ -860,9 +860,9 @@ socks = ["pysocks (>=1.5.6,!=1.5.7,<2.0)"]
 zstd = ["zstandard (>=0.18.0)"]
 
 [extras]
-tokenizers = ["requests", "tokenizers"]
+tokenizers = ["tokenizers"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "564ce2abc4afc82be47780ef1d1b74738533aad76c6cfa80b9e7f1ba340b5c55"
+content-hash = "93553c9af0fe09970137ff91abd21ec51faaeb04df02d1ac95999d2748d047d5"

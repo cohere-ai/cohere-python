@@ -1,14 +1,7 @@
+import urllib
 import typing
 from cohere.client import Client
 
-# TODO: can we get rid of requests? use std lib instead?
-try:
-    import requests
-except ImportError:
-    raise ImportError(
-        "Please install the requests package to use local tokenization."
-        "\nYou can do so by running `pip install requests`."
-    )
 try:
     from tokenizers import Tokenizer
 except ImportError:
@@ -39,9 +32,8 @@ def get_hf_tokenizer(co: Client, model_name: str) -> Tokenizer:
     response = FakeRes()
     # ---------- should use co.here API to get the tokenizer URL once the GET model is in place ----------
 
-    response = requests.request("GET", response.json()["tokenizer_url"])
-    response.raise_for_status()
-    tokenizer = Tokenizer.from_str(response.text)
+    resource = urllib.request.urlopen(response.json()["tokenizer_url"])
+    tokenizer = Tokenizer.from_str(resource.read().decode("utf-8"))
 
     co._cache_set(tokenizer_cache_key(model_name), tokenizer)
     return tokenizer
@@ -50,7 +42,7 @@ def get_hf_tokenizer(co: Client, model_name: str) -> Tokenizer:
 def local_tokenize(co: Client, model_name: str, text: str) -> typing.List[int]:
     """Tokenizes a given text using a local tokenizer."""
     tokenizer = get_hf_tokenizer(co, model_name)
-    return tokenizer.encode(text).tokens
+    return tokenizer.encode(text, add_special_tokens=False).ids
 
 
 def local_detokenize(co: Client, model_name: str, tokens: list) -> str:
