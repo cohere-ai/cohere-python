@@ -3,7 +3,7 @@ import typing
 from cohere.client import AsyncClient, Client
 
 try:
-    from tokenizers import Tokenizer
+    from tokenizers import Tokenizer  # type: ignore
 except ImportError:
     raise ImportError(
         "Please install the hugging face tokenizers package to use local tokenization."

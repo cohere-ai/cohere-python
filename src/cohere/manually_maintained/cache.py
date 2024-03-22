@@ -4,7 +4,7 @@ import time
 
 class CacheMixin:
     # A simple in-memory cache with TTL (thread safe). This is used to cache tokenizers at the moment.
-    _cache = dict()
+    _cache: typing.Dict[str, typing.Tuple[typing.Optional[float], typing.Any]] = dict()
 
     def _cache_get(self, key: str) -> typing.Any:
         val = self._cache.get(key)
