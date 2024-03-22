@@ -135,7 +135,7 @@ class Client(BaseCohere, CacheMixin):
 
         return local_tokenize(self, model, text)
 
-    def local_detokenize(self, *, tokens: typing.Sequence[int], model: str) -> str:
+    def local_detokenize(self, *, tokens: typing.List[int], model: str) -> str:
         from .manually_maintained.tokenizers import local_detokenize
 
         return local_detokenize(self, model, tokens)
@@ -225,7 +225,7 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
 
         return local_tokenize(self, model, text)
 
-    def local_detokenize(self, *, tokens: typing.Sequence[int], model: str) -> str:
+    def local_detokenize(self, *, tokens: typing.List[int], model: str) -> str:
         from .manually_maintained.tokenizers import local_detokenize
 
         return local_detokenize(self, model, tokens)

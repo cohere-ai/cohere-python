@@ -45,7 +45,7 @@ def local_tokenize(co: Client, model_name: str, text: str) -> typing.List[int]:
     return tokenizer.encode(text, add_special_tokens=False).ids
 
 
-def local_detokenize(co: Client, model_name: str, tokens: list) -> str:
+def local_detokenize(co: Client, model_name: str, tokens: typing.List[int]) -> str:
     """Detokenizes a given list of tokens using a local tokenizer."""
     tokenizer = get_hf_tokenizer(co, model_name)
     return tokenizer.decode(tokens)
