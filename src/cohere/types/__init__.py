@@ -84,12 +84,12 @@ from .generate_streamed_response import (
 )
 from .generation import Generation
 from .get_connector_response import GetConnectorResponse
+from .get_model_response import GetModelResponse
 from .label_metric import LabelMetric
 from .list_connectors_response import ListConnectorsResponse
 from .list_embed_job_response import ListEmbedJobResponse
 from .list_models_response import ListModelsResponse
 from .metrics import Metrics
-from .model import Model
 from .non_streamed_chat_response import NonStreamedChatResponse
 from .o_auth_authorize_response import OAuthAuthorizeResponse
 from .parse_info import ParseInfo
@@ -205,12 +205,12 @@ __all__ = [
     "GenerateStreamedResponse_TextGeneration",
     "Generation",
     "GetConnectorResponse",
+    "GetModelResponse",
     "LabelMetric",
     "ListConnectorsResponse",
     "ListEmbedJobResponse",
     "ListModelsResponse",
     "Metrics",
-    "Model",
     "NonStreamedChatResponse",
     "OAuthAuthorizeResponse",
     "ParseInfo",
