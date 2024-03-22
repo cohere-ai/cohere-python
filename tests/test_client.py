@@ -74,8 +74,14 @@ class TestClient(unittest.TestCase):
         response = co.embed(
             texts=['hello', 'goodbye'],
             model='embed-english-v3.0',
-            input_type="classification"
+            input_type="classification",
+            embedding_types=["float", "int8", "uint8", "binary", "ubinary"]
         )
+
+        if response.response_type == "embeddings_by_type":
+            self.assertIsNotNone(response.embeddings.float)  # type: ignore
+            self.assertIsNotNone(response.embeddings.float_)
+
         print(response)
 
     @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
