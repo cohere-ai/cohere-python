@@ -24,15 +24,11 @@ def get_hf_tokenizer(co: typing.Union[Client, AsyncClient], model_name: str) -> 
     if tokenizer is not None:
         return tokenizer
 
-    # ---------- should use co.here API to get the tokenizer URL once the GET model is in place ----------
-    class FakeRes:
-        def json(self):
-            return {"tokenizer_url": "https://storage.googleapis.com/cohere-assets/tokenizers/command-v1.json"}
+    response = co.models.get(model_name)
+    if not response.tokenizer_url:
+        raise ValueError(f"No tokenizer URL found for model {model_name}")
 
-    response = FakeRes()
-    # ---------- should use co.here API to get the tokenizer URL once the GET model is in place ----------
-
-    resource = urllib.request.urlopen(response.json()["tokenizer_url"])
+    resource = urllib.request.urlopen(response.tokenizer_url)
     tokenizer = Tokenizer.from_str(resource.read().decode("utf-8"))
 
     co._cache_set(tokenizer_cache_key(model_name), tokenizer)
