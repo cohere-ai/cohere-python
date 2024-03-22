@@ -20,6 +20,7 @@ from .environment import ClientEnvironment
 from .errors.bad_request_error import BadRequestError
 from .errors.internal_server_error import InternalServerError
 from .errors.too_many_requests_error import TooManyRequestsError
+from .finetuning.client import AsyncFinetuningClient, FinetuningClient
 from .models.client import AsyncModelsClient, ModelsClient
 from .types.chat_connector import ChatConnector
 from .types.chat_document import ChatDocument
@@ -111,6 +112,7 @@ class BaseCohere:
         self.datasets = DatasetsClient(client_wrapper=self._client_wrapper)
         self.connectors = ConnectorsClient(client_wrapper=self._client_wrapper)
         self.models = ModelsClient(client_wrapper=self._client_wrapper)
+        self.finetuning = FinetuningClient(client_wrapper=self._client_wrapper)
 
     def chat_stream(
         self,
@@ -129,6 +131,7 @@ class BaseCohere:
         k: typing.Optional[int] = OMIT,
         p: typing.Optional[float] = OMIT,
         seed: typing.Optional[float] = OMIT,
+        stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
@@ -213,6 +216,8 @@ class BaseCohere:
 
             - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinism cannot be totally guaranteed.
 
+            - stop_sequences: typing.Optional[typing.Sequence[str]]. A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
+
             - frequency_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
                                                          Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
@@ -295,6 +300,7 @@ class BaseCohere:
             k=1,
             p=1.1,
             seed=1.1,
+            stop_sequences=["string"],
             connectors_search_options=ChatStreamRequestConnectorsSearchOptions(
                 model={"key": "value"},
                 temperature={"key": "value"},
@@ -358,6 +364,8 @@ class BaseCohere:
             _request["p"] = p
         if seed is not OMIT:
             _request["seed"] = seed
+        if stop_sequences is not OMIT:
+            _request["stop_sequences"] = stop_sequences
         if frequency_penalty is not OMIT:
             _request["frequency_penalty"] = frequency_penalty
         if presence_penalty is not OMIT:
@@ -426,6 +434,7 @@ class BaseCohere:
         k: typing.Optional[int] = OMIT,
         p: typing.Optional[float] = OMIT,
         seed: typing.Optional[float] = OMIT,
+        stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
@@ -509,6 +518,8 @@ class BaseCohere:
                                          Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
             - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinism cannot be totally guaranteed.
+
+            - stop_sequences: typing.Optional[typing.Sequence[str]]. A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
 
             - frequency_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
@@ -598,6 +609,8 @@ class BaseCohere:
             _request["p"] = p
         if seed is not OMIT:
             _request["seed"] = seed
+        if stop_sequences is not OMIT:
+            _request["stop_sequences"] = stop_sequences
         if frequency_penalty is not OMIT:
             _request["frequency_penalty"] = frequency_penalty
         if presence_penalty is not OMIT:
@@ -1611,6 +1624,7 @@ class AsyncBaseCohere:
         self.datasets = AsyncDatasetsClient(client_wrapper=self._client_wrapper)
         self.connectors = AsyncConnectorsClient(client_wrapper=self._client_wrapper)
         self.models = AsyncModelsClient(client_wrapper=self._client_wrapper)
+        self.finetuning = AsyncFinetuningClient(client_wrapper=self._client_wrapper)
 
     async def chat_stream(
         self,
@@ -1629,6 +1643,7 @@ class AsyncBaseCohere:
         k: typing.Optional[int] = OMIT,
         p: typing.Optional[float] = OMIT,
         seed: typing.Optional[float] = OMIT,
+        stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
@@ -1713,6 +1728,8 @@ class AsyncBaseCohere:
 
             - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinism cannot be totally guaranteed.
 
+            - stop_sequences: typing.Optional[typing.Sequence[str]]. A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
+
             - frequency_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
                                                          Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
@@ -1795,6 +1812,7 @@ class AsyncBaseCohere:
             k=1,
             p=1.1,
             seed=1.1,
+            stop_sequences=["string"],
             connectors_search_options=ChatStreamRequestConnectorsSearchOptions(
                 model={"key": "value"},
                 temperature={"key": "value"},
@@ -1858,6 +1876,8 @@ class AsyncBaseCohere:
             _request["p"] = p
         if seed is not OMIT:
             _request["seed"] = seed
+        if stop_sequences is not OMIT:
+            _request["stop_sequences"] = stop_sequences
         if frequency_penalty is not OMIT:
             _request["frequency_penalty"] = frequency_penalty
         if presence_penalty is not OMIT:
@@ -1926,6 +1946,7 @@ class AsyncBaseCohere:
         k: typing.Optional[int] = OMIT,
         p: typing.Optional[float] = OMIT,
         seed: typing.Optional[float] = OMIT,
+        stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
@@ -2009,6 +2030,8 @@ class AsyncBaseCohere:
                                          Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
             - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinism cannot be totally guaranteed.
+
+            - stop_sequences: typing.Optional[typing.Sequence[str]]. A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
 
             - frequency_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
@@ -2098,6 +2121,8 @@ class AsyncBaseCohere:
             _request["p"] = p
         if seed is not OMIT:
             _request["seed"] = seed
+        if stop_sequences is not OMIT:
+            _request["stop_sequences"] = stop_sequences
         if frequency_penalty is not OMIT:
             _request["frequency_penalty"] = frequency_penalty
         if presence_penalty is not OMIT:
