@@ -5,6 +5,8 @@ import cohere
 from cohere import ChatMessage, ChatConnector, ClassifyExample, CreateConnectorServiceAuth, Tool, \
     ToolParameterDefinitionsValue, ChatRequestToolResultsItem
 
+from src.cohere import EmbedResponse_EmbeddingsByType
+
 co = cohere.Client(timeout=10000)
 
 package_dir = os.path.dirname(os.path.abspath(__file__))
@@ -74,8 +76,16 @@ class TestClient(unittest.TestCase):
         response = co.embed(
             texts=['hello', 'goodbye'],
             model='embed-english-v3.0',
-            input_type="classification"
+            input_type="classification",
+            embedding_types=["float", "int8", "uint8", "binary", "ubinary"],
         )
+
+        self.assertFalse(isinstance(response, EmbedResponse_EmbeddingsByType))
+        self.assertTrue(isinstance(
+            response, cohere.EmbedResponse_EmbeddingsByType))
+        self.assertTrue(response.__class__.__name__ ==
+                        'EmbedResponse_EmbeddingsByType')
+
         print(response)
 
     @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
