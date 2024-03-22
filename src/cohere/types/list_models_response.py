@@ -4,7 +4,7 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
-from .model import Model
+from .get_model_response import GetModelResponse
 
 try:
     import pydantic.v1 as pydantic  # type: ignore
@@ -13,7 +13,7 @@ except ImportError:
 
 
 class ListModelsResponse(pydantic.BaseModel):
-    models: typing.List[Model]
+    models: typing.List[GetModelResponse]
     next_page_token: typing.Optional[str] = pydantic.Field(default=None)
     """
     A token to retrieve the next page of results. Provide in the page_token parameter of the next request.
