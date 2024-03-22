@@ -24,6 +24,7 @@ def tokenizer_cache_key(model_name: str) -> str:
     return f"{TOKENIZER_CACHE_KEY}:{model_name}"
 
 
+# TODO: will this type hint work if lib is not installed?
 def get_hf_tokenizer(co: Client, model_name: str) -> Tokenizer:
     """Returns a HF tokenizer from a given tokenizer config URL."""
     tokenizer = co._cache_get(tokenizer_cache_key(model_name))
@@ -31,20 +32,10 @@ def get_hf_tokenizer(co: Client, model_name: str) -> Tokenizer:
         return tokenizer
 
     # ---------- should use co.here API to get the tokenizer URL once the GET model is in place ----------
-    # url = f"https://api.cohere.ai/v1/models/{model_name}"
-    # response = requests.request(
-    #     "GET",
-    #     url,
-    #     headers={
-    #         "Content-Type": "application/json",
-    #         "Accept": "application/json",
-    #         "Authorization": "Bearer <TOKEN>",
-    #     },
-    # )
-    # response.raise_for_status()
     class FakeRes:
         def json(self):
             return {"tokenizer_url": "https://storage.googleapis.com/cohere-assets/tokenizers/command-v1.json"}
+
     response = FakeRes()
     # ---------- should use co.here API to get the tokenizer URL once the GET model is in place ----------
 

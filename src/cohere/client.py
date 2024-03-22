@@ -132,12 +132,7 @@ class Client(BaseCohere, CacheMixin):
 
         return local_tokenize(self, model, text)
 
-    def local_detokenize(
-        self,
-        *,
-        tokens: typing.Sequence[int],
-        model: str,
-    ) -> str:
+    def local_detokenize(self, *, tokens: typing.Sequence[int], model: str) -> str:
         from .manually_maintained.tokenizers import local_detokenize
 
         return local_detokenize(self, model, tokens)
@@ -149,7 +144,7 @@ class Client(BaseCohere, CacheMixin):
         return get_hf_tokenizer(self, model)
 
 
-class AsyncClient(AsyncBaseCohere):
+class AsyncClient(AsyncBaseCohere, CacheMixin):
     def __init__(
         self,
         api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"),
@@ -218,3 +213,18 @@ class AsyncClient(AsyncBaseCohere):
     list_connectors: Never = moved_function("list_connectors", ".connectors.list")
     delete_connector: Never = moved_function("delete_connector", ".connectors.delete")
     oauth_authorize_connector: Never = moved_function("oauth_authorize_connector", ".connectors.o_auth_authorize")
+
+    def local_tokenize(self, *, text: str, model: str) -> typing.List[int]:
+        from .manually_maintained.tokenizers import local_tokenize
+
+        return local_tokenize(self, model, text)
+
+    def local_detokenize(self, *, tokens: typing.Sequence[int], model: str) -> str:
+        from .manually_maintained.tokenizers import local_detokenize
+
+        return local_detokenize(self, model, tokens)
+
+    def fetch_tokenizer(self, *, model: str) -> typing.Any:
+        from .manually_maintained.tokenizers import get_hf_tokenizer
+
+        return get_hf_tokenizer(self, model)

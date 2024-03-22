@@ -15,7 +15,6 @@ pydantic = ">= 1.9.2"
 typing_extensions = ">= 4.0.0"
 tokenizers = {version="^0.15.2", optional=true}
 requests = {version="^2.26.0", optional=true}
-cachetools = {version="^5.3.3", optional=true}
 
 
 [tool.poetry.dev-dependencies]
@@ -39,5 +38,3 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.extras]
 # used for local tokenization
 tokenizers = ["tokenizers", "requests"]
-# used for caching
-cachetools = ["cachetools"]

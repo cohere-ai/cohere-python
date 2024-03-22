@@ -1,17 +1,22 @@
-class CacheMixin:
-    # Optional caching mixin with time-to-live. If cachetools is not installed, caching is disabled.
-    try:
-        from cachetools import TTLCache
+import time
 
-        _cache = TTLCache(maxsize=100, ttl=60)
-    except ImportError:
-        _cache = None
+
+class CacheMixin:
+    # A simple in-memory cache with TTL (thread safe). This is used to cache tokenizers at the moment.
+    _cache = dict()
 
     def _cache_get(self, key):
-        if self._cache is None:
+        val = self._cache.get(key)
+        if val is None:
             return None
-        return self._cache.get(key)
+        expiry_timestamp, value = val
+        if expiry_timestamp is None or expiry_timestamp > time.time():
+            return value
 
-    def _cache_set(self, key, value):
-        if self._cache is not None:
-            self._cache[key] = value
+        del self._cache[key]  # remove expired cache entry
+
+    def _cache_set(self, key, value, ttl=60 * 60):
+        expiry_timestamp = None
+        if ttl is not None:
+            expiry_timestamp = time.time() + ttl
+        self._cache[key] = (expiry_timestamp, value)
