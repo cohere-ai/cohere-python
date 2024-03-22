@@ -264,7 +264,7 @@ class TestClient(unittest.TestCase):
             preamble="""
                 ## Task Description
                 You help people answer their questions and other requests interactively. You will be asked a very wide array of requests on all kinds of topics. You will be equipped with a wide range of search engines or similar tools to help you, which you use to research your answer. You should focus on serving the user's needs as best you can, which will be wide-ranging.
-    
+
                 ## Style Guide
                 Unless the user asks for a different style of answer, you should answer in full sentences, using proper grammar and spelling.
             """
@@ -312,3 +312,17 @@ class TestClient(unittest.TestCase):
                 "total_revenue": "48500",
             }
         ])
+
+    def test_local_tokenize(self) -> None:
+        response = co.local_tokenize(
+            model_name="command",
+            text="tokenize me! :D"
+        )
+        print(response)
+
+    def test_local_detokenize(self) -> None:
+        response = co.local_detokenize(
+            model_name="command",
+            tokens=[10104, 12221, 1315, 34, 1420, 69]
+        )
+        print(response)
