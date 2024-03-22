@@ -21,12 +21,12 @@ class EmbedByTypeResponseEmbeddings(pydantic.BaseModel):
     An array of float embeddings.
     """
 
-    int_8: typing.Optional[typing.List[typing.List[float]]] = pydantic.Field(alias="int8", default=None)
+    int8: typing.Optional[typing.List[typing.List[float]]] = pydantic.Field(default=None)
     """
     An array of signed int8 embeddings. Each value is between -128 and 127.
     """
 
-    uint_8: typing.Optional[typing.List[typing.List[float]]] = pydantic.Field(alias="uint8", default=None)
+    uint8: typing.Optional[typing.List[typing.List[float]]] = pydantic.Field(default=None)
     """
     An array of unsigned int8 embeddings. Each value is between 0 and 255.
     """
