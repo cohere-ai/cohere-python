@@ -66,11 +66,11 @@ async def async_get_hf_tokenizer(co: AsyncClient, model_name: str) -> Tokenizer:
 
 async def async_local_tokenize(co: AsyncClient, model_name: str, text: str) -> typing.List[int]:
     """Tokenizes a given text using a local tokenizer."""
-    tokenizer = async_get_hf_tokenizer(co, model_name)
+    tokenizer = await async_get_hf_tokenizer(co, model_name)
     return tokenizer.encode(text, add_special_tokens=False).ids
 
 
 async def async_local_detokenize(co: AsyncClient, model_name: str, tokens: typing.List[int]) -> str:
     """Detokenizes a given list of tokens using a local tokenizer."""
-    tokenizer = async_get_hf_tokenizer(co, model_name)
+    tokenizer = await async_get_hf_tokenizer(co, model_name)
     return tokenizer.decode(tokens)

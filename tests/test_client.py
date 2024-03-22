@@ -315,14 +315,14 @@ class TestClient(unittest.TestCase):
 
     def test_local_tokenize(self) -> None:
         response = co.local_tokenize(
-            model_name="command",
+            model="command",
             text="tokenize me! :D"
         )
         print(response)
 
     def test_local_detokenize(self) -> None:
         response = co.local_detokenize(
-            model_name="command",
+            model="command",
             tokens=[10104, 12221, 1315, 34, 1420, 69]
         )
         print(response)
