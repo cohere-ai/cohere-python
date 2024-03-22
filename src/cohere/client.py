@@ -7,6 +7,11 @@ from .environment import ClientEnvironment
 from .utils import wait, async_wait
 import os
 
+from .overrides import run_overrides
+
+run_overrides()
+
+
 # Use NoReturn as Never type for compatibility
 Never = typing.NoReturn
 
