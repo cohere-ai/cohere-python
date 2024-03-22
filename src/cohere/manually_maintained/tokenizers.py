@@ -1,6 +1,6 @@
 import urllib
 import typing
-from cohere.client import Client
+from cohere.client import AsyncClient, Client
 
 try:
     from tokenizers import Tokenizer
@@ -18,7 +18,7 @@ def tokenizer_cache_key(model_name: str) -> str:
 
 
 # TODO: will this type hint work if lib is not installed?
-def get_hf_tokenizer(co: Client, model_name: str) -> Tokenizer:
+def get_hf_tokenizer(co: typing.Union[Client, AsyncClient], model_name: str) -> Tokenizer:
     """Returns a HF tokenizer from a given tokenizer config URL."""
     tokenizer = co._cache_get(tokenizer_cache_key(model_name))
     if tokenizer is not None:
@@ -39,13 +39,13 @@ def get_hf_tokenizer(co: Client, model_name: str) -> Tokenizer:
     return tokenizer
 
 
-def local_tokenize(co: Client, model_name: str, text: str) -> typing.List[int]:
+def local_tokenize(co: typing.Union[Client, AsyncClient], model_name: str, text: str) -> typing.List[int]:
     """Tokenizes a given text using a local tokenizer."""
     tokenizer = get_hf_tokenizer(co, model_name)
     return tokenizer.encode(text, add_special_tokens=False).ids
 
 
-def local_detokenize(co: Client, model_name: str, tokens: typing.List[int]) -> str:
+def local_detokenize(co: typing.Union[Client, AsyncClient], model_name: str, tokens: typing.List[int]) -> str:
     """Detokenizes a given list of tokens using a local tokenizer."""
     tokenizer = get_hf_tokenizer(co, model_name)
     return tokenizer.decode(tokens)
