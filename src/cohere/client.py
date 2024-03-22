@@ -221,16 +221,16 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
     oauth_authorize_connector: Never = moved_function("oauth_authorize_connector", ".connectors.o_auth_authorize")
 
     async def local_tokenize(self, *, text: str, model: str) -> typing.List[int]:
-        from .manually_maintained.tokenizers import local_tokenize
+        from .manually_maintained.tokenizers import async_local_tokenize
 
-        return local_tokenize(self, model, text)
+        return await async_local_tokenize(self, model, text)
 
     async def local_detokenize(self, *, tokens: typing.List[int], model: str) -> str:
-        from .manually_maintained.tokenizers import local_detokenize
+        from .manually_maintained.tokenizers import async_local_detokenize
 
-        return local_detokenize(self, model, tokens)
+        return await async_local_detokenize(self, model, tokens)
 
     async def fetch_tokenizer(self, *, model: str) -> typing.Any:
-        from .manually_maintained.tokenizers import get_hf_tokenizer
+        from .manually_maintained.tokenizers import async_get_hf_tokenizer
 
-        return get_hf_tokenizer(self, model)
+        return await async_get_hf_tokenizer(self, model)
