@@ -19,6 +19,10 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
         cohere.AsyncClient(api_key=None)
         cohere.AsyncClient(None)
 
+    async def test_context_manager(self) -> None:
+        async with cohere.AsyncClient(api_key="xxx") as client:
+            self.assertIsNotNone(client)
+
     async def test_chat(self) -> None:
         chat = await self.co.chat(
             chat_history=[

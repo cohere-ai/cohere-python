@@ -17,6 +17,10 @@ class TestClient(unittest.TestCase):
         cohere.Client(api_key=None)
         cohere.Client(None)
 
+    def test_context_manager(self) -> None:
+        with cohere.Client(api_key="xxx") as client:
+            self.assertIsNotNone(client)
+
     def test_chat(self) -> None:
         chat = co.chat(
             chat_history=[
