@@ -87,6 +87,14 @@ class Client(BaseCohere):
 
         validate_args(self, "chat", throw_if_stream_is_true)
 
+    # support context manager until Fern upstreams
+    # https://linear.app/buildwithfern/issue/FER-1242/expose-a-context-manager-interface-or-the-http-client-easily
+    async def __enter__(self):
+        return self
+
+    async def __exit__(self, exc_type, exc_value, traceback):
+        await self._client_wrapper.httpx_client.close()
+
     wait = wait
 
     """
@@ -160,6 +168,14 @@ class AsyncClient(AsyncBaseCohere):
         )
 
         validate_args(self, "chat", throw_if_stream_is_true)
+
+    # support context manager until Fern upstreams
+    # https://linear.app/buildwithfern/issue/FER-1242/expose-a-context-manager-interface-or-the-http-client-easily
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_value, traceback):
+        await self._client_wrapper.httpx_client.aclose()
 
     wait = async_wait
 
