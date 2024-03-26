@@ -3,6 +3,8 @@ import time
 import typing
 from typing import Optional
 
+from . import EmbedResponse, EmbedResponse_EmbeddingsFloats, EmbedResponse_EmbeddingsByType, EmbedFloatsResponse, \
+    EmbedByTypeResponse, ApiMeta, EmbedByTypeResponseEmbeddings, ApiMetaBilledUnits
 from .types import EmbedJob, CreateEmbedJobResponse
 from .datasets import DatasetsCreateResponse, DatasetsGetResponse
 
@@ -31,8 +33,8 @@ def get_validation_status(awaitable: typing.Union[EmbedJob, DatasetsGetResponse]
 
 def get_job(cohere: typing.Any,
             awaitable: typing.Union[CreateEmbedJobResponse, DatasetsCreateResponse, EmbedJob, DatasetsGetResponse]) -> \
-typing.Union[
-    EmbedJob, DatasetsGetResponse]:
+        typing.Union[
+            EmbedJob, DatasetsGetResponse]:
     if awaitable.__class__.__name__ == "EmbedJob" or awaitable.__class__.__name__ == "CreateEmbedJobResponse":
         return cohere.embed_jobs.get(id=get_id(awaitable))
     elif awaitable.__class__.__name__ == "DatasetsGetResponse" or awaitable.__class__.__name__ == "DatasetsCreateResponse":
@@ -150,3 +152,99 @@ async def async_wait(
         raise Exception(get_failure_reason(job))
 
     return job
+
+
+def maybe_sum_field(obj: typing.Any, field: str) -> Optional[int]:
+    non_none = [getattr(obj, field) for obj in obj if getattr(obj, field) is not None]
+    return sum(non_none) if non_none else None
+
+
+def merge_meta_field(metas: typing.List[ApiMeta]) -> ApiMeta:
+    api_version = metas[0].api_version
+    billed_units = [meta.billed_units for meta in metas]
+    input_tokens = maybe_sum_field(billed_units, "input_tokens")
+    output_tokens = maybe_sum_field(billed_units, "output_tokens")
+    search_units = maybe_sum_field(billed_units, "search_units")
+    classifications = maybe_sum_field(billed_units, "classifications")
+    warnings = {warning for meta in metas if meta.warnings for warning in meta.warnings}
+    return ApiMeta(
+        api_version=api_version,
+        billed_units=ApiMetaBilledUnits(
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+            search_units=search_units,
+            classifications=classifications
+        ),
+        warnings=list(warnings)
+    )
+
+
+def merge_embed_responses(responses: typing.List[EmbedResponse]) -> EmbedResponse:
+    meta = merge_meta_field([response.meta for response in responses])
+    response_id = ", ".join(response.id for response in responses)
+    texts = [
+        text
+        for response in responses
+        for text in response.texts
+    ]
+
+    if responses[0].response_type == "embeddings_floats":
+        responses = typing.cast(typing.List[EmbedFloatsResponse], responses)
+        embeddings = [
+            embedding
+            for response in responses
+            for embedding in response.embeddings
+        ]
+        return EmbedResponse_EmbeddingsFloats(
+            response_type="embeddings_floats",
+            id=response_id,
+            texts=texts,
+            embeddings=embeddings,
+            meta=meta
+        )
+    else:
+        responses = typing.cast(typing.List[EmbedByTypeResponse], responses)
+        embeddings_by_type = [
+            response.embeddings
+            for response in responses
+        ]
+        float_ = [
+            embedding
+            for embedding_by_type in embeddings_by_type
+            for embedding in embedding_by_type.float_
+        ]
+        int8 = [
+            embedding
+            for embedding_by_type in embeddings_by_type
+            for embedding in embedding_by_type.int8
+        ]
+        uint8 = [
+            embedding
+            for embedding_by_type in embeddings_by_type
+            for embedding in embedding_by_type.uint8
+        ]
+        binary = [
+            embedding
+            for embedding_by_type in embeddings_by_type
+            for embedding in embedding_by_type.binary
+        ]
+        ubinary = [
+            embedding
+            for embedding_by_type in embeddings_by_type
+            for embedding in embedding_by_type.ubinary
+        ]
+        embeddings_by_type_merged = EmbedByTypeResponseEmbeddings(
+            float_=float_,
+            int8=int8,
+            uint8=uint8,
+            binary=binary,
+            ubinary=ubinary
+        )
+
+        return EmbedResponse_EmbeddingsByType(
+            response_type="embeddings_by_type",
+            id=response_id,
+            embeddings=embeddings_by_type_merged,
+            texts=texts,
+            meta=meta
+        )

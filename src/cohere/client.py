@@ -1,16 +1,20 @@
+import asyncio
 import typing
+from concurrent.futures import ThreadPoolExecutor
 
 import httpx
 
-from .base_client import BaseCohere, AsyncBaseCohere
+from . import EmbedResponse, EmbedInputType, EmbedRequestEmbeddingTypesItem, EmbedRequestTruncate
+from .base_client import BaseCohere, AsyncBaseCohere, OMIT
+from .config import embed_batch_size
+from .core import RequestOptions
 from .environment import ClientEnvironment
-from .utils import wait, async_wait
+from .utils import wait, async_wait, merge_embed_responses
 import os
 
 from .overrides import run_overrides
 
 run_overrides()
-
 
 # Use NoReturn as Never type for compatibility
 Never = typing.NoReturn
@@ -97,6 +101,44 @@ class Client(BaseCohere):
 
     wait = wait
 
+    _executor = ThreadPoolExecutor()
+
+    def embed(
+            self,
+            *,
+            texts: typing.Sequence[str],
+            model: typing.Optional[str] = OMIT,
+            input_type: typing.Optional[EmbedInputType] = OMIT,
+            embedding_types: typing.Optional[typing.Sequence[EmbedRequestEmbeddingTypesItem]] = OMIT,
+            truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
+            request_options: typing.Optional[RequestOptions] = None,
+            batching: typing.Optional[bool] = True,
+    ) -> EmbedResponse:
+        if batching is False:
+            return BaseCohere.embed(
+                self,
+                texts=texts,
+                model=model,
+                input_type=input_type,
+                embedding_types=embedding_types,
+                truncate=truncate,
+                request_options=request_options,
+            )
+
+        texts_batches = [texts[i: i + embed_batch_size] for i in range(0, len(texts), embed_batch_size)]
+
+        responses = [response for response in self._executor.map(lambda text_batch: BaseCohere.embed(
+                self,
+                texts=text_batch,
+                model=model,
+                input_type=input_type,
+                embedding_types=embedding_types,
+                truncate=truncate,
+                request_options=request_options,
+        ), texts_batches)]
+
+        return merge_embed_responses(responses)
+
     """
     The following methods have been moved or deprecated in cohere==5.0.0. Please update your usage.
     Issues may be filed in https://github.com/cohere-ai/cohere-python/issues.
@@ -178,6 +220,44 @@ class AsyncClient(AsyncBaseCohere):
         await self._client_wrapper.httpx_client.httpx_client.aclose()
 
     wait = async_wait
+
+    _executor = ThreadPoolExecutor()
+
+    async def embed(
+            self,
+            *,
+            texts: typing.Sequence[str],
+            model: typing.Optional[str] = OMIT,
+            input_type: typing.Optional[EmbedInputType] = OMIT,
+            embedding_types: typing.Optional[typing.Sequence[EmbedRequestEmbeddingTypesItem]] = OMIT,
+            truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
+            request_options: typing.Optional[RequestOptions] = None,
+            batching: typing.Optional[bool] = True,
+    ) -> EmbedResponse:
+        if batching is False:
+            return await AsyncBaseCohere.embed(
+                self,
+                texts=texts,
+                model=model,
+                input_type=input_type,
+                embedding_types=embedding_types,
+                truncate=truncate,
+                request_options=request_options,
+            )
+
+        texts_batches = [texts[i: i + embed_batch_size] for i in range(0, len(texts), embed_batch_size)]
+
+        responses = typing.cast(typing.List[EmbedResponse], await asyncio.gather(*[AsyncBaseCohere.embed(
+                self,
+                texts=text_batch,
+                model=model,
+                input_type=input_type,
+                embedding_types=embedding_types,
+                truncate=truncate,
+                request_options=request_options,
+        ) for text_batch in texts_batches]))
+
+        return merge_embed_responses(responses)
 
     """
     The following methods have been moved or deprecated in cohere==5.0.0. Please update your usage.
