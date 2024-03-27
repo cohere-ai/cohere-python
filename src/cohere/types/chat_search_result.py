@@ -14,7 +14,7 @@ except ImportError:
 
 
 class ChatSearchResult(pydantic.BaseModel):
-    search_query: ChatSearchQuery
+    search_query: typing.Optional[ChatSearchQuery] = None
     connector: ChatSearchResultConnector = pydantic.Field()
     """
     The connector from which this result comes from.
@@ -23,6 +23,16 @@ class ChatSearchResult(pydantic.BaseModel):
     document_ids: typing.List[str] = pydantic.Field()
     """
     Identifiers of documents found by this search query.
+    """
+
+    error_message: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    An error message if the search failed.
+    """
+
+    continue_on_failure: typing.Optional[bool] = pydantic.Field(default=None)
+    """
+    Whether a chat request should continue or not if the request to this connector fails.
     """
 
     def json(self, **kwargs: typing.Any) -> str:

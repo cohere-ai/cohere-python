@@ -14,16 +14,18 @@ class BaseClientWrapper:
         client_name: typing.Optional[str] = None,
         token: typing.Union[str, typing.Callable[[], str]],
         base_url: str,
+        timeout: typing.Optional[float] = None,
     ):
         self._client_name = client_name
         self._token = token
         self._base_url = base_url
+        self._timeout = timeout
 
     def get_headers(self) -> typing.Dict[str, str]:
         headers: typing.Dict[str, str] = {
             "X-Fern-Language": "Python",
             "X-Fern-SDK-Name": "cohere",
-            "X-Fern-SDK-Version": "5.1.2",
+            "X-Fern-SDK-Version": "5.1.3",
         }
         if self._client_name is not None:
             headers["X-Client-Name"] = self._client_name
@@ -39,6 +41,9 @@ class BaseClientWrapper:
     def get_base_url(self) -> str:
         return self._base_url
 
+    def get_timeout(self) -> typing.Optional[float]:
+        return self._timeout
+
 
 class SyncClientWrapper(BaseClientWrapper):
     def __init__(
@@ -47,9 +52,10 @@ class SyncClientWrapper(BaseClientWrapper):
         client_name: typing.Optional[str] = None,
         token: typing.Union[str, typing.Callable[[], str]],
         base_url: str,
+        timeout: typing.Optional[float] = None,
         httpx_client: httpx.Client,
     ):
-        super().__init__(client_name=client_name, token=token, base_url=base_url)
+        super().__init__(client_name=client_name, token=token, base_url=base_url, timeout=timeout)
         self.httpx_client = HttpClient(httpx_client=httpx_client)
 
 
@@ -60,7 +66,8 @@ class AsyncClientWrapper(BaseClientWrapper):
         client_name: typing.Optional[str] = None,
         token: typing.Union[str, typing.Callable[[], str]],
         base_url: str,
+        timeout: typing.Optional[float] = None,
         httpx_client: httpx.AsyncClient,
     ):
-        super().__init__(client_name=client_name, token=token, base_url=base_url)
+        super().__init__(client_name=client_name, token=token, base_url=base_url, timeout=timeout)
         self.httpx_client = AsyncHttpClient(httpx_client=httpx_client)
