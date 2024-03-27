@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cohere"
-version = "5.1.2"
+version = "5.1.3"
 description = ""
 readme = "README.md"
 authors = []
