@@ -50,6 +50,48 @@ ebt_2 = EmbedResponse_EmbeddingsByType(
     )
 )
 
+ebt_partial_1 = EmbedResponse_EmbeddingsByType(
+    response_type="embeddings_by_type",
+    id="1",
+    embeddings=EmbedByTypeResponseEmbeddings(
+        float=[[0, 1, 2], [3, 4, 5]],
+        int8=[[0, 1, 2], [3, 4, 5]],
+        binary=[[5, 6, 7], [8, 9, 10]],
+    ),
+    texts=["hello", "goodbye"],
+    meta=ApiMeta(
+        api_version=ApiMetaApiVersion(version="1"),
+        billed_units=ApiMetaBilledUnits(
+            input_tokens=1,
+            output_tokens=1,
+            search_units=1,
+            classifications=1
+        ),
+        warnings=["test_warning_1"]
+    )
+)
+
+ebt_partial_2 = EmbedResponse_EmbeddingsByType(
+    response_type="embeddings_by_type",
+    id="2",
+    embeddings=EmbedByTypeResponseEmbeddings(
+        float=[[7, 8, 9], [10, 11, 12]],
+        int8=[[7, 8, 9], [10, 11, 12]],
+        binary=[[14, 15, 16], [17, 18, 19]],
+    ),
+    texts=["bye", "seeya"],
+    meta=ApiMeta(
+        api_version=ApiMetaApiVersion(version="1"),
+        billed_units=ApiMetaBilledUnits(
+            input_tokens=2,
+            output_tokens=2,
+            search_units=2,
+            classifications=2
+        ),
+        warnings=["test_warning_1", "test_warning_2"]
+    )
+)
+
 ebf_1 = EmbedResponse_EmbeddingsFloats(
     response_type="embeddings_floats",
     id="1",
@@ -93,7 +135,6 @@ class TestClient(unittest.TestCase):
             ebt_2
         ])
 
-
         if resp.meta is None:
             raise Exception("this is just for mpy")
 
@@ -136,6 +177,37 @@ class TestClient(unittest.TestCase):
             id="1, 2",
             texts=["hello", "goodbye", "bye", "seeya"],
             embeddings=[[0, 1, 2], [3, 4, 5], [7, 8, 9], [10, 11, 12]],
+            meta=ApiMeta(
+                api_version=ApiMetaApiVersion(version="1"),
+                billed_units=ApiMetaBilledUnits(
+                    input_tokens=3,
+                    output_tokens=3,
+                    search_units=3,
+                    classifications=3
+                ),
+                warnings=resp.meta.warnings  # order ignored
+            )
+        ))
+
+    def test_merge_partial_embeddings_floats(self) -> None:
+        resp = merge_embed_responses([
+            ebt_partial_1,
+            ebt_partial_2
+        ])
+
+        if resp.meta is None:
+            raise Exception("this is just for mpy")
+
+        self.assertEqual(set(resp.meta.warnings or []), {"test_warning_1", "test_warning_2"})
+        self.assertEqual(resp, EmbedResponse_EmbeddingsByType(
+            response_type="embeddings_by_type",
+            id="1, 2",
+            embeddings=EmbedByTypeResponseEmbeddings(
+                float=[[0, 1, 2], [3, 4, 5], [7, 8, 9], [10, 11, 12]],
+                int8=[[0, 1, 2], [3, 4, 5], [7, 8, 9], [10, 11, 12]],
+                binary=[[5, 6, 7], [8, 9, 10], [14, 15, 16], [17, 18, 19]],
+            ),
+            texts=["hello", "goodbye", "bye", "seeya"],
             meta=ApiMeta(
                 api_version=ApiMetaApiVersion(version="1"),
                 billed_units=ApiMetaBilledUnits(
