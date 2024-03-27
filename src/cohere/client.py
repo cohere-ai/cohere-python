@@ -101,7 +101,7 @@ class Client(BaseCohere):
 
     wait = wait
 
-    _executor = ThreadPoolExecutor()
+    _executor = ThreadPoolExecutor(64)
 
     def embed(
             self,
@@ -221,7 +221,7 @@ class AsyncClient(AsyncBaseCohere):
 
     wait = async_wait
 
-    _executor = ThreadPoolExecutor()
+    _executor = ThreadPoolExecutor(64)
 
     async def embed(
             self,
