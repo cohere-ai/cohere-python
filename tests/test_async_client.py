@@ -220,14 +220,13 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
 
     @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     async def test_save_load(self) -> None:
-        my_dataset = self.co.datasets.create(
+        my_dataset = await self.co.datasets.create(
             name="test",
             type="embed-input",
             data=open(embed_job, 'rb'),
         )
 
-        dataset = self.co.datasets.get(my_dataset.id or "")
-        result = self.co.wait(dataset)
+        result = await self.co.wait(my_dataset)
 
         self.co.utils.save_dataset(result.dataset, "dataset.jsonl")
 
@@ -235,9 +234,9 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(os.path.exists("dataset.jsonl"))
         self.assertEqual(open(embed_job, 'rb').read(), open("dataset.jsonl", 'rb').read())
 
-        print(dataset)
+        print(result)
 
-        self.co.datasets.delete(my_dataset.id or "")
+        await self.co.datasets.delete(my_dataset.id or "")
 
     async def test_summarize(self) -> None:
         text = (

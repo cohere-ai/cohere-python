@@ -229,8 +229,7 @@ class TestClient(unittest.TestCase):
             data=open(embed_job, 'rb'),
         )
 
-        dataset = co.datasets.get(my_dataset.id or "")
-        result = co.wait(dataset)
+        result = co.wait(my_dataset)
 
         co.utils.save_dataset(result.dataset, "dataset.jsonl")
 
@@ -238,7 +237,7 @@ class TestClient(unittest.TestCase):
         self.assertTrue(os.path.exists("dataset.jsonl"))
         self.assertEqual(open(embed_job, 'rb').read(), open("dataset.jsonl", 'rb').read())
 
-        print(dataset)
+        print(result)
 
         co.datasets.delete(my_dataset.id or "")
 
