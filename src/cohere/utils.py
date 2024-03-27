@@ -1,10 +1,15 @@
 import asyncio
+import csv
+import json
 import time
 import typing
 from typing import Optional
 
+import requests
+from fastavro import parse_schema, reader, writer
+
 from . import EmbedResponse, EmbedResponse_EmbeddingsFloats, EmbedResponse_EmbeddingsByType, ApiMeta, \
-    EmbedByTypeResponseEmbeddings, ApiMetaBilledUnits, EmbedJob, CreateEmbedJobResponse
+    EmbedByTypeResponseEmbeddings, ApiMetaBilledUnits, EmbedJob, CreateEmbedJobResponse, Dataset
 from .datasets import DatasetsCreateResponse, DatasetsGetResponse
 
 
@@ -232,3 +237,62 @@ def merge_embed_responses(responses: typing.List[EmbedResponse]) -> EmbedRespons
             texts=texts,
             meta=meta
         )
+
+
+supported_formats = ["jsonl", "csv", "avro"]
+
+
+def save_avro(dataset: Dataset, filepath: str):
+    if not dataset.schema_:
+        raise ValueError("Dataset does not have a schema")
+    schema = parse_schema(json.loads(dataset.schema_))
+    with open(filepath, "wb") as outfile:
+        writer(outfile, schema, dataset_generator(dataset))
+
+
+def save_jsonl(dataset: Dataset, filepath: str):
+    with open(filepath, "w") as outfile:
+        for data in dataset_generator(dataset):
+            json.dump(data, outfile)
+            outfile.write("\n")
+
+
+def save_csv(dataset: Dataset, filepath: str):
+    with open(filepath, "w") as outfile:
+        for i, data in enumerate(dataset_generator(dataset)):
+            if i == 0:
+                writer = csv.DictWriter(outfile, fieldnames=list(data.keys()))
+                writer.writeheader()
+            writer.writerow(data)
+
+
+def dataset_generator(dataset: Dataset):
+    if not dataset.dataset_parts:
+        raise ValueError("Dataset does not have dataset_parts")
+    for part in dataset.dataset_parts:
+        if not part.url:
+            raise ValueError("Dataset part does not have a url")
+        resp = requests.get(part.url, stream=True)
+        for record in reader(resp.raw):
+            yield record
+
+
+class SdkUtils:
+
+    @staticmethod
+    def save_dataset(dataset: Dataset, filepath: str, format: typing.Literal["jsonl", "csv", "avro"] = "jsonl"):
+        if format == "jsonl":
+            return save_jsonl(dataset, filepath)
+        if format == "csv":
+            return save_csv(dataset, filepath)
+        if format == "avro":
+            return save_avro(dataset, filepath)
+        raise Exception(f"unsupported format must be one of : {supported_formats}")
+
+
+class SyncSdkUtils(SdkUtils):
+    pass
+
+
+class AsyncSdkUtils(SdkUtils):
+    pass
