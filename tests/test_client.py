@@ -221,6 +221,27 @@ class TestClient(unittest.TestCase):
 
         co.datasets.delete(my_dataset.id or "")
 
+    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
+    def test_save_load(self) -> None:
+        my_dataset = co.datasets.create(
+            name="test",
+            type="embed-input",
+            data=open(embed_job, 'rb'),
+        )
+
+        dataset = co.datasets.get(my_dataset.id or "")
+        result = co.wait(dataset)
+
+        co.utils.save_dataset(result.dataset, "dataset.jsonl")
+
+        # assert files equal
+        self.assertTrue(os.path.exists("dataset.jsonl"))
+        self.assertEqual(open(embed_job, 'rb').read(), open("dataset.jsonl", 'rb').read())
+
+        print(dataset)
+
+        co.datasets.delete(my_dataset.id or "")
+
     def test_summarize(self) -> None:
         text = (
             "Ice cream is a sweetened frozen food typically eaten as a snack or dessert. "
