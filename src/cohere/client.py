@@ -1,4 +1,5 @@
 import asyncio
+import os
 import typing
 from concurrent.futures import ThreadPoolExecutor
 
@@ -9,10 +10,8 @@ from .base_client import BaseCohere, AsyncBaseCohere, OMIT
 from .config import embed_batch_size
 from .core import RequestOptions
 from .environment import ClientEnvironment
-from .utils import wait, async_wait, merge_embed_responses
-import os
-
 from .overrides import run_overrides
+from .utils import wait, async_wait, merge_embed_responses, SyncSdkUtils, AsyncSdkUtils
 
 run_overrides()
 
@@ -90,6 +89,8 @@ class Client(BaseCohere):
         )
 
         validate_args(self, "chat", throw_if_stream_is_true)
+
+    utils = SyncSdkUtils()
 
     # support context manager until Fern upstreams
     # https://linear.app/buildwithfern/issue/FER-1242/expose-a-context-manager-interface-or-the-http-client-easily
@@ -210,6 +211,8 @@ class AsyncClient(AsyncBaseCohere):
         )
 
         validate_args(self, "chat", throw_if_stream_is_true)
+
+    utils = AsyncSdkUtils()
 
     # support context manager until Fern upstreams
     # https://linear.app/buildwithfern/issue/FER-1242/expose-a-context-manager-interface-or-the-http-client-easily
