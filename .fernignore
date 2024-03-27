@@ -8,3 +8,4 @@ LICENSE
 .github/workflows/tests.yml
 src/cohere/utils.py
 src/cohere/overrides.py
+src/cohere/config.py
