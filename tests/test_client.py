@@ -88,6 +88,42 @@ class TestClient(unittest.TestCase):
 
         print(response)
 
+    def test_embed_batch_types(self) -> None:
+        # batch more than 96 texts
+        response = co.embed(
+            texts=['hello']*100,
+            model='embed-english-v3.0',
+            input_type="classification",
+            embedding_types=["float", "int8", "uint8", "binary", "ubinary"]
+        )
+
+        if response.response_type == "embeddings_by_type":
+            self.assertEqual(len(response.texts or []), 100)
+            self.assertEqual(len(response.embeddings.float_ or []), 100)
+            self.assertEqual(len(response.embeddings.int8 or []), 100)
+            self.assertEqual(len(response.embeddings.uint8 or []), 100)
+            self.assertEqual(len(response.embeddings.binary or []), 100)
+            self.assertEqual(len(response.embeddings.ubinary or []), 100)
+        else:
+            self.fail("Expected embeddings_by_type response type")
+
+        print(response)
+
+    def test_embed_batch_v1(self) -> None:
+        # batch more than 96 texts
+        response = co.embed(
+            texts=['hello']*100,
+            model='embed-english-v3.0',
+            input_type="classification",
+        )
+
+        if response.response_type == "embeddings_floats":
+            self.assertEqual(len(response.embeddings), 100)
+        else:
+            self.fail("Expected embeddings_floats response type")
+
+        print(response)
+
     @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     def test_embed_job_crud(self) -> None:
         dataset = co.datasets.create(
