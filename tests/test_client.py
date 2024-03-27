@@ -98,12 +98,12 @@ class TestClient(unittest.TestCase):
         )
 
         if response.response_type == "embeddings_by_type":
-            self.assertEqual(len(response.texts), 100)
-            self.assertEqual(len(response.embeddings.float_), 100)
-            self.assertEqual(len(response.embeddings.int8), 100)
-            self.assertEqual(len(response.embeddings.uint8), 100)
-            self.assertEqual(len(response.embeddings.binary), 100)
-            self.assertEqual(len(response.embeddings.ubinary), 100)
+            self.assertEqual(len(response.texts or []), 100)
+            self.assertEqual(len(response.embeddings.float_ or []), 100)
+            self.assertEqual(len(response.embeddings.int8 or []), 100)
+            self.assertEqual(len(response.embeddings.uint8 or []), 100)
+            self.assertEqual(len(response.embeddings.binary or []), 100)
+            self.assertEqual(len(response.embeddings.ubinary or []), 100)
         else:
             self.fail("Expected embeddings_by_type response type")
 

@@ -1,18 +1,14 @@
-import os
 import unittest
 
-import cohere
-
-from cohere import EmbedResponse_EmbeddingsByType, EmbedByTypeResponseEmbeddings, ApiMeta, ApiMetaBilledUnits
+from cohere import EmbedResponse_EmbeddingsByType, EmbedByTypeResponseEmbeddings, ApiMeta, ApiMetaBilledUnits, \
+    ApiMetaApiVersion, EmbedResponse_EmbeddingsFloats
 from cohere.utils import merge_embed_responses
-
-from src.cohere import ApiMetaApiVersion, EmbedResponse_EmbeddingsFloats
 
 ebt_1 = EmbedResponse_EmbeddingsByType(
     response_type="embeddings_by_type",
     id="1",
     embeddings=EmbedByTypeResponseEmbeddings(
-        float_=[[0, 1, 2], [3, 4, 5]],
+        float=[[0, 1, 2], [3, 4, 5]],
         int8=[[0, 1, 2], [3, 4, 5]],
         uint8=[[0, 1, 2], [3, 4, 5]],
         binary=[[0, 1, 2], [3, 4, 5]],
@@ -35,7 +31,7 @@ ebt_2 = EmbedResponse_EmbeddingsByType(
     response_type="embeddings_by_type",
     id="2",
     embeddings=EmbedByTypeResponseEmbeddings(
-        float_=[[7, 8, 9], [10, 11, 12]],
+        float=[[7, 8, 9], [10, 11, 12]],
         int8=[[7, 8, 9], [10, 11, 12]],
         uint8=[[7, 8, 9], [10, 11, 12]],
         binary=[[7, 8, 9], [10, 11, 12]],
@@ -97,12 +93,16 @@ class TestClient(unittest.TestCase):
             ebt_2
         ])
 
-        self.assertEqual(set(resp.meta.warnings), {"test_warning_1", "test_warning_2"})
+
+        if resp.meta is None:
+            raise Exception("this is just for mpy")
+
+        self.assertEqual(set(*resp.meta.warnings), {"test_warning_1", "test_warning_2"})
         self.assertEqual(resp, EmbedResponse_EmbeddingsByType(
             response_type="embeddings_by_type",
             id="1, 2",
             embeddings=EmbedByTypeResponseEmbeddings(
-                float_=[[0, 1, 2], [3, 4, 5], [7, 8, 9], [10, 11, 12]],
+                float=[[0, 1, 2], [3, 4, 5], [7, 8, 9], [10, 11, 12]],
                 int8=[[0, 1, 2], [3, 4, 5], [7, 8, 9], [10, 11, 12]],
                 uint8=[[0, 1, 2], [3, 4, 5], [7, 8, 9], [10, 11, 12]],
                 binary=[[0, 1, 2], [3, 4, 5], [7, 8, 9], [10, 11, 12]],
@@ -127,7 +127,10 @@ class TestClient(unittest.TestCase):
             ebf_2
         ])
 
-        self.assertEqual(set(resp.meta.warnings), {"test_warning_1", "test_warning_2"})
+        if resp.meta is None:
+            raise Exception("this is just for mpy")
+
+        self.assertEqual(set(*resp.meta.warnings), {"test_warning_1", "test_warning_2"})
         self.assertEqual(resp, EmbedResponse_EmbeddingsFloats(
             response_type="embeddings_floats",
             id="1, 2",

@@ -3,9 +3,8 @@ import time
 import typing
 from typing import Optional
 
-from . import EmbedResponse, EmbedResponse_EmbeddingsFloats, EmbedResponse_EmbeddingsByType, EmbedFloatsResponse, \
-    EmbedByTypeResponse, ApiMeta, EmbedByTypeResponseEmbeddings, ApiMetaBilledUnits
-from .types import EmbedJob, CreateEmbedJobResponse
+from . import EmbedResponse, EmbedResponse_EmbeddingsFloats, EmbedResponse_EmbeddingsByType, ApiMeta, \
+    EmbedByTypeResponseEmbeddings, ApiMetaBilledUnits, EmbedJob, CreateEmbedJobResponse
 from .datasets import DatasetsCreateResponse, DatasetsGetResponse
 
 
@@ -180,7 +179,7 @@ def merge_meta_field(metas: typing.List[ApiMeta]) -> ApiMeta:
 
 
 def merge_embed_responses(responses: typing.List[EmbedResponse]) -> EmbedResponse:
-    meta = merge_meta_field([response.meta for response in responses])
+    meta = merge_meta_field([response.meta for response in responses if response.meta])
     response_id = ", ".join(response.id for response in responses)
     texts = [
         text
@@ -189,12 +188,14 @@ def merge_embed_responses(responses: typing.List[EmbedResponse]) -> EmbedRespons
     ]
 
     if responses[0].response_type == "embeddings_floats":
-        responses = typing.cast(typing.List[EmbedFloatsResponse], responses)
+        embeddings_floats = typing.cast(typing.List[EmbedResponse_EmbeddingsFloats], responses)
+
         embeddings = [
             embedding
-            for response in responses
-            for embedding in response.embeddings
+            for embeddings_floats in embeddings_floats
+            for embedding in embeddings_floats.embeddings
         ]
+
         return EmbedResponse_EmbeddingsFloats(
             response_type="embeddings_floats",
             id=response_id,
@@ -203,43 +204,23 @@ def merge_embed_responses(responses: typing.List[EmbedResponse]) -> EmbedRespons
             meta=meta
         )
     else:
-        responses = typing.cast(typing.List[EmbedByTypeResponse], responses)
+        embeddings_type = typing.cast(typing.List[EmbedResponse_EmbeddingsByType], responses)
+
         embeddings_by_type = [
             response.embeddings
-            for response in responses
+            for response in embeddings_type
         ]
-        float_ = [
-            embedding
-            for embedding_by_type in embeddings_by_type
-            for embedding in embedding_by_type.float_
-        ]
-        int8 = [
-            embedding
-            for embedding_by_type in embeddings_by_type
-            for embedding in embedding_by_type.int8
-        ]
-        uint8 = [
-            embedding
-            for embedding_by_type in embeddings_by_type
-            for embedding in embedding_by_type.uint8
-        ]
-        binary = [
-            embedding
-            for embedding_by_type in embeddings_by_type
-            for embedding in embedding_by_type.binary
-        ]
-        ubinary = [
-            embedding
-            for embedding_by_type in embeddings_by_type
-            for embedding in embedding_by_type.ubinary
-        ]
-        embeddings_by_type_merged = EmbedByTypeResponseEmbeddings(
-            float_=float_,
-            int8=int8,
-            uint8=uint8,
-            binary=binary,
-            ubinary=ubinary
-        )
+
+        merged_dicts = {
+            field: [
+                embedding
+                for embedding_by_type in embeddings_by_type
+                for embedding in getattr(embedding_by_type, field)
+            ]
+            for field in EmbedByTypeResponseEmbeddings.__fields__
+        }
+
+        embeddings_by_type_merged = EmbedByTypeResponseEmbeddings.parse_obj(merged_dicts)
 
         return EmbedResponse_EmbeddingsByType(
             response_type="embeddings_by_type",
