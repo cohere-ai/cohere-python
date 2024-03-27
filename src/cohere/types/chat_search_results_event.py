@@ -20,7 +20,7 @@ class ChatSearchResultsEvent(ChatStreamEvent):
     Conducted searches and the ids of documents retrieved from each of them.
     """
 
-    documents: typing.List[ChatDocument] = pydantic.Field()
+    documents: typing.Optional[typing.List[ChatDocument]] = pydantic.Field(default=None)
     """
     Documents fetched from searches or provided by the user.
     """
