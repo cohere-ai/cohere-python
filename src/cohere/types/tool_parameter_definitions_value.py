@@ -12,7 +12,7 @@ except ImportError:
 
 
 class ToolParameterDefinitionsValue(pydantic.BaseModel):
-    description: str = pydantic.Field()
+    description: typing.Optional[str] = pydantic.Field(default=None)
     """
     The description of the parameter.
     """
