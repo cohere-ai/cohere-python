@@ -153,7 +153,7 @@ async def async_wait(
     return job
 
 
-def maybe_sum_field(obj: typing.Any, field: str) -> Optional[int]:
+def sum_fields_if_not_none(obj: typing.Any, field: str) -> Optional[int]:
     non_none = [getattr(obj, field) for obj in obj if getattr(obj, field) is not None]
     return sum(non_none) if non_none else None
 
@@ -161,10 +161,10 @@ def maybe_sum_field(obj: typing.Any, field: str) -> Optional[int]:
 def merge_meta_field(metas: typing.List[ApiMeta]) -> ApiMeta:
     api_version = metas[0].api_version
     billed_units = [meta.billed_units for meta in metas]
-    input_tokens = maybe_sum_field(billed_units, "input_tokens")
-    output_tokens = maybe_sum_field(billed_units, "output_tokens")
-    search_units = maybe_sum_field(billed_units, "search_units")
-    classifications = maybe_sum_field(billed_units, "classifications")
+    input_tokens = sum_fields_if_not_none(billed_units, "input_tokens")
+    output_tokens = sum_fields_if_not_none(billed_units, "output_tokens")
+    search_units = sum_fields_if_not_none(billed_units, "search_units")
+    classifications = sum_fields_if_not_none(billed_units, "classifications")
     warnings = {warning for meta in metas if meta.warnings for warning in meta.warnings}
     return ApiMeta(
         api_version=api_version,
