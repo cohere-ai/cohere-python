@@ -15,6 +15,7 @@ pydantic = ">= 1.9.2"
 typing_extensions = ">= 4.0.0"
 fastavro = "^1.9.4"
 requests = "^2.31.0"
+types-requests = "^2.31.0.20240311"
 
 [tool.poetry.dev-dependencies]
 mypy = "^1.8.0"
