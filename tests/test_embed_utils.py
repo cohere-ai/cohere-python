@@ -97,7 +97,7 @@ class TestClient(unittest.TestCase):
         if resp.meta is None:
             raise Exception("this is just for mpy")
 
-        self.assertEqual(set(*resp.meta.warnings), {"test_warning_1", "test_warning_2"})
+        self.assertEqual(set(resp.meta.warnings or []), {"test_warning_1", "test_warning_2"})
         self.assertEqual(resp, EmbedResponse_EmbeddingsByType(
             response_type="embeddings_by_type",
             id="1, 2",
@@ -130,7 +130,7 @@ class TestClient(unittest.TestCase):
         if resp.meta is None:
             raise Exception("this is just for mpy")
 
-        self.assertEqual(set(*resp.meta.warnings), {"test_warning_1", "test_warning_2"})
+        self.assertEqual(set(resp.meta.warnings or []), {"test_warning_1", "test_warning_2"})
         self.assertEqual(resp, EmbedResponse_EmbeddingsFloats(
             response_type="embeddings_floats",
             id="1, 2",
