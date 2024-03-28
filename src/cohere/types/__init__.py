@@ -62,9 +62,9 @@ from .embed_input_type import EmbedInputType
 from .embed_job import EmbedJob
 from .embed_job_status import EmbedJobStatus
 from .embed_job_truncate import EmbedJobTruncate
-from .embed_request_embedding_types_item import EmbedRequestEmbeddingTypesItem
 from .embed_request_truncate import EmbedRequestTruncate
 from .embed_response import EmbedResponse, EmbedResponse_EmbeddingsByType, EmbedResponse_EmbeddingsFloats
+from .embedding_type import EmbeddingType
 from .finetune_dataset_metrics import FinetuneDatasetMetrics
 from .finish_reason import FinishReason
 from .generate_request_return_likelihoods import GenerateRequestReturnLikelihoods
@@ -183,11 +183,11 @@ __all__ = [
     "EmbedJob",
     "EmbedJobStatus",
     "EmbedJobTruncate",
-    "EmbedRequestEmbeddingTypesItem",
     "EmbedRequestTruncate",
     "EmbedResponse",
     "EmbedResponse_EmbeddingsByType",
     "EmbedResponse_EmbeddingsFloats",
+    "EmbeddingType",
     "FinetuneDatasetMetrics",
     "FinishReason",
     "GenerateRequestReturnLikelihoods",

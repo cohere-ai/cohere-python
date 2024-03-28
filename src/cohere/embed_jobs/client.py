@@ -16,6 +16,7 @@ from ..errors.too_many_requests_error import TooManyRequestsError
 from ..types.create_embed_job_response import CreateEmbedJobResponse
 from ..types.embed_input_type import EmbedInputType
 from ..types.embed_job import EmbedJob
+from ..types.embedding_type import EmbeddingType
 from ..types.list_embed_job_response import ListEmbedJobResponse
 from .types.create_embed_job_request_truncate import CreateEmbedJobRequestTruncate
 
@@ -88,6 +89,7 @@ class EmbedJobsClient:
         dataset_id: str,
         input_type: EmbedInputType,
         name: typing.Optional[str] = OMIT,
+        embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
         truncate: typing.Optional[CreateEmbedJobRequestTruncate] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateEmbedJobResponse:
@@ -110,6 +112,13 @@ class EmbedJobsClient:
 
             - name: typing.Optional[str]. The name of the embed job.
 
+            - embedding_types: typing.Optional[typing.Sequence[EmbeddingType]]. Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
+
+                                                                                * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
+                                                                                * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
+                                                                                * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
+                                                                                * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
+                                                                                * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
             - truncate: typing.Optional[CreateEmbedJobRequestTruncate]. One of `START|END` to specify how the API will handle inputs longer than the maximum token length.
 
                                                                         Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
@@ -131,6 +140,8 @@ class EmbedJobsClient:
         _request: typing.Dict[str, typing.Any] = {"model": model, "dataset_id": dataset_id, "input_type": input_type}
         if name is not OMIT:
             _request["name"] = name
+        if embedding_types is not OMIT:
+            _request["embedding_types"] = embedding_types
         if truncate is not OMIT:
             _request["truncate"] = truncate
         _response = self._client_wrapper.httpx_client.request(
@@ -349,6 +360,7 @@ class AsyncEmbedJobsClient:
         dataset_id: str,
         input_type: EmbedInputType,
         name: typing.Optional[str] = OMIT,
+        embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
         truncate: typing.Optional[CreateEmbedJobRequestTruncate] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateEmbedJobResponse:
@@ -371,6 +383,13 @@ class AsyncEmbedJobsClient:
 
             - name: typing.Optional[str]. The name of the embed job.
 
+            - embedding_types: typing.Optional[typing.Sequence[EmbeddingType]]. Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
+
+                                                                                * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
+                                                                                * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
+                                                                                * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
+                                                                                * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
+                                                                                * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
             - truncate: typing.Optional[CreateEmbedJobRequestTruncate]. One of `START|END` to specify how the API will handle inputs longer than the maximum token length.
 
                                                                         Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
@@ -392,6 +411,8 @@ class AsyncEmbedJobsClient:
         _request: typing.Dict[str, typing.Any] = {"model": model, "dataset_id": dataset_id, "input_type": input_type}
         if name is not OMIT:
             _request["name"] = name
+        if embedding_types is not OMIT:
+            _request["embedding_types"] = embedding_types
         if truncate is not OMIT:
             _request["truncate"] = truncate
         _response = await self._client_wrapper.httpx_client.request(
