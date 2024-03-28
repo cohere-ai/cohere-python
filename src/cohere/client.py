@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import httpx
 
-from . import EmbedResponse, EmbedInputType, EmbedRequestEmbeddingTypesItem, EmbedRequestTruncate
+from . import EmbedResponse, EmbedInputType, EmbeddingType, EmbedRequestTruncate
 from .base_client import BaseCohere, AsyncBaseCohere, OMIT
 from .config import embed_batch_size
 from .core import RequestOptions
@@ -110,7 +110,7 @@ class Client(BaseCohere):
             texts: typing.Sequence[str],
             model: typing.Optional[str] = OMIT,
             input_type: typing.Optional[EmbedInputType] = OMIT,
-            embedding_types: typing.Optional[typing.Sequence[EmbedRequestEmbeddingTypesItem]] = OMIT,
+            embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
             truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
             request_options: typing.Optional[RequestOptions] = None,
             batching: typing.Optional[bool] = True,
@@ -232,7 +232,7 @@ class AsyncClient(AsyncBaseCohere):
             texts: typing.Sequence[str],
             model: typing.Optional[str] = OMIT,
             input_type: typing.Optional[EmbedInputType] = OMIT,
-            embedding_types: typing.Optional[typing.Sequence[EmbedRequestEmbeddingTypesItem]] = OMIT,
+            embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
             truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
             request_options: typing.Optional[RequestOptions] = None,
             batching: typing.Optional[bool] = True,
