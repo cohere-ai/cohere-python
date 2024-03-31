@@ -36,7 +36,3 @@ plugins = ["pydantic.mypy"]
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.extras]
-# used for local tokenization
-tokenizers = ["tokenizers"]

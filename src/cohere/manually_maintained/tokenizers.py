@@ -1,14 +1,7 @@
 import urllib
 import typing
 from cohere.client import AsyncClient, Client
-
-try:
-    from tokenizers import Tokenizer  # type: ignore
-except ImportError:
-    raise ImportError(
-        "Please install the hugging face tokenizers package to use local tokenization."
-        "\nYou can do so by running `pip install tokenizers`."
-    )
+from tokenizers import Tokenizer
 
 TOKENIZER_CACHE_KEY = "tokenizers"
 
