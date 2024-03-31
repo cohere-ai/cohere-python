@@ -17,6 +17,10 @@ class TestClient(unittest.TestCase):
         cohere.Client(api_key=None)
         cohere.Client(None)
 
+    def test_context_manager(self) -> None:
+        with cohere.Client(api_key="xxx") as client:
+            self.assertIsNotNone(client)
+
     def test_chat(self) -> None:
         chat = co.chat(
             chat_history=[
@@ -74,8 +78,50 @@ class TestClient(unittest.TestCase):
         response = co.embed(
             texts=['hello', 'goodbye'],
             model='embed-english-v3.0',
-            input_type="classification"
+            input_type="classification",
+            embedding_types=["float", "int8", "uint8", "binary", "ubinary"]
         )
+
+        if response.response_type == "embeddings_by_type":
+            self.assertIsNotNone(response.embeddings.float)  # type: ignore
+            self.assertIsNotNone(response.embeddings.float_)
+
+        print(response)
+
+    def test_embed_batch_types(self) -> None:
+        # batch more than 96 texts
+        response = co.embed(
+            texts=['hello']*100,
+            model='embed-english-v3.0',
+            input_type="classification",
+            embedding_types=["float", "int8", "uint8", "binary", "ubinary"]
+        )
+
+        if response.response_type == "embeddings_by_type":
+            self.assertEqual(len(response.texts or []), 100)
+            self.assertEqual(len(response.embeddings.float_ or []), 100)
+            self.assertEqual(len(response.embeddings.int8 or []), 100)
+            self.assertEqual(len(response.embeddings.uint8 or []), 100)
+            self.assertEqual(len(response.embeddings.binary or []), 100)
+            self.assertEqual(len(response.embeddings.ubinary or []), 100)
+        else:
+            self.fail("Expected embeddings_by_type response type")
+
+        print(response)
+
+    def test_embed_batch_v1(self) -> None:
+        # batch more than 96 texts
+        response = co.embed(
+            texts=['hello']*100,
+            model='embed-english-v3.0',
+            input_type="classification",
+        )
+
+        if response.response_type == "embeddings_floats":
+            self.assertEqual(len(response.embeddings), 100)
+        else:
+            self.fail("Expected embeddings_floats response type")
+
         print(response)
 
     @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
@@ -172,6 +218,26 @@ class TestClient(unittest.TestCase):
         dataset = co.datasets.get(my_dataset.id or "")
 
         print(dataset)
+
+        co.datasets.delete(my_dataset.id or "")
+
+    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
+    def test_save_load(self) -> None:
+        my_dataset = co.datasets.create(
+            name="test",
+            type="embed-input",
+            data=open(embed_job, 'rb'),
+        )
+
+        result = co.wait(my_dataset)
+
+        co.utils.save_dataset(result.dataset, "dataset.jsonl")
+
+        # assert files equal
+        self.assertTrue(os.path.exists("dataset.jsonl"))
+        self.assertEqual(open(embed_job, 'rb').read(), open("dataset.jsonl", 'rb').read())
+
+        print(result)
 
         co.datasets.delete(my_dataset.id or "")
 

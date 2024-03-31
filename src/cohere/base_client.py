@@ -34,9 +34,9 @@ from .types.classify_request_truncate import ClassifyRequestTruncate
 from .types.classify_response import ClassifyResponse
 from .types.detokenize_response import DetokenizeResponse
 from .types.embed_input_type import EmbedInputType
-from .types.embed_request_embedding_types_item import EmbedRequestEmbeddingTypesItem
 from .types.embed_request_truncate import EmbedRequestTruncate
 from .types.embed_response import EmbedResponse
+from .types.embedding_type import EmbeddingType
 from .types.generate_request_return_likelihoods import GenerateRequestReturnLikelihoods
 from .types.generate_request_truncate import GenerateRequestTruncate
 from .types.generate_stream_request_return_likelihoods import GenerateStreamRequestReturnLikelihoods
@@ -78,7 +78,7 @@ class BaseCohere:
 
         - token: typing.Optional[typing.Union[str, typing.Callable[[], str]]].
 
-        - timeout: typing.Optional[float]. The timeout to be used, in seconds, for requests by default the timeout is 60 seconds.
+        - timeout: typing.Optional[float]. The timeout to be used, in seconds, for requests by default the timeout is 60 seconds, unless a custom httpx client is used, in which case a default is not set.
 
         - httpx_client: typing.Optional[httpx.Client]. The httpx client to use for making requests, a preconfigured client is used by default, however this is useful should you want to pass in any custom httpx configuration.
     ---
@@ -97,16 +97,18 @@ class BaseCohere:
         environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
         client_name: typing.Optional[str] = None,
         token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"),
-        timeout: typing.Optional[float] = 60,
+        timeout: typing.Optional[float] = None,
         httpx_client: typing.Optional[httpx.Client] = None,
     ):
+        _defaulted_timeout = timeout if timeout is not None else 300 if httpx_client is None else None
         if token is None:
             raise ApiError(body="The client must be instantiated be either passing in token or setting CO_API_KEY")
         self._client_wrapper = SyncClientWrapper(
             base_url=_get_base_url(base_url=base_url, environment=environment),
             client_name=client_name,
             token=token,
-            httpx_client=httpx.Client(timeout=timeout) if httpx_client is None else httpx_client,
+            httpx_client=httpx.Client(timeout=_defaulted_timeout) if httpx_client is None else httpx_client,
+            timeout=_defaulted_timeout,
         )
         self.embed_jobs = EmbedJobsClient(client_wrapper=self._client_wrapper)
         self.datasets = DatasetsClient(client_wrapper=self._client_wrapper)
@@ -398,7 +400,7 @@ class BaseCohere:
             ),
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else 60,
+            else self._client_wrapper.get_timeout(),
             retries=0,
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         ) as _response:
@@ -643,7 +645,7 @@ class BaseCohere:
             ),
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else 60,
+            else self._client_wrapper.get_timeout(),
             retries=0,
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
@@ -819,7 +821,7 @@ class BaseCohere:
             ),
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else 60,
+            else self._client_wrapper.get_timeout(),
             retries=0,
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         ) as _response:
@@ -990,7 +992,7 @@ class BaseCohere:
             ),
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else 60,
+            else self._client_wrapper.get_timeout(),
             retries=0,
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
@@ -1014,7 +1016,7 @@ class BaseCohere:
         texts: typing.Sequence[str],
         model: typing.Optional[str] = OMIT,
         input_type: typing.Optional[EmbedInputType] = OMIT,
-        embedding_types: typing.Optional[typing.Sequence[EmbedRequestEmbeddingTypesItem]] = OMIT,
+        embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
         truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> EmbedResponse:
@@ -1044,13 +1046,13 @@ class BaseCohere:
                                            * `embed-multilingual-v2.0`  768
             - input_type: typing.Optional[EmbedInputType].
 
-            - embedding_types: typing.Optional[typing.Sequence[EmbedRequestEmbeddingTypesItem]]. Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
+            - embedding_types: typing.Optional[typing.Sequence[EmbeddingType]]. Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
-                                                                                                 * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
-                                                                                                 * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
-                                                                                                 * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
-                                                                                                 * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
-                                                                                                 * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
+                                                                                * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
+                                                                                * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
+                                                                                * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
+                                                                                * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
+                                                                                * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
             - truncate: typing.Optional[EmbedRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
 
                                                                Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
@@ -1103,7 +1105,7 @@ class BaseCohere:
             ),
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else 60,
+            else self._client_wrapper.get_timeout(),
             retries=0,
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
@@ -1202,7 +1204,7 @@ class BaseCohere:
             ),
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else 60,
+            else self._client_wrapper.get_timeout(),
             retries=0,
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
@@ -1328,7 +1330,7 @@ class BaseCohere:
             ),
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else 60,
+            else self._client_wrapper.get_timeout(),
             retries=0,
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
@@ -1427,7 +1429,7 @@ class BaseCohere:
             ),
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else 60,
+            else self._client_wrapper.get_timeout(),
             retries=0,
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
@@ -1490,7 +1492,7 @@ class BaseCohere:
             ),
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else 60,
+            else self._client_wrapper.get_timeout(),
             retries=0,
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
@@ -1560,7 +1562,7 @@ class BaseCohere:
             ),
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else 60,
+            else self._client_wrapper.get_timeout(),
             retries=0,
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
@@ -1590,7 +1592,7 @@ class AsyncBaseCohere:
 
         - token: typing.Optional[typing.Union[str, typing.Callable[[], str]]].
 
-        - timeout: typing.Optional[float]. The timeout to be used, in seconds, for requests by default the timeout is 60 seconds.
+        - timeout: typing.Optional[float]. The timeout to be used, in seconds, for requests by default the timeout is 60 seconds, unless a custom httpx client is used, in which case a default is not set.
 
         - httpx_client: typing.Optional[httpx.AsyncClient]. The httpx client to use for making requests, a preconfigured client is used by default, however this is useful should you want to pass in any custom httpx configuration.
     ---
@@ -1609,16 +1611,18 @@ class AsyncBaseCohere:
         environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
         client_name: typing.Optional[str] = None,
         token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"),
-        timeout: typing.Optional[float] = 60,
+        timeout: typing.Optional[float] = None,
         httpx_client: typing.Optional[httpx.AsyncClient] = None,
     ):
+        _defaulted_timeout = timeout if timeout is not None else 300 if httpx_client is None else None
         if token is None:
             raise ApiError(body="The client must be instantiated be either passing in token or setting CO_API_KEY")
         self._client_wrapper = AsyncClientWrapper(
             base_url=_get_base_url(base_url=base_url, environment=environment),
             client_name=client_name,
             token=token,
-            httpx_client=httpx.AsyncClient(timeout=timeout) if httpx_client is None else httpx_client,
+            httpx_client=httpx.AsyncClient(timeout=_defaulted_timeout) if httpx_client is None else httpx_client,
+            timeout=_defaulted_timeout,
         )
         self.embed_jobs = AsyncEmbedJobsClient(client_wrapper=self._client_wrapper)
         self.datasets = AsyncDatasetsClient(client_wrapper=self._client_wrapper)
@@ -1910,7 +1914,7 @@ class AsyncBaseCohere:
             ),
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else 60,
+            else self._client_wrapper.get_timeout(),
             retries=0,
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         ) as _response:
@@ -2155,7 +2159,7 @@ class AsyncBaseCohere:
             ),
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else 60,
+            else self._client_wrapper.get_timeout(),
             retries=0,
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
@@ -2331,7 +2335,7 @@ class AsyncBaseCohere:
             ),
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else 60,
+            else self._client_wrapper.get_timeout(),
             retries=0,
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         ) as _response:
@@ -2502,7 +2506,7 @@ class AsyncBaseCohere:
             ),
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else 60,
+            else self._client_wrapper.get_timeout(),
             retries=0,
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
@@ -2526,7 +2530,7 @@ class AsyncBaseCohere:
         texts: typing.Sequence[str],
         model: typing.Optional[str] = OMIT,
         input_type: typing.Optional[EmbedInputType] = OMIT,
-        embedding_types: typing.Optional[typing.Sequence[EmbedRequestEmbeddingTypesItem]] = OMIT,
+        embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
         truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> EmbedResponse:
@@ -2556,13 +2560,13 @@ class AsyncBaseCohere:
                                            * `embed-multilingual-v2.0`  768
             - input_type: typing.Optional[EmbedInputType].
 
-            - embedding_types: typing.Optional[typing.Sequence[EmbedRequestEmbeddingTypesItem]]. Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
+            - embedding_types: typing.Optional[typing.Sequence[EmbeddingType]]. Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
-                                                                                                 * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
-                                                                                                 * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
-                                                                                                 * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
-                                                                                                 * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
-                                                                                                 * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
+                                                                                * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
+                                                                                * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
+                                                                                * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
+                                                                                * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
+                                                                                * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
             - truncate: typing.Optional[EmbedRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
 
                                                                Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
@@ -2615,7 +2619,7 @@ class AsyncBaseCohere:
             ),
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else 60,
+            else self._client_wrapper.get_timeout(),
             retries=0,
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
@@ -2714,7 +2718,7 @@ class AsyncBaseCohere:
             ),
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else 60,
+            else self._client_wrapper.get_timeout(),
             retries=0,
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
@@ -2840,7 +2844,7 @@ class AsyncBaseCohere:
             ),
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else 60,
+            else self._client_wrapper.get_timeout(),
             retries=0,
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
@@ -2939,7 +2943,7 @@ class AsyncBaseCohere:
             ),
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else 60,
+            else self._client_wrapper.get_timeout(),
             retries=0,
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
@@ -3002,7 +3006,7 @@ class AsyncBaseCohere:
             ),
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else 60,
+            else self._client_wrapper.get_timeout(),
             retries=0,
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
@@ -3072,7 +3076,7 @@ class AsyncBaseCohere:
             ),
             timeout=request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else 60,
+            else self._client_wrapper.get_timeout(),
             retries=0,
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )

@@ -10,11 +10,13 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
+fastavro = "^1.9.4"
 httpx = ">=0.21.2"
 pydantic = ">= 1.9.2"
-# tokenizers = "^0.15.2"
+tokenizers = "^0.15.2"
+requests = "^2.31.0"
+types-requests = "^2.31.0.20240311"
 typing_extensions = ">= 4.0.0"
-tokenizers = {version="^0.15.2", optional=true}
 
 
 [tool.poetry.dev-dependencies]

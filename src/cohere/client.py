@@ -1,12 +1,20 @@
+import asyncio
+import os
 import typing
+from concurrent.futures import ThreadPoolExecutor
 
 import httpx
 
-from .base_client import BaseCohere, AsyncBaseCohere
+from . import EmbedResponse, EmbedInputType, EmbeddingType, EmbedRequestTruncate
+from .base_client import BaseCohere, AsyncBaseCohere, OMIT
+from .config import embed_batch_size
+from .core import RequestOptions
 from .environment import ClientEnvironment
 from .manually_maintained.cache import CacheMixin
-from .utils import wait, async_wait
-import os
+from .overrides import run_overrides
+from .utils import wait, async_wait, merge_embed_responses, SyncSdkUtils, AsyncSdkUtils
+
+run_overrides()
 
 # Use NoReturn as Never type for compatibility
 Never = typing.NoReturn
@@ -83,7 +91,55 @@ class Client(BaseCohere, CacheMixin):
 
         validate_args(self, "chat", throw_if_stream_is_true)
 
+    utils = SyncSdkUtils()
+
+    # support context manager until Fern upstreams
+    # https://linear.app/buildwithfern/issue/FER-1242/expose-a-context-manager-interface-or-the-http-client-easily
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self._client_wrapper.httpx_client.httpx_client.close()
+
     wait = wait
+
+    _executor = ThreadPoolExecutor(64)
+
+    def embed(
+            self,
+            *,
+            texts: typing.Sequence[str],
+            model: typing.Optional[str] = OMIT,
+            input_type: typing.Optional[EmbedInputType] = OMIT,
+            embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
+            truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
+            request_options: typing.Optional[RequestOptions] = None,
+            batching: typing.Optional[bool] = True,
+    ) -> EmbedResponse:
+        if batching is False:
+            return BaseCohere.embed(
+                self,
+                texts=texts,
+                model=model,
+                input_type=input_type,
+                embedding_types=embedding_types,
+                truncate=truncate,
+                request_options=request_options,
+            )
+
+        texts_batches = [texts[i: i + embed_batch_size] for i in range(0, len(texts), embed_batch_size)]
+
+        responses = [response for response in self._executor.map(lambda text_batch: BaseCohere.embed(
+                self,
+                texts=text_batch,
+                model=model,
+                input_type=input_type,
+                embedding_types=embedding_types,
+                truncate=truncate,
+                request_options=request_options,
+        ), texts_batches)]
+
+        return merge_embed_responses(responses)
 
     """
     The following methods have been moved or deprecated in cohere==5.0.0. Please update your usage.
@@ -173,7 +229,55 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
 
         validate_args(self, "chat", throw_if_stream_is_true)
 
+    utils = AsyncSdkUtils()
+
+    # support context manager until Fern upstreams
+    # https://linear.app/buildwithfern/issue/FER-1242/expose-a-context-manager-interface-or-the-http-client-easily
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_value, traceback):
+        await self._client_wrapper.httpx_client.httpx_client.aclose()
+
     wait = async_wait
+
+    _executor = ThreadPoolExecutor(64)
+
+    async def embed(
+            self,
+            *,
+            texts: typing.Sequence[str],
+            model: typing.Optional[str] = OMIT,
+            input_type: typing.Optional[EmbedInputType] = OMIT,
+            embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
+            truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
+            request_options: typing.Optional[RequestOptions] = None,
+            batching: typing.Optional[bool] = True,
+    ) -> EmbedResponse:
+        if batching is False:
+            return await AsyncBaseCohere.embed(
+                self,
+                texts=texts,
+                model=model,
+                input_type=input_type,
+                embedding_types=embedding_types,
+                truncate=truncate,
+                request_options=request_options,
+            )
+
+        texts_batches = [texts[i: i + embed_batch_size] for i in range(0, len(texts), embed_batch_size)]
+
+        responses = typing.cast(typing.List[EmbedResponse], await asyncio.gather(*[AsyncBaseCohere.embed(
+                self,
+                texts=text_batch,
+                model=model,
+                input_type=input_type,
+                embedding_types=embedding_types,
+                truncate=truncate,
+                request_options=request_options,
+        ) for text_batch in texts_batches]))
+
+        return merge_embed_responses(responses)
 
     """
     The following methods have been moved or deprecated in cohere==5.0.0. Please update your usage.

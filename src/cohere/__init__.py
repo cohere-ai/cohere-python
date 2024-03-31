@@ -61,11 +61,11 @@ from .types import (
     EmbedJob,
     EmbedJobStatus,
     EmbedJobTruncate,
-    EmbedRequestEmbeddingTypesItem,
     EmbedRequestTruncate,
     EmbedResponse,
     EmbedResponse_EmbeddingsByType,
     EmbedResponse_EmbeddingsFloats,
+    EmbeddingType,
     FinetuneDatasetMetrics,
     FinishReason,
     GenerateRequestReturnLikelihoods,
@@ -133,6 +133,7 @@ from .client import AsyncClient, Client
 from .datasets import DatasetsCreateResponse, DatasetsGetResponse, DatasetsGetUsageResponse, DatasetsListResponse
 from .embed_jobs import CreateEmbedJobRequestTruncate
 from .environment import ClientEnvironment
+from .version import __version__
 
 __all__ = [
     "ApiMeta",
@@ -204,11 +205,11 @@ __all__ = [
     "EmbedJob",
     "EmbedJobStatus",
     "EmbedJobTruncate",
-    "EmbedRequestEmbeddingTypesItem",
     "EmbedRequestTruncate",
     "EmbedResponse",
     "EmbedResponse_EmbeddingsByType",
     "EmbedResponse_EmbeddingsFloats",
+    "EmbeddingType",
     "FinetuneDatasetMetrics",
     "FinishReason",
     "ForbiddenError",
@@ -267,6 +268,7 @@ __all__ = [
     "ToolParameterDefinitionsValue",
     "UnauthorizedError",
     "UpdateConnectorResponse",
+    "__version__",
     "connectors",
     "datasets",
     "embed_jobs",

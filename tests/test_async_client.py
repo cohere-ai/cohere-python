@@ -19,6 +19,10 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
         cohere.AsyncClient(api_key=None)
         cohere.AsyncClient(None)
 
+    async def test_context_manager(self) -> None:
+        async with cohere.AsyncClient(api_key="xxx") as client:
+            self.assertIsNotNone(client)
+
     async def test_chat(self) -> None:
         chat = await self.co.chat(
             chat_history=[
@@ -79,6 +83,43 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
             input_type="classification"
         )
         print(response)
+
+    async def test_embed_batch_types(self) -> None:
+        # batch more than 96 texts
+        response = await self.co.embed(
+            texts=['hello']*100,
+            model='embed-english-v3.0',
+            input_type="classification",
+            embedding_types=["float", "int8", "uint8", "binary", "ubinary"]
+        )
+
+        if response.response_type == "embeddings_by_type":
+            self.assertEqual(len(response.texts or []), 100)
+            self.assertEqual(len(response.embeddings.float_ or []), 100)
+            self.assertEqual(len(response.embeddings.int8 or []), 100)
+            self.assertEqual(len(response.embeddings.uint8 or []), 100)
+            self.assertEqual(len(response.embeddings.binary or []), 100)
+            self.assertEqual(len(response.embeddings.ubinary or []), 100)
+        else:
+            self.fail("Expected embeddings_by_type response type")
+
+        print(response)
+
+    async def test_embed_batch_v1(self) -> None:
+        # batch more than 96 texts
+        response = await self.co.embed(
+            texts=['hello']*100,
+            model='embed-english-v3.0',
+            input_type="classification",
+        )
+
+        if response.response_type == "embeddings_floats":
+            self.assertEqual(len(response.embeddings), 100)
+        else:
+            self.fail("Expected embeddings_floats response type")
+
+        print(response)
+
 
     @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     async def test_embed_job_crud(self) -> None:
@@ -174,6 +215,26 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
         dataset = await self.co.datasets.get(my_dataset.id or "")
 
         print(dataset)
+
+        await self.co.datasets.delete(my_dataset.id or "")
+
+    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
+    async def test_save_load(self) -> None:
+        my_dataset = await self.co.datasets.create(
+            name="test",
+            type="embed-input",
+            data=open(embed_job, 'rb'),
+        )
+
+        result = await self.co.wait(my_dataset)
+
+        self.co.utils.save_dataset(result.dataset, "dataset.jsonl")
+
+        # assert files equal
+        self.assertTrue(os.path.exists("dataset.jsonl"))
+        self.assertEqual(open(embed_job, 'rb').read(), open("dataset.jsonl", 'rb').read())
+
+        print(result)
 
         await self.co.datasets.delete(my_dataset.id or "")
 
