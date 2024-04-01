@@ -27,8 +27,9 @@ async def get_hf_tokenizer(co: typing.Union["AsyncClient", "Client"], model: str
     if not response.tokenizer_url:
         raise ValueError(f"No tokenizer URL found for model {model}")
 
-    size = requests.head(response.tokenizer_url).headers.get("Content-Length")
-    print(f"Downloading tokenizer for model {model}. Size is {size} bytes.")
+    size = int(requests.head(response.tokenizer_url).headers.get("Content-Length"))
+    size_mb = round(size / 1024 / 1024, 2)
+    print(f"Downloading tokenizer for model {model}. Size is {size_mb} MBs.")
     resource = requests.get(response.tokenizer_url)
     tokenizer = Tokenizer.from_str(resource.text)
 
