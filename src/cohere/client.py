@@ -225,7 +225,7 @@ class Client(BaseCohere, CacheMixin):
         """
         if offline:
             model = model or "command"
-            tokens = asyncio.get_event_loop().run_until_complete(
+            tokens = asyncio.run(
                 local_tokenizers.local_tokenize(self, text=text, model=model)
             )
             return TokenizeResponse(tokens=tokens, token_strings=[])
@@ -266,7 +266,7 @@ class Client(BaseCohere, CacheMixin):
 
         if offline:
             model = model or "command"
-            text = asyncio.get_event_loop().run_until_complete(
+            text = asyncio.run(
                 local_tokenizers.local_detokenize(self, model=model, tokens=tokens)
             )
             return DetokenizeResponse(text=text)
