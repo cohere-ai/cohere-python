@@ -271,14 +271,16 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
     async def test_tokenize(self) -> None:
         response = await self.co.tokenize(
             text='tokenize me! :D',
-            model='command'
+            model='command',
+            offline=False,
         )
         print(response)
 
     async def test_detokenize(self) -> None:
         response = await self.co.detokenize(
             tokens=[10104, 12221, 1315, 34, 1420, 69],
-            model="command"
+            model="command",
+            offline=False,
         )
         print(response)
 
@@ -377,14 +379,14 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
         ])
 
     async def test_local_tokenize(self) -> None:
-        response = await self.co.local_tokenize(
+        response = await self.co.tokenize(
             model="command",
             text="tokenize me! :D"
         )
         print(response)
 
     async def test_local_detokenize(self) -> None:
-        response = await self.co.local_detokenize(
+        response = await self.co.detokenize(
             model="command",
             tokens=[10104, 12221, 1315, 34, 1420, 69]
         )

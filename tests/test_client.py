@@ -274,14 +274,16 @@ class TestClient(unittest.TestCase):
     def test_tokenize(self) -> None:
         response = co.tokenize(
             text='tokenize me! :D',
-            model='command'
+            model='command',
+            offline=False,
         )
         print(response)
 
     def test_detokenize(self) -> None:
         response = co.detokenize(
             tokens=[10104, 12221, 1315, 34, 1420, 69],
-            model="command"
+            model="command",
+            offline=False,
         )
         print(response)
 
@@ -380,14 +382,14 @@ class TestClient(unittest.TestCase):
         ])
 
     def test_local_tokenize(self) -> None:
-        response = co.local_tokenize(
+        response = co.tokenize(
             model="command",
             text="tokenize me! :D"
         )
         print(response)
 
     def test_local_detokenize(self) -> None:
-        response = co.local_detokenize(
+        response = co.detokenize(
             model="command",
             tokens=[10104, 12221, 1315, 34, 1420, 69]
         )

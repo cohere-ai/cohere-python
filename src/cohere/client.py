@@ -2,8 +2,12 @@ import asyncio
 import os
 import typing
 from concurrent.futures import ThreadPoolExecutor
+from tokenizers import Tokenizer  # type: ignore
 
 import httpx
+
+from cohere.types.detokenize_response import DetokenizeResponse
+from cohere.types.tokenize_response import TokenizeResponse
 
 from . import EmbedResponse, EmbedInputType, EmbeddingType, EmbedRequestTruncate
 from .base_client import BaseCohere, AsyncBaseCohere, OMIT
@@ -11,6 +15,7 @@ from .config import embed_batch_size
 from .core import RequestOptions
 from .environment import ClientEnvironment
 from .manually_maintained.cache import CacheMixin
+from .manually_maintained import tokenizers as local_tokenizers
 from .overrides import run_overrides
 from .utils import wait, async_wait, merge_embed_responses, SyncSdkUtils, AsyncSdkUtils
 
@@ -186,21 +191,93 @@ class Client(BaseCohere, CacheMixin):
     delete_connector: Never = moved_function("delete_connector", ".connectors.delete")
     oauth_authorize_connector: Never = moved_function("oauth_authorize_connector", ".connectors.o_auth_authorize")
 
-    def local_tokenize(self, *, text: str, model: str) -> typing.List[int]:
-        from .manually_maintained.tokenizers import local_tokenize
+    def tokenize(
+        self,
+        *,
+        text: str,
+        model: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+        offline: bool = True,
+    ) -> TokenizeResponse:
+        """
+        This function splits input text into smaller units called tokens using byte-pair encoding (BPE). To learn more about tokenization and byte pair encoding, see the tokens page.
 
-        return local_tokenize(self, model, text)
+        Parameters:
+            - text: str. The string to be tokenized, the minimum text length is 1 character, and the maximum text length is 65536 characters.
 
-    def local_detokenize(self, *, tokens: typing.List[int], model: str) -> str:
-        from .manually_maintained.tokenizers import local_detokenize
+            - model: typing.Optional[str]. An optional parameter to provide the model name. This will ensure that the tokenization uses the tokenizer used by that model.
 
-        return local_detokenize(self, model, tokens)
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
 
-    # TODO: how to type hint without the package being installed?
-    def fetch_tokenizer(self, *, model: str) -> typing.Any:
-        from .manually_maintained.tokenizers import get_hf_tokenizer
+            - offline: typing.Optional[bool]. An optional parameter to specify whether to use an offline tokenizer. If set to True, the tokenizer config will be downloaded (and cached),
+                and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
+        ---
+        from cohere.client import AsyncClient
 
-        return get_hf_tokenizer(self, model)
+        client = Client(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        client.tokenize(
+            text="tokenize me! :D",
+            model="command",
+        )
+        """
+        if offline:
+            model = model or "command"
+            tokens = asyncio.get_event_loop().run_until_complete(
+                local_tokenizers.local_tokenize(self, text=text, model=model)
+            )
+            return TokenizeResponse(tokens=tokens, token_strings=[])
+        else:
+            return super().tokenize(text=text, model=model, request_options=request_options)
+
+    def detokenize(
+        self,
+        *,
+        tokens: typing.Sequence[int],
+        model: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+        offline: typing.Optional[bool] = True,
+    ) -> DetokenizeResponse:
+        """
+        This function takes tokens using byte-pair encoding and returns their text representation. To learn more about tokenization and byte pair encoding, see the tokens page.
+
+        Parameters:
+            - tokens: typing.Sequence[int]. The list of tokens to be detokenized.
+
+            - model: typing.Optional[str]. An optional parameter to provide the model name. This will ensure that the detokenization is done by the tokenizer used by that model.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
+
+            - offline: typing.Optional[bool]. An optional parameter to specify whether to use an offline tokenizer. If set to True, the tokenizer config will be downloaded (and cached),
+                and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
+        ---
+        from cohere.client import AsyncClient
+
+        client = Client(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        client.detokenize(
+            tokens=[10104, 12221, 1315, 34, 1420, 69],
+        )
+        """
+
+        if offline:
+            model = model or "command"
+            text = asyncio.get_event_loop().run_until_complete(
+                local_tokenizers.local_detokenize(self, model=model, tokens=tokens)
+            )
+            return DetokenizeResponse(text=text)
+        else:
+            return super().detokenize(tokens=tokens, model=model, request_options=request_options)
+
+    def fetch_tokenizer(self, *, model: str) -> Tokenizer:
+        """
+        Returns a Hugging Face tokenizer from a given model name.
+        """
+        return local_tokenizers.get_hf_tokenizer(self, model)
 
 
 class AsyncClient(AsyncBaseCohere, CacheMixin):
@@ -324,17 +401,86 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
     delete_connector: Never = moved_function("delete_connector", ".connectors.delete")
     oauth_authorize_connector: Never = moved_function("oauth_authorize_connector", ".connectors.o_auth_authorize")
 
-    async def local_tokenize(self, *, text: str, model: str) -> typing.List[int]:
-        from .manually_maintained.tokenizers import async_local_tokenize
+    async def tokenize(
+        self,
+        *,
+        text: str,
+        model: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+        offline: typing.Optional[bool] = True,
+    ) -> TokenizeResponse:
+        """
+        This function splits input text into smaller units called tokens using byte-pair encoding (BPE). To learn more about tokenization and byte pair encoding, see the tokens page.
 
-        return await async_local_tokenize(self, model, text)
+        Parameters:
+            - text: str. The string to be tokenized, the minimum text length is 1 character, and the maximum text length is 65536 characters.
 
-    async def local_detokenize(self, *, tokens: typing.List[int], model: str) -> str:
-        from .manually_maintained.tokenizers import async_local_detokenize
+            - model: typing.Optional[str]. An optional parameter to provide the model name. This will ensure that the tokenization uses the tokenizer used by that model.
 
-        return await async_local_detokenize(self, model, tokens)
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
 
-    async def fetch_tokenizer(self, *, model: str) -> typing.Any:
-        from .manually_maintained.tokenizers import async_get_hf_tokenizer
+            - offline: typing.Optional[bool]. An optional parameter to specify whether to use an offline tokenizer. If set to True, the tokenizer config will be downloaded (and cached),
+                and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
+        ---
+        from cohere.client import AsyncClient
 
-        return await async_get_hf_tokenizer(self, model)
+        client = AsyncClient(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        await client.tokenize(
+            text="tokenize me! :D",
+            model="command",
+        )
+        """
+        if offline:
+            model = model or "command"
+            tokens = await local_tokenizers.local_tokenize(self, model=model, text=text)
+            return TokenizeResponse(tokens=tokens, token_strings=[])
+        else:
+            return await super().tokenize(text=text, model=model, request_options=request_options)
+
+    async def detokenize(
+        self,
+        *,
+        tokens: typing.Sequence[int],
+        model: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+        offline: typing.Optional[bool] = True,
+    ) -> DetokenizeResponse:
+        """
+        This function takes tokens using byte-pair encoding and returns their text representation. To learn more about tokenization and byte pair encoding, see the tokens page.
+
+        Parameters:
+            - tokens: typing.Sequence[int]. The list of tokens to be detokenized.
+
+            - model: typing.Optional[str]. An optional parameter to provide the model name. This will ensure that the detokenization is done by the tokenizer used by that model.
+
+            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
+
+            - offline: typing.Optional[bool]. An optional parameter to specify whether to use an offline tokenizer. If set to True, the tokenizer config will be downloaded (and cached),
+                and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
+        ---
+        from cohere.client import AsyncClient
+
+        client = AsyncClient(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        await client.detokenize(
+            tokens=[10104, 12221, 1315, 34, 1420, 69],
+        )
+        """
+
+        if offline:
+            model = model or "command"
+            text = await local_tokenizers.local_detokenize(self, model=model, tokens=tokens)
+            return DetokenizeResponse(text=text)
+        else:
+            return await super().detokenize(tokens=tokens, model=model, request_options=request_options)
+
+    async def fetch_tokenizer(self, *, model: str) -> Tokenizer:
+        """
+        Returns a Hugging Face tokenizer from a given model name.
+        """
+        return await local_tokenizers.get_hf_tokenizer(self, model)
