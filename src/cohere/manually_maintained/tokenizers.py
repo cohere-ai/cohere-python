@@ -19,7 +19,7 @@ async def get_hf_tokenizer(co: typing.Union["AsyncClient", "Client"], model: str
     tokenizer = co._cache_get(tokenizer_cache_key(model))
     if tokenizer is not None:
         return tokenizer
-    tokenizer_url = ""
+    tokenizer_url = None
     if isinstance(co, AsyncClient):
         tokenizer_url = (await co.models.get(model)).tokenizer_url
     else:
@@ -30,7 +30,8 @@ async def get_hf_tokenizer(co: typing.Union["AsyncClient", "Client"], model: str
     size = int(typing.cast(int, requests.head(tokenizer_url).headers.get("Content-Length")))
     size_mb = round(size / 1024 / 1024, 2)
     print(f"Downloading tokenizer for model {model}. Size is {size_mb} MBs.")
-    resource = requests.get(tokenizer_url)  # TODO: make this async compatible
+    # TODO: make this async compatible, it's blocking. This is fine for now; since it downloads only once.
+    resource = requests.get(tokenizer_url)
     tokenizer = Tokenizer.from_str(resource.text)
 
     co._cache_set(tokenizer_cache_key(model), tokenizer)
