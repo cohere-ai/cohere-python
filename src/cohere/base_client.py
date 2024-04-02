@@ -148,7 +148,7 @@ class BaseCohere:
         Parameters:
             - message: str. Text input for the model to respond to.
 
-            - model: typing.Optional[str]. Defaults to `command`.
+            - model: typing.Optional[str]. Defaults to `command-r`.
 
                                            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
@@ -262,7 +262,6 @@ class BaseCohere:
             ChatConnector,
             ChatMessage,
             ChatStreamRequestConnectorsSearchOptions,
-            ChatStreamRequestPromptOverride,
             ChatStreamRequestToolResultsItem,
             Tool,
             ToolCall,
@@ -309,11 +308,6 @@ class BaseCohere:
                 max_tokens={"key": "value"},
                 preamble={"key": "value"},
                 seed=1.1,
-            ),
-            prompt_override=ChatStreamRequestPromptOverride(
-                preamble={"key": "value"},
-                task_description={"key": "value"},
-                style_guide={"key": "value"},
             ),
             frequency_penalty=1.1,
             presence_penalty=1.1,
@@ -451,7 +445,7 @@ class BaseCohere:
         Parameters:
             - message: str. Text input for the model to respond to.
 
-            - model: typing.Optional[str]. Defaults to `command`.
+            - model: typing.Optional[str]. Defaults to `command-r`.
 
                                            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
@@ -1444,7 +1438,7 @@ class BaseCohere:
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
     def tokenize(
-        self, *, text: str, model: typing.Optional[str] = OMIT, request_options: typing.Optional[RequestOptions] = None
+        self, *, text: str, model: str, request_options: typing.Optional[RequestOptions] = None
     ) -> TokenizeResponse:
         """
         This endpoint splits input text into smaller units called tokens using byte-pair encoding (BPE). To learn more about tokenization and byte pair encoding, see the tokens page.
@@ -1452,7 +1446,7 @@ class BaseCohere:
         Parameters:
             - text: str. The string to be tokenized, the minimum text length is 1 character, and the maximum text length is 65536 characters.
 
-            - model: typing.Optional[str]. An optional parameter to provide the model name. This will ensure that the tokenization uses the tokenizer used by that model.
+            - model: str. An optional parameter to provide the model name. This will ensure that the tokenization uses the tokenizer used by that model.
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
@@ -1467,19 +1461,16 @@ class BaseCohere:
             model="command",
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"text": text}
-        if model is not OMIT:
-            _request["model"] = model
         _response = self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "tokenize"),
             params=jsonable_encoder(
                 request_options.get("additional_query_parameters") if request_options is not None else None
             ),
-            json=jsonable_encoder(_request)
+            json=jsonable_encoder({"text": text, "model": model})
             if request_options is None or request_options.get("additional_body_parameters") is None
             else {
-                **jsonable_encoder(_request),
+                **jsonable_encoder({"text": text, "model": model}),
                 **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
             },
             headers=jsonable_encoder(
@@ -1511,11 +1502,7 @@ class BaseCohere:
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
     def detokenize(
-        self,
-        *,
-        tokens: typing.Sequence[int],
-        model: typing.Optional[str] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        self, *, tokens: typing.Sequence[int], model: str, request_options: typing.Optional[RequestOptions] = None
     ) -> DetokenizeResponse:
         """
         This endpoint takes tokens using byte-pair encoding and returns their text representation. To learn more about tokenization and byte pair encoding, see the tokens page.
@@ -1523,7 +1510,7 @@ class BaseCohere:
         Parameters:
             - tokens: typing.Sequence[int]. The list of tokens to be detokenized.
 
-            - model: typing.Optional[str]. An optional parameter to provide the model name. This will ensure that the detokenization is done by the tokenizer used by that model.
+            - model: str. An optional parameter to provide the model name. This will ensure that the detokenization is done by the tokenizer used by that model.
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
@@ -1535,21 +1522,19 @@ class BaseCohere:
         )
         client.detokenize(
             tokens=[10104, 12221, 1315, 34, 1420, 69],
+            model="command",
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"tokens": tokens}
-        if model is not OMIT:
-            _request["model"] = model
         _response = self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "detokenize"),
             params=jsonable_encoder(
                 request_options.get("additional_query_parameters") if request_options is not None else None
             ),
-            json=jsonable_encoder(_request)
+            json=jsonable_encoder({"tokens": tokens, "model": model})
             if request_options is None or request_options.get("additional_body_parameters") is None
             else {
-                **jsonable_encoder(_request),
+                **jsonable_encoder({"tokens": tokens, "model": model}),
                 **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
             },
             headers=jsonable_encoder(
@@ -1662,7 +1647,7 @@ class AsyncBaseCohere:
         Parameters:
             - message: str. Text input for the model to respond to.
 
-            - model: typing.Optional[str]. Defaults to `command`.
+            - model: typing.Optional[str]. Defaults to `command-r`.
 
                                            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
@@ -1776,7 +1761,6 @@ class AsyncBaseCohere:
             ChatConnector,
             ChatMessage,
             ChatStreamRequestConnectorsSearchOptions,
-            ChatStreamRequestPromptOverride,
             ChatStreamRequestToolResultsItem,
             Tool,
             ToolCall,
@@ -1823,11 +1807,6 @@ class AsyncBaseCohere:
                 max_tokens={"key": "value"},
                 preamble={"key": "value"},
                 seed=1.1,
-            ),
-            prompt_override=ChatStreamRequestPromptOverride(
-                preamble={"key": "value"},
-                task_description={"key": "value"},
-                style_guide={"key": "value"},
             ),
             frequency_penalty=1.1,
             presence_penalty=1.1,
@@ -1965,7 +1944,7 @@ class AsyncBaseCohere:
         Parameters:
             - message: str. Text input for the model to respond to.
 
-            - model: typing.Optional[str]. Defaults to `command`.
+            - model: typing.Optional[str]. Defaults to `command-r`.
 
                                            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
@@ -2958,7 +2937,7 @@ class AsyncBaseCohere:
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
     async def tokenize(
-        self, *, text: str, model: typing.Optional[str] = OMIT, request_options: typing.Optional[RequestOptions] = None
+        self, *, text: str, model: str, request_options: typing.Optional[RequestOptions] = None
     ) -> TokenizeResponse:
         """
         This endpoint splits input text into smaller units called tokens using byte-pair encoding (BPE). To learn more about tokenization and byte pair encoding, see the tokens page.
@@ -2966,7 +2945,7 @@ class AsyncBaseCohere:
         Parameters:
             - text: str. The string to be tokenized, the minimum text length is 1 character, and the maximum text length is 65536 characters.
 
-            - model: typing.Optional[str]. An optional parameter to provide the model name. This will ensure that the tokenization uses the tokenizer used by that model.
+            - model: str. An optional parameter to provide the model name. This will ensure that the tokenization uses the tokenizer used by that model.
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
@@ -2981,19 +2960,16 @@ class AsyncBaseCohere:
             model="command",
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"text": text}
-        if model is not OMIT:
-            _request["model"] = model
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "tokenize"),
             params=jsonable_encoder(
                 request_options.get("additional_query_parameters") if request_options is not None else None
             ),
-            json=jsonable_encoder(_request)
+            json=jsonable_encoder({"text": text, "model": model})
             if request_options is None or request_options.get("additional_body_parameters") is None
             else {
-                **jsonable_encoder(_request),
+                **jsonable_encoder({"text": text, "model": model}),
                 **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
             },
             headers=jsonable_encoder(
@@ -3025,11 +3001,7 @@ class AsyncBaseCohere:
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
     async def detokenize(
-        self,
-        *,
-        tokens: typing.Sequence[int],
-        model: typing.Optional[str] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        self, *, tokens: typing.Sequence[int], model: str, request_options: typing.Optional[RequestOptions] = None
     ) -> DetokenizeResponse:
         """
         This endpoint takes tokens using byte-pair encoding and returns their text representation. To learn more about tokenization and byte pair encoding, see the tokens page.
@@ -3037,7 +3009,7 @@ class AsyncBaseCohere:
         Parameters:
             - tokens: typing.Sequence[int]. The list of tokens to be detokenized.
 
-            - model: typing.Optional[str]. An optional parameter to provide the model name. This will ensure that the detokenization is done by the tokenizer used by that model.
+            - model: str. An optional parameter to provide the model name. This will ensure that the detokenization is done by the tokenizer used by that model.
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
@@ -3049,21 +3021,19 @@ class AsyncBaseCohere:
         )
         await client.detokenize(
             tokens=[10104, 12221, 1315, 34, 1420, 69],
+            model="command",
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"tokens": tokens}
-        if model is not OMIT:
-            _request["model"] = model
         _response = await self._client_wrapper.httpx_client.request(
             "POST",
             urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "detokenize"),
             params=jsonable_encoder(
                 request_options.get("additional_query_parameters") if request_options is not None else None
             ),
-            json=jsonable_encoder(_request)
+            json=jsonable_encoder({"tokens": tokens, "model": model})
             if request_options is None or request_options.get("additional_body_parameters") is None
             else {
-                **jsonable_encoder(_request),
+                **jsonable_encoder({"tokens": tokens, "model": model}),
                 **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
             },
             headers=jsonable_encoder(
