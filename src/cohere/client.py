@@ -201,38 +201,12 @@ class Client(BaseCohere, CacheMixin):
         self,
         *,
         text: str,
-        model: typing.Optional[str] = OMIT,
+        model: str,
         request_options: typing.Optional[RequestOptions] = None,
         offline: bool = True,
     ) -> TokenizeResponse:
-        """
-        This function splits input text into smaller units called tokens using byte-pair encoding (BPE). To learn more about tokenization and byte pair encoding, see the tokens page.
-
-        Parameters:
-            - text: str. The string to be tokenized, the minimum text length is 1 character, and the maximum text length is 65536 characters.
-
-            - model: typing.Optional[str]. An optional parameter to provide the model name. This will ensure that the tokenization uses the tokenizer used by that model.
-
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-
-            - offline: typing.Optional[bool]. An optional parameter to specify whether to use an offline tokenizer. If set to True, the tokenizer config will be downloaded (and cached),
-                and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
-        ---
-        from cohere.client import AsyncClient
-
-        client = Client(
-            client_name="YOUR_CLIENT_NAME",
-            token="YOUR_TOKEN",
-        )
-        client.tokenize(
-            text="tokenize me! :D",
-            model="command",
-        )
-        """
-        # We cannot make the parameter required in the signature because otherwise the inheritance will break (mypy incompatible with supertype)
-        if model is OMIT:
-            raise ValueError("The model parameter is required.")
-
+        # `offline` parameter controls whether to use an offline tokenizer. If set to True, the tokenizer config will be downloaded (and cached),
+        # and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
         if offline:
             tokens = asyncio.run(local_tokenizers.local_tokenize(self, text=text, model=model))
             return TokenizeResponse(tokens=tokens, token_strings=[])
@@ -243,37 +217,12 @@ class Client(BaseCohere, CacheMixin):
         self,
         *,
         tokens: typing.Sequence[int],
-        model: typing.Optional[str] = OMIT,
+        model: str,
         request_options: typing.Optional[RequestOptions] = None,
         offline: typing.Optional[bool] = True,
     ) -> DetokenizeResponse:
-        """
-        This function takes tokens using byte-pair encoding and returns their text representation. To learn more about tokenization and byte pair encoding, see the tokens page.
-
-        Parameters:
-            - tokens: typing.Sequence[int]. The list of tokens to be detokenized.
-
-            - model: typing.Optional[str]. An optional parameter to provide the model name. This will ensure that the detokenization is done by the tokenizer used by that model.
-
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-
-            - offline: typing.Optional[bool]. An optional parameter to specify whether to use an offline tokenizer. If set to True, the tokenizer config will be downloaded (and cached),
-                and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
-        ---
-        from cohere.client import AsyncClient
-
-        client = Client(
-            client_name="YOUR_CLIENT_NAME",
-            token="YOUR_TOKEN",
-        )
-        client.detokenize(
-            tokens=[10104, 12221, 1315, 34, 1420, 69],
-        )
-        """
-        # We cannot make the parameter required in the signature because otherwise the inheritance will break (mypy incompatible with supertype)
-        if model is OMIT:
-            raise ValueError("The model parameter is required.")
-
+        # `offline` parameter controls whether to use an offline tokenizer. If set to True, the tokenizer config will be downloaded (and cached),
+        # and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
         if offline:
             model = model or "command"
             text = asyncio.run(local_tokenizers.local_detokenize(self, model=model, tokens=tokens))
@@ -421,38 +370,12 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         self,
         *,
         text: str,
-        model: typing.Optional[str] = OMIT,
+        model: str,
         request_options: typing.Optional[RequestOptions] = None,
         offline: typing.Optional[bool] = True,
     ) -> TokenizeResponse:
-        """
-        This function splits input text into smaller units called tokens using byte-pair encoding (BPE). To learn more about tokenization and byte pair encoding, see the tokens page.
-
-        Parameters:
-            - text: str. The string to be tokenized, the minimum text length is 1 character, and the maximum text length is 65536 characters.
-
-            - model: typing.Optional[str]. An optional parameter to provide the model name. This will ensure that the tokenization uses the tokenizer used by that model.
-
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-
-            - offline: typing.Optional[bool]. An optional parameter to specify whether to use an offline tokenizer. If set to True, the tokenizer config will be downloaded (and cached),
-                and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
-        ---
-        from cohere.client import AsyncClient
-
-        client = AsyncClient(
-            client_name="YOUR_CLIENT_NAME",
-            token="YOUR_TOKEN",
-        )
-        await client.tokenize(
-            text="tokenize me! :D",
-            model="command",
-        )
-        """
-        # We cannot make the parameter required in the signature because otherwise the inheritance will break (mypy incompatible with supertype)
-        if model is OMIT:
-            raise ValueError("The model parameter is required.")
-
+        # `offline` parameter controls whether to use an offline tokenizer. If set to True, the tokenizer config will be downloaded (and cached),
+        # and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
         if offline:
             model = model or "command"
             tokens = await local_tokenizers.local_tokenize(self, model=model, text=text)
@@ -464,37 +387,12 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         self,
         *,
         tokens: typing.Sequence[int],
-        model: typing.Optional[str] = OMIT,
+        model: str,
         request_options: typing.Optional[RequestOptions] = None,
         offline: typing.Optional[bool] = True,
     ) -> DetokenizeResponse:
-        """
-        This function takes tokens using byte-pair encoding and returns their text representation. To learn more about tokenization and byte pair encoding, see the tokens page.
-
-        Parameters:
-            - tokens: typing.Sequence[int]. The list of tokens to be detokenized.
-
-            - model: typing.Optional[str]. An optional parameter to provide the model name. This will ensure that the detokenization is done by the tokenizer used by that model.
-
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-
-            - offline: typing.Optional[bool]. An optional parameter to specify whether to use an offline tokenizer. If set to True, the tokenizer config will be downloaded (and cached),
-                and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
-        ---
-        from cohere.client import AsyncClient
-
-        client = AsyncClient(
-            client_name="YOUR_CLIENT_NAME",
-            token="YOUR_TOKEN",
-        )
-        await client.detokenize(
-            tokens=[10104, 12221, 1315, 34, 1420, 69],
-        )
-        """
-        # We cannot make the parameter required in the signature because otherwise the inheritance will break (mypy incompatible with supertype)
-        if model is OMIT:
-            raise ValueError("The model parameter is required.")
-
+        # `offline` parameter controls whether to use an offline tokenizer. If set to True, the tokenizer config will be downloaded (and cached),
+        # and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
         if offline:
             model = model or "command"
             text = await local_tokenizers.local_detokenize(self, model=model, tokens=tokens)
