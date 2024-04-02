@@ -72,14 +72,14 @@ def deprecated_function(fn_name: str) -> typing.Any:
 
 class Client(BaseCohere, CacheMixin):
     def __init__(
-            self,
-            api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
-            *,
-            base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
-            environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
-            client_name: typing.Optional[str] = None,
-            timeout: typing.Optional[float] = 60,
-            httpx_client: typing.Optional[httpx.Client] = None,
+        self,
+        api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
+        *,
+        base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
+        environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
+        client_name: typing.Optional[str] = None,
+        timeout: typing.Optional[float] = 60,
+        httpx_client: typing.Optional[httpx.Client] = None,
     ):
         if api_key is None:
             api_key = os.getenv("CO_API_KEY")
@@ -111,15 +111,15 @@ class Client(BaseCohere, CacheMixin):
     _executor = ThreadPoolExecutor(64)
 
     def embed(
-            self,
-            *,
-            texts: typing.Sequence[str],
-            model: typing.Optional[str] = OMIT,
-            input_type: typing.Optional[EmbedInputType] = OMIT,
-            embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
-            truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
-            request_options: typing.Optional[RequestOptions] = None,
-            batching: typing.Optional[bool] = True,
+        self,
+        *,
+        texts: typing.Sequence[str],
+        model: typing.Optional[str] = OMIT,
+        input_type: typing.Optional[EmbedInputType] = OMIT,
+        embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
+        truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+        batching: typing.Optional[bool] = True,
     ) -> EmbedResponse:
         if batching is False:
             return BaseCohere.embed(
@@ -132,17 +132,23 @@ class Client(BaseCohere, CacheMixin):
                 request_options=request_options,
             )
 
-        texts_batches = [texts[i: i + embed_batch_size] for i in range(0, len(texts), embed_batch_size)]
+        texts_batches = [texts[i : i + embed_batch_size] for i in range(0, len(texts), embed_batch_size)]
 
-        responses = [response for response in self._executor.map(lambda text_batch: BaseCohere.embed(
-                self,
-                texts=text_batch,
-                model=model,
-                input_type=input_type,
-                embedding_types=embedding_types,
-                truncate=truncate,
-                request_options=request_options,
-        ), texts_batches)]
+        responses = [
+            response
+            for response in self._executor.map(
+                lambda text_batch: BaseCohere.embed(
+                    self,
+                    texts=text_batch,
+                    model=model,
+                    input_type=input_type,
+                    embedding_types=embedding_types,
+                    truncate=truncate,
+                    request_options=request_options,
+                ),
+                texts_batches,
+            )
+        ]
 
         return merge_embed_responses(responses)
 
@@ -223,11 +229,12 @@ class Client(BaseCohere, CacheMixin):
             model="command",
         )
         """
+        # We cannot make the parameter required in the signature because otherwise the inheritance will break (mypy incompatible with supertype)
+        if model is OMIT:
+            raise ValueError("The model parameter is required.")
+
         if offline:
-            model = model or "command"
-            tokens = asyncio.run(
-                local_tokenizers.local_tokenize(self, text=text, model=model)
-            )
+            tokens = asyncio.run(local_tokenizers.local_tokenize(self, text=text, model=model))
             return TokenizeResponse(tokens=tokens, token_strings=[])
         else:
             return super().tokenize(text=text, model=model, request_options=request_options)
@@ -263,12 +270,13 @@ class Client(BaseCohere, CacheMixin):
             tokens=[10104, 12221, 1315, 34, 1420, 69],
         )
         """
+        # We cannot make the parameter required in the signature because otherwise the inheritance will break (mypy incompatible with supertype)
+        if model is OMIT:
+            raise ValueError("The model parameter is required.")
 
         if offline:
             model = model or "command"
-            text = asyncio.run(
-                local_tokenizers.local_detokenize(self, model=model, tokens=tokens)
-            )
+            text = asyncio.run(local_tokenizers.local_detokenize(self, model=model, tokens=tokens))
             return DetokenizeResponse(text=text)
         else:
             return super().detokenize(tokens=tokens, model=model, request_options=request_options)
@@ -282,14 +290,14 @@ class Client(BaseCohere, CacheMixin):
 
 class AsyncClient(AsyncBaseCohere, CacheMixin):
     def __init__(
-            self,
-            api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
-            *,
-            base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
-            environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
-            client_name: typing.Optional[str] = None,
-            timeout: typing.Optional[float] = 60,
-            httpx_client: typing.Optional[httpx.AsyncClient] = None,
+        self,
+        api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
+        *,
+        base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
+        environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
+        client_name: typing.Optional[str] = None,
+        timeout: typing.Optional[float] = 60,
+        httpx_client: typing.Optional[httpx.AsyncClient] = None,
     ):
         if api_key is None:
             api_key = os.getenv("CO_API_KEY")
@@ -321,15 +329,15 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
     _executor = ThreadPoolExecutor(64)
 
     async def embed(
-            self,
-            *,
-            texts: typing.Sequence[str],
-            model: typing.Optional[str] = OMIT,
-            input_type: typing.Optional[EmbedInputType] = OMIT,
-            embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
-            truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
-            request_options: typing.Optional[RequestOptions] = None,
-            batching: typing.Optional[bool] = True,
+        self,
+        *,
+        texts: typing.Sequence[str],
+        model: typing.Optional[str] = OMIT,
+        input_type: typing.Optional[EmbedInputType] = OMIT,
+        embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
+        truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+        batching: typing.Optional[bool] = True,
     ) -> EmbedResponse:
         if batching is False:
             return await AsyncBaseCohere.embed(
@@ -342,17 +350,25 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
                 request_options=request_options,
             )
 
-        texts_batches = [texts[i: i + embed_batch_size] for i in range(0, len(texts), embed_batch_size)]
+        texts_batches = [texts[i : i + embed_batch_size] for i in range(0, len(texts), embed_batch_size)]
 
-        responses = typing.cast(typing.List[EmbedResponse], await asyncio.gather(*[AsyncBaseCohere.embed(
-                self,
-                texts=text_batch,
-                model=model,
-                input_type=input_type,
-                embedding_types=embedding_types,
-                truncate=truncate,
-                request_options=request_options,
-        ) for text_batch in texts_batches]))
+        responses = typing.cast(
+            typing.List[EmbedResponse],
+            await asyncio.gather(
+                *[
+                    AsyncBaseCohere.embed(
+                        self,
+                        texts=text_batch,
+                        model=model,
+                        input_type=input_type,
+                        embedding_types=embedding_types,
+                        truncate=truncate,
+                        request_options=request_options,
+                    )
+                    for text_batch in texts_batches
+                ]
+            ),
+        )
 
         return merge_embed_responses(responses)
 
@@ -433,6 +449,10 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
             model="command",
         )
         """
+        # We cannot make the parameter required in the signature because otherwise the inheritance will break (mypy incompatible with supertype)
+        if model is OMIT:
+            raise ValueError("The model parameter is required.")
+
         if offline:
             model = model or "command"
             tokens = await local_tokenizers.local_tokenize(self, model=model, text=text)
@@ -471,6 +491,9 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
             tokens=[10104, 12221, 1315, 34, 1420, 69],
         )
         """
+        # We cannot make the parameter required in the signature because otherwise the inheritance will break (mypy incompatible with supertype)
+        if model is OMIT:
+            raise ValueError("The model parameter is required.")
 
         if offline:
             model = model or "command"

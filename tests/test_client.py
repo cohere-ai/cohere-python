@@ -394,3 +394,11 @@ class TestClient(unittest.TestCase):
             tokens=[10104, 12221, 1315, 34, 1420, 69]
         )
         print(response)
+
+    def test_tokenize_without_model_raises(self) -> None:
+        with self.assertRaises(ValueError):
+            co.tokenize(text="hi")
+
+    def test_detokenize_without_model_raises(self) -> None:
+        with self.assertRaises(ValueError):
+            co.detokenize(tokens=[1, 2, 3])
