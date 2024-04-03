@@ -8,9 +8,9 @@ from .chat_stream_end_event_finish_reason import ChatStreamEndEventFinishReason
 from .chat_stream_event import ChatStreamEvent
 from .non_streamed_chat_response import NonStreamedChatResponse
 
-try:
+if pydantic.VERSION.startswith("2."):
     import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
+else:
     import pydantic  # type: ignore
 
 

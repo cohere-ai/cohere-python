@@ -6,9 +6,9 @@ import typing
 from ..core.datetime_utils import serialize_datetime
 from .single_generation_in_stream import SingleGenerationInStream
 
-try:
+if pydantic.VERSION.startswith("2."):
     import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
+else:
     import pydantic  # type: ignore
 
 

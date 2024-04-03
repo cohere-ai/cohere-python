@@ -6,9 +6,9 @@ import typing
 from ..core.datetime_utils import serialize_datetime
 from .tool_parameter_definitions_value import ToolParameterDefinitionsValue
 
-try:
+if pydantic.VERSION.startswith("2."):
     import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
+else:
     import pydantic  # type: ignore
 
 

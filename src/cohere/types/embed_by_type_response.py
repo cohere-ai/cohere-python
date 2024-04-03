@@ -7,9 +7,9 @@ from ..core.datetime_utils import serialize_datetime
 from .api_meta import ApiMeta
 from .embed_by_type_response_embeddings import EmbedByTypeResponseEmbeddings
 
-try:
+if pydantic.VERSION.startswith("2."):
     import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
+else:
     import pydantic  # type: ignore
 
 

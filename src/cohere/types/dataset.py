@@ -8,9 +8,9 @@ from .dataset_part import DatasetPart
 from .dataset_type import DatasetType
 from .dataset_validation_status import DatasetValidationStatus
 
-try:
+if pydantic.VERSION.startswith("2."):
     import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
+else:
     import pydantic  # type: ignore
 
 

@@ -8,9 +8,9 @@ from .api_meta import ApiMeta
 from .embed_job_status import EmbedJobStatus
 from .embed_job_truncate import EmbedJobTruncate
 
-try:
+if pydantic.VERSION.startswith("2."):
     import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
+else:
     import pydantic  # type: ignore
 
 

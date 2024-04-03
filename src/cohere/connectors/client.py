@@ -23,9 +23,9 @@ from ..types.list_connectors_response import ListConnectorsResponse
 from ..types.o_auth_authorize_response import OAuthAuthorizeResponse
 from ..types.update_connector_response import UpdateConnectorResponse
 
-try:
+if pydantic.VERSION.startswith("2."):
     import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
+else:
     import pydantic  # type: ignore
 
 # this is used as the default value for optional parameters

@@ -12,9 +12,9 @@ from .chat_search_result import ChatSearchResult
 from .finish_reason import FinishReason
 from .tool_call import ToolCall
 
-try:
+if pydantic.VERSION.startswith("2."):
     import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
+else:
     import pydantic  # type: ignore
 
 

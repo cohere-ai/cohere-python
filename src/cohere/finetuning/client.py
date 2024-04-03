@@ -28,9 +28,9 @@ from .finetuning.types.settings import Settings
 from .finetuning.types.status import Status
 from .finetuning.types.update_finetuned_model_response import UpdateFinetunedModelResponse
 
-try:
+if pydantic.VERSION.startswith("2."):
     import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
+else:
     import pydantic  # type: ignore
 
 # this is used as the default value for optional parameters

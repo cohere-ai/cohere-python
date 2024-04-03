@@ -9,9 +9,9 @@ from .classify_response_classifications_item_classification_type import (
 )
 from .classify_response_classifications_item_labels_value import ClassifyResponseClassificationsItemLabelsValue
 
-try:
+if pydantic.VERSION.startswith("2."):
     import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
+else:
     import pydantic  # type: ignore
 
 

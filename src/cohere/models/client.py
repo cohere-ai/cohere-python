@@ -16,9 +16,9 @@ from ..types.compatible_endpoint import CompatibleEndpoint
 from ..types.get_model_response import GetModelResponse
 from ..types.list_models_response import ListModelsResponse
 
-try:
+if pydantic.VERSION.startswith("2."):
     import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
+else:
     import pydantic  # type: ignore
 
 

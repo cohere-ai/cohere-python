@@ -54,9 +54,9 @@ from .types.summarize_response import SummarizeResponse
 from .types.tokenize_response import TokenizeResponse
 from .types.tool import Tool
 
-try:
+if pydantic.VERSION.startswith("2."):
     import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
+else:
     import pydantic  # type: ignore
 
 # this is used as the default value for optional parameters

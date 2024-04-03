@@ -8,9 +8,9 @@ from .chat_document import ChatDocument
 from .chat_search_result import ChatSearchResult
 from .chat_stream_event import ChatStreamEvent
 
-try:
+if pydantic.VERSION.startswith("2."):
     import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
+else:
     import pydantic  # type: ignore
 
 

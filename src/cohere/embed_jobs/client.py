@@ -20,9 +20,9 @@ from ..types.embedding_type import EmbeddingType
 from ..types.list_embed_job_response import ListEmbedJobResponse
 from .types.create_embed_job_request_truncate import CreateEmbedJobRequestTruncate
 
-try:
+if pydantic.VERSION.startswith("2."):
     import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
+else:
     import pydantic  # type: ignore
 
 # this is used as the default value for optional parameters

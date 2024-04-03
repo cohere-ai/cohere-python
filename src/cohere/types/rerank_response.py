@@ -7,9 +7,9 @@ from ..core.datetime_utils import serialize_datetime
 from .api_meta import ApiMeta
 from .rerank_response_results_item import RerankResponseResultsItem
 
-try:
+if pydantic.VERSION.startswith("2."):
     import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
+else:
     import pydantic  # type: ignore
 
 

@@ -7,9 +7,9 @@ from ..core.datetime_utils import serialize_datetime
 from .chat_citation import ChatCitation
 from .chat_stream_event import ChatStreamEvent
 
-try:
+if pydantic.VERSION.startswith("2."):
     import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
+else:
     import pydantic  # type: ignore
 
 
