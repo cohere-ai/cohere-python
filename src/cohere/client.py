@@ -78,7 +78,7 @@ class Client(BaseCohere, CacheMixin):
         base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
         environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
         client_name: typing.Optional[str] = None,
-        timeout: typing.Optional[float] = 60,
+        timeout: typing.Optional[float] = None,
         httpx_client: typing.Optional[httpx.Client] = None,
     ):
         if api_key is None:
@@ -245,7 +245,7 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
         environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
         client_name: typing.Optional[str] = None,
-        timeout: typing.Optional[float] = 60,
+        timeout: typing.Optional[float] = None,
         httpx_client: typing.Optional[httpx.AsyncClient] = None,
     ):
         if api_key is None:
