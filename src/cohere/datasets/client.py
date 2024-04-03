@@ -130,7 +130,7 @@ class DatasetsClient:
         Parameters:
             - name: str. The name of the uploaded dataset.
 
-            - type: DatasetType. The dataset type, which is used to validate the data.
+            - type: DatasetType. The dataset type, which is used to validate the data. Valid types are `embed-input`, `reranker-finetune-input`, `prompt-completion-finetune-input`, `single-label-classification-finetune-input`, `chat-finetune-input`, and `multi-label-classification-finetune-input`.
 
             - keep_original_file: typing.Optional[bool]. Indicates if the original file should be stored.
 
@@ -468,7 +468,7 @@ class AsyncDatasetsClient:
         Parameters:
             - name: str. The name of the uploaded dataset.
 
-            - type: DatasetType. The dataset type, which is used to validate the data.
+            - type: DatasetType. The dataset type, which is used to validate the data. Valid types are `embed-input`, `reranker-finetune-input`, `prompt-completion-finetune-input`, `single-label-classification-finetune-input`, `chat-finetune-input`, and `multi-label-classification-finetune-input`.
 
             - keep_original_file: typing.Optional[bool]. Indicates if the original file should be stored.
 

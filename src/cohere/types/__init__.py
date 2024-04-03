@@ -13,7 +13,6 @@ from .chat_message import ChatMessage
 from .chat_message_role import ChatMessageRole
 from .chat_request_citation_quality import ChatRequestCitationQuality
 from .chat_request_connectors_search_options import ChatRequestConnectorsSearchOptions
-from .chat_request_prompt_override import ChatRequestPromptOverride
 from .chat_request_prompt_truncation import ChatRequestPromptTruncation
 from .chat_request_tool_results_item import ChatRequestToolResultsItem
 from .chat_search_queries_generation_event import ChatSearchQueriesGenerationEvent
@@ -26,7 +25,6 @@ from .chat_stream_end_event_finish_reason import ChatStreamEndEventFinishReason
 from .chat_stream_event import ChatStreamEvent
 from .chat_stream_request_citation_quality import ChatStreamRequestCitationQuality
 from .chat_stream_request_connectors_search_options import ChatStreamRequestConnectorsSearchOptions
-from .chat_stream_request_prompt_override import ChatStreamRequestPromptOverride
 from .chat_stream_request_prompt_truncation import ChatStreamRequestPromptTruncation
 from .chat_stream_request_tool_results_item import ChatStreamRequestToolResultsItem
 from .chat_stream_start_event import ChatStreamStartEvent
@@ -136,7 +134,6 @@ __all__ = [
     "ChatMessageRole",
     "ChatRequestCitationQuality",
     "ChatRequestConnectorsSearchOptions",
-    "ChatRequestPromptOverride",
     "ChatRequestPromptTruncation",
     "ChatRequestToolResultsItem",
     "ChatSearchQueriesGenerationEvent",
@@ -149,7 +146,6 @@ __all__ = [
     "ChatStreamEvent",
     "ChatStreamRequestCitationQuality",
     "ChatStreamRequestConnectorsSearchOptions",
-    "ChatStreamRequestPromptOverride",
     "ChatStreamRequestPromptTruncation",
     "ChatStreamRequestToolResultsItem",
     "ChatStreamStartEvent",

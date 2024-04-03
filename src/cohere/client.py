@@ -2,14 +2,20 @@ import asyncio
 import os
 import typing
 from concurrent.futures import ThreadPoolExecutor
+from tokenizers import Tokenizer  # type: ignore
 
 import httpx
+
+from cohere.types.detokenize_response import DetokenizeResponse
+from cohere.types.tokenize_response import TokenizeResponse
 
 from . import EmbedResponse, EmbedInputType, EmbeddingType, EmbedRequestTruncate
 from .base_client import BaseCohere, AsyncBaseCohere, OMIT
 from .config import embed_batch_size
 from .core import RequestOptions
 from .environment import ClientEnvironment
+from .manually_maintained.cache import CacheMixin
+from .manually_maintained import tokenizers as local_tokenizers
 from .overrides import run_overrides
 from .utils import wait, async_wait, merge_embed_responses, SyncSdkUtils, AsyncSdkUtils
 
@@ -64,16 +70,16 @@ def deprecated_function(fn_name: str) -> typing.Any:
     return fn
 
 
-class Client(BaseCohere):
+class Client(BaseCohere, CacheMixin):
     def __init__(
-            self,
-            api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
-            *,
-            base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
-            environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
-            client_name: typing.Optional[str] = None,
-            timeout: typing.Optional[float] = 60,
-            httpx_client: typing.Optional[httpx.Client] = None,
+        self,
+        api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
+        *,
+        base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
+        environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
+        client_name: typing.Optional[str] = None,
+        timeout: typing.Optional[float] = 60,
+        httpx_client: typing.Optional[httpx.Client] = None,
     ):
         if api_key is None:
             api_key = os.getenv("CO_API_KEY")
@@ -105,15 +111,15 @@ class Client(BaseCohere):
     _executor = ThreadPoolExecutor(64)
 
     def embed(
-            self,
-            *,
-            texts: typing.Sequence[str],
-            model: typing.Optional[str] = OMIT,
-            input_type: typing.Optional[EmbedInputType] = OMIT,
-            embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
-            truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
-            request_options: typing.Optional[RequestOptions] = None,
-            batching: typing.Optional[bool] = True,
+        self,
+        *,
+        texts: typing.Sequence[str],
+        model: typing.Optional[str] = OMIT,
+        input_type: typing.Optional[EmbedInputType] = OMIT,
+        embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
+        truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+        batching: typing.Optional[bool] = True,
     ) -> EmbedResponse:
         if batching is False:
             return BaseCohere.embed(
@@ -126,17 +132,23 @@ class Client(BaseCohere):
                 request_options=request_options,
             )
 
-        texts_batches = [texts[i: i + embed_batch_size] for i in range(0, len(texts), embed_batch_size)]
+        texts_batches = [texts[i : i + embed_batch_size] for i in range(0, len(texts), embed_batch_size)]
 
-        responses = [response for response in self._executor.map(lambda text_batch: BaseCohere.embed(
-                self,
-                texts=text_batch,
-                model=model,
-                input_type=input_type,
-                embedding_types=embedding_types,
-                truncate=truncate,
-                request_options=request_options,
-        ), texts_batches)]
+        responses = [
+            response
+            for response in self._executor.map(
+                lambda text_batch: BaseCohere.embed(
+                    self,
+                    texts=text_batch,
+                    model=model,
+                    input_type=input_type,
+                    embedding_types=embedding_types,
+                    truncate=truncate,
+                    request_options=request_options,
+                ),
+                texts_batches,
+            )
+        ]
 
         return merge_embed_responses(responses)
 
@@ -185,17 +197,56 @@ class Client(BaseCohere):
     delete_connector: Never = moved_function("delete_connector", ".connectors.delete")
     oauth_authorize_connector: Never = moved_function("oauth_authorize_connector", ".connectors.o_auth_authorize")
 
+    def tokenize(
+        self,
+        *,
+        text: str,
+        model: str,
+        request_options: typing.Optional[RequestOptions] = None,
+        offline: bool = True,
+    ) -> TokenizeResponse:
+        # `offline` parameter controls whether to use an offline tokenizer. If set to True, the tokenizer config will be downloaded (and cached),
+        # and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
+        if offline:
+            tokens = asyncio.run(local_tokenizers.local_tokenize(self, text=text, model=model))
+            return TokenizeResponse(tokens=tokens, token_strings=[])
+        else:
+            return super().tokenize(text=text, model=model, request_options=request_options)
 
-class AsyncClient(AsyncBaseCohere):
+    def detokenize(
+        self,
+        *,
+        tokens: typing.Sequence[int],
+        model: str,
+        request_options: typing.Optional[RequestOptions] = None,
+        offline: typing.Optional[bool] = True,
+    ) -> DetokenizeResponse:
+        # `offline` parameter controls whether to use an offline tokenizer. If set to True, the tokenizer config will be downloaded (and cached),
+        # and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
+        if offline:
+            model = model or "command"
+            text = asyncio.run(local_tokenizers.local_detokenize(self, model=model, tokens=tokens))
+            return DetokenizeResponse(text=text)
+        else:
+            return super().detokenize(tokens=tokens, model=model, request_options=request_options)
+
+    def fetch_tokenizer(self, *, model: str) -> Tokenizer:
+        """
+        Returns a Hugging Face tokenizer from a given model name.
+        """
+        return local_tokenizers.get_hf_tokenizer(self, model)
+
+
+class AsyncClient(AsyncBaseCohere, CacheMixin):
     def __init__(
-            self,
-            api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
-            *,
-            base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
-            environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
-            client_name: typing.Optional[str] = None,
-            timeout: typing.Optional[float] = 60,
-            httpx_client: typing.Optional[httpx.AsyncClient] = None,
+        self,
+        api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
+        *,
+        base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
+        environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
+        client_name: typing.Optional[str] = None,
+        timeout: typing.Optional[float] = 60,
+        httpx_client: typing.Optional[httpx.AsyncClient] = None,
     ):
         if api_key is None:
             api_key = os.getenv("CO_API_KEY")
@@ -227,15 +278,15 @@ class AsyncClient(AsyncBaseCohere):
     _executor = ThreadPoolExecutor(64)
 
     async def embed(
-            self,
-            *,
-            texts: typing.Sequence[str],
-            model: typing.Optional[str] = OMIT,
-            input_type: typing.Optional[EmbedInputType] = OMIT,
-            embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
-            truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
-            request_options: typing.Optional[RequestOptions] = None,
-            batching: typing.Optional[bool] = True,
+        self,
+        *,
+        texts: typing.Sequence[str],
+        model: typing.Optional[str] = OMIT,
+        input_type: typing.Optional[EmbedInputType] = OMIT,
+        embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
+        truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+        batching: typing.Optional[bool] = True,
     ) -> EmbedResponse:
         if batching is False:
             return await AsyncBaseCohere.embed(
@@ -248,17 +299,25 @@ class AsyncClient(AsyncBaseCohere):
                 request_options=request_options,
             )
 
-        texts_batches = [texts[i: i + embed_batch_size] for i in range(0, len(texts), embed_batch_size)]
+        texts_batches = [texts[i : i + embed_batch_size] for i in range(0, len(texts), embed_batch_size)]
 
-        responses = typing.cast(typing.List[EmbedResponse], await asyncio.gather(*[AsyncBaseCohere.embed(
-                self,
-                texts=text_batch,
-                model=model,
-                input_type=input_type,
-                embedding_types=embedding_types,
-                truncate=truncate,
-                request_options=request_options,
-        ) for text_batch in texts_batches]))
+        responses = typing.cast(
+            typing.List[EmbedResponse],
+            await asyncio.gather(
+                *[
+                    AsyncBaseCohere.embed(
+                        self,
+                        texts=text_batch,
+                        model=model,
+                        input_type=input_type,
+                        embedding_types=embedding_types,
+                        truncate=truncate,
+                        request_options=request_options,
+                    )
+                    for text_batch in texts_batches
+                ]
+            ),
+        )
 
         return merge_embed_responses(responses)
 
@@ -306,3 +365,43 @@ class AsyncClient(AsyncBaseCohere):
     list_connectors: Never = moved_function("list_connectors", ".connectors.list")
     delete_connector: Never = moved_function("delete_connector", ".connectors.delete")
     oauth_authorize_connector: Never = moved_function("oauth_authorize_connector", ".connectors.o_auth_authorize")
+
+    async def tokenize(
+        self,
+        *,
+        text: str,
+        model: str,
+        request_options: typing.Optional[RequestOptions] = None,
+        offline: typing.Optional[bool] = True,
+    ) -> TokenizeResponse:
+        # `offline` parameter controls whether to use an offline tokenizer. If set to True, the tokenizer config will be downloaded (and cached),
+        # and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
+        if offline:
+            model = model or "command"
+            tokens = await local_tokenizers.local_tokenize(self, model=model, text=text)
+            return TokenizeResponse(tokens=tokens, token_strings=[])
+        else:
+            return await super().tokenize(text=text, model=model, request_options=request_options)
+
+    async def detokenize(
+        self,
+        *,
+        tokens: typing.Sequence[int],
+        model: str,
+        request_options: typing.Optional[RequestOptions] = None,
+        offline: typing.Optional[bool] = True,
+    ) -> DetokenizeResponse:
+        # `offline` parameter controls whether to use an offline tokenizer. If set to True, the tokenizer config will be downloaded (and cached),
+        # and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
+        if offline:
+            model = model or "command"
+            text = await local_tokenizers.local_detokenize(self, model=model, tokens=tokens)
+            return DetokenizeResponse(text=text)
+        else:
+            return await super().detokenize(tokens=tokens, model=model, request_options=request_options)
+
+    async def fetch_tokenizer(self, *, model: str) -> Tokenizer:
+        """
+        Returns a Hugging Face tokenizer from a given model name.
+        """
+        return await local_tokenizers.get_hf_tokenizer(self, model)
