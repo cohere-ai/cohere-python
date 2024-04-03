@@ -8,10 +8,14 @@ from .dataset_part import DatasetPart
 from .dataset_type import DatasetType
 from .dataset_validation_status import DatasetValidationStatus
 
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
+import pydantic
+
+IS_PYDANTIC_V2 = pydantic.VERSION.startswith("2.")
+
+if IS_PYDANTIC_V2:
+    import pydantic.v1 as pydantic_v1  # type: ignore
+else:
+    import pydantic  as pydantic_v1  # type: ignore
 
 
 class Dataset(pydantic.BaseModel):
