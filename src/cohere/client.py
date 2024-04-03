@@ -66,14 +66,14 @@ def deprecated_function(fn_name: str) -> typing.Any:
 
 class Client(BaseCohere):
     def __init__(
-            self,
-            api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
-            *,
-            base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
-            environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
-            client_name: typing.Optional[str] = None,
-            timeout: typing.Optional[float] = 60,
-            httpx_client: typing.Optional[httpx.Client] = None,
+        self,
+        api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
+        *,
+        base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
+        environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
+        client_name: typing.Optional[str] = None,
+        timeout: typing.Optional[float] = None,
+        httpx_client: typing.Optional[httpx.Client] = None,
     ):
         if api_key is None:
             api_key = os.getenv("CO_API_KEY")
@@ -188,14 +188,14 @@ class Client(BaseCohere):
 
 class AsyncClient(AsyncBaseCohere):
     def __init__(
-            self,
-            api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
-            *,
-            base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
-            environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
-            client_name: typing.Optional[str] = None,
-            timeout: typing.Optional[float] = 60,
-            httpx_client: typing.Optional[httpx.AsyncClient] = None,
+        self,
+        api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
+        *,
+        base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
+        environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
+        client_name: typing.Optional[str] = None,
+        timeout: typing.Optional[float] = None,
+        httpx_client: typing.Optional[httpx.AsyncClient] = None,
     ):
         if api_key is None:
             api_key = os.getenv("CO_API_KEY")
