@@ -9,3 +9,4 @@ LICENSE
 src/cohere/utils.py
 src/cohere/overrides.py
 src/cohere/config.py
+src/cohere/manually_maintained

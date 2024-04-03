@@ -271,14 +271,16 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
     async def test_tokenize(self) -> None:
         response = await self.co.tokenize(
             text='tokenize me! :D',
-            model='command'
+            model='command',
+            offline=False,
         )
         print(response)
 
     async def test_detokenize(self) -> None:
         response = await self.co.detokenize(
             tokens=[10104, 12221, 1315, 34, 1420, 69],
-            model="command"
+            model="command",
+            offline=False,
         )
         print(response)
 
@@ -327,7 +329,7 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
             preamble="""
                 ## Task Description
                 You help people answer their questions and other requests interactively. You will be asked a very wide array of requests on all kinds of topics. You will be equipped with a wide range of search engines or similar tools to help you, which you use to research your answer. You should focus on serving the user's needs as best you can, which will be wide-ranging.
-    
+
                 ## Style Guide
                 Unless the user asks for a different style of answer, you should answer in full sentences, using proper grammar and spelling.
             """
@@ -375,3 +377,17 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
                 "total_revenue": "48500",
             }
         ])
+
+    async def test_local_tokenize(self) -> None:
+        response = await self.co.tokenize(
+            model="command",
+            text="tokenize me! :D"
+        )
+        print(response)
+
+    async def test_local_detokenize(self) -> None:
+        response = await self.co.detokenize(
+            model="command",
+            tokens=[10104, 12221, 1315, 34, 1420, 69]
+        )
+        print(response)
