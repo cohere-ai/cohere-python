@@ -207,11 +207,15 @@ class Client(BaseCohere, CacheMixin):
     ) -> TokenizeResponse:
         # `offline` parameter controls whether to use an offline tokenizer. If set to True, the tokenizer config will be downloaded (and cached),
         # and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
+        opts: RequestOptions = request_options or {}  # type: ignore
         if offline:
-            tokens = asyncio.run(local_tokenizers.local_tokenize(self, text=text, model=model))
-            return TokenizeResponse(tokens=tokens, token_strings=[])
-        else:
-            return super().tokenize(text=text, model=model, request_options=request_options)
+            try:
+                tokens = asyncio.run(local_tokenizers.local_tokenize(self, text=text, model=model))
+                return TokenizeResponse(tokens=tokens, token_strings=[])
+            except Exception:
+                opts["additional_headers"] = opts.get("additional_headers", {})
+                opts["additional_headers"]["sdk-api-warning-message"] = "offline_tokenizer_failed"
+        return super().tokenize(text=text, model=model, request_options=opts)
 
     def detokenize(
         self,
@@ -223,12 +227,16 @@ class Client(BaseCohere, CacheMixin):
     ) -> DetokenizeResponse:
         # `offline` parameter controls whether to use an offline tokenizer. If set to True, the tokenizer config will be downloaded (and cached),
         # and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
+        opts: RequestOptions = request_options or {}  # type: ignore
         if offline:
-            model = model or "command"
-            text = asyncio.run(local_tokenizers.local_detokenize(self, model=model, tokens=tokens))
-            return DetokenizeResponse(text=text)
-        else:
-            return super().detokenize(tokens=tokens, model=model, request_options=request_options)
+            try:
+                text = asyncio.run(local_tokenizers.local_detokenize(self, model=model, tokens=tokens))
+                return DetokenizeResponse(text=text)
+            except Exception:
+                opts["additional_headers"] = opts.get("additional_headers", {})
+                opts["additional_headers"]["sdk-api-warning-message"] = "offline_tokenizer_failed"
+
+        return super().detokenize(tokens=tokens, model=model, request_options=opts)
 
     def fetch_tokenizer(self, *, model: str) -> Tokenizer:
         """
@@ -376,12 +384,16 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
     ) -> TokenizeResponse:
         # `offline` parameter controls whether to use an offline tokenizer. If set to True, the tokenizer config will be downloaded (and cached),
         # and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
+        opts: RequestOptions = request_options or {}  # type: ignore
         if offline:
-            model = model or "command"
-            tokens = await local_tokenizers.local_tokenize(self, model=model, text=text)
-            return TokenizeResponse(tokens=tokens, token_strings=[])
-        else:
-            return await super().tokenize(text=text, model=model, request_options=request_options)
+            try:
+                tokens = await local_tokenizers.local_tokenize(self, model=model, text=text)
+                return TokenizeResponse(tokens=tokens, token_strings=[])
+            except Exception:
+                opts["additional_headers"] = opts.get("additional_headers", {})
+                opts["additional_headers"]["sdk-api-warning-message"] = "offline_tokenizer_failed"
+
+        return await super().tokenize(text=text, model=model, request_options=opts)
 
     async def detokenize(
         self,
@@ -393,12 +405,16 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
     ) -> DetokenizeResponse:
         # `offline` parameter controls whether to use an offline tokenizer. If set to True, the tokenizer config will be downloaded (and cached),
         # and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
+        opts: RequestOptions = request_options or {}  # type: ignore
         if offline:
-            model = model or "command"
-            text = await local_tokenizers.local_detokenize(self, model=model, tokens=tokens)
-            return DetokenizeResponse(text=text)
-        else:
-            return await super().detokenize(tokens=tokens, model=model, request_options=request_options)
+            try:
+                text = await local_tokenizers.local_detokenize(self, model=model, tokens=tokens)
+                return DetokenizeResponse(text=text)
+            except Exception:
+                opts["additional_headers"] = opts.get("additional_headers", {})
+                opts["additional_headers"]["sdk-api-warning-message"] = "offline_tokenizer_failed"
+
+        return await super().detokenize(tokens=tokens, model=model, request_options=opts)
 
     async def fetch_tokenizer(self, *, model: str) -> Tokenizer:
         """
