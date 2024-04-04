@@ -4,33 +4,29 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
+from ..core.pydantic_utilities import pydantic_v1
 from .chat_search_query import ChatSearchQuery
 from .chat_search_result_connector import ChatSearchResultConnector
 
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
 
-
-class ChatSearchResult(pydantic.BaseModel):
+class ChatSearchResult(pydantic_v1.BaseModel):
     search_query: typing.Optional[ChatSearchQuery] = None
-    connector: ChatSearchResultConnector = pydantic.Field()
+    connector: ChatSearchResultConnector = pydantic_v1.Field()
     """
     The connector from which this result comes from.
     """
 
-    document_ids: typing.List[str] = pydantic.Field()
+    document_ids: typing.List[str] = pydantic_v1.Field()
     """
     Identifiers of documents found by this search query.
     """
 
-    error_message: typing.Optional[str] = pydantic.Field(default=None)
+    error_message: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     An error message if the search failed.
     """
 
-    continue_on_failure: typing.Optional[bool] = pydantic.Field(default=None)
+    continue_on_failure: typing.Optional[bool] = pydantic_v1.Field(default=None)
     """
     Whether a chat request should continue or not if the request to this connector fails.
     """
@@ -46,5 +42,5 @@ class ChatSearchResult(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

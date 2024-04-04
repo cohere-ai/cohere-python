@@ -4,16 +4,12 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
+from ..core.pydantic_utilities import pydantic_v1
 from .api_meta_api_version import ApiMetaApiVersion
 from .api_meta_billed_units import ApiMetaBilledUnits
 
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
 
-
-class ApiMeta(pydantic.BaseModel):
+class ApiMeta(pydantic_v1.BaseModel):
     api_version: typing.Optional[ApiMetaApiVersion] = None
     billed_units: typing.Optional[ApiMetaBilledUnits] = None
     warnings: typing.Optional[typing.List[str]] = None
@@ -29,5 +25,5 @@ class ApiMeta(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

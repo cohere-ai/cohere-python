@@ -4,26 +4,22 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
+from ..core.pydantic_utilities import pydantic_v1
 from .tool_parameter_definitions_value import ToolParameterDefinitionsValue
 
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
 
-
-class Tool(pydantic.BaseModel):
-    name: str = pydantic.Field()
+class Tool(pydantic_v1.BaseModel):
+    name: str = pydantic_v1.Field()
     """
     The name of the tool to be called. Valid names contain only the characters `a-z`, `A-Z`, `0-9`, `_` and must not begin with a digit.
     """
 
-    description: str = pydantic.Field()
+    description: str = pydantic_v1.Field()
     """
     The description of what the tool does, the model uses the description to choose when and how to call the function.
     """
 
-    parameter_definitions: typing.Optional[typing.Dict[str, ToolParameterDefinitionsValue]] = pydantic.Field(
+    parameter_definitions: typing.Optional[typing.Dict[str, ToolParameterDefinitionsValue]] = pydantic_v1.Field(
         default=None
     )
     """
@@ -51,5 +47,5 @@ class Tool(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

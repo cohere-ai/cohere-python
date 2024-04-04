@@ -14,7 +14,7 @@ from .chat_tool_calls_generation_event import ChatToolCallsGenerationEvent
 
 
 class StreamedChatResponse_StreamStart(ChatStreamStartEvent):
-    event_type: typing.Literal["stream-start"]
+    event_type: typing.Literal["stream-start"] = "stream-start"
 
     class Config:
         frozen = True
@@ -24,7 +24,7 @@ class StreamedChatResponse_StreamStart(ChatStreamStartEvent):
 
 
 class StreamedChatResponse_SearchQueriesGeneration(ChatSearchQueriesGenerationEvent):
-    event_type: typing.Literal["search-queries-generation"]
+    event_type: typing.Literal["search-queries-generation"] = "search-queries-generation"
 
     class Config:
         frozen = True
@@ -34,7 +34,7 @@ class StreamedChatResponse_SearchQueriesGeneration(ChatSearchQueriesGenerationEv
 
 
 class StreamedChatResponse_SearchResults(ChatSearchResultsEvent):
-    event_type: typing.Literal["search-results"]
+    event_type: typing.Literal["search-results"] = "search-results"
 
     class Config:
         frozen = True
@@ -44,7 +44,7 @@ class StreamedChatResponse_SearchResults(ChatSearchResultsEvent):
 
 
 class StreamedChatResponse_TextGeneration(ChatTextGenerationEvent):
-    event_type: typing.Literal["text-generation"]
+    event_type: typing.Literal["text-generation"] = "text-generation"
 
     class Config:
         frozen = True
@@ -54,7 +54,7 @@ class StreamedChatResponse_TextGeneration(ChatTextGenerationEvent):
 
 
 class StreamedChatResponse_CitationGeneration(ChatCitationGenerationEvent):
-    event_type: typing.Literal["citation-generation"]
+    event_type: typing.Literal["citation-generation"] = "citation-generation"
 
     class Config:
         frozen = True
@@ -64,7 +64,7 @@ class StreamedChatResponse_CitationGeneration(ChatCitationGenerationEvent):
 
 
 class StreamedChatResponse_ToolCallsGeneration(ChatToolCallsGenerationEvent):
-    event_type: typing.Literal["tool-calls-generation"]
+    event_type: typing.Literal["tool-calls-generation"] = "tool-calls-generation"
 
     class Config:
         frozen = True
@@ -74,7 +74,7 @@ class StreamedChatResponse_ToolCallsGeneration(ChatToolCallsGenerationEvent):
 
 
 class StreamedChatResponse_StreamEnd(ChatStreamEndEvent):
-    event_type: typing.Literal["stream-end"]
+    event_type: typing.Literal["stream-end"] = "stream-end"
 
     class Config:
         frozen = True
