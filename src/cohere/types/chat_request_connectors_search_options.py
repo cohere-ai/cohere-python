@@ -4,14 +4,10 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
-
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
+from ..core.pydantic_utilities import pydantic_v1
 
 
-class ChatRequestConnectorsSearchOptions(pydantic.BaseModel):
+class ChatRequestConnectorsSearchOptions(pydantic_v1.BaseModel):
     """
     (internal) Sets inference and model options for RAG search query and tool use generations. Defaults are used when options are not specified here, meaning that other parameters outside of connectors_search_options are ignored (such as model= or temperature=).
     """
@@ -20,7 +16,7 @@ class ChatRequestConnectorsSearchOptions(pydantic.BaseModel):
     temperature: typing.Optional[typing.Any] = None
     max_tokens: typing.Optional[typing.Any] = None
     preamble: typing.Optional[typing.Any] = None
-    seed: typing.Optional[float] = pydantic.Field(default=None)
+    seed: typing.Optional[float] = pydantic_v1.Field(default=None)
     """
     If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed.
     """
@@ -36,5 +32,5 @@ class ChatRequestConnectorsSearchOptions(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

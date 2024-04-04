@@ -4,17 +4,13 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
+from ..core.pydantic_utilities import pydantic_v1
 from .chat_search_query import ChatSearchQuery
 from .chat_stream_event import ChatStreamEvent
 
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
-
 
 class ChatSearchQueriesGenerationEvent(ChatStreamEvent):
-    search_queries: typing.List[ChatSearchQuery] = pydantic.Field()
+    search_queries: typing.List[ChatSearchQuery] = pydantic_v1.Field()
     """
     Generated search queries, meant to be used as part of the RAG flow.
     """
@@ -32,5 +28,5 @@ class ChatSearchQueriesGenerationEvent(ChatStreamEvent):
         smart_union = True
         allow_population_by_field_name = True
         populate_by_name = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

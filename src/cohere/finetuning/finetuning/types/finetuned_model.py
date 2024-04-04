@@ -4,66 +4,62 @@ import datetime as dt
 import typing
 
 from ....core.datetime_utils import serialize_datetime
+from ....core.pydantic_utilities import pydantic_v1
 from .settings import Settings
 from .status import Status
 
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
 
-
-class FinetunedModel(pydantic.BaseModel):
+class FinetunedModel(pydantic_v1.BaseModel):
     """
     This resource represents a fine-tuned model.
     """
 
-    id: typing.Optional[str] = pydantic.Field(default=None)
+    id: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     read-only. FinetunedModel ID.
     """
 
-    name: str = pydantic.Field()
+    name: str = pydantic_v1.Field()
     """
     FinetunedModel name (e.g. `foobar`).
     """
 
-    creator_id: typing.Optional[str] = pydantic.Field(default=None)
+    creator_id: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     read-only. User ID of the creator.
     """
 
-    organization_id: typing.Optional[str] = pydantic.Field(default=None)
+    organization_id: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     read-only. Organization ID.
     """
 
-    settings: Settings = pydantic.Field()
+    settings: Settings = pydantic_v1.Field()
     """
     FinetunedModel settings such as dataset, hyperparameters...
     """
 
-    status: typing.Optional[Status] = pydantic.Field(default=None)
+    status: typing.Optional[Status] = pydantic_v1.Field(default=None)
     """
     read-only. Current stage in the life-cycle of the fine-tuned model.
     """
 
-    created_at: typing.Optional[dt.datetime] = pydantic.Field(default=None)
+    created_at: typing.Optional[dt.datetime] = pydantic_v1.Field(default=None)
     """
     read-only. Creation timestamp.
     """
 
-    updated_at: typing.Optional[dt.datetime] = pydantic.Field(default=None)
+    updated_at: typing.Optional[dt.datetime] = pydantic_v1.Field(default=None)
     """
     read-only. Latest update timestamp.
     """
 
-    completed_at: typing.Optional[dt.datetime] = pydantic.Field(default=None)
+    completed_at: typing.Optional[dt.datetime] = pydantic_v1.Field(default=None)
     """
     read-only. Timestamp for the completed fine-tuning.
     """
 
-    last_used: typing.Optional[dt.datetime] = pydantic.Field(default=None)
+    last_used: typing.Optional[dt.datetime] = pydantic_v1.Field(default=None)
     """
     read-only. Timestamp for the latest request to this fine-tuned model.
     """
@@ -79,5 +75,5 @@ class FinetunedModel(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}
