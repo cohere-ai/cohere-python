@@ -4,31 +4,28 @@ import datetime as dt
 import typing
 
 from ....core.datetime_utils import serialize_datetime
+from ....core.pydantic_utilities import pydantic_v1
+from ....core.unchecked_base_model import UncheckedBaseModel
 from .event import Event
 
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
 
-
-class ListEventsResponse(pydantic.BaseModel):
+class ListEventsResponse(UncheckedBaseModel):
     """
     Response to a request to list events of a fine-tuned model.
     """
 
-    events: typing.Optional[typing.List[Event]] = pydantic.Field(default=None)
+    events: typing.Optional[typing.List[Event]] = pydantic_v1.Field(default=None)
     """
     List of events for the fine-tuned model.
     """
 
-    next_page_token: typing.Optional[str] = pydantic.Field(default=None)
+    next_page_token: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     Pagination token to retrieve the next page of results. If the value is "",
     it means no further results for the request.
     """
 
-    total_size: typing.Optional[int] = pydantic.Field(default=None)
+    total_size: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
     Total count of results.
     """
@@ -44,5 +41,5 @@ class ListEventsResponse(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

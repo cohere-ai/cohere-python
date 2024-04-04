@@ -4,23 +4,20 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
+from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .api_meta import ApiMeta
 from .embed_by_type_response_embeddings import EmbedByTypeResponseEmbeddings
 
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
 
-
-class EmbedByTypeResponse(pydantic.BaseModel):
+class EmbedByTypeResponse(UncheckedBaseModel):
     id: str
-    embeddings: EmbedByTypeResponseEmbeddings = pydantic.Field()
+    embeddings: EmbedByTypeResponseEmbeddings = pydantic_v1.Field()
     """
     An object with different embedding types. The length of each embedding type array will be the same as the length of the original `texts` array.
     """
 
-    texts: typing.List[str] = pydantic.Field()
+    texts: typing.List[str] = pydantic_v1.Field()
     """
     The text entries for which embeddings were returned.
     """
@@ -38,5 +35,5 @@ class EmbedByTypeResponse(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

@@ -4,45 +4,42 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
-
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
+from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 
 
-class DatasetPart(pydantic.BaseModel):
-    id: str = pydantic.Field()
+class DatasetPart(UncheckedBaseModel):
+    id: str = pydantic_v1.Field()
     """
     The dataset part ID
     """
 
-    name: str = pydantic.Field()
+    name: str = pydantic_v1.Field()
     """
     The name of the dataset part
     """
 
-    url: typing.Optional[str] = pydantic.Field(default=None)
+    url: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     The download url of the file
     """
 
-    index: typing.Optional[int] = pydantic.Field(default=None)
+    index: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
     The index of the file
     """
 
-    size_bytes: typing.Optional[int] = pydantic.Field(default=None)
+    size_bytes: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
     The size of the file in bytes
     """
 
-    num_rows: typing.Optional[int] = pydantic.Field(default=None)
+    num_rows: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
     The number of rows in the file
     """
 
-    original_url: typing.Optional[str] = pydantic.Field(default=None)
+    original_url: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     The download url of the original file
     """
@@ -58,5 +55,5 @@ class DatasetPart(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

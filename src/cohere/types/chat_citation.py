@@ -4,34 +4,31 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
-
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
+from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 
 
-class ChatCitation(pydantic.BaseModel):
+class ChatCitation(UncheckedBaseModel):
     """
     A section of the generated reply which cites external knowledge.
     """
 
-    start: int = pydantic.Field()
+    start: int = pydantic_v1.Field()
     """
     The index of text that the citation starts at, counting from zero. For example, a generation of `Hello, world!` with a citation on `world` would have a start value of `7`. This is because the citation starts at `w`, which is the seventh character.
     """
 
-    end: int = pydantic.Field()
+    end: int = pydantic_v1.Field()
     """
     The index of text that the citation ends after, counting from zero. For example, a generation of `Hello, world!` with a citation on `world` would have an end value of `11`. This is because the citation ends after `d`, which is the eleventh character.
     """
 
-    text: str = pydantic.Field()
+    text: str = pydantic_v1.Field()
     """
     The text of the citation. For example, a generation of `Hello, world!` with a citation of `world` would have a text value of `world`.
     """
 
-    document_ids: typing.List[str] = pydantic.Field()
+    document_ids: typing.List[str] = pydantic_v1.Field()
     """
     Identifiers of documents cited by this section of the generated reply.
     """
@@ -47,5 +44,5 @@ class ChatCitation(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

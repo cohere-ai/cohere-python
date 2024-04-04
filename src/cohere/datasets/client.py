@@ -12,17 +12,13 @@ from ..core.datetime_utils import serialize_datetime
 from ..core.jsonable_encoder import jsonable_encoder
 from ..core.remove_none_from_dict import remove_none_from_dict
 from ..core.request_options import RequestOptions
+from ..core.unchecked_base_model import construct_type
 from ..errors.too_many_requests_error import TooManyRequestsError
 from ..types.dataset_type import DatasetType
 from .types.datasets_create_response import DatasetsCreateResponse
 from .types.datasets_get_response import DatasetsGetResponse
 from .types.datasets_get_usage_response import DatasetsGetUsageResponse
 from .types.datasets_list_response import DatasetsListResponse
-
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -100,9 +96,11 @@ class DatasetsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(DatasetsListResponse, _response.json())  # type: ignore
+            return typing.cast(DatasetsListResponse, construct_type(type_=DatasetsListResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -211,9 +209,11 @@ class DatasetsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(DatasetsCreateResponse, _response.json())  # type: ignore
+            return typing.cast(DatasetsCreateResponse, construct_type(type_=DatasetsCreateResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -256,9 +256,11 @@ class DatasetsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(DatasetsGetUsageResponse, _response.json())  # type: ignore
+            return typing.cast(DatasetsGetUsageResponse, construct_type(type_=DatasetsGetUsageResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -305,9 +307,11 @@ class DatasetsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(DatasetsGetResponse, _response.json())  # type: ignore
+            return typing.cast(DatasetsGetResponse, construct_type(type_=DatasetsGetResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -356,9 +360,11 @@ class DatasetsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(typing.Dict[str, typing.Any], _response.json())  # type: ignore
+            return typing.cast(typing.Dict[str, typing.Any], construct_type(type_=typing.Dict[str, typing.Any], object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -438,9 +444,11 @@ class AsyncDatasetsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(DatasetsListResponse, _response.json())  # type: ignore
+            return typing.cast(DatasetsListResponse, construct_type(type_=DatasetsListResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -549,9 +557,11 @@ class AsyncDatasetsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(DatasetsCreateResponse, _response.json())  # type: ignore
+            return typing.cast(DatasetsCreateResponse, construct_type(type_=DatasetsCreateResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -594,9 +604,11 @@ class AsyncDatasetsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(DatasetsGetUsageResponse, _response.json())  # type: ignore
+            return typing.cast(DatasetsGetUsageResponse, construct_type(type_=DatasetsGetUsageResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -643,9 +655,11 @@ class AsyncDatasetsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(DatasetsGetResponse, _response.json())  # type: ignore
+            return typing.cast(DatasetsGetResponse, construct_type(type_=DatasetsGetResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -694,9 +708,11 @@ class AsyncDatasetsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(typing.Dict[str, typing.Any], _response.json())  # type: ignore
+            return typing.cast(typing.Dict[str, typing.Any], construct_type(type_=typing.Dict[str, typing.Any], object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:

@@ -4,26 +4,23 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
+from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .rerank_response_results_item_document import RerankResponseResultsItemDocument
 
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
 
-
-class RerankResponseResultsItem(pydantic.BaseModel):
-    document: typing.Optional[RerankResponseResultsItemDocument] = pydantic.Field(default=None)
+class RerankResponseResultsItem(UncheckedBaseModel):
+    document: typing.Optional[RerankResponseResultsItemDocument] = pydantic_v1.Field(default=None)
     """
     The doc object which was ranked
     """
 
-    index: int = pydantic.Field()
+    index: int = pydantic_v1.Field()
     """
     The index of the input document
     """
 
-    relevance_score: float = pydantic.Field()
+    relevance_score: float = pydantic_v1.Field()
     """
     A relevance score assigned to the ranking
     """
@@ -39,5 +36,5 @@ class RerankResponseResultsItem(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

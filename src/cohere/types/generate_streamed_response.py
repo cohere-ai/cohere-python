@@ -4,13 +4,16 @@ from __future__ import annotations
 
 import typing
 
+import typing_extensions
+
+from ..core.unchecked_base_model import UnionMetadata
 from .generate_stream_end import GenerateStreamEnd
 from .generate_stream_error import GenerateStreamError
 from .generate_stream_text import GenerateStreamText
 
 
 class GenerateStreamedResponse_TextGeneration(GenerateStreamText):
-    event_type: typing.Literal["text-generation"]
+    event_type: typing.Literal["text-generation"] = "text-generation"
 
     class Config:
         frozen = True
@@ -20,7 +23,7 @@ class GenerateStreamedResponse_TextGeneration(GenerateStreamText):
 
 
 class GenerateStreamedResponse_StreamEnd(GenerateStreamEnd):
-    event_type: typing.Literal["stream-end"]
+    event_type: typing.Literal["stream-end"] = "stream-end"
 
     class Config:
         frozen = True
@@ -30,7 +33,7 @@ class GenerateStreamedResponse_StreamEnd(GenerateStreamEnd):
 
 
 class GenerateStreamedResponse_StreamError(GenerateStreamError):
-    event_type: typing.Literal["stream-error"]
+    event_type: typing.Literal["stream-error"] = "stream-error"
 
     class Config:
         frozen = True
@@ -39,6 +42,11 @@ class GenerateStreamedResponse_StreamError(GenerateStreamError):
         populate_by_name = True
 
 
-GenerateStreamedResponse = typing.Union[
-    GenerateStreamedResponse_TextGeneration, GenerateStreamedResponse_StreamEnd, GenerateStreamedResponse_StreamError
+GenerateStreamedResponse = typing_extensions.Annotated[
+    typing.Union[
+        GenerateStreamedResponse_TextGeneration,
+        GenerateStreamedResponse_StreamEnd,
+        GenerateStreamedResponse_StreamError,
+    ],
+    UnionMetadata(discriminant="event_type"),
 ]

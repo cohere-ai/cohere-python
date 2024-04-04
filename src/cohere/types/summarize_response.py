@@ -4,21 +4,18 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
+from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .api_meta import ApiMeta
 
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
 
-
-class SummarizeResponse(pydantic.BaseModel):
-    id: typing.Optional[str] = pydantic.Field(default=None)
+class SummarizeResponse(UncheckedBaseModel):
+    id: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     Generated ID for the summary
     """
 
-    summary: typing.Optional[str] = pydantic.Field(default=None)
+    summary: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     Generated summary for the text
     """
@@ -36,5 +33,5 @@ class SummarizeResponse(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

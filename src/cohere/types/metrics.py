@@ -4,15 +4,12 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
+from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .finetune_dataset_metrics import FinetuneDatasetMetrics
 
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
 
-
-class Metrics(pydantic.BaseModel):
+class Metrics(UncheckedBaseModel):
     finetune_dataset_metrics: typing.Optional[FinetuneDatasetMetrics] = None
 
     def json(self, **kwargs: typing.Any) -> str:
@@ -26,5 +23,5 @@ class Metrics(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

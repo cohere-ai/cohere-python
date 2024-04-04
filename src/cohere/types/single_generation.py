@@ -4,24 +4,23 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
+from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .single_generation_token_likelihoods_item import SingleGenerationTokenLikelihoodsItem
 
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
 
-
-class SingleGeneration(pydantic.BaseModel):
+class SingleGeneration(UncheckedBaseModel):
     id: str
     text: str
-    index: typing.Optional[int] = pydantic.Field(default=None)
+    index: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
     Refers to the nth generation. Only present when `num_generations` is greater than zero.
     """
 
     likelihood: typing.Optional[float] = None
-    token_likelihoods: typing.Optional[typing.List[SingleGenerationTokenLikelihoodsItem]] = pydantic.Field(default=None)
+    token_likelihoods: typing.Optional[typing.List[SingleGenerationTokenLikelihoodsItem]] = pydantic_v1.Field(
+        default=None
+    )
     """
     Only returned if `return_likelihoods` is set to `GENERATION` or `ALL`. The likelihood refers to the average log-likelihood of the entire specified string, which is useful for [evaluating the performance of your model](likelihood-eval), especially if you've created a [custom model](/docs/training-custom-models). Individual token likelihoods provide the log-likelihood of each token. The first token will not have a likelihood.
     """
@@ -37,5 +36,5 @@ class SingleGeneration(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

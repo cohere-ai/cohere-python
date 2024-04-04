@@ -4,25 +4,22 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
-
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
+from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 
 
-class ChatDataMetrics(pydantic.BaseModel):
-    num_train_turns: typing.Optional[str] = pydantic.Field(alias="numTrainTurns", default=None)
+class ChatDataMetrics(UncheckedBaseModel):
+    num_train_turns: typing.Optional[str] = pydantic_v1.Field(alias="numTrainTurns", default=None)
     """
     The sum of all turns of valid train examples.
     """
 
-    num_eval_turns: typing.Optional[str] = pydantic.Field(alias="numEvalTurns", default=None)
+    num_eval_turns: typing.Optional[str] = pydantic_v1.Field(alias="numEvalTurns", default=None)
     """
     The sum of all turns of valid eval examples.
     """
 
-    preamble: typing.Optional[str] = pydantic.Field(default=None)
+    preamble: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     The preamble of this dataset.
     """
@@ -40,5 +37,5 @@ class ChatDataMetrics(pydantic.BaseModel):
         smart_union = True
         allow_population_by_field_name = True
         populate_by_name = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

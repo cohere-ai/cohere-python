@@ -4,39 +4,36 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
-
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
+from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 
 
-class EmbedByTypeResponseEmbeddings(pydantic.BaseModel):
+class EmbedByTypeResponseEmbeddings(UncheckedBaseModel):
     """
     An object with different embedding types. The length of each embedding type array will be the same as the length of the original `texts` array.
     """
 
-    float_: typing.Optional[typing.List[typing.List[float]]] = pydantic.Field(alias="float", default=None)
+    float_: typing.Optional[typing.List[typing.List[float]]] = pydantic_v1.Field(alias="float", default=None)
     """
     An array of float embeddings.
     """
 
-    int8: typing.Optional[typing.List[typing.List[float]]] = pydantic.Field(default=None)
+    int8: typing.Optional[typing.List[typing.List[float]]] = pydantic_v1.Field(default=None)
     """
     An array of signed int8 embeddings. Each value is between -128 and 127.
     """
 
-    uint8: typing.Optional[typing.List[typing.List[float]]] = pydantic.Field(default=None)
+    uint8: typing.Optional[typing.List[typing.List[float]]] = pydantic_v1.Field(default=None)
     """
     An array of unsigned int8 embeddings. Each value is between 0 and 255.
     """
 
-    binary: typing.Optional[typing.List[typing.List[float]]] = pydantic.Field(default=None)
+    binary: typing.Optional[typing.List[typing.List[float]]] = pydantic_v1.Field(default=None)
     """
     An array of packed signed binary embeddings. The length of each binary embedding is 1/8 the length of the float embeddings of the provided model. Each value is between -128 and 127.
     """
 
-    ubinary: typing.Optional[typing.List[typing.List[float]]] = pydantic.Field(default=None)
+    ubinary: typing.Optional[typing.List[typing.List[float]]] = pydantic_v1.Field(default=None)
     """
     An array of packed unsigned binary embeddings. The length of each binary embedding is 1/8 the length of the float embeddings of the provided model. Each value is between 0 and 255.
     """
@@ -54,5 +51,5 @@ class EmbedByTypeResponseEmbeddings(pydantic.BaseModel):
         smart_union = True
         allow_population_by_field_name = True
         populate_by_name = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

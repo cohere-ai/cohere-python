@@ -4,17 +4,14 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
+from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .get_model_response import GetModelResponse
 
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
 
-
-class ListModelsResponse(pydantic.BaseModel):
+class ListModelsResponse(UncheckedBaseModel):
     models: typing.List[GetModelResponse]
-    next_page_token: typing.Optional[str] = pydantic.Field(default=None)
+    next_page_token: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     A token to retrieve the next page of results. Provide in the page_token parameter of the next request.
     """
@@ -30,5 +27,5 @@ class ListModelsResponse(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}
