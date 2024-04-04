@@ -4,15 +4,11 @@ import datetime as dt
 import typing
 
 from ...core.datetime_utils import serialize_datetime
-
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
+from ...core.pydantic_utilities import pydantic_v1
 
 
-class DatasetsCreateResponse(pydantic.BaseModel):
-    id: typing.Optional[str] = pydantic.Field(default=None)
+class DatasetsCreateResponse(pydantic_v1.BaseModel):
+    id: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     The dataset ID
     """
@@ -28,5 +24,5 @@ class DatasetsCreateResponse(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

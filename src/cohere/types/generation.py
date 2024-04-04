@@ -4,23 +4,19 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
+from ..core.pydantic_utilities import pydantic_v1
 from .api_meta import ApiMeta
 from .single_generation import SingleGeneration
 
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
 
-
-class Generation(pydantic.BaseModel):
+class Generation(pydantic_v1.BaseModel):
     id: str
-    prompt: typing.Optional[str] = pydantic.Field(default=None)
+    prompt: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     Prompt used for generations.
     """
 
-    generations: typing.List[SingleGeneration] = pydantic.Field()
+    generations: typing.List[SingleGeneration] = pydantic_v1.Field()
     """
     List of generated results
     """
@@ -38,5 +34,5 @@ class Generation(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

@@ -4,25 +4,21 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
-
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
+from ..core.pydantic_utilities import pydantic_v1
 
 
-class LabelMetric(pydantic.BaseModel):
-    total_examples: typing.Optional[str] = pydantic.Field(alias="totalExamples", default=None)
+class LabelMetric(pydantic_v1.BaseModel):
+    total_examples: typing.Optional[str] = pydantic_v1.Field(alias="totalExamples", default=None)
     """
     Total number of examples for this label
     """
 
-    label: typing.Optional[str] = pydantic.Field(default=None)
+    label: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     value of the label
     """
 
-    samples: typing.Optional[typing.List[str]] = pydantic.Field(default=None)
+    samples: typing.Optional[typing.List[str]] = pydantic_v1.Field(default=None)
     """
     samples for this label
     """
@@ -40,5 +36,5 @@ class LabelMetric(pydantic.BaseModel):
         smart_union = True
         allow_population_by_field_name = True
         populate_by_name = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}
