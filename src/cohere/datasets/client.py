@@ -10,6 +10,7 @@ from ..core.api_error import ApiError
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.datetime_utils import serialize_datetime
 from ..core.jsonable_encoder import jsonable_encoder
+from ..core.pydantic_utilities import pydantic_v1
 from ..core.remove_none_from_dict import remove_none_from_dict
 from ..core.request_options import RequestOptions
 from ..errors.too_many_requests_error import TooManyRequestsError
@@ -18,11 +19,6 @@ from .types.datasets_create_response import DatasetsCreateResponse
 from .types.datasets_get_response import DatasetsGetResponse
 from .types.datasets_get_usage_response import DatasetsGetUsageResponse
 from .types.datasets_list_response import DatasetsListResponse
-
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -100,9 +96,9 @@ class DatasetsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(DatasetsListResponse, _response.json())  # type: ignore
+            return pydantic_v1.parse_obj_as(DatasetsListResponse, _response.json())  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -211,9 +207,9 @@ class DatasetsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(DatasetsCreateResponse, _response.json())  # type: ignore
+            return pydantic_v1.parse_obj_as(DatasetsCreateResponse, _response.json())  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -256,9 +252,9 @@ class DatasetsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(DatasetsGetUsageResponse, _response.json())  # type: ignore
+            return pydantic_v1.parse_obj_as(DatasetsGetUsageResponse, _response.json())  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -305,9 +301,9 @@ class DatasetsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(DatasetsGetResponse, _response.json())  # type: ignore
+            return pydantic_v1.parse_obj_as(DatasetsGetResponse, _response.json())  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -356,9 +352,9 @@ class DatasetsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(typing.Dict[str, typing.Any], _response.json())  # type: ignore
+            return pydantic_v1.parse_obj_as(typing.Dict[str, typing.Any], _response.json())  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -438,9 +434,9 @@ class AsyncDatasetsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(DatasetsListResponse, _response.json())  # type: ignore
+            return pydantic_v1.parse_obj_as(DatasetsListResponse, _response.json())  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -549,9 +545,9 @@ class AsyncDatasetsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(DatasetsCreateResponse, _response.json())  # type: ignore
+            return pydantic_v1.parse_obj_as(DatasetsCreateResponse, _response.json())  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -594,9 +590,9 @@ class AsyncDatasetsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(DatasetsGetUsageResponse, _response.json())  # type: ignore
+            return pydantic_v1.parse_obj_as(DatasetsGetUsageResponse, _response.json())  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -643,9 +639,9 @@ class AsyncDatasetsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(DatasetsGetResponse, _response.json())  # type: ignore
+            return pydantic_v1.parse_obj_as(DatasetsGetResponse, _response.json())  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -694,9 +690,9 @@ class AsyncDatasetsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(typing.Dict[str, typing.Any], _response.json())  # type: ignore
+            return pydantic_v1.parse_obj_as(typing.Dict[str, typing.Any], _response.json())  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
         try:
             _response_json = _response.json()
         except JSONDecodeError:

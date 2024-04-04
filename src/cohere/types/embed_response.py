@@ -9,7 +9,7 @@ from .embed_floats_response import EmbedFloatsResponse
 
 
 class EmbedResponse_EmbeddingsFloats(EmbedFloatsResponse):
-    response_type: typing.Literal["embeddings_floats"]
+    response_type: typing.Literal["embeddings_floats"] = "embeddings_floats"
 
     class Config:
         frozen = True
@@ -19,7 +19,7 @@ class EmbedResponse_EmbeddingsFloats(EmbedFloatsResponse):
 
 
 class EmbedResponse_EmbeddingsByType(EmbedByTypeResponse):
-    response_type: typing.Literal["embeddings_by_type"]
+    response_type: typing.Literal["embeddings_by_type"] = "embeddings_by_type"
 
     class Config:
         frozen = True

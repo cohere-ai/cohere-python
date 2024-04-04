@@ -16,16 +16,8 @@ from pathlib import PurePath
 from types import GeneratorType
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
-import pydantic
-
 from .datetime_utils import serialize_datetime
-
-IS_PYDANTIC_V2 = pydantic.VERSION.startswith("2.")
-
-if IS_PYDANTIC_V2:
-    import pydantic.v1 as pydantic_v1  # type: ignore
-else:
-    import pydantic as pydantic_v1  # type: ignore
+from .pydantic_utilities import pydantic_v1
 
 SetIntStr = Set[Union[int, str]]
 DictIntStrAny = Dict[Union[int, str], Any]
