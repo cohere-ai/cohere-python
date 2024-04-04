@@ -230,7 +230,6 @@ class Client(BaseCohere, CacheMixin):
         opts: RequestOptions = request_options or {}  # type: ignore
         if offline:
             try:
-                model = model or "command"
                 text = asyncio.run(local_tokenizers.local_detokenize(self, model=model, tokens=tokens))
                 return DetokenizeResponse(text=text)
             except Exception:
