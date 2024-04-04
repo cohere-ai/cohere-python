@@ -116,6 +116,9 @@ def construct_type(*, type_: typing.Type[typing.Any], object_: typing.Any) -> ty
     The idea is to essentially attempt to coerce object_ to type_ (recursively)
     """
     base_type = pydantic_v1.typing.get_origin(type_) or type_
+    is_annotated = (base_type == typing_extensions.Annotated)
+    maybe_annotation_members = pydantic_v1.typing.get_args(type_)
+    is_annotated_union = is_annotated and pydantic_v1.typing.is_union(pydantic_v1.typing.get_origin(maybe_annotation_members[0]))
 
     if base_type == dict:
         if not isinstance(object_, typing.Mapping):
@@ -138,9 +141,7 @@ def construct_type(*, type_: typing.Type[typing.Any], object_: typing.Any) -> ty
         inner_type = pydantic_v1.typing.get_args(type_)[0]
         return {construct_type(object_=entry, type_=inner_type) for entry in object_}
 
-    if pydantic_v1.typing.is_union(base_type) or (
-        base_type == typing_extensions.Annotated and pydantic_v1.typing.is_union(pydantic_v1.typing.get_args(type_)[0])
-    ):
+    if pydantic_v1.typing.is_union(base_type) or is_annotated_union:
         return _convert_union_type(type_, object_)
 
     # Cannot do an `issubclass` with a literal type
