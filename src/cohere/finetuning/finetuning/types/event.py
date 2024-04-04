@@ -4,30 +4,26 @@ import datetime as dt
 import typing
 
 from ....core.datetime_utils import serialize_datetime
+from ....core.pydantic_utilities import pydantic_v1
 from .status import Status
 
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
 
-
-class Event(pydantic.BaseModel):
+class Event(pydantic_v1.BaseModel):
     """
     A change in status of a fine-tuned model.
     """
 
-    user_id: typing.Optional[str] = pydantic.Field(default=None)
+    user_id: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     ID of the user who initiated the event. Empty if initiated by the system.
     """
 
-    status: typing.Optional[Status] = pydantic.Field(default=None)
+    status: typing.Optional[Status] = pydantic_v1.Field(default=None)
     """
     Status of the fine-tuned model.
     """
 
-    created_at: typing.Optional[dt.datetime] = pydantic.Field(default=None)
+    created_at: typing.Optional[dt.datetime] = pydantic_v1.Field(default=None)
     """
     Timestamp when the event happened.
     """
@@ -43,5 +39,5 @@ class Event(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

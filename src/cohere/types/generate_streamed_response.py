@@ -10,7 +10,7 @@ from .generate_stream_text import GenerateStreamText
 
 
 class GenerateStreamedResponse_TextGeneration(GenerateStreamText):
-    event_type: typing.Literal["text-generation"]
+    event_type: typing.Literal["text-generation"] = "text-generation"
 
     class Config:
         frozen = True
@@ -20,7 +20,7 @@ class GenerateStreamedResponse_TextGeneration(GenerateStreamText):
 
 
 class GenerateStreamedResponse_StreamEnd(GenerateStreamEnd):
-    event_type: typing.Literal["stream-end"]
+    event_type: typing.Literal["stream-end"] = "stream-end"
 
     class Config:
         frozen = True
@@ -30,7 +30,7 @@ class GenerateStreamedResponse_StreamEnd(GenerateStreamEnd):
 
 
 class GenerateStreamedResponse_StreamError(GenerateStreamError):
-    event_type: typing.Literal["stream-error"]
+    event_type: typing.Literal["stream-error"] = "stream-error"
 
     class Config:
         frozen = True

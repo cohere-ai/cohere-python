@@ -4,18 +4,14 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
+from ..core.pydantic_utilities import pydantic_v1
 from .chat_stream_end_event_finish_reason import ChatStreamEndEventFinishReason
 from .chat_stream_event import ChatStreamEvent
 from .non_streamed_chat_response import NonStreamedChatResponse
 
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
-
 
 class ChatStreamEndEvent(ChatStreamEvent):
-    finish_reason: ChatStreamEndEventFinishReason = pydantic.Field()
+    finish_reason: ChatStreamEndEventFinishReason = pydantic_v1.Field()
     """
     - `COMPLETE` - the model sent back a finished reply
     - `ERROR_LIMIT` - the reply was cut off because the model reached the maximum number of tokens for its context length
@@ -24,7 +20,7 @@ class ChatStreamEndEvent(ChatStreamEvent):
     - `ERROR_TOXIC` - the model generated a reply that was deemed toxic
     """
 
-    response: NonStreamedChatResponse = pydantic.Field()
+    response: NonStreamedChatResponse = pydantic_v1.Field()
     """
     The consolidated response from the model. Contains the generated reply and all the other information streamed back in the previous events.
     """
@@ -42,5 +38,5 @@ class ChatStreamEndEvent(ChatStreamEvent):
         smart_union = True
         allow_population_by_field_name = True
         populate_by_name = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

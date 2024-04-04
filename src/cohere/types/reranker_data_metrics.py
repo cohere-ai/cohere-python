@@ -4,40 +4,38 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
-
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
+from ..core.pydantic_utilities import pydantic_v1
 
 
-class RerankerDataMetrics(pydantic.BaseModel):
-    num_train_queries: typing.Optional[str] = pydantic.Field(alias="numTrainQueries", default=None)
+class RerankerDataMetrics(pydantic_v1.BaseModel):
+    num_train_queries: typing.Optional[str] = pydantic_v1.Field(alias="numTrainQueries", default=None)
     """
     The number of training queries.
     """
 
-    num_train_relevant_passages: typing.Optional[str] = pydantic.Field(alias="numTrainRelevantPassages", default=None)
+    num_train_relevant_passages: typing.Optional[str] = pydantic_v1.Field(
+        alias="numTrainRelevantPassages", default=None
+    )
     """
     The sum of all relevant passages of valid training examples.
     """
 
-    num_train_hard_negatives: typing.Optional[str] = pydantic.Field(alias="numTrainHardNegatives", default=None)
+    num_train_hard_negatives: typing.Optional[str] = pydantic_v1.Field(alias="numTrainHardNegatives", default=None)
     """
     The sum of all hard negatives of valid training examples.
     """
 
-    num_eval_queries: typing.Optional[str] = pydantic.Field(alias="numEvalQueries", default=None)
+    num_eval_queries: typing.Optional[str] = pydantic_v1.Field(alias="numEvalQueries", default=None)
     """
     The number of evaluation queries.
     """
 
-    num_eval_relevant_passages: typing.Optional[str] = pydantic.Field(alias="numEvalRelevantPassages", default=None)
+    num_eval_relevant_passages: typing.Optional[str] = pydantic_v1.Field(alias="numEvalRelevantPassages", default=None)
     """
     The sum of all relevant passages of valid eval examples.
     """
 
-    num_eval_hard_negatives: typing.Optional[str] = pydantic.Field(alias="numEvalHardNegatives", default=None)
+    num_eval_hard_negatives: typing.Optional[str] = pydantic_v1.Field(alias="numEvalHardNegatives", default=None)
     """
     The sum of all hard negatives of valid eval examples.
     """
@@ -55,5 +53,5 @@ class RerankerDataMetrics(pydantic.BaseModel):
         smart_union = True
         allow_population_by_field_name = True
         populate_by_name = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

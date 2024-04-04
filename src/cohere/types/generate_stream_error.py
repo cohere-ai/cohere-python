@@ -4,24 +4,20 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
+from ..core.pydantic_utilities import pydantic_v1
 from .finish_reason import FinishReason
 from .generate_stream_event import GenerateStreamEvent
 
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
-
 
 class GenerateStreamError(GenerateStreamEvent):
-    index: typing.Optional[int] = pydantic.Field(default=None)
+    index: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
     Refers to the nth generation. Only present when `num_generations` is greater than zero.
     """
 
     is_finished: bool
     finish_reason: FinishReason
-    err: str = pydantic.Field()
+    err: str = pydantic_v1.Field()
     """
     Error message
     """
@@ -39,5 +35,5 @@ class GenerateStreamError(GenerateStreamEvent):
         smart_union = True
         allow_population_by_field_name = True
         populate_by_name = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

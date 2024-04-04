@@ -4,29 +4,25 @@ import datetime as dt
 import typing
 
 from ....core.datetime_utils import serialize_datetime
-
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
+from ....core.pydantic_utilities import pydantic_v1
 
 
-class TrainingStepMetrics(pydantic.BaseModel):
+class TrainingStepMetrics(pydantic_v1.BaseModel):
     """
     The evaluation metrics at a given step of the training of a fine-tuned model.
     """
 
-    created_at: typing.Optional[dt.datetime] = pydantic.Field(default=None)
+    created_at: typing.Optional[dt.datetime] = pydantic_v1.Field(default=None)
     """
     Creation timestamp.
     """
 
-    step_number: typing.Optional[int] = pydantic.Field(default=None)
+    step_number: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
     Step number.
     """
 
-    metrics: typing.Optional[typing.Dict[str, float]] = pydantic.Field(default=None)
+    metrics: typing.Optional[typing.Dict[str, float]] = pydantic_v1.Field(default=None)
     """
     Map of names and values for each evaluation metrics.
     """
@@ -42,5 +38,5 @@ class TrainingStepMetrics(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

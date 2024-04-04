@@ -4,36 +4,32 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
-
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
+from ..core.pydantic_utilities import pydantic_v1
 
 
-class ChatConnector(pydantic.BaseModel):
+class ChatConnector(pydantic_v1.BaseModel):
     """
     The connector used for fetching documents.
     """
 
-    id: str = pydantic.Field()
+    id: str = pydantic_v1.Field()
     """
     The identifier of the connector.
     """
 
-    user_access_token: typing.Optional[str] = pydantic.Field(default=None)
+    user_access_token: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     When specified, this user access token will be passed to the connector in the Authorization header instead of the Cohere generated one.
     """
 
-    continue_on_failure: typing.Optional[bool] = pydantic.Field(default=None)
+    continue_on_failure: typing.Optional[bool] = pydantic_v1.Field(default=None)
     """
     Defaults to `false`.
     
     When `true`, the request will continue if this connector returned an error.
     """
 
-    options: typing.Optional[typing.Dict[str, typing.Any]] = pydantic.Field(default=None)
+    options: typing.Optional[typing.Dict[str, typing.Any]] = pydantic_v1.Field(default=None)
     """
     Provides the connector with different settings at request time. The key/value pairs of this object are specific to each connector.
     
@@ -51,5 +47,5 @@ class ChatConnector(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}
