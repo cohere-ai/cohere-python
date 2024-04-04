@@ -215,7 +215,6 @@ class Client(BaseCohere, CacheMixin):
             except Exception:
                 opts["additional_headers"] = opts.get("additional_headers", {})
                 opts["additional_headers"]["sdk-api-warning-message"] = "offline_tokenizer_failed"
-        print(opts)
         return super().tokenize(text=text, model=model, request_options=opts)
 
     def detokenize(
