@@ -9,17 +9,13 @@ from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.jsonable_encoder import jsonable_encoder
 from ..core.remove_none_from_dict import remove_none_from_dict
 from ..core.request_options import RequestOptions
+from ..core.unchecked_base_model import construct_type
 from ..errors.bad_request_error import BadRequestError
 from ..errors.internal_server_error import InternalServerError
 from ..errors.too_many_requests_error import TooManyRequestsError
 from ..types.compatible_endpoint import CompatibleEndpoint
 from ..types.get_model_response import GetModelResponse
 from ..types.list_models_response import ListModelsResponse
-
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
 
 
 class ModelsClient:
@@ -66,13 +62,17 @@ class ModelsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(GetModelResponse, _response.json())  # type: ignore
+            return typing.cast(GetModelResponse, construct_type(type_=GetModelResponse, object_=_response.json()))
         if _response.status_code == 400:
-            raise BadRequestError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -139,9 +139,11 @@ class ModelsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(ListModelsResponse, _response.json())  # type: ignore
+            return typing.cast(ListModelsResponse, construct_type(type_=ListModelsResponse, object_=_response.json()))
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -193,13 +195,17 @@ class AsyncModelsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(GetModelResponse, _response.json())  # type: ignore
+            return typing.cast(GetModelResponse, construct_type(type_=GetModelResponse, object_=_response.json()))
         if _response.status_code == 400:
-            raise BadRequestError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -266,9 +272,11 @@ class AsyncModelsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(ListModelsResponse, _response.json())  # type: ignore
+            return typing.cast(ListModelsResponse, construct_type(type_=ListModelsResponse, object_=_response.json()))
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:

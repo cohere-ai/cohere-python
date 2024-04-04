@@ -4,36 +4,33 @@ import datetime as dt
 import typing
 
 from ....core.datetime_utils import serialize_datetime
+from ....core.pydantic_utilities import pydantic_v1
+from ....core.unchecked_base_model import UncheckedBaseModel
 from .base_model import BaseModel
 from .hyperparameters import Hyperparameters
 
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
 
-
-class Settings(pydantic.BaseModel):
+class Settings(UncheckedBaseModel):
     """
     The configuration used for fine-tuning.
     """
 
-    base_model: BaseModel = pydantic.Field()
+    base_model: BaseModel = pydantic_v1.Field()
     """
     The base model to fine-tune.
     """
 
-    dataset_id: str = pydantic.Field()
+    dataset_id: str = pydantic_v1.Field()
     """
     The data used for training and evaluating the fine-tuned model.
     """
 
-    hyperparameters: typing.Optional[Hyperparameters] = pydantic.Field(default=None)
+    hyperparameters: typing.Optional[Hyperparameters] = pydantic_v1.Field(default=None)
     """
     Fine-tuning hyper-parameters.
     """
 
-    multi_label: typing.Optional[bool] = pydantic.Field(default=None)
+    multi_label: typing.Optional[bool] = pydantic_v1.Field(default=None)
     """
     read-only. Whether the model is single-label or multi-label (only for classification).
     """
@@ -49,5 +46,5 @@ class Settings(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

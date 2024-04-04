@@ -4,23 +4,19 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
+from ..core.pydantic_utilities import pydantic_v1
 from .chat_document import ChatDocument
 from .chat_search_result import ChatSearchResult
 from .chat_stream_event import ChatStreamEvent
 
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
-
 
 class ChatSearchResultsEvent(ChatStreamEvent):
-    search_results: typing.Optional[typing.List[ChatSearchResult]] = pydantic.Field(default=None)
+    search_results: typing.Optional[typing.List[ChatSearchResult]] = pydantic_v1.Field(default=None)
     """
     Conducted searches and the ids of documents retrieved from each of them.
     """
 
-    documents: typing.Optional[typing.List[ChatDocument]] = pydantic.Field(default=None)
+    documents: typing.Optional[typing.List[ChatDocument]] = pydantic_v1.Field(default=None)
     """
     Documents fetched from searches or provided by the user.
     """
@@ -38,5 +34,5 @@ class ChatSearchResultsEvent(ChatStreamEvent):
         smart_union = True
         allow_population_by_field_name = True
         populate_by_name = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

@@ -14,6 +14,7 @@ from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from .core.jsonable_encoder import jsonable_encoder
 from .core.remove_none_from_dict import remove_none_from_dict
 from .core.request_options import RequestOptions
+from .core.unchecked_base_model import construct_type
 from .datasets.client import AsyncDatasetsClient, DatasetsClient
 from .embed_jobs.client import AsyncEmbedJobsClient, EmbedJobsClient
 from .environment import ClientEnvironment
@@ -27,8 +28,10 @@ from .types.chat_document import ChatDocument
 from .types.chat_message import ChatMessage
 from .types.chat_request_prompt_truncation import ChatRequestPromptTruncation
 from .types.chat_request_tool_results_item import ChatRequestToolResultsItem
-from .types.chat_stream_request_prompt_truncation import ChatStreamRequestPromptTruncation
-from .types.chat_stream_request_tool_results_item import ChatStreamRequestToolResultsItem
+from .types.chat_stream_request_prompt_truncation import \
+    ChatStreamRequestPromptTruncation
+from .types.chat_stream_request_tool_results_item import \
+    ChatStreamRequestToolResultsItem
 from .types.classify_example import ClassifyExample
 from .types.classify_request_truncate import ClassifyRequestTruncate
 from .types.classify_response import ClassifyResponse
@@ -37,206 +40,166 @@ from .types.embed_input_type import EmbedInputType
 from .types.embed_request_truncate import EmbedRequestTruncate
 from .types.embed_response import EmbedResponse
 from .types.embedding_type import EmbeddingType
-from .types.generate_request_return_likelihoods import GenerateRequestReturnLikelihoods
+from .types.generate_request_return_likelihoods import \
+    GenerateRequestReturnLikelihoods
 from .types.generate_request_truncate import GenerateRequestTruncate
-from .types.generate_stream_request_return_likelihoods import GenerateStreamRequestReturnLikelihoods
-from .types.generate_stream_request_truncate import GenerateStreamRequestTruncate
+from .types.generate_stream_request_return_likelihoods import \
+    GenerateStreamRequestReturnLikelihoods
+from .types.generate_stream_request_truncate import \
+    GenerateStreamRequestTruncate
 from .types.generate_streamed_response import GenerateStreamedResponse
 from .types.generation import Generation
 from .types.non_streamed_chat_response import NonStreamedChatResponse
 from .types.rerank_request_documents_item import RerankRequestDocumentsItem
 from .types.rerank_response import RerankResponse
 from .types.streamed_chat_response import StreamedChatResponse
-from .types.summarize_request_extractiveness import SummarizeRequestExtractiveness
+from .types.summarize_request_extractiveness import \
+    SummarizeRequestExtractiveness
 from .types.summarize_request_format import SummarizeRequestFormat
 from .types.summarize_request_length import SummarizeRequestLength
 from .types.summarize_response import SummarizeResponse
 from .types.tokenize_response import TokenizeResponse
 from .types.tool import Tool
 
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
-
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
-
-
 class BaseCohere:
     """
     Use this class to access the different functions within the SDK. You can instantiate any number of clients with different configuration that will propogate to these functions.
-
+    
     Parameters:
         - base_url: typing.Optional[str]. The base url to use for requests from the client.
-
+        
         - environment: ClientEnvironment. The environment to use for requests from the client. from .environment import ClientEnvironment
-
+                                          
                                           Defaults to ClientEnvironment.PRODUCTION
-
+                                          
         - client_name: typing.Optional[str].
-
+        
         - token: typing.Optional[typing.Union[str, typing.Callable[[], str]]].
-
+        
         - timeout: typing.Optional[float]. The timeout to be used, in seconds, for requests by default the timeout is 60 seconds, unless a custom httpx client is used, in which case a default is not set.
-
+        
+        - follow_redirects: typing.Optional[bool]. Whether the default httpx client follows redirects or not, this is irrelevant if a custom httpx client is passed in.
+        
         - httpx_client: typing.Optional[httpx.Client]. The httpx client to use for making requests, a preconfigured client is used by default, however this is useful should you want to pass in any custom httpx configuration.
     ---
     from cohere.client import Client
-
+    
     client = Client(
         client_name="YOUR_CLIENT_NAME",
         token="YOUR_TOKEN",
     )
     """
-
-    def __init__(
-        self,
-        *,
-        base_url: typing.Optional[str] = None,
-        environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
-        client_name: typing.Optional[str] = None,
-        token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"),
-        timeout: typing.Optional[float] = None,
-        httpx_client: typing.Optional[httpx.Client] = None,
-    ):
+    def __init__(self, *, base_url: typing.Optional[str] = None, environment: ClientEnvironment = ClientEnvironment.PRODUCTION
+    , client_name: typing.Optional[str] = None, token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"), timeout: typing.Optional[float] = None, follow_redirects: typing.Optional[bool] = None, httpx_client: typing.Optional[httpx.Client] = None):
         _defaulted_timeout = timeout if timeout is not None else 300 if httpx_client is None else None
         if token is None:
             raise ApiError(body="The client must be instantiated be either passing in token or setting CO_API_KEY")
-        self._client_wrapper = SyncClientWrapper(
-            base_url=_get_base_url(base_url=base_url, environment=environment),
-            client_name=client_name,
-            token=token,
-            httpx_client=httpx.Client(timeout=_defaulted_timeout) if httpx_client is None else httpx_client,
-            timeout=_defaulted_timeout,
-        )
+        self._client_wrapper = SyncClientWrapper(base_url=_get_base_url(base_url=base_url, environment=environment), client_name=client_name, token=token, httpx_client=httpx_client if httpx_client is not None else httpx.Client(timeout=_defaulted_timeout, follow_redirects=follow_redirects) if follow_redirects is not None else httpx.Client(timeout=_defaulted_timeout)
+        , timeout=_defaulted_timeout)
         self.embed_jobs = EmbedJobsClient(client_wrapper=self._client_wrapper)
         self.datasets = DatasetsClient(client_wrapper=self._client_wrapper)
         self.connectors = ConnectorsClient(client_wrapper=self._client_wrapper)
         self.models = ModelsClient(client_wrapper=self._client_wrapper)
         self.finetuning = FinetuningClient(client_wrapper=self._client_wrapper)
-
-    def chat_stream(
-        self,
-        *,
-        message: str,
-        model: typing.Optional[str] = OMIT,
-        preamble: typing.Optional[str] = OMIT,
-        chat_history: typing.Optional[typing.Sequence[ChatMessage]] = OMIT,
-        conversation_id: typing.Optional[str] = OMIT,
-        prompt_truncation: typing.Optional[ChatStreamRequestPromptTruncation] = OMIT,
-        connectors: typing.Optional[typing.Sequence[ChatConnector]] = OMIT,
-        search_queries_only: typing.Optional[bool] = OMIT,
-        documents: typing.Optional[typing.Sequence[ChatDocument]] = OMIT,
-        temperature: typing.Optional[float] = OMIT,
-        max_tokens: typing.Optional[int] = OMIT,
-        k: typing.Optional[int] = OMIT,
-        p: typing.Optional[float] = OMIT,
-        seed: typing.Optional[float] = OMIT,
-        stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
-        frequency_penalty: typing.Optional[float] = OMIT,
-        presence_penalty: typing.Optional[float] = OMIT,
-        raw_prompting: typing.Optional[bool] = OMIT,
-        tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
-        tool_results: typing.Optional[typing.Sequence[ChatStreamRequestToolResultsItem]] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> typing.Iterator[StreamedChatResponse]:
+    def chat_stream(self, *, message: str, model: typing.Optional[str] = OMIT, preamble: typing.Optional[str] = OMIT, chat_history: typing.Optional[typing.Sequence[ChatMessage]] = OMIT, conversation_id: typing.Optional[str] = OMIT, prompt_truncation: typing.Optional[ChatStreamRequestPromptTruncation] = OMIT, connectors: typing.Optional[typing.Sequence[ChatConnector]] = OMIT, search_queries_only: typing.Optional[bool] = OMIT, documents: typing.Optional[typing.Sequence[ChatDocument]] = OMIT, temperature: typing.Optional[float] = OMIT, max_tokens: typing.Optional[int] = OMIT, k: typing.Optional[int] = OMIT, p: typing.Optional[float] = OMIT, seed: typing.Optional[float] = OMIT, stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT, frequency_penalty: typing.Optional[float] = OMIT, presence_penalty: typing.Optional[float] = OMIT, raw_prompting: typing.Optional[bool] = OMIT, tools: typing.Optional[typing.Sequence[Tool]] = OMIT, tool_results: typing.Optional[typing.Sequence[ChatStreamRequestToolResultsItem]] = OMIT, request_options: typing.Optional[RequestOptions] = None) -> typing.Iterator[StreamedChatResponse]:
         """
         Generates a text response to a user message.
         To learn how to use Chat with Streaming and RAG follow [this guide](https://docs.cohere.com/docs/cochat-beta#various-ways-of-using-the-chat-endpoint).
-
+        
         Parameters:
             - message: str. Text input for the model to respond to.
-
+                            
             - model: typing.Optional[str]. Defaults to `command-r`.
-
+                                           
                                            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
-
+                                           
             - preamble: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style, and use the `SYSTEM` role.
-
+                                              
                                               The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
-
+                                              
             - chat_history: typing.Optional[typing.Sequence[ChatMessage]]. A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
-
+                                                                           
                                                                            Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
-
+                                                                           
                                                                            The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
-
+                                                                           
             - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
-
+                                                     
                                                      Providing a `conversation_id` creates or resumes a persisted conversation with the specified ID. The ID can be any non empty string.
-
+                                                     
             - prompt_truncation: typing.Optional[ChatStreamRequestPromptTruncation]. Defaults to `AUTO` when `connectors` are specified and `OFF` in all other cases.
-
+                                                                                     
                                                                                      Dictates how the prompt will be constructed.
-
+                                                                                     
                                                                                      With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be changed and ranked by relevance.
-
+                                                                                     
                                                                                      With `prompt_truncation` set to "AUTO_PRESERVE_ORDER", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be preserved as they are inputted into the API.
-
+                                                                                     
                                                                                      With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
-
+                                                                                     
             - connectors: typing.Optional[typing.Sequence[ChatConnector]]. Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
-
+                                                                           
                                                                            When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
-
+                                                                           
             - search_queries_only: typing.Optional[bool]. Defaults to `false`.
-
+                                                          
                                                           When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
-
+                                                          
             - documents: typing.Optional[typing.Sequence[ChatDocument]]. A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
-
+                                                                         
                                                                          Example:
                                                                          `[
                                                                            { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
                                                                            { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
                                                                          ]`
-
+                                                                         
                                                                          Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
-
+                                                                         
                                                                          Some suggested keys are "text", "author", and "date". For better generation quality, it is recommended to keep the total word count of the strings in the dictionary to under 300 words.
-
+                                                                         
                                                                          An `id` field (string) can be optionally supplied to identify the document in the citations. This field will not be passed to the model.
-
+                                                                         
                                                                          An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
-
+                                                                         
                                                                          See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
-
+                                                                         
             - temperature: typing.Optional[float]. Defaults to `0.3`.
-
+                                                   
                                                    A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
-
+                                                   
                                                    Randomness can be further maximized by increasing the  value of the `p` parameter.
-
+                                                   
             - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
-
+                                                
             - k: typing.Optional[int]. Ensures only the top `k` most likely tokens are considered for generation at each step.
                                        Defaults to `0`, min value of `0`, max value of `500`.
-
+                                       
             - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
                                          Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
-
+                                         
             - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinism cannot be totally guaranteed.
-
+            
             - stop_sequences: typing.Optional[typing.Sequence[str]]. A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
-
+                                                                     
             - frequency_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
-
+                                                         
                                                          Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
-
+                                                         
             - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
-
+                                                        
                                                         Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
-
+                                                        
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
-
+            
             - tools: typing.Optional[typing.Sequence[Tool]]. A list of available tools (functions) that the model may suggest invoking before producing a text response.
-
+                                                             
                                                              When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
-
+                                                             
             - tool_results: typing.Optional[typing.Sequence[ChatStreamRequestToolResultsItem]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
                                                                                                 Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
-
+                                                                                                
                                                                                                 **Note**: `outputs` must be a list of objects. If your tool returns a single object (eg `{"status": 200}`), make sure to wrap it in a list.
                                                                                                 ```
                                                                                                 tool_results = [
@@ -255,7 +218,7 @@ class BaseCohere:
                                                                                                 ]
                                                                                                 ```
                                                                                                 **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
-
+                                                                                                
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere import (
@@ -268,7 +231,7 @@ class BaseCohere:
             ToolParameterDefinitionsValue,
         )
         from cohere.client import Client
-
+        
         client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
@@ -333,7 +296,10 @@ class BaseCohere:
             ],
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"message": message, "stream": True}
+        _request: typing.Dict[str, typing.Any] = {
+            "message": message,
+            "stream": True,
+        }
         if model is not OMIT:
             _request["model"] = model
         if preamble is not OMIT:
@@ -372,168 +338,125 @@ class BaseCohere:
             _request["tools"] = tools
         if tool_results is not OMIT:
             _request["tool_results"] = tool_results
-        with self._client_wrapper.httpx_client.stream(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
+        with self._client_wrapper.httpx_client.stream("POST", urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"), 
+            params=jsonable_encoder(request_options.get('additional_query_parameters') if request_options is not None else None),
+            json=jsonable_encoder(_request) if request_options is None or request_options.get('additional_body_parameters') is None else {**jsonable_encoder(_request), **(jsonable_encoder(remove_none_from_dict(request_options.get('additional_body_parameters', {}))))},
+            headers=jsonable_encoder(remove_none_from_dict({**self._client_wrapper.get_headers(),**(request_options.get('additional_headers', {}) if request_options is not None else {}),},
+            )),
+            timeout=request_options.get('timeout_in_seconds') if request_options is not None and request_options.get('timeout_in_seconds') is not None else self._client_wrapper.get_timeout(),
             retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            max_retries=request_options.get('max_retries') if request_options is not None else 0,  # type: ignore
         ) as _response:
             if 200 <= _response.status_code < 300:
-                for _text in _response.iter_lines():
+                for _text in _response.iter_lines(): 
                     if len(_text) == 0:
                         continue
-                    yield pydantic.parse_obj_as(StreamedChatResponse, json.loads(_text))  # type: ignore
-                return
+                    yield typing.cast(StreamedChatResponse, construct_type(type_=StreamedChatResponse, object_=json.loads(_text)))return
             _response.read()
             if _response.status_code == 429:
-                raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+                raise TooManyRequestsError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
             try:
                 _response_json = _response.json()
             except JSONDecodeError:
                 raise ApiError(status_code=_response.status_code, body=_response.text)
             raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    def chat(
-        self,
-        *,
-        message: str,
-        model: typing.Optional[str] = OMIT,
-        preamble: typing.Optional[str] = OMIT,
-        chat_history: typing.Optional[typing.Sequence[ChatMessage]] = OMIT,
-        conversation_id: typing.Optional[str] = OMIT,
-        prompt_truncation: typing.Optional[ChatRequestPromptTruncation] = OMIT,
-        connectors: typing.Optional[typing.Sequence[ChatConnector]] = OMIT,
-        search_queries_only: typing.Optional[bool] = OMIT,
-        documents: typing.Optional[typing.Sequence[ChatDocument]] = OMIT,
-        temperature: typing.Optional[float] = OMIT,
-        max_tokens: typing.Optional[int] = OMIT,
-        k: typing.Optional[int] = OMIT,
-        p: typing.Optional[float] = OMIT,
-        seed: typing.Optional[float] = OMIT,
-        stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
-        frequency_penalty: typing.Optional[float] = OMIT,
-        presence_penalty: typing.Optional[float] = OMIT,
-        raw_prompting: typing.Optional[bool] = OMIT,
-        tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
-        tool_results: typing.Optional[typing.Sequence[ChatRequestToolResultsItem]] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> NonStreamedChatResponse:
+    def chat(self, *, message: str, model: typing.Optional[str] = OMIT, preamble: typing.Optional[str] = OMIT, chat_history: typing.Optional[typing.Sequence[ChatMessage]] = OMIT, conversation_id: typing.Optional[str] = OMIT, prompt_truncation: typing.Optional[ChatRequestPromptTruncation] = OMIT, connectors: typing.Optional[typing.Sequence[ChatConnector]] = OMIT, search_queries_only: typing.Optional[bool] = OMIT, documents: typing.Optional[typing.Sequence[ChatDocument]] = OMIT, temperature: typing.Optional[float] = OMIT, max_tokens: typing.Optional[int] = OMIT, k: typing.Optional[int] = OMIT, p: typing.Optional[float] = OMIT, seed: typing.Optional[float] = OMIT, stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT, frequency_penalty: typing.Optional[float] = OMIT, presence_penalty: typing.Optional[float] = OMIT, raw_prompting: typing.Optional[bool] = OMIT, tools: typing.Optional[typing.Sequence[Tool]] = OMIT, tool_results: typing.Optional[typing.Sequence[ChatRequestToolResultsItem]] = OMIT, request_options: typing.Optional[RequestOptions] = None) -> NonStreamedChatResponse:
         """
         Generates a text response to a user message.
         To learn how to use Chat with Streaming and RAG follow [this guide](https://docs.cohere.com/docs/cochat-beta#various-ways-of-using-the-chat-endpoint).
-
+        
         Parameters:
             - message: str. Text input for the model to respond to.
-
+                            
             - model: typing.Optional[str]. Defaults to `command-r`.
-
+                                           
                                            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
-
+                                           
             - preamble: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style, and use the `SYSTEM` role.
-
+                                              
                                               The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
-
+                                              
             - chat_history: typing.Optional[typing.Sequence[ChatMessage]]. A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
-
+                                                                           
                                                                            Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
-
+                                                                           
                                                                            The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
-
+                                                                           
             - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
-
+                                                     
                                                      Providing a `conversation_id` creates or resumes a persisted conversation with the specified ID. The ID can be any non empty string.
-
+                                                     
             - prompt_truncation: typing.Optional[ChatRequestPromptTruncation]. Defaults to `AUTO` when `connectors` are specified and `OFF` in all other cases.
-
+                                                                               
                                                                                Dictates how the prompt will be constructed.
-
+                                                                               
                                                                                With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be changed and ranked by relevance.
-
+                                                                               
                                                                                With `prompt_truncation` set to "AUTO_PRESERVE_ORDER", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be preserved as they are inputted into the API.
-
+                                                                               
                                                                                With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
-
+                                                                               
             - connectors: typing.Optional[typing.Sequence[ChatConnector]]. Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
-
+                                                                           
                                                                            When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
-
+                                                                           
             - search_queries_only: typing.Optional[bool]. Defaults to `false`.
-
+                                                          
                                                           When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
-
+                                                          
             - documents: typing.Optional[typing.Sequence[ChatDocument]]. A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
-
+                                                                         
                                                                          Example:
                                                                          `[
                                                                            { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
                                                                            { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
                                                                          ]`
-
+                                                                         
                                                                          Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
-
+                                                                         
                                                                          Some suggested keys are "text", "author", and "date". For better generation quality, it is recommended to keep the total word count of the strings in the dictionary to under 300 words.
-
+                                                                         
                                                                          An `id` field (string) can be optionally supplied to identify the document in the citations. This field will not be passed to the model.
-
+                                                                         
                                                                          An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
-
+                                                                         
                                                                          See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
-
+                                                                         
             - temperature: typing.Optional[float]. Defaults to `0.3`.
-
+                                                   
                                                    A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
-
+                                                   
                                                    Randomness can be further maximized by increasing the  value of the `p` parameter.
-
+                                                   
             - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
-
+                                                
             - k: typing.Optional[int]. Ensures only the top `k` most likely tokens are considered for generation at each step.
                                        Defaults to `0`, min value of `0`, max value of `500`.
-
+                                       
             - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
                                          Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
-
+                                         
             - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinism cannot be totally guaranteed.
-
+            
             - stop_sequences: typing.Optional[typing.Sequence[str]]. A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
-
+                                                                     
             - frequency_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
-
+                                                         
                                                          Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
-
+                                                         
             - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
-
+                                                        
                                                         Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
-
+                                                        
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
-
+            
             - tools: typing.Optional[typing.Sequence[Tool]]. A list of available tools (functions) that the model may suggest invoking before producing a text response.
-
+                                                             
                                                              When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
-
+                                                             
             - tool_results: typing.Optional[typing.Sequence[ChatRequestToolResultsItem]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
                                                                                           Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
-
+                                                                                          
                                                                                           **Note**: `outputs` must be a list of objects. If your tool returns a single object (eg `{"status": 200}`), make sure to wrap it in a list.
                                                                                           ```
                                                                                           tool_results = [
@@ -552,12 +475,12 @@ class BaseCohere:
                                                                                           ]
                                                                                           ```
                                                                                           **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
-
+                                                                                          
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere import ChatMessage
         from cohere.client import Client
-
+        
         client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
@@ -578,7 +501,10 @@ class BaseCohere:
             temperature=0.3,
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"message": message, "stream": False}
+        _request: typing.Dict[str, typing.Any] = {
+            "message": message,
+            "stream": False,
+        }
         if model is not OMIT:
             _request["model"] = model
         if preamble is not OMIT:
@@ -617,128 +543,90 @@ class BaseCohere:
             _request["tools"] = tools
         if tool_results is not OMIT:
             _request["tool_results"] = tool_results
-        _response = self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
+        _response = self._client_wrapper.httpx_client.request("POST", urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"), 
+            params=jsonable_encoder(request_options.get('additional_query_parameters') if request_options is not None else None),
+            json=jsonable_encoder(_request) if request_options is None or request_options.get('additional_body_parameters') is None else {**jsonable_encoder(_request), **(jsonable_encoder(remove_none_from_dict(request_options.get('additional_body_parameters', {}))))},
+            headers=jsonable_encoder(remove_none_from_dict({**self._client_wrapper.get_headers(),**(request_options.get('additional_headers', {}) if request_options is not None else {}),},
+            )),
+            timeout=request_options.get('timeout_in_seconds') if request_options is not None and request_options.get('timeout_in_seconds') is not None else self._client_wrapper.get_timeout(),
             retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            max_retries=request_options.get('max_retries') if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(NonStreamedChatResponse, _response.json())  # type: ignore
+            return typing.cast(NonStreamedChatResponse, construct_type(type_=NonStreamedChatResponse, object_=_response.json()))
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         try:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    def generate_stream(
-        self,
-        *,
-        prompt: str,
-        model: typing.Optional[str] = OMIT,
-        num_generations: typing.Optional[int] = OMIT,
-        max_tokens: typing.Optional[int] = OMIT,
-        truncate: typing.Optional[GenerateStreamRequestTruncate] = OMIT,
-        temperature: typing.Optional[float] = OMIT,
-        seed: typing.Optional[float] = OMIT,
-        preset: typing.Optional[str] = OMIT,
-        end_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
-        stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
-        k: typing.Optional[int] = OMIT,
-        p: typing.Optional[float] = OMIT,
-        frequency_penalty: typing.Optional[float] = OMIT,
-        presence_penalty: typing.Optional[float] = OMIT,
-        return_likelihoods: typing.Optional[GenerateStreamRequestReturnLikelihoods] = OMIT,
-        raw_prompting: typing.Optional[bool] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> typing.Iterator[GenerateStreamedResponse]:
+    def generate_stream(self, *, prompt: str, model: typing.Optional[str] = OMIT, num_generations: typing.Optional[int] = OMIT, max_tokens: typing.Optional[int] = OMIT, truncate: typing.Optional[GenerateStreamRequestTruncate] = OMIT, temperature: typing.Optional[float] = OMIT, seed: typing.Optional[float] = OMIT, preset: typing.Optional[str] = OMIT, end_sequences: typing.Optional[typing.Sequence[str]] = OMIT, stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT, k: typing.Optional[int] = OMIT, p: typing.Optional[float] = OMIT, frequency_penalty: typing.Optional[float] = OMIT, presence_penalty: typing.Optional[float] = OMIT, return_likelihoods: typing.Optional[GenerateStreamRequestReturnLikelihoods] = OMIT, raw_prompting: typing.Optional[bool] = OMIT, request_options: typing.Optional[RequestOptions] = None) -> typing.Iterator[GenerateStreamedResponse]:
         """
         > 🚧 Warning
         >
         > This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
-
+        
         Generates realistic text conditioned on a given input.
-
+        
         Parameters:
             - prompt: str. The input text that serves as the starting point for generating the response.
                            Note: The prompt will be pre-processed and modified before reaching the model.
-
+                           
             - model: typing.Optional[str]. The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
                                            Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
             - num_generations: typing.Optional[int]. The maximum number of generations that will be returned. Defaults to `1`, min value of `1`, max value of `5`.
-
+                                                     
             - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
-
+                                                
                                                 This parameter is off by default, and if it's not specified, the model will continue generating until it emits an EOS completion token. See [BPE Tokens](/bpe-tokens-wiki) for more details.
-
+                                                
                                                 Can only be set to `0` if `return_likelihoods` is set to `ALL` to get the likelihood of the prompt.
-
+                                                
             - truncate: typing.Optional[GenerateStreamRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
-
+                                                                        
                                                                         Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
-
+                                                                        
                                                                         If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
             - temperature: typing.Optional[float]. A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations. See [Temperature](/temperature-wiki) for more details.
                                                    Defaults to `0.75`, min value of `0.0`, max value of `5.0`.
-
+                                                   
             - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed.
-
+            
             - preset: typing.Optional[str]. Identifier of a custom preset. A preset is a combination of parameters, such as prompt, temperature etc. You can create presets in the [playground](https://dashboard.cohere.ai/playground/generate).
                                             When a preset is specified, the `prompt` parameter becomes optional, and any included parameters will override the preset's parameters.
-
+                                            
             - end_sequences: typing.Optional[typing.Sequence[str]]. The generated text will be cut at the beginning of the earliest occurrence of an end sequence. The sequence will be excluded from the text.
-
+            
             - stop_sequences: typing.Optional[typing.Sequence[str]]. The generated text will be cut at the end of the earliest occurrence of a stop sequence. The sequence will be included the text.
-
+            
             - k: typing.Optional[int]. Ensures only the top `k` most likely tokens are considered for generation at each step.
                                        Defaults to `0`, min value of `0`, max value of `500`.
-
+                                       
             - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
                                          Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
-
+                                         
             - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
-
+                                                         
                                                          Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
-
+                                                         
             - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
-
+                                                        
                                                         Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
-
+                                                        
                                                         Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
-
+                                                        
             - return_likelihoods: typing.Optional[GenerateStreamRequestReturnLikelihoods]. One of `GENERATION|ALL|NONE` to specify how and if the token likelihoods are returned with the response. Defaults to `NONE`.
-
+                                                                                           
                                                                                            If `GENERATION` is selected, the token likelihoods will only be provided for generated text.
-
+                                                                                           
                                                                                            If `ALL` is selected, the token likelihoods will be provided both for the prompt and the generated text.
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
-
+            
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import Client
-
+        
         client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
@@ -762,7 +650,10 @@ class BaseCohere:
             raw_prompting=True,
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": True}
+        _request: typing.Dict[str, typing.Any] = {
+            "prompt": prompt,
+            "stream": True,
+        }
         if model is not OMIT:
             _request["model"] = model
         if num_generations is not OMIT:
@@ -793,137 +684,98 @@ class BaseCohere:
             _request["return_likelihoods"] = return_likelihoods
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
-        with self._client_wrapper.httpx_client.stream(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "generate"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
+        with self._client_wrapper.httpx_client.stream("POST", urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "generate"), 
+            params=jsonable_encoder(request_options.get('additional_query_parameters') if request_options is not None else None),
+            json=jsonable_encoder(_request) if request_options is None or request_options.get('additional_body_parameters') is None else {**jsonable_encoder(_request), **(jsonable_encoder(remove_none_from_dict(request_options.get('additional_body_parameters', {}))))},
+            headers=jsonable_encoder(remove_none_from_dict({**self._client_wrapper.get_headers(),**(request_options.get('additional_headers', {}) if request_options is not None else {}),},
+            )),
+            timeout=request_options.get('timeout_in_seconds') if request_options is not None and request_options.get('timeout_in_seconds') is not None else self._client_wrapper.get_timeout(),
             retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            max_retries=request_options.get('max_retries') if request_options is not None else 0,  # type: ignore
         ) as _response:
             if 200 <= _response.status_code < 300:
-                for _text in _response.iter_lines():
+                for _text in _response.iter_lines(): 
                     if len(_text) == 0:
                         continue
-                    yield pydantic.parse_obj_as(GenerateStreamedResponse, json.loads(_text))  # type: ignore
-                return
+                    yield typing.cast(GenerateStreamedResponse, construct_type(type_=GenerateStreamedResponse, object_=json.loads(_text)))return
             _response.read()
             if _response.status_code == 400:
-                raise BadRequestError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+                raise BadRequestError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
             if _response.status_code == 429:
-                raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+                raise TooManyRequestsError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
             if _response.status_code == 500:
-                raise InternalServerError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+                raise InternalServerError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
             try:
                 _response_json = _response.json()
             except JSONDecodeError:
                 raise ApiError(status_code=_response.status_code, body=_response.text)
             raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    def generate(
-        self,
-        *,
-        prompt: str,
-        model: typing.Optional[str] = OMIT,
-        num_generations: typing.Optional[int] = OMIT,
-        max_tokens: typing.Optional[int] = OMIT,
-        truncate: typing.Optional[GenerateRequestTruncate] = OMIT,
-        temperature: typing.Optional[float] = OMIT,
-        seed: typing.Optional[float] = OMIT,
-        preset: typing.Optional[str] = OMIT,
-        end_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
-        stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
-        k: typing.Optional[int] = OMIT,
-        p: typing.Optional[float] = OMIT,
-        frequency_penalty: typing.Optional[float] = OMIT,
-        presence_penalty: typing.Optional[float] = OMIT,
-        return_likelihoods: typing.Optional[GenerateRequestReturnLikelihoods] = OMIT,
-        raw_prompting: typing.Optional[bool] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> Generation:
+    def generate(self, *, prompt: str, model: typing.Optional[str] = OMIT, num_generations: typing.Optional[int] = OMIT, max_tokens: typing.Optional[int] = OMIT, truncate: typing.Optional[GenerateRequestTruncate] = OMIT, temperature: typing.Optional[float] = OMIT, seed: typing.Optional[float] = OMIT, preset: typing.Optional[str] = OMIT, end_sequences: typing.Optional[typing.Sequence[str]] = OMIT, stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT, k: typing.Optional[int] = OMIT, p: typing.Optional[float] = OMIT, frequency_penalty: typing.Optional[float] = OMIT, presence_penalty: typing.Optional[float] = OMIT, return_likelihoods: typing.Optional[GenerateRequestReturnLikelihoods] = OMIT, raw_prompting: typing.Optional[bool] = OMIT, request_options: typing.Optional[RequestOptions] = None) -> Generation:
         """
         > 🚧 Warning
         >
         > This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
-
+        
         Generates realistic text conditioned on a given input.
-
+        
         Parameters:
             - prompt: str. The input text that serves as the starting point for generating the response.
                            Note: The prompt will be pre-processed and modified before reaching the model.
-
+                           
             - model: typing.Optional[str]. The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
                                            Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
             - num_generations: typing.Optional[int]. The maximum number of generations that will be returned. Defaults to `1`, min value of `1`, max value of `5`.
-
+                                                     
             - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
-
+                                                
                                                 This parameter is off by default, and if it's not specified, the model will continue generating until it emits an EOS completion token. See [BPE Tokens](/bpe-tokens-wiki) for more details.
-
+                                                
                                                 Can only be set to `0` if `return_likelihoods` is set to `ALL` to get the likelihood of the prompt.
-
+                                                
             - truncate: typing.Optional[GenerateRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
-
+                                                                  
                                                                   Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
-
+                                                                  
                                                                   If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
             - temperature: typing.Optional[float]. A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations. See [Temperature](/temperature-wiki) for more details.
                                                    Defaults to `0.75`, min value of `0.0`, max value of `5.0`.
-
+                                                   
             - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed.
-
+            
             - preset: typing.Optional[str]. Identifier of a custom preset. A preset is a combination of parameters, such as prompt, temperature etc. You can create presets in the [playground](https://dashboard.cohere.ai/playground/generate).
                                             When a preset is specified, the `prompt` parameter becomes optional, and any included parameters will override the preset's parameters.
-
+                                            
             - end_sequences: typing.Optional[typing.Sequence[str]]. The generated text will be cut at the beginning of the earliest occurrence of an end sequence. The sequence will be excluded from the text.
-
+            
             - stop_sequences: typing.Optional[typing.Sequence[str]]. The generated text will be cut at the end of the earliest occurrence of a stop sequence. The sequence will be included the text.
-
+            
             - k: typing.Optional[int]. Ensures only the top `k` most likely tokens are considered for generation at each step.
                                        Defaults to `0`, min value of `0`, max value of `500`.
-
+                                       
             - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
                                          Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
-
+                                         
             - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
-
+                                                         
                                                          Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
-
+                                                         
             - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
-
+                                                        
                                                         Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
-
+                                                        
                                                         Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
-
+                                                        
             - return_likelihoods: typing.Optional[GenerateRequestReturnLikelihoods]. One of `GENERATION|ALL|NONE` to specify how and if the token likelihoods are returned with the response. Defaults to `NONE`.
-
+                                                                                     
                                                                                      If `GENERATION` is selected, the token likelihoods will only be provided for generated text.
-
+                                                                                     
                                                                                      If `ALL` is selected, the token likelihoods will be provided both for the prompt and the generated text.
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
-
+            
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import Client
-
+        
         client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
@@ -933,7 +785,10 @@ class BaseCohere:
             preset="my-preset-a58sbd",
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": False}
+        _request: typing.Dict[str, typing.Any] = {
+            "prompt": prompt,
+            "stream": False,
+        }
         if model is not OMIT:
             _request["model"] = model
         if num_generations is not OMIT:
@@ -964,98 +819,71 @@ class BaseCohere:
             _request["return_likelihoods"] = return_likelihoods
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
-        _response = self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "generate"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
+        _response = self._client_wrapper.httpx_client.request("POST", urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "generate"), 
+            params=jsonable_encoder(request_options.get('additional_query_parameters') if request_options is not None else None),
+            json=jsonable_encoder(_request) if request_options is None or request_options.get('additional_body_parameters') is None else {**jsonable_encoder(_request), **(jsonable_encoder(remove_none_from_dict(request_options.get('additional_body_parameters', {}))))},
+            headers=jsonable_encoder(remove_none_from_dict({**self._client_wrapper.get_headers(),**(request_options.get('additional_headers', {}) if request_options is not None else {}),},
+            )),
+            timeout=request_options.get('timeout_in_seconds') if request_options is not None and request_options.get('timeout_in_seconds') is not None else self._client_wrapper.get_timeout(),
             retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            max_retries=request_options.get('max_retries') if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(Generation, _response.json())  # type: ignore
+            return typing.cast(Generation, construct_type(type_=Generation, object_=_response.json()))
         if _response.status_code == 400:
-            raise BadRequestError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         if _response.status_code == 500:
-            raise InternalServerError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         try:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    def embed(
-        self,
-        *,
-        texts: typing.Sequence[str],
-        model: typing.Optional[str] = OMIT,
-        input_type: typing.Optional[EmbedInputType] = OMIT,
-        embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
-        truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> EmbedResponse:
+    def embed(self, *, texts: typing.Sequence[str], model: typing.Optional[str] = OMIT, input_type: typing.Optional[EmbedInputType] = OMIT, embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT, truncate: typing.Optional[EmbedRequestTruncate] = OMIT, request_options: typing.Optional[RequestOptions] = None) -> EmbedResponse:
         """
         This endpoint returns text embeddings. An embedding is a list of floating point numbers that captures semantic information about the text that it represents.
-
+        
         Embeddings can be used to create text classifiers as well as empower semantic search. To learn more about embeddings, see the embedding page.
-
+        
         If you want to learn more how to use the embedding model, have a look at the [Semantic Search Guide](/docs/semantic-search).
-
+        
         Parameters:
             - texts: typing.Sequence[str]. An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
-
+            
             - model: typing.Optional[str]. Defaults to embed-english-v2.0
-
+                                           
                                            The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
-
+                                           
                                            Available models and corresponding embedding dimensions:
-
+                                           
                                            * `embed-english-v3.0`  1024
                                            * `embed-multilingual-v3.0`  1024
                                            * `embed-english-light-v3.0`  384
                                            * `embed-multilingual-light-v3.0`  384
-
+                                           
                                            * `embed-english-v2.0`  4096
                                            * `embed-english-light-v2.0`  1024
                                            * `embed-multilingual-v2.0`  768
             - input_type: typing.Optional[EmbedInputType].
-
+            
             - embedding_types: typing.Optional[typing.Sequence[EmbeddingType]]. Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
-
+                                                                                
                                                                                 * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
                                                                                 * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
                                                                                 * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
                                                                                 * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
                                                                                 * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
             - truncate: typing.Optional[EmbedRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
-
+                                                               
                                                                Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
-
+                                                               
                                                                If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import Client
-
+        
         client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
@@ -1068,7 +896,9 @@ class BaseCohere:
             truncate="NONE",
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"texts": texts}
+        _request: typing.Dict[str, typing.Any] = {
+            "texts": texts,
+        }
         if model is not OMIT:
             _request["model"] = model
         if input_type is not OMIT:
@@ -1077,81 +907,53 @@ class BaseCohere:
             _request["embedding_types"] = embedding_types
         if truncate is not OMIT:
             _request["truncate"] = truncate
-        _response = self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
+        _response = self._client_wrapper.httpx_client.request("POST", urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed"), 
+            params=jsonable_encoder(request_options.get('additional_query_parameters') if request_options is not None else None),
+            json=jsonable_encoder(_request) if request_options is None or request_options.get('additional_body_parameters') is None else {**jsonable_encoder(_request), **(jsonable_encoder(remove_none_from_dict(request_options.get('additional_body_parameters', {}))))},
+            headers=jsonable_encoder(remove_none_from_dict({**self._client_wrapper.get_headers(),**(request_options.get('additional_headers', {}) if request_options is not None else {}),},
+            )),
+            timeout=request_options.get('timeout_in_seconds') if request_options is not None and request_options.get('timeout_in_seconds') is not None else self._client_wrapper.get_timeout(),
             retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            max_retries=request_options.get('max_retries') if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(EmbedResponse, _response.json())  # type: ignore
+            return typing.cast(EmbedResponse, construct_type(type_=EmbedResponse, object_=_response.json()))
         if _response.status_code == 400:
-            raise BadRequestError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         if _response.status_code == 500:
-            raise InternalServerError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         try:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    def rerank(
-        self,
-        *,
-        model: typing.Optional[str] = OMIT,
-        query: str,
-        documents: typing.Sequence[RerankRequestDocumentsItem],
-        top_n: typing.Optional[int] = OMIT,
-        return_documents: typing.Optional[bool] = OMIT,
-        max_chunks_per_doc: typing.Optional[int] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> RerankResponse:
+    def rerank(self, *, model: typing.Optional[str] = OMIT, query: str, documents: typing.Sequence[RerankRequestDocumentsItem], top_n: typing.Optional[int] = OMIT, return_documents: typing.Optional[bool] = OMIT, max_chunks_per_doc: typing.Optional[int] = OMIT, request_options: typing.Optional[RequestOptions] = None) -> RerankResponse:
         """
         This endpoint takes in a query and a list of texts and produces an ordered array with each text assigned a relevance score.
-
+        
         Parameters:
             - model: typing.Optional[str]. The identifier of the model to use, one of : `rerank-english-v2.0`, `rerank-multilingual-v2.0`
-
+            
             - query: str. The search query
-
+            
             - documents: typing.Sequence[RerankRequestDocumentsItem]. A list of document objects or strings to rerank.
                                                                       If a document is provided the text fields is required and all other fields will be preserved in the response.
-
+                                                                      
                                                                       The total max chunks (length of documents * max_chunks_per_doc) must be less than 10000.
-
+                                                                      
                                                                       We recommend a maximum of 1,000 documents for optimal endpoint performance.
             - top_n: typing.Optional[int]. The number of most relevant documents or indices to return, defaults to the length of the documents
-
+            
             - return_documents: typing.Optional[bool]. - If false, returns results without the doc text - the api will return a list of {index, relevance score} where index is inferred from the list passed into the request.
                                                        - If true, returns results with the doc text passed in - the api will return an ordered list of {index, text, relevance score} where index + text refers to the list passed into the request.
             - max_chunks_per_doc: typing.Optional[int]. The maximum number of chunks to produce internally from a document
-
+            
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import Client
-
+        
         client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
@@ -1167,7 +969,10 @@ class BaseCohere:
             ],
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"query": query, "documents": documents}
+        _request: typing.Dict[str, typing.Any] = {
+            "query": query,
+            "documents": documents,
+        }
         if model is not OMIT:
             _request["model"] = model
         if top_n is not OMIT:
@@ -1176,56 +981,29 @@ class BaseCohere:
             _request["return_documents"] = return_documents
         if max_chunks_per_doc is not OMIT:
             _request["max_chunks_per_doc"] = max_chunks_per_doc
-        _response = self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "rerank"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
+        _response = self._client_wrapper.httpx_client.request("POST", urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "rerank"), 
+            params=jsonable_encoder(request_options.get('additional_query_parameters') if request_options is not None else None),
+            json=jsonable_encoder(_request) if request_options is None or request_options.get('additional_body_parameters') is None else {**jsonable_encoder(_request), **(jsonable_encoder(remove_none_from_dict(request_options.get('additional_body_parameters', {}))))},
+            headers=jsonable_encoder(remove_none_from_dict({**self._client_wrapper.get_headers(),**(request_options.get('additional_headers', {}) if request_options is not None else {}),},
+            )),
+            timeout=request_options.get('timeout_in_seconds') if request_options is not None and request_options.get('timeout_in_seconds') is not None else self._client_wrapper.get_timeout(),
             retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            max_retries=request_options.get('max_retries') if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(RerankResponse, _response.json())  # type: ignore
+            return typing.cast(RerankResponse, construct_type(type_=RerankResponse, object_=_response.json()))
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         try:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    def classify(
-        self,
-        *,
-        inputs: typing.Sequence[str],
-        examples: typing.Sequence[ClassifyExample],
-        model: typing.Optional[str] = OMIT,
-        preset: typing.Optional[str] = OMIT,
-        truncate: typing.Optional[ClassifyRequestTruncate] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> ClassifyResponse:
+    def classify(self, *, inputs: typing.Sequence[str], examples: typing.Sequence[ClassifyExample], model: typing.Optional[str] = OMIT, preset: typing.Optional[str] = OMIT, truncate: typing.Optional[ClassifyRequestTruncate] = OMIT, request_options: typing.Optional[RequestOptions] = None) -> ClassifyResponse:
         """
         This endpoint makes a prediction about which label fits the specified text inputs best. To make a prediction, Classify uses the provided `examples` of text + label pairs as a reference.
         Note: [Fine-tuned models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
-
+        
         Parameters:
             - inputs: typing.Sequence[str]. A list of up to 96 texts to be classified. Each one must be a non-empty string.
                                             There is, however, no consistent, universal limit to the length a particular input can be. We perform classification on the first `x` tokens of each input, and `x` varies depending on which underlying model is powering classification. The maximum token length for each model is listed in the "max tokens" column [here](https://docs.cohere.com/docs/models).
@@ -1233,9 +1011,9 @@ class BaseCohere:
             - examples: typing.Sequence[ClassifyExample]. An array of examples to provide context to the model. Each example is a text string and its associated label/class. Each unique label requires at least 2 examples associated with it; the maximum number of examples is 2500, and each example has a maximum length of 512 tokens. The values should be structured as `{text: "...",label: "..."}`.
                                                           Note: [Fine-tuned Models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
             - model: typing.Optional[str]. The identifier of the model. Currently available models are `embed-multilingual-v2.0`, `embed-english-light-v2.0`, and `embed-english-v2.0` (default). Smaller "light" models are faster, while larger models will perform better. [Fine-tuned models](https://docs.cohere.com/docs/fine-tuning) can also be supplied with their full ID.
-
+            
             - preset: typing.Optional[str]. The ID of a custom playground preset. You can create presets in the [playground](https://dashboard.cohere.ai/playground/classify?model=large). If you use a preset, all other parameters become optional, and any included parameters will override the preset's parameters.
-
+            
             - truncate: typing.Optional[ClassifyRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
                                                                   Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
                                                                   If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
@@ -1243,7 +1021,7 @@ class BaseCohere:
         ---
         from cohere import ClassifyExample
         from cohere.client import Client
-
+        
         client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
@@ -1295,91 +1073,65 @@ class BaseCohere:
             preset="my-preset-a58sbd",
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"inputs": inputs, "examples": examples}
+        _request: typing.Dict[str, typing.Any] = {
+            "inputs": inputs,
+            "examples": examples,
+        }
         if model is not OMIT:
             _request["model"] = model
         if preset is not OMIT:
             _request["preset"] = preset
         if truncate is not OMIT:
             _request["truncate"] = truncate
-        _response = self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "classify"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
+        _response = self._client_wrapper.httpx_client.request("POST", urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "classify"), 
+            params=jsonable_encoder(request_options.get('additional_query_parameters') if request_options is not None else None),
+            json=jsonable_encoder(_request) if request_options is None or request_options.get('additional_body_parameters') is None else {**jsonable_encoder(_request), **(jsonable_encoder(remove_none_from_dict(request_options.get('additional_body_parameters', {}))))},
+            headers=jsonable_encoder(remove_none_from_dict({**self._client_wrapper.get_headers(),**(request_options.get('additional_headers', {}) if request_options is not None else {}),},
+            )),
+            timeout=request_options.get('timeout_in_seconds') if request_options is not None and request_options.get('timeout_in_seconds') is not None else self._client_wrapper.get_timeout(),
             retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            max_retries=request_options.get('max_retries') if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(ClassifyResponse, _response.json())  # type: ignore
+            return typing.cast(ClassifyResponse, construct_type(type_=ClassifyResponse, object_=_response.json()))
         if _response.status_code == 400:
-            raise BadRequestError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         if _response.status_code == 500:
-            raise InternalServerError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         try:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    def summarize(
-        self,
-        *,
-        text: str,
-        length: typing.Optional[SummarizeRequestLength] = OMIT,
-        format: typing.Optional[SummarizeRequestFormat] = OMIT,
-        model: typing.Optional[str] = OMIT,
-        extractiveness: typing.Optional[SummarizeRequestExtractiveness] = OMIT,
-        temperature: typing.Optional[float] = OMIT,
-        additional_command: typing.Optional[str] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> SummarizeResponse:
+    def summarize(self, *, text: str, length: typing.Optional[SummarizeRequestLength] = OMIT, format: typing.Optional[SummarizeRequestFormat] = OMIT, model: typing.Optional[str] = OMIT, extractiveness: typing.Optional[SummarizeRequestExtractiveness] = OMIT, temperature: typing.Optional[float] = OMIT, additional_command: typing.Optional[str] = OMIT, request_options: typing.Optional[RequestOptions] = None) -> SummarizeResponse:
         """
         > 🚧 Warning
         >
         > This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
-
+        
         Generates a summary in English for a given text.
-
+        
         Parameters:
             - text: str. The text to generate a summary for. Can be up to 100,000 characters long. Currently the only supported language is English.
-
+            
             - length: typing.Optional[SummarizeRequestLength]. One of `short`, `medium`, `long`, or `auto` defaults to `auto`. Indicates the approximate length of the summary. If `auto` is selected, the best option will be picked based on the input text.
-
+            
             - format: typing.Optional[SummarizeRequestFormat]. One of `paragraph`, `bullets`, or `auto`, defaults to `auto`. Indicates the style in which the summary will be delivered - in a free form paragraph or in bullet points. If `auto` is selected, the best option will be picked based on the input text.
-
+            
             - model: typing.Optional[str]. The identifier of the model to generate the summary with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental). Smaller, "light" models are faster, while larger models will perform better.
-
+            
             - extractiveness: typing.Optional[SummarizeRequestExtractiveness]. One of `low`, `medium`, `high`, or `auto`, defaults to `auto`. Controls how close to the original text the summary is. `high` extractiveness summaries will lean towards reusing sentences verbatim, while `low` extractiveness summaries will tend to paraphrase more. If `auto` is selected, the best option will be picked based on the input text.
-
+            
             - temperature: typing.Optional[float]. Ranges from 0 to 5. Controls the randomness of the output. Lower values tend to generate more “predictable” output, while higher values tend to generate more “creative” output. The sweet spot is typically between 0 and 1.
-
+            
             - additional_command: typing.Optional[str]. A free-form instruction for modifying how the summaries get generated. Should complete the sentence "Generate a summary _". Eg. "focusing on the next steps" or "written by Yoda"
-
+            
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import Client
-
+        
         client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
@@ -1388,7 +1140,9 @@ class BaseCohere:
             text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.\n\nThe meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo\r all variants. Analogues made from dairy alternatives, such as goat\'s or sheep\'s milk, or milk substitutes (e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are lactose intolerant, allergic to dairy protein or vegan.',
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"text": text}
+        _request: typing.Dict[str, typing.Any] = {
+            "text": text,
+        }
         if length is not OMIT:
             _request["length"] = length
         if format is not OMIT:
@@ -1401,57 +1155,37 @@ class BaseCohere:
             _request["temperature"] = temperature
         if additional_command is not OMIT:
             _request["additional_command"] = additional_command
-        _response = self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "summarize"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
+        _response = self._client_wrapper.httpx_client.request("POST", urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "summarize"), 
+            params=jsonable_encoder(request_options.get('additional_query_parameters') if request_options is not None else None),
+            json=jsonable_encoder(_request) if request_options is None or request_options.get('additional_body_parameters') is None else {**jsonable_encoder(_request), **(jsonable_encoder(remove_none_from_dict(request_options.get('additional_body_parameters', {}))))},
+            headers=jsonable_encoder(remove_none_from_dict({**self._client_wrapper.get_headers(),**(request_options.get('additional_headers', {}) if request_options is not None else {}),},
+            )),
+            timeout=request_options.get('timeout_in_seconds') if request_options is not None and request_options.get('timeout_in_seconds') is not None else self._client_wrapper.get_timeout(),
             retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            max_retries=request_options.get('max_retries') if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(SummarizeResponse, _response.json())  # type: ignore
+            return typing.cast(SummarizeResponse, construct_type(type_=SummarizeResponse, object_=_response.json()))
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         try:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    def tokenize(
-        self, *, text: str, model: str, request_options: typing.Optional[RequestOptions] = None
-    ) -> TokenizeResponse:
+    def tokenize(self, *, text: str, model: str, request_options: typing.Optional[RequestOptions] = None) -> TokenizeResponse:
         """
         This endpoint splits input text into smaller units called tokens using byte-pair encoding (BPE). To learn more about tokenization and byte pair encoding, see the tokens page.
-
+        
         Parameters:
             - text: str. The string to be tokenized, the minimum text length is 1 character, and the maximum text length is 65536 characters.
-
+            
             - model: str. An optional parameter to provide the model name. This will ensure that the tokenization uses the tokenizer used by that model.
-
+            
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import Client
-
+        
         client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
@@ -1461,61 +1195,49 @@ class BaseCohere:
             model="command",
         )
         """
-        _response = self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "tokenize"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
-            ),
-            json=jsonable_encoder({"text": text, "model": model})
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder({"text": text, "model": model}),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
+        _response = self._client_wrapper.httpx_client.request("POST", urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "tokenize"), 
+            params=jsonable_encoder(request_options.get('additional_query_parameters') if request_options is not None else None),
+            json=jsonable_encoder({
+                "text": text,
+                "model": model,
+            }
+            ) if request_options is None or request_options.get('additional_body_parameters') is None else {**jsonable_encoder({
+                "text": text,
+                "model": model,
+            }
+            ), **(jsonable_encoder(remove_none_from_dict(request_options.get('additional_body_parameters', {}))))},
+            headers=jsonable_encoder(remove_none_from_dict({**self._client_wrapper.get_headers(),**(request_options.get('additional_headers', {}) if request_options is not None else {}),},
+            )),
+            timeout=request_options.get('timeout_in_seconds') if request_options is not None and request_options.get('timeout_in_seconds') is not None else self._client_wrapper.get_timeout(),
             retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            max_retries=request_options.get('max_retries') if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(TokenizeResponse, _response.json())  # type: ignore
+            return typing.cast(TokenizeResponse, construct_type(type_=TokenizeResponse, object_=_response.json()))
         if _response.status_code == 400:
-            raise BadRequestError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         if _response.status_code == 500:
-            raise InternalServerError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         try:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    def detokenize(
-        self, *, tokens: typing.Sequence[int], model: str, request_options: typing.Optional[RequestOptions] = None
-    ) -> DetokenizeResponse:
+    def detokenize(self, *, tokens: typing.Sequence[int], model: str, request_options: typing.Optional[RequestOptions] = None) -> DetokenizeResponse:
         """
         This endpoint takes tokens using byte-pair encoding and returns their text representation. To learn more about tokenization and byte pair encoding, see the tokens page.
-
+        
         Parameters:
             - tokens: typing.Sequence[int]. The list of tokens to be detokenized.
-
+            
             - model: str. An optional parameter to provide the model name. This will ensure that the detokenization is done by the tokenizer used by that model.
-
+            
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import Client
-
+        
         client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
@@ -1525,217 +1247,169 @@ class BaseCohere:
             model="command",
         )
         """
-        _response = self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "detokenize"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
-            ),
-            json=jsonable_encoder({"tokens": tokens, "model": model})
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder({"tokens": tokens, "model": model}),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
+        _response = self._client_wrapper.httpx_client.request("POST", urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "detokenize"), 
+            params=jsonable_encoder(request_options.get('additional_query_parameters') if request_options is not None else None),
+            json=jsonable_encoder({
+                "tokens": tokens,
+                "model": model,
+            }
+            ) if request_options is None or request_options.get('additional_body_parameters') is None else {**jsonable_encoder({
+                "tokens": tokens,
+                "model": model,
+            }
+            ), **(jsonable_encoder(remove_none_from_dict(request_options.get('additional_body_parameters', {}))))},
+            headers=jsonable_encoder(remove_none_from_dict({**self._client_wrapper.get_headers(),**(request_options.get('additional_headers', {}) if request_options is not None else {}),},
+            )),
+            timeout=request_options.get('timeout_in_seconds') if request_options is not None and request_options.get('timeout_in_seconds') is not None else self._client_wrapper.get_timeout(),
             retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            max_retries=request_options.get('max_retries') if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(DetokenizeResponse, _response.json())  # type: ignore
+            return typing.cast(DetokenizeResponse, construct_type(type_=DetokenizeResponse, object_=_response.json()))
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         try:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
-
-
 class AsyncBaseCohere:
     """
     Use this class to access the different functions within the SDK. You can instantiate any number of clients with different configuration that will propogate to these functions.
-
+    
     Parameters:
         - base_url: typing.Optional[str]. The base url to use for requests from the client.
-
+        
         - environment: ClientEnvironment. The environment to use for requests from the client. from .environment import ClientEnvironment
-
+                                          
                                           Defaults to ClientEnvironment.PRODUCTION
-
+                                          
         - client_name: typing.Optional[str].
-
+        
         - token: typing.Optional[typing.Union[str, typing.Callable[[], str]]].
-
+        
         - timeout: typing.Optional[float]. The timeout to be used, in seconds, for requests by default the timeout is 60 seconds, unless a custom httpx client is used, in which case a default is not set.
-
+        
+        - follow_redirects: typing.Optional[bool]. Whether the default httpx client follows redirects or not, this is irrelevant if a custom httpx client is passed in.
+        
         - httpx_client: typing.Optional[httpx.AsyncClient]. The httpx client to use for making requests, a preconfigured client is used by default, however this is useful should you want to pass in any custom httpx configuration.
     ---
     from cohere.client import AsyncClient
-
+    
     client = AsyncClient(
         client_name="YOUR_CLIENT_NAME",
         token="YOUR_TOKEN",
     )
     """
-
-    def __init__(
-        self,
-        *,
-        base_url: typing.Optional[str] = None,
-        environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
-        client_name: typing.Optional[str] = None,
-        token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"),
-        timeout: typing.Optional[float] = None,
-        httpx_client: typing.Optional[httpx.AsyncClient] = None,
-    ):
+    def __init__(self, *, base_url: typing.Optional[str] = None, environment: ClientEnvironment = ClientEnvironment.PRODUCTION
+    , client_name: typing.Optional[str] = None, token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"), timeout: typing.Optional[float] = None, follow_redirects: typing.Optional[bool] = None, httpx_client: typing.Optional[httpx.AsyncClient] = None):
         _defaulted_timeout = timeout if timeout is not None else 300 if httpx_client is None else None
         if token is None:
             raise ApiError(body="The client must be instantiated be either passing in token or setting CO_API_KEY")
-        self._client_wrapper = AsyncClientWrapper(
-            base_url=_get_base_url(base_url=base_url, environment=environment),
-            client_name=client_name,
-            token=token,
-            httpx_client=httpx.AsyncClient(timeout=_defaulted_timeout) if httpx_client is None else httpx_client,
-            timeout=_defaulted_timeout,
-        )
+        self._client_wrapper = AsyncClientWrapper(base_url=_get_base_url(base_url=base_url, environment=environment), client_name=client_name, token=token, httpx_client=httpx_client if httpx_client is not None else httpx.AsyncClient(timeout=_defaulted_timeout, follow_redirects=follow_redirects) if follow_redirects is not None else httpx.AsyncClient(timeout=_defaulted_timeout)
+        , timeout=_defaulted_timeout)
         self.embed_jobs = AsyncEmbedJobsClient(client_wrapper=self._client_wrapper)
         self.datasets = AsyncDatasetsClient(client_wrapper=self._client_wrapper)
         self.connectors = AsyncConnectorsClient(client_wrapper=self._client_wrapper)
         self.models = AsyncModelsClient(client_wrapper=self._client_wrapper)
         self.finetuning = AsyncFinetuningClient(client_wrapper=self._client_wrapper)
-
-    async def chat_stream(
-        self,
-        *,
-        message: str,
-        model: typing.Optional[str] = OMIT,
-        preamble: typing.Optional[str] = OMIT,
-        chat_history: typing.Optional[typing.Sequence[ChatMessage]] = OMIT,
-        conversation_id: typing.Optional[str] = OMIT,
-        prompt_truncation: typing.Optional[ChatStreamRequestPromptTruncation] = OMIT,
-        connectors: typing.Optional[typing.Sequence[ChatConnector]] = OMIT,
-        search_queries_only: typing.Optional[bool] = OMIT,
-        documents: typing.Optional[typing.Sequence[ChatDocument]] = OMIT,
-        temperature: typing.Optional[float] = OMIT,
-        max_tokens: typing.Optional[int] = OMIT,
-        k: typing.Optional[int] = OMIT,
-        p: typing.Optional[float] = OMIT,
-        seed: typing.Optional[float] = OMIT,
-        stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
-        frequency_penalty: typing.Optional[float] = OMIT,
-        presence_penalty: typing.Optional[float] = OMIT,
-        raw_prompting: typing.Optional[bool] = OMIT,
-        tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
-        tool_results: typing.Optional[typing.Sequence[ChatStreamRequestToolResultsItem]] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> typing.AsyncIterator[StreamedChatResponse]:
+    async def chat_stream(self, *, message: str, model: typing.Optional[str] = OMIT, preamble: typing.Optional[str] = OMIT, chat_history: typing.Optional[typing.Sequence[ChatMessage]] = OMIT, conversation_id: typing.Optional[str] = OMIT, prompt_truncation: typing.Optional[ChatStreamRequestPromptTruncation] = OMIT, connectors: typing.Optional[typing.Sequence[ChatConnector]] = OMIT, search_queries_only: typing.Optional[bool] = OMIT, documents: typing.Optional[typing.Sequence[ChatDocument]] = OMIT, temperature: typing.Optional[float] = OMIT, max_tokens: typing.Optional[int] = OMIT, k: typing.Optional[int] = OMIT, p: typing.Optional[float] = OMIT, seed: typing.Optional[float] = OMIT, stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT, frequency_penalty: typing.Optional[float] = OMIT, presence_penalty: typing.Optional[float] = OMIT, raw_prompting: typing.Optional[bool] = OMIT, tools: typing.Optional[typing.Sequence[Tool]] = OMIT, tool_results: typing.Optional[typing.Sequence[ChatStreamRequestToolResultsItem]] = OMIT, request_options: typing.Optional[RequestOptions] = None) -> typing.AsyncIterator[StreamedChatResponse]:
         """
         Generates a text response to a user message.
         To learn how to use Chat with Streaming and RAG follow [this guide](https://docs.cohere.com/docs/cochat-beta#various-ways-of-using-the-chat-endpoint).
-
+        
         Parameters:
             - message: str. Text input for the model to respond to.
-
+                            
             - model: typing.Optional[str]. Defaults to `command-r`.
-
+                                           
                                            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
-
+                                           
             - preamble: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style, and use the `SYSTEM` role.
-
+                                              
                                               The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
-
+                                              
             - chat_history: typing.Optional[typing.Sequence[ChatMessage]]. A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
-
+                                                                           
                                                                            Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
-
+                                                                           
                                                                            The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
-
+                                                                           
             - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
-
+                                                     
                                                      Providing a `conversation_id` creates or resumes a persisted conversation with the specified ID. The ID can be any non empty string.
-
+                                                     
             - prompt_truncation: typing.Optional[ChatStreamRequestPromptTruncation]. Defaults to `AUTO` when `connectors` are specified and `OFF` in all other cases.
-
+                                                                                     
                                                                                      Dictates how the prompt will be constructed.
-
+                                                                                     
                                                                                      With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be changed and ranked by relevance.
-
+                                                                                     
                                                                                      With `prompt_truncation` set to "AUTO_PRESERVE_ORDER", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be preserved as they are inputted into the API.
-
+                                                                                     
                                                                                      With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
-
+                                                                                     
             - connectors: typing.Optional[typing.Sequence[ChatConnector]]. Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
-
+                                                                           
                                                                            When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
-
+                                                                           
             - search_queries_only: typing.Optional[bool]. Defaults to `false`.
-
+                                                          
                                                           When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
-
+                                                          
             - documents: typing.Optional[typing.Sequence[ChatDocument]]. A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
-
+                                                                         
                                                                          Example:
                                                                          `[
                                                                            { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
                                                                            { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
                                                                          ]`
-
+                                                                         
                                                                          Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
-
+                                                                         
                                                                          Some suggested keys are "text", "author", and "date". For better generation quality, it is recommended to keep the total word count of the strings in the dictionary to under 300 words.
-
+                                                                         
                                                                          An `id` field (string) can be optionally supplied to identify the document in the citations. This field will not be passed to the model.
-
+                                                                         
                                                                          An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
-
+                                                                         
                                                                          See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
-
+                                                                         
             - temperature: typing.Optional[float]. Defaults to `0.3`.
-
+                                                   
                                                    A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
-
+                                                   
                                                    Randomness can be further maximized by increasing the  value of the `p` parameter.
-
+                                                   
             - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
-
+                                                
             - k: typing.Optional[int]. Ensures only the top `k` most likely tokens are considered for generation at each step.
                                        Defaults to `0`, min value of `0`, max value of `500`.
-
+                                       
             - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
                                          Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
-
+                                         
             - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinism cannot be totally guaranteed.
-
+            
             - stop_sequences: typing.Optional[typing.Sequence[str]]. A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
-
+                                                                     
             - frequency_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
-
+                                                         
                                                          Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
-
+                                                         
             - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
-
+                                                        
                                                         Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
-
+                                                        
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
-
+            
             - tools: typing.Optional[typing.Sequence[Tool]]. A list of available tools (functions) that the model may suggest invoking before producing a text response.
-
+                                                             
                                                              When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
-
+                                                             
             - tool_results: typing.Optional[typing.Sequence[ChatStreamRequestToolResultsItem]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
                                                                                                 Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
-
+                                                                                                
                                                                                                 **Note**: `outputs` must be a list of objects. If your tool returns a single object (eg `{"status": 200}`), make sure to wrap it in a list.
                                                                                                 ```
                                                                                                 tool_results = [
@@ -1754,7 +1428,7 @@ class AsyncBaseCohere:
                                                                                                 ]
                                                                                                 ```
                                                                                                 **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
-
+                                                                                                
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere import (
@@ -1767,7 +1441,7 @@ class AsyncBaseCohere:
             ToolParameterDefinitionsValue,
         )
         from cohere.client import AsyncClient
-
+        
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
@@ -1832,7 +1506,10 @@ class AsyncBaseCohere:
             ],
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"message": message, "stream": True}
+        _request: typing.Dict[str, typing.Any] = {
+            "message": message,
+            "stream": True,
+        }
         if model is not OMIT:
             _request["model"] = model
         if preamble is not OMIT:
@@ -1871,168 +1548,125 @@ class AsyncBaseCohere:
             _request["tools"] = tools
         if tool_results is not OMIT:
             _request["tool_results"] = tool_results
-        async with self._client_wrapper.httpx_client.stream(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
+        async with self._client_wrapper.httpx_client.stream("POST", urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"), 
+            params=jsonable_encoder(request_options.get('additional_query_parameters') if request_options is not None else None),
+            json=jsonable_encoder(_request) if request_options is None or request_options.get('additional_body_parameters') is None else {**jsonable_encoder(_request), **(jsonable_encoder(remove_none_from_dict(request_options.get('additional_body_parameters', {}))))},
+            headers=jsonable_encoder(remove_none_from_dict({**self._client_wrapper.get_headers(),**(request_options.get('additional_headers', {}) if request_options is not None else {}),},
+            )),
+            timeout=request_options.get('timeout_in_seconds') if request_options is not None and request_options.get('timeout_in_seconds') is not None else self._client_wrapper.get_timeout(),
             retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            max_retries=request_options.get('max_retries') if request_options is not None else 0,  # type: ignore
         ) as _response:
             if 200 <= _response.status_code < 300:
-                async for _text in _response.aiter_lines():
+                async for _text in _response.aiter_lines(): 
                     if len(_text) == 0:
                         continue
-                    yield pydantic.parse_obj_as(StreamedChatResponse, json.loads(_text))  # type: ignore
-                return
+                    yield typing.cast(StreamedChatResponse, construct_type(type_=StreamedChatResponse, object_=json.loads(_text)))return
             await _response.aread()
             if _response.status_code == 429:
-                raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+                raise TooManyRequestsError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
             try:
                 _response_json = _response.json()
             except JSONDecodeError:
                 raise ApiError(status_code=_response.status_code, body=_response.text)
             raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    async def chat(
-        self,
-        *,
-        message: str,
-        model: typing.Optional[str] = OMIT,
-        preamble: typing.Optional[str] = OMIT,
-        chat_history: typing.Optional[typing.Sequence[ChatMessage]] = OMIT,
-        conversation_id: typing.Optional[str] = OMIT,
-        prompt_truncation: typing.Optional[ChatRequestPromptTruncation] = OMIT,
-        connectors: typing.Optional[typing.Sequence[ChatConnector]] = OMIT,
-        search_queries_only: typing.Optional[bool] = OMIT,
-        documents: typing.Optional[typing.Sequence[ChatDocument]] = OMIT,
-        temperature: typing.Optional[float] = OMIT,
-        max_tokens: typing.Optional[int] = OMIT,
-        k: typing.Optional[int] = OMIT,
-        p: typing.Optional[float] = OMIT,
-        seed: typing.Optional[float] = OMIT,
-        stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
-        frequency_penalty: typing.Optional[float] = OMIT,
-        presence_penalty: typing.Optional[float] = OMIT,
-        raw_prompting: typing.Optional[bool] = OMIT,
-        tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
-        tool_results: typing.Optional[typing.Sequence[ChatRequestToolResultsItem]] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> NonStreamedChatResponse:
+    async def chat(self, *, message: str, model: typing.Optional[str] = OMIT, preamble: typing.Optional[str] = OMIT, chat_history: typing.Optional[typing.Sequence[ChatMessage]] = OMIT, conversation_id: typing.Optional[str] = OMIT, prompt_truncation: typing.Optional[ChatRequestPromptTruncation] = OMIT, connectors: typing.Optional[typing.Sequence[ChatConnector]] = OMIT, search_queries_only: typing.Optional[bool] = OMIT, documents: typing.Optional[typing.Sequence[ChatDocument]] = OMIT, temperature: typing.Optional[float] = OMIT, max_tokens: typing.Optional[int] = OMIT, k: typing.Optional[int] = OMIT, p: typing.Optional[float] = OMIT, seed: typing.Optional[float] = OMIT, stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT, frequency_penalty: typing.Optional[float] = OMIT, presence_penalty: typing.Optional[float] = OMIT, raw_prompting: typing.Optional[bool] = OMIT, tools: typing.Optional[typing.Sequence[Tool]] = OMIT, tool_results: typing.Optional[typing.Sequence[ChatRequestToolResultsItem]] = OMIT, request_options: typing.Optional[RequestOptions] = None) -> NonStreamedChatResponse:
         """
         Generates a text response to a user message.
         To learn how to use Chat with Streaming and RAG follow [this guide](https://docs.cohere.com/docs/cochat-beta#various-ways-of-using-the-chat-endpoint).
-
+        
         Parameters:
             - message: str. Text input for the model to respond to.
-
+                            
             - model: typing.Optional[str]. Defaults to `command-r`.
-
+                                           
                                            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
-
+                                           
             - preamble: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style, and use the `SYSTEM` role.
-
+                                              
                                               The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
-
+                                              
             - chat_history: typing.Optional[typing.Sequence[ChatMessage]]. A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
-
+                                                                           
                                                                            Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
-
+                                                                           
                                                                            The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
-
+                                                                           
             - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
-
+                                                     
                                                      Providing a `conversation_id` creates or resumes a persisted conversation with the specified ID. The ID can be any non empty string.
-
+                                                     
             - prompt_truncation: typing.Optional[ChatRequestPromptTruncation]. Defaults to `AUTO` when `connectors` are specified and `OFF` in all other cases.
-
+                                                                               
                                                                                Dictates how the prompt will be constructed.
-
+                                                                               
                                                                                With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be changed and ranked by relevance.
-
+                                                                               
                                                                                With `prompt_truncation` set to "AUTO_PRESERVE_ORDER", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be preserved as they are inputted into the API.
-
+                                                                               
                                                                                With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
-
+                                                                               
             - connectors: typing.Optional[typing.Sequence[ChatConnector]]. Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
-
+                                                                           
                                                                            When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
-
+                                                                           
             - search_queries_only: typing.Optional[bool]. Defaults to `false`.
-
+                                                          
                                                           When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
-
+                                                          
             - documents: typing.Optional[typing.Sequence[ChatDocument]]. A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
-
+                                                                         
                                                                          Example:
                                                                          `[
                                                                            { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
                                                                            { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
                                                                          ]`
-
+                                                                         
                                                                          Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
-
+                                                                         
                                                                          Some suggested keys are "text", "author", and "date". For better generation quality, it is recommended to keep the total word count of the strings in the dictionary to under 300 words.
-
+                                                                         
                                                                          An `id` field (string) can be optionally supplied to identify the document in the citations. This field will not be passed to the model.
-
+                                                                         
                                                                          An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
-
+                                                                         
                                                                          See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
-
+                                                                         
             - temperature: typing.Optional[float]. Defaults to `0.3`.
-
+                                                   
                                                    A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
-
+                                                   
                                                    Randomness can be further maximized by increasing the  value of the `p` parameter.
-
+                                                   
             - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
-
+                                                
             - k: typing.Optional[int]. Ensures only the top `k` most likely tokens are considered for generation at each step.
                                        Defaults to `0`, min value of `0`, max value of `500`.
-
+                                       
             - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
                                          Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
-
+                                         
             - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinism cannot be totally guaranteed.
-
+            
             - stop_sequences: typing.Optional[typing.Sequence[str]]. A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
-
+                                                                     
             - frequency_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
-
+                                                         
                                                          Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
-
+                                                         
             - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
-
+                                                        
                                                         Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
-
+                                                        
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
-
+            
             - tools: typing.Optional[typing.Sequence[Tool]]. A list of available tools (functions) that the model may suggest invoking before producing a text response.
-
+                                                             
                                                              When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
-
+                                                             
             - tool_results: typing.Optional[typing.Sequence[ChatRequestToolResultsItem]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
                                                                                           Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
-
+                                                                                          
                                                                                           **Note**: `outputs` must be a list of objects. If your tool returns a single object (eg `{"status": 200}`), make sure to wrap it in a list.
                                                                                           ```
                                                                                           tool_results = [
@@ -2051,12 +1685,12 @@ class AsyncBaseCohere:
                                                                                           ]
                                                                                           ```
                                                                                           **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
-
+                                                                                          
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere import ChatMessage
         from cohere.client import AsyncClient
-
+        
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
@@ -2077,7 +1711,10 @@ class AsyncBaseCohere:
             temperature=0.3,
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"message": message, "stream": False}
+        _request: typing.Dict[str, typing.Any] = {
+            "message": message,
+            "stream": False,
+        }
         if model is not OMIT:
             _request["model"] = model
         if preamble is not OMIT:
@@ -2116,128 +1753,90 @@ class AsyncBaseCohere:
             _request["tools"] = tools
         if tool_results is not OMIT:
             _request["tool_results"] = tool_results
-        _response = await self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
+        _response = await self._client_wrapper.httpx_client.request("POST", urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"), 
+            params=jsonable_encoder(request_options.get('additional_query_parameters') if request_options is not None else None),
+            json=jsonable_encoder(_request) if request_options is None or request_options.get('additional_body_parameters') is None else {**jsonable_encoder(_request), **(jsonable_encoder(remove_none_from_dict(request_options.get('additional_body_parameters', {}))))},
+            headers=jsonable_encoder(remove_none_from_dict({**self._client_wrapper.get_headers(),**(request_options.get('additional_headers', {}) if request_options is not None else {}),},
+            )),
+            timeout=request_options.get('timeout_in_seconds') if request_options is not None and request_options.get('timeout_in_seconds') is not None else self._client_wrapper.get_timeout(),
             retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            max_retries=request_options.get('max_retries') if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(NonStreamedChatResponse, _response.json())  # type: ignore
+            return typing.cast(NonStreamedChatResponse, construct_type(type_=NonStreamedChatResponse, object_=_response.json()))
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         try:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    async def generate_stream(
-        self,
-        *,
-        prompt: str,
-        model: typing.Optional[str] = OMIT,
-        num_generations: typing.Optional[int] = OMIT,
-        max_tokens: typing.Optional[int] = OMIT,
-        truncate: typing.Optional[GenerateStreamRequestTruncate] = OMIT,
-        temperature: typing.Optional[float] = OMIT,
-        seed: typing.Optional[float] = OMIT,
-        preset: typing.Optional[str] = OMIT,
-        end_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
-        stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
-        k: typing.Optional[int] = OMIT,
-        p: typing.Optional[float] = OMIT,
-        frequency_penalty: typing.Optional[float] = OMIT,
-        presence_penalty: typing.Optional[float] = OMIT,
-        return_likelihoods: typing.Optional[GenerateStreamRequestReturnLikelihoods] = OMIT,
-        raw_prompting: typing.Optional[bool] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> typing.AsyncIterator[GenerateStreamedResponse]:
+    async def generate_stream(self, *, prompt: str, model: typing.Optional[str] = OMIT, num_generations: typing.Optional[int] = OMIT, max_tokens: typing.Optional[int] = OMIT, truncate: typing.Optional[GenerateStreamRequestTruncate] = OMIT, temperature: typing.Optional[float] = OMIT, seed: typing.Optional[float] = OMIT, preset: typing.Optional[str] = OMIT, end_sequences: typing.Optional[typing.Sequence[str]] = OMIT, stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT, k: typing.Optional[int] = OMIT, p: typing.Optional[float] = OMIT, frequency_penalty: typing.Optional[float] = OMIT, presence_penalty: typing.Optional[float] = OMIT, return_likelihoods: typing.Optional[GenerateStreamRequestReturnLikelihoods] = OMIT, raw_prompting: typing.Optional[bool] = OMIT, request_options: typing.Optional[RequestOptions] = None) -> typing.AsyncIterator[GenerateStreamedResponse]:
         """
         > 🚧 Warning
         >
         > This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
-
+        
         Generates realistic text conditioned on a given input.
-
+        
         Parameters:
             - prompt: str. The input text that serves as the starting point for generating the response.
                            Note: The prompt will be pre-processed and modified before reaching the model.
-
+                           
             - model: typing.Optional[str]. The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
                                            Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
             - num_generations: typing.Optional[int]. The maximum number of generations that will be returned. Defaults to `1`, min value of `1`, max value of `5`.
-
+                                                     
             - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
-
+                                                
                                                 This parameter is off by default, and if it's not specified, the model will continue generating until it emits an EOS completion token. See [BPE Tokens](/bpe-tokens-wiki) for more details.
-
+                                                
                                                 Can only be set to `0` if `return_likelihoods` is set to `ALL` to get the likelihood of the prompt.
-
+                                                
             - truncate: typing.Optional[GenerateStreamRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
-
+                                                                        
                                                                         Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
-
+                                                                        
                                                                         If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
             - temperature: typing.Optional[float]. A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations. See [Temperature](/temperature-wiki) for more details.
                                                    Defaults to `0.75`, min value of `0.0`, max value of `5.0`.
-
+                                                   
             - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed.
-
+            
             - preset: typing.Optional[str]. Identifier of a custom preset. A preset is a combination of parameters, such as prompt, temperature etc. You can create presets in the [playground](https://dashboard.cohere.ai/playground/generate).
                                             When a preset is specified, the `prompt` parameter becomes optional, and any included parameters will override the preset's parameters.
-
+                                            
             - end_sequences: typing.Optional[typing.Sequence[str]]. The generated text will be cut at the beginning of the earliest occurrence of an end sequence. The sequence will be excluded from the text.
-
+            
             - stop_sequences: typing.Optional[typing.Sequence[str]]. The generated text will be cut at the end of the earliest occurrence of a stop sequence. The sequence will be included the text.
-
+            
             - k: typing.Optional[int]. Ensures only the top `k` most likely tokens are considered for generation at each step.
                                        Defaults to `0`, min value of `0`, max value of `500`.
-
+                                       
             - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
                                          Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
-
+                                         
             - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
-
+                                                         
                                                          Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
-
+                                                         
             - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
-
+                                                        
                                                         Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
-
+                                                        
                                                         Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
-
+                                                        
             - return_likelihoods: typing.Optional[GenerateStreamRequestReturnLikelihoods]. One of `GENERATION|ALL|NONE` to specify how and if the token likelihoods are returned with the response. Defaults to `NONE`.
-
+                                                                                           
                                                                                            If `GENERATION` is selected, the token likelihoods will only be provided for generated text.
-
+                                                                                           
                                                                                            If `ALL` is selected, the token likelihoods will be provided both for the prompt and the generated text.
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
-
+            
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import AsyncClient
-
+        
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
@@ -2261,7 +1860,10 @@ class AsyncBaseCohere:
             raw_prompting=True,
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": True}
+        _request: typing.Dict[str, typing.Any] = {
+            "prompt": prompt,
+            "stream": True,
+        }
         if model is not OMIT:
             _request["model"] = model
         if num_generations is not OMIT:
@@ -2292,137 +1894,98 @@ class AsyncBaseCohere:
             _request["return_likelihoods"] = return_likelihoods
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
-        async with self._client_wrapper.httpx_client.stream(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "generate"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
+        async with self._client_wrapper.httpx_client.stream("POST", urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "generate"), 
+            params=jsonable_encoder(request_options.get('additional_query_parameters') if request_options is not None else None),
+            json=jsonable_encoder(_request) if request_options is None or request_options.get('additional_body_parameters') is None else {**jsonable_encoder(_request), **(jsonable_encoder(remove_none_from_dict(request_options.get('additional_body_parameters', {}))))},
+            headers=jsonable_encoder(remove_none_from_dict({**self._client_wrapper.get_headers(),**(request_options.get('additional_headers', {}) if request_options is not None else {}),},
+            )),
+            timeout=request_options.get('timeout_in_seconds') if request_options is not None and request_options.get('timeout_in_seconds') is not None else self._client_wrapper.get_timeout(),
             retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            max_retries=request_options.get('max_retries') if request_options is not None else 0,  # type: ignore
         ) as _response:
             if 200 <= _response.status_code < 300:
-                async for _text in _response.aiter_lines():
+                async for _text in _response.aiter_lines(): 
                     if len(_text) == 0:
                         continue
-                    yield pydantic.parse_obj_as(GenerateStreamedResponse, json.loads(_text))  # type: ignore
-                return
+                    yield typing.cast(GenerateStreamedResponse, construct_type(type_=GenerateStreamedResponse, object_=json.loads(_text)))return
             await _response.aread()
             if _response.status_code == 400:
-                raise BadRequestError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+                raise BadRequestError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
             if _response.status_code == 429:
-                raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+                raise TooManyRequestsError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
             if _response.status_code == 500:
-                raise InternalServerError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+                raise InternalServerError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
             try:
                 _response_json = _response.json()
             except JSONDecodeError:
                 raise ApiError(status_code=_response.status_code, body=_response.text)
             raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    async def generate(
-        self,
-        *,
-        prompt: str,
-        model: typing.Optional[str] = OMIT,
-        num_generations: typing.Optional[int] = OMIT,
-        max_tokens: typing.Optional[int] = OMIT,
-        truncate: typing.Optional[GenerateRequestTruncate] = OMIT,
-        temperature: typing.Optional[float] = OMIT,
-        seed: typing.Optional[float] = OMIT,
-        preset: typing.Optional[str] = OMIT,
-        end_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
-        stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
-        k: typing.Optional[int] = OMIT,
-        p: typing.Optional[float] = OMIT,
-        frequency_penalty: typing.Optional[float] = OMIT,
-        presence_penalty: typing.Optional[float] = OMIT,
-        return_likelihoods: typing.Optional[GenerateRequestReturnLikelihoods] = OMIT,
-        raw_prompting: typing.Optional[bool] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> Generation:
+    async def generate(self, *, prompt: str, model: typing.Optional[str] = OMIT, num_generations: typing.Optional[int] = OMIT, max_tokens: typing.Optional[int] = OMIT, truncate: typing.Optional[GenerateRequestTruncate] = OMIT, temperature: typing.Optional[float] = OMIT, seed: typing.Optional[float] = OMIT, preset: typing.Optional[str] = OMIT, end_sequences: typing.Optional[typing.Sequence[str]] = OMIT, stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT, k: typing.Optional[int] = OMIT, p: typing.Optional[float] = OMIT, frequency_penalty: typing.Optional[float] = OMIT, presence_penalty: typing.Optional[float] = OMIT, return_likelihoods: typing.Optional[GenerateRequestReturnLikelihoods] = OMIT, raw_prompting: typing.Optional[bool] = OMIT, request_options: typing.Optional[RequestOptions] = None) -> Generation:
         """
         > 🚧 Warning
         >
         > This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
-
+        
         Generates realistic text conditioned on a given input.
-
+        
         Parameters:
             - prompt: str. The input text that serves as the starting point for generating the response.
                            Note: The prompt will be pre-processed and modified before reaching the model.
-
+                           
             - model: typing.Optional[str]. The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
                                            Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
             - num_generations: typing.Optional[int]. The maximum number of generations that will be returned. Defaults to `1`, min value of `1`, max value of `5`.
-
+                                                     
             - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
-
+                                                
                                                 This parameter is off by default, and if it's not specified, the model will continue generating until it emits an EOS completion token. See [BPE Tokens](/bpe-tokens-wiki) for more details.
-
+                                                
                                                 Can only be set to `0` if `return_likelihoods` is set to `ALL` to get the likelihood of the prompt.
-
+                                                
             - truncate: typing.Optional[GenerateRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
-
+                                                                  
                                                                   Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
-
+                                                                  
                                                                   If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
             - temperature: typing.Optional[float]. A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations. See [Temperature](/temperature-wiki) for more details.
                                                    Defaults to `0.75`, min value of `0.0`, max value of `5.0`.
-
+                                                   
             - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed.
-
+            
             - preset: typing.Optional[str]. Identifier of a custom preset. A preset is a combination of parameters, such as prompt, temperature etc. You can create presets in the [playground](https://dashboard.cohere.ai/playground/generate).
                                             When a preset is specified, the `prompt` parameter becomes optional, and any included parameters will override the preset's parameters.
-
+                                            
             - end_sequences: typing.Optional[typing.Sequence[str]]. The generated text will be cut at the beginning of the earliest occurrence of an end sequence. The sequence will be excluded from the text.
-
+            
             - stop_sequences: typing.Optional[typing.Sequence[str]]. The generated text will be cut at the end of the earliest occurrence of a stop sequence. The sequence will be included the text.
-
+            
             - k: typing.Optional[int]. Ensures only the top `k` most likely tokens are considered for generation at each step.
                                        Defaults to `0`, min value of `0`, max value of `500`.
-
+                                       
             - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
                                          Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
-
+                                         
             - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
-
+                                                         
                                                          Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
-
+                                                         
             - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
-
+                                                        
                                                         Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
-
+                                                        
                                                         Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
-
+                                                        
             - return_likelihoods: typing.Optional[GenerateRequestReturnLikelihoods]. One of `GENERATION|ALL|NONE` to specify how and if the token likelihoods are returned with the response. Defaults to `NONE`.
-
+                                                                                     
                                                                                      If `GENERATION` is selected, the token likelihoods will only be provided for generated text.
-
+                                                                                     
                                                                                      If `ALL` is selected, the token likelihoods will be provided both for the prompt and the generated text.
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
-
+            
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import AsyncClient
-
+        
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
@@ -2432,7 +1995,10 @@ class AsyncBaseCohere:
             preset="my-preset-a58sbd",
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": False}
+        _request: typing.Dict[str, typing.Any] = {
+            "prompt": prompt,
+            "stream": False,
+        }
         if model is not OMIT:
             _request["model"] = model
         if num_generations is not OMIT:
@@ -2463,98 +2029,71 @@ class AsyncBaseCohere:
             _request["return_likelihoods"] = return_likelihoods
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
-        _response = await self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "generate"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
+        _response = await self._client_wrapper.httpx_client.request("POST", urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "generate"), 
+            params=jsonable_encoder(request_options.get('additional_query_parameters') if request_options is not None else None),
+            json=jsonable_encoder(_request) if request_options is None or request_options.get('additional_body_parameters') is None else {**jsonable_encoder(_request), **(jsonable_encoder(remove_none_from_dict(request_options.get('additional_body_parameters', {}))))},
+            headers=jsonable_encoder(remove_none_from_dict({**self._client_wrapper.get_headers(),**(request_options.get('additional_headers', {}) if request_options is not None else {}),},
+            )),
+            timeout=request_options.get('timeout_in_seconds') if request_options is not None and request_options.get('timeout_in_seconds') is not None else self._client_wrapper.get_timeout(),
             retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            max_retries=request_options.get('max_retries') if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(Generation, _response.json())  # type: ignore
+            return typing.cast(Generation, construct_type(type_=Generation, object_=_response.json()))
         if _response.status_code == 400:
-            raise BadRequestError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         if _response.status_code == 500:
-            raise InternalServerError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         try:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    async def embed(
-        self,
-        *,
-        texts: typing.Sequence[str],
-        model: typing.Optional[str] = OMIT,
-        input_type: typing.Optional[EmbedInputType] = OMIT,
-        embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
-        truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> EmbedResponse:
+    async def embed(self, *, texts: typing.Sequence[str], model: typing.Optional[str] = OMIT, input_type: typing.Optional[EmbedInputType] = OMIT, embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT, truncate: typing.Optional[EmbedRequestTruncate] = OMIT, request_options: typing.Optional[RequestOptions] = None) -> EmbedResponse:
         """
         This endpoint returns text embeddings. An embedding is a list of floating point numbers that captures semantic information about the text that it represents.
-
+        
         Embeddings can be used to create text classifiers as well as empower semantic search. To learn more about embeddings, see the embedding page.
-
+        
         If you want to learn more how to use the embedding model, have a look at the [Semantic Search Guide](/docs/semantic-search).
-
+        
         Parameters:
             - texts: typing.Sequence[str]. An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
-
+            
             - model: typing.Optional[str]. Defaults to embed-english-v2.0
-
+                                           
                                            The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
-
+                                           
                                            Available models and corresponding embedding dimensions:
-
+                                           
                                            * `embed-english-v3.0`  1024
                                            * `embed-multilingual-v3.0`  1024
                                            * `embed-english-light-v3.0`  384
                                            * `embed-multilingual-light-v3.0`  384
-
+                                           
                                            * `embed-english-v2.0`  4096
                                            * `embed-english-light-v2.0`  1024
                                            * `embed-multilingual-v2.0`  768
             - input_type: typing.Optional[EmbedInputType].
-
+            
             - embedding_types: typing.Optional[typing.Sequence[EmbeddingType]]. Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
-
+                                                                                
                                                                                 * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
                                                                                 * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
                                                                                 * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
                                                                                 * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
                                                                                 * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
             - truncate: typing.Optional[EmbedRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
-
+                                                               
                                                                Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
-
+                                                               
                                                                If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import AsyncClient
-
+        
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
@@ -2567,7 +2106,9 @@ class AsyncBaseCohere:
             truncate="NONE",
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"texts": texts}
+        _request: typing.Dict[str, typing.Any] = {
+            "texts": texts,
+        }
         if model is not OMIT:
             _request["model"] = model
         if input_type is not OMIT:
@@ -2576,81 +2117,53 @@ class AsyncBaseCohere:
             _request["embedding_types"] = embedding_types
         if truncate is not OMIT:
             _request["truncate"] = truncate
-        _response = await self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
+        _response = await self._client_wrapper.httpx_client.request("POST", urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed"), 
+            params=jsonable_encoder(request_options.get('additional_query_parameters') if request_options is not None else None),
+            json=jsonable_encoder(_request) if request_options is None or request_options.get('additional_body_parameters') is None else {**jsonable_encoder(_request), **(jsonable_encoder(remove_none_from_dict(request_options.get('additional_body_parameters', {}))))},
+            headers=jsonable_encoder(remove_none_from_dict({**self._client_wrapper.get_headers(),**(request_options.get('additional_headers', {}) if request_options is not None else {}),},
+            )),
+            timeout=request_options.get('timeout_in_seconds') if request_options is not None and request_options.get('timeout_in_seconds') is not None else self._client_wrapper.get_timeout(),
             retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            max_retries=request_options.get('max_retries') if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(EmbedResponse, _response.json())  # type: ignore
+            return typing.cast(EmbedResponse, construct_type(type_=EmbedResponse, object_=_response.json()))
         if _response.status_code == 400:
-            raise BadRequestError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         if _response.status_code == 500:
-            raise InternalServerError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         try:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    async def rerank(
-        self,
-        *,
-        model: typing.Optional[str] = OMIT,
-        query: str,
-        documents: typing.Sequence[RerankRequestDocumentsItem],
-        top_n: typing.Optional[int] = OMIT,
-        return_documents: typing.Optional[bool] = OMIT,
-        max_chunks_per_doc: typing.Optional[int] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> RerankResponse:
+    async def rerank(self, *, model: typing.Optional[str] = OMIT, query: str, documents: typing.Sequence[RerankRequestDocumentsItem], top_n: typing.Optional[int] = OMIT, return_documents: typing.Optional[bool] = OMIT, max_chunks_per_doc: typing.Optional[int] = OMIT, request_options: typing.Optional[RequestOptions] = None) -> RerankResponse:
         """
         This endpoint takes in a query and a list of texts and produces an ordered array with each text assigned a relevance score.
-
+        
         Parameters:
             - model: typing.Optional[str]. The identifier of the model to use, one of : `rerank-english-v2.0`, `rerank-multilingual-v2.0`
-
+            
             - query: str. The search query
-
+            
             - documents: typing.Sequence[RerankRequestDocumentsItem]. A list of document objects or strings to rerank.
                                                                       If a document is provided the text fields is required and all other fields will be preserved in the response.
-
+                                                                      
                                                                       The total max chunks (length of documents * max_chunks_per_doc) must be less than 10000.
-
+                                                                      
                                                                       We recommend a maximum of 1,000 documents for optimal endpoint performance.
             - top_n: typing.Optional[int]. The number of most relevant documents or indices to return, defaults to the length of the documents
-
+            
             - return_documents: typing.Optional[bool]. - If false, returns results without the doc text - the api will return a list of {index, relevance score} where index is inferred from the list passed into the request.
                                                        - If true, returns results with the doc text passed in - the api will return an ordered list of {index, text, relevance score} where index + text refers to the list passed into the request.
             - max_chunks_per_doc: typing.Optional[int]. The maximum number of chunks to produce internally from a document
-
+            
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import AsyncClient
-
+        
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
@@ -2666,7 +2179,10 @@ class AsyncBaseCohere:
             ],
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"query": query, "documents": documents}
+        _request: typing.Dict[str, typing.Any] = {
+            "query": query,
+            "documents": documents,
+        }
         if model is not OMIT:
             _request["model"] = model
         if top_n is not OMIT:
@@ -2675,56 +2191,29 @@ class AsyncBaseCohere:
             _request["return_documents"] = return_documents
         if max_chunks_per_doc is not OMIT:
             _request["max_chunks_per_doc"] = max_chunks_per_doc
-        _response = await self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "rerank"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
+        _response = await self._client_wrapper.httpx_client.request("POST", urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "rerank"), 
+            params=jsonable_encoder(request_options.get('additional_query_parameters') if request_options is not None else None),
+            json=jsonable_encoder(_request) if request_options is None or request_options.get('additional_body_parameters') is None else {**jsonable_encoder(_request), **(jsonable_encoder(remove_none_from_dict(request_options.get('additional_body_parameters', {}))))},
+            headers=jsonable_encoder(remove_none_from_dict({**self._client_wrapper.get_headers(),**(request_options.get('additional_headers', {}) if request_options is not None else {}),},
+            )),
+            timeout=request_options.get('timeout_in_seconds') if request_options is not None and request_options.get('timeout_in_seconds') is not None else self._client_wrapper.get_timeout(),
             retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            max_retries=request_options.get('max_retries') if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(RerankResponse, _response.json())  # type: ignore
+            return typing.cast(RerankResponse, construct_type(type_=RerankResponse, object_=_response.json()))
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         try:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    async def classify(
-        self,
-        *,
-        inputs: typing.Sequence[str],
-        examples: typing.Sequence[ClassifyExample],
-        model: typing.Optional[str] = OMIT,
-        preset: typing.Optional[str] = OMIT,
-        truncate: typing.Optional[ClassifyRequestTruncate] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> ClassifyResponse:
+    async def classify(self, *, inputs: typing.Sequence[str], examples: typing.Sequence[ClassifyExample], model: typing.Optional[str] = OMIT, preset: typing.Optional[str] = OMIT, truncate: typing.Optional[ClassifyRequestTruncate] = OMIT, request_options: typing.Optional[RequestOptions] = None) -> ClassifyResponse:
         """
         This endpoint makes a prediction about which label fits the specified text inputs best. To make a prediction, Classify uses the provided `examples` of text + label pairs as a reference.
         Note: [Fine-tuned models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
-
+        
         Parameters:
             - inputs: typing.Sequence[str]. A list of up to 96 texts to be classified. Each one must be a non-empty string.
                                             There is, however, no consistent, universal limit to the length a particular input can be. We perform classification on the first `x` tokens of each input, and `x` varies depending on which underlying model is powering classification. The maximum token length for each model is listed in the "max tokens" column [here](https://docs.cohere.com/docs/models).
@@ -2732,9 +2221,9 @@ class AsyncBaseCohere:
             - examples: typing.Sequence[ClassifyExample]. An array of examples to provide context to the model. Each example is a text string and its associated label/class. Each unique label requires at least 2 examples associated with it; the maximum number of examples is 2500, and each example has a maximum length of 512 tokens. The values should be structured as `{text: "...",label: "..."}`.
                                                           Note: [Fine-tuned Models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
             - model: typing.Optional[str]. The identifier of the model. Currently available models are `embed-multilingual-v2.0`, `embed-english-light-v2.0`, and `embed-english-v2.0` (default). Smaller "light" models are faster, while larger models will perform better. [Fine-tuned models](https://docs.cohere.com/docs/fine-tuning) can also be supplied with their full ID.
-
+            
             - preset: typing.Optional[str]. The ID of a custom playground preset. You can create presets in the [playground](https://dashboard.cohere.ai/playground/classify?model=large). If you use a preset, all other parameters become optional, and any included parameters will override the preset's parameters.
-
+            
             - truncate: typing.Optional[ClassifyRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
                                                                   Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
                                                                   If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
@@ -2742,7 +2231,7 @@ class AsyncBaseCohere:
         ---
         from cohere import ClassifyExample
         from cohere.client import AsyncClient
-
+        
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
@@ -2794,91 +2283,65 @@ class AsyncBaseCohere:
             preset="my-preset-a58sbd",
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"inputs": inputs, "examples": examples}
+        _request: typing.Dict[str, typing.Any] = {
+            "inputs": inputs,
+            "examples": examples,
+        }
         if model is not OMIT:
             _request["model"] = model
         if preset is not OMIT:
             _request["preset"] = preset
         if truncate is not OMIT:
             _request["truncate"] = truncate
-        _response = await self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "classify"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
+        _response = await self._client_wrapper.httpx_client.request("POST", urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "classify"), 
+            params=jsonable_encoder(request_options.get('additional_query_parameters') if request_options is not None else None),
+            json=jsonable_encoder(_request) if request_options is None or request_options.get('additional_body_parameters') is None else {**jsonable_encoder(_request), **(jsonable_encoder(remove_none_from_dict(request_options.get('additional_body_parameters', {}))))},
+            headers=jsonable_encoder(remove_none_from_dict({**self._client_wrapper.get_headers(),**(request_options.get('additional_headers', {}) if request_options is not None else {}),},
+            )),
+            timeout=request_options.get('timeout_in_seconds') if request_options is not None and request_options.get('timeout_in_seconds') is not None else self._client_wrapper.get_timeout(),
             retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            max_retries=request_options.get('max_retries') if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(ClassifyResponse, _response.json())  # type: ignore
+            return typing.cast(ClassifyResponse, construct_type(type_=ClassifyResponse, object_=_response.json()))
         if _response.status_code == 400:
-            raise BadRequestError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         if _response.status_code == 500:
-            raise InternalServerError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         try:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    async def summarize(
-        self,
-        *,
-        text: str,
-        length: typing.Optional[SummarizeRequestLength] = OMIT,
-        format: typing.Optional[SummarizeRequestFormat] = OMIT,
-        model: typing.Optional[str] = OMIT,
-        extractiveness: typing.Optional[SummarizeRequestExtractiveness] = OMIT,
-        temperature: typing.Optional[float] = OMIT,
-        additional_command: typing.Optional[str] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> SummarizeResponse:
+    async def summarize(self, *, text: str, length: typing.Optional[SummarizeRequestLength] = OMIT, format: typing.Optional[SummarizeRequestFormat] = OMIT, model: typing.Optional[str] = OMIT, extractiveness: typing.Optional[SummarizeRequestExtractiveness] = OMIT, temperature: typing.Optional[float] = OMIT, additional_command: typing.Optional[str] = OMIT, request_options: typing.Optional[RequestOptions] = None) -> SummarizeResponse:
         """
         > 🚧 Warning
         >
         > This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
-
+        
         Generates a summary in English for a given text.
-
+        
         Parameters:
             - text: str. The text to generate a summary for. Can be up to 100,000 characters long. Currently the only supported language is English.
-
+            
             - length: typing.Optional[SummarizeRequestLength]. One of `short`, `medium`, `long`, or `auto` defaults to `auto`. Indicates the approximate length of the summary. If `auto` is selected, the best option will be picked based on the input text.
-
+            
             - format: typing.Optional[SummarizeRequestFormat]. One of `paragraph`, `bullets`, or `auto`, defaults to `auto`. Indicates the style in which the summary will be delivered - in a free form paragraph or in bullet points. If `auto` is selected, the best option will be picked based on the input text.
-
+            
             - model: typing.Optional[str]. The identifier of the model to generate the summary with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental). Smaller, "light" models are faster, while larger models will perform better.
-
+            
             - extractiveness: typing.Optional[SummarizeRequestExtractiveness]. One of `low`, `medium`, `high`, or `auto`, defaults to `auto`. Controls how close to the original text the summary is. `high` extractiveness summaries will lean towards reusing sentences verbatim, while `low` extractiveness summaries will tend to paraphrase more. If `auto` is selected, the best option will be picked based on the input text.
-
+            
             - temperature: typing.Optional[float]. Ranges from 0 to 5. Controls the randomness of the output. Lower values tend to generate more “predictable” output, while higher values tend to generate more “creative” output. The sweet spot is typically between 0 and 1.
-
+            
             - additional_command: typing.Optional[str]. A free-form instruction for modifying how the summaries get generated. Should complete the sentence "Generate a summary _". Eg. "focusing on the next steps" or "written by Yoda"
-
+            
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import AsyncClient
-
+        
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
@@ -2887,7 +2350,9 @@ class AsyncBaseCohere:
             text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.\n\nThe meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo\r all variants. Analogues made from dairy alternatives, such as goat\'s or sheep\'s milk, or milk substitutes (e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are lactose intolerant, allergic to dairy protein or vegan.',
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"text": text}
+        _request: typing.Dict[str, typing.Any] = {
+            "text": text,
+        }
         if length is not OMIT:
             _request["length"] = length
         if format is not OMIT:
@@ -2900,57 +2365,37 @@ class AsyncBaseCohere:
             _request["temperature"] = temperature
         if additional_command is not OMIT:
             _request["additional_command"] = additional_command
-        _response = await self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "summarize"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
+        _response = await self._client_wrapper.httpx_client.request("POST", urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "summarize"), 
+            params=jsonable_encoder(request_options.get('additional_query_parameters') if request_options is not None else None),
+            json=jsonable_encoder(_request) if request_options is None or request_options.get('additional_body_parameters') is None else {**jsonable_encoder(_request), **(jsonable_encoder(remove_none_from_dict(request_options.get('additional_body_parameters', {}))))},
+            headers=jsonable_encoder(remove_none_from_dict({**self._client_wrapper.get_headers(),**(request_options.get('additional_headers', {}) if request_options is not None else {}),},
+            )),
+            timeout=request_options.get('timeout_in_seconds') if request_options is not None and request_options.get('timeout_in_seconds') is not None else self._client_wrapper.get_timeout(),
             retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            max_retries=request_options.get('max_retries') if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(SummarizeResponse, _response.json())  # type: ignore
+            return typing.cast(SummarizeResponse, construct_type(type_=SummarizeResponse, object_=_response.json()))
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         try:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    async def tokenize(
-        self, *, text: str, model: str, request_options: typing.Optional[RequestOptions] = None
-    ) -> TokenizeResponse:
+    async def tokenize(self, *, text: str, model: str, request_options: typing.Optional[RequestOptions] = None) -> TokenizeResponse:
         """
         This endpoint splits input text into smaller units called tokens using byte-pair encoding (BPE). To learn more about tokenization and byte pair encoding, see the tokens page.
-
+        
         Parameters:
             - text: str. The string to be tokenized, the minimum text length is 1 character, and the maximum text length is 65536 characters.
-
+            
             - model: str. An optional parameter to provide the model name. This will ensure that the tokenization uses the tokenizer used by that model.
-
+            
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import AsyncClient
-
+        
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
@@ -2960,61 +2405,49 @@ class AsyncBaseCohere:
             model="command",
         )
         """
-        _response = await self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "tokenize"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
-            ),
-            json=jsonable_encoder({"text": text, "model": model})
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder({"text": text, "model": model}),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
+        _response = await self._client_wrapper.httpx_client.request("POST", urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "tokenize"), 
+            params=jsonable_encoder(request_options.get('additional_query_parameters') if request_options is not None else None),
+            json=jsonable_encoder({
+                "text": text,
+                "model": model,
+            }
+            ) if request_options is None or request_options.get('additional_body_parameters') is None else {**jsonable_encoder({
+                "text": text,
+                "model": model,
+            }
+            ), **(jsonable_encoder(remove_none_from_dict(request_options.get('additional_body_parameters', {}))))},
+            headers=jsonable_encoder(remove_none_from_dict({**self._client_wrapper.get_headers(),**(request_options.get('additional_headers', {}) if request_options is not None else {}),},
+            )),
+            timeout=request_options.get('timeout_in_seconds') if request_options is not None and request_options.get('timeout_in_seconds') is not None else self._client_wrapper.get_timeout(),
             retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            max_retries=request_options.get('max_retries') if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(TokenizeResponse, _response.json())  # type: ignore
+            return typing.cast(TokenizeResponse, construct_type(type_=TokenizeResponse, object_=_response.json()))
         if _response.status_code == 400:
-            raise BadRequestError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         if _response.status_code == 500:
-            raise InternalServerError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         try:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    async def detokenize(
-        self, *, tokens: typing.Sequence[int], model: str, request_options: typing.Optional[RequestOptions] = None
-    ) -> DetokenizeResponse:
+    async def detokenize(self, *, tokens: typing.Sequence[int], model: str, request_options: typing.Optional[RequestOptions] = None) -> DetokenizeResponse:
         """
         This endpoint takes tokens using byte-pair encoding and returns their text representation. To learn more about tokenization and byte pair encoding, see the tokens page.
-
+        
         Parameters:
             - tokens: typing.Sequence[int]. The list of tokens to be detokenized.
-
+            
             - model: str. An optional parameter to provide the model name. This will ensure that the detokenization is done by the tokenizer used by that model.
-
+            
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere.client import AsyncClient
-
+        
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
@@ -3024,43 +2457,32 @@ class AsyncBaseCohere:
             model="command",
         )
         """
-        _response = await self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "detokenize"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
-            ),
-            json=jsonable_encoder({"tokens": tokens, "model": model})
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder({"tokens": tokens, "model": model}),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
+        _response = await self._client_wrapper.httpx_client.request("POST", urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "detokenize"), 
+            params=jsonable_encoder(request_options.get('additional_query_parameters') if request_options is not None else None),
+            json=jsonable_encoder({
+                "tokens": tokens,
+                "model": model,
+            }
+            ) if request_options is None or request_options.get('additional_body_parameters') is None else {**jsonable_encoder({
+                "tokens": tokens,
+                "model": model,
+            }
+            ), **(jsonable_encoder(remove_none_from_dict(request_options.get('additional_body_parameters', {}))))},
+            headers=jsonable_encoder(remove_none_from_dict({**self._client_wrapper.get_headers(),**(request_options.get('additional_headers', {}) if request_options is not None else {}),},
+            )),
+            timeout=request_options.get('timeout_in_seconds') if request_options is not None and request_options.get('timeout_in_seconds') is not None else self._client_wrapper.get_timeout(),
             retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            max_retries=request_options.get('max_retries') if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic.parse_obj_as(DetokenizeResponse, _response.json())  # type: ignore
+            return typing.cast(DetokenizeResponse, construct_type(type_=DetokenizeResponse, object_=_response.json()))
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json())))
         try:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
-
-
 def _get_base_url(*, base_url: typing.Optional[str] = None, environment: ClientEnvironment) -> str:
     if base_url is not None:
         return base_url

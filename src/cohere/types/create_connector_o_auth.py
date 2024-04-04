@@ -4,35 +4,32 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
-
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
+from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 
 
-class CreateConnectorOAuth(pydantic.BaseModel):
-    client_id: typing.Optional[str] = pydantic.Field(default=None)
+class CreateConnectorOAuth(UncheckedBaseModel):
+    client_id: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     The OAuth 2.0 client ID. This fields is encrypted at rest.
     """
 
-    client_secret: typing.Optional[str] = pydantic.Field(default=None)
+    client_secret: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     The OAuth 2.0 client Secret. This field is encrypted at rest and never returned in a response.
     """
 
-    authorize_url: typing.Optional[str] = pydantic.Field(default=None)
+    authorize_url: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     The OAuth 2.0 /authorize endpoint to use when users authorize the connector.
     """
 
-    token_url: typing.Optional[str] = pydantic.Field(default=None)
+    token_url: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     The OAuth 2.0 /token endpoint to use when users authorize the connector.
     """
 
-    scope: typing.Optional[str] = pydantic.Field(default=None)
+    scope: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     The OAuth scopes to request when users authorize the connector.
     """
@@ -48,5 +45,5 @@ class CreateConnectorOAuth(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

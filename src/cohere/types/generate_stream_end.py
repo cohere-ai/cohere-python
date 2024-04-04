@@ -4,14 +4,10 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
+from ..core.pydantic_utilities import pydantic_v1
 from .finish_reason import FinishReason
 from .generate_stream_end_response import GenerateStreamEndResponse
 from .generate_stream_event import GenerateStreamEvent
-
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
 
 
 class GenerateStreamEnd(GenerateStreamEvent):
@@ -32,5 +28,5 @@ class GenerateStreamEnd(GenerateStreamEvent):
         smart_union = True
         allow_population_by_field_name = True
         populate_by_name = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

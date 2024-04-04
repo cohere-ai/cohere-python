@@ -4,36 +4,33 @@ import datetime as dt
 import typing
 
 from ....core.datetime_utils import serialize_datetime
+from ....core.pydantic_utilities import pydantic_v1
+from ....core.unchecked_base_model import UncheckedBaseModel
 from .base_type import BaseType
 from .strategy import Strategy
 
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
 
-
-class BaseModel(pydantic.BaseModel):
+class BaseModel(UncheckedBaseModel):
     """
     The base model used for fine-tuning.
     """
 
-    name: typing.Optional[str] = pydantic.Field(default=None)
+    name: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     The name of the base model.
     """
 
-    version: typing.Optional[str] = pydantic.Field(default=None)
+    version: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     read-only. The version of the base model.
     """
 
-    base_type: BaseType = pydantic.Field()
+    base_type: BaseType = pydantic_v1.Field()
     """
     The type of the base model.
     """
 
-    strategy: typing.Optional[Strategy] = pydantic.Field(default=None)
+    strategy: typing.Optional[Strategy] = pydantic_v1.Field(default=None)
     """
     The fine-tuning strategy.
     """
@@ -49,5 +46,5 @@ class BaseModel(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

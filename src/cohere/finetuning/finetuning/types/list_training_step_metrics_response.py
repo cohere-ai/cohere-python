@@ -4,25 +4,22 @@ import datetime as dt
 import typing
 
 from ....core.datetime_utils import serialize_datetime
+from ....core.pydantic_utilities import pydantic_v1
+from ....core.unchecked_base_model import UncheckedBaseModel
 from .training_step_metrics import TrainingStepMetrics
 
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
 
-
-class ListTrainingStepMetricsResponse(pydantic.BaseModel):
+class ListTrainingStepMetricsResponse(UncheckedBaseModel):
     """
     Response to a request to list training-step metrics of a fine-tuned model.
     """
 
-    step_metrics: typing.Optional[typing.List[TrainingStepMetrics]] = pydantic.Field(default=None)
+    step_metrics: typing.Optional[typing.List[TrainingStepMetrics]] = pydantic_v1.Field(default=None)
     """
     The metrics for each step the evaluation was run on.
     """
 
-    next_page_token: typing.Optional[str] = pydantic.Field(default=None)
+    next_page_token: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     Pagination token to retrieve the next page of results. If the value is "",
     it means no further results for the request.
@@ -39,5 +36,5 @@ class ListTrainingStepMetricsResponse(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

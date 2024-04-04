@@ -4,27 +4,24 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
+from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .chat_message_role import ChatMessageRole
 
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
 
-
-class ChatMessage(pydantic.BaseModel):
+class ChatMessage(UncheckedBaseModel):
     """
     Represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
 
     The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
     """
 
-    role: ChatMessageRole = pydantic.Field()
+    role: ChatMessageRole = pydantic_v1.Field()
     """
     One of `CHATBOT`, `SYSTEM`, or `USER` to identify who the message is coming from.
     """
 
-    message: str = pydantic.Field()
+    message: str = pydantic_v1.Field()
     """
     Contents of the chat message.
     """
@@ -40,5 +37,5 @@ class ChatMessage(pydantic.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

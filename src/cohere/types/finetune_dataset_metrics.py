@@ -4,40 +4,37 @@ import datetime as dt
 import typing
 
 from ..core.datetime_utils import serialize_datetime
-
-try:
-    import pydantic.v1 as pydantic  # type: ignore
-except ImportError:
-    import pydantic  # type: ignore
+from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 
 
-class FinetuneDatasetMetrics(pydantic.BaseModel):
-    trainable_token_count: typing.Optional[str] = pydantic.Field(alias="trainableTokenCount", default=None)
+class FinetuneDatasetMetrics(UncheckedBaseModel):
+    trainable_token_count: typing.Optional[str] = pydantic_v1.Field(alias="trainableTokenCount", default=None)
     """
     The number of tokens of valid examples that can be used for training.
     """
 
-    total_examples: typing.Optional[str] = pydantic.Field(alias="totalExamples", default=None)
+    total_examples: typing.Optional[str] = pydantic_v1.Field(alias="totalExamples", default=None)
     """
     The overall number of examples.
     """
 
-    train_examples: typing.Optional[str] = pydantic.Field(alias="trainExamples", default=None)
+    train_examples: typing.Optional[str] = pydantic_v1.Field(alias="trainExamples", default=None)
     """
     The number of training examples.
     """
 
-    train_size_bytes: typing.Optional[str] = pydantic.Field(alias="trainSizeBytes", default=None)
+    train_size_bytes: typing.Optional[str] = pydantic_v1.Field(alias="trainSizeBytes", default=None)
     """
     The size in bytes of all training examples.
     """
 
-    eval_examples: typing.Optional[str] = pydantic.Field(alias="evalExamples", default=None)
+    eval_examples: typing.Optional[str] = pydantic_v1.Field(alias="evalExamples", default=None)
     """
     Number of evaluation examples.
     """
 
-    eval_size_bytes: typing.Optional[str] = pydantic.Field(alias="evalSizeBytes", default=None)
+    eval_size_bytes: typing.Optional[str] = pydantic_v1.Field(alias="evalSizeBytes", default=None)
     """
     The size in bytes of all eval examples.
     """
@@ -55,5 +52,5 @@ class FinetuneDatasetMetrics(pydantic.BaseModel):
         smart_union = True
         allow_population_by_field_name = True
         populate_by_name = True
-        extra = pydantic.Extra.allow
+        extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}
