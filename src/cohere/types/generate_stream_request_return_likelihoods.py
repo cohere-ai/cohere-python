@@ -2,4 +2,4 @@
 
 import typing
 
-GenerateStreamRequestReturnLikelihoods = typing.Union[typing.AnyStr, typing.Literal["GENERATION", "ALL", "NONE"]]
+GenerateStreamRequestReturnLikelihoods = typing.Union[typing.Literal["GENERATION", "ALL", "NONE"], typing.Any]

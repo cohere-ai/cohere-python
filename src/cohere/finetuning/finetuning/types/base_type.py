@@ -3,7 +3,6 @@
 import typing
 
 BaseType = typing.Union[
-    typing.AnyStr,
     typing.Literal[
         "BASE_TYPE_UNSPECIFIED",
         "BASE_TYPE_GENERATIVE",
@@ -11,4 +10,5 @@ BaseType = typing.Union[
         "BASE_TYPE_RERANK",
         "BASE_TYPE_CHAT",
     ],
+    typing.Any,
 ]

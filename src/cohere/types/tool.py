@@ -5,10 +5,11 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .tool_parameter_definitions_value import ToolParameterDefinitionsValue
 
 
-class Tool(pydantic_v1.BaseModel):
+class Tool(UncheckedBaseModel):
     name: str = pydantic_v1.Field()
     """
     The name of the tool to be called. Valid names contain only the characters `a-z`, `A-Z`, `0-9`, `_` and must not begin with a digit.

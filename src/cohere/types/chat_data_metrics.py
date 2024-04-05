@@ -5,9 +5,10 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 
 
-class ChatDataMetrics(pydantic_v1.BaseModel):
+class ChatDataMetrics(UncheckedBaseModel):
     num_train_turns: typing.Optional[str] = pydantic_v1.Field(alias="numTrainTurns", default=None)
     """
     The sum of all turns of valid train examples.

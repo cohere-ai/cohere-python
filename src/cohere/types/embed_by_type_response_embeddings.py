@@ -5,9 +5,10 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 
 
-class EmbedByTypeResponseEmbeddings(pydantic_v1.BaseModel):
+class EmbedByTypeResponseEmbeddings(UncheckedBaseModel):
     """
     An object with different embedding types. The length of each embedding type array will be the same as the length of the original `texts` array.
     """

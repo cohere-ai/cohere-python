@@ -5,10 +5,11 @@ import typing
 
 from ....core.datetime_utils import serialize_datetime
 from ....core.pydantic_utilities import pydantic_v1
+from ....core.unchecked_base_model import UncheckedBaseModel
 from .training_step_metrics import TrainingStepMetrics
 
 
-class ListTrainingStepMetricsResponse(pydantic_v1.BaseModel):
+class ListTrainingStepMetricsResponse(UncheckedBaseModel):
     """
     Response to a request to list training-step metrics of a fine-tuned model.
     """

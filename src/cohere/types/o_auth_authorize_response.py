@@ -5,9 +5,10 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 
 
-class OAuthAuthorizeResponse(pydantic_v1.BaseModel):
+class OAuthAuthorizeResponse(UncheckedBaseModel):
     redirect_url: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     The OAuth 2.0 redirect url. Redirect the user to this url to authorize the connector.

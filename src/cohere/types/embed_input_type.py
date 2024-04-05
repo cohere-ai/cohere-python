@@ -3,5 +3,5 @@
 import typing
 
 EmbedInputType = typing.Union[
-    typing.AnyStr, typing.Literal["search_document", "search_query", "classification", "clustering"]
+    typing.Literal["search_document", "search_query", "classification", "clustering"], typing.Any
 ]

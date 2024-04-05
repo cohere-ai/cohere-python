@@ -12,9 +12,9 @@ from .connectors.client import AsyncConnectorsClient, ConnectorsClient
 from .core.api_error import ApiError
 from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from .core.jsonable_encoder import jsonable_encoder
-from .core.pydantic_utilities import pydantic_v1
 from .core.remove_none_from_dict import remove_none_from_dict
 from .core.request_options import RequestOptions
+from .core.unchecked_base_model import construct_type
 from .datasets.client import AsyncDatasetsClient, DatasetsClient
 from .embed_jobs.client import AsyncEmbedJobsClient, EmbedJobsClient
 from .environment import ClientEnvironment
@@ -405,11 +405,13 @@ class BaseCohere:
                 for _text in _response.iter_lines():
                     if len(_text) == 0:
                         continue
-                    yield pydantic_v1.parse_obj_as(StreamedChatResponse, json.loads(_text))  # type: ignore
+                    yield typing.cast(StreamedChatResponse, construct_type(type_=StreamedChatResponse, object_=json.loads(_text)))  # type: ignore
                 return
             _response.read()
             if _response.status_code == 429:
-                raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+                raise TooManyRequestsError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
             try:
                 _response_json = _response.json()
             except JSONDecodeError:
@@ -647,9 +649,11 @@ class BaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(NonStreamedChatResponse, _response.json())  # type: ignore
+            return typing.cast(NonStreamedChatResponse, construct_type(type_=NonStreamedChatResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -826,15 +830,21 @@ class BaseCohere:
                 for _text in _response.iter_lines():
                     if len(_text) == 0:
                         continue
-                    yield pydantic_v1.parse_obj_as(GenerateStreamedResponse, json.loads(_text))  # type: ignore
+                    yield typing.cast(GenerateStreamedResponse, construct_type(type_=GenerateStreamedResponse, object_=json.loads(_text)))  # type: ignore
                 return
             _response.read()
             if _response.status_code == 400:
-                raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
             if _response.status_code == 429:
-                raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+                raise TooManyRequestsError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
             if _response.status_code == 500:
-                raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
             try:
                 _response_json = _response.json()
             except JSONDecodeError:
@@ -994,13 +1004,19 @@ class BaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(Generation, _response.json())  # type: ignore
+            return typing.cast(Generation, construct_type(type_=Generation, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -1107,13 +1123,19 @@ class BaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(EmbedResponse, _response.json())  # type: ignore
+            return typing.cast(EmbedResponse, construct_type(type_=EmbedResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -1206,9 +1228,11 @@ class BaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(RerankResponse, _response.json())  # type: ignore
+            return typing.cast(RerankResponse, construct_type(type_=RerankResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -1332,13 +1356,19 @@ class BaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(ClassifyResponse, _response.json())  # type: ignore
+            return typing.cast(ClassifyResponse, construct_type(type_=ClassifyResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -1431,9 +1461,11 @@ class BaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(SummarizeResponse, _response.json())  # type: ignore
+            return typing.cast(SummarizeResponse, construct_type(type_=SummarizeResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -1491,13 +1523,19 @@ class BaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(TokenizeResponse, _response.json())  # type: ignore
+            return typing.cast(TokenizeResponse, construct_type(type_=TokenizeResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -1555,9 +1593,11 @@ class BaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(DetokenizeResponse, _response.json())  # type: ignore
+            return typing.cast(DetokenizeResponse, construct_type(type_=DetokenizeResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -1911,11 +1951,13 @@ class AsyncBaseCohere:
                 async for _text in _response.aiter_lines():
                     if len(_text) == 0:
                         continue
-                    yield pydantic_v1.parse_obj_as(StreamedChatResponse, json.loads(_text))  # type: ignore
+                    yield typing.cast(StreamedChatResponse, construct_type(type_=StreamedChatResponse, object_=json.loads(_text)))  # type: ignore
                 return
             await _response.aread()
             if _response.status_code == 429:
-                raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+                raise TooManyRequestsError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
             try:
                 _response_json = _response.json()
             except JSONDecodeError:
@@ -2153,9 +2195,11 @@ class AsyncBaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(NonStreamedChatResponse, _response.json())  # type: ignore
+            return typing.cast(NonStreamedChatResponse, construct_type(type_=NonStreamedChatResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -2332,15 +2376,21 @@ class AsyncBaseCohere:
                 async for _text in _response.aiter_lines():
                     if len(_text) == 0:
                         continue
-                    yield pydantic_v1.parse_obj_as(GenerateStreamedResponse, json.loads(_text))  # type: ignore
+                    yield typing.cast(GenerateStreamedResponse, construct_type(type_=GenerateStreamedResponse, object_=json.loads(_text)))  # type: ignore
                 return
             await _response.aread()
             if _response.status_code == 400:
-                raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
             if _response.status_code == 429:
-                raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+                raise TooManyRequestsError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
             if _response.status_code == 500:
-                raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
             try:
                 _response_json = _response.json()
             except JSONDecodeError:
@@ -2500,13 +2550,19 @@ class AsyncBaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(Generation, _response.json())  # type: ignore
+            return typing.cast(Generation, construct_type(type_=Generation, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -2613,13 +2669,19 @@ class AsyncBaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(EmbedResponse, _response.json())  # type: ignore
+            return typing.cast(EmbedResponse, construct_type(type_=EmbedResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -2712,9 +2774,11 @@ class AsyncBaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(RerankResponse, _response.json())  # type: ignore
+            return typing.cast(RerankResponse, construct_type(type_=RerankResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -2838,13 +2902,19 @@ class AsyncBaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(ClassifyResponse, _response.json())  # type: ignore
+            return typing.cast(ClassifyResponse, construct_type(type_=ClassifyResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -2937,9 +3007,11 @@ class AsyncBaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(SummarizeResponse, _response.json())  # type: ignore
+            return typing.cast(SummarizeResponse, construct_type(type_=SummarizeResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -2997,13 +3069,19 @@ class AsyncBaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(TokenizeResponse, _response.json())  # type: ignore
+            return typing.cast(TokenizeResponse, construct_type(type_=TokenizeResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -3061,9 +3139,11 @@ class AsyncBaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(DetokenizeResponse, _response.json())  # type: ignore
+            return typing.cast(DetokenizeResponse, construct_type(type_=DetokenizeResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:

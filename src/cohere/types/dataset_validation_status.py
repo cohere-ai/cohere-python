@@ -3,5 +3,5 @@
 import typing
 
 DatasetValidationStatus = typing.Union[
-    typing.AnyStr, typing.Literal["unknown", "queued", "processing", "failed", "validated", "skipped"]
+    typing.Literal["unknown", "queued", "processing", "failed", "validated", "skipped"], typing.Any
 ]

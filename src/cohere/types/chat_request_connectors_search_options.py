@@ -5,9 +5,10 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 
 
-class ChatRequestConnectorsSearchOptions(pydantic_v1.BaseModel):
+class ChatRequestConnectorsSearchOptions(UncheckedBaseModel):
     """
     (internal) Sets inference and model options for RAG search query and tool use generations. Defaults are used when options are not specified here, meaning that other parameters outside of connectors_search_options are ignored (such as model= or temperature=).
     """

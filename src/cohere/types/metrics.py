@@ -5,10 +5,11 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .finetune_dataset_metrics import FinetuneDatasetMetrics
 
 
-class Metrics(pydantic_v1.BaseModel):
+class Metrics(UncheckedBaseModel):
     finetune_dataset_metrics: typing.Optional[FinetuneDatasetMetrics] = None
 
     def json(self, **kwargs: typing.Any) -> str:

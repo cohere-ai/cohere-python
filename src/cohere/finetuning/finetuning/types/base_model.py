@@ -5,11 +5,12 @@ import typing
 
 from ....core.datetime_utils import serialize_datetime
 from ....core.pydantic_utilities import pydantic_v1
+from ....core.unchecked_base_model import UncheckedBaseModel
 from .base_type import BaseType
 from .strategy import Strategy
 
 
-class BaseModel(pydantic_v1.BaseModel):
+class BaseModel(UncheckedBaseModel):
     """
     The base model used for fine-tuning.
     """
