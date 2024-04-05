@@ -5,10 +5,11 @@ import typing
 
 from ...core.datetime_utils import serialize_datetime
 from ...core.pydantic_utilities import pydantic_v1
+from ...core.unchecked_base_model import UncheckedBaseModel
 from ...types.dataset import Dataset
 
 
-class DatasetsListResponse(pydantic_v1.BaseModel):
+class DatasetsListResponse(UncheckedBaseModel):
     datasets: typing.Optional[typing.List[Dataset]] = None
 
     def json(self, **kwargs: typing.Any) -> str:

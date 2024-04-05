@@ -5,10 +5,11 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .rerank_response_results_item_document import RerankResponseResultsItemDocument
 
 
-class RerankResponseResultsItem(pydantic_v1.BaseModel):
+class RerankResponseResultsItem(UncheckedBaseModel):
     document: typing.Optional[RerankResponseResultsItemDocument] = pydantic_v1.Field(default=None)
     """
     The doc object which was ranked

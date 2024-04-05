@@ -5,9 +5,10 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 
 
-class LabelMetric(pydantic_v1.BaseModel):
+class LabelMetric(UncheckedBaseModel):
     total_examples: typing.Optional[str] = pydantic_v1.Field(alias="totalExamples", default=None)
     """
     Total number of examples for this label

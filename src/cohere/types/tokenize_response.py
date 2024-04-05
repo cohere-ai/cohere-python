@@ -5,10 +5,11 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .api_meta import ApiMeta
 
 
-class TokenizeResponse(pydantic_v1.BaseModel):
+class TokenizeResponse(UncheckedBaseModel):
     tokens: typing.List[int] = pydantic_v1.Field()
     """
     An array of tokens, where each token is an integer.

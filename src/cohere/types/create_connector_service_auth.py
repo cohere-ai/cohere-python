@@ -5,10 +5,11 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .auth_token_type import AuthTokenType
 
 
-class CreateConnectorServiceAuth(pydantic_v1.BaseModel):
+class CreateConnectorServiceAuth(UncheckedBaseModel):
     type: AuthTokenType
     token: str = pydantic_v1.Field()
     """

@@ -2,4 +2,4 @@
 
 import typing
 
-EmbedRequestTruncate = typing.Union[typing.AnyStr, typing.Literal["NONE", "START", "END"]]
+EmbedRequestTruncate = typing.Union[typing.Literal["NONE", "START", "END"], typing.Any]

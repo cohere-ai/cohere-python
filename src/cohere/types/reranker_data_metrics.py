@@ -5,9 +5,10 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 
 
-class RerankerDataMetrics(pydantic_v1.BaseModel):
+class RerankerDataMetrics(UncheckedBaseModel):
     num_train_queries: typing.Optional[str] = pydantic_v1.Field(alias="numTrainQueries", default=None)
     """
     The number of training queries.

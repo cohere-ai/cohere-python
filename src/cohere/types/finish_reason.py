@@ -3,5 +3,5 @@
 import typing
 
 FinishReason = typing.Union[
-    typing.AnyStr, typing.Literal["COMPLETE", "ERROR", "ERROR_TOXIC", "ERROR_LIMIT", "USER_CANCEL", "MAX_TOKENS"]
+    typing.Literal["COMPLETE", "ERROR", "ERROR_TOXIC", "ERROR_LIMIT", "USER_CANCEL", "MAX_TOKENS"], typing.Any
 ]

@@ -5,9 +5,10 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 
 
-class FinetuneDatasetMetrics(pydantic_v1.BaseModel):
+class FinetuneDatasetMetrics(UncheckedBaseModel):
     trainable_token_count: typing.Optional[str] = pydantic_v1.Field(alias="trainableTokenCount", default=None)
     """
     The number of tokens of valid examples that can be used for training.

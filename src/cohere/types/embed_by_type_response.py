@@ -5,11 +5,12 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .api_meta import ApiMeta
 from .embed_by_type_response_embeddings import EmbedByTypeResponseEmbeddings
 
 
-class EmbedByTypeResponse(pydantic_v1.BaseModel):
+class EmbedByTypeResponse(UncheckedBaseModel):
     id: str
     embeddings: EmbedByTypeResponseEmbeddings = pydantic_v1.Field()
     """

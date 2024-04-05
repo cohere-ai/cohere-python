@@ -5,10 +5,11 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .get_model_response import GetModelResponse
 
 
-class ListModelsResponse(pydantic_v1.BaseModel):
+class ListModelsResponse(UncheckedBaseModel):
     models: typing.List[GetModelResponse]
     next_page_token: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
