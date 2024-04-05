@@ -136,6 +136,9 @@ def construct_type(*, type_: typing.Type[typing.Any], object_: typing.Any) -> ty
         pydantic_v1.typing.get_origin(maybe_annotation_members[0])
     )
 
+    if base_type == typing.Any:
+        return object_
+
     if base_type == dict:
         if not isinstance(object_, typing.Mapping):
             return object_
