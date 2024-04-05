@@ -7,6 +7,7 @@ import urllib.parse
 from json.decoder import JSONDecodeError
 
 import httpx
+from httpx_sse import EventSource
 
 from .connectors.client import AsyncConnectorsClient, ConnectorsClient
 from .core.api_error import ApiError
@@ -390,6 +391,7 @@ class BaseCohere:
             headers=jsonable_encoder(
                 remove_none_from_dict(
                     {
+                        "Accept": "*/*, text/event-stream, application/stream+json",
                         **self._client_wrapper.get_headers(),
                         **(request_options.get("additional_headers", {}) if request_options is not None else {}),
                     }
@@ -402,10 +404,20 @@ class BaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         ) as _response:
             if 200 <= _response.status_code < 300:
-                for _text in _response.iter_lines():
-                    if len(_text) == 0:
-                        continue
-                    yield pydantic_v1.parse_obj_as(StreamedChatResponse, json.loads(_text))  # type: ignore
+                try:
+                    event_source = EventSource(_response)
+                    for sse in event_source.iter_sse():
+                        try:
+                            yield pydantic_v1.parse_obj_as(StreamedChatResponse, json.loads(sse.data))  # type: ignore
+                        except Exception as e:
+                            print(f"couldn't parse event: {e}")
+                except Exception as e:
+                    print(f"response doesn't seem to be sse: {e}")
+                    print(f"trying normal stream instead")
+                    for _text in _response.iter_lines():
+                        if len(_text) == 0:
+                            continue
+                        yield pydantic_v1.parse_obj_as(StreamedChatResponse, json.loads(_text))  # type: ignore
                 return
             _response.read()
             if _response.status_code == 429:
