@@ -5,11 +5,12 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .api_meta import ApiMeta
 from .rerank_response_results_item import RerankResponseResultsItem
 
 
-class RerankResponse(pydantic_v1.BaseModel):
+class RerankResponse(UncheckedBaseModel):
     id: typing.Optional[str] = None
     results: typing.List[RerankResponseResultsItem] = pydantic_v1.Field()
     """

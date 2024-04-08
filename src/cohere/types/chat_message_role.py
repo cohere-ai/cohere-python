@@ -2,4 +2,4 @@
 
 import typing
 
-ChatMessageRole = typing.Union[typing.AnyStr, typing.Literal["CHATBOT", "SYSTEM", "USER"]]
+ChatMessageRole = typing.Union[typing.Literal["CHATBOT", "SYSTEM", "USER"], typing.Any]

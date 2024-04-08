@@ -5,11 +5,12 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .chat_search_query import ChatSearchQuery
 from .chat_search_result_connector import ChatSearchResultConnector
 
 
-class ChatSearchResult(pydantic_v1.BaseModel):
+class ChatSearchResult(UncheckedBaseModel):
     search_query: typing.Optional[ChatSearchQuery] = None
     connector: ChatSearchResultConnector = pydantic_v1.Field()
     """

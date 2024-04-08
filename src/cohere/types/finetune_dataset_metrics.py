@@ -5,35 +5,36 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 
 
-class FinetuneDatasetMetrics(pydantic_v1.BaseModel):
-    trainable_token_count: typing.Optional[str] = pydantic_v1.Field(alias="trainableTokenCount", default=None)
+class FinetuneDatasetMetrics(UncheckedBaseModel):
+    trainable_token_count: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     The number of tokens of valid examples that can be used for training.
     """
 
-    total_examples: typing.Optional[str] = pydantic_v1.Field(alias="totalExamples", default=None)
+    total_examples: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     The overall number of examples.
     """
 
-    train_examples: typing.Optional[str] = pydantic_v1.Field(alias="trainExamples", default=None)
+    train_examples: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     The number of training examples.
     """
 
-    train_size_bytes: typing.Optional[str] = pydantic_v1.Field(alias="trainSizeBytes", default=None)
+    train_size_bytes: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     The size in bytes of all training examples.
     """
 
-    eval_examples: typing.Optional[str] = pydantic_v1.Field(alias="evalExamples", default=None)
+    eval_examples: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     Number of evaluation examples.
     """
 
-    eval_size_bytes: typing.Optional[str] = pydantic_v1.Field(alias="evalSizeBytes", default=None)
+    eval_size_bytes: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     The size in bytes of all eval examples.
     """
@@ -49,7 +50,5 @@ class FinetuneDatasetMetrics(pydantic_v1.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        allow_population_by_field_name = True
-        populate_by_name = True
         extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

@@ -5,11 +5,12 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .label_metric import LabelMetric
 
 
-class ClassifyDataMetrics(pydantic_v1.BaseModel):
-    label_metrics: typing.Optional[typing.List[LabelMetric]] = pydantic_v1.Field(alias="labelMetrics", default=None)
+class ClassifyDataMetrics(UncheckedBaseModel):
+    label_metrics: typing.Optional[typing.List[LabelMetric]] = None
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -22,7 +23,5 @@ class ClassifyDataMetrics(pydantic_v1.BaseModel):
     class Config:
         frozen = True
         smart_union = True
-        allow_population_by_field_name = True
-        populate_by_name = True
         extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

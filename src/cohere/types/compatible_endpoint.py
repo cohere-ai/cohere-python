@@ -3,5 +3,5 @@
 import typing
 
 CompatibleEndpoint = typing.Union[
-    typing.AnyStr, typing.Literal["chat", "embed", "classify", "summarize", "rerank", "rate", "generate"]
+    typing.Literal["chat", "embed", "classify", "summarize", "rerank", "rate", "generate"], typing.Any
 ]

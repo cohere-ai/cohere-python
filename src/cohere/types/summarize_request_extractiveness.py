@@ -2,4 +2,4 @@
 
 import typing
 
-SummarizeRequestExtractiveness = typing.Union[typing.AnyStr, typing.Literal["low", "medium", "high"]]
+SummarizeRequestExtractiveness = typing.Union[typing.Literal["low", "medium", "high"], typing.Any]

@@ -5,10 +5,11 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .compatible_endpoint import CompatibleEndpoint
 
 
-class GetModelResponse(pydantic_v1.BaseModel):
+class GetModelResponse(UncheckedBaseModel):
     """
     Contains information about the model and which API endpoints it can be used with.
     """
@@ -31,11 +32,6 @@ class GetModelResponse(pydantic_v1.BaseModel):
     context_length: typing.Optional[float] = pydantic_v1.Field(default=None)
     """
     The maximum number of tokens that the model can process in a single request. Note that not all of these tokens are always available due to special tokens and preambles that Cohere has added by default.
-    """
-
-    tokenizer: typing.Optional[str] = pydantic_v1.Field(default=None)
-    """
-    The name of the tokenizer used for the model.
     """
 
     tokenizer_url: typing.Optional[str] = pydantic_v1.Field(default=None)

@@ -5,11 +5,12 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .api_meta import ApiMeta
 from .single_generation import SingleGeneration
 
 
-class Generation(pydantic_v1.BaseModel):
+class Generation(UncheckedBaseModel):
     id: str
     prompt: typing.Optional[str] = pydantic_v1.Field(default=None)
     """

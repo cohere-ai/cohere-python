@@ -5,10 +5,11 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .single_generation_token_likelihoods_item import SingleGenerationTokenLikelihoodsItem
 
 
-class SingleGeneration(pydantic_v1.BaseModel):
+class SingleGeneration(UncheckedBaseModel):
     id: str
     text: str
     index: typing.Optional[int] = pydantic_v1.Field(default=None)

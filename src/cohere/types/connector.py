@@ -5,11 +5,12 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .connector_auth_status import ConnectorAuthStatus
 from .connector_o_auth import ConnectorOAuth
 
 
-class Connector(pydantic_v1.BaseModel):
+class Connector(UncheckedBaseModel):
     """
     A connector allows you to integrate data sources with the '/chat' endpoint to create grounded generations with citations to the data source.
     documents to help answer users.
