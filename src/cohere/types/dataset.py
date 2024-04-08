@@ -5,12 +5,13 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .dataset_part import DatasetPart
 from .dataset_type import DatasetType
 from .dataset_validation_status import DatasetValidationStatus
 
 
-class Dataset(pydantic_v1.BaseModel):
+class Dataset(UncheckedBaseModel):
     id: str = pydantic_v1.Field()
     """
     The dataset ID

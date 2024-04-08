@@ -5,13 +5,14 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .classify_response_classifications_item_classification_type import (
     ClassifyResponseClassificationsItemClassificationType,
 )
 from .classify_response_classifications_item_labels_value import ClassifyResponseClassificationsItemLabelsValue
 
 
-class ClassifyResponseClassificationsItem(pydantic_v1.BaseModel):
+class ClassifyResponseClassificationsItem(UncheckedBaseModel):
     id: str
     input: typing.Optional[str] = pydantic_v1.Field(default=None)
     """

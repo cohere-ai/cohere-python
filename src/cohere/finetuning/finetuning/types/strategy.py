@@ -2,4 +2,4 @@
 
 import typing
 
-Strategy = typing.Union[typing.AnyStr, typing.Literal["STRATEGY_UNSPECIFIED", "STRATEGY_VANILLA", "STRATEGY_TFEW"]]
+Strategy = typing.Union[typing.Literal["STRATEGY_UNSPECIFIED", "STRATEGY_VANILLA", "STRATEGY_TFEW"], typing.Any]

@@ -5,10 +5,11 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .tool_call import ToolCall
 
 
-class ChatRequestToolResultsItem(pydantic_v1.BaseModel):
+class ChatRequestToolResultsItem(UncheckedBaseModel):
     call: ToolCall
     outputs: typing.List[typing.Dict[str, typing.Any]]
 

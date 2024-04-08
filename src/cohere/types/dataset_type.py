@@ -3,7 +3,6 @@
 import typing
 
 DatasetType = typing.Union[
-    typing.AnyStr,
     typing.Literal[
         "embed-input",
         "embed-result",
@@ -15,4 +14,5 @@ DatasetType = typing.Union[
         "chat-finetune-input",
         "multi-label-classification-finetune-input",
     ],
+    typing.Any,
 ]

@@ -5,9 +5,10 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 
 
-class ApiMetaApiVersion(pydantic_v1.BaseModel):
+class ApiMetaApiVersion(UncheckedBaseModel):
     version: str
     is_deprecated: typing.Optional[bool] = None
     is_experimental: typing.Optional[bool] = None

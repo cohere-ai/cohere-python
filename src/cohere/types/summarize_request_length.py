@@ -2,4 +2,4 @@
 
 import typing
 
-SummarizeRequestLength = typing.Union[typing.AnyStr, typing.Literal["short", "medium", "long"]]
+SummarizeRequestLength = typing.Union[typing.Literal["short", "medium", "long"], typing.Any]

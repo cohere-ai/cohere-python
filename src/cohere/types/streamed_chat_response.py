@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import typing
 
+import typing_extensions
+
+from ..core.unchecked_base_model import UnionMetadata
 from .chat_citation_generation_event import ChatCitationGenerationEvent
 from .chat_search_queries_generation_event import ChatSearchQueriesGenerationEvent
 from .chat_search_results_event import ChatSearchResultsEvent
@@ -83,12 +86,15 @@ class StreamedChatResponse_StreamEnd(ChatStreamEndEvent):
         populate_by_name = True
 
 
-StreamedChatResponse = typing.Union[
-    StreamedChatResponse_StreamStart,
-    StreamedChatResponse_SearchQueriesGeneration,
-    StreamedChatResponse_SearchResults,
-    StreamedChatResponse_TextGeneration,
-    StreamedChatResponse_CitationGeneration,
-    StreamedChatResponse_ToolCallsGeneration,
-    StreamedChatResponse_StreamEnd,
+StreamedChatResponse = typing_extensions.Annotated[
+    typing.Union[
+        StreamedChatResponse_StreamStart,
+        StreamedChatResponse_SearchQueriesGeneration,
+        StreamedChatResponse_SearchResults,
+        StreamedChatResponse_TextGeneration,
+        StreamedChatResponse_CitationGeneration,
+        StreamedChatResponse_ToolCallsGeneration,
+        StreamedChatResponse_StreamEnd,
+    ],
+    UnionMetadata(discriminant="event_type"),
 ]

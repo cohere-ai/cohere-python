@@ -8,9 +8,9 @@ from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.jsonable_encoder import jsonable_encoder
-from ..core.pydantic_utilities import pydantic_v1
 from ..core.remove_none_from_dict import remove_none_from_dict
 from ..core.request_options import RequestOptions
+from ..core.unchecked_base_model import construct_type
 from ..errors.bad_request_error import BadRequestError
 from ..errors.forbidden_error import ForbiddenError
 from ..errors.internal_server_error import InternalServerError
@@ -100,19 +100,31 @@ class FinetuningClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(ListFinetunedModelsResponse, _response.json())  # type: ignore
+            return typing.cast(ListFinetunedModelsResponse, construct_type(type_=ListFinetunedModelsResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 401:
-            raise UnauthorizedError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise UnauthorizedError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 403:
-            raise ForbiddenError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise ForbiddenError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 404:
-            raise NotFoundError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise NotFoundError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 503:
-            raise ServiceUnavailableError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise ServiceUnavailableError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -174,19 +186,31 @@ class FinetuningClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(CreateFinetunedModelResponse, _response.json())  # type: ignore
+            return typing.cast(CreateFinetunedModelResponse, construct_type(type_=CreateFinetunedModelResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 401:
-            raise UnauthorizedError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise UnauthorizedError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 403:
-            raise ForbiddenError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise ForbiddenError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 404:
-            raise NotFoundError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise NotFoundError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 503:
-            raise ServiceUnavailableError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise ServiceUnavailableError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -235,19 +259,31 @@ class FinetuningClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(GetFinetunedModelResponse, _response.json())  # type: ignore
+            return typing.cast(GetFinetunedModelResponse, construct_type(type_=GetFinetunedModelResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 401:
-            raise UnauthorizedError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise UnauthorizedError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 403:
-            raise ForbiddenError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise ForbiddenError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 404:
-            raise NotFoundError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise NotFoundError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 503:
-            raise ServiceUnavailableError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise ServiceUnavailableError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -296,19 +332,31 @@ class FinetuningClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(DeleteFinetunedModelResponse, _response.json())  # type: ignore
+            return typing.cast(DeleteFinetunedModelResponse, construct_type(type_=DeleteFinetunedModelResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 401:
-            raise UnauthorizedError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise UnauthorizedError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 403:
-            raise ForbiddenError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise ForbiddenError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 404:
-            raise NotFoundError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise NotFoundError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 503:
-            raise ServiceUnavailableError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise ServiceUnavailableError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -416,19 +464,31 @@ class FinetuningClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(UpdateFinetunedModelResponse, _response.json())  # type: ignore
+            return typing.cast(UpdateFinetunedModelResponse, construct_type(type_=UpdateFinetunedModelResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 401:
-            raise UnauthorizedError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise UnauthorizedError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 403:
-            raise ForbiddenError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise ForbiddenError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 404:
-            raise NotFoundError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise NotFoundError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 503:
-            raise ServiceUnavailableError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise ServiceUnavailableError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -506,19 +566,31 @@ class FinetuningClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(ListEventsResponse, _response.json())  # type: ignore
+            return typing.cast(ListEventsResponse, construct_type(type_=ListEventsResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 401:
-            raise UnauthorizedError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise UnauthorizedError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 403:
-            raise ForbiddenError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise ForbiddenError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 404:
-            raise NotFoundError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise NotFoundError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 503:
-            raise ServiceUnavailableError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise ServiceUnavailableError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -587,19 +659,31 @@ class FinetuningClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(ListTrainingStepMetricsResponse, _response.json())  # type: ignore
+            return typing.cast(ListTrainingStepMetricsResponse, construct_type(type_=ListTrainingStepMetricsResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 401:
-            raise UnauthorizedError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise UnauthorizedError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 403:
-            raise ForbiddenError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise ForbiddenError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 404:
-            raise NotFoundError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise NotFoundError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 503:
-            raise ServiceUnavailableError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise ServiceUnavailableError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -674,19 +758,31 @@ class AsyncFinetuningClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(ListFinetunedModelsResponse, _response.json())  # type: ignore
+            return typing.cast(ListFinetunedModelsResponse, construct_type(type_=ListFinetunedModelsResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 401:
-            raise UnauthorizedError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise UnauthorizedError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 403:
-            raise ForbiddenError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise ForbiddenError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 404:
-            raise NotFoundError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise NotFoundError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 503:
-            raise ServiceUnavailableError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise ServiceUnavailableError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -748,19 +844,31 @@ class AsyncFinetuningClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(CreateFinetunedModelResponse, _response.json())  # type: ignore
+            return typing.cast(CreateFinetunedModelResponse, construct_type(type_=CreateFinetunedModelResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 401:
-            raise UnauthorizedError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise UnauthorizedError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 403:
-            raise ForbiddenError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise ForbiddenError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 404:
-            raise NotFoundError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise NotFoundError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 503:
-            raise ServiceUnavailableError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise ServiceUnavailableError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -809,19 +917,31 @@ class AsyncFinetuningClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(GetFinetunedModelResponse, _response.json())  # type: ignore
+            return typing.cast(GetFinetunedModelResponse, construct_type(type_=GetFinetunedModelResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 401:
-            raise UnauthorizedError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise UnauthorizedError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 403:
-            raise ForbiddenError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise ForbiddenError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 404:
-            raise NotFoundError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise NotFoundError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 503:
-            raise ServiceUnavailableError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise ServiceUnavailableError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -870,19 +990,31 @@ class AsyncFinetuningClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(DeleteFinetunedModelResponse, _response.json())  # type: ignore
+            return typing.cast(DeleteFinetunedModelResponse, construct_type(type_=DeleteFinetunedModelResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 401:
-            raise UnauthorizedError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise UnauthorizedError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 403:
-            raise ForbiddenError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise ForbiddenError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 404:
-            raise NotFoundError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise NotFoundError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 503:
-            raise ServiceUnavailableError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise ServiceUnavailableError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -990,19 +1122,31 @@ class AsyncFinetuningClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(UpdateFinetunedModelResponse, _response.json())  # type: ignore
+            return typing.cast(UpdateFinetunedModelResponse, construct_type(type_=UpdateFinetunedModelResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 401:
-            raise UnauthorizedError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise UnauthorizedError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 403:
-            raise ForbiddenError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise ForbiddenError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 404:
-            raise NotFoundError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise NotFoundError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 503:
-            raise ServiceUnavailableError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise ServiceUnavailableError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -1080,19 +1224,31 @@ class AsyncFinetuningClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(ListEventsResponse, _response.json())  # type: ignore
+            return typing.cast(ListEventsResponse, construct_type(type_=ListEventsResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 401:
-            raise UnauthorizedError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise UnauthorizedError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 403:
-            raise ForbiddenError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise ForbiddenError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 404:
-            raise NotFoundError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise NotFoundError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 503:
-            raise ServiceUnavailableError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise ServiceUnavailableError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -1161,19 +1317,31 @@ class AsyncFinetuningClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(ListTrainingStepMetricsResponse, _response.json())  # type: ignore
+            return typing.cast(ListTrainingStepMetricsResponse, construct_type(type_=ListTrainingStepMetricsResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 401:
-            raise UnauthorizedError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise UnauthorizedError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 403:
-            raise ForbiddenError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise ForbiddenError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 404:
-            raise NotFoundError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise NotFoundError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 503:
-            raise ServiceUnavailableError(pydantic_v1.parse_obj_as(Error, _response.json()))  # type: ignore
+            raise ServiceUnavailableError(
+                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:

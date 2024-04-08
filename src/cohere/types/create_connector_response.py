@@ -5,10 +5,11 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .connector import Connector
 
 
-class CreateConnectorResponse(pydantic_v1.BaseModel):
+class CreateConnectorResponse(UncheckedBaseModel):
     connector: Connector
 
     def json(self, **kwargs: typing.Any) -> str:

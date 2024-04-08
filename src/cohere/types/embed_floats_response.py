@@ -5,10 +5,11 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .api_meta import ApiMeta
 
 
-class EmbedFloatsResponse(pydantic_v1.BaseModel):
+class EmbedFloatsResponse(UncheckedBaseModel):
     id: str
     embeddings: typing.List[typing.List[float]] = pydantic_v1.Field()
     """
