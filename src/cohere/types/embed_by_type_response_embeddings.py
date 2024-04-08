@@ -18,22 +18,22 @@ class EmbedByTypeResponseEmbeddings(UncheckedBaseModel):
     An array of float embeddings.
     """
 
-    int8: typing.Optional[typing.List[typing.List[float]]] = pydantic_v1.Field(default=None)
+    int8: typing.Optional[typing.List[typing.List[int]]] = pydantic_v1.Field(default=None)
     """
     An array of signed int8 embeddings. Each value is between -128 and 127.
     """
 
-    uint8: typing.Optional[typing.List[typing.List[float]]] = pydantic_v1.Field(default=None)
+    uint8: typing.Optional[typing.List[typing.List[int]]] = pydantic_v1.Field(default=None)
     """
     An array of unsigned int8 embeddings. Each value is between 0 and 255.
     """
 
-    binary: typing.Optional[typing.List[typing.List[float]]] = pydantic_v1.Field(default=None)
+    binary: typing.Optional[typing.List[typing.List[int]]] = pydantic_v1.Field(default=None)
     """
     An array of packed signed binary embeddings. The length of each binary embedding is 1/8 the length of the float embeddings of the provided model. Each value is between -128 and 127.
     """
 
-    ubinary: typing.Optional[typing.List[typing.List[float]]] = pydantic_v1.Field(default=None)
+    ubinary: typing.Optional[typing.List[typing.List[int]]] = pydantic_v1.Field(default=None)
     """
     An array of packed unsigned binary embeddings. The length of each binary embedding is 1/8 the length of the float embeddings of the provided model. Each value is between 0 and 255.
     """
