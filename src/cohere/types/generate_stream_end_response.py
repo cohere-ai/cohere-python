@@ -5,10 +5,11 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .single_generation_in_stream import SingleGenerationInStream
 
 
-class GenerateStreamEndResponse(pydantic_v1.BaseModel):
+class GenerateStreamEndResponse(UncheckedBaseModel):
     id: str
     prompt: typing.Optional[str] = None
     generations: typing.Optional[typing.List[SingleGenerationInStream]] = None

@@ -7,9 +7,9 @@ from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.jsonable_encoder import jsonable_encoder
-from ..core.pydantic_utilities import pydantic_v1
 from ..core.remove_none_from_dict import remove_none_from_dict
 from ..core.request_options import RequestOptions
+from ..core.unchecked_base_model import construct_type
 from ..errors.bad_request_error import BadRequestError
 from ..errors.forbidden_error import ForbiddenError
 from ..errors.internal_server_error import InternalServerError
@@ -88,13 +88,19 @@ class ConnectorsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(ListConnectorsResponse, _response.json())  # type: ignore
+            return typing.cast(ListConnectorsResponse, construct_type(type_=ListConnectorsResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -187,15 +193,23 @@ class ConnectorsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(CreateConnectorResponse, _response.json())  # type: ignore
+            return typing.cast(CreateConnectorResponse, construct_type(type_=CreateConnectorResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 403:
-            raise ForbiddenError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise ForbiddenError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -242,15 +256,23 @@ class ConnectorsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(GetConnectorResponse, _response.json())  # type: ignore
+            return typing.cast(GetConnectorResponse, construct_type(type_=GetConnectorResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 404:
-            raise NotFoundError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise NotFoundError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -297,17 +319,27 @@ class ConnectorsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(DeleteConnectorResponse, _response.json())  # type: ignore
+            return typing.cast(DeleteConnectorResponse, construct_type(type_=DeleteConnectorResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 403:
-            raise ForbiddenError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise ForbiddenError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 404:
-            raise NotFoundError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise NotFoundError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -401,17 +433,27 @@ class ConnectorsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(UpdateConnectorResponse, _response.json())  # type: ignore
+            return typing.cast(UpdateConnectorResponse, construct_type(type_=UpdateConnectorResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 403:
-            raise ForbiddenError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise ForbiddenError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 404:
-            raise NotFoundError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise NotFoundError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -480,15 +522,23 @@ class ConnectorsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(OAuthAuthorizeResponse, _response.json())  # type: ignore
+            return typing.cast(OAuthAuthorizeResponse, construct_type(type_=OAuthAuthorizeResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 404:
-            raise NotFoundError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise NotFoundError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -556,13 +606,19 @@ class AsyncConnectorsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(ListConnectorsResponse, _response.json())  # type: ignore
+            return typing.cast(ListConnectorsResponse, construct_type(type_=ListConnectorsResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -655,15 +711,23 @@ class AsyncConnectorsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(CreateConnectorResponse, _response.json())  # type: ignore
+            return typing.cast(CreateConnectorResponse, construct_type(type_=CreateConnectorResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 403:
-            raise ForbiddenError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise ForbiddenError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -710,15 +774,23 @@ class AsyncConnectorsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(GetConnectorResponse, _response.json())  # type: ignore
+            return typing.cast(GetConnectorResponse, construct_type(type_=GetConnectorResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 404:
-            raise NotFoundError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise NotFoundError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -767,17 +839,27 @@ class AsyncConnectorsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(DeleteConnectorResponse, _response.json())  # type: ignore
+            return typing.cast(DeleteConnectorResponse, construct_type(type_=DeleteConnectorResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 403:
-            raise ForbiddenError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise ForbiddenError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 404:
-            raise NotFoundError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise NotFoundError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -871,17 +953,27 @@ class AsyncConnectorsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(UpdateConnectorResponse, _response.json())  # type: ignore
+            return typing.cast(UpdateConnectorResponse, construct_type(type_=UpdateConnectorResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 403:
-            raise ForbiddenError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise ForbiddenError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 404:
-            raise NotFoundError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise NotFoundError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:
@@ -950,15 +1042,23 @@ class AsyncConnectorsClient:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         )
         if 200 <= _response.status_code < 300:
-            return pydantic_v1.parse_obj_as(OAuthAuthorizeResponse, _response.json())  # type: ignore
+            return typing.cast(OAuthAuthorizeResponse, construct_type(type_=OAuthAuthorizeResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 400:
-            raise BadRequestError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise BadRequestError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 404:
-            raise NotFoundError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise NotFoundError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 429:
-            raise TooManyRequestsError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise TooManyRequestsError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         if _response.status_code == 500:
-            raise InternalServerError(pydantic_v1.parse_obj_as(typing.Any, _response.json()))  # type: ignore
+            raise InternalServerError(
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+            )
         try:
             _response_json = _response.json()
         except JSONDecodeError:

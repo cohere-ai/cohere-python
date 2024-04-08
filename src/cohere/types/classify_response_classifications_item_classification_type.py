@@ -3,5 +3,5 @@
 import typing
 
 ClassifyResponseClassificationsItemClassificationType = typing.Union[
-    typing.AnyStr, typing.Literal["single-label", "multi-label"]
+    typing.Literal["single-label", "multi-label"], typing.Any
 ]

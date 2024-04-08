@@ -2,6 +2,4 @@
 
 import typing
 
-EmbedJobStatus = typing.Union[
-    typing.AnyStr, typing.Literal["processing", "complete", "cancelling", "cancelled", "failed"]
-]
+EmbedJobStatus = typing.Union[typing.Literal["processing", "complete", "cancelling", "cancelled", "failed"], typing.Any]

@@ -5,11 +5,12 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .api_meta_api_version import ApiMetaApiVersion
 from .api_meta_billed_units import ApiMetaBilledUnits
 
 
-class ApiMeta(pydantic_v1.BaseModel):
+class ApiMeta(UncheckedBaseModel):
     api_version: typing.Optional[ApiMetaApiVersion] = None
     billed_units: typing.Optional[ApiMetaBilledUnits] = None
     warnings: typing.Optional[typing.List[str]] = None

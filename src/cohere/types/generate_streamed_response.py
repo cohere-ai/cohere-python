@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import typing
 
+import typing_extensions
+
+from ..core.unchecked_base_model import UnionMetadata
 from .generate_stream_end import GenerateStreamEnd
 from .generate_stream_error import GenerateStreamError
 from .generate_stream_text import GenerateStreamText
@@ -39,6 +42,11 @@ class GenerateStreamedResponse_StreamError(GenerateStreamError):
         populate_by_name = True
 
 
-GenerateStreamedResponse = typing.Union[
-    GenerateStreamedResponse_TextGeneration, GenerateStreamedResponse_StreamEnd, GenerateStreamedResponse_StreamError
+GenerateStreamedResponse = typing_extensions.Annotated[
+    typing.Union[
+        GenerateStreamedResponse_TextGeneration,
+        GenerateStreamedResponse_StreamEnd,
+        GenerateStreamedResponse_StreamError,
+    ],
+    UnionMetadata(discriminant="event_type"),
 ]

@@ -2,4 +2,4 @@
 
 import typing
 
-ChatRequestPromptTruncation = typing.Union[typing.AnyStr, typing.Literal["OFF", "AUTO", "AUTO_PRESERVE_ORDER"]]
+ChatRequestPromptTruncation = typing.Union[typing.Literal["OFF", "AUTO", "AUTO_PRESERVE_ORDER"], typing.Any]
