@@ -86,6 +86,17 @@ class TestClient(unittest.TestCase):
             self.assertIsNotNone(response.embeddings.float)  # type: ignore
             self.assertIsNotNone(response.embeddings.float_)
 
+            if response.embeddings.float_ is not None:
+                self.assertEqual(type(response.embeddings.float_[0][0]), float)
+            if response.embeddings.int8 is not None:
+                self.assertEqual(type(response.embeddings.int8[0][0]), int)
+            if response.embeddings.uint8 is not None:
+                self.assertEqual(type(response.embeddings.uint8[0][0]), int)
+            if response.embeddings.binary is not None:
+                self.assertEqual(type(response.embeddings.binary[0][0]), int)
+            if response.embeddings.ubinary is not None:
+                self.assertEqual(type(response.embeddings.ubinary[0][0]), int)
+
         print(response)
 
     def test_embed_batch_types(self) -> None:
