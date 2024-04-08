@@ -5,9 +5,10 @@ import typing
 
 from ...core.datetime_utils import serialize_datetime
 from ...core.pydantic_utilities import pydantic_v1
+from ...core.unchecked_base_model import UncheckedBaseModel
 
 
-class DatasetsCreateResponse(pydantic_v1.BaseModel):
+class DatasetsCreateResponse(UncheckedBaseModel):
     id: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     The dataset ID

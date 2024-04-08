@@ -3,7 +3,6 @@
 import typing
 
 Status = typing.Union[
-    typing.AnyStr,
     typing.Literal[
         "STATUS_UNSPECIFIED",
         "STATUS_FINETUNING",
@@ -15,4 +14,5 @@ Status = typing.Union[
         "STATUS_PAUSED",
         "STATUS_QUEUED",
     ],
+    typing.Any,
 ]

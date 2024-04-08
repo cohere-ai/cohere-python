@@ -5,9 +5,10 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 
 
-class ChatSearchQuery(pydantic_v1.BaseModel):
+class ChatSearchQuery(UncheckedBaseModel):
     """
     The generated search query. Contains the text of the query and a unique identifier for the query.
     """

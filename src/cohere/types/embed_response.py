@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import typing
 
+import typing_extensions
+
+from ..core.unchecked_base_model import UnionMetadata
 from .embed_by_type_response import EmbedByTypeResponse
 from .embed_floats_response import EmbedFloatsResponse
 
@@ -28,4 +31,7 @@ class EmbedResponse_EmbeddingsByType(EmbedByTypeResponse):
         populate_by_name = True
 
 
-EmbedResponse = typing.Union[EmbedResponse_EmbeddingsFloats, EmbedResponse_EmbeddingsByType]
+EmbedResponse = typing_extensions.Annotated[
+    typing.Union[EmbedResponse_EmbeddingsFloats, EmbedResponse_EmbeddingsByType],
+    UnionMetadata(discriminant="response_type"),
+]

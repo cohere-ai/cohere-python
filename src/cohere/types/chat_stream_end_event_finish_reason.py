@@ -3,5 +3,5 @@
 import typing
 
 ChatStreamEndEventFinishReason = typing.Union[
-    typing.AnyStr, typing.Literal["COMPLETE", "ERROR_LIMIT", "MAX_TOKENS", "ERROR", "ERROR_TOXIC"]
+    typing.Literal["COMPLETE", "ERROR_LIMIT", "MAX_TOKENS", "ERROR", "ERROR_TOXIC"], typing.Any
 ]

@@ -5,12 +5,13 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 from .api_meta import ApiMeta
 from .embed_job_status import EmbedJobStatus
 from .embed_job_truncate import EmbedJobTruncate
 
 
-class EmbedJob(pydantic_v1.BaseModel):
+class EmbedJob(UncheckedBaseModel):
     job_id: str = pydantic_v1.Field()
     """
     ID of the embed job
