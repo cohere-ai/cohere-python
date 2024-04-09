@@ -416,7 +416,7 @@ class BaseCohere:
                     event_source = EventSource(_response)
                     for sse in event_source.iter_sse():
                         try:
-                            yield pydantic_v1.parse_obj_as(StreamedChatResponse, json.loads(sse.data))  # type: ignore
+                            yield typing.cast(StreamedChatResponse, construct_type(type_=StreamedChatResponse, object_=json.loads(sse.data)))  # type: ignore
                         except Exception as e:
                             print(f"couldn't parse event: {e}")
                 except Exception as e:
