@@ -67,7 +67,6 @@ class TestClient(unittest.TestCase):
         with self.assertRaises(ValueError):
             co.list_connectors("dummy", dummy="dummy") # type: ignore
 
-    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     def test_generate(self) -> None:
         response = co.generate(
             prompt='Please explain to me how LLMs work',
@@ -135,7 +134,6 @@ class TestClient(unittest.TestCase):
 
         print(response)
 
-    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     def test_embed_job_crud(self) -> None:
         dataset = co.datasets.create(
             name="test",
@@ -184,7 +182,6 @@ class TestClient(unittest.TestCase):
 
         print(response)
 
-    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     def test_classify(self) -> None:
         examples = [
             ClassifyExample(text="Dermatologists don't like her!", label="Spam"),
@@ -212,7 +209,6 @@ class TestClient(unittest.TestCase):
         )
         print(response)
 
-    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     def test_datasets_crud(self) -> None:
         my_dataset = co.datasets.create(
             name="test",
@@ -232,7 +228,6 @@ class TestClient(unittest.TestCase):
 
         co.datasets.delete(my_dataset.id or "")
 
-    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     def test_save_load(self) -> None:
         my_dataset = co.datasets.create(
             name="test",
@@ -298,7 +293,6 @@ class TestClient(unittest.TestCase):
         )
         print(response)
 
-    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     def test_connectors_crud(self) -> None:
         created_connector = co.connectors.create(
             name="Example connector",
@@ -321,7 +315,6 @@ class TestClient(unittest.TestCase):
 
         co.connectors.delete(created_connector.connector.id)
 
-    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     def test_tool_use(self) -> None:
         tools = [
             Tool(
