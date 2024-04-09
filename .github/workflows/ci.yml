@@ -33,7 +33,7 @@ jobs:
       - name: Install dependencies
         run: poetry install
       - name: Test
-        run: poetry run pytest .
+        run: poetry run python -m pytest -v -s tests
         env:
           CO_API_KEY: ${{ secrets.COHERE_API_KEY }}
   
