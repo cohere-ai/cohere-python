@@ -68,12 +68,14 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(ValueError):
             await self.co.list_connectors("dummy", dummy="dummy")  # type: ignore
 
+    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     async def test_generate(self) -> None:
         response = await self.co.generate(
             prompt='Please explain to me how LLMs work',
         )
         print(response)
 
+    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     async def test_embed(self) -> None:
         response = await self.co.embed(
             texts=['hello', 'goodbye'],
@@ -119,6 +121,7 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
         print(response)
 
 
+    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     async def test_embed_job_crud(self) -> None:
         dataset = await self.co.datasets.create(
             name="test",
@@ -167,6 +170,7 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
 
         print(response)
 
+    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     async def test_classify(self) -> None:
         examples = [
             ClassifyExample(text="Dermatologists don't like her!", label="Spam"),
@@ -194,6 +198,7 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
         )
         print(response)
 
+    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     async def test_datasets_crud(self) -> None:
         my_dataset = await self.co.datasets.create(
             name="test",
@@ -213,6 +218,7 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
 
         await self.co.datasets.delete(my_dataset.id or "")
 
+    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     async def test_save_load(self) -> None:
         my_dataset = await self.co.datasets.create(
             name="test",
@@ -278,6 +284,7 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
         )
         print(response)
 
+    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     async def test_connectors_crud(self) -> None:
         created_connector = await self.co.connectors.create(
             name="Example connector",
@@ -300,6 +307,7 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
 
         await self.co.connectors.delete(created_connector.connector.id)
 
+    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     async def test_tool_use(self) -> None:
         tools = [
             Tool(
