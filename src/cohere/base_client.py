@@ -1164,6 +1164,7 @@ class BaseCohere:
         query: str,
         documents: typing.Sequence[RerankRequestDocumentsItem],
         top_n: typing.Optional[int] = OMIT,
+        rank_fields: typing.Optional[typing.Sequence[str]] = OMIT,
         return_documents: typing.Optional[bool] = OMIT,
         max_chunks_per_doc: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
@@ -1183,6 +1184,8 @@ class BaseCohere:
 
                                                                       We recommend a maximum of 1,000 documents for optimal endpoint performance.
             - top_n: typing.Optional[int]. The number of most relevant documents or indices to return, defaults to the length of the documents
+
+            - rank_fields: typing.Optional[typing.Sequence[str]]. If a JSON object is provided, you can specify which keys you would like to have considered for reranking. The model will rerank based on order of the fields passed in (i.e. rank_fields=['title','author','text'] will rerank using the values in title, author, text  sequentially. If the length of title, author, and text exceeds the context length of the model, the chunking will not re-consider earlier fields). If not provided, the model will use the default text field for ranking.
 
             - return_documents: typing.Optional[bool]. - If false, returns results without the doc text - the api will return a list of {index, relevance score} where index is inferred from the list passed into the request.
                                                        - If true, returns results with the doc text passed in - the api will return an ordered list of {index, text, relevance score} where index + text refers to the list passed into the request.
@@ -1212,6 +1215,8 @@ class BaseCohere:
             _request["model"] = model
         if top_n is not OMIT:
             _request["top_n"] = top_n
+        if rank_fields is not OMIT:
+            _request["rank_fields"] = rank_fields
         if return_documents is not OMIT:
             _request["return_documents"] = return_documents
         if max_chunks_per_doc is not OMIT:
@@ -2725,6 +2730,7 @@ class AsyncBaseCohere:
         query: str,
         documents: typing.Sequence[RerankRequestDocumentsItem],
         top_n: typing.Optional[int] = OMIT,
+        rank_fields: typing.Optional[typing.Sequence[str]] = OMIT,
         return_documents: typing.Optional[bool] = OMIT,
         max_chunks_per_doc: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
@@ -2744,6 +2750,8 @@ class AsyncBaseCohere:
 
                                                                       We recommend a maximum of 1,000 documents for optimal endpoint performance.
             - top_n: typing.Optional[int]. The number of most relevant documents or indices to return, defaults to the length of the documents
+
+            - rank_fields: typing.Optional[typing.Sequence[str]]. If a JSON object is provided, you can specify which keys you would like to have considered for reranking. The model will rerank based on order of the fields passed in (i.e. rank_fields=['title','author','text'] will rerank using the values in title, author, text  sequentially. If the length of title, author, and text exceeds the context length of the model, the chunking will not re-consider earlier fields). If not provided, the model will use the default text field for ranking.
 
             - return_documents: typing.Optional[bool]. - If false, returns results without the doc text - the api will return a list of {index, relevance score} where index is inferred from the list passed into the request.
                                                        - If true, returns results with the doc text passed in - the api will return an ordered list of {index, text, relevance score} where index + text refers to the list passed into the request.
@@ -2773,6 +2781,8 @@ class AsyncBaseCohere:
             _request["model"] = model
         if top_n is not OMIT:
             _request["top_n"] = top_n
+        if rank_fields is not OMIT:
+            _request["rank_fields"] = rank_fields
         if return_documents is not OMIT:
             _request["return_documents"] = return_documents
         if max_chunks_per_doc is not OMIT:
