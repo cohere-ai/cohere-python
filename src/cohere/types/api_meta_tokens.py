@@ -6,16 +6,18 @@ import typing
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
 from ..core.unchecked_base_model import UncheckedBaseModel
-from .api_meta_api_version import ApiMetaApiVersion
-from .api_meta_billed_units import ApiMetaBilledUnits
-from .api_meta_tokens import ApiMetaTokens
 
 
-class ApiMeta(UncheckedBaseModel):
-    api_version: typing.Optional[ApiMetaApiVersion] = None
-    billed_units: typing.Optional[ApiMetaBilledUnits] = None
-    tokens: typing.Optional[ApiMetaTokens] = None
-    warnings: typing.Optional[typing.List[str]] = None
+class ApiMetaTokens(UncheckedBaseModel):
+    input_tokens: typing.Optional[float] = pydantic_v1.Field(default=None)
+    """
+    The number of tokens used as input to the model.
+    """
+
+    output_tokens: typing.Optional[float] = pydantic_v1.Field(default=None)
+    """
+    The number of tokens produced by the model.
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

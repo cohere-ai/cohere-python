@@ -142,6 +142,7 @@ class DatasetsClient:
 
             - csv_delimiter: typing.Optional[str]. The delimiter used for .csv uploads.
 
+
             - data: core.File. See core.File for more documentation
 
             - eval_data: typing.Optional[core.File]. See core.File for more documentation
@@ -489,6 +490,7 @@ class AsyncDatasetsClient:
             - text_separator: typing.Optional[str]. Raw .txt uploads will be split into entries using the text_separator value.
 
             - csv_delimiter: typing.Optional[str]. The delimiter used for .csv uploads.
+
 
             - data: core.File. See core.File for more documentation
 
