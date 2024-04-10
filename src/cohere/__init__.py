@@ -4,6 +4,7 @@ from .types import (
     ApiMeta,
     ApiMetaApiVersion,
     ApiMetaBilledUnits,
+    ApiMetaTokens,
     AuthTokenType,
     ChatCitation,
     ChatCitationGenerationEvent,
@@ -128,7 +129,13 @@ from .errors import (
 )
 from . import connectors, datasets, embed_jobs, finetuning, models
 from .client import AsyncClient, Client
-from .datasets import DatasetsCreateResponse, DatasetsGetResponse, DatasetsGetUsageResponse, DatasetsListResponse
+from .datasets import (
+    DatasetsCreateResponse,
+    DatasetsCreateResponseDatasetParts,
+    DatasetsGetResponse,
+    DatasetsGetUsageResponse,
+    DatasetsListResponse,
+)
 from .embed_jobs import CreateEmbedJobRequestTruncate
 from .environment import ClientEnvironment
 from .version import __version__
@@ -137,6 +144,7 @@ __all__ = [
     "ApiMeta",
     "ApiMetaApiVersion",
     "ApiMetaBilledUnits",
+    "ApiMetaTokens",
     "AsyncClient",
     "AuthTokenType",
     "BadRequestError",
@@ -189,6 +197,7 @@ __all__ = [
     "DatasetType",
     "DatasetValidationStatus",
     "DatasetsCreateResponse",
+    "DatasetsCreateResponseDatasetParts",
     "DatasetsGetResponse",
     "DatasetsGetUsageResponse",
     "DatasetsListResponse",
