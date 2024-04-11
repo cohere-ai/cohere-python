@@ -62,7 +62,7 @@ def get_failure_reason(job: typing.Union[EmbedJob, DatasetsGetResponse]) -> Opti
     if isinstance(job, EmbedJob):
         return f"Embed job {job.job_id} failed with status {job.status}"
     elif isinstance(job, DatasetsGetResponse):
-        return f"Dataset creation {job.dataset.validation_status} failed with status {job.dataset.validation_status}"
+        return f"Dataset creation failed with status {job.dataset.validation_status} and error : {job.dataset.validation_error}"
     return None
 
 
