@@ -1173,7 +1173,7 @@ class BaseCohere:
         This endpoint takes in a query and a list of texts and produces an ordered array with each text assigned a relevance score.
 
         Parameters:
-            - model: typing.Optional[str]. The identifier of the model to use, one of : `rerank-english-v2.0`, `rerank-multilingual-v2.0`
+            - model: typing.Optional[str]. The identifier of the model to use, one of : `rerank-english-v3.0`, `rerank-multilingual-v3.0`, `rerank-english-v2.0`, `rerank-multilingual-v2.0`
 
             - query: str. The search query
 
@@ -2739,7 +2739,7 @@ class AsyncBaseCohere:
         This endpoint takes in a query and a list of texts and produces an ordered array with each text assigned a relevance score.
 
         Parameters:
-            - model: typing.Optional[str]. The identifier of the model to use, one of : `rerank-english-v2.0`, `rerank-multilingual-v2.0`
+            - model: typing.Optional[str]. The identifier of the model to use, one of : `rerank-english-v3.0`, `rerank-multilingual-v3.0`, `rerank-english-v2.0`, `rerank-multilingual-v2.0`
 
             - query: str. The search query
 

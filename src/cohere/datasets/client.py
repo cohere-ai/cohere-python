@@ -118,6 +118,7 @@ class DatasetsClient:
         optional_fields: typing.Optional[typing.Union[str, typing.Sequence[str]]] = None,
         text_separator: typing.Optional[str] = None,
         csv_delimiter: typing.Optional[str] = None,
+        dry_run: typing.Optional[bool] = None,
         data: core.File,
         eval_data: typing.Optional[core.File] = None,
         request_options: typing.Optional[RequestOptions] = None,
@@ -142,6 +143,7 @@ class DatasetsClient:
 
             - csv_delimiter: typing.Optional[str]. The delimiter used for .csv uploads.
 
+            - dry_run: typing.Optional[bool]. flag to enable dry_run mode
 
             - data: core.File. See core.File for more documentation
 
@@ -164,6 +166,7 @@ class DatasetsClient:
             optional_fields="string",
             text_separator="string",
             csv_delimiter="string",
+            dry_run=True,
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -180,6 +183,7 @@ class DatasetsClient:
                         "optional_fields": optional_fields,
                         "text_separator": text_separator,
                         "csv_delimiter": csv_delimiter,
+                        "dry_run": dry_run,
                         **(
                             request_options.get("additional_query_parameters", {})
                             if request_options is not None
@@ -467,6 +471,7 @@ class AsyncDatasetsClient:
         optional_fields: typing.Optional[typing.Union[str, typing.Sequence[str]]] = None,
         text_separator: typing.Optional[str] = None,
         csv_delimiter: typing.Optional[str] = None,
+        dry_run: typing.Optional[bool] = None,
         data: core.File,
         eval_data: typing.Optional[core.File] = None,
         request_options: typing.Optional[RequestOptions] = None,
@@ -491,6 +496,7 @@ class AsyncDatasetsClient:
 
             - csv_delimiter: typing.Optional[str]. The delimiter used for .csv uploads.
 
+            - dry_run: typing.Optional[bool]. flag to enable dry_run mode
 
             - data: core.File. See core.File for more documentation
 
@@ -513,6 +519,7 @@ class AsyncDatasetsClient:
             optional_fields="string",
             text_separator="string",
             csv_delimiter="string",
+            dry_run=True,
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -529,6 +536,7 @@ class AsyncDatasetsClient:
                         "optional_fields": optional_fields,
                         "text_separator": text_separator,
                         "csv_delimiter": csv_delimiter,
+                        "dry_run": dry_run,
                         **(
                             request_options.get("additional_query_parameters", {})
                             if request_options is not None
