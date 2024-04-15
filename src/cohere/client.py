@@ -82,7 +82,7 @@ class Client(BaseCohere, CacheMixin):
         httpx_client: typing.Optional[httpx.Client] = None,
     ):
         if api_key is None:
-            api_key = os.getenv("CO_API_KEY")
+            api_key = _get_api_key_from_environment()
 
         BaseCohere.__init__(
             self,
@@ -257,7 +257,7 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         httpx_client: typing.Optional[httpx.AsyncClient] = None,
     ):
         if api_key is None:
-            api_key = os.getenv("CO_API_KEY")
+            api_key = _get_api_key_from_environment()
 
         AsyncBaseCohere.__init__(
             self,
@@ -421,3 +421,11 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         Returns a Hugging Face tokenizer from a given model name.
         """
         return await local_tokenizers.get_hf_tokenizer(self, model)
+
+
+def _get_api_key_from_environment() -> typing.Optional[str]:
+    """
+    Retrieves the Cohere API key from specific environment variables.
+    CO_API_KEY is preferred (and documented) COHERE_API_KEY is accepted (but not documented).
+    """
+    return os.getenv("CO_API_KEY", os.getenv("COHERE_API_KEY"))
