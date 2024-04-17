@@ -266,15 +266,7 @@ class BaseCohere:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere import (
-            ChatConnector,
-            ChatMessage,
-            ChatStreamRequestConnectorsSearchOptions,
-            ChatStreamRequestToolResultsItem,
-            Tool,
-            ToolCall,
-            ToolParameterDefinitionsValue,
-        )
+        from cohere import ChatMessage
         from cohere.client import Client
 
         client = Client(
@@ -282,64 +274,19 @@ class BaseCohere:
             token="YOUR_TOKEN",
         )
         client.chat_stream(
-            message="string",
-            model="string",
-            preamble="string",
+            message="Can you give me a global market overview of solar panels?",
             chat_history=[
                 ChatMessage(
                     role="CHATBOT",
-                    message="string",
-                )
+                    message="Hi!",
+                ),
+                ChatMessage(
+                    role="CHATBOT",
+                    message="How can I help you today?",
+                ),
             ],
-            conversation_id="string",
             prompt_truncation="OFF",
-            connectors=[
-                ChatConnector(
-                    id="string",
-                    user_access_token="string",
-                    continue_on_failure=True,
-                    options={"string": {"key": "value"}},
-                )
-            ],
-            search_queries_only=True,
-            documents=[{"string": "string"}],
-            citation_quality="fast",
-            temperature=1.1,
-            max_tokens=1,
-            max_input_tokens=1,
-            k=1,
-            p=1.1,
-            seed=1.1,
-            stop_sequences=["string"],
-            connectors_search_options=ChatStreamRequestConnectorsSearchOptions(
-                model={"key": "value"},
-                temperature={"key": "value"},
-                max_tokens={"key": "value"},
-                preamble={"key": "value"},
-                seed=1.1,
-            ),
-            frequency_penalty=1.1,
-            presence_penalty=1.1,
-            raw_prompting=True,
-            tools=[
-                Tool(
-                    name="string",
-                    description="string",
-                    parameter_definitions={
-                        "string": ToolParameterDefinitionsValue(
-                            description="string",
-                            type="string",
-                            required=True,
-                        )
-                    },
-                )
-            ],
-            tool_results=[
-                ChatStreamRequestToolResultsItem(
-                    call=ToolCall(),
-                    outputs=[{"string": {"key": "value"}}],
-                )
-            ],
+            temperature=0.3,
         )
         """
         _request: typing.Dict[str, typing.Any] = {"message": message, "stream": True}
@@ -766,22 +713,8 @@ class BaseCohere:
             token="YOUR_TOKEN",
         )
         client.generate_stream(
-            prompt="string",
-            model="string",
-            num_generations=1,
-            max_tokens=1,
-            truncate="NONE",
-            temperature=1.1,
-            seed=1.1,
-            preset="string",
-            end_sequences=["string"],
-            stop_sequences=["string"],
-            k=1,
-            p=1.1,
-            frequency_penalty=1.1,
-            presence_penalty=1.1,
-            return_likelihoods="GENERATION",
-            raw_prompting=True,
+            prompt="Please explain to me how LLMs work",
+            preset="my-preset-a58sbd",
         )
         """
         _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": True}
@@ -1832,15 +1765,7 @@ class AsyncBaseCohere:
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere import (
-            ChatConnector,
-            ChatMessage,
-            ChatStreamRequestConnectorsSearchOptions,
-            ChatStreamRequestToolResultsItem,
-            Tool,
-            ToolCall,
-            ToolParameterDefinitionsValue,
-        )
+        from cohere import ChatMessage
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -1848,64 +1773,19 @@ class AsyncBaseCohere:
             token="YOUR_TOKEN",
         )
         await client.chat_stream(
-            message="string",
-            model="string",
-            preamble="string",
+            message="Can you give me a global market overview of solar panels?",
             chat_history=[
                 ChatMessage(
                     role="CHATBOT",
-                    message="string",
-                )
+                    message="Hi!",
+                ),
+                ChatMessage(
+                    role="CHATBOT",
+                    message="How can I help you today?",
+                ),
             ],
-            conversation_id="string",
             prompt_truncation="OFF",
-            connectors=[
-                ChatConnector(
-                    id="string",
-                    user_access_token="string",
-                    continue_on_failure=True,
-                    options={"string": {"key": "value"}},
-                )
-            ],
-            search_queries_only=True,
-            documents=[{"string": "string"}],
-            citation_quality="fast",
-            temperature=1.1,
-            max_tokens=1,
-            max_input_tokens=1,
-            k=1,
-            p=1.1,
-            seed=1.1,
-            stop_sequences=["string"],
-            connectors_search_options=ChatStreamRequestConnectorsSearchOptions(
-                model={"key": "value"},
-                temperature={"key": "value"},
-                max_tokens={"key": "value"},
-                preamble={"key": "value"},
-                seed=1.1,
-            ),
-            frequency_penalty=1.1,
-            presence_penalty=1.1,
-            raw_prompting=True,
-            tools=[
-                Tool(
-                    name="string",
-                    description="string",
-                    parameter_definitions={
-                        "string": ToolParameterDefinitionsValue(
-                            description="string",
-                            type="string",
-                            required=True,
-                        )
-                    },
-                )
-            ],
-            tool_results=[
-                ChatStreamRequestToolResultsItem(
-                    call=ToolCall(),
-                    outputs=[{"string": {"key": "value"}}],
-                )
-            ],
+            temperature=0.3,
         )
         """
         _request: typing.Dict[str, typing.Any] = {"message": message, "stream": True}
@@ -2332,22 +2212,8 @@ class AsyncBaseCohere:
             token="YOUR_TOKEN",
         )
         await client.generate_stream(
-            prompt="string",
-            model="string",
-            num_generations=1,
-            max_tokens=1,
-            truncate="NONE",
-            temperature=1.1,
-            seed=1.1,
-            preset="string",
-            end_sequences=["string"],
-            stop_sequences=["string"],
-            k=1,
-            p=1.1,
-            frequency_penalty=1.1,
-            presence_penalty=1.1,
-            return_likelihoods="GENERATION",
-            raw_prompting=True,
+            prompt="Please explain to me how LLMs work",
+            preset="my-preset-a58sbd",
         )
         """
         _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": True}

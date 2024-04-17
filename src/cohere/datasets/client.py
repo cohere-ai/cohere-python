@@ -158,15 +158,8 @@ class DatasetsClient:
             token="YOUR_TOKEN",
         )
         client.datasets.create(
-            name="string",
+            name="name",
             type="embed-input",
-            keep_original_file=True,
-            skip_malformed_input=True,
-            keep_fields="string",
-            optional_fields="string",
-            text_separator="string",
-            csv_delimiter="string",
-            dry_run=True,
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -511,15 +504,8 @@ class AsyncDatasetsClient:
             token="YOUR_TOKEN",
         )
         await client.datasets.create(
-            name="string",
+            name="name",
             type="embed-input",
-            keep_original_file=True,
-            skip_malformed_input=True,
-            keep_fields="string",
-            optional_fields="string",
-            text_separator="string",
-            csv_delimiter="string",
-            dry_run=True,
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
