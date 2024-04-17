@@ -87,6 +87,7 @@ class ModelsClient:
         page_size: typing.Optional[float] = None,
         page_token: typing.Optional[str] = None,
         endpoint: typing.Optional[CompatibleEndpoint] = None,
+        default_only: typing.Optional[bool] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListModelsResponse:
         """
@@ -98,6 +99,8 @@ class ModelsClient:
             - page_token: typing.Optional[str]. Page token provided in the `next_page_token` field of a previous response.
 
             - endpoint: typing.Optional[CompatibleEndpoint]. When provided, filters the list of models to only those that are compatible with the specified endpoint.
+
+            - default_only: typing.Optional[bool]. When provided, filters the list of models to only the default model to the endpoint. This parameter is only valid when `endpoint` is provided.
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
@@ -118,6 +121,7 @@ class ModelsClient:
                         "page_size": page_size,
                         "page_token": page_token,
                         "endpoint": endpoint,
+                        "default_only": default_only,
                         **(
                             request_options.get("additional_query_parameters", {})
                             if request_options is not None
@@ -222,6 +226,7 @@ class AsyncModelsClient:
         page_size: typing.Optional[float] = None,
         page_token: typing.Optional[str] = None,
         endpoint: typing.Optional[CompatibleEndpoint] = None,
+        default_only: typing.Optional[bool] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListModelsResponse:
         """
@@ -233,6 +238,8 @@ class AsyncModelsClient:
             - page_token: typing.Optional[str]. Page token provided in the `next_page_token` field of a previous response.
 
             - endpoint: typing.Optional[CompatibleEndpoint]. When provided, filters the list of models to only those that are compatible with the specified endpoint.
+
+            - default_only: typing.Optional[bool]. When provided, filters the list of models to only the default model to the endpoint. This parameter is only valid when `endpoint` is provided.
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
@@ -253,6 +260,7 @@ class AsyncModelsClient:
                         "page_size": page_size,
                         "page_token": page_token,
                         "endpoint": endpoint,
+                        "default_only": default_only,
                         **(
                             request_options.get("additional_query_parameters", {})
                             if request_options is not None

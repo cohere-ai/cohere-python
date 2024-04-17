@@ -6,6 +6,7 @@ import typing
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
 from ..core.unchecked_base_model import UncheckedBaseModel
+from .api_meta import ApiMeta
 from .chat_citation import ChatCitation
 from .chat_document import ChatDocument
 from .chat_message import ChatMessage
@@ -57,6 +58,8 @@ class NonStreamedChatResponse(UncheckedBaseModel):
     """
     A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
     """
+
+    meta: typing.Optional[ApiMeta] = None
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
