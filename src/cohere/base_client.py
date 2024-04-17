@@ -837,6 +837,7 @@ class BaseCohere:
             headers=jsonable_encoder(
                 remove_none_from_dict(
                     {
+                        "Accept": "*/*, text/event-stream, application/stream+json",
                         **self._client_wrapper.get_headers(),
                         **(request_options.get("additional_headers", {}) if request_options is not None else {}),
                     }
@@ -1976,6 +1977,7 @@ class AsyncBaseCohere:
             headers=jsonable_encoder(
                 remove_none_from_dict(
                     {
+                        "Accept": "*/*, text/event-stream, application/stream+json",
                         **self._client_wrapper.get_headers(),
                         **(request_options.get("additional_headers", {}) if request_options is not None else {}),
                     }
@@ -2413,6 +2415,7 @@ class AsyncBaseCohere:
             headers=jsonable_encoder(
                 remove_none_from_dict(
                     {
+                        "Accept": "*/*, text/event-stream, application/stream+json",
                         **self._client_wrapper.get_headers(),
                         **(request_options.get("additional_headers", {}) if request_options is not None else {}),
                     }
