@@ -7,6 +7,7 @@ import urllib.parse
 from json.decoder import JSONDecodeError
 
 import httpx
+from httpx_sse import EventSource
 
 from .connectors.client import AsyncConnectorsClient, ConnectorsClient
 from .core.api_error import ApiError
@@ -441,6 +442,7 @@ class BaseCohere:
             headers=jsonable_encoder(
                 remove_none_from_dict(
                     {
+                        "Accept": "*/*, text/event-stream, application/stream+json",
                         **self._client_wrapper.get_headers(),
                         **(request_options.get("additional_headers", {}) if request_options is not None else {}),
                     }
@@ -453,10 +455,15 @@ class BaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         ) as _response:
             if 200 <= _response.status_code < 300:
-                for _text in _response.iter_lines():
-                    if len(_text) == 0:
-                        continue
-                    yield typing.cast(StreamedChatResponse, construct_type(type_=StreamedChatResponse, object_=json.loads(_text)))  # type: ignore
+                try:
+                    event_source = EventSource(_response)
+                    for sse in event_source.iter_sse():
+                        yield typing.cast(StreamedChatResponse, construct_type(type_=StreamedChatResponse, object_=json.loads(sse.data)))  # type: ignore
+                except Exception:
+                    for _text in _response.iter_lines():
+                        if len(_text) == 0:
+                            continue
+                        yield typing.cast(StreamedChatResponse, construct_type(type_=StreamedChatResponse, object_=json.loads(_text)))  # type: ignore
                 return
             _response.read()
             if _response.status_code == 429:
@@ -911,6 +918,7 @@ class BaseCohere:
             headers=jsonable_encoder(
                 remove_none_from_dict(
                     {
+                        "Accept": "*/*, text/event-stream, application/stream+json",
                         **self._client_wrapper.get_headers(),
                         **(request_options.get("additional_headers", {}) if request_options is not None else {}),
                     }
@@ -923,10 +931,15 @@ class BaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         ) as _response:
             if 200 <= _response.status_code < 300:
-                for _text in _response.iter_lines():
-                    if len(_text) == 0:
-                        continue
-                    yield typing.cast(GenerateStreamedResponse, construct_type(type_=GenerateStreamedResponse, object_=json.loads(_text)))  # type: ignore
+                try:
+                    event_source = EventSource(_response)
+                    for sse in event_source.iter_sse():
+                        yield typing.cast(GenerateStreamedResponse, construct_type(type_=GenerateStreamedResponse, object_=json.loads(sse.data)))  # type: ignore
+                except Exception:
+                    for _text in _response.iter_lines():
+                        if len(_text) == 0:
+                            continue
+                        yield typing.cast(GenerateStreamedResponse, construct_type(type_=GenerateStreamedResponse, object_=json.loads(_text)))  # type: ignore
                 return
             _response.read()
             if _response.status_code == 400:
@@ -2134,6 +2147,7 @@ class AsyncBaseCohere:
             headers=jsonable_encoder(
                 remove_none_from_dict(
                     {
+                        "Accept": "*/*, text/event-stream, application/stream+json",
                         **self._client_wrapper.get_headers(),
                         **(request_options.get("additional_headers", {}) if request_options is not None else {}),
                     }
@@ -2146,10 +2160,15 @@ class AsyncBaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         ) as _response:
             if 200 <= _response.status_code < 300:
-                async for _text in _response.aiter_lines():
-                    if len(_text) == 0:
-                        continue
-                    yield typing.cast(StreamedChatResponse, construct_type(type_=StreamedChatResponse, object_=json.loads(_text)))  # type: ignore
+                try:
+                    event_source = EventSource(_response)
+                    async for sse in event_source.aiter_sse():
+                        yield typing.cast(StreamedChatResponse, construct_type(type_=StreamedChatResponse, object_=json.loads(sse.data)))  # type: ignore
+                except Exception:
+                    async for _text in _response.aiter_lines():
+                        if len(_text) == 0:
+                            continue
+                        yield typing.cast(StreamedChatResponse, construct_type(type_=StreamedChatResponse, object_=json.loads(_text)))  # type: ignore
                 return
             await _response.aread()
             if _response.status_code == 429:
@@ -2604,6 +2623,7 @@ class AsyncBaseCohere:
             headers=jsonable_encoder(
                 remove_none_from_dict(
                     {
+                        "Accept": "*/*, text/event-stream, application/stream+json",
                         **self._client_wrapper.get_headers(),
                         **(request_options.get("additional_headers", {}) if request_options is not None else {}),
                     }
@@ -2616,10 +2636,15 @@ class AsyncBaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         ) as _response:
             if 200 <= _response.status_code < 300:
-                async for _text in _response.aiter_lines():
-                    if len(_text) == 0:
-                        continue
-                    yield typing.cast(GenerateStreamedResponse, construct_type(type_=GenerateStreamedResponse, object_=json.loads(_text)))  # type: ignore
+                try:
+                    event_source = EventSource(_response)
+                    async for sse in event_source.aiter_sse():
+                        yield typing.cast(GenerateStreamedResponse, construct_type(type_=GenerateStreamedResponse, object_=json.loads(sse.data)))  # type: ignore
+                except Exception:
+                    async for _text in _response.aiter_lines():
+                        if len(_text) == 0:
+                            continue
+                        yield typing.cast(GenerateStreamedResponse, construct_type(type_=GenerateStreamedResponse, object_=json.loads(_text)))  # type: ignore
                 return
             await _response.aread()
             if _response.status_code == 400:
