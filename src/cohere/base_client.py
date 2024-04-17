@@ -1990,7 +1990,7 @@ class AsyncBaseCohere:
             if 200 <= _response.status_code < 300:
                 try:
                     event_source = EventSource(_response)
-                    for sse in event_source.aiter_sse():
+                    async for sse in event_source.aiter_sse():
                         yield typing.cast(StreamedChatResponse, construct_type(type_=StreamedChatResponse, object_=json.loads(sse.data)))  # type: ignore
                 except Exception:
                     async for _text in _response.aiter_lines():
@@ -2427,7 +2427,7 @@ class AsyncBaseCohere:
             if 200 <= _response.status_code < 300:
                 try:
                     event_source = EventSource(_response)
-                    for sse in event_source.aiter_sse():
+                    async for sse in event_source.aiter_sse():
                         yield typing.cast(GenerateStreamedResponse, construct_type(type_=GenerateStreamedResponse, object_=json.loads(sse.data)))  # type: ignore
                 except Exception:
                     async for _text in _response.aiter_lines():
