@@ -424,7 +424,7 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         """
         Returns a Hugging Face tokenizer from a given model name.
         """
-        return await local_tokenizers.get_hf_tokenizer(self, model)
+        return await local_tokenizers.async_get_hf_tokenizer(self, model)
 
 
 def _get_api_key_from_environment() -> typing.Optional[str]:
