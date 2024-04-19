@@ -208,11 +208,24 @@ class Client(BaseCohere, CacheMixin):
         # `offline` parameter controls whether to use an offline tokenizer. If set to True, the tokenizer config will be downloaded (and cached),
         # and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
         opts: RequestOptions = request_options or {}  # type: ignore
+
+        # Global try/except that falls back to calling the API if the offline tokenizer fails.
+        # Inner try/except is used to handle the case where the sync client is used in an async context.
         if offline:
+            task = local_tokenizers.local_tokenize(self, text=text, model=model)
             try:
-                tokens = asyncio.run(local_tokenizers.local_tokenize(self, text=text, model=model))
+                try:
+                    asyncio.get_running_loop()  # raises a RuntimeError if not in an async context
+                    # User is using the sync client in an async context, so we need to run the call in a separate thread (since we cannot await).
+                    with ThreadPoolExecutor(1) as pool:
+                        tokens = pool.submit(lambda: asyncio.run(task)).result()
+                except RuntimeError:
+                    # Running sync context.
+                    tokens = asyncio.run(task)
                 return TokenizeResponse(tokens=tokens, token_strings=[])
+
             except Exception:
+                # Fallback to calling the API.
                 opts["additional_headers"] = opts.get("additional_headers", {})
                 opts["additional_headers"]["sdk-api-warning-message"] = "offline_tokenizer_failed"
         return super().tokenize(text=text, model=model, request_options=opts)
@@ -228,11 +241,23 @@ class Client(BaseCohere, CacheMixin):
         # `offline` parameter controls whether to use an offline tokenizer. If set to True, the tokenizer config will be downloaded (and cached),
         # and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
         opts: RequestOptions = request_options or {}  # type: ignore
+
+        # Global try/except that falls back to calling the API if the offline tokenizer fails.
+        # Inner try/except is used to handle the case where the sync client is used in an async context.
         if offline:
+            task = local_tokenizers.local_detokenize(self, model=model, tokens=tokens)
             try:
-                text = asyncio.run(local_tokenizers.local_detokenize(self, model=model, tokens=tokens))
+                try:
+                    asyncio.get_running_loop()  # raises a RuntimeError if not in an async context
+                    # User is using the sync client in an async context, so we need to run the call in a separate thread (since we cannot await).
+                    with ThreadPoolExecutor(1) as pool:
+                        text = pool.submit(lambda: asyncio.run(task)).result()
+                except RuntimeError:
+                    # Running sync context.
+                    text = asyncio.run(task)
                 return DetokenizeResponse(text=text)
             except Exception:
+                # Fallback to calling the API.
                 opts["additional_headers"] = opts.get("additional_headers", {})
                 opts["additional_headers"]["sdk-api-warning-message"] = "offline_tokenizer_failed"
 
