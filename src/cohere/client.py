@@ -209,21 +209,10 @@ class Client(BaseCohere, CacheMixin):
         # and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
         opts: RequestOptions = request_options or {}  # type: ignore
 
-        # Global try/except that falls back to calling the API if the offline tokenizer fails.
-        # Inner try/except is used to handle the case where the sync client is used in an async context.
         if offline:
-            task = local_tokenizers.local_tokenize(self, text=text, model=model)
             try:
-                try:
-                    asyncio.get_running_loop()  # raises a RuntimeError if not in an async context
-                    # User is using the sync client in an async context, so we need to run the call in a separate thread (since we cannot await).
-                    with ThreadPoolExecutor(1) as pool:
-                        tokens = pool.submit(lambda: asyncio.run(task)).result()
-                except RuntimeError:
-                    # Running sync context.
-                    tokens = asyncio.run(task)
+                tokens = local_tokenizers.local_tokenize(self, text=text, model=model)
                 return TokenizeResponse(tokens=tokens, token_strings=[])
-
             except Exception:
                 # Fallback to calling the API.
                 opts["additional_headers"] = opts.get("additional_headers", {})
@@ -242,19 +231,9 @@ class Client(BaseCohere, CacheMixin):
         # and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
         opts: RequestOptions = request_options or {}  # type: ignore
 
-        # Global try/except that falls back to calling the API if the offline tokenizer fails.
-        # Inner try/except is used to handle the case where the sync client is used in an async context.
         if offline:
-            task = local_tokenizers.local_detokenize(self, model=model, tokens=tokens)
             try:
-                try:
-                    asyncio.get_running_loop()  # raises a RuntimeError if not in an async context
-                    # User is using the sync client in an async context, so we need to run the call in a separate thread (since we cannot await).
-                    with ThreadPoolExecutor(1) as pool:
-                        text = pool.submit(lambda: asyncio.run(task)).result()
-                except RuntimeError:
-                    # Running sync context.
-                    text = asyncio.run(task)
+                text = local_tokenizers.local_detokenize(self, model=model, tokens=tokens)
                 return DetokenizeResponse(text=text)
             except Exception:
                 # Fallback to calling the API.
@@ -412,7 +391,7 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         opts: RequestOptions = request_options or {}  # type: ignore
         if offline:
             try:
-                tokens = await local_tokenizers.local_tokenize(self, model=model, text=text)
+                tokens = await local_tokenizers.async_local_tokenize(self, model=model, text=text)
                 return TokenizeResponse(tokens=tokens, token_strings=[])
             except Exception:
                 opts["additional_headers"] = opts.get("additional_headers", {})
@@ -433,7 +412,7 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         opts: RequestOptions = request_options or {}  # type: ignore
         if offline:
             try:
-                text = await local_tokenizers.local_detokenize(self, model=model, tokens=tokens)
+                text = await local_tokenizers.async_local_detokenize(self, model=model, tokens=tokens)
                 return DetokenizeResponse(text=text)
             except Exception:
                 opts["additional_headers"] = opts.get("additional_headers", {})
