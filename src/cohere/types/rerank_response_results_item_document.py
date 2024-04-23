@@ -10,7 +10,7 @@ from ..core.unchecked_base_model import UncheckedBaseModel
 
 class RerankResponseResultsItemDocument(UncheckedBaseModel):
     """
-    The doc object which was ranked
+    If `return_documents` is set as `false` this will return none, if `true` it will return the documents passed in
     """
 
     text: str = pydantic_v1.Field()
