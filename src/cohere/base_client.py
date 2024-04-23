@@ -27,8 +27,10 @@ from .models.client import AsyncModelsClient, ModelsClient
 from .types.chat_connector import ChatConnector
 from .types.chat_document import ChatDocument
 from .types.chat_message import ChatMessage
+from .types.chat_request_citation_quality import ChatRequestCitationQuality
 from .types.chat_request_prompt_truncation import ChatRequestPromptTruncation
 from .types.chat_request_tool_results_item import ChatRequestToolResultsItem
+from .types.chat_stream_request_citation_quality import ChatStreamRequestCitationQuality
 from .types.chat_stream_request_prompt_truncation import ChatStreamRequestPromptTruncation
 from .types.chat_stream_request_tool_results_item import ChatStreamRequestToolResultsItem
 from .types.classify_example import ClassifyExample
@@ -132,6 +134,7 @@ class BaseCohere:
         connectors: typing.Optional[typing.Sequence[ChatConnector]] = OMIT,
         search_queries_only: typing.Optional[bool] = OMIT,
         documents: typing.Optional[typing.Sequence[ChatDocument]] = OMIT,
+        citation_quality: typing.Optional[ChatStreamRequestCitationQuality] = OMIT,
         temperature: typing.Optional[float] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         max_input_tokens: typing.Optional[int] = OMIT,
@@ -142,6 +145,7 @@ class BaseCohere:
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
+        return_prompt: typing.Optional[bool] = OMIT,
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ChatStreamRequestToolResultsItem]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
@@ -153,7 +157,7 @@ class BaseCohere:
         Parameters:
             - message: str. Text input for the model to respond to.
 
-            - model: typing.Optional[str]. Defaults to `command-r`.
+            - model: typing.Optional[str]. Defaults to `command-r-plus`.
 
                                            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
@@ -207,6 +211,10 @@ class BaseCohere:
 
                                                                          See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
 
+            - citation_quality: typing.Optional[ChatStreamRequestCitationQuality]. Defaults to `"accurate"`.
+
+                                                                                   Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results or `"fast"` results.
+
             - temperature: typing.Optional[float]. Defaults to `0.3`.
 
                                                    A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
@@ -238,6 +246,8 @@ class BaseCohere:
                                                         Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
 
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
+
+            - return_prompt: typing.Optional[bool]. The prompt is returned in the `prompt` response field when this is enabled.
 
             - tools: typing.Optional[typing.Sequence[Tool]]. A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
@@ -307,6 +317,8 @@ class BaseCohere:
             _request["search_queries_only"] = search_queries_only
         if documents is not OMIT:
             _request["documents"] = documents
+        if citation_quality is not OMIT:
+            _request["citation_quality"] = citation_quality
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if max_tokens is not OMIT:
@@ -327,6 +339,8 @@ class BaseCohere:
             _request["presence_penalty"] = presence_penalty
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
+        if return_prompt is not OMIT:
+            _request["return_prompt"] = return_prompt
         if tools is not OMIT:
             _request["tools"] = tools
         if tool_results is not OMIT:
@@ -392,6 +406,7 @@ class BaseCohere:
         connectors: typing.Optional[typing.Sequence[ChatConnector]] = OMIT,
         search_queries_only: typing.Optional[bool] = OMIT,
         documents: typing.Optional[typing.Sequence[ChatDocument]] = OMIT,
+        citation_quality: typing.Optional[ChatRequestCitationQuality] = OMIT,
         temperature: typing.Optional[float] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         max_input_tokens: typing.Optional[int] = OMIT,
@@ -402,6 +417,7 @@ class BaseCohere:
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
+        return_prompt: typing.Optional[bool] = OMIT,
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ChatRequestToolResultsItem]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
@@ -413,7 +429,7 @@ class BaseCohere:
         Parameters:
             - message: str. Text input for the model to respond to.
 
-            - model: typing.Optional[str]. Defaults to `command-r`.
+            - model: typing.Optional[str]. Defaults to `command-r-plus`.
 
                                            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
@@ -467,6 +483,10 @@ class BaseCohere:
 
                                                                          See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
 
+            - citation_quality: typing.Optional[ChatRequestCitationQuality]. Defaults to `"accurate"`.
+
+                                                                             Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results or `"fast"` results.
+
             - temperature: typing.Optional[float]. Defaults to `0.3`.
 
                                                    A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
@@ -498,6 +518,8 @@ class BaseCohere:
                                                         Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
 
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
+
+            - return_prompt: typing.Optional[bool]. The prompt is returned in the `prompt` response field when this is enabled.
 
             - tools: typing.Optional[typing.Sequence[Tool]]. A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
@@ -567,6 +589,8 @@ class BaseCohere:
             _request["search_queries_only"] = search_queries_only
         if documents is not OMIT:
             _request["documents"] = documents
+        if citation_quality is not OMIT:
+            _request["citation_quality"] = citation_quality
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if max_tokens is not OMIT:
@@ -587,6 +611,8 @@ class BaseCohere:
             _request["presence_penalty"] = presence_penalty
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
+        if return_prompt is not OMIT:
+            _request["return_prompt"] = return_prompt
         if tools is not OMIT:
             _request["tools"] = tools
         if tool_results is not OMIT:
@@ -1209,7 +1235,7 @@ class BaseCohere:
         self,
         *,
         inputs: typing.Sequence[str],
-        examples: typing.Sequence[ClassifyExample],
+        examples: typing.Optional[typing.Sequence[ClassifyExample]] = OMIT,
         model: typing.Optional[str] = OMIT,
         preset: typing.Optional[str] = OMIT,
         truncate: typing.Optional[ClassifyRequestTruncate] = OMIT,
@@ -1223,8 +1249,8 @@ class BaseCohere:
             - inputs: typing.Sequence[str]. A list of up to 96 texts to be classified. Each one must be a non-empty string.
                                             There is, however, no consistent, universal limit to the length a particular input can be. We perform classification on the first `x` tokens of each input, and `x` varies depending on which underlying model is powering classification. The maximum token length for each model is listed in the "max tokens" column [here](https://docs.cohere.com/docs/models).
                                             Note: by default the `truncate` parameter is set to `END`, so tokens exceeding the limit will be automatically dropped. This behavior can be disabled by setting `truncate` to `NONE`, which will result in validation errors for longer texts.
-            - examples: typing.Sequence[ClassifyExample]. An array of examples to provide context to the model. Each example is a text string and its associated label/class. Each unique label requires at least 2 examples associated with it; the maximum number of examples is 2500, and each example has a maximum length of 512 tokens. The values should be structured as `{text: "...",label: "..."}`.
-                                                          Note: [Fine-tuned Models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
+            - examples: typing.Optional[typing.Sequence[ClassifyExample]]. An array of examples to provide context to the model. Each example is a text string and its associated label/class. Each unique label requires at least 2 examples associated with it; the maximum number of examples is 2500, and each example has a maximum length of 512 tokens. The values should be structured as `{text: "...",label: "..."}`.
+                                                                           Note: [Fine-tuned Models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
             - model: typing.Optional[str]. The identifier of the model. Currently available models are `embed-multilingual-v2.0`, `embed-english-light-v2.0`, and `embed-english-v2.0` (default). Smaller "light" models are faster, while larger models will perform better. [Fine-tuned models](https://docs.cohere.com/docs/fine-tuning) can also be supplied with their full ID.
 
             - preset: typing.Optional[str]. The ID of a custom playground preset. You can create presets in the [playground](https://dashboard.cohere.ai/playground/classify?model=large). If you use a preset, all other parameters become optional, and any included parameters will override the preset's parameters.
@@ -1288,7 +1314,9 @@ class BaseCohere:
             preset="my-preset-a58sbd",
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"inputs": inputs, "examples": examples}
+        _request: typing.Dict[str, typing.Any] = {"inputs": inputs}
+        if examples is not OMIT:
+            _request["examples"] = examples
         if model is not OMIT:
             _request["model"] = model
         if preset is not OMIT:
@@ -1643,6 +1671,7 @@ class AsyncBaseCohere:
         connectors: typing.Optional[typing.Sequence[ChatConnector]] = OMIT,
         search_queries_only: typing.Optional[bool] = OMIT,
         documents: typing.Optional[typing.Sequence[ChatDocument]] = OMIT,
+        citation_quality: typing.Optional[ChatStreamRequestCitationQuality] = OMIT,
         temperature: typing.Optional[float] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         max_input_tokens: typing.Optional[int] = OMIT,
@@ -1653,6 +1682,7 @@ class AsyncBaseCohere:
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
+        return_prompt: typing.Optional[bool] = OMIT,
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ChatStreamRequestToolResultsItem]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
@@ -1664,7 +1694,7 @@ class AsyncBaseCohere:
         Parameters:
             - message: str. Text input for the model to respond to.
 
-            - model: typing.Optional[str]. Defaults to `command-r`.
+            - model: typing.Optional[str]. Defaults to `command-r-plus`.
 
                                            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
@@ -1718,6 +1748,10 @@ class AsyncBaseCohere:
 
                                                                          See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
 
+            - citation_quality: typing.Optional[ChatStreamRequestCitationQuality]. Defaults to `"accurate"`.
+
+                                                                                   Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results or `"fast"` results.
+
             - temperature: typing.Optional[float]. Defaults to `0.3`.
 
                                                    A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
@@ -1749,6 +1783,8 @@ class AsyncBaseCohere:
                                                         Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
 
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
+
+            - return_prompt: typing.Optional[bool]. The prompt is returned in the `prompt` response field when this is enabled.
 
             - tools: typing.Optional[typing.Sequence[Tool]]. A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
@@ -1818,6 +1854,8 @@ class AsyncBaseCohere:
             _request["search_queries_only"] = search_queries_only
         if documents is not OMIT:
             _request["documents"] = documents
+        if citation_quality is not OMIT:
+            _request["citation_quality"] = citation_quality
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if max_tokens is not OMIT:
@@ -1838,6 +1876,8 @@ class AsyncBaseCohere:
             _request["presence_penalty"] = presence_penalty
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
+        if return_prompt is not OMIT:
+            _request["return_prompt"] = return_prompt
         if tools is not OMIT:
             _request["tools"] = tools
         if tool_results is not OMIT:
@@ -1903,6 +1943,7 @@ class AsyncBaseCohere:
         connectors: typing.Optional[typing.Sequence[ChatConnector]] = OMIT,
         search_queries_only: typing.Optional[bool] = OMIT,
         documents: typing.Optional[typing.Sequence[ChatDocument]] = OMIT,
+        citation_quality: typing.Optional[ChatRequestCitationQuality] = OMIT,
         temperature: typing.Optional[float] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         max_input_tokens: typing.Optional[int] = OMIT,
@@ -1913,6 +1954,7 @@ class AsyncBaseCohere:
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
+        return_prompt: typing.Optional[bool] = OMIT,
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ChatRequestToolResultsItem]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
@@ -1924,7 +1966,7 @@ class AsyncBaseCohere:
         Parameters:
             - message: str. Text input for the model to respond to.
 
-            - model: typing.Optional[str]. Defaults to `command-r`.
+            - model: typing.Optional[str]. Defaults to `command-r-plus`.
 
                                            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
@@ -1978,6 +2020,10 @@ class AsyncBaseCohere:
 
                                                                          See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
 
+            - citation_quality: typing.Optional[ChatRequestCitationQuality]. Defaults to `"accurate"`.
+
+                                                                             Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results or `"fast"` results.
+
             - temperature: typing.Optional[float]. Defaults to `0.3`.
 
                                                    A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
@@ -2009,6 +2055,8 @@ class AsyncBaseCohere:
                                                         Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
 
             - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
+
+            - return_prompt: typing.Optional[bool]. The prompt is returned in the `prompt` response field when this is enabled.
 
             - tools: typing.Optional[typing.Sequence[Tool]]. A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
@@ -2078,6 +2126,8 @@ class AsyncBaseCohere:
             _request["search_queries_only"] = search_queries_only
         if documents is not OMIT:
             _request["documents"] = documents
+        if citation_quality is not OMIT:
+            _request["citation_quality"] = citation_quality
         if temperature is not OMIT:
             _request["temperature"] = temperature
         if max_tokens is not OMIT:
@@ -2098,6 +2148,8 @@ class AsyncBaseCohere:
             _request["presence_penalty"] = presence_penalty
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
+        if return_prompt is not OMIT:
+            _request["return_prompt"] = return_prompt
         if tools is not OMIT:
             _request["tools"] = tools
         if tool_results is not OMIT:
@@ -2720,7 +2772,7 @@ class AsyncBaseCohere:
         self,
         *,
         inputs: typing.Sequence[str],
-        examples: typing.Sequence[ClassifyExample],
+        examples: typing.Optional[typing.Sequence[ClassifyExample]] = OMIT,
         model: typing.Optional[str] = OMIT,
         preset: typing.Optional[str] = OMIT,
         truncate: typing.Optional[ClassifyRequestTruncate] = OMIT,
@@ -2734,8 +2786,8 @@ class AsyncBaseCohere:
             - inputs: typing.Sequence[str]. A list of up to 96 texts to be classified. Each one must be a non-empty string.
                                             There is, however, no consistent, universal limit to the length a particular input can be. We perform classification on the first `x` tokens of each input, and `x` varies depending on which underlying model is powering classification. The maximum token length for each model is listed in the "max tokens" column [here](https://docs.cohere.com/docs/models).
                                             Note: by default the `truncate` parameter is set to `END`, so tokens exceeding the limit will be automatically dropped. This behavior can be disabled by setting `truncate` to `NONE`, which will result in validation errors for longer texts.
-            - examples: typing.Sequence[ClassifyExample]. An array of examples to provide context to the model. Each example is a text string and its associated label/class. Each unique label requires at least 2 examples associated with it; the maximum number of examples is 2500, and each example has a maximum length of 512 tokens. The values should be structured as `{text: "...",label: "..."}`.
-                                                          Note: [Fine-tuned Models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
+            - examples: typing.Optional[typing.Sequence[ClassifyExample]]. An array of examples to provide context to the model. Each example is a text string and its associated label/class. Each unique label requires at least 2 examples associated with it; the maximum number of examples is 2500, and each example has a maximum length of 512 tokens. The values should be structured as `{text: "...",label: "..."}`.
+                                                                           Note: [Fine-tuned Models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
             - model: typing.Optional[str]. The identifier of the model. Currently available models are `embed-multilingual-v2.0`, `embed-english-light-v2.0`, and `embed-english-v2.0` (default). Smaller "light" models are faster, while larger models will perform better. [Fine-tuned models](https://docs.cohere.com/docs/fine-tuning) can also be supplied with their full ID.
 
             - preset: typing.Optional[str]. The ID of a custom playground preset. You can create presets in the [playground](https://dashboard.cohere.ai/playground/classify?model=large). If you use a preset, all other parameters become optional, and any included parameters will override the preset's parameters.
@@ -2799,7 +2851,9 @@ class AsyncBaseCohere:
             preset="my-preset-a58sbd",
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"inputs": inputs, "examples": examples}
+        _request: typing.Dict[str, typing.Any] = {"inputs": inputs}
+        if examples is not OMIT:
+            _request["examples"] = examples
         if model is not OMIT:
             _request["model"] = model
         if preset is not OMIT:
