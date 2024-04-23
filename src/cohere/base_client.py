@@ -376,7 +376,7 @@ class BaseCohere:
                 try:
                     event_source = EventSource(_response)
                     for sse in event_source.iter_sse():
-                        yield typing.cast(StreamedChatResponse, construct_type(type_=StreamedChatResponse, object_=json.loads(sse.data.data)))  # type: ignore
+                        yield typing.cast(StreamedChatResponse, construct_type(type_=StreamedChatResponse, object_=json.loads(sse.data)))  # type: ignore
                 except Exception:
                     for _text in _response.iter_lines():
                         if len(_text) == 0:
