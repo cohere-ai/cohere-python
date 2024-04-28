@@ -55,6 +55,7 @@ use `chat_stream`.
 
 ```Python
 import cohere
+import sys
 
 co = cohere.Client(
     api_key="YOUR_API_KEY",
@@ -67,6 +68,8 @@ stream = co.chat_stream(
 for event in stream:
     if event.event_type == "text-generation":
         print(event.text, end='')
+        # flush stdout to display text immediately rather than buffering by lines
+        sys.stdout.flush()
 ```
 
 ## Contributing
