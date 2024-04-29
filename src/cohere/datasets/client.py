@@ -15,6 +15,7 @@ from ..core.request_options import RequestOptions
 from ..core.unchecked_base_model import construct_type
 from ..errors.too_many_requests_error import TooManyRequestsError
 from ..types.dataset_type import DatasetType
+from ..types.dataset_validation_status import DatasetValidationStatus
 from .types.datasets_create_response import DatasetsCreateResponse
 from .types.datasets_get_response import DatasetsGetResponse
 from .types.datasets_get_usage_response import DatasetsGetUsageResponse
@@ -36,6 +37,7 @@ class DatasetsClient:
         after: typing.Optional[dt.datetime] = None,
         limit: typing.Optional[float] = None,
         offset: typing.Optional[float] = None,
+        validation_status: typing.Optional[DatasetValidationStatus] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> DatasetsListResponse:
         """
@@ -51,6 +53,8 @@ class DatasetsClient:
             - limit: typing.Optional[float]. optional limit to number of results
 
             - offset: typing.Optional[float]. optional offset to start of results
+
+            - validation_status: typing.Optional[DatasetValidationStatus]. optional filter by validation status
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
@@ -73,6 +77,7 @@ class DatasetsClient:
                         "after": serialize_datetime(after) if after is not None else None,
                         "limit": limit,
                         "offset": offset,
+                        "validationStatus": validation_status,
                         **(
                             request_options.get("additional_query_parameters", {})
                             if request_options is not None
@@ -382,6 +387,7 @@ class AsyncDatasetsClient:
         after: typing.Optional[dt.datetime] = None,
         limit: typing.Optional[float] = None,
         offset: typing.Optional[float] = None,
+        validation_status: typing.Optional[DatasetValidationStatus] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> DatasetsListResponse:
         """
@@ -397,6 +403,8 @@ class AsyncDatasetsClient:
             - limit: typing.Optional[float]. optional limit to number of results
 
             - offset: typing.Optional[float]. optional offset to start of results
+
+            - validation_status: typing.Optional[DatasetValidationStatus]. optional filter by validation status
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
@@ -419,6 +427,7 @@ class AsyncDatasetsClient:
                         "after": serialize_datetime(after) if after is not None else None,
                         "limit": limit,
                         "offset": offset,
+                        "validationStatus": validation_status,
                         **(
                             request_options.get("additional_query_parameters", {})
                             if request_options is not None

@@ -59,6 +59,11 @@ class NonStreamedChatResponse(UncheckedBaseModel):
     A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
     """
 
+    prompt: typing.Optional[str] = pydantic_v1.Field(default=None)
+    """
+    The prompt that was used. Only present when `return_prompt` in the request is set to true.
+    """
+
     meta: typing.Optional[ApiMeta] = None
 
     def json(self, **kwargs: typing.Any) -> str:
