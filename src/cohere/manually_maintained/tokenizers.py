@@ -1,12 +1,15 @@
 import asyncio
-import requests
+import logging
 import typing
+
+import requests
 from tokenizers import Tokenizer  # type: ignore
 
 if typing.TYPE_CHECKING:
     from cohere.client import AsyncClient, Client
 
 TOKENIZER_CACHE_KEY = "tokenizers"
+logger = logging.getLogger(__name__)
 
 
 def tokenizer_cache_key(model: str) -> str:
@@ -24,7 +27,7 @@ def get_hf_tokenizer(co: "Client", model: str) -> Tokenizer:
 
     size = int(typing.cast(int, requests.head(tokenizer_url).headers.get("Content-Length")))
     size_mb = round(size / 1024 / 1024, 2)
-    print(f"Downloading tokenizer for model {model}. Size is {size_mb} MBs.")
+    logger.info(f"Downloading tokenizer for model {model}. Size is {size_mb} MBs.")
     response = requests.get(tokenizer_url)
     tokenizer = Tokenizer.from_str(response.text)
 
@@ -56,7 +59,7 @@ async def async_get_hf_tokenizer(co: "AsyncClient", model: str) -> Tokenizer:
 
     size = int(typing.cast(int, requests.head(tokenizer_url).headers.get("Content-Length")))
     size_mb = round(size / 1024 / 1024, 2)
-    print(f"Downloading tokenizer for model {model}. Size is {size_mb} MBs.")
+    logger.info(f"Downloading tokenizer for model {model}. Size is {size_mb} MBs.")
     response = await asyncio.get_event_loop().run_in_executor(None, requests.get, tokenizer_url)
     tokenizer = Tokenizer.from_str(response.text)
 
