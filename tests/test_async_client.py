@@ -391,3 +391,9 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
             tokens=[10104, 12221, 1315, 34, 1420, 69]
         )
         print(response)
+
+    async def test_tokenize_async_context_with_sync_client(self) -> None:
+        # Test that the sync client can be used in an async context.
+        co = cohere.Client(timeout=10000)
+        print(co.tokenize(model="command", text="tokenize me! :D"))
+        print(co.detokenize(model="command", tokens=[10104, 12221, 1315, 34, 1420, 69]))
