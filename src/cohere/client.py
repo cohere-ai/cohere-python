@@ -208,11 +208,13 @@ class Client(BaseCohere, CacheMixin):
         # `offline` parameter controls whether to use an offline tokenizer. If set to True, the tokenizer config will be downloaded (and cached),
         # and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
         opts: RequestOptions = request_options or {}  # type: ignore
+
         if offline:
             try:
-                tokens = asyncio.run(local_tokenizers.local_tokenize(self, text=text, model=model))
+                tokens = local_tokenizers.local_tokenize(self, text=text, model=model)
                 return TokenizeResponse(tokens=tokens, token_strings=[])
             except Exception:
+                # Fallback to calling the API.
                 opts["additional_headers"] = opts.get("additional_headers", {})
                 opts["additional_headers"]["sdk-api-warning-message"] = "offline_tokenizer_failed"
         return super().tokenize(text=text, model=model, request_options=opts)
@@ -228,11 +230,13 @@ class Client(BaseCohere, CacheMixin):
         # `offline` parameter controls whether to use an offline tokenizer. If set to True, the tokenizer config will be downloaded (and cached),
         # and the request will be processed using the offline tokenizer. If set to False, the request will be processed using the API. The default value is True.
         opts: RequestOptions = request_options or {}  # type: ignore
+
         if offline:
             try:
-                text = asyncio.run(local_tokenizers.local_detokenize(self, model=model, tokens=tokens))
+                text = local_tokenizers.local_detokenize(self, model=model, tokens=tokens)
                 return DetokenizeResponse(text=text)
             except Exception:
+                # Fallback to calling the API.
                 opts["additional_headers"] = opts.get("additional_headers", {})
                 opts["additional_headers"]["sdk-api-warning-message"] = "offline_tokenizer_failed"
 
@@ -387,7 +391,7 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         opts: RequestOptions = request_options or {}  # type: ignore
         if offline:
             try:
-                tokens = await local_tokenizers.local_tokenize(self, model=model, text=text)
+                tokens = await local_tokenizers.async_local_tokenize(self, model=model, text=text)
                 return TokenizeResponse(tokens=tokens, token_strings=[])
             except Exception:
                 opts["additional_headers"] = opts.get("additional_headers", {})
@@ -408,7 +412,7 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         opts: RequestOptions = request_options or {}  # type: ignore
         if offline:
             try:
-                text = await local_tokenizers.local_detokenize(self, model=model, tokens=tokens)
+                text = await local_tokenizers.async_local_detokenize(self, model=model, tokens=tokens)
                 return DetokenizeResponse(text=text)
             except Exception:
                 opts["additional_headers"] = opts.get("additional_headers", {})
@@ -420,7 +424,7 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         """
         Returns a Hugging Face tokenizer from a given model name.
         """
-        return await local_tokenizers.get_hf_tokenizer(self, model)
+        return await local_tokenizers.async_get_hf_tokenizer(self, model)
 
 
 def _get_api_key_from_environment() -> typing.Optional[str]:
