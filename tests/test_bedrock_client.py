@@ -6,6 +6,9 @@ import cohere
 co = cohere.BedrockClient(
     timeout=10000,
     aws_region="us-east-1",
+    chat_model="cohere.command-r-plus-v1:0",
+    embed_model="cohere.embed-multilingual-v3",
+    generate_model="cohere.command-text-v14",
 )
 
 package_dir = os.path.dirname(os.path.abspath(__file__))

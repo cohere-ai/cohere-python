@@ -6,7 +6,7 @@ import httpcore
 from httpx import URL, SyncByteStream
 from tokenizers import Tokenizer  # type: ignore
 
-from . import GenerateStreamText
+from . import GenerateStreamText, GenerateStreamEndResponse, GenerateStreamEnd, GenerateStreamedResponse, Generation
 from .client import Client, ClientEnvironment
 
 import typing
@@ -16,6 +16,8 @@ import boto3
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
 from botocore.eventstream import EventStream
+
+from .core import construct_type
 
 
 class BedrockClient(Client):
@@ -29,6 +31,9 @@ class BedrockClient(Client):
             base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
             client_name: typing.Optional[str] = None,
             timeout: typing.Optional[float] = None,
+            chat_model: typing.Optional[str] = None,
+            embed_model: typing.Optional[str] = None,
+            generate_model: typing.Optional[str] = None,
     ):
         Client.__init__(
             self,
@@ -44,6 +49,9 @@ class BedrockClient(Client):
                     aws_secret_key=aws_secret_key,
                     aws_session_token=aws_session_token,
                     aws_region=aws_region,
+                    chat_model=chat_model,
+                    embed_model=embed_model,
+                    generate_model=generate_model,
                 ),
                 timeout=timeout,
             ),
@@ -59,6 +67,9 @@ def get_event_hooks(
         aws_secret_key: typing.Optional[str] = None,
         aws_session_token: typing.Optional[str] = None,
         aws_region: typing.Optional[str] = None,
+        chat_model: typing.Optional[str] = None,
+        embed_model: typing.Optional[str] = None,
+        generate_model: typing.Optional[str] = None,
 ) -> typing.Dict[str, typing.List[EventHook]]:
     return {
         "request": [
@@ -68,6 +79,9 @@ def get_event_hooks(
                 aws_secret_key=aws_secret_key,
                 aws_session_token=aws_session_token,
                 aws_region=aws_region,
+                chat_model=chat_model,
+                embed_model=embed_model,
+                generate_model=generate_model,
             ),
         ],
         "response": [
@@ -101,24 +115,38 @@ class Streamer(SyncByteStream):
 
 def map_response_from_bedrock(
         response: httpx.Response,
-) -> httpx.Response:
+) -> None:
+    stream = response.headers["content-type"] == "application/vnd.amazon.eventstream"
     output = ""
-    regex = r"{[^\}]*}"
-    for _text in response.iter_lines():
-        match = re.search(regex, _text)
-        if match:
-            obj = json.loads(match.group())
-            if "bytes" in obj:
-                # base64 decode the bytes
-                str = base64.b64decode(obj["bytes"]).decode("utf-8")
-                streamed_obj = json.loads(str)
-                if streamed_obj["event_type"] == "text-generation":
-                    output += json.dumps(GenerateStreamText.parse_obj(streamed_obj).dict()) + "\n"
-
+    if not stream:
+        response.read()
+        parsed = typing.cast(Generation,
+                             construct_type(type_=Generation, object_=json.loads(response.text)))
+        output = json.dumps(parsed.dict())
+    elif stream:
+        output = ""
+        regex = r"{[^\}]*}"
+        for _text in response.iter_lines():
+            match = re.search(regex, _text)
+            if match:
+                obj = json.loads(match.group())
+                if "bytes" in obj:
+                    # base64 decode the bytes
+                    str = base64.b64decode(obj["bytes"]).decode("utf-8")
+                    streamed_obj = json.loads(str)
+                    if streamed_obj["event_type"] == "text-generation":
+                        parsed = typing.cast(GenerateStreamedResponse,
+                                             construct_type(type_=GenerateStreamedResponse, object_=streamed_obj))
+                        output += json.dumps(parsed.dict()) + "\n"
+                    elif streamed_obj["event_type"] == "stream-end":
+                        parsed = typing.cast(GenerateStreamedResponse,
+                                             construct_type(type_=GenerateStreamedResponse, object_=streamed_obj))
+                        output += json.dumps(parsed.dict()) + "\n"
 
     response.stream = Streamer([output.encode("utf-8")])
     response.is_stream_consumed = False
     response.is_closed = False
+
 
 def map_request_to_bedrock(
         service: str,
@@ -126,6 +154,9 @@ def map_request_to_bedrock(
         aws_secret_key: typing.Optional[str] = None,
         aws_session_token: typing.Optional[str] = None,
         aws_region: typing.Optional[str] = None,
+        chat_model: typing.Optional[str] = None,
+        embed_model: typing.Optional[str] = None,
+        generate_model: typing.Optional[str] = None,
 ) -> EventHook:
     session = boto3.Session(
         region_name=aws_region,
@@ -136,11 +167,25 @@ def map_request_to_bedrock(
     credentials = session.get_credentials()
     signer = SigV4Auth(credentials, service, session.region_name)
 
+    model_lookup = {
+        "embed": embed_model,
+        "chat": chat_model,
+        "generate": generate_model,
+    }
+
     def _event_hook(request: httpx.Request) -> None:
         headers = request.headers.copy()
         del headers["connection"]
 
-        url = get_url(platform=service, aws_region=aws_region)
+        endpoint = request.url.path.split("/")[-1]
+        body = json.loads(request.read())
+
+        url = get_url(
+            platform=service,
+            aws_region=aws_region,
+            model=model_lookup[endpoint],
+            stream=body["stream"],
+        )
         request.url = URL(url)
         request.headers["host"] = request.url.host
 
@@ -157,9 +202,25 @@ def map_request_to_bedrock(
     return _event_hook
 
 
+def get_endpoint_from_url(url: str,
+                          chat_model: typing.Optional[str] = None,
+                          embed_model: typing.Optional[str] = None,
+                          generate_model: typing.Optional[str] = None,
+                          ) -> str:
+    if chat_model in url:
+        return "chat"
+    if embed_model in url:
+        return "embed"
+    if generate_model in url:
+        return "generate"
+
+
 def get_url(
         *,
-        platform: str = "bedrock",
-        aws_region: typing.Optional[str] = "us-east-1"
+        platform: str,
+        aws_region: typing.Optional[str],
+        model: str,
+        stream: bool,
 ) -> str:
-    return f"https://{platform}-runtime.{aws_region}.amazonaws.com/model/cohere.command-text-v14/invoke-with-response-stream"
+    endpoint = "invoke" if not stream else "invoke-with-response-stream"
+    return f"https://{platform}-runtime.{aws_region}.amazonaws.com/model/{model}/{endpoint}"
