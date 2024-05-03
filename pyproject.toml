@@ -18,6 +18,7 @@ requests = "^2.0.0"
 tokenizers = "^0.19"
 types-requests = "^2.0.0"
 typing_extensions = ">= 4.0.0"
+boto3 = "^1.34.96"
 
 [tool.poetry.dev-dependencies]
 mypy = "^1.8.0"
