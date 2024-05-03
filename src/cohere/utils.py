@@ -164,7 +164,7 @@ def sum_fields_if_not_none(obj: typing.Any, field: str) -> Optional[int]:
 
 
 def merge_meta_field(metas: typing.List[ApiMeta]) -> ApiMeta:
-    api_version = metas[0].api_version
+    api_version = metas[0].api_version if metas else None
     billed_units = [meta.billed_units for meta in metas]
     input_tokens = sum_fields_if_not_none(billed_units, "input_tokens")
     output_tokens = sum_fields_if_not_none(billed_units, "output_tokens")

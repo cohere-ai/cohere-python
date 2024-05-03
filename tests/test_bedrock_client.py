@@ -16,6 +16,13 @@ embed_job = os.path.join(package_dir, 'embed_job.jsonl')
 
 
 class TestClient(unittest.TestCase):
+    def test_embed(self) -> None:
+        response = co.embed(
+            texts=["I love Cohere!"],
+            input_type="search_document",
+        )
+        print(response)
+
     def test_generate(self) -> None:
         response = co.generate(
             prompt='Please explain to me how LLMs work',
@@ -25,6 +32,20 @@ class TestClient(unittest.TestCase):
     def test_generate_stream(self) -> None:
         response = co.generate_stream(
             prompt='Please explain to me how LLMs work',
+        )
+        for event in response:
+            if event.event_type == "text-generation":
+                print(event.text, end='')
+
+    def test_chat(self) -> None:
+        response = co.chat(
+            message='Please explain to me how LLMs work',
+        )
+        print(response)
+
+    def test_chat_stream(self) -> None:
+        response = co.chat_stream(
+            message='Please explain to me how LLMs work',
         )
         for event in response:
             if event.event_type == "text-generation":

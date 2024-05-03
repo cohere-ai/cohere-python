@@ -3,10 +3,11 @@ import os
 import re
 import base64
 import httpcore
-from httpx import URL, SyncByteStream
+from httpx import URL, SyncByteStream, ByteStream
 from tokenizers import Tokenizer  # type: ignore
 
-from . import GenerateStreamText, GenerateStreamEndResponse, GenerateStreamEnd, GenerateStreamedResponse, Generation
+from . import GenerateStreamText, GenerateStreamEndResponse, GenerateStreamEnd, GenerateStreamedResponse, Generation, \
+    NonStreamedChatResponse, EmbedResponse, StreamedChatResponse
 from .client import Client, ClientEnvironment
 
 import typing
@@ -17,7 +18,7 @@ from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
 from botocore.eventstream import EventStream
 
-from .core import construct_type
+from .core import construct_type, UncheckedBaseModel
 
 
 class BedrockClient(Client):
@@ -85,12 +86,13 @@ def get_event_hooks(
             ),
         ],
         "response": [
-            map_response_from_bedrock
+            map_response_from_bedrock(
+                chat_model=chat_model,
+                embed_model=embed_model,
+                generate_model=generate_model,
+            )
         ],
     }
-
-
-# {'is_finished': True, 'event_type': 'stream-end', 'finish_reason': 'COMPLETE', 'amazon-bedrock-invocationMetrics': {'inputTokenCount': 8, 'outputTokenCount': 490, 'invocationLatency': 15094, 'firstByteLatency': 389}}
 
 
 TextGeneration = typing.TypedDict('TextGeneration',
@@ -103,49 +105,70 @@ StreamEnd = typing.TypedDict('StreamEnd',
 
 
 class Streamer(SyncByteStream):
-    lines: typing.List[bytes]
+    lines: typing.Iterator[bytes]
 
-    def __init__(self, lines: typing.List[bytes]):
+    def __init__(self, lines: typing.Iterator[bytes]):
         self.lines = lines
 
     def __iter__(self) -> typing.Iterator[bytes]:
-        return iter(self.lines)
+        return self.lines
 
+
+response_mapping = {
+    "chat": NonStreamedChatResponse,
+    "embed": EmbedResponse,
+    "generate": Generation,
+}
+
+stream_response_mapping = {
+    "chat": StreamedChatResponse,
+    "generate": GenerateStreamedResponse,
+}
+
+
+def stream_generator(response: httpx.Response, endpoint: str) -> typing.Iterator[bytes]:
+    regex = r"{[^\}]*}"
+
+    for _text in response.iter_lines():
+        match = re.search(regex, _text)
+        if match:
+            obj = json.loads(match.group())
+            if "bytes" in obj:
+                base64_payload = base64.b64decode(obj["bytes"]).decode("utf-8")
+                streamed_obj = json.loads(base64_payload)
+                if "event_type" in streamed_obj:
+                    response_type = stream_response_mapping[endpoint]
+                    parsed = typing.cast(response_type, construct_type(type_=response_type, object_=streamed_obj))
+                    yield (json.dumps(parsed.dict()) + "\n").encode("utf-8")
 
 
 def map_response_from_bedrock(
-        response: httpx.Response,
-) -> None:
-    stream = response.headers["content-type"] == "application/vnd.amazon.eventstream"
-    output = ""
-    if not stream:
-        response.read()
-        parsed = typing.cast(Generation,
-                             construct_type(type_=Generation, object_=json.loads(response.text)))
-        output = json.dumps(parsed.dict())
-    elif stream:
-        output = ""
-        regex = r"{[^\}]*}"
-        for _text in response.iter_lines():
-            match = re.search(regex, _text)
-            if match:
-                obj = json.loads(match.group())
-                if "bytes" in obj:
-                    # base64 decode the bytes
-                    str = base64.b64decode(obj["bytes"]).decode("utf-8")
-                    streamed_obj = json.loads(str)
-                    if streamed_obj["event_type"] == "text-generation":
-                        parsed = typing.cast(GenerateStreamedResponse,
-                                             construct_type(type_=GenerateStreamedResponse, object_=streamed_obj))
-                        output += json.dumps(parsed.dict()) + "\n"
-                    elif streamed_obj["event_type"] == "stream-end":
-                        parsed = typing.cast(GenerateStreamedResponse,
-                                             construct_type(type_=GenerateStreamedResponse, object_=streamed_obj))
-                        output += json.dumps(parsed.dict()) + "\n"
+        chat_model: typing.Optional[str] = None,
+        embed_model: typing.Optional[str] = None,
+        generate_model: typing.Optional[str] = None,
+):
+    def _hook(
+            response: httpx.Response,
+    ) -> None:
+        stream = response.headers["content-type"] == "application/vnd.amazon.eventstream"
+        endpoint = get_endpoint_from_url(response.url.path, chat_model, embed_model, generate_model)
+        output: typing.Iterator[bytes]
+        if not stream:
+            response_type = response_mapping[endpoint]
+            output = iter([json.dumps(typing.cast(response_type,
+                                            construct_type(type_=response_type,
+                                                           object_=json.loads(response.read()))).dict()).encode("utf-8")])
+        elif stream:
+            output = stream_generator(httpx.Response(
+                stream=response.stream,
+                status_code=response.status_code,
+            ), endpoint)
 
-    response.stream = Streamer([output.encode("utf-8")])
-    response.is_stream_consumed = False
-    response.is_closed = False
+        response.stream = Streamer(output)
+        response.is_stream_consumed = False
+        response.is_closed = False
+
+    return _hook
 
 
 def map_request_to_bedrock(
@@ -184,10 +207,18 @@ def map_request_to_bedrock(
             platform=service,
             aws_region=aws_region,
             model=model_lookup[endpoint],
-            stream=body["stream"],
+            stream="stream" in body and body["stream"],
         )
         request.url = URL(url)
         request.headers["host"] = request.url.host
+
+        if "stream" in body:
+            del body["stream"]
+
+        new_body = json.dumps(body).encode("utf-8")
+        request.stream = ByteStream(new_body)
+        request._content = new_body
+        headers["content-length"] = str(len(new_body))
 
         aws_request = AWSRequest(
             method=request.method,
