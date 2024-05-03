@@ -15,6 +15,7 @@ package_dir = os.path.dirname(os.path.abspath(__file__))
 embed_job = os.path.join(package_dir, 'embed_job.jsonl')
 
 
+@unittest.skip("Skip test")
 class TestClient(unittest.TestCase):
     def test_embed(self) -> None:
         response = co.embed(

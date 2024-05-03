@@ -153,16 +153,18 @@ def map_response_from_bedrock(
         stream = response.headers["content-type"] == "application/vnd.amazon.eventstream"
         endpoint = get_endpoint_from_url(response.url.path, chat_model, embed_model, generate_model)
         output: typing.Iterator[bytes]
-        if not stream:
-            response_type = response_mapping[endpoint]
-            output = iter([json.dumps(typing.cast(response_type,
-                                            construct_type(type_=response_type,
-                                                           object_=json.loads(response.read()))).dict()).encode("utf-8")])
-        elif stream:
+
+        if stream:
             output = stream_generator(httpx.Response(
                 stream=response.stream,
                 status_code=response.status_code,
             ), endpoint)
+        else:
+            response_type = response_mapping[endpoint]
+            output = iter([json.dumps(typing.cast(response_type,
+                                                  construct_type(type_=response_type,
+                                                                 object_=json.loads(response.read()))).dict()).encode(
+                "utf-8")])
 
         response.stream = Streamer(output)
         response.is_stream_consumed = False
