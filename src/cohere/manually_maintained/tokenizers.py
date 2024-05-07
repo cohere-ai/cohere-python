@@ -41,6 +41,12 @@ def local_tokenize(co: "Client", model: str, text: str) -> typing.List[int]:
     return tokenizer.encode(text, add_special_tokens=False).ids
 
 
+def local_tokens_to_token_strings(co: "Client", model: str, tokens: typing.Sequence[int]) -> typing.List[str]:
+    """Decodes a list of token ints to a list of token strings."""
+    tokenizer = get_hf_tokenizer(co, model)
+    return tokenizer.decode_batch([[token] for token in tokens], skip_special_tokens=False)
+
+
 def local_detokenize(co: "Client", model: str, tokens: typing.Sequence[int]) -> str:
     """Decodes a given list of tokens using a local tokenizer."""
     tokenizer = get_hf_tokenizer(co, model)
@@ -71,6 +77,12 @@ async def async_local_tokenize(co: "AsyncClient", model: str, text: str) -> typi
     """Encodes a given text using a local tokenizer."""
     tokenizer = await async_get_hf_tokenizer(co, model)
     return tokenizer.encode(text, add_special_tokens=False).ids
+
+
+async def async_local_tokens_to_token_strings(co: "Client", model: str, tokens: typing.Sequence[int]) -> typing.List[str]:
+    """Decodes a list of token ints to a list of token strings."""
+    tokenizer = await async_get_hf_tokenizer(co, model)
+    return tokenizer.decode_batch([[token] for token in tokens], skip_special_tokens=False)
 
 
 async def async_local_detokenize(co: "AsyncClient", model: str, tokens: typing.Sequence[int]) -> str:

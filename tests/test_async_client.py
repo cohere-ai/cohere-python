@@ -383,7 +383,8 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
             model="command",
             text="tokenize me! :D"
         )
-        print(response)
+        self.assertEqual(response.tokens, [10002, 2261, 2012, 8, 2792, 43])
+        self.assertEqual(response.token_strings, ["token", "ize", " me", "!", " :", "D"])
 
     async def test_local_detokenize(self) -> None:
         response = await self.co.detokenize(
