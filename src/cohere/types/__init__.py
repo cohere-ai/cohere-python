@@ -31,6 +31,7 @@ from .chat_stream_request_tool_results_item import ChatStreamRequestToolResultsI
 from .chat_stream_start_event import ChatStreamStartEvent
 from .chat_text_generation_event import ChatTextGenerationEvent
 from .chat_tool_calls_generation_event import ChatToolCallsGenerationEvent
+from .check_api_key_response import CheckApiKeyResponse
 from .classify_data_metrics import ClassifyDataMetrics
 from .classify_example import ClassifyExample
 from .classify_request_truncate import ClassifyRequestTruncate
@@ -89,6 +90,8 @@ from .list_connectors_response import ListConnectorsResponse
 from .list_embed_job_response import ListEmbedJobResponse
 from .list_models_response import ListModelsResponse
 from .metrics import Metrics
+from .metrics_embed_data import MetricsEmbedData
+from .metrics_embed_data_fields_item import MetricsEmbedDataFieldsItem
 from .non_streamed_chat_response import NonStreamedChatResponse
 from .o_auth_authorize_response import OAuthAuthorizeResponse
 from .parse_info import ParseInfo
@@ -116,6 +119,7 @@ from .summarize_request_format import SummarizeRequestFormat
 from .summarize_request_length import SummarizeRequestLength
 from .summarize_response import SummarizeResponse
 from .tokenize_response import TokenizeResponse
+from .too_many_requests_error_body import TooManyRequestsErrorBody
 from .tool import Tool
 from .tool_call import ToolCall
 from .tool_parameter_definitions_value import ToolParameterDefinitionsValue
@@ -153,6 +157,7 @@ __all__ = [
     "ChatStreamStartEvent",
     "ChatTextGenerationEvent",
     "ChatToolCallsGenerationEvent",
+    "CheckApiKeyResponse",
     "ClassifyDataMetrics",
     "ClassifyExample",
     "ClassifyRequestTruncate",
@@ -209,6 +214,8 @@ __all__ = [
     "ListEmbedJobResponse",
     "ListModelsResponse",
     "Metrics",
+    "MetricsEmbedData",
+    "MetricsEmbedDataFieldsItem",
     "NonStreamedChatResponse",
     "OAuthAuthorizeResponse",
     "ParseInfo",
@@ -234,6 +241,7 @@ __all__ = [
     "SummarizeRequestLength",
     "SummarizeResponse",
     "TokenizeResponse",
+    "TooManyRequestsErrorBody",
     "Tool",
     "ToolCall",
     "ToolParameterDefinitionsValue",

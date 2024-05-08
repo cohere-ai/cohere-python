@@ -16,6 +16,7 @@ from ..core.unchecked_base_model import construct_type
 from ..errors.too_many_requests_error import TooManyRequestsError
 from ..types.dataset_type import DatasetType
 from ..types.dataset_validation_status import DatasetValidationStatus
+from ..types.too_many_requests_error_body import TooManyRequestsErrorBody
 from .types.datasets_create_response import DatasetsCreateResponse
 from .types.datasets_get_response import DatasetsGetResponse
 from .types.datasets_get_usage_response import DatasetsGetUsageResponse
@@ -104,7 +105,7 @@ class DatasetsClient:
             return typing.cast(DatasetsListResponse, construct_type(type_=DatasetsListResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()
@@ -134,7 +135,7 @@ class DatasetsClient:
         Parameters:
             - name: str. The name of the uploaded dataset.
 
-            - type: DatasetType. The dataset type, which is used to validate the data. Valid types are `embed-input`, `reranker-finetune-input`, `prompt-completion-finetune-input`, `single-label-classification-finetune-input`, `chat-finetune-input`, and `multi-label-classification-finetune-input`.
+            - type: DatasetType. The dataset type, which is used to validate the data. Valid types are `embed-input`, `reranker-finetune-input`, `single-label-classification-finetune-input`, `chat-finetune-input`, and `multi-label-classification-finetune-input`.
 
             - keep_original_file: typing.Optional[bool]. Indicates if the original file should be stored.
 
@@ -215,7 +216,7 @@ class DatasetsClient:
             return typing.cast(DatasetsCreateResponse, construct_type(type_=DatasetsCreateResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()
@@ -262,7 +263,7 @@ class DatasetsClient:
             return typing.cast(DatasetsGetUsageResponse, construct_type(type_=DatasetsGetUsageResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()
@@ -313,7 +314,7 @@ class DatasetsClient:
             return typing.cast(DatasetsGetResponse, construct_type(type_=DatasetsGetResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()
@@ -366,7 +367,7 @@ class DatasetsClient:
             return typing.cast(typing.Dict[str, typing.Any], construct_type(type_=typing.Dict[str, typing.Any], object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()
@@ -454,7 +455,7 @@ class AsyncDatasetsClient:
             return typing.cast(DatasetsListResponse, construct_type(type_=DatasetsListResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()
@@ -484,7 +485,7 @@ class AsyncDatasetsClient:
         Parameters:
             - name: str. The name of the uploaded dataset.
 
-            - type: DatasetType. The dataset type, which is used to validate the data. Valid types are `embed-input`, `reranker-finetune-input`, `prompt-completion-finetune-input`, `single-label-classification-finetune-input`, `chat-finetune-input`, and `multi-label-classification-finetune-input`.
+            - type: DatasetType. The dataset type, which is used to validate the data. Valid types are `embed-input`, `reranker-finetune-input`, `single-label-classification-finetune-input`, `chat-finetune-input`, and `multi-label-classification-finetune-input`.
 
             - keep_original_file: typing.Optional[bool]. Indicates if the original file should be stored.
 
@@ -565,7 +566,7 @@ class AsyncDatasetsClient:
             return typing.cast(DatasetsCreateResponse, construct_type(type_=DatasetsCreateResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()
@@ -612,7 +613,7 @@ class AsyncDatasetsClient:
             return typing.cast(DatasetsGetUsageResponse, construct_type(type_=DatasetsGetUsageResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()
@@ -663,7 +664,7 @@ class AsyncDatasetsClient:
             return typing.cast(DatasetsGetResponse, construct_type(type_=DatasetsGetResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()
@@ -716,7 +717,7 @@ class AsyncDatasetsClient:
             return typing.cast(typing.Dict[str, typing.Any], construct_type(type_=typing.Dict[str, typing.Any], object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()
