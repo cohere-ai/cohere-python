@@ -152,7 +152,7 @@ class FinetuningClient:
                 name="api-test",
                 settings=Settings(
                     base_model=BaseModel(
-                        base_type="BASE_TYPE_GENERATIVE",
+                        base_type="BASE_TYPE_CHAT",
                     ),
                     dataset_id="my-dataset-id",
                 ),
@@ -810,7 +810,7 @@ class AsyncFinetuningClient:
                 name="api-test",
                 settings=Settings(
                     base_model=BaseModel(
-                        base_type="BASE_TYPE_GENERATIVE",
+                        base_type="BASE_TYPE_CHAT",
                     ),
                     dataset_id="my-dataset-id",
                 ),

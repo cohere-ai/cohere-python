@@ -16,6 +16,7 @@ from ..errors.too_many_requests_error import TooManyRequestsError
 from ..types.compatible_endpoint import CompatibleEndpoint
 from ..types.get_model_response import GetModelResponse
 from ..types.list_models_response import ListModelsResponse
+from ..types.too_many_requests_error_body import TooManyRequestsErrorBody
 
 
 class ModelsClient:
@@ -69,7 +70,7 @@ class ModelsClient:
             )
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 500:
             raise InternalServerError(
@@ -148,7 +149,7 @@ class ModelsClient:
             return typing.cast(ListModelsResponse, construct_type(type_=ListModelsResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()
@@ -208,7 +209,7 @@ class AsyncModelsClient:
             )
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 500:
             raise InternalServerError(
@@ -287,7 +288,7 @@ class AsyncModelsClient:
             return typing.cast(ListModelsResponse, construct_type(type_=ListModelsResponse, object_=_response.json()))  # type: ignore
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()

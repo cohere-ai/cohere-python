@@ -22,6 +22,7 @@ from ..types.delete_connector_response import DeleteConnectorResponse
 from ..types.get_connector_response import GetConnectorResponse
 from ..types.list_connectors_response import ListConnectorsResponse
 from ..types.o_auth_authorize_response import OAuthAuthorizeResponse
+from ..types.too_many_requests_error_body import TooManyRequestsErrorBody
 from ..types.update_connector_response import UpdateConnectorResponse
 
 # this is used as the default value for optional parameters
@@ -95,7 +96,7 @@ class ConnectorsClient:
             )
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 500:
             raise InternalServerError(
@@ -204,7 +205,7 @@ class ConnectorsClient:
             )
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 500:
             raise InternalServerError(
@@ -267,7 +268,7 @@ class ConnectorsClient:
             )
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 500:
             raise InternalServerError(
@@ -334,7 +335,7 @@ class ConnectorsClient:
             )
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 500:
             raise InternalServerError(
@@ -448,7 +449,7 @@ class ConnectorsClient:
             )
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 500:
             raise InternalServerError(
@@ -533,7 +534,7 @@ class ConnectorsClient:
             )
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 500:
             raise InternalServerError(
@@ -613,7 +614,7 @@ class AsyncConnectorsClient:
             )
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 500:
             raise InternalServerError(
@@ -722,7 +723,7 @@ class AsyncConnectorsClient:
             )
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 500:
             raise InternalServerError(
@@ -785,7 +786,7 @@ class AsyncConnectorsClient:
             )
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 500:
             raise InternalServerError(
@@ -854,7 +855,7 @@ class AsyncConnectorsClient:
             )
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 500:
             raise InternalServerError(
@@ -968,7 +969,7 @@ class AsyncConnectorsClient:
             )
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 500:
             raise InternalServerError(
@@ -1053,7 +1054,7 @@ class AsyncConnectorsClient:
             )
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 500:
             raise InternalServerError(

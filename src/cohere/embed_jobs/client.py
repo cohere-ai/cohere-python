@@ -19,6 +19,7 @@ from ..types.embed_input_type import EmbedInputType
 from ..types.embed_job import EmbedJob
 from ..types.embedding_type import EmbeddingType
 from ..types.list_embed_job_response import ListEmbedJobResponse
+from ..types.too_many_requests_error_body import TooManyRequestsErrorBody
 from .types.create_embed_job_request_truncate import CreateEmbedJobRequestTruncate
 
 # this is used as the default value for optional parameters
@@ -72,7 +73,7 @@ class EmbedJobsClient:
             )
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 500:
             raise InternalServerError(
@@ -180,7 +181,7 @@ class EmbedJobsClient:
             )
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 500:
             raise InternalServerError(
@@ -243,7 +244,7 @@ class EmbedJobsClient:
             )
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 500:
             raise InternalServerError(
@@ -311,7 +312,7 @@ class EmbedJobsClient:
             )
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 500:
             raise InternalServerError(
@@ -371,7 +372,7 @@ class AsyncEmbedJobsClient:
             )
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 500:
             raise InternalServerError(
@@ -479,7 +480,7 @@ class AsyncEmbedJobsClient:
             )
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 500:
             raise InternalServerError(
@@ -542,7 +543,7 @@ class AsyncEmbedJobsClient:
             )
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 500:
             raise InternalServerError(
@@ -610,7 +611,7 @@ class AsyncEmbedJobsClient:
             )
         if _response.status_code == 429:
             raise TooManyRequestsError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 500:
             raise InternalServerError(
