@@ -9,7 +9,6 @@ DatasetType = typing.Union[
         "cluster-result",
         "cluster-outliers",
         "reranker-finetune-input",
-        "prompt-completion-finetune-input",
         "single-label-classification-finetune-input",
         "chat-finetune-input",
         "multi-label-classification-finetune-input",

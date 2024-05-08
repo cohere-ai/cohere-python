@@ -6,13 +6,10 @@ import typing
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
 from ..core.unchecked_base_model import UncheckedBaseModel
-from .finetune_dataset_metrics import FinetuneDatasetMetrics
-from .metrics_embed_data import MetricsEmbedData
 
 
-class Metrics(UncheckedBaseModel):
-    finetune_dataset_metrics: typing.Optional[FinetuneDatasetMetrics] = None
-    embed_data: typing.Optional[MetricsEmbedData] = None
+class TooManyRequestsErrorBody(UncheckedBaseModel):
+    data: typing.Optional[str] = None
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

@@ -2,7 +2,7 @@
 
 from .types import (
     DatasetsCreateResponse,
-    DatasetsCreateResponseDatasetParts,
+    DatasetsCreateResponseDatasetPartsItem,
     DatasetsGetResponse,
     DatasetsGetUsageResponse,
     DatasetsListResponse,
@@ -10,7 +10,7 @@ from .types import (
 
 __all__ = [
     "DatasetsCreateResponse",
-    "DatasetsCreateResponseDatasetParts",
+    "DatasetsCreateResponseDatasetPartsItem",
     "DatasetsGetResponse",
     "DatasetsGetUsageResponse",
     "DatasetsListResponse",

@@ -6,13 +6,14 @@ import typing
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
 from ..core.unchecked_base_model import UncheckedBaseModel
-from .finetune_dataset_metrics import FinetuneDatasetMetrics
-from .metrics_embed_data import MetricsEmbedData
+from .metrics_embed_data_fields_item import MetricsEmbedDataFieldsItem
 
 
-class Metrics(UncheckedBaseModel):
-    finetune_dataset_metrics: typing.Optional[FinetuneDatasetMetrics] = None
-    embed_data: typing.Optional[MetricsEmbedData] = None
+class MetricsEmbedData(UncheckedBaseModel):
+    fields: typing.Optional[typing.List[MetricsEmbedDataFieldsItem]] = pydantic_v1.Field(default=None)
+    """
+    the fields in the dataset
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

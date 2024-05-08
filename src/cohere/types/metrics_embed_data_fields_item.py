@@ -3,30 +3,20 @@
 import datetime as dt
 import typing
 
-from ...core.datetime_utils import serialize_datetime
-from ...core.pydantic_utilities import pydantic_v1
-from ...core.unchecked_base_model import UncheckedBaseModel
+from ..core.datetime_utils import serialize_datetime
+from ..core.pydantic_utilities import pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 
 
-class DatasetsCreateResponseDatasetParts(UncheckedBaseModel):
-    """
-    the underlying files that make up the dataset
-    """
-
+class MetricsEmbedDataFieldsItem(UncheckedBaseModel):
     name: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
-    the name of the dataset part
+    the name of the field
     """
 
-    num_rows: typing.Optional[float] = pydantic_v1.Field(default=None)
+    count: typing.Optional[float] = pydantic_v1.Field(default=None)
     """
-    the number of rows in the dataset part
-    """
-
-    samples: typing.Optional[typing.List[str]] = None
-    part_kind: typing.Optional[str] = pydantic_v1.Field(default=None)
-    """
-    the kind of dataset part
+    the number of times the field appears in the dataset
     """
 
     def json(self, **kwargs: typing.Any) -> str:
