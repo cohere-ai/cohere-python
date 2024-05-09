@@ -9,7 +9,7 @@ from ...core.unchecked_base_model import UncheckedBaseModel
 
 
 class DatasetsGetUsageResponse(UncheckedBaseModel):
-    organization_usage: typing.Optional[str] = pydantic_v1.Field(default=None)
+    organization_usage: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
     The total number of bytes used by the organization.
     """

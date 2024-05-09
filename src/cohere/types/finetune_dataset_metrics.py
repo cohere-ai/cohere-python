@@ -9,32 +9,32 @@ from ..core.unchecked_base_model import UncheckedBaseModel
 
 
 class FinetuneDatasetMetrics(UncheckedBaseModel):
-    trainable_token_count: typing.Optional[str] = pydantic_v1.Field(default=None)
+    trainable_token_count: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
     The number of tokens of valid examples that can be used for training.
     """
 
-    total_examples: typing.Optional[str] = pydantic_v1.Field(default=None)
+    total_examples: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
     The overall number of examples.
     """
 
-    train_examples: typing.Optional[str] = pydantic_v1.Field(default=None)
+    train_examples: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
     The number of training examples.
     """
 
-    train_size_bytes: typing.Optional[str] = pydantic_v1.Field(default=None)
+    train_size_bytes: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
     The size in bytes of all training examples.
     """
 
-    eval_examples: typing.Optional[str] = pydantic_v1.Field(default=None)
+    eval_examples: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
     Number of evaluation examples.
     """
 
-    eval_size_bytes: typing.Optional[str] = pydantic_v1.Field(default=None)
+    eval_size_bytes: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
     The size in bytes of all eval examples.
     """

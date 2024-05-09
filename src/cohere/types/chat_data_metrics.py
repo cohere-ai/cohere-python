@@ -9,12 +9,12 @@ from ..core.unchecked_base_model import UncheckedBaseModel
 
 
 class ChatDataMetrics(UncheckedBaseModel):
-    num_train_turns: typing.Optional[str] = pydantic_v1.Field(default=None)
+    num_train_turns: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
     The sum of all turns of valid train examples.
     """
 
-    num_eval_turns: typing.Optional[str] = pydantic_v1.Field(default=None)
+    num_eval_turns: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
     The sum of all turns of valid eval examples.
     """
