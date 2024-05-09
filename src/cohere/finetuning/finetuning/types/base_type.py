@@ -5,6 +5,7 @@ import typing
 BaseType = typing.Union[
     typing.Literal[
         "BASE_TYPE_UNSPECIFIED",
+        "BASE_TYPE_GENERATIVE",
         "BASE_TYPE_CLASSIFICATION",
         "BASE_TYPE_RERANK",
         "BASE_TYPE_CHAT",

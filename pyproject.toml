@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cohere"
-version = "5.3.5"
+version = "5.4.0"
 description = ""
 readme = "README.md"
 authors = []
@@ -10,6 +10,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
+boto3 = "^1.34.0"
 fastavro = "^1.9.4"
 httpx = ">=0.21.2"
 httpx-sse = "^0.4.0"
@@ -18,7 +19,6 @@ requests = "^2.0.0"
 tokenizers = "^0.19"
 types-requests = "^2.0.0"
 typing_extensions = ">= 4.0.0"
-boto3 = "^1.34.96"
 
 [tool.poetry.dev-dependencies]
 mypy = "^1.8.0"
