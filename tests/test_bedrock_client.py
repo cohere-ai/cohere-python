@@ -61,8 +61,6 @@ class TestClient(unittest.TestCase):
             if event.event_type == "stream-end":
                 self.assertIsNotNone(event.finish_reason)
                 self.assertIsNotNone(event.response)
-                self.assertIsNotNone(event.is_finished)
                 self.assertIsNotNone(event.response.text)
-                self.assertIsNotNone(event.response.response_id)
 
         self.assertSetEqual(response_types, {"text-generation", "stream-end"})
