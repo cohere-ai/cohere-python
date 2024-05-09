@@ -132,8 +132,8 @@ from .errors import (
     UnauthorizedError,
 )
 from . import connectors, datasets, embed_jobs, finetuning, models
-from .client import AsyncClient, Client
 from .bedrock_client import BedrockClient
+from .client import AsyncClient, Client
 from .datasets import (
     DatasetsCreateResponse,
     DatasetsCreateResponseDatasetPartsItem,
@@ -153,6 +153,7 @@ __all__ = [
     "AsyncClient",
     "AuthTokenType",
     "BadRequestError",
+    "BedrockClient",
     "ChatCitation",
     "ChatCitationGenerationEvent",
     "ChatConnector",

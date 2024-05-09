@@ -9,7 +9,7 @@ from ..core.unchecked_base_model import UncheckedBaseModel
 
 
 class LabelMetric(UncheckedBaseModel):
-    total_examples: typing.Optional[str] = pydantic_v1.Field(default=None)
+    total_examples: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
     Total number of examples for this label
     """

@@ -9,32 +9,32 @@ from ..core.unchecked_base_model import UncheckedBaseModel
 
 
 class RerankerDataMetrics(UncheckedBaseModel):
-    num_train_queries: typing.Optional[str] = pydantic_v1.Field(default=None)
+    num_train_queries: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
     The number of training queries.
     """
 
-    num_train_relevant_passages: typing.Optional[str] = pydantic_v1.Field(default=None)
+    num_train_relevant_passages: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
     The sum of all relevant passages of valid training examples.
     """
 
-    num_train_hard_negatives: typing.Optional[str] = pydantic_v1.Field(default=None)
+    num_train_hard_negatives: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
     The sum of all hard negatives of valid training examples.
     """
 
-    num_eval_queries: typing.Optional[str] = pydantic_v1.Field(default=None)
+    num_eval_queries: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
     The number of evaluation queries.
     """
 
-    num_eval_relevant_passages: typing.Optional[str] = pydantic_v1.Field(default=None)
+    num_eval_relevant_passages: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
     The sum of all relevant passages of valid eval examples.
     """
 
-    num_eval_hard_negatives: typing.Optional[str] = pydantic_v1.Field(default=None)
+    num_eval_hard_negatives: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
     The sum of all hard negatives of valid eval examples.
     """
