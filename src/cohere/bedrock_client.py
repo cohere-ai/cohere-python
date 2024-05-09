@@ -28,8 +28,6 @@ class BedrockClient(Client):
             aws_secret_key: typing.Optional[str] = None,
             aws_session_token: typing.Optional[str] = None,
             aws_region: typing.Optional[str] = None,
-            base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
-            client_name: typing.Optional[str] = None,
             timeout: typing.Optional[float] = None,
             chat_model: typing.Optional[str] = None,
             embed_model: typing.Optional[str] = None,
@@ -37,9 +35,9 @@ class BedrockClient(Client):
     ):
         Client.__init__(
             self,
-            base_url=base_url,
+            base_url="https://api.cohere.com",  # this url is unused for BedrockClient
             environment=ClientEnvironment.PRODUCTION,
-            client_name=client_name,
+            client_name="n/a",
             timeout=timeout,
             api_key="n/a",
             httpx_client=httpx.Client(
