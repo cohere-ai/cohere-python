@@ -13,10 +13,9 @@ from .client import Client, ClientEnvironment
 import typing
 
 import httpx
-import boto3
-from botocore.auth import SigV4Auth
-from botocore.awsrequest import AWSRequest
-from botocore.eventstream import EventStream
+import boto3  # type: ignore
+from botocore.auth import SigV4Auth  # type: ignore
+from botocore.awsrequest import AWSRequest  # type: ignore
 
 from .core import construct_type, UncheckedBaseModel
 
@@ -99,9 +98,10 @@ TextGeneration = typing.TypedDict('TextGeneration',
                                   {"text": str, "is_finished": str, "event_type": typing.Literal["text-generation"]})
 StreamEnd = typing.TypedDict('StreamEnd',
                              {"is_finished": str, "event_type": typing.Literal["stream-end"], "finish_reason": str,
-                              "amazon-bedrock-invocationMetrics": typing.TypedDict('InvocationMetrics', {
-                                  "inputTokenCount": int, "outputTokenCount": int, "invocationLatency": int,
-                                  "firstByteLatency": int})})
+                              # "amazon-bedrock-invocationMetrics": {
+                              #     "inputTokenCount": int, "outputTokenCount": int, "invocationLatency": int,
+                              #     "firstByteLatency": int}
+                              })
 
 
 class Streamer(SyncByteStream):
@@ -114,13 +114,13 @@ class Streamer(SyncByteStream):
         return self.lines
 
 
-response_mapping = {
+response_mapping: typing.Dict[str, typing.Any] = {
     "chat": NonStreamedChatResponse,
     "embed": EmbedResponse,
     "generate": Generation,
 }
 
-stream_response_mapping = {
+stream_response_mapping: typing.Dict[str, typing.Any] = {
     "chat": StreamedChatResponse,
     "generate": GenerateStreamedResponse,
 }
@@ -138,8 +138,9 @@ def stream_generator(response: httpx.Response, endpoint: str) -> typing.Iterator
                 streamed_obj = json.loads(base64_payload)
                 if "event_type" in streamed_obj:
                     response_type = stream_response_mapping[endpoint]
-                    parsed = typing.cast(response_type, construct_type(type_=response_type, object_=streamed_obj))
-                    yield (json.dumps(parsed.dict()) + "\n").encode("utf-8")
+                    parsed = typing.cast(response_type,  # type: ignore
+                                         construct_type(type_=response_type, object_=streamed_obj))  # type: ignore
+                    yield (json.dumps(parsed.dict()) + "\n").encode("utf-8")  # type: ignore
 
 
 def map_response_from_bedrock(
@@ -161,9 +162,11 @@ def map_response_from_bedrock(
             ), endpoint)
         else:
             response_type = response_mapping[endpoint]
-            output = iter([json.dumps(typing.cast(response_type,
-                                                  construct_type(type_=response_type,
-                                                                 object_=json.loads(response.read()))).dict()).encode(
+            output = iter([json.dumps(typing.cast(response_type,  # type: ignore
+                                                  construct_type(
+                                                      type_=response_type,
+                                                      object_=json.loads(response.read()))).dict()  # type: ignore
+                                      ).encode(
                 "utf-8")])
 
         response.stream = Streamer(output)
@@ -208,7 +211,7 @@ def map_request_to_bedrock(
         url = get_url(
             platform=service,
             aws_region=aws_region,
-            model=model_lookup[endpoint],
+            model=model_lookup[endpoint],  # type: ignore
             stream="stream" in body and body["stream"],
         )
         request.url = URL(url)
@@ -240,12 +243,13 @@ def get_endpoint_from_url(url: str,
                           embed_model: typing.Optional[str] = None,
                           generate_model: typing.Optional[str] = None,
                           ) -> str:
-    if chat_model in url:
+    if chat_model and chat_model in url:
         return "chat"
-    if embed_model in url:
+    if embed_model and embed_model in url:
         return "embed"
-    if generate_model in url:
+    if generate_model and generate_model in url:
         return "generate"
+    raise ValueError(f"Unknown endpoint in url: {url}")
 
 
 def get_url(
