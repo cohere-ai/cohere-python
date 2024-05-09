@@ -133,6 +133,7 @@ from .errors import (
 )
 from . import connectors, datasets, embed_jobs, finetuning, models
 from .client import AsyncClient, Client
+from .bedrock_client import BedrockClient
 from .datasets import (
     DatasetsCreateResponse,
     DatasetsCreateResponseDatasetPartsItem,
