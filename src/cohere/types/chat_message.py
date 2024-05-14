@@ -10,6 +10,11 @@ from .tool_call import ToolCall
 
 
 class ChatMessage(UncheckedBaseModel):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.__fields_set__.add("role")
+
     """
     Represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
 
