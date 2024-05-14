@@ -7,7 +7,6 @@ import urllib.parse
 from json.decoder import JSONDecodeError
 
 import httpx
-from httpx_sse import EventSource
 
 from .connectors.client import AsyncConnectorsClient, ConnectorsClient
 from .core.api_error import ApiError
@@ -26,13 +25,10 @@ from .finetuning.client import AsyncFinetuningClient, FinetuningClient
 from .models.client import AsyncModelsClient, ModelsClient
 from .types.chat_connector import ChatConnector
 from .types.chat_document import ChatDocument
-from .types.chat_message import ChatMessage
 from .types.chat_request_citation_quality import ChatRequestCitationQuality
 from .types.chat_request_prompt_truncation import ChatRequestPromptTruncation
-from .types.chat_request_tool_results_item import ChatRequestToolResultsItem
 from .types.chat_stream_request_citation_quality import ChatStreamRequestCitationQuality
 from .types.chat_stream_request_prompt_truncation import ChatStreamRequestPromptTruncation
-from .types.chat_stream_request_tool_results_item import ChatStreamRequestToolResultsItem
 from .types.check_api_key_response import CheckApiKeyResponse
 from .types.classify_example import ClassifyExample
 from .types.classify_request_truncate import ClassifyRequestTruncate
@@ -48,6 +44,7 @@ from .types.generate_stream_request_return_likelihoods import GenerateStreamRequ
 from .types.generate_stream_request_truncate import GenerateStreamRequestTruncate
 from .types.generate_streamed_response import GenerateStreamedResponse
 from .types.generation import Generation
+from .types.message import Message
 from .types.non_streamed_chat_response import NonStreamedChatResponse
 from .types.rerank_request_documents_item import RerankRequestDocumentsItem
 from .types.rerank_response import RerankResponse
@@ -59,6 +56,7 @@ from .types.summarize_response import SummarizeResponse
 from .types.tokenize_response import TokenizeResponse
 from .types.too_many_requests_error_body import TooManyRequestsErrorBody
 from .types.tool import Tool
+from .types.tool_result import ToolResult
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -130,7 +128,7 @@ class BaseCohere:
         message: str,
         model: typing.Optional[str] = OMIT,
         preamble: typing.Optional[str] = OMIT,
-        chat_history: typing.Optional[typing.Sequence[ChatMessage]] = OMIT,
+        chat_history: typing.Optional[typing.Sequence[Message]] = OMIT,
         conversation_id: typing.Optional[str] = OMIT,
         prompt_truncation: typing.Optional[ChatStreamRequestPromptTruncation] = OMIT,
         connectors: typing.Optional[typing.Sequence[ChatConnector]] = OMIT,
@@ -149,7 +147,7 @@ class BaseCohere:
         raw_prompting: typing.Optional[bool] = OMIT,
         return_prompt: typing.Optional[bool] = OMIT,
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
-        tool_results: typing.Optional[typing.Sequence[ChatStreamRequestToolResultsItem]] = OMIT,
+        tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[StreamedChatResponse]:
         """
@@ -170,12 +168,12 @@ class BaseCohere:
                                               The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
                                               Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - chat_history: typing.Optional[typing.Sequence[ChatMessage]]. A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
+            - chat_history: typing.Optional[typing.Sequence[Message]]. A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
 
-                                                                           Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
+                                                                       Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
 
-                                                                           The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
-                                                                           Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+                                                                       The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
+                                                                       Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
             - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
 
@@ -280,39 +278,39 @@ class BaseCohere:
                                                              When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
                                                              Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - tool_results: typing.Optional[typing.Sequence[ChatStreamRequestToolResultsItem]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
-                                                                                                Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
+            - tool_results: typing.Optional[typing.Sequence[ToolResult]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
+                                                                          Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
 
-                                                                                                **Note**: `outputs` must be a list of objects. If your tool returns a single object (eg `{"status": 200}`), make sure to wrap it in a list.
-                                                                                                ```
-                                                                                                tool_results = [
-                                                                                                  {
-                                                                                                    "call": {
-                                                                                                      "name": <tool name>,
-                                                                                                      "parameters": {
-                                                                                                        <param name>: <param value>
-                                                                                                      }
-                                                                                                    },
-                                                                                                    "outputs": [{
-                                                                                                      <key>: <value>
-                                                                                                    }]
-                                                                                                  },
-                                                                                                  ...
-                                                                                                ]
-                                                                                                ```
-                                                                                                **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
-                                                                                                Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+                                                                          **Note**: `outputs` must be a list of objects. If your tool returns a single object (eg `{"status": 200}`), make sure to wrap it in a list.
+                                                                          ```
+                                                                          tool_results = [
+                                                                            {
+                                                                              "call": {
+                                                                                "name": <tool name>,
+                                                                                "parameters": {
+                                                                                  <param name>: <param value>
+                                                                                }
+                                                                              },
+                                                                              "outputs": [{
+                                                                                <key>: <value>
+                                                                              }]
+                                                                            },
+                                                                            ...
+                                                                          ]
+                                                                          ```
+                                                                          **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
+                                                                          Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere import (
             ChatConnector,
-            ChatMessage,
             ChatStreamRequestConnectorsSearchOptions,
-            ChatStreamRequestToolResultsItem,
+            Message_Chatbot,
             Tool,
             ToolCall,
             ToolParameterDefinitionsValue,
+            ToolResult,
         )
         from cohere.client import Client
 
@@ -325,9 +323,14 @@ class BaseCohere:
             model="string",
             preamble="string",
             chat_history=[
-                ChatMessage(
-                    role="CHATBOT",
+                Message_Chatbot(
                     message="string",
+                    tool_calls=[
+                        ToolCall(
+                            name="string",
+                            parameters={"string": {"key": "value"}},
+                        )
+                    ],
                 )
             ],
             conversation_id="string",
@@ -375,11 +378,15 @@ class BaseCohere:
                 )
             ],
             tool_results=[
-                ChatStreamRequestToolResultsItem(
-                    call=ToolCall(),
+                ToolResult(
+                    call=ToolCall(
+                        name="string",
+                        parameters={"string": {"key": "value"}},
+                    ),
                     outputs=[{"string": {"key": "value"}}],
                 )
             ],
+            enable_multi_step=True,
         )
         """
         _request: typing.Dict[str, typing.Any] = {"message": message, "stream": True}
@@ -442,7 +449,6 @@ class BaseCohere:
             headers=jsonable_encoder(
                 remove_none_from_dict(
                     {
-                        "Accept": "*/*, text/event-stream, application/stream+json",
                         **self._client_wrapper.get_headers(),
                         **(request_options.get("additional_headers", {}) if request_options is not None else {}),
                     }
@@ -455,15 +461,10 @@ class BaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         ) as _response:
             if 200 <= _response.status_code < 300:
-                try:
-                    event_source = EventSource(_response)
-                    for sse in event_source.iter_sse():
-                        yield typing.cast(StreamedChatResponse, construct_type(type_=StreamedChatResponse, object_=json.loads(sse.data)))  # type: ignore
-                except Exception:
-                    for _text in _response.iter_lines():
-                        if len(_text) == 0:
-                            continue
-                        yield typing.cast(StreamedChatResponse, construct_type(type_=StreamedChatResponse, object_=json.loads(_text)))  # type: ignore
+                for _text in _response.iter_lines():
+                    if len(_text) == 0:
+                        continue
+                    yield typing.cast(StreamedChatResponse, construct_type(type_=StreamedChatResponse, object_=json.loads(_text)))  # type: ignore
                 return
             _response.read()
             if _response.status_code == 429:
@@ -482,7 +483,7 @@ class BaseCohere:
         message: str,
         model: typing.Optional[str] = OMIT,
         preamble: typing.Optional[str] = OMIT,
-        chat_history: typing.Optional[typing.Sequence[ChatMessage]] = OMIT,
+        chat_history: typing.Optional[typing.Sequence[Message]] = OMIT,
         conversation_id: typing.Optional[str] = OMIT,
         prompt_truncation: typing.Optional[ChatRequestPromptTruncation] = OMIT,
         connectors: typing.Optional[typing.Sequence[ChatConnector]] = OMIT,
@@ -501,7 +502,7 @@ class BaseCohere:
         raw_prompting: typing.Optional[bool] = OMIT,
         return_prompt: typing.Optional[bool] = OMIT,
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
-        tool_results: typing.Optional[typing.Sequence[ChatRequestToolResultsItem]] = OMIT,
+        tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> NonStreamedChatResponse:
         """
@@ -522,12 +523,12 @@ class BaseCohere:
                                               The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
                                               Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - chat_history: typing.Optional[typing.Sequence[ChatMessage]]. A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
+            - chat_history: typing.Optional[typing.Sequence[Message]]. A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
 
-                                                                           Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
+                                                                       Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
 
-                                                                           The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
-                                                                           Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+                                                                       The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
+                                                                       Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
             - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
 
@@ -632,32 +633,31 @@ class BaseCohere:
                                                              When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
                                                              Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - tool_results: typing.Optional[typing.Sequence[ChatRequestToolResultsItem]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
-                                                                                          Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
+            - tool_results: typing.Optional[typing.Sequence[ToolResult]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
+                                                                          Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
 
-                                                                                          **Note**: `outputs` must be a list of objects. If your tool returns a single object (eg `{"status": 200}`), make sure to wrap it in a list.
-                                                                                          ```
-                                                                                          tool_results = [
-                                                                                            {
-                                                                                              "call": {
-                                                                                                "name": <tool name>,
-                                                                                                "parameters": {
-                                                                                                  <param name>: <param value>
-                                                                                                }
-                                                                                              },
-                                                                                              "outputs": [{
-                                                                                                <key>: <value>
-                                                                                              }]
-                                                                                            },
-                                                                                            ...
-                                                                                          ]
-                                                                                          ```
-                                                                                          **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
-                                                                                          Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+                                                                          **Note**: `outputs` must be a list of objects. If your tool returns a single object (eg `{"status": 200}`), make sure to wrap it in a list.
+                                                                          ```
+                                                                          tool_results = [
+                                                                            {
+                                                                              "call": {
+                                                                                "name": <tool name>,
+                                                                                "parameters": {
+                                                                                  <param name>: <param value>
+                                                                                }
+                                                                              },
+                                                                              "outputs": [{
+                                                                                <key>: <value>
+                                                                              }]
+                                                                            },
+                                                                            ...
+                                                                          ]
+                                                                          ```
+                                                                          **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
+                                                                          Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere import ChatMessage
         from cohere.client import Client
 
         client = Client(
@@ -666,16 +666,6 @@ class BaseCohere:
         )
         client.chat(
             message="Can you give me a global market overview of solar panels?",
-            chat_history=[
-                ChatMessage(
-                    role="CHATBOT",
-                    message="Hi!",
-                ),
-                ChatMessage(
-                    role="CHATBOT",
-                    message="How can I help you today?",
-                ),
-            ],
             prompt_truncation="OFF",
             temperature=0.3,
         )
@@ -918,7 +908,6 @@ class BaseCohere:
             headers=jsonable_encoder(
                 remove_none_from_dict(
                     {
-                        "Accept": "*/*, text/event-stream, application/stream+json",
                         **self._client_wrapper.get_headers(),
                         **(request_options.get("additional_headers", {}) if request_options is not None else {}),
                     }
@@ -931,15 +920,10 @@ class BaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         ) as _response:
             if 200 <= _response.status_code < 300:
-                try:
-                    event_source = EventSource(_response)
-                    for sse in event_source.iter_sse():
-                        yield typing.cast(GenerateStreamedResponse, construct_type(type_=GenerateStreamedResponse, object_=json.loads(sse.data)))  # type: ignore
-                except Exception:
-                    for _text in _response.iter_lines():
-                        if len(_text) == 0:
-                            continue
-                        yield typing.cast(GenerateStreamedResponse, construct_type(type_=GenerateStreamedResponse, object_=json.loads(_text)))  # type: ignore
+                for _text in _response.iter_lines():
+                    if len(_text) == 0:
+                        continue
+                    yield typing.cast(GenerateStreamedResponse, construct_type(type_=GenerateStreamedResponse, object_=json.loads(_text)))  # type: ignore
                 return
             _response.read()
             if _response.status_code == 400:
@@ -1835,7 +1819,7 @@ class AsyncBaseCohere:
         message: str,
         model: typing.Optional[str] = OMIT,
         preamble: typing.Optional[str] = OMIT,
-        chat_history: typing.Optional[typing.Sequence[ChatMessage]] = OMIT,
+        chat_history: typing.Optional[typing.Sequence[Message]] = OMIT,
         conversation_id: typing.Optional[str] = OMIT,
         prompt_truncation: typing.Optional[ChatStreamRequestPromptTruncation] = OMIT,
         connectors: typing.Optional[typing.Sequence[ChatConnector]] = OMIT,
@@ -1854,7 +1838,7 @@ class AsyncBaseCohere:
         raw_prompting: typing.Optional[bool] = OMIT,
         return_prompt: typing.Optional[bool] = OMIT,
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
-        tool_results: typing.Optional[typing.Sequence[ChatStreamRequestToolResultsItem]] = OMIT,
+        tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[StreamedChatResponse]:
         """
@@ -1875,12 +1859,12 @@ class AsyncBaseCohere:
                                               The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
                                               Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - chat_history: typing.Optional[typing.Sequence[ChatMessage]]. A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
+            - chat_history: typing.Optional[typing.Sequence[Message]]. A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
 
-                                                                           Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
+                                                                       Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
 
-                                                                           The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
-                                                                           Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+                                                                       The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
+                                                                       Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
             - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
 
@@ -1985,39 +1969,39 @@ class AsyncBaseCohere:
                                                              When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
                                                              Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - tool_results: typing.Optional[typing.Sequence[ChatStreamRequestToolResultsItem]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
-                                                                                                Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
+            - tool_results: typing.Optional[typing.Sequence[ToolResult]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
+                                                                          Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
 
-                                                                                                **Note**: `outputs` must be a list of objects. If your tool returns a single object (eg `{"status": 200}`), make sure to wrap it in a list.
-                                                                                                ```
-                                                                                                tool_results = [
-                                                                                                  {
-                                                                                                    "call": {
-                                                                                                      "name": <tool name>,
-                                                                                                      "parameters": {
-                                                                                                        <param name>: <param value>
-                                                                                                      }
-                                                                                                    },
-                                                                                                    "outputs": [{
-                                                                                                      <key>: <value>
-                                                                                                    }]
-                                                                                                  },
-                                                                                                  ...
-                                                                                                ]
-                                                                                                ```
-                                                                                                **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
-                                                                                                Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+                                                                          **Note**: `outputs` must be a list of objects. If your tool returns a single object (eg `{"status": 200}`), make sure to wrap it in a list.
+                                                                          ```
+                                                                          tool_results = [
+                                                                            {
+                                                                              "call": {
+                                                                                "name": <tool name>,
+                                                                                "parameters": {
+                                                                                  <param name>: <param value>
+                                                                                }
+                                                                              },
+                                                                              "outputs": [{
+                                                                                <key>: <value>
+                                                                              }]
+                                                                            },
+                                                                            ...
+                                                                          ]
+                                                                          ```
+                                                                          **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
+                                                                          Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
         from cohere import (
             ChatConnector,
-            ChatMessage,
             ChatStreamRequestConnectorsSearchOptions,
-            ChatStreamRequestToolResultsItem,
+            Message_Chatbot,
             Tool,
             ToolCall,
             ToolParameterDefinitionsValue,
+            ToolResult,
         )
         from cohere.client import AsyncClient
 
@@ -2030,9 +2014,14 @@ class AsyncBaseCohere:
             model="string",
             preamble="string",
             chat_history=[
-                ChatMessage(
-                    role="CHATBOT",
+                Message_Chatbot(
                     message="string",
+                    tool_calls=[
+                        ToolCall(
+                            name="string",
+                            parameters={"string": {"key": "value"}},
+                        )
+                    ],
                 )
             ],
             conversation_id="string",
@@ -2080,11 +2069,15 @@ class AsyncBaseCohere:
                 )
             ],
             tool_results=[
-                ChatStreamRequestToolResultsItem(
-                    call=ToolCall(),
+                ToolResult(
+                    call=ToolCall(
+                        name="string",
+                        parameters={"string": {"key": "value"}},
+                    ),
                     outputs=[{"string": {"key": "value"}}],
                 )
             ],
+            enable_multi_step=True,
         )
         """
         _request: typing.Dict[str, typing.Any] = {"message": message, "stream": True}
@@ -2147,7 +2140,6 @@ class AsyncBaseCohere:
             headers=jsonable_encoder(
                 remove_none_from_dict(
                     {
-                        "Accept": "*/*, text/event-stream, application/stream+json",
                         **self._client_wrapper.get_headers(),
                         **(request_options.get("additional_headers", {}) if request_options is not None else {}),
                     }
@@ -2160,15 +2152,10 @@ class AsyncBaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         ) as _response:
             if 200 <= _response.status_code < 300:
-                try:
-                    event_source = EventSource(_response)
-                    async for sse in event_source.aiter_sse():
-                        yield typing.cast(StreamedChatResponse, construct_type(type_=StreamedChatResponse, object_=json.loads(sse.data)))  # type: ignore
-                except Exception:
-                    async for _text in _response.aiter_lines():
-                        if len(_text) == 0:
-                            continue
-                        yield typing.cast(StreamedChatResponse, construct_type(type_=StreamedChatResponse, object_=json.loads(_text)))  # type: ignore
+                async for _text in _response.aiter_lines():
+                    if len(_text) == 0:
+                        continue
+                    yield typing.cast(StreamedChatResponse, construct_type(type_=StreamedChatResponse, object_=json.loads(_text)))  # type: ignore
                 return
             await _response.aread()
             if _response.status_code == 429:
@@ -2187,7 +2174,7 @@ class AsyncBaseCohere:
         message: str,
         model: typing.Optional[str] = OMIT,
         preamble: typing.Optional[str] = OMIT,
-        chat_history: typing.Optional[typing.Sequence[ChatMessage]] = OMIT,
+        chat_history: typing.Optional[typing.Sequence[Message]] = OMIT,
         conversation_id: typing.Optional[str] = OMIT,
         prompt_truncation: typing.Optional[ChatRequestPromptTruncation] = OMIT,
         connectors: typing.Optional[typing.Sequence[ChatConnector]] = OMIT,
@@ -2206,7 +2193,7 @@ class AsyncBaseCohere:
         raw_prompting: typing.Optional[bool] = OMIT,
         return_prompt: typing.Optional[bool] = OMIT,
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
-        tool_results: typing.Optional[typing.Sequence[ChatRequestToolResultsItem]] = OMIT,
+        tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> NonStreamedChatResponse:
         """
@@ -2227,12 +2214,12 @@ class AsyncBaseCohere:
                                               The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
                                               Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - chat_history: typing.Optional[typing.Sequence[ChatMessage]]. A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
+            - chat_history: typing.Optional[typing.Sequence[Message]]. A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
 
-                                                                           Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
+                                                                       Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
 
-                                                                           The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
-                                                                           Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+                                                                       The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
+                                                                       Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
             - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
 
@@ -2337,32 +2324,31 @@ class AsyncBaseCohere:
                                                              When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
                                                              Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - tool_results: typing.Optional[typing.Sequence[ChatRequestToolResultsItem]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
-                                                                                          Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
+            - tool_results: typing.Optional[typing.Sequence[ToolResult]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
+                                                                          Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
 
-                                                                                          **Note**: `outputs` must be a list of objects. If your tool returns a single object (eg `{"status": 200}`), make sure to wrap it in a list.
-                                                                                          ```
-                                                                                          tool_results = [
-                                                                                            {
-                                                                                              "call": {
-                                                                                                "name": <tool name>,
-                                                                                                "parameters": {
-                                                                                                  <param name>: <param value>
-                                                                                                }
-                                                                                              },
-                                                                                              "outputs": [{
-                                                                                                <key>: <value>
-                                                                                              }]
-                                                                                            },
-                                                                                            ...
-                                                                                          ]
-                                                                                          ```
-                                                                                          **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
-                                                                                          Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+                                                                          **Note**: `outputs` must be a list of objects. If your tool returns a single object (eg `{"status": 200}`), make sure to wrap it in a list.
+                                                                          ```
+                                                                          tool_results = [
+                                                                            {
+                                                                              "call": {
+                                                                                "name": <tool name>,
+                                                                                "parameters": {
+                                                                                  <param name>: <param value>
+                                                                                }
+                                                                              },
+                                                                              "outputs": [{
+                                                                                <key>: <value>
+                                                                              }]
+                                                                            },
+                                                                            ...
+                                                                          ]
+                                                                          ```
+                                                                          **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
+                                                                          Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
             - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
         ---
-        from cohere import ChatMessage
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -2371,16 +2357,6 @@ class AsyncBaseCohere:
         )
         await client.chat(
             message="Can you give me a global market overview of solar panels?",
-            chat_history=[
-                ChatMessage(
-                    role="CHATBOT",
-                    message="Hi!",
-                ),
-                ChatMessage(
-                    role="CHATBOT",
-                    message="How can I help you today?",
-                ),
-            ],
             prompt_truncation="OFF",
             temperature=0.3,
         )
@@ -2623,7 +2599,6 @@ class AsyncBaseCohere:
             headers=jsonable_encoder(
                 remove_none_from_dict(
                     {
-                        "Accept": "*/*, text/event-stream, application/stream+json",
                         **self._client_wrapper.get_headers(),
                         **(request_options.get("additional_headers", {}) if request_options is not None else {}),
                     }
@@ -2636,15 +2611,10 @@ class AsyncBaseCohere:
             max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
         ) as _response:
             if 200 <= _response.status_code < 300:
-                try:
-                    event_source = EventSource(_response)
-                    async for sse in event_source.aiter_sse():
-                        yield typing.cast(GenerateStreamedResponse, construct_type(type_=GenerateStreamedResponse, object_=json.loads(sse.data)))  # type: ignore
-                except Exception:
-                    async for _text in _response.aiter_lines():
-                        if len(_text) == 0:
-                            continue
-                        yield typing.cast(GenerateStreamedResponse, construct_type(type_=GenerateStreamedResponse, object_=json.loads(_text)))  # type: ignore
+                async for _text in _response.aiter_lines():
+                    if len(_text) == 0:
+                        continue
+                    yield typing.cast(GenerateStreamedResponse, construct_type(type_=GenerateStreamedResponse, object_=json.loads(_text)))  # type: ignore
                 return
             await _response.aread()
             if _response.status_code == 400:

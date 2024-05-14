@@ -6,12 +6,15 @@ import typing
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import pydantic_v1
 from ..core.unchecked_base_model import UncheckedBaseModel
-from .tool_call import ToolCall
+from .tool_result import ToolResult
 
 
-class ChatStreamRequestToolResultsItem(UncheckedBaseModel):
-    call: ToolCall
-    outputs: typing.List[typing.Dict[str, typing.Any]]
+class ToolMessage(UncheckedBaseModel):
+    """
+    Represents tool result in the chat history.
+    """
+
+    tool_results: typing.Optional[typing.List[ToolResult]] = None
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

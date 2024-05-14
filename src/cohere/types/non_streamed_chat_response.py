@@ -9,10 +9,10 @@ from ..core.unchecked_base_model import UncheckedBaseModel
 from .api_meta import ApiMeta
 from .chat_citation import ChatCitation
 from .chat_document import ChatDocument
-from .chat_message import ChatMessage
 from .chat_search_query import ChatSearchQuery
 from .chat_search_result import ChatSearchResult
 from .finish_reason import FinishReason
+from .message import Message
 from .tool_call import ToolCall
 
 
@@ -54,7 +54,7 @@ class NonStreamedChatResponse(UncheckedBaseModel):
 
     finish_reason: typing.Optional[FinishReason] = None
     tool_calls: typing.Optional[typing.List[ToolCall]] = None
-    chat_history: typing.Optional[typing.List[ChatMessage]] = pydantic_v1.Field(default=None)
+    chat_history: typing.Optional[typing.List[Message]] = pydantic_v1.Field(default=None)
     """
     A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
     """
