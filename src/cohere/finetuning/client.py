@@ -629,7 +629,7 @@ class FinetuningClient:
             "GET",
             urllib.parse.urljoin(
                 f"{self._client_wrapper.get_base_url()}/",
-                f"finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/metrics",
+                f"finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/training-step-metrics",
             ),
             params=jsonable_encoder(
                 remove_none_from_dict(
@@ -1287,7 +1287,7 @@ class AsyncFinetuningClient:
             "GET",
             urllib.parse.urljoin(
                 f"{self._client_wrapper.get_base_url()}/",
-                f"finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/metrics",
+                f"finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/training-step-metrics",
             ),
             params=jsonable_encoder(
                 remove_none_from_dict(
