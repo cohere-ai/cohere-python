@@ -24,10 +24,10 @@ class TestClient(unittest.TestCase):
     def test_chat(self) -> None:
         chat = co.chat(
             chat_history=[
-                Message_User(ChatMessage(
-                    message="Who discovered gravity?")),
-                Message_Chatbot(ChatMessage(message="The man who is widely credited with discovering "
-                                                    "gravity is Sir Isaac Newton"))
+                Message_User(
+                    message="Who discovered gravity?"),
+                Message_Chatbot(message="The man who is widely credited with discovering "
+                                "gravity is Sir Isaac Newton")
             ],
             message="What year was he born?",
             connectors=[ChatConnector(id="web-search")]
@@ -38,10 +38,10 @@ class TestClient(unittest.TestCase):
     def test_chat_stream(self) -> None:
         stream = co.chat_stream(
             chat_history=[
-                Message_User(ChatMessage(
-                    message="Who discovered gravity?")),
-                Message_Chatbot(ChatMessage(message="The man who is widely credited with discovering "
-                                                    "gravity is Sir Isaac Newton"))
+                Message_User(
+                    message="Who discovered gravity?"),
+                Message_Chatbot(message="The man who is widely credited with discovering "
+                                "gravity is Sir Isaac Newton")
             ],
             message="What year was he born?",
             connectors=[ChatConnector(id="web-search")]
