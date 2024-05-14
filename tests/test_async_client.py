@@ -3,7 +3,7 @@ import unittest
 
 import cohere
 from cohere import ChatMessage, ChatConnector, ClassifyExample, CreateConnectorServiceAuth, Tool, \
-    ToolParameterDefinitionsValue, ChatRequestToolResultsItem
+    ToolParameterDefinitionsValue, ToolResult, Message_User, Message_Chatbot
 
 package_dir = os.path.dirname(os.path.abspath(__file__))
 embed_job = os.path.join(package_dir, 'embed_job.jsonl')
@@ -26,10 +26,10 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
     async def test_chat(self) -> None:
         chat = await self.co.chat(
             chat_history=[
-                ChatMessage(role="USER",
-                            message="Who discovered gravity?"),
-                ChatMessage(role="CHATBOT", message="The man who is widely credited with discovering "
-                                                    "gravity is Sir Isaac Newton")
+                Message_User(
+                    message="Who discovered gravity?"),
+                Message_Chatbot(message="The man who is widely credited with discovering "
+                                "gravity is Sir Isaac Newton")
             ],
             message="What year was he born?",
             connectors=[ChatConnector(id="web-search")]
@@ -40,10 +40,10 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
     async def test_chat_stream(self) -> None:
         stream = self.co.chat_stream(
             chat_history=[
-                ChatMessage(role="USER",
-                            message="Who discovered gravity?"),
-                ChatMessage(role="CHATBOT", message="The man who is widely credited with discovering "
-                                                    "gravity is Sir Isaac Newton")
+                Message_User(
+                    message="Who discovered gravity?"),
+                Message_Chatbot(message="The man who is widely credited with discovering "
+                                "gravity is Sir Isaac Newton")
             ],
             message="What year was he born?",
             connectors=[ChatConnector(id="web-search")]
@@ -66,7 +66,7 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
 
     async def test_moved_fn(self) -> None:
         with self.assertRaises(ValueError):
-            await self.co.list_connectors("dummy", dummy="dummy")  # type: ignore
+            await self.co.list_connectors("dummy", dummy="dummy")   # type: ignore
 
     @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     async def test_generate(self) -> None:
@@ -120,7 +120,6 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
 
         print(response)
 
-
     @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     async def test_embed_job_crud(self) -> None:
         dataset = await self.co.datasets.create(
@@ -173,7 +172,8 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
     @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     async def test_classify(self) -> None:
         examples = [
-            ClassifyExample(text="Dermatologists don't like her!", label="Spam"),
+            ClassifyExample(
+                text="Dermatologists don't like her!", label="Spam"),
             ClassifyExample(text="'Hello, open to this?'", label="Spam"),
             ClassifyExample(
                 text="I need help please wire me $1000 right now", label="Spam"),
@@ -232,7 +232,8 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
 
         # assert files equal
         self.assertTrue(os.path.exists("dataset.jsonl"))
-        self.assertEqual(open(embed_job, 'rb').read(), open("dataset.jsonl", 'rb').read())
+        self.assertEqual(open(embed_job, 'rb').read(),
+                         open("dataset.jsonl", 'rb').read())
 
         print(result)
 
@@ -336,8 +337,10 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
         )
 
         if tool_parameters_response.tool_calls is not None:
-            self.assertEqual(tool_parameters_response.tool_calls[0].name, "sales_database")
-            self.assertEqual(tool_parameters_response.tool_calls[0].parameters, {"day": "2023-09-29"})
+            self.assertEqual(
+                tool_parameters_response.tool_calls[0].name, "sales_database")
+            self.assertEqual(tool_parameters_response.tool_calls[0].parameters, {
+                             "day": "2023-09-29"})
         else:
             raise ValueError("Expected tool calls to be present")
 
@@ -355,7 +358,7 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
             output = local_tools[tool_call.name](**tool_call.parameters)
             outputs = [output]
 
-            tool_results.append(ChatRequestToolResultsItem(
+            tool_results.append(ToolResult(
                 call=tool_call,
                 outputs=outputs
             ))
@@ -396,4 +399,5 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
         # Test that the sync client can be used in an async context.
         co = cohere.Client(timeout=10000)
         print(co.tokenize(model="command", text="tokenize me! :D"))
-        print(co.detokenize(model="command", tokens=[10104, 12221, 1315, 34, 1420, 69]))
+        print(co.detokenize(model="command", tokens=[
+              10104, 12221, 1315, 34, 1420, 69]))

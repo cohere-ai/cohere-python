@@ -11,11 +11,9 @@ from .chat_connector import ChatConnector
 from .chat_data_metrics import ChatDataMetrics
 from .chat_document import ChatDocument
 from .chat_message import ChatMessage
-from .chat_message_role import ChatMessageRole
 from .chat_request_citation_quality import ChatRequestCitationQuality
 from .chat_request_connectors_search_options import ChatRequestConnectorsSearchOptions
 from .chat_request_prompt_truncation import ChatRequestPromptTruncation
-from .chat_request_tool_results_item import ChatRequestToolResultsItem
 from .chat_search_queries_generation_event import ChatSearchQueriesGenerationEvent
 from .chat_search_query import ChatSearchQuery
 from .chat_search_result import ChatSearchResult
@@ -27,7 +25,6 @@ from .chat_stream_event import ChatStreamEvent
 from .chat_stream_request_citation_quality import ChatStreamRequestCitationQuality
 from .chat_stream_request_connectors_search_options import ChatStreamRequestConnectorsSearchOptions
 from .chat_stream_request_prompt_truncation import ChatStreamRequestPromptTruncation
-from .chat_stream_request_tool_results_item import ChatStreamRequestToolResultsItem
 from .chat_stream_start_event import ChatStreamStartEvent
 from .chat_text_generation_event import ChatTextGenerationEvent
 from .chat_tool_calls_generation_event import ChatToolCallsGenerationEvent
@@ -89,6 +86,7 @@ from .label_metric import LabelMetric
 from .list_connectors_response import ListConnectorsResponse
 from .list_embed_job_response import ListEmbedJobResponse
 from .list_models_response import ListModelsResponse
+from .message import Message, Message_Chatbot, Message_System, Message_Tool, Message_User
 from .metrics import Metrics
 from .metrics_embed_data import MetricsEmbedData
 from .metrics_embed_data_fields_item import MetricsEmbedDataFieldsItem
@@ -122,7 +120,9 @@ from .tokenize_response import TokenizeResponse
 from .too_many_requests_error_body import TooManyRequestsErrorBody
 from .tool import Tool
 from .tool_call import ToolCall
+from .tool_message import ToolMessage
 from .tool_parameter_definitions_value import ToolParameterDefinitionsValue
+from .tool_result import ToolResult
 from .update_connector_response import UpdateConnectorResponse
 
 __all__ = [
@@ -137,11 +137,9 @@ __all__ = [
     "ChatDataMetrics",
     "ChatDocument",
     "ChatMessage",
-    "ChatMessageRole",
     "ChatRequestCitationQuality",
     "ChatRequestConnectorsSearchOptions",
     "ChatRequestPromptTruncation",
-    "ChatRequestToolResultsItem",
     "ChatSearchQueriesGenerationEvent",
     "ChatSearchQuery",
     "ChatSearchResult",
@@ -153,7 +151,6 @@ __all__ = [
     "ChatStreamRequestCitationQuality",
     "ChatStreamRequestConnectorsSearchOptions",
     "ChatStreamRequestPromptTruncation",
-    "ChatStreamRequestToolResultsItem",
     "ChatStreamStartEvent",
     "ChatTextGenerationEvent",
     "ChatToolCallsGenerationEvent",
@@ -213,6 +210,11 @@ __all__ = [
     "ListConnectorsResponse",
     "ListEmbedJobResponse",
     "ListModelsResponse",
+    "Message",
+    "Message_Chatbot",
+    "Message_System",
+    "Message_Tool",
+    "Message_User",
     "Metrics",
     "MetricsEmbedData",
     "MetricsEmbedDataFieldsItem",
@@ -244,6 +246,8 @@ __all__ = [
     "TooManyRequestsErrorBody",
     "Tool",
     "ToolCall",
+    "ToolMessage",
     "ToolParameterDefinitionsValue",
+    "ToolResult",
     "UpdateConnectorResponse",
 ]

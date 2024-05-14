@@ -9,7 +9,7 @@ from ..core.unchecked_base_model import UncheckedBaseModel
 from .tool_call import ToolCall
 
 
-class ChatRequestToolResultsItem(UncheckedBaseModel):
+class ToolResult(UncheckedBaseModel):
     call: ToolCall
     outputs: typing.List[typing.Dict[str, typing.Any]]
 
