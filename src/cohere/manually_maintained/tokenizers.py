@@ -25,9 +25,14 @@ def get_hf_tokenizer(co: "Client", model: str) -> Tokenizer:
     if not tokenizer_url:
         raise ValueError(f"No tokenizer URL found for model {model}")
 
-    size = int(typing.cast(int, requests.head(tokenizer_url).headers.get("Content-Length")))
-    size_mb = round(size / 1024 / 1024, 2)
-    logger.info(f"Downloading tokenizer for model {model}. Size is {size_mb} MBs.")
+    # Print the size of the tokenizer config before downloading it.
+    try:
+        size = _get_tokenizer_config_size(tokenizer_url)
+        logger.info(f"Downloading tokenizer for model {model}. Size is {size} MBs.")
+    except Exception as e:
+        # Skip the size logging, this is not critical.
+        logger.warn(f"Failed to get the size of the tokenizer config: {e}")
+
     response = requests.get(tokenizer_url)
     tokenizer = Tokenizer.from_str(response.text)
 
@@ -57,9 +62,14 @@ async def async_get_hf_tokenizer(co: "AsyncClient", model: str) -> Tokenizer:
     if not tokenizer_url:
         raise ValueError(f"No tokenizer URL found for model {model}")
 
-    size = int(typing.cast(int, requests.head(tokenizer_url).headers.get("Content-Length")))
-    size_mb = round(size / 1024 / 1024, 2)
-    logger.info(f"Downloading tokenizer for model {model}. Size is {size_mb} MBs.")
+    # Print the size of the tokenizer config before downloading it.
+    try:
+        size = _get_tokenizer_config_size(tokenizer_url)
+        logger.info(f"Downloading tokenizer for model {model}. Size is {size} MBs.")
+    except Exception as e:
+        # Skip the size logging, this is not critical.
+        logger.warn(f"Failed to get the size of the tokenizer config: {e}")
+
     response = await asyncio.get_event_loop().run_in_executor(None, requests.get, tokenizer_url)
     tokenizer = Tokenizer.from_str(response.text)
 
@@ -77,3 +87,16 @@ async def async_local_detokenize(co: "AsyncClient", model: str, tokens: typing.S
     """Decodes a given list of tokens using a local tokenizer."""
     tokenizer = await async_get_hf_tokenizer(co, model)
     return tokenizer.decode(tokens)
+
+
+def _get_tokenizer_config_size(tokenizer_url: str) -> None:
+    # Get the size of the tokenizer config before downloading it.
+    # Content-Length is not always present in the headers (if transfer-encoding: chunked).
+    head_response = requests.head(tokenizer_url)
+    size = None
+    for header in ["x-goog-stored-content-length", "Content-Length"]:
+        size = head_response.headers.get(header)
+        if size:
+            break
+
+    return round(int(typing.cast(int, size)) / 1024 / 1024, 2)
