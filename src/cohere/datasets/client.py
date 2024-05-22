@@ -10,6 +10,7 @@ from ..core.api_error import ApiError
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.datetime_utils import serialize_datetime
 from ..core.jsonable_encoder import jsonable_encoder
+from ..core.query_encoder import encode_query
 from ..core.remove_none_from_dict import remove_none_from_dict
 from ..core.request_options import RequestOptions
 from ..core.unchecked_base_model import construct_type
@@ -44,21 +45,36 @@ class DatasetsClient:
         """
         List datasets that have been created.
 
-        Parameters:
-            - dataset_type: typing.Optional[str]. optional filter by dataset type
+        Parameters
+        ----------
+        dataset_type : typing.Optional[str]
+            optional filter by dataset type
 
-            - before: typing.Optional[dt.datetime]. optional filter before a date
+        before : typing.Optional[dt.datetime]
+            optional filter before a date
 
-            - after: typing.Optional[dt.datetime]. optional filter after a date
+        after : typing.Optional[dt.datetime]
+            optional filter after a date
 
-            - limit: typing.Optional[float]. optional limit to number of results
+        limit : typing.Optional[float]
+            optional limit to number of results
 
-            - offset: typing.Optional[float]. optional offset to start of results
+        offset : typing.Optional[float]
+            optional offset to start of results
 
-            - validation_status: typing.Optional[DatasetValidationStatus]. optional filter by validation status
+        validation_status : typing.Optional[DatasetValidationStatus]
+            optional filter by validation status
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        DatasetsListResponse
+            A successful response.
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -68,23 +84,25 @@ class DatasetsClient:
         client.datasets.list()
         """
         _response = self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "datasets"),
-            params=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        "datasetType": dataset_type,
-                        "before": serialize_datetime(before) if before is not None else None,
-                        "after": serialize_datetime(after) if after is not None else None,
-                        "limit": limit,
-                        "offset": offset,
-                        "validationStatus": validation_status,
-                        **(
-                            request_options.get("additional_query_parameters", {})
-                            if request_options is not None
-                            else {}
-                        ),
-                    }
+            method="GET",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "datasets"),
+            params=encode_query(
+                jsonable_encoder(
+                    remove_none_from_dict(
+                        {
+                            "datasetType": dataset_type,
+                            "before": serialize_datetime(before) if before is not None else None,
+                            "after": serialize_datetime(after) if after is not None else None,
+                            "limit": limit,
+                            "offset": offset,
+                            "validationStatus": validation_status,
+                            **(
+                                request_options.get("additional_query_parameters", {})
+                                if request_options is not None
+                                else {}
+                            ),
+                        }
+                    )
                 )
             ),
             headers=jsonable_encoder(
@@ -118,6 +136,7 @@ class DatasetsClient:
         *,
         name: str,
         type: DatasetType,
+        data: core.File,
         keep_original_file: typing.Optional[bool] = None,
         skip_malformed_input: typing.Optional[bool] = None,
         keep_fields: typing.Optional[typing.Union[str, typing.Sequence[str]]] = None,
@@ -125,38 +144,57 @@ class DatasetsClient:
         text_separator: typing.Optional[str] = None,
         csv_delimiter: typing.Optional[str] = None,
         dry_run: typing.Optional[bool] = None,
-        data: core.File,
         eval_data: typing.Optional[core.File] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> DatasetsCreateResponse:
         """
         Create a dataset by uploading a file. See ['Dataset Creation'](https://docs.cohere.com/docs/datasets#dataset-creation) for more information.
 
-        Parameters:
-            - name: str. The name of the uploaded dataset.
+        Parameters
+        ----------
+        name : str
+            The name of the uploaded dataset.
 
-            - type: DatasetType. The dataset type, which is used to validate the data. Valid types are `embed-input`, `reranker-finetune-input`, `single-label-classification-finetune-input`, `chat-finetune-input`, and `multi-label-classification-finetune-input`.
+        type : DatasetType
+            The dataset type, which is used to validate the data. Valid types are `embed-input`, `reranker-finetune-input`, `single-label-classification-finetune-input`, `chat-finetune-input`, and `multi-label-classification-finetune-input`.
 
-            - keep_original_file: typing.Optional[bool]. Indicates if the original file should be stored.
+        data : core.File
+            See core.File for more documentation
 
-            - skip_malformed_input: typing.Optional[bool]. Indicates whether rows with malformed input should be dropped (instead of failing the validation check). Dropped rows will be returned in the warnings field.
+        keep_original_file : typing.Optional[bool]
+            Indicates if the original file should be stored.
 
-            - keep_fields: typing.Optional[typing.Union[str, typing.Sequence[str]]]. List of names of fields that will be persisted in the Dataset. By default the Dataset will retain only the required fields indicated in the [schema for the corresponding Dataset type](https://docs.cohere.com/docs/datasets#dataset-types). For example, datasets of type `embed-input` will drop all fields other than the required `text` field. If any of the fields in `keep_fields` are missing from the uploaded file, Dataset validation will fail.
+        skip_malformed_input : typing.Optional[bool]
+            Indicates whether rows with malformed input should be dropped (instead of failing the validation check). Dropped rows will be returned in the warnings field.
 
-            - optional_fields: typing.Optional[typing.Union[str, typing.Sequence[str]]]. List of names of fields that will be persisted in the Dataset. By default the Dataset will retain only the required fields indicated in the [schema for the corresponding Dataset type](https://docs.cohere.com/docs/datasets#dataset-types). For example, Datasets of type `embed-input` will drop all fields other than the required `text` field. If any of the fields in `optional_fields` are missing from the uploaded file, Dataset validation will pass.
+        keep_fields : typing.Optional[typing.Union[str, typing.Sequence[str]]]
+            List of names of fields that will be persisted in the Dataset. By default the Dataset will retain only the required fields indicated in the [schema for the corresponding Dataset type](https://docs.cohere.com/docs/datasets#dataset-types). For example, datasets of type `embed-input` will drop all fields other than the required `text` field. If any of the fields in `keep_fields` are missing from the uploaded file, Dataset validation will fail.
 
-            - text_separator: typing.Optional[str]. Raw .txt uploads will be split into entries using the text_separator value.
+        optional_fields : typing.Optional[typing.Union[str, typing.Sequence[str]]]
+            List of names of fields that will be persisted in the Dataset. By default the Dataset will retain only the required fields indicated in the [schema for the corresponding Dataset type](https://docs.cohere.com/docs/datasets#dataset-types). For example, Datasets of type `embed-input` will drop all fields other than the required `text` field. If any of the fields in `optional_fields` are missing from the uploaded file, Dataset validation will pass.
 
-            - csv_delimiter: typing.Optional[str]. The delimiter used for .csv uploads.
+        text_separator : typing.Optional[str]
+            Raw .txt uploads will be split into entries using the text_separator value.
 
-            - dry_run: typing.Optional[bool]. flag to enable dry_run mode
+        csv_delimiter : typing.Optional[str]
+            The delimiter used for .csv uploads.
 
-            - data: core.File. See core.File for more documentation
+        dry_run : typing.Optional[bool]
+            flag to enable dry_run mode
 
-            - eval_data: typing.Optional[core.File]. See core.File for more documentation
+        eval_data : typing.Optional[core.File]
+            See core.File for more documentation
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        DatasetsCreateResponse
+            A successful response.
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -169,26 +207,28 @@ class DatasetsClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "datasets"),
-            params=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        "name": name,
-                        "type": type,
-                        "keep_original_file": keep_original_file,
-                        "skip_malformed_input": skip_malformed_input,
-                        "keep_fields": keep_fields,
-                        "optional_fields": optional_fields,
-                        "text_separator": text_separator,
-                        "csv_delimiter": csv_delimiter,
-                        "dry_run": dry_run,
-                        **(
-                            request_options.get("additional_query_parameters", {})
-                            if request_options is not None
-                            else {}
-                        ),
-                    }
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "datasets"),
+            params=encode_query(
+                jsonable_encoder(
+                    remove_none_from_dict(
+                        {
+                            "name": name,
+                            "type": type,
+                            "keep_original_file": keep_original_file,
+                            "skip_malformed_input": skip_malformed_input,
+                            "keep_fields": keep_fields,
+                            "optional_fields": optional_fields,
+                            "text_separator": text_separator,
+                            "csv_delimiter": csv_delimiter,
+                            "dry_run": dry_run,
+                            **(
+                                request_options.get("additional_query_parameters", {})
+                                if request_options is not None
+                                else {}
+                            ),
+                        }
+                    )
                 )
             ),
             data=jsonable_encoder(remove_none_from_dict({}))
@@ -228,9 +268,18 @@ class DatasetsClient:
         """
         View the dataset storage usage for your Organization. Each Organization can have up to 10GB of storage across all their users.
 
-        Parameters:
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        Parameters
+        ----------
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        DatasetsGetUsageResponse
+            A successful response.
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -240,10 +289,12 @@ class DatasetsClient:
         client.datasets.get_usage()
         """
         _response = self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "datasets/usage"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="GET",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "datasets/usage"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             headers=jsonable_encoder(
                 remove_none_from_dict(
@@ -275,11 +326,20 @@ class DatasetsClient:
         """
         Retrieve a dataset by ID. See ['Datasets'](https://docs.cohere.com/docs/datasets) for more information.
 
-        Parameters:
-            - id: str.
+        Parameters
+        ----------
+        id : str
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        DatasetsGetResponse
+            A successful response.
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -291,10 +351,12 @@ class DatasetsClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"datasets/{jsonable_encoder(id)}"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="GET",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"datasets/{jsonable_encoder(id)}"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             headers=jsonable_encoder(
                 remove_none_from_dict(
@@ -328,11 +390,20 @@ class DatasetsClient:
         """
         Delete a dataset by ID. Datasets are automatically deleted after 30 days, but they can also be deleted manually.
 
-        Parameters:
-            - id: str.
+        Parameters
+        ----------
+        id : str
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        typing.Dict[str, typing.Any]
+            A successful response.
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -344,10 +415,12 @@ class DatasetsClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "DELETE",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"datasets/{jsonable_encoder(id)}"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="DELETE",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"datasets/{jsonable_encoder(id)}"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             headers=jsonable_encoder(
                 remove_none_from_dict(
@@ -394,21 +467,36 @@ class AsyncDatasetsClient:
         """
         List datasets that have been created.
 
-        Parameters:
-            - dataset_type: typing.Optional[str]. optional filter by dataset type
+        Parameters
+        ----------
+        dataset_type : typing.Optional[str]
+            optional filter by dataset type
 
-            - before: typing.Optional[dt.datetime]. optional filter before a date
+        before : typing.Optional[dt.datetime]
+            optional filter before a date
 
-            - after: typing.Optional[dt.datetime]. optional filter after a date
+        after : typing.Optional[dt.datetime]
+            optional filter after a date
 
-            - limit: typing.Optional[float]. optional limit to number of results
+        limit : typing.Optional[float]
+            optional limit to number of results
 
-            - offset: typing.Optional[float]. optional offset to start of results
+        offset : typing.Optional[float]
+            optional offset to start of results
 
-            - validation_status: typing.Optional[DatasetValidationStatus]. optional filter by validation status
+        validation_status : typing.Optional[DatasetValidationStatus]
+            optional filter by validation status
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        DatasetsListResponse
+            A successful response.
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -418,23 +506,25 @@ class AsyncDatasetsClient:
         await client.datasets.list()
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "datasets"),
-            params=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        "datasetType": dataset_type,
-                        "before": serialize_datetime(before) if before is not None else None,
-                        "after": serialize_datetime(after) if after is not None else None,
-                        "limit": limit,
-                        "offset": offset,
-                        "validationStatus": validation_status,
-                        **(
-                            request_options.get("additional_query_parameters", {})
-                            if request_options is not None
-                            else {}
-                        ),
-                    }
+            method="GET",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "datasets"),
+            params=encode_query(
+                jsonable_encoder(
+                    remove_none_from_dict(
+                        {
+                            "datasetType": dataset_type,
+                            "before": serialize_datetime(before) if before is not None else None,
+                            "after": serialize_datetime(after) if after is not None else None,
+                            "limit": limit,
+                            "offset": offset,
+                            "validationStatus": validation_status,
+                            **(
+                                request_options.get("additional_query_parameters", {})
+                                if request_options is not None
+                                else {}
+                            ),
+                        }
+                    )
                 )
             ),
             headers=jsonable_encoder(
@@ -468,6 +558,7 @@ class AsyncDatasetsClient:
         *,
         name: str,
         type: DatasetType,
+        data: core.File,
         keep_original_file: typing.Optional[bool] = None,
         skip_malformed_input: typing.Optional[bool] = None,
         keep_fields: typing.Optional[typing.Union[str, typing.Sequence[str]]] = None,
@@ -475,38 +566,57 @@ class AsyncDatasetsClient:
         text_separator: typing.Optional[str] = None,
         csv_delimiter: typing.Optional[str] = None,
         dry_run: typing.Optional[bool] = None,
-        data: core.File,
         eval_data: typing.Optional[core.File] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> DatasetsCreateResponse:
         """
         Create a dataset by uploading a file. See ['Dataset Creation'](https://docs.cohere.com/docs/datasets#dataset-creation) for more information.
 
-        Parameters:
-            - name: str. The name of the uploaded dataset.
+        Parameters
+        ----------
+        name : str
+            The name of the uploaded dataset.
 
-            - type: DatasetType. The dataset type, which is used to validate the data. Valid types are `embed-input`, `reranker-finetune-input`, `single-label-classification-finetune-input`, `chat-finetune-input`, and `multi-label-classification-finetune-input`.
+        type : DatasetType
+            The dataset type, which is used to validate the data. Valid types are `embed-input`, `reranker-finetune-input`, `single-label-classification-finetune-input`, `chat-finetune-input`, and `multi-label-classification-finetune-input`.
 
-            - keep_original_file: typing.Optional[bool]. Indicates if the original file should be stored.
+        data : core.File
+            See core.File for more documentation
 
-            - skip_malformed_input: typing.Optional[bool]. Indicates whether rows with malformed input should be dropped (instead of failing the validation check). Dropped rows will be returned in the warnings field.
+        keep_original_file : typing.Optional[bool]
+            Indicates if the original file should be stored.
 
-            - keep_fields: typing.Optional[typing.Union[str, typing.Sequence[str]]]. List of names of fields that will be persisted in the Dataset. By default the Dataset will retain only the required fields indicated in the [schema for the corresponding Dataset type](https://docs.cohere.com/docs/datasets#dataset-types). For example, datasets of type `embed-input` will drop all fields other than the required `text` field. If any of the fields in `keep_fields` are missing from the uploaded file, Dataset validation will fail.
+        skip_malformed_input : typing.Optional[bool]
+            Indicates whether rows with malformed input should be dropped (instead of failing the validation check). Dropped rows will be returned in the warnings field.
 
-            - optional_fields: typing.Optional[typing.Union[str, typing.Sequence[str]]]. List of names of fields that will be persisted in the Dataset. By default the Dataset will retain only the required fields indicated in the [schema for the corresponding Dataset type](https://docs.cohere.com/docs/datasets#dataset-types). For example, Datasets of type `embed-input` will drop all fields other than the required `text` field. If any of the fields in `optional_fields` are missing from the uploaded file, Dataset validation will pass.
+        keep_fields : typing.Optional[typing.Union[str, typing.Sequence[str]]]
+            List of names of fields that will be persisted in the Dataset. By default the Dataset will retain only the required fields indicated in the [schema for the corresponding Dataset type](https://docs.cohere.com/docs/datasets#dataset-types). For example, datasets of type `embed-input` will drop all fields other than the required `text` field. If any of the fields in `keep_fields` are missing from the uploaded file, Dataset validation will fail.
 
-            - text_separator: typing.Optional[str]. Raw .txt uploads will be split into entries using the text_separator value.
+        optional_fields : typing.Optional[typing.Union[str, typing.Sequence[str]]]
+            List of names of fields that will be persisted in the Dataset. By default the Dataset will retain only the required fields indicated in the [schema for the corresponding Dataset type](https://docs.cohere.com/docs/datasets#dataset-types). For example, Datasets of type `embed-input` will drop all fields other than the required `text` field. If any of the fields in `optional_fields` are missing from the uploaded file, Dataset validation will pass.
 
-            - csv_delimiter: typing.Optional[str]. The delimiter used for .csv uploads.
+        text_separator : typing.Optional[str]
+            Raw .txt uploads will be split into entries using the text_separator value.
 
-            - dry_run: typing.Optional[bool]. flag to enable dry_run mode
+        csv_delimiter : typing.Optional[str]
+            The delimiter used for .csv uploads.
 
-            - data: core.File. See core.File for more documentation
+        dry_run : typing.Optional[bool]
+            flag to enable dry_run mode
 
-            - eval_data: typing.Optional[core.File]. See core.File for more documentation
+        eval_data : typing.Optional[core.File]
+            See core.File for more documentation
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        DatasetsCreateResponse
+            A successful response.
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -519,26 +629,28 @@ class AsyncDatasetsClient:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "datasets"),
-            params=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        "name": name,
-                        "type": type,
-                        "keep_original_file": keep_original_file,
-                        "skip_malformed_input": skip_malformed_input,
-                        "keep_fields": keep_fields,
-                        "optional_fields": optional_fields,
-                        "text_separator": text_separator,
-                        "csv_delimiter": csv_delimiter,
-                        "dry_run": dry_run,
-                        **(
-                            request_options.get("additional_query_parameters", {})
-                            if request_options is not None
-                            else {}
-                        ),
-                    }
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "datasets"),
+            params=encode_query(
+                jsonable_encoder(
+                    remove_none_from_dict(
+                        {
+                            "name": name,
+                            "type": type,
+                            "keep_original_file": keep_original_file,
+                            "skip_malformed_input": skip_malformed_input,
+                            "keep_fields": keep_fields,
+                            "optional_fields": optional_fields,
+                            "text_separator": text_separator,
+                            "csv_delimiter": csv_delimiter,
+                            "dry_run": dry_run,
+                            **(
+                                request_options.get("additional_query_parameters", {})
+                                if request_options is not None
+                                else {}
+                            ),
+                        }
+                    )
                 )
             ),
             data=jsonable_encoder(remove_none_from_dict({}))
@@ -578,9 +690,18 @@ class AsyncDatasetsClient:
         """
         View the dataset storage usage for your Organization. Each Organization can have up to 10GB of storage across all their users.
 
-        Parameters:
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        Parameters
+        ----------
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        DatasetsGetUsageResponse
+            A successful response.
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -590,10 +711,12 @@ class AsyncDatasetsClient:
         await client.datasets.get_usage()
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "datasets/usage"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="GET",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "datasets/usage"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             headers=jsonable_encoder(
                 remove_none_from_dict(
@@ -625,11 +748,20 @@ class AsyncDatasetsClient:
         """
         Retrieve a dataset by ID. See ['Datasets'](https://docs.cohere.com/docs/datasets) for more information.
 
-        Parameters:
-            - id: str.
+        Parameters
+        ----------
+        id : str
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        DatasetsGetResponse
+            A successful response.
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -641,10 +773,12 @@ class AsyncDatasetsClient:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"datasets/{jsonable_encoder(id)}"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="GET",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"datasets/{jsonable_encoder(id)}"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             headers=jsonable_encoder(
                 remove_none_from_dict(
@@ -678,11 +812,20 @@ class AsyncDatasetsClient:
         """
         Delete a dataset by ID. Datasets are automatically deleted after 30 days, but they can also be deleted manually.
 
-        Parameters:
-            - id: str.
+        Parameters
+        ----------
+        id : str
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        typing.Dict[str, typing.Any]
+            A successful response.
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -694,10 +837,12 @@ class AsyncDatasetsClient:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "DELETE",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"datasets/{jsonable_encoder(id)}"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="DELETE",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"datasets/{jsonable_encoder(id)}"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             headers=jsonable_encoder(
                 remove_none_from_dict(
