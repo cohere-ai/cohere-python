@@ -364,7 +364,6 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
             ))
 
         cited_response = await self.co.chat(
-            message="How good were the sales on September 29?",
             tools=tools,
             tool_results=tool_results,
             model="command-nightly",

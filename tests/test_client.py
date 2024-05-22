@@ -322,7 +322,7 @@ class TestClient(unittest.TestCase):
 
         co.connectors.delete(created_connector.connector.id)
 
-    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
+    # @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     def test_tool_use(self) -> None:
         tools = [
             Tool(
@@ -378,7 +378,6 @@ class TestClient(unittest.TestCase):
             ))
 
         cited_response = co.chat(
-            message="How good were the sales on September 29?",
             tools=tools,
             tool_results=tool_results,
             model="command-nightly",
