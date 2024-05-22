@@ -364,6 +364,7 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
             ))
 
         cited_response = await self.co.chat(
+            message="",
             tools=tools,
             tool_results=tool_results,
             model="command-nightly",

@@ -378,6 +378,7 @@ class TestClient(unittest.TestCase):
             ))
 
         cited_response = co.chat(
+            message="",
             tools=tools,
             tool_results=tool_results,
             model="command-nightly",
