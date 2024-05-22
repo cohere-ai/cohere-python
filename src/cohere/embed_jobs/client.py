@@ -7,6 +7,7 @@ from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.jsonable_encoder import jsonable_encoder
+from ..core.query_encoder import encode_query
 from ..core.remove_none_from_dict import remove_none_from_dict
 from ..core.request_options import RequestOptions
 from ..core.unchecked_base_model import construct_type
@@ -34,9 +35,18 @@ class EmbedJobsClient:
         """
         The list embed job endpoint allows users to view all embed jobs history for that specific user.
 
-        Parameters:
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        Parameters
+        ----------
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListEmbedJobResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -46,10 +56,12 @@ class EmbedJobsClient:
         client.embed_jobs.list()
         """
         _response = self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed-jobs"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="GET",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed-jobs"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             headers=jsonable_encoder(
                 remove_none_from_dict(
@@ -99,35 +111,52 @@ class EmbedJobsClient:
         """
         This API launches an async Embed job for a [Dataset](https://docs.cohere.com/docs/datasets) of type `embed-input`. The result of a completed embed job is new Dataset of type `embed-output`, which contains the original text entries and the corresponding embeddings.
 
-        Parameters:
-            - model: str. ID of the embedding model.
+        Parameters
+        ----------
+        model : str
+            ID of the embedding model.
 
-                          Available models and corresponding embedding dimensions:
+            Available models and corresponding embedding dimensions:
 
-                          - `embed-english-v3.0` : 1024
-                          - `embed-multilingual-v3.0` : 1024
-                          - `embed-english-light-v3.0` : 384
-                          - `embed-multilingual-light-v3.0` : 384
+            - `embed-english-v3.0` : 1024
+            - `embed-multilingual-v3.0` : 1024
+            - `embed-english-light-v3.0` : 384
+            - `embed-multilingual-light-v3.0` : 384
 
-            - dataset_id: str. ID of a [Dataset](https://docs.cohere.com/docs/datasets). The Dataset must be of type `embed-input` and must have a validation status `Validated`
 
-            - input_type: EmbedInputType.
+        dataset_id : str
+            ID of a [Dataset](https://docs.cohere.com/docs/datasets). The Dataset must be of type `embed-input` and must have a validation status `Validated`
 
-            - name: typing.Optional[str]. The name of the embed job.
+        input_type : EmbedInputType
 
-            - embedding_types: typing.Optional[typing.Sequence[EmbeddingType]]. Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
+        name : typing.Optional[str]
+            The name of the embed job.
 
-                                                                                * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
-                                                                                * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
-                                                                                * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
-                                                                                * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
-                                                                                * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
-            - truncate: typing.Optional[CreateEmbedJobRequestTruncate]. One of `START|END` to specify how the API will handle inputs longer than the maximum token length.
+        embedding_types : typing.Optional[typing.Sequence[EmbeddingType]]
+            Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
-                                                                        Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
+            * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
+            * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
+            * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
+            * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
+            * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        truncate : typing.Optional[CreateEmbedJobRequestTruncate]
+            One of `START|END` to specify how the API will handle inputs longer than the maximum token length.
+
+            Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
+
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CreateEmbedJobResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -148,10 +177,12 @@ class EmbedJobsClient:
         if truncate is not OMIT:
             _request["truncate"] = truncate
         _response = self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed-jobs"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed-jobs"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(_request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -197,11 +228,21 @@ class EmbedJobsClient:
         """
         This API retrieves the details about an embed job started by the same user.
 
-        Parameters:
-            - id: str. The ID of the embed job to retrieve.
+        Parameters
+        ----------
+        id : str
+            The ID of the embed job to retrieve.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        EmbedJob
+            OK
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -213,10 +254,12 @@ class EmbedJobsClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"embed-jobs/{jsonable_encoder(id)}"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="GET",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"embed-jobs/{jsonable_encoder(id)}"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             headers=jsonable_encoder(
                 remove_none_from_dict(
@@ -260,11 +303,20 @@ class EmbedJobsClient:
         """
         This API allows users to cancel an active embed job. Once invoked, the embedding process will be terminated, and users will be charged for the embeddings processed up to the cancellation point. It's important to note that partial results will not be available to users after cancellation.
 
-        Parameters:
-            - id: str. The ID of the embed job to cancel.
+        Parameters
+        ----------
+        id : str
+            The ID of the embed job to cancel.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -276,12 +328,14 @@ class EmbedJobsClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(
+            method="POST",
+            url=urllib.parse.urljoin(
                 f"{self._client_wrapper.get_base_url()}/", f"embed-jobs/{jsonable_encoder(id)}/cancel"
             ),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))
             if request_options is not None
@@ -333,9 +387,18 @@ class AsyncEmbedJobsClient:
         """
         The list embed job endpoint allows users to view all embed jobs history for that specific user.
 
-        Parameters:
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        Parameters
+        ----------
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListEmbedJobResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -345,10 +408,12 @@ class AsyncEmbedJobsClient:
         await client.embed_jobs.list()
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed-jobs"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="GET",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed-jobs"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             headers=jsonable_encoder(
                 remove_none_from_dict(
@@ -398,35 +463,52 @@ class AsyncEmbedJobsClient:
         """
         This API launches an async Embed job for a [Dataset](https://docs.cohere.com/docs/datasets) of type `embed-input`. The result of a completed embed job is new Dataset of type `embed-output`, which contains the original text entries and the corresponding embeddings.
 
-        Parameters:
-            - model: str. ID of the embedding model.
+        Parameters
+        ----------
+        model : str
+            ID of the embedding model.
 
-                          Available models and corresponding embedding dimensions:
+            Available models and corresponding embedding dimensions:
 
-                          - `embed-english-v3.0` : 1024
-                          - `embed-multilingual-v3.0` : 1024
-                          - `embed-english-light-v3.0` : 384
-                          - `embed-multilingual-light-v3.0` : 384
+            - `embed-english-v3.0` : 1024
+            - `embed-multilingual-v3.0` : 1024
+            - `embed-english-light-v3.0` : 384
+            - `embed-multilingual-light-v3.0` : 384
 
-            - dataset_id: str. ID of a [Dataset](https://docs.cohere.com/docs/datasets). The Dataset must be of type `embed-input` and must have a validation status `Validated`
 
-            - input_type: EmbedInputType.
+        dataset_id : str
+            ID of a [Dataset](https://docs.cohere.com/docs/datasets). The Dataset must be of type `embed-input` and must have a validation status `Validated`
 
-            - name: typing.Optional[str]. The name of the embed job.
+        input_type : EmbedInputType
 
-            - embedding_types: typing.Optional[typing.Sequence[EmbeddingType]]. Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
+        name : typing.Optional[str]
+            The name of the embed job.
 
-                                                                                * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
-                                                                                * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
-                                                                                * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
-                                                                                * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
-                                                                                * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
-            - truncate: typing.Optional[CreateEmbedJobRequestTruncate]. One of `START|END` to specify how the API will handle inputs longer than the maximum token length.
+        embedding_types : typing.Optional[typing.Sequence[EmbeddingType]]
+            Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
-                                                                        Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
+            * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
+            * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
+            * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
+            * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
+            * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        truncate : typing.Optional[CreateEmbedJobRequestTruncate]
+            One of `START|END` to specify how the API will handle inputs longer than the maximum token length.
+
+            Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
+
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CreateEmbedJobResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -447,10 +529,12 @@ class AsyncEmbedJobsClient:
         if truncate is not OMIT:
             _request["truncate"] = truncate
         _response = await self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed-jobs"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed-jobs"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(_request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -496,11 +580,21 @@ class AsyncEmbedJobsClient:
         """
         This API retrieves the details about an embed job started by the same user.
 
-        Parameters:
-            - id: str. The ID of the embed job to retrieve.
+        Parameters
+        ----------
+        id : str
+            The ID of the embed job to retrieve.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        EmbedJob
+            OK
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -512,10 +606,12 @@ class AsyncEmbedJobsClient:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"embed-jobs/{jsonable_encoder(id)}"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="GET",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"embed-jobs/{jsonable_encoder(id)}"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             headers=jsonable_encoder(
                 remove_none_from_dict(
@@ -559,11 +655,20 @@ class AsyncEmbedJobsClient:
         """
         This API allows users to cancel an active embed job. Once invoked, the embedding process will be terminated, and users will be charged for the embeddings processed up to the cancellation point. It's important to note that partial results will not be available to users after cancellation.
 
-        Parameters:
-            - id: str. The ID of the embed job to cancel.
+        Parameters
+        ----------
+        id : str
+            The ID of the embed job to cancel.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -575,12 +680,14 @@ class AsyncEmbedJobsClient:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(
+            method="POST",
+            url=urllib.parse.urljoin(
                 f"{self._client_wrapper.get_base_url()}/", f"embed-jobs/{jsonable_encoder(id)}/cancel"
             ),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))
             if request_options is not None

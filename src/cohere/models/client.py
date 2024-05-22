@@ -7,6 +7,7 @@ from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.jsonable_encoder import jsonable_encoder
+from ..core.query_encoder import encode_query
 from ..core.remove_none_from_dict import remove_none_from_dict
 from ..core.request_options import RequestOptions
 from ..core.unchecked_base_model import construct_type
@@ -27,11 +28,20 @@ class ModelsClient:
         """
         Returns the details of a model, provided its name.
 
-        Parameters:
-            - model: str.
+        Parameters
+        ----------
+        model : str
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        GetModelResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -43,10 +53,12 @@ class ModelsClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"models/{jsonable_encoder(model)}"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="GET",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"models/{jsonable_encoder(model)}"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             headers=jsonable_encoder(
                 remove_none_from_dict(
@@ -94,17 +106,31 @@ class ModelsClient:
         """
         Returns a list of models available for use. The list contains models from Cohere as well as your fine-tuned models.
 
-        Parameters:
-            - page_size: typing.Optional[float]. Maximum number of models to include in a page
-                                                 Defaults to `20`, min value of `1`, max value of `1000`.
-            - page_token: typing.Optional[str]. Page token provided in the `next_page_token` field of a previous response.
+        Parameters
+        ----------
+        page_size : typing.Optional[float]
+            Maximum number of models to include in a page
+            Defaults to `20`, min value of `1`, max value of `1000`.
 
-            - endpoint: typing.Optional[CompatibleEndpoint]. When provided, filters the list of models to only those that are compatible with the specified endpoint.
+        page_token : typing.Optional[str]
+            Page token provided in the `next_page_token` field of a previous response.
 
-            - default_only: typing.Optional[bool]. When provided, filters the list of models to only the default model to the endpoint. This parameter is only valid when `endpoint` is provided.
+        endpoint : typing.Optional[CompatibleEndpoint]
+            When provided, filters the list of models to only those that are compatible with the specified endpoint.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        default_only : typing.Optional[bool]
+            When provided, filters the list of models to only the default model to the endpoint. This parameter is only valid when `endpoint` is provided.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListModelsResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -114,21 +140,23 @@ class ModelsClient:
         client.models.list()
         """
         _response = self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "models"),
-            params=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        "page_size": page_size,
-                        "page_token": page_token,
-                        "endpoint": endpoint,
-                        "default_only": default_only,
-                        **(
-                            request_options.get("additional_query_parameters", {})
-                            if request_options is not None
-                            else {}
-                        ),
-                    }
+            method="GET",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "models"),
+            params=encode_query(
+                jsonable_encoder(
+                    remove_none_from_dict(
+                        {
+                            "page_size": page_size,
+                            "page_token": page_token,
+                            "endpoint": endpoint,
+                            "default_only": default_only,
+                            **(
+                                request_options.get("additional_query_parameters", {})
+                                if request_options is not None
+                                else {}
+                            ),
+                        }
+                    )
                 )
             ),
             headers=jsonable_encoder(
@@ -166,11 +194,20 @@ class AsyncModelsClient:
         """
         Returns the details of a model, provided its name.
 
-        Parameters:
-            - model: str.
+        Parameters
+        ----------
+        model : str
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        GetModelResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -182,10 +219,12 @@ class AsyncModelsClient:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"models/{jsonable_encoder(model)}"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="GET",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"models/{jsonable_encoder(model)}"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             headers=jsonable_encoder(
                 remove_none_from_dict(
@@ -233,17 +272,31 @@ class AsyncModelsClient:
         """
         Returns a list of models available for use. The list contains models from Cohere as well as your fine-tuned models.
 
-        Parameters:
-            - page_size: typing.Optional[float]. Maximum number of models to include in a page
-                                                 Defaults to `20`, min value of `1`, max value of `1000`.
-            - page_token: typing.Optional[str]. Page token provided in the `next_page_token` field of a previous response.
+        Parameters
+        ----------
+        page_size : typing.Optional[float]
+            Maximum number of models to include in a page
+            Defaults to `20`, min value of `1`, max value of `1000`.
 
-            - endpoint: typing.Optional[CompatibleEndpoint]. When provided, filters the list of models to only those that are compatible with the specified endpoint.
+        page_token : typing.Optional[str]
+            Page token provided in the `next_page_token` field of a previous response.
 
-            - default_only: typing.Optional[bool]. When provided, filters the list of models to only the default model to the endpoint. This parameter is only valid when `endpoint` is provided.
+        endpoint : typing.Optional[CompatibleEndpoint]
+            When provided, filters the list of models to only those that are compatible with the specified endpoint.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        default_only : typing.Optional[bool]
+            When provided, filters the list of models to only the default model to the endpoint. This parameter is only valid when `endpoint` is provided.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListModelsResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -253,21 +306,23 @@ class AsyncModelsClient:
         await client.models.list()
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "models"),
-            params=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        "page_size": page_size,
-                        "page_token": page_token,
-                        "endpoint": endpoint,
-                        "default_only": default_only,
-                        **(
-                            request_options.get("additional_query_parameters", {})
-                            if request_options is not None
-                            else {}
-                        ),
-                    }
+            method="GET",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "models"),
+            params=encode_query(
+                jsonable_encoder(
+                    remove_none_from_dict(
+                        {
+                            "page_size": page_size,
+                            "page_token": page_token,
+                            "endpoint": endpoint,
+                            "default_only": default_only,
+                            **(
+                                request_options.get("additional_query_parameters", {})
+                                if request_options is not None
+                                else {}
+                            ),
+                        }
+                    )
                 )
             ),
             headers=jsonable_encoder(
