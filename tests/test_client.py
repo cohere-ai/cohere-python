@@ -389,7 +389,7 @@ class TestClient(unittest.TestCase):
                 "tool_name": "sales_database",
                 "average_sale_value": "404.17",
                 "date": "2023-09-29",
-                "id": "sales_database:0:0",
+                "id": "sales_database:0:1:0",
                 "number_of_sales": "120",
                 "total_revenue": "48500",
             }

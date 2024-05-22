@@ -7,6 +7,7 @@ from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.jsonable_encoder import jsonable_encoder
+from ..core.query_encoder import encode_query
 from ..core.remove_none_from_dict import remove_none_from_dict
 from ..core.request_options import RequestOptions
 from ..core.unchecked_base_model import construct_type
@@ -43,13 +44,24 @@ class ConnectorsClient:
         """
         Returns a list of connectors ordered by descending creation date (newer first). See ['Managing your Connector'](https://docs.cohere.com/docs/managing-your-connector) for more information.
 
-        Parameters:
-            - limit: typing.Optional[float]. Maximum number of connectors to return [0, 100].
+        Parameters
+        ----------
+        limit : typing.Optional[float]
+            Maximum number of connectors to return [0, 100].
 
-            - offset: typing.Optional[float]. Number of connectors to skip before returning results [0, inf].
+        offset : typing.Optional[float]
+            Number of connectors to skip before returning results [0, inf].
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListConnectorsResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -59,19 +71,21 @@ class ConnectorsClient:
         client.connectors.list()
         """
         _response = self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "connectors"),
-            params=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        "limit": limit,
-                        "offset": offset,
-                        **(
-                            request_options.get("additional_query_parameters", {})
-                            if request_options is not None
-                            else {}
-                        ),
-                    }
+            method="GET",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "connectors"),
+            params=encode_query(
+                jsonable_encoder(
+                    remove_none_from_dict(
+                        {
+                            "limit": limit,
+                            "offset": offset,
+                            **(
+                                request_options.get("additional_query_parameters", {})
+                                if request_options is not None
+                                else {}
+                            ),
+                        }
+                    )
                 )
             ),
             headers=jsonable_encoder(
@@ -112,8 +126,8 @@ class ConnectorsClient:
         self,
         *,
         name: str,
-        description: typing.Optional[str] = OMIT,
         url: str,
+        description: typing.Optional[str] = OMIT,
         excludes: typing.Optional[typing.Sequence[str]] = OMIT,
         oauth: typing.Optional[CreateConnectorOAuth] = OMIT,
         active: typing.Optional[bool] = OMIT,
@@ -124,25 +138,42 @@ class ConnectorsClient:
         """
         Creates a new connector. The connector is tested during registration and will cancel registration when the test is unsuccessful. See ['Creating and Deploying a Connector'](https://docs.cohere.com/docs/creating-and-deploying-a-connector) for more information.
 
-        Parameters:
-            - name: str. A human-readable name for the connector.
+        Parameters
+        ----------
+        name : str
+            A human-readable name for the connector.
 
-            - description: typing.Optional[str]. A description of the connector.
+        url : str
+            The URL of the connector that will be used to search for documents.
 
-            - url: str. The URL of the connector that will be used to search for documents.
+        description : typing.Optional[str]
+            A description of the connector.
 
-            - excludes: typing.Optional[typing.Sequence[str]]. A list of fields to exclude from the prompt (fields remain in the document).
+        excludes : typing.Optional[typing.Sequence[str]]
+            A list of fields to exclude from the prompt (fields remain in the document).
 
-            - oauth: typing.Optional[CreateConnectorOAuth]. The OAuth 2.0 configuration for the connector. Cannot be specified if service_auth is specified.
+        oauth : typing.Optional[CreateConnectorOAuth]
+            The OAuth 2.0 configuration for the connector. Cannot be specified if service_auth is specified.
 
-            - active: typing.Optional[bool]. Whether the connector is active or not.
+        active : typing.Optional[bool]
+            Whether the connector is active or not.
 
-            - continue_on_failure: typing.Optional[bool]. Whether a chat request should continue or not if the request to this connector fails.
+        continue_on_failure : typing.Optional[bool]
+            Whether a chat request should continue or not if the request to this connector fails.
 
-            - service_auth: typing.Optional[CreateConnectorServiceAuth]. The service to service authentication configuration for the connector. Cannot be specified if oauth is specified.
+        service_auth : typing.Optional[CreateConnectorServiceAuth]
+            The service to service authentication configuration for the connector. Cannot be specified if oauth is specified.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CreateConnectorResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -168,10 +199,12 @@ class ConnectorsClient:
         if service_auth is not OMIT:
             _request["service_auth"] = service_auth
         _response = self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "connectors"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "connectors"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(_request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -221,11 +254,21 @@ class ConnectorsClient:
         """
         Retrieve a connector by ID. See ['Connectors'](https://docs.cohere.com/docs/connectors) for more information.
 
-        Parameters:
-            - id: str. The ID of the connector to retrieve.
+        Parameters
+        ----------
+        id : str
+            The ID of the connector to retrieve.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        GetConnectorResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -237,10 +280,12 @@ class ConnectorsClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{jsonable_encoder(id)}"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="GET",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{jsonable_encoder(id)}"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             headers=jsonable_encoder(
                 remove_none_from_dict(
@@ -284,11 +329,21 @@ class ConnectorsClient:
         """
         Delete a connector by ID. See ['Connectors'](https://docs.cohere.com/docs/connectors) for more information.
 
-        Parameters:
-            - id: str. The ID of the connector to delete.
+        Parameters
+        ----------
+        id : str
+            The ID of the connector to delete.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        DeleteConnectorResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -300,10 +355,12 @@ class ConnectorsClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "DELETE",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{jsonable_encoder(id)}"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="DELETE",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{jsonable_encoder(id)}"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             headers=jsonable_encoder(
                 remove_none_from_dict(
@@ -363,25 +420,40 @@ class ConnectorsClient:
         """
         Update a connector by ID. Omitted fields will not be updated. See ['Managing your Connector'](https://docs.cohere.com/docs/managing-your-connector) for more information.
 
-        Parameters:
-            - id: str. The ID of the connector to update.
+        Parameters
+        ----------
+        id : str
+            The ID of the connector to update.
 
-            - name: typing.Optional[str]. A human-readable name for the connector.
+        name : typing.Optional[str]
+            A human-readable name for the connector.
 
-            - url: typing.Optional[str]. The URL of the connector that will be used to search for documents.
+        url : typing.Optional[str]
+            The URL of the connector that will be used to search for documents.
 
-            - excludes: typing.Optional[typing.Sequence[str]]. A list of fields to exclude from the prompt (fields remain in the document).
+        excludes : typing.Optional[typing.Sequence[str]]
+            A list of fields to exclude from the prompt (fields remain in the document).
 
-            - oauth: typing.Optional[CreateConnectorOAuth]. The OAuth 2.0 configuration for the connector. Cannot be specified if service_auth is specified.
+        oauth : typing.Optional[CreateConnectorOAuth]
+            The OAuth 2.0 configuration for the connector. Cannot be specified if service_auth is specified.
 
-            - active: typing.Optional[bool].
+        active : typing.Optional[bool]
 
-            - continue_on_failure: typing.Optional[bool].
+        continue_on_failure : typing.Optional[bool]
 
-            - service_auth: typing.Optional[CreateConnectorServiceAuth]. The service to service authentication configuration for the connector. Cannot be specified if oauth is specified.
+        service_auth : typing.Optional[CreateConnectorServiceAuth]
+            The service to service authentication configuration for the connector. Cannot be specified if oauth is specified.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        UpdateConnectorResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -408,10 +480,12 @@ class ConnectorsClient:
         if service_auth is not OMIT:
             _request["service_auth"] = service_auth
         _response = self._client_wrapper.httpx_client.request(
-            "PATCH",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{jsonable_encoder(id)}"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="PATCH",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{jsonable_encoder(id)}"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(_request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -471,13 +545,24 @@ class ConnectorsClient:
         """
         Authorize the connector with the given ID for the connector oauth app. See ['Connector Authentication'](https://docs.cohere.com/docs/connector-authentication) for more information.
 
-        Parameters:
-            - id: str. The ID of the connector to authorize.
+        Parameters
+        ----------
+        id : str
+            The ID of the connector to authorize.
 
-            - after_token_redirect: typing.Optional[str]. The URL to redirect to after the connector has been authorized.
+        after_token_redirect : typing.Optional[str]
+            The URL to redirect to after the connector has been authorized.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        OAuthAuthorizeResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -489,20 +574,22 @@ class ConnectorsClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(
+            method="POST",
+            url=urllib.parse.urljoin(
                 f"{self._client_wrapper.get_base_url()}/", f"connectors/{jsonable_encoder(id)}/oauth/authorize"
             ),
-            params=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        "after_token_redirect": after_token_redirect,
-                        **(
-                            request_options.get("additional_query_parameters", {})
-                            if request_options is not None
-                            else {}
-                        ),
-                    }
+            params=encode_query(
+                jsonable_encoder(
+                    remove_none_from_dict(
+                        {
+                            "after_token_redirect": after_token_redirect,
+                            **(
+                                request_options.get("additional_query_parameters", {})
+                                if request_options is not None
+                                else {}
+                            ),
+                        }
+                    )
                 )
             ),
             json=jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))
@@ -561,13 +648,24 @@ class AsyncConnectorsClient:
         """
         Returns a list of connectors ordered by descending creation date (newer first). See ['Managing your Connector'](https://docs.cohere.com/docs/managing-your-connector) for more information.
 
-        Parameters:
-            - limit: typing.Optional[float]. Maximum number of connectors to return [0, 100].
+        Parameters
+        ----------
+        limit : typing.Optional[float]
+            Maximum number of connectors to return [0, 100].
 
-            - offset: typing.Optional[float]. Number of connectors to skip before returning results [0, inf].
+        offset : typing.Optional[float]
+            Number of connectors to skip before returning results [0, inf].
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListConnectorsResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -577,19 +675,21 @@ class AsyncConnectorsClient:
         await client.connectors.list()
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "connectors"),
-            params=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        "limit": limit,
-                        "offset": offset,
-                        **(
-                            request_options.get("additional_query_parameters", {})
-                            if request_options is not None
-                            else {}
-                        ),
-                    }
+            method="GET",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "connectors"),
+            params=encode_query(
+                jsonable_encoder(
+                    remove_none_from_dict(
+                        {
+                            "limit": limit,
+                            "offset": offset,
+                            **(
+                                request_options.get("additional_query_parameters", {})
+                                if request_options is not None
+                                else {}
+                            ),
+                        }
+                    )
                 )
             ),
             headers=jsonable_encoder(
@@ -630,8 +730,8 @@ class AsyncConnectorsClient:
         self,
         *,
         name: str,
-        description: typing.Optional[str] = OMIT,
         url: str,
+        description: typing.Optional[str] = OMIT,
         excludes: typing.Optional[typing.Sequence[str]] = OMIT,
         oauth: typing.Optional[CreateConnectorOAuth] = OMIT,
         active: typing.Optional[bool] = OMIT,
@@ -642,25 +742,42 @@ class AsyncConnectorsClient:
         """
         Creates a new connector. The connector is tested during registration and will cancel registration when the test is unsuccessful. See ['Creating and Deploying a Connector'](https://docs.cohere.com/docs/creating-and-deploying-a-connector) for more information.
 
-        Parameters:
-            - name: str. A human-readable name for the connector.
+        Parameters
+        ----------
+        name : str
+            A human-readable name for the connector.
 
-            - description: typing.Optional[str]. A description of the connector.
+        url : str
+            The URL of the connector that will be used to search for documents.
 
-            - url: str. The URL of the connector that will be used to search for documents.
+        description : typing.Optional[str]
+            A description of the connector.
 
-            - excludes: typing.Optional[typing.Sequence[str]]. A list of fields to exclude from the prompt (fields remain in the document).
+        excludes : typing.Optional[typing.Sequence[str]]
+            A list of fields to exclude from the prompt (fields remain in the document).
 
-            - oauth: typing.Optional[CreateConnectorOAuth]. The OAuth 2.0 configuration for the connector. Cannot be specified if service_auth is specified.
+        oauth : typing.Optional[CreateConnectorOAuth]
+            The OAuth 2.0 configuration for the connector. Cannot be specified if service_auth is specified.
 
-            - active: typing.Optional[bool]. Whether the connector is active or not.
+        active : typing.Optional[bool]
+            Whether the connector is active or not.
 
-            - continue_on_failure: typing.Optional[bool]. Whether a chat request should continue or not if the request to this connector fails.
+        continue_on_failure : typing.Optional[bool]
+            Whether a chat request should continue or not if the request to this connector fails.
 
-            - service_auth: typing.Optional[CreateConnectorServiceAuth]. The service to service authentication configuration for the connector. Cannot be specified if oauth is specified.
+        service_auth : typing.Optional[CreateConnectorServiceAuth]
+            The service to service authentication configuration for the connector. Cannot be specified if oauth is specified.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CreateConnectorResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -686,10 +803,12 @@ class AsyncConnectorsClient:
         if service_auth is not OMIT:
             _request["service_auth"] = service_auth
         _response = await self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "connectors"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "connectors"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(_request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -739,11 +858,21 @@ class AsyncConnectorsClient:
         """
         Retrieve a connector by ID. See ['Connectors'](https://docs.cohere.com/docs/connectors) for more information.
 
-        Parameters:
-            - id: str. The ID of the connector to retrieve.
+        Parameters
+        ----------
+        id : str
+            The ID of the connector to retrieve.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        GetConnectorResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -755,10 +884,12 @@ class AsyncConnectorsClient:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{jsonable_encoder(id)}"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="GET",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{jsonable_encoder(id)}"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             headers=jsonable_encoder(
                 remove_none_from_dict(
@@ -804,11 +935,21 @@ class AsyncConnectorsClient:
         """
         Delete a connector by ID. See ['Connectors'](https://docs.cohere.com/docs/connectors) for more information.
 
-        Parameters:
-            - id: str. The ID of the connector to delete.
+        Parameters
+        ----------
+        id : str
+            The ID of the connector to delete.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        DeleteConnectorResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -820,10 +961,12 @@ class AsyncConnectorsClient:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "DELETE",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{jsonable_encoder(id)}"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="DELETE",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{jsonable_encoder(id)}"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             headers=jsonable_encoder(
                 remove_none_from_dict(
@@ -883,25 +1026,40 @@ class AsyncConnectorsClient:
         """
         Update a connector by ID. Omitted fields will not be updated. See ['Managing your Connector'](https://docs.cohere.com/docs/managing-your-connector) for more information.
 
-        Parameters:
-            - id: str. The ID of the connector to update.
+        Parameters
+        ----------
+        id : str
+            The ID of the connector to update.
 
-            - name: typing.Optional[str]. A human-readable name for the connector.
+        name : typing.Optional[str]
+            A human-readable name for the connector.
 
-            - url: typing.Optional[str]. The URL of the connector that will be used to search for documents.
+        url : typing.Optional[str]
+            The URL of the connector that will be used to search for documents.
 
-            - excludes: typing.Optional[typing.Sequence[str]]. A list of fields to exclude from the prompt (fields remain in the document).
+        excludes : typing.Optional[typing.Sequence[str]]
+            A list of fields to exclude from the prompt (fields remain in the document).
 
-            - oauth: typing.Optional[CreateConnectorOAuth]. The OAuth 2.0 configuration for the connector. Cannot be specified if service_auth is specified.
+        oauth : typing.Optional[CreateConnectorOAuth]
+            The OAuth 2.0 configuration for the connector. Cannot be specified if service_auth is specified.
 
-            - active: typing.Optional[bool].
+        active : typing.Optional[bool]
 
-            - continue_on_failure: typing.Optional[bool].
+        continue_on_failure : typing.Optional[bool]
 
-            - service_auth: typing.Optional[CreateConnectorServiceAuth]. The service to service authentication configuration for the connector. Cannot be specified if oauth is specified.
+        service_auth : typing.Optional[CreateConnectorServiceAuth]
+            The service to service authentication configuration for the connector. Cannot be specified if oauth is specified.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        UpdateConnectorResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -928,10 +1086,12 @@ class AsyncConnectorsClient:
         if service_auth is not OMIT:
             _request["service_auth"] = service_auth
         _response = await self._client_wrapper.httpx_client.request(
-            "PATCH",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{jsonable_encoder(id)}"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="PATCH",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"connectors/{jsonable_encoder(id)}"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(_request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -991,13 +1151,24 @@ class AsyncConnectorsClient:
         """
         Authorize the connector with the given ID for the connector oauth app. See ['Connector Authentication'](https://docs.cohere.com/docs/connector-authentication) for more information.
 
-        Parameters:
-            - id: str. The ID of the connector to authorize.
+        Parameters
+        ----------
+        id : str
+            The ID of the connector to authorize.
 
-            - after_token_redirect: typing.Optional[str]. The URL to redirect to after the connector has been authorized.
+        after_token_redirect : typing.Optional[str]
+            The URL to redirect to after the connector has been authorized.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        OAuthAuthorizeResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -1009,20 +1180,22 @@ class AsyncConnectorsClient:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(
+            method="POST",
+            url=urllib.parse.urljoin(
                 f"{self._client_wrapper.get_base_url()}/", f"connectors/{jsonable_encoder(id)}/oauth/authorize"
             ),
-            params=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        "after_token_redirect": after_token_redirect,
-                        **(
-                            request_options.get("additional_query_parameters", {})
-                            if request_options is not None
-                            else {}
-                        ),
-                    }
+            params=encode_query(
+                jsonable_encoder(
+                    remove_none_from_dict(
+                        {
+                            "after_token_redirect": after_token_redirect,
+                            **(
+                                request_options.get("additional_query_parameters", {})
+                                if request_options is not None
+                                else {}
+                            ),
+                        }
+                    )
                 )
             ),
             json=jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))

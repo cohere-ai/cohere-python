@@ -8,6 +8,7 @@ from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.jsonable_encoder import jsonable_encoder
+from ..core.query_encoder import encode_query
 from ..core.remove_none_from_dict import remove_none_from_dict
 from ..core.request_options import RequestOptions
 from ..core.unchecked_base_model import construct_type
@@ -46,20 +47,33 @@ class FinetuningClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListFinetunedModelsResponse:
         """
-        Parameters:
-            - page_size: typing.Optional[int]. Maximum number of results to be returned by the server. If 0, defaults to 50.
+        Parameters
+        ----------
+        page_size : typing.Optional[int]
+            Maximum number of results to be returned by the server. If 0, defaults to 50.
 
-            - page_token: typing.Optional[str]. Request a specific page of the list results.
+        page_token : typing.Optional[str]
+            Request a specific page of the list results.
 
-            - order_by: typing.Optional[str]. Comma separated list of fields. For example: "created_at,name". The default
-                                              sorting order is ascending. To specify descending order for a field, append
-                                              " desc" to the field name. For example: "created_at desc,name".
+        order_by : typing.Optional[str]
+            Comma separated list of fields. For example: "created_at,name". The default
+            sorting order is ascending. To specify descending order for a field, append
+            " desc" to the field name. For example: "created_at desc,name".
 
-                                              Supported sorting fields:
+            Supported sorting fields:
 
-                                              - created_at (default)
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+            - created_at (default)
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListFinetunedModelsResponse
+            A successful response.
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -69,20 +83,22 @@ class FinetuningClient:
         client.finetuning.list_finetuned_models()
         """
         _response = self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "finetuning/finetuned-models"),
-            params=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        "page_size": page_size,
-                        "page_token": page_token,
-                        "order_by": order_by,
-                        **(
-                            request_options.get("additional_query_parameters", {})
-                            if request_options is not None
-                            else {}
-                        ),
-                    }
+            method="GET",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "finetuning/finetuned-models"),
+            params=encode_query(
+                jsonable_encoder(
+                    remove_none_from_dict(
+                        {
+                            "page_size": page_size,
+                            "page_token": page_token,
+                            "order_by": order_by,
+                            **(
+                                request_options.get("additional_query_parameters", {})
+                                if request_options is not None
+                                else {}
+                            ),
+                        }
+                    )
                 )
             ),
             headers=jsonable_encoder(
@@ -135,11 +151,20 @@ class FinetuningClient:
         self, *, request: FinetunedModel, request_options: typing.Optional[RequestOptions] = None
     ) -> CreateFinetunedModelResponse:
         """
-        Parameters:
-            - request: FinetunedModel.
+        Parameters
+        ----------
+        request : FinetunedModel
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CreateFinetunedModelResponse
+            A successful response.
+
+        Examples
+        --------
         from cohere.client import Client
         from cohere.finetuning import BaseModel, FinetunedModel, Settings
 
@@ -160,10 +185,12 @@ class FinetuningClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "finetuning/finetuned-models"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "finetuning/finetuned-models"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -221,11 +248,21 @@ class FinetuningClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> GetFinetunedModelResponse:
         """
-        Parameters:
-            - id: str. The fine-tuned model ID.
+        Parameters
+        ----------
+        id : str
+            The fine-tuned model ID.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        GetFinetunedModelResponse
+            A successful response.
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -237,12 +274,14 @@ class FinetuningClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(
+            method="GET",
+            url=urllib.parse.urljoin(
                 f"{self._client_wrapper.get_base_url()}/", f"finetuning/finetuned-models/{jsonable_encoder(id)}"
             ),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             headers=jsonable_encoder(
                 remove_none_from_dict(
@@ -294,11 +333,21 @@ class FinetuningClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> DeleteFinetunedModelResponse:
         """
-        Parameters:
-            - id: str. The fine-tuned model ID.
+        Parameters
+        ----------
+        id : str
+            The fine-tuned model ID.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        DeleteFinetunedModelResponse
+            A successful response.
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -310,12 +359,14 @@ class FinetuningClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "DELETE",
-            urllib.parse.urljoin(
+            method="DELETE",
+            url=urllib.parse.urljoin(
                 f"{self._client_wrapper.get_base_url()}/", f"finetuning/finetuned-models/{jsonable_encoder(id)}"
             ),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             headers=jsonable_encoder(
                 remove_none_from_dict(
@@ -368,9 +419,9 @@ class FinetuningClient:
         id: str,
         *,
         name: str,
+        settings: Settings,
         creator_id: typing.Optional[str] = OMIT,
         organization_id: typing.Optional[str] = OMIT,
-        settings: Settings,
         status: typing.Optional[Status] = OMIT,
         created_at: typing.Optional[dt.datetime] = OMIT,
         updated_at: typing.Optional[dt.datetime] = OMIT,
@@ -379,29 +430,48 @@ class FinetuningClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> UpdateFinetunedModelResponse:
         """
-        Parameters:
-            - id: str. FinetunedModel ID.
+        Parameters
+        ----------
+        id : str
+            FinetunedModel ID.
 
-            - name: str. FinetunedModel name (e.g. `foobar`).
+        name : str
+            FinetunedModel name (e.g. `foobar`).
 
-            - creator_id: typing.Optional[str]. User ID of the creator.
+        settings : Settings
+            FinetunedModel settings such as dataset, hyperparameters...
 
-            - organization_id: typing.Optional[str]. Organization ID.
+        creator_id : typing.Optional[str]
+            User ID of the creator.
 
-            - settings: Settings. FinetunedModel settings such as dataset, hyperparameters...
+        organization_id : typing.Optional[str]
+            Organization ID.
 
-            - status: typing.Optional[Status]. Current stage in the life-cycle of the fine-tuned model.
+        status : typing.Optional[Status]
+            Current stage in the life-cycle of the fine-tuned model.
 
-            - created_at: typing.Optional[dt.datetime]. Creation timestamp.
+        created_at : typing.Optional[dt.datetime]
+            Creation timestamp.
 
-            - updated_at: typing.Optional[dt.datetime]. Latest update timestamp.
+        updated_at : typing.Optional[dt.datetime]
+            Latest update timestamp.
 
-            - completed_at: typing.Optional[dt.datetime]. Timestamp for the completed fine-tuning.
+        completed_at : typing.Optional[dt.datetime]
+            Timestamp for the completed fine-tuning.
 
-            - last_used: typing.Optional[dt.datetime]. Timestamp for the latest request to this fine-tuned model.
+        last_used : typing.Optional[dt.datetime]
+            Timestamp for the latest request to this fine-tuned model.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        UpdateFinetunedModelResponse
+            A successful response.
+
+        Examples
+        --------
         from cohere.client import Client
         from cohere.finetuning import BaseModel, Settings
 
@@ -436,12 +506,14 @@ class FinetuningClient:
         if last_used is not OMIT:
             _request["last_used"] = last_used
         _response = self._client_wrapper.httpx_client.request(
-            "PATCH",
-            urllib.parse.urljoin(
+            method="PATCH",
+            url=urllib.parse.urljoin(
                 f"{self._client_wrapper.get_base_url()}/", f"finetuning/finetuned-models/{jsonable_encoder(id)}"
             ),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(_request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -505,22 +577,36 @@ class FinetuningClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListEventsResponse:
         """
-        Parameters:
-            - finetuned_model_id: str. The parent fine-tuned model ID.
+        Parameters
+        ----------
+        finetuned_model_id : str
+            The parent fine-tuned model ID.
 
-            - page_size: typing.Optional[int]. Maximum number of results to be returned by the server. If 0, defaults to 50.
+        page_size : typing.Optional[int]
+            Maximum number of results to be returned by the server. If 0, defaults to 50.
 
-            - page_token: typing.Optional[str]. Request a specific page of the list results.
+        page_token : typing.Optional[str]
+            Request a specific page of the list results.
 
-            - order_by: typing.Optional[str]. Comma separated list of fields. For example: "created_at,name". The default
-                                              sorting order is ascending. To specify descending order for a field, append
-                                              " desc" to the field name. For example: "created_at desc,name".
+        order_by : typing.Optional[str]
+            Comma separated list of fields. For example: "created_at,name". The default
+            sorting order is ascending. To specify descending order for a field, append
+            " desc" to the field name. For example: "created_at desc,name".
 
-                                              Supported sorting fields:
+            Supported sorting fields:
 
-                                              - created_at (default)
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+            - created_at (default)
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListEventsResponse
+            A successful response.
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -532,23 +618,25 @@ class FinetuningClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(
+            method="GET",
+            url=urllib.parse.urljoin(
                 f"{self._client_wrapper.get_base_url()}/",
                 f"finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/events",
             ),
-            params=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        "page_size": page_size,
-                        "page_token": page_token,
-                        "order_by": order_by,
-                        **(
-                            request_options.get("additional_query_parameters", {})
-                            if request_options is not None
-                            else {}
-                        ),
-                    }
+            params=encode_query(
+                jsonable_encoder(
+                    remove_none_from_dict(
+                        {
+                            "page_size": page_size,
+                            "page_token": page_token,
+                            "order_by": order_by,
+                            **(
+                                request_options.get("additional_query_parameters", {})
+                                if request_options is not None
+                                else {}
+                            ),
+                        }
+                    )
                 )
             ),
             headers=jsonable_encoder(
@@ -606,15 +694,27 @@ class FinetuningClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListTrainingStepMetricsResponse:
         """
-        Parameters:
-            - finetuned_model_id: str. The parent fine-tuned model ID.
+        Parameters
+        ----------
+        finetuned_model_id : str
+            The parent fine-tuned model ID.
 
-            - page_size: typing.Optional[int]. Maximum number of results to be returned by the server. If 0, defaults to 50.
+        page_size : typing.Optional[int]
+            Maximum number of results to be returned by the server. If 0, defaults to 50.
 
-            - page_token: typing.Optional[str]. Request a specific page of the list results.
+        page_token : typing.Optional[str]
+            Request a specific page of the list results.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListTrainingStepMetricsResponse
+            A successful response.
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -626,22 +726,24 @@ class FinetuningClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(
+            method="GET",
+            url=urllib.parse.urljoin(
                 f"{self._client_wrapper.get_base_url()}/",
                 f"finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/training-step-metrics",
             ),
-            params=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        "page_size": page_size,
-                        "page_token": page_token,
-                        **(
-                            request_options.get("additional_query_parameters", {})
-                            if request_options is not None
-                            else {}
-                        ),
-                    }
+            params=encode_query(
+                jsonable_encoder(
+                    remove_none_from_dict(
+                        {
+                            "page_size": page_size,
+                            "page_token": page_token,
+                            **(
+                                request_options.get("additional_query_parameters", {})
+                                if request_options is not None
+                                else {}
+                            ),
+                        }
+                    )
                 )
             ),
             headers=jsonable_encoder(
@@ -704,20 +806,33 @@ class AsyncFinetuningClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListFinetunedModelsResponse:
         """
-        Parameters:
-            - page_size: typing.Optional[int]. Maximum number of results to be returned by the server. If 0, defaults to 50.
+        Parameters
+        ----------
+        page_size : typing.Optional[int]
+            Maximum number of results to be returned by the server. If 0, defaults to 50.
 
-            - page_token: typing.Optional[str]. Request a specific page of the list results.
+        page_token : typing.Optional[str]
+            Request a specific page of the list results.
 
-            - order_by: typing.Optional[str]. Comma separated list of fields. For example: "created_at,name". The default
-                                              sorting order is ascending. To specify descending order for a field, append
-                                              " desc" to the field name. For example: "created_at desc,name".
+        order_by : typing.Optional[str]
+            Comma separated list of fields. For example: "created_at,name". The default
+            sorting order is ascending. To specify descending order for a field, append
+            " desc" to the field name. For example: "created_at desc,name".
 
-                                              Supported sorting fields:
+            Supported sorting fields:
 
-                                              - created_at (default)
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+            - created_at (default)
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListFinetunedModelsResponse
+            A successful response.
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -727,20 +842,22 @@ class AsyncFinetuningClient:
         await client.finetuning.list_finetuned_models()
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "finetuning/finetuned-models"),
-            params=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        "page_size": page_size,
-                        "page_token": page_token,
-                        "order_by": order_by,
-                        **(
-                            request_options.get("additional_query_parameters", {})
-                            if request_options is not None
-                            else {}
-                        ),
-                    }
+            method="GET",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "finetuning/finetuned-models"),
+            params=encode_query(
+                jsonable_encoder(
+                    remove_none_from_dict(
+                        {
+                            "page_size": page_size,
+                            "page_token": page_token,
+                            "order_by": order_by,
+                            **(
+                                request_options.get("additional_query_parameters", {})
+                                if request_options is not None
+                                else {}
+                            ),
+                        }
+                    )
                 )
             ),
             headers=jsonable_encoder(
@@ -793,11 +910,20 @@ class AsyncFinetuningClient:
         self, *, request: FinetunedModel, request_options: typing.Optional[RequestOptions] = None
     ) -> CreateFinetunedModelResponse:
         """
-        Parameters:
-            - request: FinetunedModel.
+        Parameters
+        ----------
+        request : FinetunedModel
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CreateFinetunedModelResponse
+            A successful response.
+
+        Examples
+        --------
         from cohere.client import AsyncClient
         from cohere.finetuning import BaseModel, FinetunedModel, Settings
 
@@ -818,10 +944,12 @@ class AsyncFinetuningClient:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "finetuning/finetuned-models"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "finetuning/finetuned-models"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -879,11 +1007,21 @@ class AsyncFinetuningClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> GetFinetunedModelResponse:
         """
-        Parameters:
-            - id: str. The fine-tuned model ID.
+        Parameters
+        ----------
+        id : str
+            The fine-tuned model ID.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        GetFinetunedModelResponse
+            A successful response.
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -895,12 +1033,14 @@ class AsyncFinetuningClient:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(
+            method="GET",
+            url=urllib.parse.urljoin(
                 f"{self._client_wrapper.get_base_url()}/", f"finetuning/finetuned-models/{jsonable_encoder(id)}"
             ),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             headers=jsonable_encoder(
                 remove_none_from_dict(
@@ -952,11 +1092,21 @@ class AsyncFinetuningClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> DeleteFinetunedModelResponse:
         """
-        Parameters:
-            - id: str. The fine-tuned model ID.
+        Parameters
+        ----------
+        id : str
+            The fine-tuned model ID.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        DeleteFinetunedModelResponse
+            A successful response.
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -968,12 +1118,14 @@ class AsyncFinetuningClient:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "DELETE",
-            urllib.parse.urljoin(
+            method="DELETE",
+            url=urllib.parse.urljoin(
                 f"{self._client_wrapper.get_base_url()}/", f"finetuning/finetuned-models/{jsonable_encoder(id)}"
             ),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             headers=jsonable_encoder(
                 remove_none_from_dict(
@@ -1026,9 +1178,9 @@ class AsyncFinetuningClient:
         id: str,
         *,
         name: str,
+        settings: Settings,
         creator_id: typing.Optional[str] = OMIT,
         organization_id: typing.Optional[str] = OMIT,
-        settings: Settings,
         status: typing.Optional[Status] = OMIT,
         created_at: typing.Optional[dt.datetime] = OMIT,
         updated_at: typing.Optional[dt.datetime] = OMIT,
@@ -1037,29 +1189,48 @@ class AsyncFinetuningClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> UpdateFinetunedModelResponse:
         """
-        Parameters:
-            - id: str. FinetunedModel ID.
+        Parameters
+        ----------
+        id : str
+            FinetunedModel ID.
 
-            - name: str. FinetunedModel name (e.g. `foobar`).
+        name : str
+            FinetunedModel name (e.g. `foobar`).
 
-            - creator_id: typing.Optional[str]. User ID of the creator.
+        settings : Settings
+            FinetunedModel settings such as dataset, hyperparameters...
 
-            - organization_id: typing.Optional[str]. Organization ID.
+        creator_id : typing.Optional[str]
+            User ID of the creator.
 
-            - settings: Settings. FinetunedModel settings such as dataset, hyperparameters...
+        organization_id : typing.Optional[str]
+            Organization ID.
 
-            - status: typing.Optional[Status]. Current stage in the life-cycle of the fine-tuned model.
+        status : typing.Optional[Status]
+            Current stage in the life-cycle of the fine-tuned model.
 
-            - created_at: typing.Optional[dt.datetime]. Creation timestamp.
+        created_at : typing.Optional[dt.datetime]
+            Creation timestamp.
 
-            - updated_at: typing.Optional[dt.datetime]. Latest update timestamp.
+        updated_at : typing.Optional[dt.datetime]
+            Latest update timestamp.
 
-            - completed_at: typing.Optional[dt.datetime]. Timestamp for the completed fine-tuning.
+        completed_at : typing.Optional[dt.datetime]
+            Timestamp for the completed fine-tuning.
 
-            - last_used: typing.Optional[dt.datetime]. Timestamp for the latest request to this fine-tuned model.
+        last_used : typing.Optional[dt.datetime]
+            Timestamp for the latest request to this fine-tuned model.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        UpdateFinetunedModelResponse
+            A successful response.
+
+        Examples
+        --------
         from cohere.client import AsyncClient
         from cohere.finetuning import BaseModel, Settings
 
@@ -1094,12 +1265,14 @@ class AsyncFinetuningClient:
         if last_used is not OMIT:
             _request["last_used"] = last_used
         _response = await self._client_wrapper.httpx_client.request(
-            "PATCH",
-            urllib.parse.urljoin(
+            method="PATCH",
+            url=urllib.parse.urljoin(
                 f"{self._client_wrapper.get_base_url()}/", f"finetuning/finetuned-models/{jsonable_encoder(id)}"
             ),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(_request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -1163,22 +1336,36 @@ class AsyncFinetuningClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListEventsResponse:
         """
-        Parameters:
-            - finetuned_model_id: str. The parent fine-tuned model ID.
+        Parameters
+        ----------
+        finetuned_model_id : str
+            The parent fine-tuned model ID.
 
-            - page_size: typing.Optional[int]. Maximum number of results to be returned by the server. If 0, defaults to 50.
+        page_size : typing.Optional[int]
+            Maximum number of results to be returned by the server. If 0, defaults to 50.
 
-            - page_token: typing.Optional[str]. Request a specific page of the list results.
+        page_token : typing.Optional[str]
+            Request a specific page of the list results.
 
-            - order_by: typing.Optional[str]. Comma separated list of fields. For example: "created_at,name". The default
-                                              sorting order is ascending. To specify descending order for a field, append
-                                              " desc" to the field name. For example: "created_at desc,name".
+        order_by : typing.Optional[str]
+            Comma separated list of fields. For example: "created_at,name". The default
+            sorting order is ascending. To specify descending order for a field, append
+            " desc" to the field name. For example: "created_at desc,name".
 
-                                              Supported sorting fields:
+            Supported sorting fields:
 
-                                              - created_at (default)
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+            - created_at (default)
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListEventsResponse
+            A successful response.
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -1190,23 +1377,25 @@ class AsyncFinetuningClient:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(
+            method="GET",
+            url=urllib.parse.urljoin(
                 f"{self._client_wrapper.get_base_url()}/",
                 f"finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/events",
             ),
-            params=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        "page_size": page_size,
-                        "page_token": page_token,
-                        "order_by": order_by,
-                        **(
-                            request_options.get("additional_query_parameters", {})
-                            if request_options is not None
-                            else {}
-                        ),
-                    }
+            params=encode_query(
+                jsonable_encoder(
+                    remove_none_from_dict(
+                        {
+                            "page_size": page_size,
+                            "page_token": page_token,
+                            "order_by": order_by,
+                            **(
+                                request_options.get("additional_query_parameters", {})
+                                if request_options is not None
+                                else {}
+                            ),
+                        }
+                    )
                 )
             ),
             headers=jsonable_encoder(
@@ -1264,15 +1453,27 @@ class AsyncFinetuningClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListTrainingStepMetricsResponse:
         """
-        Parameters:
-            - finetuned_model_id: str. The parent fine-tuned model ID.
+        Parameters
+        ----------
+        finetuned_model_id : str
+            The parent fine-tuned model ID.
 
-            - page_size: typing.Optional[int]. Maximum number of results to be returned by the server. If 0, defaults to 50.
+        page_size : typing.Optional[int]
+            Maximum number of results to be returned by the server. If 0, defaults to 50.
 
-            - page_token: typing.Optional[str]. Request a specific page of the list results.
+        page_token : typing.Optional[str]
+            Request a specific page of the list results.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListTrainingStepMetricsResponse
+            A successful response.
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -1284,22 +1485,24 @@ class AsyncFinetuningClient:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "GET",
-            urllib.parse.urljoin(
+            method="GET",
+            url=urllib.parse.urljoin(
                 f"{self._client_wrapper.get_base_url()}/",
                 f"finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/training-step-metrics",
             ),
-            params=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        "page_size": page_size,
-                        "page_token": page_token,
-                        **(
-                            request_options.get("additional_query_parameters", {})
-                            if request_options is not None
-                            else {}
-                        ),
-                    }
+            params=encode_query(
+                jsonable_encoder(
+                    remove_none_from_dict(
+                        {
+                            "page_size": page_size,
+                            "page_token": page_token,
+                            **(
+                                request_options.get("additional_query_parameters", {})
+                                if request_options is not None
+                                else {}
+                            ),
+                        }
+                    )
                 )
             ),
             headers=jsonable_encoder(
