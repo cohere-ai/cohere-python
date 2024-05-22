@@ -89,7 +89,7 @@ async def async_local_detokenize(co: "AsyncClient", model: str, tokens: typing.S
     return tokenizer.decode(tokens)
 
 
-def _get_tokenizer_config_size(tokenizer_url: str) -> None:
+def _get_tokenizer_config_size(tokenizer_url: str) -> float:
     # Get the size of the tokenizer config before downloading it.
     # Content-Length is not always present in the headers (if transfer-encoding: chunked).
     head_response = requests.head(tokenizer_url)
