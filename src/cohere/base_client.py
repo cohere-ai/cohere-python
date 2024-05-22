@@ -12,6 +12,7 @@ from .connectors.client import AsyncConnectorsClient, ConnectorsClient
 from .core.api_error import ApiError
 from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from .core.jsonable_encoder import jsonable_encoder
+from .core.query_encoder import encode_query
 from .core.remove_none_from_dict import remove_none_from_dict
 from .core.request_options import RequestOptions
 from .core.unchecked_base_model import construct_type
@@ -66,23 +67,33 @@ class BaseCohere:
     """
     Use this class to access the different functions within the SDK. You can instantiate any number of clients with different configuration that will propogate to these functions.
 
-    Parameters:
-        - base_url: typing.Optional[str]. The base url to use for requests from the client.
+    Parameters
+    ----------
+    base_url : typing.Optional[str]
+        The base url to use for requests from the client.
 
-        - environment: ClientEnvironment. The environment to use for requests from the client. from .environment import ClientEnvironment
+    environment : ClientEnvironment
+        The environment to use for requests from the client. from .environment import ClientEnvironment
 
-                                          Defaults to ClientEnvironment.PRODUCTION
 
-        - client_name: typing.Optional[str].
 
-        - token: typing.Optional[typing.Union[str, typing.Callable[[], str]]].
+        Defaults to ClientEnvironment.PRODUCTION
 
-        - timeout: typing.Optional[float]. The timeout to be used, in seconds, for requests by default the timeout is 60 seconds, unless a custom httpx client is used, in which case a default is not set.
 
-        - follow_redirects: typing.Optional[bool]. Whether the default httpx client follows redirects or not, this is irrelevant if a custom httpx client is passed in.
 
-        - httpx_client: typing.Optional[httpx.Client]. The httpx client to use for making requests, a preconfigured client is used by default, however this is useful should you want to pass in any custom httpx configuration.
-    ---
+    client_name : typing.Optional[str]
+    token : typing.Optional[typing.Union[str, typing.Callable[[], str]]]
+    timeout : typing.Optional[float]
+        The timeout to be used, in seconds, for requests by default the timeout is 60 seconds, unless a custom httpx client is used, in which case a default is not set.
+
+    follow_redirects : typing.Optional[bool]
+        Whether the default httpx client follows redirects or not, this is irrelevant if a custom httpx client is passed in.
+
+    httpx_client : typing.Optional[httpx.Client]
+        The httpx client to use for making requests, a preconfigured client is used by default, however this is useful should you want to pass in any custom httpx configuration.
+
+    Examples
+    --------
     from cohere.client import Client
 
     client = Client(
@@ -99,7 +110,7 @@ class BaseCohere:
         client_name: typing.Optional[str] = None,
         token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"),
         timeout: typing.Optional[float] = None,
-        follow_redirects: typing.Optional[bool] = None,
+        follow_redirects: typing.Optional[bool] = True,
         httpx_client: typing.Optional[httpx.Client] = None,
     ):
         _defaulted_timeout = timeout if timeout is not None else 300 if httpx_client is None else None
@@ -148,161 +159,219 @@ class BaseCohere:
         return_prompt: typing.Optional[bool] = OMIT,
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
+        force_single_step: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[StreamedChatResponse]:
         """
         Generates a text response to a user message.
         To learn how to use Chat with Streaming and RAG follow [this guide](https://docs.cohere.com/docs/cochat-beta#various-ways-of-using-the-chat-endpoint).
 
-        Parameters:
-            - message: str. Text input for the model to respond to.
-                            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+        Parameters
+        ----------
+        message : str
+            Text input for the model to respond to.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - model: typing.Optional[str]. Defaults to `command-r-plus`.
 
-                                           The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
-                                           Compatible Deployments: Cohere Platform, Private Deployments
+        model : typing.Optional[str]
+            Defaults to `command-r-plus`.
 
-            - preamble: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style, and use the `SYSTEM` role.
+            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
+            Compatible Deployments: Cohere Platform, Private Deployments
 
-                                              The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
-                                              Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - chat_history: typing.Optional[typing.Sequence[Message]]. A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
+        preamble : typing.Optional[str]
+            When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style, and use the `SYSTEM` role.
 
-                                                                       Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
+            The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-                                                                       The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
-                                                                       Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
+        chat_history : typing.Optional[typing.Sequence[Message]]
+            A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
 
-                                                     Providing a `conversation_id` creates or resumes a persisted conversation with the specified ID. The ID can be any non empty string.
-                                                     Compatible Deployments: Cohere Platform
+            Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
 
-            - prompt_truncation: typing.Optional[ChatStreamRequestPromptTruncation]. Defaults to `AUTO` when `connectors` are specified and `OFF` in all other cases.
+            The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-                                                                                     Dictates how the prompt will be constructed.
 
-                                                                                     With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be changed and ranked by relevance.
+        conversation_id : typing.Optional[str]
+            An alternative to `chat_history`.
 
-                                                                                     With `prompt_truncation` set to "AUTO_PRESERVE_ORDER", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be preserved as they are inputted into the API.
+            Providing a `conversation_id` creates or resumes a persisted conversation with the specified ID. The ID can be any non empty string.
+            Compatible Deployments: Cohere Platform
 
-                                                                                     With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
-                                                                                     Compatible Deployments: Cohere Platform Only AUTO_PRESERVE_ORDER: Azure, AWS Sagemaker, Private Deployments
 
-            - connectors: typing.Optional[typing.Sequence[ChatConnector]]. Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
+        prompt_truncation : typing.Optional[ChatStreamRequestPromptTruncation]
+            Defaults to `AUTO` when `connectors` are specified and `OFF` in all other cases.
 
-                                                                           When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
-                                                                           Compatible Deployments: Cohere Platform
+            Dictates how the prompt will be constructed.
 
-            - search_queries_only: typing.Optional[bool]. Defaults to `false`.
+            With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be changed and ranked by relevance.
 
-                                                          When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
-                                                          Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            With `prompt_truncation` set to "AUTO_PRESERVE_ORDER", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be preserved as they are inputted into the API.
 
-            - documents: typing.Optional[typing.Sequence[ChatDocument]]. A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
+            With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
+            Compatible Deployments: Cohere Platform Only AUTO_PRESERVE_ORDER: Azure, AWS Sagemaker, Private Deployments
 
-                                                                         Example:
-                                                                         `[
-                                                                           { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
-                                                                           { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
-                                                                         ]`
 
-                                                                         Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
+        connectors : typing.Optional[typing.Sequence[ChatConnector]]
+            Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
 
-                                                                         Some suggested keys are "text", "author", and "date". For better generation quality, it is recommended to keep the total word count of the strings in the dictionary to under 300 words.
+            When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
+            Compatible Deployments: Cohere Platform
 
-                                                                         An `id` field (string) can be optionally supplied to identify the document in the citations. This field will not be passed to the model.
 
-                                                                         An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
+        search_queries_only : typing.Optional[bool]
+            Defaults to `false`.
 
-                                                                         See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
-                                                                         Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - citation_quality: typing.Optional[ChatStreamRequestCitationQuality]. Defaults to `"accurate"`.
 
-                                                                                   Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results or `"fast"` results.
-                                                                                   Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+        documents : typing.Optional[typing.Sequence[ChatDocument]]
+            A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
 
-            - temperature: typing.Optional[float]. Defaults to `0.3`.
+            Example:
+            `[
+              { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
+              { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
+            ]`
 
-                                                   A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
+            Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
 
-                                                   Randomness can be further maximized by increasing the  value of the `p` parameter.
-                                                   Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            Some suggested keys are "text", "author", and "date". For better generation quality, it is recommended to keep the total word count of the strings in the dictionary to under 300 words.
 
-            - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
-                                                Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            An `id` field (string) can be optionally supplied to identify the document in the citations. This field will not be passed to the model.
 
-            - max_input_tokens: typing.Optional[int]. The maximum number of input tokens to send to the model. If not specified, `max_input_tokens` is the model's context length limit minus a small buffer.
+            An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
 
-                                                      Input will be truncated according to the `prompt_truncation` parameter.
-                                                      Compatible Deployments: Cohere Platform
+            See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - k: typing.Optional[int]. Ensures only the top `k` most likely tokens are considered for generation at each step.
-                                       Defaults to `0`, min value of `0`, max value of `500`.
-                                       Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
-                                         Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
-                                         Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+        citation_quality : typing.Optional[ChatStreamRequestCitationQuality]
+            Defaults to `"accurate"`.
 
-            - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens
-                                            deterministically, such that repeated requests with the same
-                                            seed and parameters should return the same result. However,
-                                            determinism cannot be totally guaranteed.
-                                            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results or `"fast"` results.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - stop_sequences: typing.Optional[typing.Sequence[str]]. A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
-                                                                     Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - frequency_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+        temperature : typing.Optional[float]
+            Defaults to `0.3`.
 
-                                                         Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
-                                                         Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
 
-            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+            Randomness can be further maximized by increasing the  value of the `p` parameter.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-                                                        Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
-                                                        Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without
-                                                    any pre-processing.
-                                                    Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+        max_tokens : typing.Optional[int]
+            The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - return_prompt: typing.Optional[bool]. The prompt is returned in the `prompt` response field when this is enabled.
 
-            - tools: typing.Optional[typing.Sequence[Tool]]. A list of available tools (functions) that the model may suggest invoking before producing a text response.
+        max_input_tokens : typing.Optional[int]
+            The maximum number of input tokens to send to the model. If not specified, `max_input_tokens` is the model's context length limit minus a small buffer.
 
-                                                             When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
-                                                             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            Input will be truncated according to the `prompt_truncation` parameter.
+            Compatible Deployments: Cohere Platform
 
-            - tool_results: typing.Optional[typing.Sequence[ToolResult]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
-                                                                          Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
 
-                                                                          **Note**: `outputs` must be a list of objects. If your tool returns a single object (eg `{"status": 200}`), make sure to wrap it in a list.
-                                                                          ```
-                                                                          tool_results = [
-                                                                            {
-                                                                              "call": {
-                                                                                "name": <tool name>,
-                                                                                "parameters": {
-                                                                                  <param name>: <param value>
-                                                                                }
-                                                                              },
-                                                                              "outputs": [{
-                                                                                <key>: <value>
-                                                                              }]
-                                                                            },
-                                                                            ...
-                                                                          ]
-                                                                          ```
-                                                                          **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
-                                                                          Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+        k : typing.Optional[int]
+            Ensures only the top `k` most likely tokens are considered for generation at each step.
+            Defaults to `0`, min value of `0`, max value of `500`.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+
+        p : typing.Optional[float]
+            Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
+            Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        seed : typing.Optional[float]
+            If specified, the backend will make a best effort to sample tokens
+            deterministically, such that repeated requests with the same
+            seed and parameters should return the same result. However,
+            determinism cannot be totally guaranteed.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        stop_sequences : typing.Optional[typing.Sequence[str]]
+            A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        frequency_penalty : typing.Optional[float]
+            Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+
+            Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        presence_penalty : typing.Optional[float]
+            Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+
+            Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        raw_prompting : typing.Optional[bool]
+            When enabled, the user's prompt will be sent to the model without
+            any pre-processing.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        return_prompt : typing.Optional[bool]
+            The prompt is returned in the `prompt` response field when this is enabled.
+
+        tools : typing.Optional[typing.Sequence[Tool]]
+            A list of available tools (functions) that the model may suggest invoking before producing a text response.
+
+            When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        tool_results : typing.Optional[typing.Sequence[ToolResult]]
+            A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
+            Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
+
+            **Note**: `outputs` must be a list of objects. If your tool returns a single object (eg `{"status": 200}`), make sure to wrap it in a list.
+            ```
+            tool_results = [
+              {
+                "call": {
+                  "name": <tool name>,
+                  "parameters": {
+                    <param name>: <param value>
+                  }
+                },
+                "outputs": [{
+                  <key>: <value>
+                }]
+              },
+              ...
+            ]
+            ```
+            **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        force_single_step : typing.Optional[bool]
+            Forces the chat to be single step. Defaults to `false`.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Yields
+        ------
+        typing.Iterator[StreamedChatResponse]
+
+
+        Examples
+        --------
         from cohere import (
             ChatConnector,
             ChatStreamRequestConnectorsSearchOptions,
@@ -318,7 +387,7 @@ class BaseCohere:
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        client.chat_stream(
+        response = client.chat_stream(
             message="string",
             model="string",
             preamble="string",
@@ -344,7 +413,7 @@ class BaseCohere:
                 )
             ],
             search_queries_only=True,
-            documents=[{{"key": "value"}: {"key": "value"}}],
+            documents=[{"string": {"key": "value"}}],
             citation_quality="fast",
             temperature=1.1,
             max_tokens=1,
@@ -386,8 +455,10 @@ class BaseCohere:
                     outputs=[{"string": {"key": "value"}}],
                 )
             ],
-            enable_multi_step=True,
+            force_single_step=True,
         )
+        for chunk in response:
+            yield chunk
         """
         _request: typing.Dict[str, typing.Any] = {"message": message, "stream": True}
         if model is not OMIT:
@@ -434,11 +505,15 @@ class BaseCohere:
             _request["tools"] = tools
         if tool_results is not OMIT:
             _request["tool_results"] = tool_results
+        if force_single_step is not OMIT:
+            _request["force_single_step"] = force_single_step
         with self._client_wrapper.httpx_client.stream(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(_request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -503,161 +578,219 @@ class BaseCohere:
         return_prompt: typing.Optional[bool] = OMIT,
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
+        force_single_step: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> NonStreamedChatResponse:
         """
         Generates a text response to a user message.
         To learn how to use Chat with Streaming and RAG follow [this guide](https://docs.cohere.com/docs/cochat-beta#various-ways-of-using-the-chat-endpoint).
 
-        Parameters:
-            - message: str. Text input for the model to respond to.
-                            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+        Parameters
+        ----------
+        message : str
+            Text input for the model to respond to.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - model: typing.Optional[str]. Defaults to `command-r-plus`.
 
-                                           The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
-                                           Compatible Deployments: Cohere Platform, Private Deployments
+        model : typing.Optional[str]
+            Defaults to `command-r-plus`.
 
-            - preamble: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style, and use the `SYSTEM` role.
+            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
+            Compatible Deployments: Cohere Platform, Private Deployments
 
-                                              The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
-                                              Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - chat_history: typing.Optional[typing.Sequence[Message]]. A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
+        preamble : typing.Optional[str]
+            When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style, and use the `SYSTEM` role.
 
-                                                                       Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
+            The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-                                                                       The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
-                                                                       Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
+        chat_history : typing.Optional[typing.Sequence[Message]]
+            A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
 
-                                                     Providing a `conversation_id` creates or resumes a persisted conversation with the specified ID. The ID can be any non empty string.
-                                                     Compatible Deployments: Cohere Platform
+            Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
 
-            - prompt_truncation: typing.Optional[ChatRequestPromptTruncation]. Defaults to `AUTO` when `connectors` are specified and `OFF` in all other cases.
+            The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-                                                                               Dictates how the prompt will be constructed.
 
-                                                                               With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be changed and ranked by relevance.
+        conversation_id : typing.Optional[str]
+            An alternative to `chat_history`.
 
-                                                                               With `prompt_truncation` set to "AUTO_PRESERVE_ORDER", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be preserved as they are inputted into the API.
+            Providing a `conversation_id` creates or resumes a persisted conversation with the specified ID. The ID can be any non empty string.
+            Compatible Deployments: Cohere Platform
 
-                                                                               With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
-                                                                               Compatible Deployments: Cohere Platform Only AUTO_PRESERVE_ORDER: Azure, AWS Sagemaker, Private Deployments
 
-            - connectors: typing.Optional[typing.Sequence[ChatConnector]]. Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
+        prompt_truncation : typing.Optional[ChatRequestPromptTruncation]
+            Defaults to `AUTO` when `connectors` are specified and `OFF` in all other cases.
 
-                                                                           When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
-                                                                           Compatible Deployments: Cohere Platform
+            Dictates how the prompt will be constructed.
 
-            - search_queries_only: typing.Optional[bool]. Defaults to `false`.
+            With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be changed and ranked by relevance.
 
-                                                          When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
-                                                          Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            With `prompt_truncation` set to "AUTO_PRESERVE_ORDER", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be preserved as they are inputted into the API.
 
-            - documents: typing.Optional[typing.Sequence[ChatDocument]]. A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
+            With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
+            Compatible Deployments: Cohere Platform Only AUTO_PRESERVE_ORDER: Azure, AWS Sagemaker, Private Deployments
 
-                                                                         Example:
-                                                                         `[
-                                                                           { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
-                                                                           { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
-                                                                         ]`
 
-                                                                         Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
+        connectors : typing.Optional[typing.Sequence[ChatConnector]]
+            Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
 
-                                                                         Some suggested keys are "text", "author", and "date". For better generation quality, it is recommended to keep the total word count of the strings in the dictionary to under 300 words.
+            When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
+            Compatible Deployments: Cohere Platform
 
-                                                                         An `id` field (string) can be optionally supplied to identify the document in the citations. This field will not be passed to the model.
 
-                                                                         An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
+        search_queries_only : typing.Optional[bool]
+            Defaults to `false`.
 
-                                                                         See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
-                                                                         Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - citation_quality: typing.Optional[ChatRequestCitationQuality]. Defaults to `"accurate"`.
 
-                                                                             Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results or `"fast"` results.
-                                                                             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+        documents : typing.Optional[typing.Sequence[ChatDocument]]
+            A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
 
-            - temperature: typing.Optional[float]. Defaults to `0.3`.
+            Example:
+            `[
+              { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
+              { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
+            ]`
 
-                                                   A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
+            Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
 
-                                                   Randomness can be further maximized by increasing the  value of the `p` parameter.
-                                                   Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            Some suggested keys are "text", "author", and "date". For better generation quality, it is recommended to keep the total word count of the strings in the dictionary to under 300 words.
 
-            - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
-                                                Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            An `id` field (string) can be optionally supplied to identify the document in the citations. This field will not be passed to the model.
 
-            - max_input_tokens: typing.Optional[int]. The maximum number of input tokens to send to the model. If not specified, `max_input_tokens` is the model's context length limit minus a small buffer.
+            An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
 
-                                                      Input will be truncated according to the `prompt_truncation` parameter.
-                                                      Compatible Deployments: Cohere Platform
+            See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - k: typing.Optional[int]. Ensures only the top `k` most likely tokens are considered for generation at each step.
-                                       Defaults to `0`, min value of `0`, max value of `500`.
-                                       Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
-                                         Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
-                                         Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+        citation_quality : typing.Optional[ChatRequestCitationQuality]
+            Defaults to `"accurate"`.
 
-            - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens
-                                            deterministically, such that repeated requests with the same
-                                            seed and parameters should return the same result. However,
-                                            determinism cannot be totally guaranteed.
-                                            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results or `"fast"` results.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - stop_sequences: typing.Optional[typing.Sequence[str]]. A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
-                                                                     Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - frequency_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+        temperature : typing.Optional[float]
+            Defaults to `0.3`.
 
-                                                         Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
-                                                         Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
 
-            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+            Randomness can be further maximized by increasing the  value of the `p` parameter.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-                                                        Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
-                                                        Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without
-                                                    any pre-processing.
-                                                    Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+        max_tokens : typing.Optional[int]
+            The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - return_prompt: typing.Optional[bool]. The prompt is returned in the `prompt` response field when this is enabled.
 
-            - tools: typing.Optional[typing.Sequence[Tool]]. A list of available tools (functions) that the model may suggest invoking before producing a text response.
+        max_input_tokens : typing.Optional[int]
+            The maximum number of input tokens to send to the model. If not specified, `max_input_tokens` is the model's context length limit minus a small buffer.
 
-                                                             When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
-                                                             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            Input will be truncated according to the `prompt_truncation` parameter.
+            Compatible Deployments: Cohere Platform
 
-            - tool_results: typing.Optional[typing.Sequence[ToolResult]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
-                                                                          Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
 
-                                                                          **Note**: `outputs` must be a list of objects. If your tool returns a single object (eg `{"status": 200}`), make sure to wrap it in a list.
-                                                                          ```
-                                                                          tool_results = [
-                                                                            {
-                                                                              "call": {
-                                                                                "name": <tool name>,
-                                                                                "parameters": {
-                                                                                  <param name>: <param value>
-                                                                                }
-                                                                              },
-                                                                              "outputs": [{
-                                                                                <key>: <value>
-                                                                              }]
-                                                                            },
-                                                                            ...
-                                                                          ]
-                                                                          ```
-                                                                          **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
-                                                                          Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+        k : typing.Optional[int]
+            Ensures only the top `k` most likely tokens are considered for generation at each step.
+            Defaults to `0`, min value of `0`, max value of `500`.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+
+        p : typing.Optional[float]
+            Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
+            Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        seed : typing.Optional[float]
+            If specified, the backend will make a best effort to sample tokens
+            deterministically, such that repeated requests with the same
+            seed and parameters should return the same result. However,
+            determinism cannot be totally guaranteed.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        stop_sequences : typing.Optional[typing.Sequence[str]]
+            A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        frequency_penalty : typing.Optional[float]
+            Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+
+            Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        presence_penalty : typing.Optional[float]
+            Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+
+            Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        raw_prompting : typing.Optional[bool]
+            When enabled, the user's prompt will be sent to the model without
+            any pre-processing.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        return_prompt : typing.Optional[bool]
+            The prompt is returned in the `prompt` response field when this is enabled.
+
+        tools : typing.Optional[typing.Sequence[Tool]]
+            A list of available tools (functions) that the model may suggest invoking before producing a text response.
+
+            When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        tool_results : typing.Optional[typing.Sequence[ToolResult]]
+            A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
+            Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
+
+            **Note**: `outputs` must be a list of objects. If your tool returns a single object (eg `{"status": 200}`), make sure to wrap it in a list.
+            ```
+            tool_results = [
+              {
+                "call": {
+                  "name": <tool name>,
+                  "parameters": {
+                    <param name>: <param value>
+                  }
+                },
+                "outputs": [{
+                  <key>: <value>
+                }]
+              },
+              ...
+            ]
+            ```
+            **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        force_single_step : typing.Optional[bool]
+            Forces the chat to be single step. Defaults to `false`.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        NonStreamedChatResponse
+
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -715,11 +848,15 @@ class BaseCohere:
             _request["tools"] = tools
         if tool_results is not OMIT:
             _request["tool_results"] = tool_results
+        if force_single_step is not OMIT:
+            _request["force_single_step"] = force_single_step
         _response = self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(_request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -781,69 +918,106 @@ class BaseCohere:
 
         Generates realistic text conditioned on a given input.
 
-        Parameters:
-            - prompt: str. The input text that serves as the starting point for generating the response.
-                           Note: The prompt will be pre-processed and modified before reaching the model.
+        Parameters
+        ----------
+        prompt : str
+            The input text that serves as the starting point for generating the response.
+            Note: The prompt will be pre-processed and modified before reaching the model.
 
-            - model: typing.Optional[str]. The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
-                                           Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
-            - num_generations: typing.Optional[int]. The maximum number of generations that will be returned. Defaults to `1`, min value of `1`, max value of `5`.
 
-            - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+        model : typing.Optional[str]
+            The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
+            Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
 
-                                                This parameter is off by default, and if it's not specified, the model will continue generating until it emits an EOS completion token. See [BPE Tokens](/bpe-tokens-wiki) for more details.
+        num_generations : typing.Optional[int]
+            The maximum number of generations that will be returned. Defaults to `1`, min value of `1`, max value of `5`.
 
-                                                Can only be set to `0` if `return_likelihoods` is set to `ALL` to get the likelihood of the prompt.
 
-            - truncate: typing.Optional[GenerateStreamRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
+        max_tokens : typing.Optional[int]
+            The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
 
-                                                                        Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
+            This parameter is off by default, and if it's not specified, the model will continue generating until it emits an EOS completion token. See [BPE Tokens](/bpe-tokens-wiki) for more details.
 
-                                                                        If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
-            - temperature: typing.Optional[float]. A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations. See [Temperature](/temperature-wiki) for more details.
-                                                   Defaults to `0.75`, min value of `0.0`, max value of `5.0`.
+            Can only be set to `0` if `return_likelihoods` is set to `ALL` to get the likelihood of the prompt.
 
-            - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed.
 
-            - preset: typing.Optional[str]. Identifier of a custom preset. A preset is a combination of parameters, such as prompt, temperature etc. You can create presets in the [playground](https://dashboard.cohere.ai/playground/generate).
-                                            When a preset is specified, the `prompt` parameter becomes optional, and any included parameters will override the preset's parameters.
+        truncate : typing.Optional[GenerateStreamRequestTruncate]
+            One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
 
-            - end_sequences: typing.Optional[typing.Sequence[str]]. The generated text will be cut at the beginning of the earliest occurrence of an end sequence. The sequence will be excluded from the text.
+            Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
 
-            - stop_sequences: typing.Optional[typing.Sequence[str]]. The generated text will be cut at the end of the earliest occurrence of a stop sequence. The sequence will be included the text.
+            If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
 
-            - k: typing.Optional[int]. Ensures only the top `k` most likely tokens are considered for generation at each step.
-                                       Defaults to `0`, min value of `0`, max value of `500`.
+        temperature : typing.Optional[float]
+            A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations. See [Temperature](/temperature-wiki) for more details.
+            Defaults to `0.75`, min value of `0.0`, max value of `5.0`.
 
-            - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
-                                         Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
-            - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+        seed : typing.Optional[float]
+            If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed.
 
-                                                         Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
+        preset : typing.Optional[str]
+            Identifier of a custom preset. A preset is a combination of parameters, such as prompt, temperature etc. You can create presets in the [playground](https://dashboard.cohere.com/playground/generate).
+            When a preset is specified, the `prompt` parameter becomes optional, and any included parameters will override the preset's parameters.
 
-            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
-                                                        Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+        end_sequences : typing.Optional[typing.Sequence[str]]
+            The generated text will be cut at the beginning of the earliest occurrence of an end sequence. The sequence will be excluded from the text.
 
-                                                        Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
+        stop_sequences : typing.Optional[typing.Sequence[str]]
+            The generated text will be cut at the end of the earliest occurrence of a stop sequence. The sequence will be included the text.
 
-            - return_likelihoods: typing.Optional[GenerateStreamRequestReturnLikelihoods]. One of `GENERATION|ALL|NONE` to specify how and if the token likelihoods are returned with the response. Defaults to `NONE`.
+        k : typing.Optional[int]
+            Ensures only the top `k` most likely tokens are considered for generation at each step.
+            Defaults to `0`, min value of `0`, max value of `500`.
 
-                                                                                           If `GENERATION` is selected, the token likelihoods will only be provided for generated text.
 
-                                                                                           If `ALL` is selected, the token likelihoods will be provided both for the prompt and the generated text.
-            - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
+        p : typing.Optional[float]
+            Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
+            Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+
+        frequency_penalty : typing.Optional[float]
+            Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+
+            Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
+
+
+        presence_penalty : typing.Optional[float]
+            Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+
+            Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+
+            Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
+
+
+        return_likelihoods : typing.Optional[GenerateStreamRequestReturnLikelihoods]
+            One of `GENERATION|ALL|NONE` to specify how and if the token likelihoods are returned with the response. Defaults to `NONE`.
+
+            If `GENERATION` is selected, the token likelihoods will only be provided for generated text.
+
+            If `ALL` is selected, the token likelihoods will be provided both for the prompt and the generated text.
+
+        raw_prompting : typing.Optional[bool]
+            When enabled, the user's prompt will be sent to the model without any pre-processing.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Yields
+        ------
+        typing.Iterator[GenerateStreamedResponse]
+
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        client.generate_stream(
+        response = client.generate_stream(
             prompt="string",
             model="string",
             num_generations=1,
@@ -861,6 +1035,8 @@ class BaseCohere:
             return_likelihoods="GENERATION",
             raw_prompting=True,
         )
+        for chunk in response:
+            yield chunk
         """
         _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": True}
         if model is not OMIT:
@@ -894,10 +1070,12 @@ class BaseCohere:
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
         with self._client_wrapper.httpx_client.stream(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "generate"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "generate"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(_request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -972,62 +1150,99 @@ class BaseCohere:
 
         Generates realistic text conditioned on a given input.
 
-        Parameters:
-            - prompt: str. The input text that serves as the starting point for generating the response.
-                           Note: The prompt will be pre-processed and modified before reaching the model.
+        Parameters
+        ----------
+        prompt : str
+            The input text that serves as the starting point for generating the response.
+            Note: The prompt will be pre-processed and modified before reaching the model.
 
-            - model: typing.Optional[str]. The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
-                                           Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
-            - num_generations: typing.Optional[int]. The maximum number of generations that will be returned. Defaults to `1`, min value of `1`, max value of `5`.
 
-            - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+        model : typing.Optional[str]
+            The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
+            Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
 
-                                                This parameter is off by default, and if it's not specified, the model will continue generating until it emits an EOS completion token. See [BPE Tokens](/bpe-tokens-wiki) for more details.
+        num_generations : typing.Optional[int]
+            The maximum number of generations that will be returned. Defaults to `1`, min value of `1`, max value of `5`.
 
-                                                Can only be set to `0` if `return_likelihoods` is set to `ALL` to get the likelihood of the prompt.
 
-            - truncate: typing.Optional[GenerateRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
+        max_tokens : typing.Optional[int]
+            The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
 
-                                                                  Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
+            This parameter is off by default, and if it's not specified, the model will continue generating until it emits an EOS completion token. See [BPE Tokens](/bpe-tokens-wiki) for more details.
 
-                                                                  If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
-            - temperature: typing.Optional[float]. A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations. See [Temperature](/temperature-wiki) for more details.
-                                                   Defaults to `0.75`, min value of `0.0`, max value of `5.0`.
+            Can only be set to `0` if `return_likelihoods` is set to `ALL` to get the likelihood of the prompt.
 
-            - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed.
 
-            - preset: typing.Optional[str]. Identifier of a custom preset. A preset is a combination of parameters, such as prompt, temperature etc. You can create presets in the [playground](https://dashboard.cohere.ai/playground/generate).
-                                            When a preset is specified, the `prompt` parameter becomes optional, and any included parameters will override the preset's parameters.
+        truncate : typing.Optional[GenerateRequestTruncate]
+            One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
 
-            - end_sequences: typing.Optional[typing.Sequence[str]]. The generated text will be cut at the beginning of the earliest occurrence of an end sequence. The sequence will be excluded from the text.
+            Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
 
-            - stop_sequences: typing.Optional[typing.Sequence[str]]. The generated text will be cut at the end of the earliest occurrence of a stop sequence. The sequence will be included the text.
+            If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
 
-            - k: typing.Optional[int]. Ensures only the top `k` most likely tokens are considered for generation at each step.
-                                       Defaults to `0`, min value of `0`, max value of `500`.
+        temperature : typing.Optional[float]
+            A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations. See [Temperature](/temperature-wiki) for more details.
+            Defaults to `0.75`, min value of `0.0`, max value of `5.0`.
 
-            - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
-                                         Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
-            - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+        seed : typing.Optional[float]
+            If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed.
 
-                                                         Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
+        preset : typing.Optional[str]
+            Identifier of a custom preset. A preset is a combination of parameters, such as prompt, temperature etc. You can create presets in the [playground](https://dashboard.cohere.com/playground/generate).
+            When a preset is specified, the `prompt` parameter becomes optional, and any included parameters will override the preset's parameters.
 
-            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
-                                                        Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+        end_sequences : typing.Optional[typing.Sequence[str]]
+            The generated text will be cut at the beginning of the earliest occurrence of an end sequence. The sequence will be excluded from the text.
 
-                                                        Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
+        stop_sequences : typing.Optional[typing.Sequence[str]]
+            The generated text will be cut at the end of the earliest occurrence of a stop sequence. The sequence will be included the text.
 
-            - return_likelihoods: typing.Optional[GenerateRequestReturnLikelihoods]. One of `GENERATION|ALL|NONE` to specify how and if the token likelihoods are returned with the response. Defaults to `NONE`.
+        k : typing.Optional[int]
+            Ensures only the top `k` most likely tokens are considered for generation at each step.
+            Defaults to `0`, min value of `0`, max value of `500`.
 
-                                                                                     If `GENERATION` is selected, the token likelihoods will only be provided for generated text.
 
-                                                                                     If `ALL` is selected, the token likelihoods will be provided both for the prompt and the generated text.
-            - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
+        p : typing.Optional[float]
+            Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
+            Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+
+        frequency_penalty : typing.Optional[float]
+            Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+
+            Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
+
+
+        presence_penalty : typing.Optional[float]
+            Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+
+            Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+
+            Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
+
+
+        return_likelihoods : typing.Optional[GenerateRequestReturnLikelihoods]
+            One of `GENERATION|ALL|NONE` to specify how and if the token likelihoods are returned with the response. Defaults to `NONE`.
+
+            If `GENERATION` is selected, the token likelihoods will only be provided for generated text.
+
+            If `ALL` is selected, the token likelihoods will be provided both for the prompt and the generated text.
+
+        raw_prompting : typing.Optional[bool]
+            When enabled, the user's prompt will be sent to the model without any pre-processing.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        Generation
+
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -1070,10 +1285,12 @@ class BaseCohere:
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
         _response = self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "generate"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "generate"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(_request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -1132,39 +1349,55 @@ class BaseCohere:
 
         If you want to learn more how to use the embedding model, have a look at the [Semantic Search Guide](/docs/semantic-search).
 
-        Parameters:
-            - texts: typing.Sequence[str]. An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
+        Parameters
+        ----------
+        texts : typing.Sequence[str]
+            An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
 
-            - model: typing.Optional[str]. Defaults to embed-english-v2.0
+        model : typing.Optional[str]
+            Defaults to embed-english-v2.0
 
-                                           The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
+            The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
 
-                                           Available models and corresponding embedding dimensions:
+            Available models and corresponding embedding dimensions:
 
-                                           * `embed-english-v3.0`  1024
-                                           * `embed-multilingual-v3.0`  1024
-                                           * `embed-english-light-v3.0`  384
-                                           * `embed-multilingual-light-v3.0`  384
+            * `embed-english-v3.0`  1024
+            * `embed-multilingual-v3.0`  1024
+            * `embed-english-light-v3.0`  384
+            * `embed-multilingual-light-v3.0`  384
 
-                                           * `embed-english-v2.0`  4096
-                                           * `embed-english-light-v2.0`  1024
-                                           * `embed-multilingual-v2.0`  768
-            - input_type: typing.Optional[EmbedInputType].
+            * `embed-english-v2.0`  4096
+            * `embed-english-light-v2.0`  1024
+            * `embed-multilingual-v2.0`  768
 
-            - embedding_types: typing.Optional[typing.Sequence[EmbeddingType]]. Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
+        input_type : typing.Optional[EmbedInputType]
 
-                                                                                * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
-                                                                                * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
-                                                                                * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
-                                                                                * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
-                                                                                * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
-            - truncate: typing.Optional[EmbedRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
+        embedding_types : typing.Optional[typing.Sequence[EmbeddingType]]
+            Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
-                                                               Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
+            * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
+            * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
+            * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
+            * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
+            * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
 
-                                                               If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        truncate : typing.Optional[EmbedRequestTruncate]
+            One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
+
+            Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
+
+            If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        EmbedResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -1189,10 +1422,12 @@ class BaseCohere:
         if truncate is not OMIT:
             _request["truncate"] = truncate
         _response = self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(_request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -1237,9 +1472,9 @@ class BaseCohere:
     def rerank(
         self,
         *,
-        model: typing.Optional[str] = OMIT,
         query: str,
         documents: typing.Sequence[RerankRequestDocumentsItem],
+        model: typing.Optional[str] = OMIT,
         top_n: typing.Optional[int] = OMIT,
         rank_fields: typing.Optional[typing.Sequence[str]] = OMIT,
         return_documents: typing.Optional[bool] = OMIT,
@@ -1249,27 +1484,45 @@ class BaseCohere:
         """
         This endpoint takes in a query and a list of texts and produces an ordered array with each text assigned a relevance score.
 
-        Parameters:
-            - model: typing.Optional[str]. The identifier of the model to use, one of : `rerank-english-v3.0`, `rerank-multilingual-v3.0`, `rerank-english-v2.0`, `rerank-multilingual-v2.0`
+        Parameters
+        ----------
+        query : str
+            The search query
 
-            - query: str. The search query
+        documents : typing.Sequence[RerankRequestDocumentsItem]
+            A list of document objects or strings to rerank.
+            If a document is provided the text fields is required and all other fields will be preserved in the response.
 
-            - documents: typing.Sequence[RerankRequestDocumentsItem]. A list of document objects or strings to rerank.
-                                                                      If a document is provided the text fields is required and all other fields will be preserved in the response.
+            The total max chunks (length of documents * max_chunks_per_doc) must be less than 10000.
 
-                                                                      The total max chunks (length of documents * max_chunks_per_doc) must be less than 10000.
+            We recommend a maximum of 1,000 documents for optimal endpoint performance.
 
-                                                                      We recommend a maximum of 1,000 documents for optimal endpoint performance.
-            - top_n: typing.Optional[int]. The number of most relevant documents or indices to return, defaults to the length of the documents
+        model : typing.Optional[str]
+            The identifier of the model to use, one of : `rerank-english-v3.0`, `rerank-multilingual-v3.0`, `rerank-english-v2.0`, `rerank-multilingual-v2.0`
 
-            - rank_fields: typing.Optional[typing.Sequence[str]]. If a JSON object is provided, you can specify which keys you would like to have considered for reranking. The model will rerank based on order of the fields passed in (i.e. rank_fields=['title','author','text'] will rerank using the values in title, author, text  sequentially. If the length of title, author, and text exceeds the context length of the model, the chunking will not re-consider earlier fields). If not provided, the model will use the default text field for ranking.
+        top_n : typing.Optional[int]
+            The number of most relevant documents or indices to return, defaults to the length of the documents
 
-            - return_documents: typing.Optional[bool]. - If false, returns results without the doc text - the api will return a list of {index, relevance score} where index is inferred from the list passed into the request.
-                                                       - If true, returns results with the doc text passed in - the api will return an ordered list of {index, text, relevance score} where index + text refers to the list passed into the request.
-            - max_chunks_per_doc: typing.Optional[int]. The maximum number of chunks to produce internally from a document
+        rank_fields : typing.Optional[typing.Sequence[str]]
+            If a JSON object is provided, you can specify which keys you would like to have considered for reranking. The model will rerank based on order of the fields passed in (i.e. rank_fields=['title','author','text'] will rerank using the values in title, author, text  sequentially. If the length of title, author, and text exceeds the context length of the model, the chunking will not re-consider earlier fields). If not provided, the model will use the default text field for ranking.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        return_documents : typing.Optional[bool]
+            - If false, returns results without the doc text - the api will return a list of {index, relevance score} where index is inferred from the list passed into the request.
+            - If true, returns results with the doc text passed in - the api will return an ordered list of {index, text, relevance score} where index + text refers to the list passed into the request.
+
+        max_chunks_per_doc : typing.Optional[int]
+            The maximum number of chunks to produce internally from a document
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        RerankResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -1299,10 +1552,12 @@ class BaseCohere:
         if max_chunks_per_doc is not OMIT:
             _request["max_chunks_per_doc"] = max_chunks_per_doc
         _response = self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "rerank"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "rerank"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(_request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -1350,21 +1605,38 @@ class BaseCohere:
         This endpoint makes a prediction about which label fits the specified text inputs best. To make a prediction, Classify uses the provided `examples` of text + label pairs as a reference.
         Note: [Fine-tuned models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
 
-        Parameters:
-            - inputs: typing.Sequence[str]. A list of up to 96 texts to be classified. Each one must be a non-empty string.
-                                            There is, however, no consistent, universal limit to the length a particular input can be. We perform classification on the first `x` tokens of each input, and `x` varies depending on which underlying model is powering classification. The maximum token length for each model is listed in the "max tokens" column [here](https://docs.cohere.com/docs/models).
-                                            Note: by default the `truncate` parameter is set to `END`, so tokens exceeding the limit will be automatically dropped. This behavior can be disabled by setting `truncate` to `NONE`, which will result in validation errors for longer texts.
-            - examples: typing.Optional[typing.Sequence[ClassifyExample]]. An array of examples to provide context to the model. Each example is a text string and its associated label/class. Each unique label requires at least 2 examples associated with it; the maximum number of examples is 2500, and each example has a maximum length of 512 tokens. The values should be structured as `{text: "...",label: "..."}`.
-                                                                           Note: [Fine-tuned Models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
-            - model: typing.Optional[str]. The identifier of the model. Currently available models are `embed-multilingual-v2.0`, `embed-english-light-v2.0`, and `embed-english-v2.0` (default). Smaller "light" models are faster, while larger models will perform better. [Fine-tuned models](https://docs.cohere.com/docs/fine-tuning) can also be supplied with their full ID.
+        Parameters
+        ----------
+        inputs : typing.Sequence[str]
+            A list of up to 96 texts to be classified. Each one must be a non-empty string.
+            There is, however, no consistent, universal limit to the length a particular input can be. We perform classification on the first `x` tokens of each input, and `x` varies depending on which underlying model is powering classification. The maximum token length for each model is listed in the "max tokens" column [here](https://docs.cohere.com/docs/models).
+            Note: by default the `truncate` parameter is set to `END`, so tokens exceeding the limit will be automatically dropped. This behavior can be disabled by setting `truncate` to `NONE`, which will result in validation errors for longer texts.
 
-            - preset: typing.Optional[str]. The ID of a custom playground preset. You can create presets in the [playground](https://dashboard.cohere.ai/playground/classify?model=large). If you use a preset, all other parameters become optional, and any included parameters will override the preset's parameters.
+        examples : typing.Optional[typing.Sequence[ClassifyExample]]
+            An array of examples to provide context to the model. Each example is a text string and its associated label/class. Each unique label requires at least 2 examples associated with it; the maximum number of examples is 2500, and each example has a maximum length of 512 tokens. The values should be structured as `{text: "...",label: "..."}`.
+            Note: [Fine-tuned Models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
 
-            - truncate: typing.Optional[ClassifyRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
-                                                                  Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
-                                                                  If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        model : typing.Optional[str]
+            The identifier of the model. Currently available models are `embed-multilingual-v2.0`, `embed-english-light-v2.0`, and `embed-english-v2.0` (default). Smaller "light" models are faster, while larger models will perform better. [Fine-tuned models](https://docs.cohere.com/docs/fine-tuning) can also be supplied with their full ID.
+
+        preset : typing.Optional[str]
+            The ID of a custom playground preset. You can create presets in the [playground](https://dashboard.cohere.com/playground/classify?model=large). If you use a preset, all other parameters become optional, and any included parameters will override the preset's parameters.
+
+        truncate : typing.Optional[ClassifyRequestTruncate]
+            One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
+            Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
+            If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ClassifyResponse
+            OK
+
+        Examples
+        --------
         from cohere import ClassifyExample
         from cohere.client import Client
 
@@ -1428,10 +1700,12 @@ class BaseCohere:
         if truncate is not OMIT:
             _request["truncate"] = truncate
         _response = self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "classify"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "classify"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(_request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -1492,23 +1766,39 @@ class BaseCohere:
 
         Generates a summary in English for a given text.
 
-        Parameters:
-            - text: str. The text to generate a summary for. Can be up to 100,000 characters long. Currently the only supported language is English.
+        Parameters
+        ----------
+        text : str
+            The text to generate a summary for. Can be up to 100,000 characters long. Currently the only supported language is English.
 
-            - length: typing.Optional[SummarizeRequestLength]. One of `short`, `medium`, `long`, or `auto` defaults to `auto`. Indicates the approximate length of the summary. If `auto` is selected, the best option will be picked based on the input text.
+        length : typing.Optional[SummarizeRequestLength]
+            One of `short`, `medium`, `long`, or `auto` defaults to `auto`. Indicates the approximate length of the summary. If `auto` is selected, the best option will be picked based on the input text.
 
-            - format: typing.Optional[SummarizeRequestFormat]. One of `paragraph`, `bullets`, or `auto`, defaults to `auto`. Indicates the style in which the summary will be delivered - in a free form paragraph or in bullet points. If `auto` is selected, the best option will be picked based on the input text.
+        format : typing.Optional[SummarizeRequestFormat]
+            One of `paragraph`, `bullets`, or `auto`, defaults to `auto`. Indicates the style in which the summary will be delivered - in a free form paragraph or in bullet points. If `auto` is selected, the best option will be picked based on the input text.
 
-            - model: typing.Optional[str]. The identifier of the model to generate the summary with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental). Smaller, "light" models are faster, while larger models will perform better.
+        model : typing.Optional[str]
+            The identifier of the model to generate the summary with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental). Smaller, "light" models are faster, while larger models will perform better.
 
-            - extractiveness: typing.Optional[SummarizeRequestExtractiveness]. One of `low`, `medium`, `high`, or `auto`, defaults to `auto`. Controls how close to the original text the summary is. `high` extractiveness summaries will lean towards reusing sentences verbatim, while `low` extractiveness summaries will tend to paraphrase more. If `auto` is selected, the best option will be picked based on the input text.
+        extractiveness : typing.Optional[SummarizeRequestExtractiveness]
+            One of `low`, `medium`, `high`, or `auto`, defaults to `auto`. Controls how close to the original text the summary is. `high` extractiveness summaries will lean towards reusing sentences verbatim, while `low` extractiveness summaries will tend to paraphrase more. If `auto` is selected, the best option will be picked based on the input text.
 
-            - temperature: typing.Optional[float]. Ranges from 0 to 5. Controls the randomness of the output. Lower values tend to generate more “predictable” output, while higher values tend to generate more “creative” output. The sweet spot is typically between 0 and 1.
+        temperature : typing.Optional[float]
+            Ranges from 0 to 5. Controls the randomness of the output. Lower values tend to generate more “predictable” output, while higher values tend to generate more “creative” output. The sweet spot is typically between 0 and 1.
 
-            - additional_command: typing.Optional[str]. A free-form instruction for modifying how the summaries get generated. Should complete the sentence "Generate a summary _". Eg. "focusing on the next steps" or "written by Yoda"
+        additional_command : typing.Optional[str]
+            A free-form instruction for modifying how the summaries get generated. Should complete the sentence "Generate a summary _". Eg. "focusing on the next steps" or "written by Yoda"
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SummarizeResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -1533,10 +1823,12 @@ class BaseCohere:
         if additional_command is not OMIT:
             _request["additional_command"] = additional_command
         _response = self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "summarize"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "summarize"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(_request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -1576,13 +1868,24 @@ class BaseCohere:
         """
         This endpoint splits input text into smaller units called tokens using byte-pair encoding (BPE). To learn more about tokenization and byte pair encoding, see the tokens page.
 
-        Parameters:
-            - text: str. The string to be tokenized, the minimum text length is 1 character, and the maximum text length is 65536 characters.
+        Parameters
+        ----------
+        text : str
+            The string to be tokenized, the minimum text length is 1 character, and the maximum text length is 65536 characters.
 
-            - model: str. An optional parameter to provide the model name. This will ensure that the tokenization uses the tokenizer used by that model.
+        model : str
+            An optional parameter to provide the model name. This will ensure that the tokenization uses the tokenizer used by that model.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        TokenizeResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -1595,10 +1898,12 @@ class BaseCohere:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "tokenize"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "tokenize"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder({"text": text, "model": model})
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -1646,13 +1951,24 @@ class BaseCohere:
         """
         This endpoint takes tokens using byte-pair encoding and returns their text representation. To learn more about tokenization and byte pair encoding, see the tokens page.
 
-        Parameters:
-            - tokens: typing.Sequence[int]. The list of tokens to be detokenized.
+        Parameters
+        ----------
+        tokens : typing.Sequence[int]
+            The list of tokens to be detokenized.
 
-            - model: str. An optional parameter to provide the model name. This will ensure that the detokenization is done by the tokenizer used by that model.
+        model : str
+            An optional parameter to provide the model name. This will ensure that the detokenization is done by the tokenizer used by that model.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        DetokenizeResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -1665,10 +1981,12 @@ class BaseCohere:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "detokenize"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "detokenize"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder({"tokens": tokens, "model": model})
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -1706,9 +2024,18 @@ class BaseCohere:
         """
         Checks that the api key in the Authorization header is valid and active
 
-        Parameters:
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        Parameters
+        ----------
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CheckApiKeyResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import Client
 
         client = Client(
@@ -1718,10 +2045,12 @@ class BaseCohere:
         client.check_api_key()
         """
         _response = self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "check-api-key"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "check-api-key"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))
             if request_options is not None
@@ -1757,23 +2086,33 @@ class AsyncBaseCohere:
     """
     Use this class to access the different functions within the SDK. You can instantiate any number of clients with different configuration that will propogate to these functions.
 
-    Parameters:
-        - base_url: typing.Optional[str]. The base url to use for requests from the client.
+    Parameters
+    ----------
+    base_url : typing.Optional[str]
+        The base url to use for requests from the client.
 
-        - environment: ClientEnvironment. The environment to use for requests from the client. from .environment import ClientEnvironment
+    environment : ClientEnvironment
+        The environment to use for requests from the client. from .environment import ClientEnvironment
 
-                                          Defaults to ClientEnvironment.PRODUCTION
 
-        - client_name: typing.Optional[str].
 
-        - token: typing.Optional[typing.Union[str, typing.Callable[[], str]]].
+        Defaults to ClientEnvironment.PRODUCTION
 
-        - timeout: typing.Optional[float]. The timeout to be used, in seconds, for requests by default the timeout is 60 seconds, unless a custom httpx client is used, in which case a default is not set.
 
-        - follow_redirects: typing.Optional[bool]. Whether the default httpx client follows redirects or not, this is irrelevant if a custom httpx client is passed in.
 
-        - httpx_client: typing.Optional[httpx.AsyncClient]. The httpx client to use for making requests, a preconfigured client is used by default, however this is useful should you want to pass in any custom httpx configuration.
-    ---
+    client_name : typing.Optional[str]
+    token : typing.Optional[typing.Union[str, typing.Callable[[], str]]]
+    timeout : typing.Optional[float]
+        The timeout to be used, in seconds, for requests by default the timeout is 60 seconds, unless a custom httpx client is used, in which case a default is not set.
+
+    follow_redirects : typing.Optional[bool]
+        Whether the default httpx client follows redirects or not, this is irrelevant if a custom httpx client is passed in.
+
+    httpx_client : typing.Optional[httpx.AsyncClient]
+        The httpx client to use for making requests, a preconfigured client is used by default, however this is useful should you want to pass in any custom httpx configuration.
+
+    Examples
+    --------
     from cohere.client import AsyncClient
 
     client = AsyncClient(
@@ -1790,7 +2129,7 @@ class AsyncBaseCohere:
         client_name: typing.Optional[str] = None,
         token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"),
         timeout: typing.Optional[float] = None,
-        follow_redirects: typing.Optional[bool] = None,
+        follow_redirects: typing.Optional[bool] = True,
         httpx_client: typing.Optional[httpx.AsyncClient] = None,
     ):
         _defaulted_timeout = timeout if timeout is not None else 300 if httpx_client is None else None
@@ -1839,161 +2178,219 @@ class AsyncBaseCohere:
         return_prompt: typing.Optional[bool] = OMIT,
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
+        force_single_step: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[StreamedChatResponse]:
         """
         Generates a text response to a user message.
         To learn how to use Chat with Streaming and RAG follow [this guide](https://docs.cohere.com/docs/cochat-beta#various-ways-of-using-the-chat-endpoint).
 
-        Parameters:
-            - message: str. Text input for the model to respond to.
-                            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+        Parameters
+        ----------
+        message : str
+            Text input for the model to respond to.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - model: typing.Optional[str]. Defaults to `command-r-plus`.
 
-                                           The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
-                                           Compatible Deployments: Cohere Platform, Private Deployments
+        model : typing.Optional[str]
+            Defaults to `command-r-plus`.
 
-            - preamble: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style, and use the `SYSTEM` role.
+            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
+            Compatible Deployments: Cohere Platform, Private Deployments
 
-                                              The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
-                                              Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - chat_history: typing.Optional[typing.Sequence[Message]]. A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
+        preamble : typing.Optional[str]
+            When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style, and use the `SYSTEM` role.
 
-                                                                       Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
+            The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-                                                                       The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
-                                                                       Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
+        chat_history : typing.Optional[typing.Sequence[Message]]
+            A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
 
-                                                     Providing a `conversation_id` creates or resumes a persisted conversation with the specified ID. The ID can be any non empty string.
-                                                     Compatible Deployments: Cohere Platform
+            Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
 
-            - prompt_truncation: typing.Optional[ChatStreamRequestPromptTruncation]. Defaults to `AUTO` when `connectors` are specified and `OFF` in all other cases.
+            The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-                                                                                     Dictates how the prompt will be constructed.
 
-                                                                                     With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be changed and ranked by relevance.
+        conversation_id : typing.Optional[str]
+            An alternative to `chat_history`.
 
-                                                                                     With `prompt_truncation` set to "AUTO_PRESERVE_ORDER", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be preserved as they are inputted into the API.
+            Providing a `conversation_id` creates or resumes a persisted conversation with the specified ID. The ID can be any non empty string.
+            Compatible Deployments: Cohere Platform
 
-                                                                                     With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
-                                                                                     Compatible Deployments: Cohere Platform Only AUTO_PRESERVE_ORDER: Azure, AWS Sagemaker, Private Deployments
 
-            - connectors: typing.Optional[typing.Sequence[ChatConnector]]. Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
+        prompt_truncation : typing.Optional[ChatStreamRequestPromptTruncation]
+            Defaults to `AUTO` when `connectors` are specified and `OFF` in all other cases.
 
-                                                                           When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
-                                                                           Compatible Deployments: Cohere Platform
+            Dictates how the prompt will be constructed.
 
-            - search_queries_only: typing.Optional[bool]. Defaults to `false`.
+            With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be changed and ranked by relevance.
 
-                                                          When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
-                                                          Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            With `prompt_truncation` set to "AUTO_PRESERVE_ORDER", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be preserved as they are inputted into the API.
 
-            - documents: typing.Optional[typing.Sequence[ChatDocument]]. A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
+            With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
+            Compatible Deployments: Cohere Platform Only AUTO_PRESERVE_ORDER: Azure, AWS Sagemaker, Private Deployments
 
-                                                                         Example:
-                                                                         `[
-                                                                           { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
-                                                                           { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
-                                                                         ]`
 
-                                                                         Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
+        connectors : typing.Optional[typing.Sequence[ChatConnector]]
+            Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
 
-                                                                         Some suggested keys are "text", "author", and "date". For better generation quality, it is recommended to keep the total word count of the strings in the dictionary to under 300 words.
+            When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
+            Compatible Deployments: Cohere Platform
 
-                                                                         An `id` field (string) can be optionally supplied to identify the document in the citations. This field will not be passed to the model.
 
-                                                                         An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
+        search_queries_only : typing.Optional[bool]
+            Defaults to `false`.
 
-                                                                         See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
-                                                                         Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - citation_quality: typing.Optional[ChatStreamRequestCitationQuality]. Defaults to `"accurate"`.
 
-                                                                                   Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results or `"fast"` results.
-                                                                                   Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+        documents : typing.Optional[typing.Sequence[ChatDocument]]
+            A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
 
-            - temperature: typing.Optional[float]. Defaults to `0.3`.
+            Example:
+            `[
+              { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
+              { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
+            ]`
 
-                                                   A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
+            Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
 
-                                                   Randomness can be further maximized by increasing the  value of the `p` parameter.
-                                                   Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            Some suggested keys are "text", "author", and "date". For better generation quality, it is recommended to keep the total word count of the strings in the dictionary to under 300 words.
 
-            - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
-                                                Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            An `id` field (string) can be optionally supplied to identify the document in the citations. This field will not be passed to the model.
 
-            - max_input_tokens: typing.Optional[int]. The maximum number of input tokens to send to the model. If not specified, `max_input_tokens` is the model's context length limit minus a small buffer.
+            An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
 
-                                                      Input will be truncated according to the `prompt_truncation` parameter.
-                                                      Compatible Deployments: Cohere Platform
+            See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - k: typing.Optional[int]. Ensures only the top `k` most likely tokens are considered for generation at each step.
-                                       Defaults to `0`, min value of `0`, max value of `500`.
-                                       Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
-                                         Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
-                                         Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+        citation_quality : typing.Optional[ChatStreamRequestCitationQuality]
+            Defaults to `"accurate"`.
 
-            - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens
-                                            deterministically, such that repeated requests with the same
-                                            seed and parameters should return the same result. However,
-                                            determinism cannot be totally guaranteed.
-                                            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results or `"fast"` results.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - stop_sequences: typing.Optional[typing.Sequence[str]]. A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
-                                                                     Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - frequency_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+        temperature : typing.Optional[float]
+            Defaults to `0.3`.
 
-                                                         Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
-                                                         Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
 
-            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+            Randomness can be further maximized by increasing the  value of the `p` parameter.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-                                                        Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
-                                                        Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without
-                                                    any pre-processing.
-                                                    Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+        max_tokens : typing.Optional[int]
+            The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - return_prompt: typing.Optional[bool]. The prompt is returned in the `prompt` response field when this is enabled.
 
-            - tools: typing.Optional[typing.Sequence[Tool]]. A list of available tools (functions) that the model may suggest invoking before producing a text response.
+        max_input_tokens : typing.Optional[int]
+            The maximum number of input tokens to send to the model. If not specified, `max_input_tokens` is the model's context length limit minus a small buffer.
 
-                                                             When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
-                                                             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            Input will be truncated according to the `prompt_truncation` parameter.
+            Compatible Deployments: Cohere Platform
 
-            - tool_results: typing.Optional[typing.Sequence[ToolResult]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
-                                                                          Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
 
-                                                                          **Note**: `outputs` must be a list of objects. If your tool returns a single object (eg `{"status": 200}`), make sure to wrap it in a list.
-                                                                          ```
-                                                                          tool_results = [
-                                                                            {
-                                                                              "call": {
-                                                                                "name": <tool name>,
-                                                                                "parameters": {
-                                                                                  <param name>: <param value>
-                                                                                }
-                                                                              },
-                                                                              "outputs": [{
-                                                                                <key>: <value>
-                                                                              }]
-                                                                            },
-                                                                            ...
-                                                                          ]
-                                                                          ```
-                                                                          **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
-                                                                          Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+        k : typing.Optional[int]
+            Ensures only the top `k` most likely tokens are considered for generation at each step.
+            Defaults to `0`, min value of `0`, max value of `500`.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+
+        p : typing.Optional[float]
+            Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
+            Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        seed : typing.Optional[float]
+            If specified, the backend will make a best effort to sample tokens
+            deterministically, such that repeated requests with the same
+            seed and parameters should return the same result. However,
+            determinism cannot be totally guaranteed.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        stop_sequences : typing.Optional[typing.Sequence[str]]
+            A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        frequency_penalty : typing.Optional[float]
+            Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+
+            Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        presence_penalty : typing.Optional[float]
+            Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+
+            Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        raw_prompting : typing.Optional[bool]
+            When enabled, the user's prompt will be sent to the model without
+            any pre-processing.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        return_prompt : typing.Optional[bool]
+            The prompt is returned in the `prompt` response field when this is enabled.
+
+        tools : typing.Optional[typing.Sequence[Tool]]
+            A list of available tools (functions) that the model may suggest invoking before producing a text response.
+
+            When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        tool_results : typing.Optional[typing.Sequence[ToolResult]]
+            A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
+            Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
+
+            **Note**: `outputs` must be a list of objects. If your tool returns a single object (eg `{"status": 200}`), make sure to wrap it in a list.
+            ```
+            tool_results = [
+              {
+                "call": {
+                  "name": <tool name>,
+                  "parameters": {
+                    <param name>: <param value>
+                  }
+                },
+                "outputs": [{
+                  <key>: <value>
+                }]
+              },
+              ...
+            ]
+            ```
+            **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        force_single_step : typing.Optional[bool]
+            Forces the chat to be single step. Defaults to `false`.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Yields
+        ------
+        typing.AsyncIterator[StreamedChatResponse]
+
+
+        Examples
+        --------
         from cohere import (
             ChatConnector,
             ChatStreamRequestConnectorsSearchOptions,
@@ -2009,7 +2406,7 @@ class AsyncBaseCohere:
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        await client.chat_stream(
+        response = await client.chat_stream(
             message="string",
             model="string",
             preamble="string",
@@ -2035,7 +2432,7 @@ class AsyncBaseCohere:
                 )
             ],
             search_queries_only=True,
-            documents=[{{"key": "value"}: {"key": "value"}}],
+            documents=[{"string": {"key": "value"}}],
             citation_quality="fast",
             temperature=1.1,
             max_tokens=1,
@@ -2077,8 +2474,10 @@ class AsyncBaseCohere:
                     outputs=[{"string": {"key": "value"}}],
                 )
             ],
-            enable_multi_step=True,
+            force_single_step=True,
         )
+        async for chunk in response:
+            yield chunk
         """
         _request: typing.Dict[str, typing.Any] = {"message": message, "stream": True}
         if model is not OMIT:
@@ -2125,11 +2524,15 @@ class AsyncBaseCohere:
             _request["tools"] = tools
         if tool_results is not OMIT:
             _request["tool_results"] = tool_results
+        if force_single_step is not OMIT:
+            _request["force_single_step"] = force_single_step
         async with self._client_wrapper.httpx_client.stream(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(_request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -2194,161 +2597,219 @@ class AsyncBaseCohere:
         return_prompt: typing.Optional[bool] = OMIT,
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
+        force_single_step: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> NonStreamedChatResponse:
         """
         Generates a text response to a user message.
         To learn how to use Chat with Streaming and RAG follow [this guide](https://docs.cohere.com/docs/cochat-beta#various-ways-of-using-the-chat-endpoint).
 
-        Parameters:
-            - message: str. Text input for the model to respond to.
-                            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+        Parameters
+        ----------
+        message : str
+            Text input for the model to respond to.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - model: typing.Optional[str]. Defaults to `command-r-plus`.
 
-                                           The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
-                                           Compatible Deployments: Cohere Platform, Private Deployments
+        model : typing.Optional[str]
+            Defaults to `command-r-plus`.
 
-            - preamble: typing.Optional[str]. When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style, and use the `SYSTEM` role.
+            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
+            Compatible Deployments: Cohere Platform, Private Deployments
 
-                                              The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
-                                              Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - chat_history: typing.Optional[typing.Sequence[Message]]. A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
+        preamble : typing.Optional[str]
+            When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style, and use the `SYSTEM` role.
 
-                                                                       Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
+            The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-                                                                       The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
-                                                                       Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - conversation_id: typing.Optional[str]. An alternative to `chat_history`.
+        chat_history : typing.Optional[typing.Sequence[Message]]
+            A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
 
-                                                     Providing a `conversation_id` creates or resumes a persisted conversation with the specified ID. The ID can be any non empty string.
-                                                     Compatible Deployments: Cohere Platform
+            Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
 
-            - prompt_truncation: typing.Optional[ChatRequestPromptTruncation]. Defaults to `AUTO` when `connectors` are specified and `OFF` in all other cases.
+            The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-                                                                               Dictates how the prompt will be constructed.
 
-                                                                               With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be changed and ranked by relevance.
+        conversation_id : typing.Optional[str]
+            An alternative to `chat_history`.
 
-                                                                               With `prompt_truncation` set to "AUTO_PRESERVE_ORDER", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be preserved as they are inputted into the API.
+            Providing a `conversation_id` creates or resumes a persisted conversation with the specified ID. The ID can be any non empty string.
+            Compatible Deployments: Cohere Platform
 
-                                                                               With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
-                                                                               Compatible Deployments: Cohere Platform Only AUTO_PRESERVE_ORDER: Azure, AWS Sagemaker, Private Deployments
 
-            - connectors: typing.Optional[typing.Sequence[ChatConnector]]. Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
+        prompt_truncation : typing.Optional[ChatRequestPromptTruncation]
+            Defaults to `AUTO` when `connectors` are specified and `OFF` in all other cases.
 
-                                                                           When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
-                                                                           Compatible Deployments: Cohere Platform
+            Dictates how the prompt will be constructed.
 
-            - search_queries_only: typing.Optional[bool]. Defaults to `false`.
+            With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be changed and ranked by relevance.
 
-                                                          When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
-                                                          Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            With `prompt_truncation` set to "AUTO_PRESERVE_ORDER", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be preserved as they are inputted into the API.
 
-            - documents: typing.Optional[typing.Sequence[ChatDocument]]. A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
+            With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
+            Compatible Deployments: Cohere Platform Only AUTO_PRESERVE_ORDER: Azure, AWS Sagemaker, Private Deployments
 
-                                                                         Example:
-                                                                         `[
-                                                                           { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
-                                                                           { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
-                                                                         ]`
 
-                                                                         Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
+        connectors : typing.Optional[typing.Sequence[ChatConnector]]
+            Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
 
-                                                                         Some suggested keys are "text", "author", and "date". For better generation quality, it is recommended to keep the total word count of the strings in the dictionary to under 300 words.
+            When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
+            Compatible Deployments: Cohere Platform
 
-                                                                         An `id` field (string) can be optionally supplied to identify the document in the citations. This field will not be passed to the model.
 
-                                                                         An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
+        search_queries_only : typing.Optional[bool]
+            Defaults to `false`.
 
-                                                                         See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
-                                                                         Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - citation_quality: typing.Optional[ChatRequestCitationQuality]. Defaults to `"accurate"`.
 
-                                                                             Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results or `"fast"` results.
-                                                                             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+        documents : typing.Optional[typing.Sequence[ChatDocument]]
+            A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
 
-            - temperature: typing.Optional[float]. Defaults to `0.3`.
+            Example:
+            `[
+              { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
+              { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
+            ]`
 
-                                                   A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
+            Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
 
-                                                   Randomness can be further maximized by increasing the  value of the `p` parameter.
-                                                   Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            Some suggested keys are "text", "author", and "date". For better generation quality, it is recommended to keep the total word count of the strings in the dictionary to under 300 words.
 
-            - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
-                                                Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            An `id` field (string) can be optionally supplied to identify the document in the citations. This field will not be passed to the model.
 
-            - max_input_tokens: typing.Optional[int]. The maximum number of input tokens to send to the model. If not specified, `max_input_tokens` is the model's context length limit minus a small buffer.
+            An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
 
-                                                      Input will be truncated according to the `prompt_truncation` parameter.
-                                                      Compatible Deployments: Cohere Platform
+            See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - k: typing.Optional[int]. Ensures only the top `k` most likely tokens are considered for generation at each step.
-                                       Defaults to `0`, min value of `0`, max value of `500`.
-                                       Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
-                                         Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
-                                         Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+        citation_quality : typing.Optional[ChatRequestCitationQuality]
+            Defaults to `"accurate"`.
 
-            - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens
-                                            deterministically, such that repeated requests with the same
-                                            seed and parameters should return the same result. However,
-                                            determinism cannot be totally guaranteed.
-                                            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results or `"fast"` results.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - stop_sequences: typing.Optional[typing.Sequence[str]]. A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
-                                                                     Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - frequency_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+        temperature : typing.Optional[float]
+            Defaults to `0.3`.
 
-                                                         Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
-                                                         Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
 
-            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+            Randomness can be further maximized by increasing the  value of the `p` parameter.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-                                                        Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
-                                                        Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without
-                                                    any pre-processing.
-                                                    Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+        max_tokens : typing.Optional[int]
+            The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - return_prompt: typing.Optional[bool]. The prompt is returned in the `prompt` response field when this is enabled.
 
-            - tools: typing.Optional[typing.Sequence[Tool]]. A list of available tools (functions) that the model may suggest invoking before producing a text response.
+        max_input_tokens : typing.Optional[int]
+            The maximum number of input tokens to send to the model. If not specified, `max_input_tokens` is the model's context length limit minus a small buffer.
 
-                                                             When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
-                                                             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+            Input will be truncated according to the `prompt_truncation` parameter.
+            Compatible Deployments: Cohere Platform
 
-            - tool_results: typing.Optional[typing.Sequence[ToolResult]]. A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
-                                                                          Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
 
-                                                                          **Note**: `outputs` must be a list of objects. If your tool returns a single object (eg `{"status": 200}`), make sure to wrap it in a list.
-                                                                          ```
-                                                                          tool_results = [
-                                                                            {
-                                                                              "call": {
-                                                                                "name": <tool name>,
-                                                                                "parameters": {
-                                                                                  <param name>: <param value>
-                                                                                }
-                                                                              },
-                                                                              "outputs": [{
-                                                                                <key>: <value>
-                                                                              }]
-                                                                            },
-                                                                            ...
-                                                                          ]
-                                                                          ```
-                                                                          **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
-                                                                          Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+        k : typing.Optional[int]
+            Ensures only the top `k` most likely tokens are considered for generation at each step.
+            Defaults to `0`, min value of `0`, max value of `500`.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+
+        p : typing.Optional[float]
+            Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
+            Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        seed : typing.Optional[float]
+            If specified, the backend will make a best effort to sample tokens
+            deterministically, such that repeated requests with the same
+            seed and parameters should return the same result. However,
+            determinism cannot be totally guaranteed.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        stop_sequences : typing.Optional[typing.Sequence[str]]
+            A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        frequency_penalty : typing.Optional[float]
+            Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+
+            Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        presence_penalty : typing.Optional[float]
+            Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+
+            Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        raw_prompting : typing.Optional[bool]
+            When enabled, the user's prompt will be sent to the model without
+            any pre-processing.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        return_prompt : typing.Optional[bool]
+            The prompt is returned in the `prompt` response field when this is enabled.
+
+        tools : typing.Optional[typing.Sequence[Tool]]
+            A list of available tools (functions) that the model may suggest invoking before producing a text response.
+
+            When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        tool_results : typing.Optional[typing.Sequence[ToolResult]]
+            A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
+            Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
+
+            **Note**: `outputs` must be a list of objects. If your tool returns a single object (eg `{"status": 200}`), make sure to wrap it in a list.
+            ```
+            tool_results = [
+              {
+                "call": {
+                  "name": <tool name>,
+                  "parameters": {
+                    <param name>: <param value>
+                  }
+                },
+                "outputs": [{
+                  <key>: <value>
+                }]
+              },
+              ...
+            ]
+            ```
+            **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
+
+        force_single_step : typing.Optional[bool]
+            Forces the chat to be single step. Defaults to `false`.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        NonStreamedChatResponse
+
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -2406,11 +2867,15 @@ class AsyncBaseCohere:
             _request["tools"] = tools
         if tool_results is not OMIT:
             _request["tool_results"] = tool_results
+        if force_single_step is not OMIT:
+            _request["force_single_step"] = force_single_step
         _response = await self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(_request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -2472,69 +2937,106 @@ class AsyncBaseCohere:
 
         Generates realistic text conditioned on a given input.
 
-        Parameters:
-            - prompt: str. The input text that serves as the starting point for generating the response.
-                           Note: The prompt will be pre-processed and modified before reaching the model.
+        Parameters
+        ----------
+        prompt : str
+            The input text that serves as the starting point for generating the response.
+            Note: The prompt will be pre-processed and modified before reaching the model.
 
-            - model: typing.Optional[str]. The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
-                                           Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
-            - num_generations: typing.Optional[int]. The maximum number of generations that will be returned. Defaults to `1`, min value of `1`, max value of `5`.
 
-            - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+        model : typing.Optional[str]
+            The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
+            Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
 
-                                                This parameter is off by default, and if it's not specified, the model will continue generating until it emits an EOS completion token. See [BPE Tokens](/bpe-tokens-wiki) for more details.
+        num_generations : typing.Optional[int]
+            The maximum number of generations that will be returned. Defaults to `1`, min value of `1`, max value of `5`.
 
-                                                Can only be set to `0` if `return_likelihoods` is set to `ALL` to get the likelihood of the prompt.
 
-            - truncate: typing.Optional[GenerateStreamRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
+        max_tokens : typing.Optional[int]
+            The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
 
-                                                                        Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
+            This parameter is off by default, and if it's not specified, the model will continue generating until it emits an EOS completion token. See [BPE Tokens](/bpe-tokens-wiki) for more details.
 
-                                                                        If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
-            - temperature: typing.Optional[float]. A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations. See [Temperature](/temperature-wiki) for more details.
-                                                   Defaults to `0.75`, min value of `0.0`, max value of `5.0`.
+            Can only be set to `0` if `return_likelihoods` is set to `ALL` to get the likelihood of the prompt.
 
-            - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed.
 
-            - preset: typing.Optional[str]. Identifier of a custom preset. A preset is a combination of parameters, such as prompt, temperature etc. You can create presets in the [playground](https://dashboard.cohere.ai/playground/generate).
-                                            When a preset is specified, the `prompt` parameter becomes optional, and any included parameters will override the preset's parameters.
+        truncate : typing.Optional[GenerateStreamRequestTruncate]
+            One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
 
-            - end_sequences: typing.Optional[typing.Sequence[str]]. The generated text will be cut at the beginning of the earliest occurrence of an end sequence. The sequence will be excluded from the text.
+            Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
 
-            - stop_sequences: typing.Optional[typing.Sequence[str]]. The generated text will be cut at the end of the earliest occurrence of a stop sequence. The sequence will be included the text.
+            If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
 
-            - k: typing.Optional[int]. Ensures only the top `k` most likely tokens are considered for generation at each step.
-                                       Defaults to `0`, min value of `0`, max value of `500`.
+        temperature : typing.Optional[float]
+            A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations. See [Temperature](/temperature-wiki) for more details.
+            Defaults to `0.75`, min value of `0.0`, max value of `5.0`.
 
-            - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
-                                         Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
-            - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+        seed : typing.Optional[float]
+            If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed.
 
-                                                         Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
+        preset : typing.Optional[str]
+            Identifier of a custom preset. A preset is a combination of parameters, such as prompt, temperature etc. You can create presets in the [playground](https://dashboard.cohere.com/playground/generate).
+            When a preset is specified, the `prompt` parameter becomes optional, and any included parameters will override the preset's parameters.
 
-            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
-                                                        Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+        end_sequences : typing.Optional[typing.Sequence[str]]
+            The generated text will be cut at the beginning of the earliest occurrence of an end sequence. The sequence will be excluded from the text.
 
-                                                        Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
+        stop_sequences : typing.Optional[typing.Sequence[str]]
+            The generated text will be cut at the end of the earliest occurrence of a stop sequence. The sequence will be included the text.
 
-            - return_likelihoods: typing.Optional[GenerateStreamRequestReturnLikelihoods]. One of `GENERATION|ALL|NONE` to specify how and if the token likelihoods are returned with the response. Defaults to `NONE`.
+        k : typing.Optional[int]
+            Ensures only the top `k` most likely tokens are considered for generation at each step.
+            Defaults to `0`, min value of `0`, max value of `500`.
 
-                                                                                           If `GENERATION` is selected, the token likelihoods will only be provided for generated text.
 
-                                                                                           If `ALL` is selected, the token likelihoods will be provided both for the prompt and the generated text.
-            - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
+        p : typing.Optional[float]
+            Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
+            Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+
+        frequency_penalty : typing.Optional[float]
+            Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+
+            Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
+
+
+        presence_penalty : typing.Optional[float]
+            Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+
+            Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+
+            Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
+
+
+        return_likelihoods : typing.Optional[GenerateStreamRequestReturnLikelihoods]
+            One of `GENERATION|ALL|NONE` to specify how and if the token likelihoods are returned with the response. Defaults to `NONE`.
+
+            If `GENERATION` is selected, the token likelihoods will only be provided for generated text.
+
+            If `ALL` is selected, the token likelihoods will be provided both for the prompt and the generated text.
+
+        raw_prompting : typing.Optional[bool]
+            When enabled, the user's prompt will be sent to the model without any pre-processing.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Yields
+        ------
+        typing.AsyncIterator[GenerateStreamedResponse]
+
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        await client.generate_stream(
+        response = await client.generate_stream(
             prompt="string",
             model="string",
             num_generations=1,
@@ -2552,6 +3054,8 @@ class AsyncBaseCohere:
             return_likelihoods="GENERATION",
             raw_prompting=True,
         )
+        async for chunk in response:
+            yield chunk
         """
         _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": True}
         if model is not OMIT:
@@ -2585,10 +3089,12 @@ class AsyncBaseCohere:
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
         async with self._client_wrapper.httpx_client.stream(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "generate"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "generate"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(_request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -2663,62 +3169,99 @@ class AsyncBaseCohere:
 
         Generates realistic text conditioned on a given input.
 
-        Parameters:
-            - prompt: str. The input text that serves as the starting point for generating the response.
-                           Note: The prompt will be pre-processed and modified before reaching the model.
+        Parameters
+        ----------
+        prompt : str
+            The input text that serves as the starting point for generating the response.
+            Note: The prompt will be pre-processed and modified before reaching the model.
 
-            - model: typing.Optional[str]. The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
-                                           Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
-            - num_generations: typing.Optional[int]. The maximum number of generations that will be returned. Defaults to `1`, min value of `1`, max value of `5`.
 
-            - max_tokens: typing.Optional[int]. The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+        model : typing.Optional[str]
+            The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
+            Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
 
-                                                This parameter is off by default, and if it's not specified, the model will continue generating until it emits an EOS completion token. See [BPE Tokens](/bpe-tokens-wiki) for more details.
+        num_generations : typing.Optional[int]
+            The maximum number of generations that will be returned. Defaults to `1`, min value of `1`, max value of `5`.
 
-                                                Can only be set to `0` if `return_likelihoods` is set to `ALL` to get the likelihood of the prompt.
 
-            - truncate: typing.Optional[GenerateRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
+        max_tokens : typing.Optional[int]
+            The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
 
-                                                                  Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
+            This parameter is off by default, and if it's not specified, the model will continue generating until it emits an EOS completion token. See [BPE Tokens](/bpe-tokens-wiki) for more details.
 
-                                                                  If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
-            - temperature: typing.Optional[float]. A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations. See [Temperature](/temperature-wiki) for more details.
-                                                   Defaults to `0.75`, min value of `0.0`, max value of `5.0`.
+            Can only be set to `0` if `return_likelihoods` is set to `ALL` to get the likelihood of the prompt.
 
-            - seed: typing.Optional[float]. If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed.
 
-            - preset: typing.Optional[str]. Identifier of a custom preset. A preset is a combination of parameters, such as prompt, temperature etc. You can create presets in the [playground](https://dashboard.cohere.ai/playground/generate).
-                                            When a preset is specified, the `prompt` parameter becomes optional, and any included parameters will override the preset's parameters.
+        truncate : typing.Optional[GenerateRequestTruncate]
+            One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
 
-            - end_sequences: typing.Optional[typing.Sequence[str]]. The generated text will be cut at the beginning of the earliest occurrence of an end sequence. The sequence will be excluded from the text.
+            Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
 
-            - stop_sequences: typing.Optional[typing.Sequence[str]]. The generated text will be cut at the end of the earliest occurrence of a stop sequence. The sequence will be included the text.
+            If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
 
-            - k: typing.Optional[int]. Ensures only the top `k` most likely tokens are considered for generation at each step.
-                                       Defaults to `0`, min value of `0`, max value of `500`.
+        temperature : typing.Optional[float]
+            A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations. See [Temperature](/temperature-wiki) for more details.
+            Defaults to `0.75`, min value of `0.0`, max value of `5.0`.
 
-            - p: typing.Optional[float]. Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
-                                         Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
-            - frequency_penalty: typing.Optional[float]. Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+        seed : typing.Optional[float]
+            If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed.
 
-                                                         Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
+        preset : typing.Optional[str]
+            Identifier of a custom preset. A preset is a combination of parameters, such as prompt, temperature etc. You can create presets in the [playground](https://dashboard.cohere.com/playground/generate).
+            When a preset is specified, the `prompt` parameter becomes optional, and any included parameters will override the preset's parameters.
 
-            - presence_penalty: typing.Optional[float]. Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
-                                                        Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+        end_sequences : typing.Optional[typing.Sequence[str]]
+            The generated text will be cut at the beginning of the earliest occurrence of an end sequence. The sequence will be excluded from the text.
 
-                                                        Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
+        stop_sequences : typing.Optional[typing.Sequence[str]]
+            The generated text will be cut at the end of the earliest occurrence of a stop sequence. The sequence will be included the text.
 
-            - return_likelihoods: typing.Optional[GenerateRequestReturnLikelihoods]. One of `GENERATION|ALL|NONE` to specify how and if the token likelihoods are returned with the response. Defaults to `NONE`.
+        k : typing.Optional[int]
+            Ensures only the top `k` most likely tokens are considered for generation at each step.
+            Defaults to `0`, min value of `0`, max value of `500`.
 
-                                                                                     If `GENERATION` is selected, the token likelihoods will only be provided for generated text.
 
-                                                                                     If `ALL` is selected, the token likelihoods will be provided both for the prompt and the generated text.
-            - raw_prompting: typing.Optional[bool]. When enabled, the user's prompt will be sent to the model without any pre-processing.
+        p : typing.Optional[float]
+            Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
+            Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+
+        frequency_penalty : typing.Optional[float]
+            Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+
+            Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
+
+
+        presence_penalty : typing.Optional[float]
+            Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+
+            Can be used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+
+            Using `frequency_penalty` in combination with `presence_penalty` is not supported on newer models.
+
+
+        return_likelihoods : typing.Optional[GenerateRequestReturnLikelihoods]
+            One of `GENERATION|ALL|NONE` to specify how and if the token likelihoods are returned with the response. Defaults to `NONE`.
+
+            If `GENERATION` is selected, the token likelihoods will only be provided for generated text.
+
+            If `ALL` is selected, the token likelihoods will be provided both for the prompt and the generated text.
+
+        raw_prompting : typing.Optional[bool]
+            When enabled, the user's prompt will be sent to the model without any pre-processing.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        Generation
+
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -2761,10 +3304,12 @@ class AsyncBaseCohere:
         if raw_prompting is not OMIT:
             _request["raw_prompting"] = raw_prompting
         _response = await self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "generate"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "generate"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(_request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -2823,39 +3368,55 @@ class AsyncBaseCohere:
 
         If you want to learn more how to use the embedding model, have a look at the [Semantic Search Guide](/docs/semantic-search).
 
-        Parameters:
-            - texts: typing.Sequence[str]. An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
+        Parameters
+        ----------
+        texts : typing.Sequence[str]
+            An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
 
-            - model: typing.Optional[str]. Defaults to embed-english-v2.0
+        model : typing.Optional[str]
+            Defaults to embed-english-v2.0
 
-                                           The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
+            The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
 
-                                           Available models and corresponding embedding dimensions:
+            Available models and corresponding embedding dimensions:
 
-                                           * `embed-english-v3.0`  1024
-                                           * `embed-multilingual-v3.0`  1024
-                                           * `embed-english-light-v3.0`  384
-                                           * `embed-multilingual-light-v3.0`  384
+            * `embed-english-v3.0`  1024
+            * `embed-multilingual-v3.0`  1024
+            * `embed-english-light-v3.0`  384
+            * `embed-multilingual-light-v3.0`  384
 
-                                           * `embed-english-v2.0`  4096
-                                           * `embed-english-light-v2.0`  1024
-                                           * `embed-multilingual-v2.0`  768
-            - input_type: typing.Optional[EmbedInputType].
+            * `embed-english-v2.0`  4096
+            * `embed-english-light-v2.0`  1024
+            * `embed-multilingual-v2.0`  768
 
-            - embedding_types: typing.Optional[typing.Sequence[EmbeddingType]]. Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
+        input_type : typing.Optional[EmbedInputType]
 
-                                                                                * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
-                                                                                * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
-                                                                                * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
-                                                                                * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
-                                                                                * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
-            - truncate: typing.Optional[EmbedRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
+        embedding_types : typing.Optional[typing.Sequence[EmbeddingType]]
+            Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
-                                                               Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
+            * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
+            * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
+            * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
+            * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
+            * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
 
-                                                               If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        truncate : typing.Optional[EmbedRequestTruncate]
+            One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
+
+            Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
+
+            If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        EmbedResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -2880,10 +3441,12 @@ class AsyncBaseCohere:
         if truncate is not OMIT:
             _request["truncate"] = truncate
         _response = await self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(_request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -2928,9 +3491,9 @@ class AsyncBaseCohere:
     async def rerank(
         self,
         *,
-        model: typing.Optional[str] = OMIT,
         query: str,
         documents: typing.Sequence[RerankRequestDocumentsItem],
+        model: typing.Optional[str] = OMIT,
         top_n: typing.Optional[int] = OMIT,
         rank_fields: typing.Optional[typing.Sequence[str]] = OMIT,
         return_documents: typing.Optional[bool] = OMIT,
@@ -2940,27 +3503,45 @@ class AsyncBaseCohere:
         """
         This endpoint takes in a query and a list of texts and produces an ordered array with each text assigned a relevance score.
 
-        Parameters:
-            - model: typing.Optional[str]. The identifier of the model to use, one of : `rerank-english-v3.0`, `rerank-multilingual-v3.0`, `rerank-english-v2.0`, `rerank-multilingual-v2.0`
+        Parameters
+        ----------
+        query : str
+            The search query
 
-            - query: str. The search query
+        documents : typing.Sequence[RerankRequestDocumentsItem]
+            A list of document objects or strings to rerank.
+            If a document is provided the text fields is required and all other fields will be preserved in the response.
 
-            - documents: typing.Sequence[RerankRequestDocumentsItem]. A list of document objects or strings to rerank.
-                                                                      If a document is provided the text fields is required and all other fields will be preserved in the response.
+            The total max chunks (length of documents * max_chunks_per_doc) must be less than 10000.
 
-                                                                      The total max chunks (length of documents * max_chunks_per_doc) must be less than 10000.
+            We recommend a maximum of 1,000 documents for optimal endpoint performance.
 
-                                                                      We recommend a maximum of 1,000 documents for optimal endpoint performance.
-            - top_n: typing.Optional[int]. The number of most relevant documents or indices to return, defaults to the length of the documents
+        model : typing.Optional[str]
+            The identifier of the model to use, one of : `rerank-english-v3.0`, `rerank-multilingual-v3.0`, `rerank-english-v2.0`, `rerank-multilingual-v2.0`
 
-            - rank_fields: typing.Optional[typing.Sequence[str]]. If a JSON object is provided, you can specify which keys you would like to have considered for reranking. The model will rerank based on order of the fields passed in (i.e. rank_fields=['title','author','text'] will rerank using the values in title, author, text  sequentially. If the length of title, author, and text exceeds the context length of the model, the chunking will not re-consider earlier fields). If not provided, the model will use the default text field for ranking.
+        top_n : typing.Optional[int]
+            The number of most relevant documents or indices to return, defaults to the length of the documents
 
-            - return_documents: typing.Optional[bool]. - If false, returns results without the doc text - the api will return a list of {index, relevance score} where index is inferred from the list passed into the request.
-                                                       - If true, returns results with the doc text passed in - the api will return an ordered list of {index, text, relevance score} where index + text refers to the list passed into the request.
-            - max_chunks_per_doc: typing.Optional[int]. The maximum number of chunks to produce internally from a document
+        rank_fields : typing.Optional[typing.Sequence[str]]
+            If a JSON object is provided, you can specify which keys you would like to have considered for reranking. The model will rerank based on order of the fields passed in (i.e. rank_fields=['title','author','text'] will rerank using the values in title, author, text  sequentially. If the length of title, author, and text exceeds the context length of the model, the chunking will not re-consider earlier fields). If not provided, the model will use the default text field for ranking.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        return_documents : typing.Optional[bool]
+            - If false, returns results without the doc text - the api will return a list of {index, relevance score} where index is inferred from the list passed into the request.
+            - If true, returns results with the doc text passed in - the api will return an ordered list of {index, text, relevance score} where index + text refers to the list passed into the request.
+
+        max_chunks_per_doc : typing.Optional[int]
+            The maximum number of chunks to produce internally from a document
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        RerankResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -2990,10 +3571,12 @@ class AsyncBaseCohere:
         if max_chunks_per_doc is not OMIT:
             _request["max_chunks_per_doc"] = max_chunks_per_doc
         _response = await self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "rerank"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "rerank"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(_request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -3041,21 +3624,38 @@ class AsyncBaseCohere:
         This endpoint makes a prediction about which label fits the specified text inputs best. To make a prediction, Classify uses the provided `examples` of text + label pairs as a reference.
         Note: [Fine-tuned models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
 
-        Parameters:
-            - inputs: typing.Sequence[str]. A list of up to 96 texts to be classified. Each one must be a non-empty string.
-                                            There is, however, no consistent, universal limit to the length a particular input can be. We perform classification on the first `x` tokens of each input, and `x` varies depending on which underlying model is powering classification. The maximum token length for each model is listed in the "max tokens" column [here](https://docs.cohere.com/docs/models).
-                                            Note: by default the `truncate` parameter is set to `END`, so tokens exceeding the limit will be automatically dropped. This behavior can be disabled by setting `truncate` to `NONE`, which will result in validation errors for longer texts.
-            - examples: typing.Optional[typing.Sequence[ClassifyExample]]. An array of examples to provide context to the model. Each example is a text string and its associated label/class. Each unique label requires at least 2 examples associated with it; the maximum number of examples is 2500, and each example has a maximum length of 512 tokens. The values should be structured as `{text: "...",label: "..."}`.
-                                                                           Note: [Fine-tuned Models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
-            - model: typing.Optional[str]. The identifier of the model. Currently available models are `embed-multilingual-v2.0`, `embed-english-light-v2.0`, and `embed-english-v2.0` (default). Smaller "light" models are faster, while larger models will perform better. [Fine-tuned models](https://docs.cohere.com/docs/fine-tuning) can also be supplied with their full ID.
+        Parameters
+        ----------
+        inputs : typing.Sequence[str]
+            A list of up to 96 texts to be classified. Each one must be a non-empty string.
+            There is, however, no consistent, universal limit to the length a particular input can be. We perform classification on the first `x` tokens of each input, and `x` varies depending on which underlying model is powering classification. The maximum token length for each model is listed in the "max tokens" column [here](https://docs.cohere.com/docs/models).
+            Note: by default the `truncate` parameter is set to `END`, so tokens exceeding the limit will be automatically dropped. This behavior can be disabled by setting `truncate` to `NONE`, which will result in validation errors for longer texts.
 
-            - preset: typing.Optional[str]. The ID of a custom playground preset. You can create presets in the [playground](https://dashboard.cohere.ai/playground/classify?model=large). If you use a preset, all other parameters become optional, and any included parameters will override the preset's parameters.
+        examples : typing.Optional[typing.Sequence[ClassifyExample]]
+            An array of examples to provide context to the model. Each example is a text string and its associated label/class. Each unique label requires at least 2 examples associated with it; the maximum number of examples is 2500, and each example has a maximum length of 512 tokens. The values should be structured as `{text: "...",label: "..."}`.
+            Note: [Fine-tuned Models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
 
-            - truncate: typing.Optional[ClassifyRequestTruncate]. One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
-                                                                  Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
-                                                                  If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        model : typing.Optional[str]
+            The identifier of the model. Currently available models are `embed-multilingual-v2.0`, `embed-english-light-v2.0`, and `embed-english-v2.0` (default). Smaller "light" models are faster, while larger models will perform better. [Fine-tuned models](https://docs.cohere.com/docs/fine-tuning) can also be supplied with their full ID.
+
+        preset : typing.Optional[str]
+            The ID of a custom playground preset. You can create presets in the [playground](https://dashboard.cohere.com/playground/classify?model=large). If you use a preset, all other parameters become optional, and any included parameters will override the preset's parameters.
+
+        truncate : typing.Optional[ClassifyRequestTruncate]
+            One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
+            Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
+            If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ClassifyResponse
+            OK
+
+        Examples
+        --------
         from cohere import ClassifyExample
         from cohere.client import AsyncClient
 
@@ -3119,10 +3719,12 @@ class AsyncBaseCohere:
         if truncate is not OMIT:
             _request["truncate"] = truncate
         _response = await self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "classify"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "classify"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(_request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -3183,23 +3785,39 @@ class AsyncBaseCohere:
 
         Generates a summary in English for a given text.
 
-        Parameters:
-            - text: str. The text to generate a summary for. Can be up to 100,000 characters long. Currently the only supported language is English.
+        Parameters
+        ----------
+        text : str
+            The text to generate a summary for. Can be up to 100,000 characters long. Currently the only supported language is English.
 
-            - length: typing.Optional[SummarizeRequestLength]. One of `short`, `medium`, `long`, or `auto` defaults to `auto`. Indicates the approximate length of the summary. If `auto` is selected, the best option will be picked based on the input text.
+        length : typing.Optional[SummarizeRequestLength]
+            One of `short`, `medium`, `long`, or `auto` defaults to `auto`. Indicates the approximate length of the summary. If `auto` is selected, the best option will be picked based on the input text.
 
-            - format: typing.Optional[SummarizeRequestFormat]. One of `paragraph`, `bullets`, or `auto`, defaults to `auto`. Indicates the style in which the summary will be delivered - in a free form paragraph or in bullet points. If `auto` is selected, the best option will be picked based on the input text.
+        format : typing.Optional[SummarizeRequestFormat]
+            One of `paragraph`, `bullets`, or `auto`, defaults to `auto`. Indicates the style in which the summary will be delivered - in a free form paragraph or in bullet points. If `auto` is selected, the best option will be picked based on the input text.
 
-            - model: typing.Optional[str]. The identifier of the model to generate the summary with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental). Smaller, "light" models are faster, while larger models will perform better.
+        model : typing.Optional[str]
+            The identifier of the model to generate the summary with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental). Smaller, "light" models are faster, while larger models will perform better.
 
-            - extractiveness: typing.Optional[SummarizeRequestExtractiveness]. One of `low`, `medium`, `high`, or `auto`, defaults to `auto`. Controls how close to the original text the summary is. `high` extractiveness summaries will lean towards reusing sentences verbatim, while `low` extractiveness summaries will tend to paraphrase more. If `auto` is selected, the best option will be picked based on the input text.
+        extractiveness : typing.Optional[SummarizeRequestExtractiveness]
+            One of `low`, `medium`, `high`, or `auto`, defaults to `auto`. Controls how close to the original text the summary is. `high` extractiveness summaries will lean towards reusing sentences verbatim, while `low` extractiveness summaries will tend to paraphrase more. If `auto` is selected, the best option will be picked based on the input text.
 
-            - temperature: typing.Optional[float]. Ranges from 0 to 5. Controls the randomness of the output. Lower values tend to generate more “predictable” output, while higher values tend to generate more “creative” output. The sweet spot is typically between 0 and 1.
+        temperature : typing.Optional[float]
+            Ranges from 0 to 5. Controls the randomness of the output. Lower values tend to generate more “predictable” output, while higher values tend to generate more “creative” output. The sweet spot is typically between 0 and 1.
 
-            - additional_command: typing.Optional[str]. A free-form instruction for modifying how the summaries get generated. Should complete the sentence "Generate a summary _". Eg. "focusing on the next steps" or "written by Yoda"
+        additional_command : typing.Optional[str]
+            A free-form instruction for modifying how the summaries get generated. Should complete the sentence "Generate a summary _". Eg. "focusing on the next steps" or "written by Yoda"
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SummarizeResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -3224,10 +3842,12 @@ class AsyncBaseCohere:
         if additional_command is not OMIT:
             _request["additional_command"] = additional_command
         _response = await self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "summarize"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "summarize"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(_request)
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -3267,13 +3887,24 @@ class AsyncBaseCohere:
         """
         This endpoint splits input text into smaller units called tokens using byte-pair encoding (BPE). To learn more about tokenization and byte pair encoding, see the tokens page.
 
-        Parameters:
-            - text: str. The string to be tokenized, the minimum text length is 1 character, and the maximum text length is 65536 characters.
+        Parameters
+        ----------
+        text : str
+            The string to be tokenized, the minimum text length is 1 character, and the maximum text length is 65536 characters.
 
-            - model: str. An optional parameter to provide the model name. This will ensure that the tokenization uses the tokenizer used by that model.
+        model : str
+            An optional parameter to provide the model name. This will ensure that the tokenization uses the tokenizer used by that model.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        TokenizeResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -3286,10 +3917,12 @@ class AsyncBaseCohere:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "tokenize"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "tokenize"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder({"text": text, "model": model})
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -3337,13 +3970,24 @@ class AsyncBaseCohere:
         """
         This endpoint takes tokens using byte-pair encoding and returns their text representation. To learn more about tokenization and byte pair encoding, see the tokens page.
 
-        Parameters:
-            - tokens: typing.Sequence[int]. The list of tokens to be detokenized.
+        Parameters
+        ----------
+        tokens : typing.Sequence[int]
+            The list of tokens to be detokenized.
 
-            - model: str. An optional parameter to provide the model name. This will ensure that the detokenization is done by the tokenizer used by that model.
+        model : str
+            An optional parameter to provide the model name. This will ensure that the detokenization is done by the tokenizer used by that model.
 
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        DetokenizeResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -3356,10 +4000,12 @@ class AsyncBaseCohere:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "detokenize"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "detokenize"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder({"tokens": tokens, "model": model})
             if request_options is None or request_options.get("additional_body_parameters") is None
@@ -3397,9 +4043,18 @@ class AsyncBaseCohere:
         """
         Checks that the api key in the Authorization header is valid and active
 
-        Parameters:
-            - request_options: typing.Optional[RequestOptions]. Request-specific configuration.
-        ---
+        Parameters
+        ----------
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CheckApiKeyResponse
+            OK
+
+        Examples
+        --------
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -3409,10 +4064,12 @@ class AsyncBaseCohere:
         await client.check_api_key()
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "POST",
-            urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "check-api-key"),
-            params=jsonable_encoder(
-                request_options.get("additional_query_parameters") if request_options is not None else None
+            method="POST",
+            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "check-api-key"),
+            params=encode_query(
+                jsonable_encoder(
+                    request_options.get("additional_query_parameters") if request_options is not None else None
+                )
             ),
             json=jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))
             if request_options is not None
