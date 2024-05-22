@@ -378,7 +378,7 @@ class TestClient(unittest.TestCase):
             ))
 
         cited_response = co.chat(
-            message="",
+            message="How good were the sales on September 29?",
             tools=tools,
             tool_results=tool_results,
             force_single_step=True,
