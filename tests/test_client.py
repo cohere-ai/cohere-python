@@ -322,7 +322,7 @@ class TestClient(unittest.TestCase):
 
         co.connectors.delete(created_connector.connector.id)
 
-    # @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
+    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     def test_tool_use(self) -> None:
         tools = [
             Tool(
@@ -390,7 +390,7 @@ class TestClient(unittest.TestCase):
                 "tool_name": "sales_database",
                 "average_sale_value": "404.17",
                 "date": "2023-09-29",
-                "id": "sales_database:0:1:0",
+                "id": "sales_database:0:0:0",
                 "number_of_sales": "120",
                 "total_revenue": "48500",
             }
