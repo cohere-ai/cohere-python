@@ -381,6 +381,7 @@ class TestClient(unittest.TestCase):
             message="",
             tools=tools,
             tool_results=tool_results,
+            force_single_step=True,
             model="command-nightly",
         )
 
