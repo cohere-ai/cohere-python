@@ -47,9 +47,16 @@ class TestClient(unittest.TestCase):
             connectors=[ChatConnector(id="web-search")]
         )
 
+        events = set()
+
         for chat_event in stream:
+            events.add(chat_event.event_type)
             if chat_event.event_type == "text-generation":
                 print(chat_event.text)
+
+        self.assertTrue("text-generation" in events)
+        self.assertTrue("stream-start" in events)
+        self.assertTrue("stream-end" in events)
 
     def test_stream_equals_true(self) -> None:
         with self.assertRaises(ValueError):
