@@ -65,7 +65,7 @@ OMIT = typing.cast(typing.Any, ...)
 
 class BaseCohere:
     """
-    Use this class to access the different functions within the SDK. You can instantiate any number of clients with different configuration that will propogate to these functions.
+    Use this class to access the different functions within the SDK. You can instantiate any number of clients with different configuration that will propagate to these functions.
 
     Parameters
     ----------
@@ -164,7 +164,7 @@ class BaseCohere:
     ) -> typing.Iterator[StreamedChatResponse]:
         """
         Generates a text response to a user message.
-        To learn how to use Chat with Streaming and RAG follow [this guide](https://docs.cohere.com/docs/cochat-beta#various-ways-of-using-the-chat-endpoint).
+        To learn how to use the Chat API with Streaming and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
 
         Parameters
         ----------
@@ -460,7 +460,7 @@ class BaseCohere:
         for chunk in response:
             yield chunk
         """
-        _request: typing.Dict[str, typing.Any] = {"message": message}
+        _request: typing.Dict[str, typing.Any] = {"message": message, "stream": True}
         if model is not OMIT:
             _request["model"] = model
         if preamble is not OMIT:
@@ -583,7 +583,7 @@ class BaseCohere:
     ) -> NonStreamedChatResponse:
         """
         Generates a text response to a user message.
-        To learn how to use Chat with Streaming and RAG follow [this guide](https://docs.cohere.com/docs/cochat-beta#various-ways-of-using-the-chat-endpoint).
+        To learn how to use the Chat API with Streaming and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
 
         Parameters
         ----------
@@ -803,7 +803,7 @@ class BaseCohere:
             temperature=0.3,
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"message": message}
+        _request: typing.Dict[str, typing.Any] = {"message": message, "stream": False}
         if model is not OMIT:
             _request["model"] = model
         if preamble is not OMIT:
@@ -1038,7 +1038,7 @@ class BaseCohere:
         for chunk in response:
             yield chunk
         """
-        _request: typing.Dict[str, typing.Any] = {"prompt": prompt}
+        _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": True}
         if model is not OMIT:
             _request["model"] = model
         if num_generations is not OMIT:
@@ -1253,7 +1253,7 @@ class BaseCohere:
             prompt="Please explain to me how LLMs work",
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"prompt": prompt}
+        _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": False}
         if model is not OMIT:
             _request["model"] = model
         if num_generations is not OMIT:
@@ -2084,7 +2084,7 @@ class BaseCohere:
 
 class AsyncBaseCohere:
     """
-    Use this class to access the different functions within the SDK. You can instantiate any number of clients with different configuration that will propogate to these functions.
+    Use this class to access the different functions within the SDK. You can instantiate any number of clients with different configuration that will propagate to these functions.
 
     Parameters
     ----------
@@ -2183,7 +2183,7 @@ class AsyncBaseCohere:
     ) -> typing.AsyncIterator[StreamedChatResponse]:
         """
         Generates a text response to a user message.
-        To learn how to use Chat with Streaming and RAG follow [this guide](https://docs.cohere.com/docs/cochat-beta#various-ways-of-using-the-chat-endpoint).
+        To learn how to use the Chat API with Streaming and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
 
         Parameters
         ----------
@@ -2479,7 +2479,7 @@ class AsyncBaseCohere:
         async for chunk in response:
             yield chunk
         """
-        _request: typing.Dict[str, typing.Any] = {"message": message}
+        _request: typing.Dict[str, typing.Any] = {"message": message, "stream": True}
         if model is not OMIT:
             _request["model"] = model
         if preamble is not OMIT:
@@ -2602,7 +2602,7 @@ class AsyncBaseCohere:
     ) -> NonStreamedChatResponse:
         """
         Generates a text response to a user message.
-        To learn how to use Chat with Streaming and RAG follow [this guide](https://docs.cohere.com/docs/cochat-beta#various-ways-of-using-the-chat-endpoint).
+        To learn how to use the Chat API with Streaming and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
 
         Parameters
         ----------
@@ -2822,7 +2822,7 @@ class AsyncBaseCohere:
             temperature=0.3,
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"message": message}
+        _request: typing.Dict[str, typing.Any] = {"message": message, "stream": False}
         if model is not OMIT:
             _request["model"] = model
         if preamble is not OMIT:
@@ -3057,7 +3057,7 @@ class AsyncBaseCohere:
         async for chunk in response:
             yield chunk
         """
-        _request: typing.Dict[str, typing.Any] = {"prompt": prompt}
+        _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": True}
         if model is not OMIT:
             _request["model"] = model
         if num_generations is not OMIT:
@@ -3272,7 +3272,7 @@ class AsyncBaseCohere:
             prompt="Please explain to me how LLMs work",
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"prompt": prompt}
+        _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": False}
         if model is not OMIT:
             _request["model"] = model
         if num_generations is not OMIT:
