@@ -94,7 +94,7 @@ class ModelsClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    def list(
+    def list_(
         self,
         *,
         page_size: typing.Optional[float] = None,
@@ -137,7 +137,7 @@ class ModelsClient:
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        client.models.list()
+        client.models.list_()
         """
         _response = self._client_wrapper.httpx_client.request(
             method="GET",
@@ -260,7 +260,7 @@ class AsyncModelsClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    async def list(
+    async def list_(
         self,
         *,
         page_size: typing.Optional[float] = None,
@@ -303,7 +303,7 @@ class AsyncModelsClient:
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        await client.models.list()
+        await client.models.list_()
         """
         _response = await self._client_wrapper.httpx_client.request(
             method="GET",

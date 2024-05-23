@@ -31,7 +31,7 @@ class EmbedJobsClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> ListEmbedJobResponse:
+    def list_(self, *, request_options: typing.Optional[RequestOptions] = None) -> ListEmbedJobResponse:
         """
         The list embed job endpoint allows users to view all embed jobs history for that specific user.
 
@@ -53,7 +53,7 @@ class EmbedJobsClient:
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        client.embed_jobs.list()
+        client.embed_jobs.list_()
         """
         _response = self._client_wrapper.httpx_client.request(
             method="GET",
@@ -383,7 +383,7 @@ class AsyncEmbedJobsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> ListEmbedJobResponse:
+    async def list_(self, *, request_options: typing.Optional[RequestOptions] = None) -> ListEmbedJobResponse:
         """
         The list embed job endpoint allows users to view all embed jobs history for that specific user.
 
@@ -405,7 +405,7 @@ class AsyncEmbedJobsClient:
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        await client.embed_jobs.list()
+        await client.embed_jobs.list_()
         """
         _response = await self._client_wrapper.httpx_client.request(
             method="GET",

@@ -31,7 +31,7 @@ class DatasetsClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def list(
+    def list_(
         self,
         *,
         dataset_type: typing.Optional[str] = None,
@@ -81,7 +81,7 @@ class DatasetsClient:
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        client.datasets.list()
+        client.datasets.list_()
         """
         _response = self._client_wrapper.httpx_client.request(
             method="GET",
@@ -422,6 +422,9 @@ class DatasetsClient:
                     request_options.get("additional_query_parameters") if request_options is not None else None
                 )
             ),
+            json=jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))
+            if request_options is not None
+            else None,
             headers=jsonable_encoder(
                 remove_none_from_dict(
                     {
@@ -453,7 +456,7 @@ class AsyncDatasetsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def list(
+    async def list_(
         self,
         *,
         dataset_type: typing.Optional[str] = None,
@@ -503,7 +506,7 @@ class AsyncDatasetsClient:
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        await client.datasets.list()
+        await client.datasets.list_()
         """
         _response = await self._client_wrapper.httpx_client.request(
             method="GET",
@@ -844,6 +847,9 @@ class AsyncDatasetsClient:
                     request_options.get("additional_query_parameters") if request_options is not None else None
                 )
             ),
+            json=jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))
+            if request_options is not None
+            else None,
             headers=jsonable_encoder(
                 remove_none_from_dict(
                     {

@@ -34,7 +34,7 @@ class ConnectorsClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def list(
+    def list_(
         self,
         *,
         limit: typing.Optional[float] = None,
@@ -68,7 +68,7 @@ class ConnectorsClient:
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        client.connectors.list()
+        client.connectors.list_()
         """
         _response = self._client_wrapper.httpx_client.request(
             method="GET",
@@ -362,6 +362,9 @@ class ConnectorsClient:
                     request_options.get("additional_query_parameters") if request_options is not None else None
                 )
             ),
+            json=jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))
+            if request_options is not None
+            else None,
             headers=jsonable_encoder(
                 remove_none_from_dict(
                     {
@@ -638,7 +641,7 @@ class AsyncConnectorsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def list(
+    async def list_(
         self,
         *,
         limit: typing.Optional[float] = None,
@@ -672,7 +675,7 @@ class AsyncConnectorsClient:
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        await client.connectors.list()
+        await client.connectors.list_()
         """
         _response = await self._client_wrapper.httpx_client.request(
             method="GET",
@@ -968,6 +971,9 @@ class AsyncConnectorsClient:
                     request_options.get("additional_query_parameters") if request_options is not None else None
                 )
             ),
+            json=jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))
+            if request_options is not None
+            else None,
             headers=jsonable_encoder(
                 remove_none_from_dict(
                     {
