@@ -422,6 +422,9 @@ class DatasetsClient:
                     request_options.get("additional_query_parameters") if request_options is not None else None
                 )
             ),
+            json=jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))
+            if request_options is not None
+            else None,
             headers=jsonable_encoder(
                 remove_none_from_dict(
                     {
@@ -844,6 +847,9 @@ class AsyncDatasetsClient:
                     request_options.get("additional_query_parameters") if request_options is not None else None
                 )
             ),
+            json=jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))
+            if request_options is not None
+            else None,
             headers=jsonable_encoder(
                 remove_none_from_dict(
                     {
