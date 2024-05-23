@@ -52,7 +52,7 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
         events = set()
 
         async for chat_event in stream:
-            
+            events.add(chat_event.event_type)
             if chat_event.event_type == "text-generation":
                 print(chat_event.text)
 
