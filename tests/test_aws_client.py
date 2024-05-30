@@ -1,9 +1,8 @@
 import os
 import unittest
-from parameterized import parameterized_class # type: ignore
 
 import cohere
-
+from parameterized import parameterized_class  # type: ignore
 
 package_dir = os.path.dirname(os.path.abspath(__file__))
 embed_job = os.path.join(package_dir, 'embed_job.jsonl')
