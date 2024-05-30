@@ -28,8 +28,10 @@ from .types.chat_connector import ChatConnector
 from .types.chat_document import ChatDocument
 from .types.chat_request_citation_quality import ChatRequestCitationQuality
 from .types.chat_request_prompt_truncation import ChatRequestPromptTruncation
+from .types.chat_request_response_format import ChatRequestResponseFormat
 from .types.chat_stream_request_citation_quality import ChatStreamRequestCitationQuality
 from .types.chat_stream_request_prompt_truncation import ChatStreamRequestPromptTruncation
+from .types.chat_stream_request_response_format import ChatStreamRequestResponseFormat
 from .types.check_api_key_response import CheckApiKeyResponse
 from .types.classify_example import ClassifyExample
 from .types.classify_request_truncate import ClassifyRequestTruncate
@@ -160,6 +162,7 @@ class BaseCohere:
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         force_single_step: typing.Optional[bool] = OMIT,
+        response_format: typing.Optional[ChatStreamRequestResponseFormat] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[StreamedChatResponse]:
         """
@@ -362,6 +365,9 @@ class BaseCohere:
         force_single_step : typing.Optional[bool]
             Forces the chat to be single step. Defaults to `false`.
 
+        response_format : typing.Optional[ChatStreamRequestResponseFormat]
+            (not public yet) Guidance parameters for the generation, forcing the model to output json.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -375,6 +381,7 @@ class BaseCohere:
         from cohere import (
             ChatConnector,
             ChatStreamRequestConnectorsSearchOptions,
+            ChatStreamRequestResponseFormat,
             Message_Chatbot,
             Tool,
             ToolCall,
@@ -456,6 +463,10 @@ class BaseCohere:
                 )
             ],
             force_single_step=True,
+            response_format=ChatStreamRequestResponseFormat(
+                type="json_object",
+                schema="string",
+            ),
         )
         for chunk in response:
             yield chunk
@@ -507,6 +518,8 @@ class BaseCohere:
             _request["tool_results"] = tool_results
         if force_single_step is not OMIT:
             _request["force_single_step"] = force_single_step
+        if response_format is not OMIT:
+            _request["response_format"] = response_format
         with self._client_wrapper.httpx_client.stream(
             method="POST",
             url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
@@ -579,6 +592,7 @@ class BaseCohere:
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         force_single_step: typing.Optional[bool] = OMIT,
+        response_format: typing.Optional[ChatRequestResponseFormat] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> NonStreamedChatResponse:
         """
@@ -781,6 +795,9 @@ class BaseCohere:
         force_single_step : typing.Optional[bool]
             Forces the chat to be single step. Defaults to `false`.
 
+        response_format : typing.Optional[ChatRequestResponseFormat]
+            (not public yet) Guidance parameters for the generation, forcing the model to output json.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -850,6 +867,8 @@ class BaseCohere:
             _request["tool_results"] = tool_results
         if force_single_step is not OMIT:
             _request["force_single_step"] = force_single_step
+        if response_format is not OMIT:
+            _request["response_format"] = response_format
         _response = self._client_wrapper.httpx_client.request(
             method="POST",
             url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
@@ -2179,6 +2198,7 @@ class AsyncBaseCohere:
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         force_single_step: typing.Optional[bool] = OMIT,
+        response_format: typing.Optional[ChatStreamRequestResponseFormat] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[StreamedChatResponse]:
         """
@@ -2381,6 +2401,9 @@ class AsyncBaseCohere:
         force_single_step : typing.Optional[bool]
             Forces the chat to be single step. Defaults to `false`.
 
+        response_format : typing.Optional[ChatStreamRequestResponseFormat]
+            (not public yet) Guidance parameters for the generation, forcing the model to output json.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -2394,6 +2417,7 @@ class AsyncBaseCohere:
         from cohere import (
             ChatConnector,
             ChatStreamRequestConnectorsSearchOptions,
+            ChatStreamRequestResponseFormat,
             Message_Chatbot,
             Tool,
             ToolCall,
@@ -2475,6 +2499,10 @@ class AsyncBaseCohere:
                 )
             ],
             force_single_step=True,
+            response_format=ChatStreamRequestResponseFormat(
+                type="json_object",
+                schema="string",
+            ),
         )
         async for chunk in response:
             yield chunk
@@ -2526,6 +2554,8 @@ class AsyncBaseCohere:
             _request["tool_results"] = tool_results
         if force_single_step is not OMIT:
             _request["force_single_step"] = force_single_step
+        if response_format is not OMIT:
+            _request["response_format"] = response_format
         async with self._client_wrapper.httpx_client.stream(
             method="POST",
             url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
@@ -2598,6 +2628,7 @@ class AsyncBaseCohere:
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         force_single_step: typing.Optional[bool] = OMIT,
+        response_format: typing.Optional[ChatRequestResponseFormat] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> NonStreamedChatResponse:
         """
@@ -2800,6 +2831,9 @@ class AsyncBaseCohere:
         force_single_step : typing.Optional[bool]
             Forces the chat to be single step. Defaults to `false`.
 
+        response_format : typing.Optional[ChatRequestResponseFormat]
+            (not public yet) Guidance parameters for the generation, forcing the model to output json.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -2869,6 +2903,8 @@ class AsyncBaseCohere:
             _request["tool_results"] = tool_results
         if force_single_step is not OMIT:
             _request["force_single_step"] = force_single_step
+        if response_format is not OMIT:
+            _request["response_format"] = response_format
         _response = await self._client_wrapper.httpx_client.request(
             method="POST",
             url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
