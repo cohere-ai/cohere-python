@@ -15,7 +15,6 @@ from .types import (
     ChatRequestCitationQuality,
     ChatRequestConnectorsSearchOptions,
     ChatRequestPromptTruncation,
-    ChatRequestResponseFormat,
     ChatSearchQueriesGenerationEvent,
     ChatSearchQuery,
     ChatSearchResult,
@@ -27,7 +26,6 @@ from .types import (
     ChatStreamRequestCitationQuality,
     ChatStreamRequestConnectorsSearchOptions,
     ChatStreamRequestPromptTruncation,
-    ChatStreamRequestResponseFormat,
     ChatStreamStartEvent,
     ChatTextGenerationEvent,
     ChatToolCallsGenerationEvent,
@@ -139,8 +137,6 @@ from .errors import (
 )
 from . import connectors, datasets, embed_jobs, finetuning, models
 from .bedrock_client import BedrockClient
-from .sagemaker_client import SagemakerClient
-from .aws_client import AwsClient
 from .client import AsyncClient, Client
 from .datasets import (
     DatasetsCreateResponse,
@@ -171,7 +167,6 @@ __all__ = [
     "ChatRequestCitationQuality",
     "ChatRequestConnectorsSearchOptions",
     "ChatRequestPromptTruncation",
-    "ChatRequestResponseFormat",
     "ChatSearchQueriesGenerationEvent",
     "ChatSearchQuery",
     "ChatSearchResult",
@@ -183,7 +178,6 @@ __all__ = [
     "ChatStreamRequestCitationQuality",
     "ChatStreamRequestConnectorsSearchOptions",
     "ChatStreamRequestPromptTruncation",
-    "ChatStreamRequestResponseFormat",
     "ChatStreamStartEvent",
     "ChatTextGenerationEvent",
     "ChatToolCallsGenerationEvent",
