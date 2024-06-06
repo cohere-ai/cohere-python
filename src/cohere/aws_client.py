@@ -25,9 +25,6 @@ class AwsClient(Client):
             aws_session_token: typing.Optional[str] = None,
             aws_region: typing.Optional[str] = None,
             timeout: typing.Optional[float] = None,
-            chat_model: typing.Optional[str] = None,
-            embed_model: typing.Optional[str] = None,
-            generate_model: typing.Optional[str] = None,
             service: typing.Union[typing.Literal["bedrock"], typing.Literal["sagemaker"]],
     ):
         Client.__init__(
@@ -44,9 +41,6 @@ class AwsClient(Client):
                     aws_secret_key=aws_secret_key,
                     aws_session_token=aws_session_token,
                     aws_region=aws_region,
-                    chat_model=chat_model,
-                    embed_model=embed_model,
-                    generate_model=generate_model,
                 ),
                 timeout=timeout,
             ),
@@ -62,9 +56,6 @@ def get_event_hooks(
         aws_secret_key: typing.Optional[str] = None,
         aws_session_token: typing.Optional[str] = None,
         aws_region: typing.Optional[str] = None,
-        chat_model: typing.Optional[str] = None,
-        embed_model: typing.Optional[str] = None,
-        generate_model: typing.Optional[str] = None,
 ) -> typing.Dict[str, typing.List[EventHook]]:
     return {
         "request": [
@@ -74,17 +65,10 @@ def get_event_hooks(
                 aws_secret_key=aws_secret_key,
                 aws_session_token=aws_session_token,
                 aws_region=aws_region,
-                chat_model=chat_model,
-                embed_model=embed_model,
-                generate_model=generate_model,
             ),
         ],
         "response": [
-            map_response_from_bedrock(
-                chat_model=chat_model,
-                embed_model=embed_model,
-                generate_model=generate_model,
-            )
+            map_response_from_bedrock()
         ],
     }
 
@@ -138,17 +122,12 @@ def stream_generator(response: httpx.Response, endpoint: str) -> typing.Iterator
                     yield (json.dumps(parsed.dict()) + "\n").encode("utf-8") # type: ignore
 
 
-def map_response_from_bedrock(
-        chat_model: typing.Optional[str] = None,
-        embed_model: typing.Optional[str] = None,
-        generate_model: typing.Optional[str] = None,
-):
+def map_response_from_bedrock():
     def _hook(
             response: httpx.Response,
     ) -> None:
         stream = response.headers["content-type"] == "application/vnd.amazon.eventstream"
-        endpoint = get_endpoint_from_url(
-            response.url.path, chat_model, embed_model, generate_model)
+        endpoint = response.request.extensions["endpoint"]
         output: typing.Iterator[bytes]
 
         if stream:
@@ -179,9 +158,6 @@ def map_request_to_bedrock(
         aws_secret_key: typing.Optional[str] = None,
         aws_session_token: typing.Optional[str] = None,
         aws_region: typing.Optional[str] = None,
-        chat_model: typing.Optional[str] = None,
-        embed_model: typing.Optional[str] = None,
-        generate_model: typing.Optional[str] = None,
 ) -> EventHook:
     session = boto3.Session(
         region_name=aws_region,
@@ -192,23 +168,18 @@ def map_request_to_bedrock(
     credentials = session.get_credentials()
     signer = SigV4Auth(credentials, service, session.region_name)
 
-    model_lookup = {
-        "embed": embed_model,
-        "chat": chat_model,
-        "generate": generate_model,
-    }
-
     def _event_hook(request: httpx.Request) -> None:
         headers = request.headers.copy()
         del headers["connection"]
 
         endpoint = request.url.path.split("/")[-1]
         body = json.loads(request.read())
+        model = body["model"]
 
         url = get_url(
             platform=service,
             aws_region=aws_region,
-            model=model_lookup[endpoint],  # type: ignore
+            model=model,  # type: ignore
             stream="stream" in body and body["stream"],
         )
         request.url = URL(url)
@@ -216,6 +187,9 @@ def map_request_to_bedrock(
 
         if "stream" in body:
             del body["stream"]
+
+        if "model" in body:
+            del body["model"]
 
         new_body = json.dumps(body).encode("utf-8")
         request.stream = ByteStream(new_body)
@@ -231,6 +205,7 @@ def map_request_to_bedrock(
         signer.add_auth(aws_request)
 
         request.headers = httpx.Headers(aws_request.prepare().headers)
+        request.extensions["endpoint"] = endpoint
 
     return _event_hook
 
