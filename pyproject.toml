@@ -27,6 +27,9 @@ packages = [
     { include = "cohere", from = "src"}
 ]
 
+[tool.poetry.group.dev.dependencies]
+parameterized = "^0.9.0"
+
 [project.urls]
 Repository = 'https://github.com/cohere-ai/cohere-python'
 
