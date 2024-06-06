@@ -1,14 +1,11 @@
 import typing
 
-import boto3  # type: ignore
-from botocore.auth import SigV4Auth  # type: ignore
-from botocore.awsrequest import AWSRequest  # type: ignore
 from tokenizers import Tokenizer  # type: ignore
 
 from .aws_client import AwsClient
 
 
-class BedrockClient(AwsClient):
+class SagemakerClient(AwsClient):
     def __init__(
             self,
             *,
@@ -23,7 +20,7 @@ class BedrockClient(AwsClient):
     ):
         AwsClient.__init__(
             self,
-            service="bedrock",
+            service="sagemaker",
             aws_access_key=aws_access_key,
             aws_secret_key=aws_secret_key,
             aws_session_token=aws_session_token,
