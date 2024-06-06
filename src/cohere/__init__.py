@@ -137,6 +137,8 @@ from .errors import (
 )
 from . import connectors, datasets, embed_jobs, finetuning, models
 from .bedrock_client import BedrockClient
+from .sagemaker_client import SagemakerClient
+from .aws_client import AwsClient
 from .client import AsyncClient, Client
 from .datasets import (
     DatasetsCreateResponse,
