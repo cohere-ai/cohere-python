@@ -9,7 +9,6 @@ from ..core.api_error import ApiError
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.datetime_utils import serialize_datetime
 from ..core.jsonable_encoder import jsonable_encoder
-from ..core.remove_none_from_dict import remove_none_from_dict
 from ..core.request_options import RequestOptions
 from ..core.unchecked_base_model import construct_type
 from ..errors.too_many_requests_error import TooManyRequestsError
@@ -195,8 +194,8 @@ class DatasetsClient:
                 "csv_delimiter": csv_delimiter,
                 "dry_run": dry_run,
             },
-            data=remove_none_from_dict({}),
-            files=core.convert_file_dict_to_httpx_tuples(remove_none_from_dict({"data": data, "eval_data": eval_data})),
+            data={},
+            files={"data": data, "eval_data": eval_data},
             request_options=request_options,
             omit=OMIT,
         )
@@ -510,8 +509,8 @@ class AsyncDatasetsClient:
                 "csv_delimiter": csv_delimiter,
                 "dry_run": dry_run,
             },
-            data=remove_none_from_dict({}),
-            files=core.convert_file_dict_to_httpx_tuples(remove_none_from_dict({"data": data, "eval_data": eval_data})),
+            data={},
+            files={"data": data, "eval_data": eval_data},
             request_options=request_options,
             omit=OMIT,
         )
