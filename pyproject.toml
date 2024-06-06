@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cohere"
-version = "5.5.5"
+version = "5.5.6"
 description = ""
 readme = "README.md"
 authors = []
@@ -27,9 +27,6 @@ packages = [
     { include = "cohere", from = "src"}
 ]
 
-[tool.poetry.group.dev.dependencies]
-parameterized = "^0.9.0"
-
 [project.urls]
 Repository = 'https://github.com/cohere-ai/cohere-python'
 
@@ -50,6 +47,7 @@ mypy = "1.9.0"
 pytest = "^7.4.0"
 pytest-asyncio = "^0.23.5"
 python-dateutil = "^2.9.0"
+types-python-dateutil = "^2.9.0.20240316"
 
 [tool.pytest.ini_options]
 testpaths = [ "tests" ]
