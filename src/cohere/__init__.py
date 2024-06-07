@@ -15,7 +15,6 @@ from .types import (
     ChatRequestCitationQuality,
     ChatRequestConnectorsSearchOptions,
     ChatRequestPromptTruncation,
-    ChatRequestResponseFormat,
     ChatSearchQueriesGenerationEvent,
     ChatSearchQuery,
     ChatSearchResult,
@@ -27,7 +26,6 @@ from .types import (
     ChatStreamRequestCitationQuality,
     ChatStreamRequestConnectorsSearchOptions,
     ChatStreamRequestPromptTruncation,
-    ChatStreamRequestResponseFormat,
     ChatStreamStartEvent,
     ChatTextGenerationEvent,
     ChatToolCallsGenerationEvent,
@@ -138,9 +136,8 @@ from .errors import (
     UnauthorizedError,
 )
 from . import connectors, datasets, embed_jobs, finetuning, models
-from .bedrock_client import BedrockClient
-from .sagemaker_client import SagemakerClient
 from .aws_client import AwsClient
+from .bedrock_client import BedrockClient
 from .client import AsyncClient, Client
 from .datasets import (
     DatasetsCreateResponse,
@@ -151,6 +148,7 @@ from .datasets import (
 )
 from .embed_jobs import CreateEmbedJobRequestTruncate
 from .environment import ClientEnvironment
+from .sagemaker_client import SagemakerClient
 from .version import __version__
 
 __all__ = [
@@ -160,6 +158,7 @@ __all__ = [
     "ApiMetaTokens",
     "AsyncClient",
     "AuthTokenType",
+    "AwsClient",
     "BadRequestError",
     "BedrockClient",
     "ChatCitation",
@@ -171,7 +170,6 @@ __all__ = [
     "ChatRequestCitationQuality",
     "ChatRequestConnectorsSearchOptions",
     "ChatRequestPromptTruncation",
-    "ChatRequestResponseFormat",
     "ChatSearchQueriesGenerationEvent",
     "ChatSearchQuery",
     "ChatSearchResult",
@@ -183,7 +181,6 @@ __all__ = [
     "ChatStreamRequestCitationQuality",
     "ChatStreamRequestConnectorsSearchOptions",
     "ChatStreamRequestPromptTruncation",
-    "ChatStreamRequestResponseFormat",
     "ChatStreamStartEvent",
     "ChatTextGenerationEvent",
     "ChatToolCallsGenerationEvent",
@@ -271,6 +268,7 @@ __all__ = [
     "RerankResponseResultsItem",
     "RerankResponseResultsItemDocument",
     "RerankerDataMetrics",
+    "SagemakerClient",
     "ServiceUnavailableError",
     "SingleGeneration",
     "SingleGenerationInStream",

@@ -13,13 +13,13 @@ class ChatStreamRequestConnectorsSearchOptions(UncheckedBaseModel):
     (internal) Sets inference and model options for RAG search query and tool use generations. Defaults are used when options are not specified here, meaning that other parameters outside of connectors_search_options are ignored (such as model= or temperature=).
     """
 
-    model: typing.Optional[typing.Any] = None
-    temperature: typing.Optional[typing.Any] = None
-    max_tokens: typing.Optional[typing.Any] = None
-    preamble: typing.Optional[typing.Any] = None
-    seed: typing.Optional[float] = pydantic_v1.Field(default=None)
+    seed: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
-    If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed.
+    If specified, the backend will make a best effort to sample tokens
+    deterministically, such that repeated requests with the same
+    seed and parameters should return the same result. However,
+    determinism cannot be totally guaranteed.
+    Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
     """
 
     def json(self, **kwargs: typing.Any) -> str:

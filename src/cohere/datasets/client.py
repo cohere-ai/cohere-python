@@ -2,7 +2,6 @@
 
 import datetime as dt
 import typing
-import urllib.parse
 from json.decoder import JSONDecodeError
 
 from .. import core
@@ -10,8 +9,6 @@ from ..core.api_error import ApiError
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.datetime_utils import serialize_datetime
 from ..core.jsonable_encoder import jsonable_encoder
-from ..core.query_encoder import encode_query
-from ..core.remove_none_from_dict import remove_none_from_dict
 from ..core.request_options import RequestOptions
 from ..core.unchecked_base_model import construct_type
 from ..errors.too_many_requests_error import TooManyRequestsError
@@ -84,40 +81,17 @@ class DatasetsClient:
         client.datasets.list()
         """
         _response = self._client_wrapper.httpx_client.request(
+            "datasets",
             method="GET",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "datasets"),
-            params=encode_query(
-                jsonable_encoder(
-                    remove_none_from_dict(
-                        {
-                            "datasetType": dataset_type,
-                            "before": serialize_datetime(before) if before is not None else None,
-                            "after": serialize_datetime(after) if after is not None else None,
-                            "limit": limit,
-                            "offset": offset,
-                            "validationStatus": validation_status,
-                            **(
-                                request_options.get("additional_query_parameters", {})
-                                if request_options is not None
-                                else {}
-                            ),
-                        }
-                    )
-                )
-            ),
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            params={
+                "datasetType": dataset_type,
+                "before": serialize_datetime(before) if before is not None else None,
+                "after": serialize_datetime(after) if after is not None else None,
+                "limit": limit,
+                "offset": offset,
+                "validationStatus": validation_status,
+            },
+            request_options=request_options,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(DatasetsListResponse, construct_type(type_=DatasetsListResponse, object_=_response.json()))  # type: ignore
@@ -207,50 +181,23 @@ class DatasetsClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
+            "datasets",
             method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "datasets"),
-            params=encode_query(
-                jsonable_encoder(
-                    remove_none_from_dict(
-                        {
-                            "name": name,
-                            "type": type,
-                            "keep_original_file": keep_original_file,
-                            "skip_malformed_input": skip_malformed_input,
-                            "keep_fields": keep_fields,
-                            "optional_fields": optional_fields,
-                            "text_separator": text_separator,
-                            "csv_delimiter": csv_delimiter,
-                            "dry_run": dry_run,
-                            **(
-                                request_options.get("additional_query_parameters", {})
-                                if request_options is not None
-                                else {}
-                            ),
-                        }
-                    )
-                )
-            ),
-            data=jsonable_encoder(remove_none_from_dict({}))
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(remove_none_from_dict({})),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            params={
+                "name": name,
+                "type": type,
+                "keep_original_file": keep_original_file,
+                "skip_malformed_input": skip_malformed_input,
+                "keep_fields": keep_fields,
+                "optional_fields": optional_fields,
+                "text_separator": text_separator,
+                "csv_delimiter": csv_delimiter,
+                "dry_run": dry_run,
             },
-            files=core.convert_file_dict_to_httpx_tuples(remove_none_from_dict({"data": data, "eval_data": eval_data})),
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            data={},
+            files={"data": data, "eval_data": eval_data},
+            request_options=request_options,
+            omit=OMIT,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(DatasetsCreateResponse, construct_type(type_=DatasetsCreateResponse, object_=_response.json()))  # type: ignore
@@ -289,26 +236,7 @@ class DatasetsClient:
         client.datasets.get_usage()
         """
         _response = self._client_wrapper.httpx_client.request(
-            method="GET",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "datasets/usage"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            "datasets/usage", method="GET", request_options=request_options
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(DatasetsGetUsageResponse, construct_type(type_=DatasetsGetUsageResponse, object_=_response.json()))  # type: ignore
@@ -351,26 +279,7 @@ class DatasetsClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            method="GET",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"datasets/{jsonable_encoder(id)}"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            f"datasets/{jsonable_encoder(id)}", method="GET", request_options=request_options
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(DatasetsGetResponse, construct_type(type_=DatasetsGetResponse, object_=_response.json()))  # type: ignore
@@ -415,29 +324,7 @@ class DatasetsClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            method="DELETE",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"datasets/{jsonable_encoder(id)}"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))
-            if request_options is not None
-            else None,
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            f"datasets/{jsonable_encoder(id)}", method="DELETE", request_options=request_options
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(typing.Dict[str, typing.Any], construct_type(type_=typing.Dict[str, typing.Any], object_=_response.json()))  # type: ignore
@@ -509,40 +396,17 @@ class AsyncDatasetsClient:
         await client.datasets.list()
         """
         _response = await self._client_wrapper.httpx_client.request(
+            "datasets",
             method="GET",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "datasets"),
-            params=encode_query(
-                jsonable_encoder(
-                    remove_none_from_dict(
-                        {
-                            "datasetType": dataset_type,
-                            "before": serialize_datetime(before) if before is not None else None,
-                            "after": serialize_datetime(after) if after is not None else None,
-                            "limit": limit,
-                            "offset": offset,
-                            "validationStatus": validation_status,
-                            **(
-                                request_options.get("additional_query_parameters", {})
-                                if request_options is not None
-                                else {}
-                            ),
-                        }
-                    )
-                )
-            ),
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            params={
+                "datasetType": dataset_type,
+                "before": serialize_datetime(before) if before is not None else None,
+                "after": serialize_datetime(after) if after is not None else None,
+                "limit": limit,
+                "offset": offset,
+                "validationStatus": validation_status,
+            },
+            request_options=request_options,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(DatasetsListResponse, construct_type(type_=DatasetsListResponse, object_=_response.json()))  # type: ignore
@@ -632,50 +496,23 @@ class AsyncDatasetsClient:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
+            "datasets",
             method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "datasets"),
-            params=encode_query(
-                jsonable_encoder(
-                    remove_none_from_dict(
-                        {
-                            "name": name,
-                            "type": type,
-                            "keep_original_file": keep_original_file,
-                            "skip_malformed_input": skip_malformed_input,
-                            "keep_fields": keep_fields,
-                            "optional_fields": optional_fields,
-                            "text_separator": text_separator,
-                            "csv_delimiter": csv_delimiter,
-                            "dry_run": dry_run,
-                            **(
-                                request_options.get("additional_query_parameters", {})
-                                if request_options is not None
-                                else {}
-                            ),
-                        }
-                    )
-                )
-            ),
-            data=jsonable_encoder(remove_none_from_dict({}))
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(remove_none_from_dict({})),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            params={
+                "name": name,
+                "type": type,
+                "keep_original_file": keep_original_file,
+                "skip_malformed_input": skip_malformed_input,
+                "keep_fields": keep_fields,
+                "optional_fields": optional_fields,
+                "text_separator": text_separator,
+                "csv_delimiter": csv_delimiter,
+                "dry_run": dry_run,
             },
-            files=core.convert_file_dict_to_httpx_tuples(remove_none_from_dict({"data": data, "eval_data": eval_data})),
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            data={},
+            files={"data": data, "eval_data": eval_data},
+            request_options=request_options,
+            omit=OMIT,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(DatasetsCreateResponse, construct_type(type_=DatasetsCreateResponse, object_=_response.json()))  # type: ignore
@@ -714,26 +551,7 @@ class AsyncDatasetsClient:
         await client.datasets.get_usage()
         """
         _response = await self._client_wrapper.httpx_client.request(
-            method="GET",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "datasets/usage"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            "datasets/usage", method="GET", request_options=request_options
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(DatasetsGetUsageResponse, construct_type(type_=DatasetsGetUsageResponse, object_=_response.json()))  # type: ignore
@@ -776,26 +594,7 @@ class AsyncDatasetsClient:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
-            method="GET",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"datasets/{jsonable_encoder(id)}"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            f"datasets/{jsonable_encoder(id)}", method="GET", request_options=request_options
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(DatasetsGetResponse, construct_type(type_=DatasetsGetResponse, object_=_response.json()))  # type: ignore
@@ -840,29 +639,7 @@ class AsyncDatasetsClient:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
-            method="DELETE",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", f"datasets/{jsonable_encoder(id)}"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))
-            if request_options is not None
-            else None,
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            f"datasets/{jsonable_encoder(id)}", method="DELETE", request_options=request_options
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(typing.Dict[str, typing.Any], construct_type(type_=typing.Dict[str, typing.Any], object_=_response.json()))  # type: ignore
