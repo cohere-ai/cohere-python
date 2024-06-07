@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cohere"
-version = "5.5.5"
+version = "5.5.6"
 description = ""
 readme = "README.md"
 authors = []
@@ -27,9 +27,6 @@ packages = [
     { include = "cohere", from = "src"}
 ]
 
-[tool.poetry.group.dev.dependencies]
-parameterized = "^0.9.0"
-
 [project.urls]
 Repository = 'https://github.com/cohere-ai/cohere-python'
 
@@ -39,6 +36,7 @@ boto3 = "^1.34.0"
 fastavro = "^1.9.4"
 httpx = ">=0.21.2"
 httpx-sse = "^0.4.0"
+parameterized = "^0.9.0"
 pydantic = ">= 1.9.2"
 requests = "^2.0.0"
 tokenizers = "^0.15"
@@ -46,10 +44,12 @@ types-requests = "^2.0.0"
 typing_extensions = ">= 4.0.0"
 
 [tool.poetry.dev-dependencies]
-mypy = "1.9.0"
+mypy = "1.0.1"
 pytest = "^7.4.0"
 pytest-asyncio = "^0.23.5"
 python-dateutil = "^2.9.0"
+types-python-dateutil = "^2.9.0.20240316"
+parameterized = "^0.9.0"
 
 [tool.pytest.ini_options]
 testpaths = [ "tests" ]

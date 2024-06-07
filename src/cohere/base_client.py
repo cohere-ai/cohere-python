@@ -3,7 +3,6 @@
 import json
 import os
 import typing
-import urllib.parse
 from json.decoder import JSONDecodeError
 
 import httpx
@@ -11,9 +10,6 @@ import httpx
 from .connectors.client import AsyncConnectorsClient, ConnectorsClient
 from .core.api_error import ApiError
 from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
-from .core.jsonable_encoder import jsonable_encoder
-from .core.query_encoder import encode_query
-from .core.remove_none_from_dict import remove_none_from_dict
 from .core.request_options import RequestOptions
 from .core.unchecked_base_model import construct_type
 from .datasets.client import AsyncDatasetsClient, DatasetsClient
@@ -28,10 +24,8 @@ from .types.chat_connector import ChatConnector
 from .types.chat_document import ChatDocument
 from .types.chat_request_citation_quality import ChatRequestCitationQuality
 from .types.chat_request_prompt_truncation import ChatRequestPromptTruncation
-from .types.chat_request_response_format import ChatRequestResponseFormat
 from .types.chat_stream_request_citation_quality import ChatStreamRequestCitationQuality
 from .types.chat_stream_request_prompt_truncation import ChatStreamRequestPromptTruncation
-from .types.chat_stream_request_response_format import ChatStreamRequestResponseFormat
 from .types.check_api_key_response import CheckApiKeyResponse
 from .types.classify_example import ClassifyExample
 from .types.classify_request_truncate import ClassifyRequestTruncate
@@ -86,7 +80,7 @@ class BaseCohere:
     client_name : typing.Optional[str]
     token : typing.Optional[typing.Union[str, typing.Callable[[], str]]]
     timeout : typing.Optional[float]
-        The timeout to be used, in seconds, for requests by default the timeout is 60 seconds, unless a custom httpx client is used, in which case a default is not set.
+        The timeout to be used, in seconds, for requests. By default the timeout is 300 seconds, unless a custom httpx client is used, in which case this default is not enforced.
 
     follow_redirects : typing.Optional[bool]
         Whether the default httpx client follows redirects or not, this is irrelevant if a custom httpx client is passed in.
@@ -113,7 +107,7 @@ class BaseCohere:
         token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"),
         timeout: typing.Optional[float] = None,
         follow_redirects: typing.Optional[bool] = True,
-        httpx_client: typing.Optional[httpx.Client] = None,
+        httpx_client: typing.Optional[httpx.Client] = None
     ):
         _defaulted_timeout = timeout if timeout is not None else 300 if httpx_client is None else None
         if token is None:
@@ -153,7 +147,7 @@ class BaseCohere:
         max_input_tokens: typing.Optional[int] = OMIT,
         k: typing.Optional[int] = OMIT,
         p: typing.Optional[float] = OMIT,
-        seed: typing.Optional[float] = OMIT,
+        seed: typing.Optional[int] = OMIT,
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
@@ -162,8 +156,7 @@ class BaseCohere:
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         force_single_step: typing.Optional[bool] = OMIT,
-        response_format: typing.Optional[ChatStreamRequestResponseFormat] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        request_options: typing.Optional[RequestOptions] = None
     ) -> typing.Iterator[StreamedChatResponse]:
         """
         Generates a text response to a user message.
@@ -294,7 +287,7 @@ class BaseCohere:
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
 
-        seed : typing.Optional[float]
+        seed : typing.Optional[int]
             If specified, the backend will make a best effort to sample tokens
             deterministically, such that repeated requests with the same
             seed and parameters should return the same result. However,
@@ -365,9 +358,6 @@ class BaseCohere:
         force_single_step : typing.Optional[bool]
             Forces the chat to be single step. Defaults to `false`.
 
-        response_format : typing.Optional[ChatStreamRequestResponseFormat]
-            (not public yet) Guidance parameters for the generation, forcing the model to output json.
-
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -381,7 +371,6 @@ class BaseCohere:
         from cohere import (
             ChatConnector,
             ChatStreamRequestConnectorsSearchOptions,
-            ChatStreamRequestResponseFormat,
             Message_Chatbot,
             Tool,
             ToolCall,
@@ -427,14 +416,10 @@ class BaseCohere:
             max_input_tokens=1,
             k=1,
             p=1.1,
-            seed=1.1,
+            seed=1,
             stop_sequences=["string"],
             connectors_search_options=ChatStreamRequestConnectorsSearchOptions(
-                model={"key": "value"},
-                temperature={"key": "value"},
-                max_tokens={"key": "value"},
-                preamble={"key": "value"},
-                seed=1.1,
+                seed=1,
             ),
             frequency_penalty=1.1,
             presence_penalty=1.1,
@@ -463,90 +448,42 @@ class BaseCohere:
                 )
             ],
             force_single_step=True,
-            response_format=ChatStreamRequestResponseFormat(
-                type="json_object",
-                schema="string",
-            ),
         )
         for chunk in response:
             yield chunk
         """
-        _request: typing.Dict[str, typing.Any] = {"message": message, "stream": True}
-        if model is not OMIT:
-            _request["model"] = model
-        if preamble is not OMIT:
-            _request["preamble"] = preamble
-        if chat_history is not OMIT:
-            _request["chat_history"] = chat_history
-        if conversation_id is not OMIT:
-            _request["conversation_id"] = conversation_id
-        if prompt_truncation is not OMIT:
-            _request["prompt_truncation"] = prompt_truncation
-        if connectors is not OMIT:
-            _request["connectors"] = connectors
-        if search_queries_only is not OMIT:
-            _request["search_queries_only"] = search_queries_only
-        if documents is not OMIT:
-            _request["documents"] = documents
-        if citation_quality is not OMIT:
-            _request["citation_quality"] = citation_quality
-        if temperature is not OMIT:
-            _request["temperature"] = temperature
-        if max_tokens is not OMIT:
-            _request["max_tokens"] = max_tokens
-        if max_input_tokens is not OMIT:
-            _request["max_input_tokens"] = max_input_tokens
-        if k is not OMIT:
-            _request["k"] = k
-        if p is not OMIT:
-            _request["p"] = p
-        if seed is not OMIT:
-            _request["seed"] = seed
-        if stop_sequences is not OMIT:
-            _request["stop_sequences"] = stop_sequences
-        if frequency_penalty is not OMIT:
-            _request["frequency_penalty"] = frequency_penalty
-        if presence_penalty is not OMIT:
-            _request["presence_penalty"] = presence_penalty
-        if raw_prompting is not OMIT:
-            _request["raw_prompting"] = raw_prompting
-        if return_prompt is not OMIT:
-            _request["return_prompt"] = return_prompt
-        if tools is not OMIT:
-            _request["tools"] = tools
-        if tool_results is not OMIT:
-            _request["tool_results"] = tool_results
-        if force_single_step is not OMIT:
-            _request["force_single_step"] = force_single_step
-        if response_format is not OMIT:
-            _request["response_format"] = response_format
         with self._client_wrapper.httpx_client.stream(
+            "chat",
             method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            json={
+                "message": message,
+                "model": model,
+                "preamble": preamble,
+                "chat_history": chat_history,
+                "conversation_id": conversation_id,
+                "prompt_truncation": prompt_truncation,
+                "connectors": connectors,
+                "search_queries_only": search_queries_only,
+                "documents": documents,
+                "citation_quality": citation_quality,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+                "max_input_tokens": max_input_tokens,
+                "k": k,
+                "p": p,
+                "seed": seed,
+                "stop_sequences": stop_sequences,
+                "frequency_penalty": frequency_penalty,
+                "presence_penalty": presence_penalty,
+                "raw_prompting": raw_prompting,
+                "return_prompt": return_prompt,
+                "tools": tools,
+                "tool_results": tool_results,
+                "force_single_step": force_single_step,
+                "stream": True,
             },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            request_options=request_options,
+            omit=OMIT,
         ) as _response:
             if 200 <= _response.status_code < 300:
                 for _text in _response.iter_lines():
@@ -583,7 +520,7 @@ class BaseCohere:
         max_input_tokens: typing.Optional[int] = OMIT,
         k: typing.Optional[int] = OMIT,
         p: typing.Optional[float] = OMIT,
-        seed: typing.Optional[float] = OMIT,
+        seed: typing.Optional[int] = OMIT,
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
@@ -592,8 +529,7 @@ class BaseCohere:
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         force_single_step: typing.Optional[bool] = OMIT,
-        response_format: typing.Optional[ChatRequestResponseFormat] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        request_options: typing.Optional[RequestOptions] = None
     ) -> NonStreamedChatResponse:
         """
         Generates a text response to a user message.
@@ -724,7 +660,7 @@ class BaseCohere:
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
 
-        seed : typing.Optional[float]
+        seed : typing.Optional[int]
             If specified, the backend will make a best effort to sample tokens
             deterministically, such that repeated requests with the same
             seed and parameters should return the same result. However,
@@ -795,9 +731,6 @@ class BaseCohere:
         force_single_step : typing.Optional[bool]
             Forces the chat to be single step. Defaults to `false`.
 
-        response_format : typing.Optional[ChatRequestResponseFormat]
-            (not public yet) Guidance parameters for the generation, forcing the model to output json.
-
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -820,82 +753,38 @@ class BaseCohere:
             temperature=0.3,
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"message": message, "stream": False}
-        if model is not OMIT:
-            _request["model"] = model
-        if preamble is not OMIT:
-            _request["preamble"] = preamble
-        if chat_history is not OMIT:
-            _request["chat_history"] = chat_history
-        if conversation_id is not OMIT:
-            _request["conversation_id"] = conversation_id
-        if prompt_truncation is not OMIT:
-            _request["prompt_truncation"] = prompt_truncation
-        if connectors is not OMIT:
-            _request["connectors"] = connectors
-        if search_queries_only is not OMIT:
-            _request["search_queries_only"] = search_queries_only
-        if documents is not OMIT:
-            _request["documents"] = documents
-        if citation_quality is not OMIT:
-            _request["citation_quality"] = citation_quality
-        if temperature is not OMIT:
-            _request["temperature"] = temperature
-        if max_tokens is not OMIT:
-            _request["max_tokens"] = max_tokens
-        if max_input_tokens is not OMIT:
-            _request["max_input_tokens"] = max_input_tokens
-        if k is not OMIT:
-            _request["k"] = k
-        if p is not OMIT:
-            _request["p"] = p
-        if seed is not OMIT:
-            _request["seed"] = seed
-        if stop_sequences is not OMIT:
-            _request["stop_sequences"] = stop_sequences
-        if frequency_penalty is not OMIT:
-            _request["frequency_penalty"] = frequency_penalty
-        if presence_penalty is not OMIT:
-            _request["presence_penalty"] = presence_penalty
-        if raw_prompting is not OMIT:
-            _request["raw_prompting"] = raw_prompting
-        if return_prompt is not OMIT:
-            _request["return_prompt"] = return_prompt
-        if tools is not OMIT:
-            _request["tools"] = tools
-        if tool_results is not OMIT:
-            _request["tool_results"] = tool_results
-        if force_single_step is not OMIT:
-            _request["force_single_step"] = force_single_step
-        if response_format is not OMIT:
-            _request["response_format"] = response_format
         _response = self._client_wrapper.httpx_client.request(
+            "chat",
             method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            json={
+                "message": message,
+                "model": model,
+                "preamble": preamble,
+                "chat_history": chat_history,
+                "conversation_id": conversation_id,
+                "prompt_truncation": prompt_truncation,
+                "connectors": connectors,
+                "search_queries_only": search_queries_only,
+                "documents": documents,
+                "citation_quality": citation_quality,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+                "max_input_tokens": max_input_tokens,
+                "k": k,
+                "p": p,
+                "seed": seed,
+                "stop_sequences": stop_sequences,
+                "frequency_penalty": frequency_penalty,
+                "presence_penalty": presence_penalty,
+                "raw_prompting": raw_prompting,
+                "return_prompt": return_prompt,
+                "tools": tools,
+                "tool_results": tool_results,
+                "force_single_step": force_single_step,
+                "stream": False,
             },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            request_options=request_options,
+            omit=OMIT,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(NonStreamedChatResponse, construct_type(type_=NonStreamedChatResponse, object_=_response.json()))  # type: ignore
@@ -918,7 +807,7 @@ class BaseCohere:
         max_tokens: typing.Optional[int] = OMIT,
         truncate: typing.Optional[GenerateStreamRequestTruncate] = OMIT,
         temperature: typing.Optional[float] = OMIT,
-        seed: typing.Optional[float] = OMIT,
+        seed: typing.Optional[int] = OMIT,
         preset: typing.Optional[str] = OMIT,
         end_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
@@ -928,7 +817,7 @@ class BaseCohere:
         presence_penalty: typing.Optional[float] = OMIT,
         return_likelihoods: typing.Optional[GenerateStreamRequestReturnLikelihoods] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        request_options: typing.Optional[RequestOptions] = None
     ) -> typing.Iterator[GenerateStreamedResponse]:
         """
         > 🚧 Warning
@@ -972,8 +861,13 @@ class BaseCohere:
             Defaults to `0.75`, min value of `0.0`, max value of `5.0`.
 
 
-        seed : typing.Optional[float]
-            If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed.
+        seed : typing.Optional[int]
+            If specified, the backend will make a best effort to sample tokens
+            deterministically, such that repeated requests with the same
+            seed and parameters should return the same result. However,
+            determinism cannot be totally guaranteed.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
 
         preset : typing.Optional[str]
             Identifier of a custom preset. A preset is a combination of parameters, such as prompt, temperature etc. You can create presets in the [playground](https://dashboard.cohere.com/playground/generate).
@@ -1043,7 +937,7 @@ class BaseCohere:
             max_tokens=1,
             truncate="NONE",
             temperature=1.1,
-            seed=1.1,
+            seed=1,
             preset="string",
             end_sequences=["string"],
             stop_sequences=["string"],
@@ -1057,64 +951,30 @@ class BaseCohere:
         for chunk in response:
             yield chunk
         """
-        _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": True}
-        if model is not OMIT:
-            _request["model"] = model
-        if num_generations is not OMIT:
-            _request["num_generations"] = num_generations
-        if max_tokens is not OMIT:
-            _request["max_tokens"] = max_tokens
-        if truncate is not OMIT:
-            _request["truncate"] = truncate
-        if temperature is not OMIT:
-            _request["temperature"] = temperature
-        if seed is not OMIT:
-            _request["seed"] = seed
-        if preset is not OMIT:
-            _request["preset"] = preset
-        if end_sequences is not OMIT:
-            _request["end_sequences"] = end_sequences
-        if stop_sequences is not OMIT:
-            _request["stop_sequences"] = stop_sequences
-        if k is not OMIT:
-            _request["k"] = k
-        if p is not OMIT:
-            _request["p"] = p
-        if frequency_penalty is not OMIT:
-            _request["frequency_penalty"] = frequency_penalty
-        if presence_penalty is not OMIT:
-            _request["presence_penalty"] = presence_penalty
-        if return_likelihoods is not OMIT:
-            _request["return_likelihoods"] = return_likelihoods
-        if raw_prompting is not OMIT:
-            _request["raw_prompting"] = raw_prompting
         with self._client_wrapper.httpx_client.stream(
+            "generate",
             method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "generate"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            json={
+                "prompt": prompt,
+                "model": model,
+                "num_generations": num_generations,
+                "max_tokens": max_tokens,
+                "truncate": truncate,
+                "temperature": temperature,
+                "seed": seed,
+                "preset": preset,
+                "end_sequences": end_sequences,
+                "stop_sequences": stop_sequences,
+                "k": k,
+                "p": p,
+                "frequency_penalty": frequency_penalty,
+                "presence_penalty": presence_penalty,
+                "return_likelihoods": return_likelihoods,
+                "raw_prompting": raw_prompting,
+                "stream": True,
             },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            request_options=request_options,
+            omit=OMIT,
         ) as _response:
             if 200 <= _response.status_code < 300:
                 for _text in _response.iter_lines():
@@ -1150,7 +1010,7 @@ class BaseCohere:
         max_tokens: typing.Optional[int] = OMIT,
         truncate: typing.Optional[GenerateRequestTruncate] = OMIT,
         temperature: typing.Optional[float] = OMIT,
-        seed: typing.Optional[float] = OMIT,
+        seed: typing.Optional[int] = OMIT,
         preset: typing.Optional[str] = OMIT,
         end_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
@@ -1160,7 +1020,7 @@ class BaseCohere:
         presence_penalty: typing.Optional[float] = OMIT,
         return_likelihoods: typing.Optional[GenerateRequestReturnLikelihoods] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        request_options: typing.Optional[RequestOptions] = None
     ) -> Generation:
         """
         > 🚧 Warning
@@ -1204,8 +1064,13 @@ class BaseCohere:
             Defaults to `0.75`, min value of `0.0`, max value of `5.0`.
 
 
-        seed : typing.Optional[float]
-            If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed.
+        seed : typing.Optional[int]
+            If specified, the backend will make a best effort to sample tokens
+            deterministically, such that repeated requests with the same
+            seed and parameters should return the same result. However,
+            determinism cannot be totally guaranteed.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
 
         preset : typing.Optional[str]
             Identifier of a custom preset. A preset is a combination of parameters, such as prompt, temperature etc. You can create presets in the [playground](https://dashboard.cohere.com/playground/generate).
@@ -1272,64 +1137,30 @@ class BaseCohere:
             prompt="Please explain to me how LLMs work",
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": False}
-        if model is not OMIT:
-            _request["model"] = model
-        if num_generations is not OMIT:
-            _request["num_generations"] = num_generations
-        if max_tokens is not OMIT:
-            _request["max_tokens"] = max_tokens
-        if truncate is not OMIT:
-            _request["truncate"] = truncate
-        if temperature is not OMIT:
-            _request["temperature"] = temperature
-        if seed is not OMIT:
-            _request["seed"] = seed
-        if preset is not OMIT:
-            _request["preset"] = preset
-        if end_sequences is not OMIT:
-            _request["end_sequences"] = end_sequences
-        if stop_sequences is not OMIT:
-            _request["stop_sequences"] = stop_sequences
-        if k is not OMIT:
-            _request["k"] = k
-        if p is not OMIT:
-            _request["p"] = p
-        if frequency_penalty is not OMIT:
-            _request["frequency_penalty"] = frequency_penalty
-        if presence_penalty is not OMIT:
-            _request["presence_penalty"] = presence_penalty
-        if return_likelihoods is not OMIT:
-            _request["return_likelihoods"] = return_likelihoods
-        if raw_prompting is not OMIT:
-            _request["raw_prompting"] = raw_prompting
         _response = self._client_wrapper.httpx_client.request(
+            "generate",
             method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "generate"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            json={
+                "prompt": prompt,
+                "model": model,
+                "num_generations": num_generations,
+                "max_tokens": max_tokens,
+                "truncate": truncate,
+                "temperature": temperature,
+                "seed": seed,
+                "preset": preset,
+                "end_sequences": end_sequences,
+                "stop_sequences": stop_sequences,
+                "k": k,
+                "p": p,
+                "frequency_penalty": frequency_penalty,
+                "presence_penalty": presence_penalty,
+                "return_likelihoods": return_likelihoods,
+                "raw_prompting": raw_prompting,
+                "stream": False,
             },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            request_options=request_options,
+            omit=OMIT,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(Generation, construct_type(type_=Generation, object_=_response.json()))  # type: ignore
@@ -1359,7 +1190,7 @@ class BaseCohere:
         input_type: typing.Optional[EmbedInputType] = OMIT,
         embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
         truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        request_options: typing.Optional[RequestOptions] = None
     ) -> EmbedResponse:
         """
         This endpoint returns text embeddings. An embedding is a list of floating point numbers that captures semantic information about the text that it represents.
@@ -1431,42 +1262,18 @@ class BaseCohere:
             truncate="NONE",
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"texts": texts}
-        if model is not OMIT:
-            _request["model"] = model
-        if input_type is not OMIT:
-            _request["input_type"] = input_type
-        if embedding_types is not OMIT:
-            _request["embedding_types"] = embedding_types
-        if truncate is not OMIT:
-            _request["truncate"] = truncate
         _response = self._client_wrapper.httpx_client.request(
+            "embed",
             method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            json={
+                "texts": texts,
+                "model": model,
+                "input_type": input_type,
+                "embedding_types": embedding_types,
+                "truncate": truncate,
             },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            request_options=request_options,
+            omit=OMIT,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(EmbedResponse, construct_type(type_=EmbedResponse, object_=_response.json()))  # type: ignore
@@ -1498,7 +1305,7 @@ class BaseCohere:
         rank_fields: typing.Optional[typing.Sequence[str]] = OMIT,
         return_documents: typing.Optional[bool] = OMIT,
         max_chunks_per_doc: typing.Optional[int] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        request_options: typing.Optional[RequestOptions] = None
     ) -> RerankResponse:
         """
         This endpoint takes in a query and a list of texts and produces an ordered array with each text assigned a relevance score.
@@ -1559,44 +1366,20 @@ class BaseCohere:
             ],
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"query": query, "documents": documents}
-        if model is not OMIT:
-            _request["model"] = model
-        if top_n is not OMIT:
-            _request["top_n"] = top_n
-        if rank_fields is not OMIT:
-            _request["rank_fields"] = rank_fields
-        if return_documents is not OMIT:
-            _request["return_documents"] = return_documents
-        if max_chunks_per_doc is not OMIT:
-            _request["max_chunks_per_doc"] = max_chunks_per_doc
         _response = self._client_wrapper.httpx_client.request(
+            "rerank",
             method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "rerank"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            json={
+                "model": model,
+                "query": query,
+                "documents": documents,
+                "top_n": top_n,
+                "rank_fields": rank_fields,
+                "return_documents": return_documents,
+                "max_chunks_per_doc": max_chunks_per_doc,
             },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            request_options=request_options,
+            omit=OMIT,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(RerankResponse, construct_type(type_=RerankResponse, object_=_response.json()))  # type: ignore
@@ -1618,7 +1401,7 @@ class BaseCohere:
         model: typing.Optional[str] = OMIT,
         preset: typing.Optional[str] = OMIT,
         truncate: typing.Optional[ClassifyRequestTruncate] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        request_options: typing.Optional[RequestOptions] = None
     ) -> ClassifyResponse:
         """
         This endpoint makes a prediction about which label fits the specified text inputs best. To make a prediction, Classify uses the provided `examples` of text + label pairs as a reference.
@@ -1709,42 +1492,12 @@ class BaseCohere:
             ],
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"inputs": inputs}
-        if examples is not OMIT:
-            _request["examples"] = examples
-        if model is not OMIT:
-            _request["model"] = model
-        if preset is not OMIT:
-            _request["preset"] = preset
-        if truncate is not OMIT:
-            _request["truncate"] = truncate
         _response = self._client_wrapper.httpx_client.request(
+            "classify",
             method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "classify"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            json={"inputs": inputs, "examples": examples, "model": model, "preset": preset, "truncate": truncate},
+            request_options=request_options,
+            omit=OMIT,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(ClassifyResponse, construct_type(type_=ClassifyResponse, object_=_response.json()))  # type: ignore
@@ -1776,7 +1529,7 @@ class BaseCohere:
         extractiveness: typing.Optional[SummarizeRequestExtractiveness] = OMIT,
         temperature: typing.Optional[float] = OMIT,
         additional_command: typing.Optional[str] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        request_options: typing.Optional[RequestOptions] = None
     ) -> SummarizeResponse:
         """
         > 🚧 Warning
@@ -1828,46 +1581,20 @@ class BaseCohere:
             text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.\n\nThe meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo\r all variants. Analogues made from dairy alternatives, such as goat\'s or sheep\'s milk, or milk substitutes (e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are lactose intolerant, allergic to dairy protein or vegan.',
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"text": text}
-        if length is not OMIT:
-            _request["length"] = length
-        if format is not OMIT:
-            _request["format"] = format
-        if model is not OMIT:
-            _request["model"] = model
-        if extractiveness is not OMIT:
-            _request["extractiveness"] = extractiveness
-        if temperature is not OMIT:
-            _request["temperature"] = temperature
-        if additional_command is not OMIT:
-            _request["additional_command"] = additional_command
         _response = self._client_wrapper.httpx_client.request(
+            "summarize",
             method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "summarize"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            json={
+                "text": text,
+                "length": length,
+                "format": format,
+                "model": model,
+                "extractiveness": extractiveness,
+                "temperature": temperature,
+                "additional_command": additional_command,
             },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            request_options=request_options,
+            omit=OMIT,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(SummarizeResponse, construct_type(type_=SummarizeResponse, object_=_response.json()))  # type: ignore
@@ -1917,32 +1644,7 @@ class BaseCohere:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "tokenize"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder({"text": text, "model": model})
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder({"text": text, "model": model}),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            "tokenize", method="POST", json={"text": text, "model": model}, request_options=request_options, omit=OMIT
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(TokenizeResponse, construct_type(type_=TokenizeResponse, object_=_response.json()))  # type: ignore
@@ -2000,32 +1702,11 @@ class BaseCohere:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
+            "detokenize",
             method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "detokenize"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder({"tokens": tokens, "model": model})
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder({"tokens": tokens, "model": model}),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            json={"tokens": tokens, "model": model},
+            request_options=request_options,
+            omit=OMIT,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(DetokenizeResponse, construct_type(type_=DetokenizeResponse, object_=_response.json()))  # type: ignore
@@ -2064,29 +1745,7 @@ class BaseCohere:
         client.check_api_key()
         """
         _response = self._client_wrapper.httpx_client.request(
-            method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "check-api-key"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))
-            if request_options is not None
-            else None,
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            "check-api-key", method="POST", request_options=request_options
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(CheckApiKeyResponse, construct_type(type_=CheckApiKeyResponse, object_=_response.json()))  # type: ignore
@@ -2122,7 +1781,7 @@ class AsyncBaseCohere:
     client_name : typing.Optional[str]
     token : typing.Optional[typing.Union[str, typing.Callable[[], str]]]
     timeout : typing.Optional[float]
-        The timeout to be used, in seconds, for requests by default the timeout is 60 seconds, unless a custom httpx client is used, in which case a default is not set.
+        The timeout to be used, in seconds, for requests. By default the timeout is 300 seconds, unless a custom httpx client is used, in which case this default is not enforced.
 
     follow_redirects : typing.Optional[bool]
         Whether the default httpx client follows redirects or not, this is irrelevant if a custom httpx client is passed in.
@@ -2149,7 +1808,7 @@ class AsyncBaseCohere:
         token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"),
         timeout: typing.Optional[float] = None,
         follow_redirects: typing.Optional[bool] = True,
-        httpx_client: typing.Optional[httpx.AsyncClient] = None,
+        httpx_client: typing.Optional[httpx.AsyncClient] = None
     ):
         _defaulted_timeout = timeout if timeout is not None else 300 if httpx_client is None else None
         if token is None:
@@ -2189,7 +1848,7 @@ class AsyncBaseCohere:
         max_input_tokens: typing.Optional[int] = OMIT,
         k: typing.Optional[int] = OMIT,
         p: typing.Optional[float] = OMIT,
-        seed: typing.Optional[float] = OMIT,
+        seed: typing.Optional[int] = OMIT,
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
@@ -2198,8 +1857,7 @@ class AsyncBaseCohere:
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         force_single_step: typing.Optional[bool] = OMIT,
-        response_format: typing.Optional[ChatStreamRequestResponseFormat] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        request_options: typing.Optional[RequestOptions] = None
     ) -> typing.AsyncIterator[StreamedChatResponse]:
         """
         Generates a text response to a user message.
@@ -2330,7 +1988,7 @@ class AsyncBaseCohere:
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
 
-        seed : typing.Optional[float]
+        seed : typing.Optional[int]
             If specified, the backend will make a best effort to sample tokens
             deterministically, such that repeated requests with the same
             seed and parameters should return the same result. However,
@@ -2401,9 +2059,6 @@ class AsyncBaseCohere:
         force_single_step : typing.Optional[bool]
             Forces the chat to be single step. Defaults to `false`.
 
-        response_format : typing.Optional[ChatStreamRequestResponseFormat]
-            (not public yet) Guidance parameters for the generation, forcing the model to output json.
-
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -2417,7 +2072,6 @@ class AsyncBaseCohere:
         from cohere import (
             ChatConnector,
             ChatStreamRequestConnectorsSearchOptions,
-            ChatStreamRequestResponseFormat,
             Message_Chatbot,
             Tool,
             ToolCall,
@@ -2463,14 +2117,10 @@ class AsyncBaseCohere:
             max_input_tokens=1,
             k=1,
             p=1.1,
-            seed=1.1,
+            seed=1,
             stop_sequences=["string"],
             connectors_search_options=ChatStreamRequestConnectorsSearchOptions(
-                model={"key": "value"},
-                temperature={"key": "value"},
-                max_tokens={"key": "value"},
-                preamble={"key": "value"},
-                seed=1.1,
+                seed=1,
             ),
             frequency_penalty=1.1,
             presence_penalty=1.1,
@@ -2499,90 +2149,42 @@ class AsyncBaseCohere:
                 )
             ],
             force_single_step=True,
-            response_format=ChatStreamRequestResponseFormat(
-                type="json_object",
-                schema="string",
-            ),
         )
         async for chunk in response:
             yield chunk
         """
-        _request: typing.Dict[str, typing.Any] = {"message": message, "stream": True}
-        if model is not OMIT:
-            _request["model"] = model
-        if preamble is not OMIT:
-            _request["preamble"] = preamble
-        if chat_history is not OMIT:
-            _request["chat_history"] = chat_history
-        if conversation_id is not OMIT:
-            _request["conversation_id"] = conversation_id
-        if prompt_truncation is not OMIT:
-            _request["prompt_truncation"] = prompt_truncation
-        if connectors is not OMIT:
-            _request["connectors"] = connectors
-        if search_queries_only is not OMIT:
-            _request["search_queries_only"] = search_queries_only
-        if documents is not OMIT:
-            _request["documents"] = documents
-        if citation_quality is not OMIT:
-            _request["citation_quality"] = citation_quality
-        if temperature is not OMIT:
-            _request["temperature"] = temperature
-        if max_tokens is not OMIT:
-            _request["max_tokens"] = max_tokens
-        if max_input_tokens is not OMIT:
-            _request["max_input_tokens"] = max_input_tokens
-        if k is not OMIT:
-            _request["k"] = k
-        if p is not OMIT:
-            _request["p"] = p
-        if seed is not OMIT:
-            _request["seed"] = seed
-        if stop_sequences is not OMIT:
-            _request["stop_sequences"] = stop_sequences
-        if frequency_penalty is not OMIT:
-            _request["frequency_penalty"] = frequency_penalty
-        if presence_penalty is not OMIT:
-            _request["presence_penalty"] = presence_penalty
-        if raw_prompting is not OMIT:
-            _request["raw_prompting"] = raw_prompting
-        if return_prompt is not OMIT:
-            _request["return_prompt"] = return_prompt
-        if tools is not OMIT:
-            _request["tools"] = tools
-        if tool_results is not OMIT:
-            _request["tool_results"] = tool_results
-        if force_single_step is not OMIT:
-            _request["force_single_step"] = force_single_step
-        if response_format is not OMIT:
-            _request["response_format"] = response_format
         async with self._client_wrapper.httpx_client.stream(
+            "chat",
             method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            json={
+                "message": message,
+                "model": model,
+                "preamble": preamble,
+                "chat_history": chat_history,
+                "conversation_id": conversation_id,
+                "prompt_truncation": prompt_truncation,
+                "connectors": connectors,
+                "search_queries_only": search_queries_only,
+                "documents": documents,
+                "citation_quality": citation_quality,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+                "max_input_tokens": max_input_tokens,
+                "k": k,
+                "p": p,
+                "seed": seed,
+                "stop_sequences": stop_sequences,
+                "frequency_penalty": frequency_penalty,
+                "presence_penalty": presence_penalty,
+                "raw_prompting": raw_prompting,
+                "return_prompt": return_prompt,
+                "tools": tools,
+                "tool_results": tool_results,
+                "force_single_step": force_single_step,
+                "stream": True,
             },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            request_options=request_options,
+            omit=OMIT,
         ) as _response:
             if 200 <= _response.status_code < 300:
                 async for _text in _response.aiter_lines():
@@ -2619,7 +2221,7 @@ class AsyncBaseCohere:
         max_input_tokens: typing.Optional[int] = OMIT,
         k: typing.Optional[int] = OMIT,
         p: typing.Optional[float] = OMIT,
-        seed: typing.Optional[float] = OMIT,
+        seed: typing.Optional[int] = OMIT,
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
@@ -2628,8 +2230,7 @@ class AsyncBaseCohere:
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         force_single_step: typing.Optional[bool] = OMIT,
-        response_format: typing.Optional[ChatRequestResponseFormat] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        request_options: typing.Optional[RequestOptions] = None
     ) -> NonStreamedChatResponse:
         """
         Generates a text response to a user message.
@@ -2760,7 +2361,7 @@ class AsyncBaseCohere:
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
 
 
-        seed : typing.Optional[float]
+        seed : typing.Optional[int]
             If specified, the backend will make a best effort to sample tokens
             deterministically, such that repeated requests with the same
             seed and parameters should return the same result. However,
@@ -2831,9 +2432,6 @@ class AsyncBaseCohere:
         force_single_step : typing.Optional[bool]
             Forces the chat to be single step. Defaults to `false`.
 
-        response_format : typing.Optional[ChatRequestResponseFormat]
-            (not public yet) Guidance parameters for the generation, forcing the model to output json.
-
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -2856,82 +2454,38 @@ class AsyncBaseCohere:
             temperature=0.3,
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"message": message, "stream": False}
-        if model is not OMIT:
-            _request["model"] = model
-        if preamble is not OMIT:
-            _request["preamble"] = preamble
-        if chat_history is not OMIT:
-            _request["chat_history"] = chat_history
-        if conversation_id is not OMIT:
-            _request["conversation_id"] = conversation_id
-        if prompt_truncation is not OMIT:
-            _request["prompt_truncation"] = prompt_truncation
-        if connectors is not OMIT:
-            _request["connectors"] = connectors
-        if search_queries_only is not OMIT:
-            _request["search_queries_only"] = search_queries_only
-        if documents is not OMIT:
-            _request["documents"] = documents
-        if citation_quality is not OMIT:
-            _request["citation_quality"] = citation_quality
-        if temperature is not OMIT:
-            _request["temperature"] = temperature
-        if max_tokens is not OMIT:
-            _request["max_tokens"] = max_tokens
-        if max_input_tokens is not OMIT:
-            _request["max_input_tokens"] = max_input_tokens
-        if k is not OMIT:
-            _request["k"] = k
-        if p is not OMIT:
-            _request["p"] = p
-        if seed is not OMIT:
-            _request["seed"] = seed
-        if stop_sequences is not OMIT:
-            _request["stop_sequences"] = stop_sequences
-        if frequency_penalty is not OMIT:
-            _request["frequency_penalty"] = frequency_penalty
-        if presence_penalty is not OMIT:
-            _request["presence_penalty"] = presence_penalty
-        if raw_prompting is not OMIT:
-            _request["raw_prompting"] = raw_prompting
-        if return_prompt is not OMIT:
-            _request["return_prompt"] = return_prompt
-        if tools is not OMIT:
-            _request["tools"] = tools
-        if tool_results is not OMIT:
-            _request["tool_results"] = tool_results
-        if force_single_step is not OMIT:
-            _request["force_single_step"] = force_single_step
-        if response_format is not OMIT:
-            _request["response_format"] = response_format
         _response = await self._client_wrapper.httpx_client.request(
+            "chat",
             method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "chat"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            json={
+                "message": message,
+                "model": model,
+                "preamble": preamble,
+                "chat_history": chat_history,
+                "conversation_id": conversation_id,
+                "prompt_truncation": prompt_truncation,
+                "connectors": connectors,
+                "search_queries_only": search_queries_only,
+                "documents": documents,
+                "citation_quality": citation_quality,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+                "max_input_tokens": max_input_tokens,
+                "k": k,
+                "p": p,
+                "seed": seed,
+                "stop_sequences": stop_sequences,
+                "frequency_penalty": frequency_penalty,
+                "presence_penalty": presence_penalty,
+                "raw_prompting": raw_prompting,
+                "return_prompt": return_prompt,
+                "tools": tools,
+                "tool_results": tool_results,
+                "force_single_step": force_single_step,
+                "stream": False,
             },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            request_options=request_options,
+            omit=OMIT,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(NonStreamedChatResponse, construct_type(type_=NonStreamedChatResponse, object_=_response.json()))  # type: ignore
@@ -2954,7 +2508,7 @@ class AsyncBaseCohere:
         max_tokens: typing.Optional[int] = OMIT,
         truncate: typing.Optional[GenerateStreamRequestTruncate] = OMIT,
         temperature: typing.Optional[float] = OMIT,
-        seed: typing.Optional[float] = OMIT,
+        seed: typing.Optional[int] = OMIT,
         preset: typing.Optional[str] = OMIT,
         end_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
@@ -2964,7 +2518,7 @@ class AsyncBaseCohere:
         presence_penalty: typing.Optional[float] = OMIT,
         return_likelihoods: typing.Optional[GenerateStreamRequestReturnLikelihoods] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        request_options: typing.Optional[RequestOptions] = None
     ) -> typing.AsyncIterator[GenerateStreamedResponse]:
         """
         > 🚧 Warning
@@ -3008,8 +2562,13 @@ class AsyncBaseCohere:
             Defaults to `0.75`, min value of `0.0`, max value of `5.0`.
 
 
-        seed : typing.Optional[float]
-            If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed.
+        seed : typing.Optional[int]
+            If specified, the backend will make a best effort to sample tokens
+            deterministically, such that repeated requests with the same
+            seed and parameters should return the same result. However,
+            determinism cannot be totally guaranteed.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
 
         preset : typing.Optional[str]
             Identifier of a custom preset. A preset is a combination of parameters, such as prompt, temperature etc. You can create presets in the [playground](https://dashboard.cohere.com/playground/generate).
@@ -3079,7 +2638,7 @@ class AsyncBaseCohere:
             max_tokens=1,
             truncate="NONE",
             temperature=1.1,
-            seed=1.1,
+            seed=1,
             preset="string",
             end_sequences=["string"],
             stop_sequences=["string"],
@@ -3093,64 +2652,30 @@ class AsyncBaseCohere:
         async for chunk in response:
             yield chunk
         """
-        _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": True}
-        if model is not OMIT:
-            _request["model"] = model
-        if num_generations is not OMIT:
-            _request["num_generations"] = num_generations
-        if max_tokens is not OMIT:
-            _request["max_tokens"] = max_tokens
-        if truncate is not OMIT:
-            _request["truncate"] = truncate
-        if temperature is not OMIT:
-            _request["temperature"] = temperature
-        if seed is not OMIT:
-            _request["seed"] = seed
-        if preset is not OMIT:
-            _request["preset"] = preset
-        if end_sequences is not OMIT:
-            _request["end_sequences"] = end_sequences
-        if stop_sequences is not OMIT:
-            _request["stop_sequences"] = stop_sequences
-        if k is not OMIT:
-            _request["k"] = k
-        if p is not OMIT:
-            _request["p"] = p
-        if frequency_penalty is not OMIT:
-            _request["frequency_penalty"] = frequency_penalty
-        if presence_penalty is not OMIT:
-            _request["presence_penalty"] = presence_penalty
-        if return_likelihoods is not OMIT:
-            _request["return_likelihoods"] = return_likelihoods
-        if raw_prompting is not OMIT:
-            _request["raw_prompting"] = raw_prompting
         async with self._client_wrapper.httpx_client.stream(
+            "generate",
             method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "generate"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            json={
+                "prompt": prompt,
+                "model": model,
+                "num_generations": num_generations,
+                "max_tokens": max_tokens,
+                "truncate": truncate,
+                "temperature": temperature,
+                "seed": seed,
+                "preset": preset,
+                "end_sequences": end_sequences,
+                "stop_sequences": stop_sequences,
+                "k": k,
+                "p": p,
+                "frequency_penalty": frequency_penalty,
+                "presence_penalty": presence_penalty,
+                "return_likelihoods": return_likelihoods,
+                "raw_prompting": raw_prompting,
+                "stream": True,
             },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            request_options=request_options,
+            omit=OMIT,
         ) as _response:
             if 200 <= _response.status_code < 300:
                 async for _text in _response.aiter_lines():
@@ -3186,7 +2711,7 @@ class AsyncBaseCohere:
         max_tokens: typing.Optional[int] = OMIT,
         truncate: typing.Optional[GenerateRequestTruncate] = OMIT,
         temperature: typing.Optional[float] = OMIT,
-        seed: typing.Optional[float] = OMIT,
+        seed: typing.Optional[int] = OMIT,
         preset: typing.Optional[str] = OMIT,
         end_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
@@ -3196,7 +2721,7 @@ class AsyncBaseCohere:
         presence_penalty: typing.Optional[float] = OMIT,
         return_likelihoods: typing.Optional[GenerateRequestReturnLikelihoods] = OMIT,
         raw_prompting: typing.Optional[bool] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        request_options: typing.Optional[RequestOptions] = None
     ) -> Generation:
         """
         > 🚧 Warning
@@ -3240,8 +2765,13 @@ class AsyncBaseCohere:
             Defaults to `0.75`, min value of `0.0`, max value of `5.0`.
 
 
-        seed : typing.Optional[float]
-            If specified, the backend will make a best effort to sample tokens deterministically, such that repeated requests with the same seed and parameters should return the same result. However, determinsim cannot be totally guaranteed.
+        seed : typing.Optional[int]
+            If specified, the backend will make a best effort to sample tokens
+            deterministically, such that repeated requests with the same
+            seed and parameters should return the same result. However,
+            determinism cannot be totally guaranteed.
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+
 
         preset : typing.Optional[str]
             Identifier of a custom preset. A preset is a combination of parameters, such as prompt, temperature etc. You can create presets in the [playground](https://dashboard.cohere.com/playground/generate).
@@ -3308,64 +2838,30 @@ class AsyncBaseCohere:
             prompt="Please explain to me how LLMs work",
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"prompt": prompt, "stream": False}
-        if model is not OMIT:
-            _request["model"] = model
-        if num_generations is not OMIT:
-            _request["num_generations"] = num_generations
-        if max_tokens is not OMIT:
-            _request["max_tokens"] = max_tokens
-        if truncate is not OMIT:
-            _request["truncate"] = truncate
-        if temperature is not OMIT:
-            _request["temperature"] = temperature
-        if seed is not OMIT:
-            _request["seed"] = seed
-        if preset is not OMIT:
-            _request["preset"] = preset
-        if end_sequences is not OMIT:
-            _request["end_sequences"] = end_sequences
-        if stop_sequences is not OMIT:
-            _request["stop_sequences"] = stop_sequences
-        if k is not OMIT:
-            _request["k"] = k
-        if p is not OMIT:
-            _request["p"] = p
-        if frequency_penalty is not OMIT:
-            _request["frequency_penalty"] = frequency_penalty
-        if presence_penalty is not OMIT:
-            _request["presence_penalty"] = presence_penalty
-        if return_likelihoods is not OMIT:
-            _request["return_likelihoods"] = return_likelihoods
-        if raw_prompting is not OMIT:
-            _request["raw_prompting"] = raw_prompting
         _response = await self._client_wrapper.httpx_client.request(
+            "generate",
             method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "generate"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            json={
+                "prompt": prompt,
+                "model": model,
+                "num_generations": num_generations,
+                "max_tokens": max_tokens,
+                "truncate": truncate,
+                "temperature": temperature,
+                "seed": seed,
+                "preset": preset,
+                "end_sequences": end_sequences,
+                "stop_sequences": stop_sequences,
+                "k": k,
+                "p": p,
+                "frequency_penalty": frequency_penalty,
+                "presence_penalty": presence_penalty,
+                "return_likelihoods": return_likelihoods,
+                "raw_prompting": raw_prompting,
+                "stream": False,
             },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            request_options=request_options,
+            omit=OMIT,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(Generation, construct_type(type_=Generation, object_=_response.json()))  # type: ignore
@@ -3395,7 +2891,7 @@ class AsyncBaseCohere:
         input_type: typing.Optional[EmbedInputType] = OMIT,
         embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
         truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        request_options: typing.Optional[RequestOptions] = None
     ) -> EmbedResponse:
         """
         This endpoint returns text embeddings. An embedding is a list of floating point numbers that captures semantic information about the text that it represents.
@@ -3467,42 +2963,18 @@ class AsyncBaseCohere:
             truncate="NONE",
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"texts": texts}
-        if model is not OMIT:
-            _request["model"] = model
-        if input_type is not OMIT:
-            _request["input_type"] = input_type
-        if embedding_types is not OMIT:
-            _request["embedding_types"] = embedding_types
-        if truncate is not OMIT:
-            _request["truncate"] = truncate
         _response = await self._client_wrapper.httpx_client.request(
+            "embed",
             method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "embed"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            json={
+                "texts": texts,
+                "model": model,
+                "input_type": input_type,
+                "embedding_types": embedding_types,
+                "truncate": truncate,
             },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            request_options=request_options,
+            omit=OMIT,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(EmbedResponse, construct_type(type_=EmbedResponse, object_=_response.json()))  # type: ignore
@@ -3534,7 +3006,7 @@ class AsyncBaseCohere:
         rank_fields: typing.Optional[typing.Sequence[str]] = OMIT,
         return_documents: typing.Optional[bool] = OMIT,
         max_chunks_per_doc: typing.Optional[int] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        request_options: typing.Optional[RequestOptions] = None
     ) -> RerankResponse:
         """
         This endpoint takes in a query and a list of texts and produces an ordered array with each text assigned a relevance score.
@@ -3595,44 +3067,20 @@ class AsyncBaseCohere:
             ],
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"query": query, "documents": documents}
-        if model is not OMIT:
-            _request["model"] = model
-        if top_n is not OMIT:
-            _request["top_n"] = top_n
-        if rank_fields is not OMIT:
-            _request["rank_fields"] = rank_fields
-        if return_documents is not OMIT:
-            _request["return_documents"] = return_documents
-        if max_chunks_per_doc is not OMIT:
-            _request["max_chunks_per_doc"] = max_chunks_per_doc
         _response = await self._client_wrapper.httpx_client.request(
+            "rerank",
             method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "rerank"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            json={
+                "model": model,
+                "query": query,
+                "documents": documents,
+                "top_n": top_n,
+                "rank_fields": rank_fields,
+                "return_documents": return_documents,
+                "max_chunks_per_doc": max_chunks_per_doc,
             },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            request_options=request_options,
+            omit=OMIT,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(RerankResponse, construct_type(type_=RerankResponse, object_=_response.json()))  # type: ignore
@@ -3654,7 +3102,7 @@ class AsyncBaseCohere:
         model: typing.Optional[str] = OMIT,
         preset: typing.Optional[str] = OMIT,
         truncate: typing.Optional[ClassifyRequestTruncate] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        request_options: typing.Optional[RequestOptions] = None
     ) -> ClassifyResponse:
         """
         This endpoint makes a prediction about which label fits the specified text inputs best. To make a prediction, Classify uses the provided `examples` of text + label pairs as a reference.
@@ -3745,42 +3193,12 @@ class AsyncBaseCohere:
             ],
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"inputs": inputs}
-        if examples is not OMIT:
-            _request["examples"] = examples
-        if model is not OMIT:
-            _request["model"] = model
-        if preset is not OMIT:
-            _request["preset"] = preset
-        if truncate is not OMIT:
-            _request["truncate"] = truncate
         _response = await self._client_wrapper.httpx_client.request(
+            "classify",
             method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "classify"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            json={"inputs": inputs, "examples": examples, "model": model, "preset": preset, "truncate": truncate},
+            request_options=request_options,
+            omit=OMIT,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(ClassifyResponse, construct_type(type_=ClassifyResponse, object_=_response.json()))  # type: ignore
@@ -3812,7 +3230,7 @@ class AsyncBaseCohere:
         extractiveness: typing.Optional[SummarizeRequestExtractiveness] = OMIT,
         temperature: typing.Optional[float] = OMIT,
         additional_command: typing.Optional[str] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        request_options: typing.Optional[RequestOptions] = None
     ) -> SummarizeResponse:
         """
         > 🚧 Warning
@@ -3864,46 +3282,20 @@ class AsyncBaseCohere:
             text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.\n\nThe meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo\r all variants. Analogues made from dairy alternatives, such as goat\'s or sheep\'s milk, or milk substitutes (e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are lactose intolerant, allergic to dairy protein or vegan.',
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"text": text}
-        if length is not OMIT:
-            _request["length"] = length
-        if format is not OMIT:
-            _request["format"] = format
-        if model is not OMIT:
-            _request["model"] = model
-        if extractiveness is not OMIT:
-            _request["extractiveness"] = extractiveness
-        if temperature is not OMIT:
-            _request["temperature"] = temperature
-        if additional_command is not OMIT:
-            _request["additional_command"] = additional_command
         _response = await self._client_wrapper.httpx_client.request(
+            "summarize",
             method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "summarize"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            json={
+                "text": text,
+                "length": length,
+                "format": format,
+                "model": model,
+                "extractiveness": extractiveness,
+                "temperature": temperature,
+                "additional_command": additional_command,
             },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            request_options=request_options,
+            omit=OMIT,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(SummarizeResponse, construct_type(type_=SummarizeResponse, object_=_response.json()))  # type: ignore
@@ -3953,32 +3345,7 @@ class AsyncBaseCohere:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
-            method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "tokenize"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder({"text": text, "model": model})
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder({"text": text, "model": model}),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            "tokenize", method="POST", json={"text": text, "model": model}, request_options=request_options, omit=OMIT
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(TokenizeResponse, construct_type(type_=TokenizeResponse, object_=_response.json()))  # type: ignore
@@ -4036,32 +3403,11 @@ class AsyncBaseCohere:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
+            "detokenize",
             method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "detokenize"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder({"tokens": tokens, "model": model})
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder({"tokens": tokens, "model": model}),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            json={"tokens": tokens, "model": model},
+            request_options=request_options,
+            omit=OMIT,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(DetokenizeResponse, construct_type(type_=DetokenizeResponse, object_=_response.json()))  # type: ignore
@@ -4100,29 +3446,7 @@ class AsyncBaseCohere:
         await client.check_api_key()
         """
         _response = await self._client_wrapper.httpx_client.request(
-            method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "check-api-key"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))
-            if request_options is not None
-            else None,
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            "check-api-key", method="POST", request_options=request_options
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(CheckApiKeyResponse, construct_type(type_=CheckApiKeyResponse, object_=_response.json()))  # type: ignore

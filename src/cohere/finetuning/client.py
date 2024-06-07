@@ -2,14 +2,11 @@
 
 import datetime as dt
 import typing
-import urllib.parse
 from json.decoder import JSONDecodeError
 
 from ..core.api_error import ApiError
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.jsonable_encoder import jsonable_encoder
-from ..core.query_encoder import encode_query
-from ..core.remove_none_from_dict import remove_none_from_dict
 from ..core.request_options import RequestOptions
 from ..core.unchecked_base_model import construct_type
 from ..errors.bad_request_error import BadRequestError
@@ -83,37 +80,10 @@ class FinetuningClient:
         client.finetuning.list_finetuned_models()
         """
         _response = self._client_wrapper.httpx_client.request(
+            "finetuning/finetuned-models",
             method="GET",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "finetuning/finetuned-models"),
-            params=encode_query(
-                jsonable_encoder(
-                    remove_none_from_dict(
-                        {
-                            "page_size": page_size,
-                            "page_token": page_token,
-                            "order_by": order_by,
-                            **(
-                                request_options.get("additional_query_parameters", {})
-                                if request_options is not None
-                                else {}
-                            ),
-                        }
-                    )
-                )
-            ),
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            params={"page_size": page_size, "page_token": page_token, "order_by": order_by},
+            request_options=request_options,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(ListFinetunedModelsResponse, construct_type(type_=ListFinetunedModelsResponse, object_=_response.json()))  # type: ignore
@@ -185,32 +155,7 @@ class FinetuningClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "finetuning/finetuned-models"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            "finetuning/finetuned-models", method="POST", json=request, request_options=request_options, omit=OMIT
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(CreateFinetunedModelResponse, construct_type(type_=CreateFinetunedModelResponse, object_=_response.json()))  # type: ignore
@@ -274,28 +219,7 @@ class FinetuningClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            method="GET",
-            url=urllib.parse.urljoin(
-                f"{self._client_wrapper.get_base_url()}/", f"finetuning/finetuned-models/{jsonable_encoder(id)}"
-            ),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            f"finetuning/finetuned-models/{jsonable_encoder(id)}", method="GET", request_options=request_options
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(GetFinetunedModelResponse, construct_type(type_=GetFinetunedModelResponse, object_=_response.json()))  # type: ignore
@@ -359,31 +283,7 @@ class FinetuningClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            method="DELETE",
-            url=urllib.parse.urljoin(
-                f"{self._client_wrapper.get_base_url()}/", f"finetuning/finetuned-models/{jsonable_encoder(id)}"
-            ),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))
-            if request_options is not None
-            else None,
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            f"finetuning/finetuned-models/{jsonable_encoder(id)}", method="DELETE", request_options=request_options
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(DeleteFinetunedModelResponse, construct_type(type_=DeleteFinetunedModelResponse, object_=_response.json()))  # type: ignore
@@ -493,50 +393,22 @@ class FinetuningClient:
             ),
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"name": name, "settings": settings}
-        if creator_id is not OMIT:
-            _request["creator_id"] = creator_id
-        if organization_id is not OMIT:
-            _request["organization_id"] = organization_id
-        if status is not OMIT:
-            _request["status"] = status
-        if created_at is not OMIT:
-            _request["created_at"] = created_at
-        if updated_at is not OMIT:
-            _request["updated_at"] = updated_at
-        if completed_at is not OMIT:
-            _request["completed_at"] = completed_at
-        if last_used is not OMIT:
-            _request["last_used"] = last_used
         _response = self._client_wrapper.httpx_client.request(
+            f"finetuning/finetuned-models/{jsonable_encoder(id)}",
             method="PATCH",
-            url=urllib.parse.urljoin(
-                f"{self._client_wrapper.get_base_url()}/", f"finetuning/finetuned-models/{jsonable_encoder(id)}"
-            ),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            json={
+                "name": name,
+                "creator_id": creator_id,
+                "organization_id": organization_id,
+                "settings": settings,
+                "status": status,
+                "created_at": created_at,
+                "updated_at": updated_at,
+                "completed_at": completed_at,
+                "last_used": last_used,
             },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            request_options=request_options,
+            omit=OMIT,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(UpdateFinetunedModelResponse, construct_type(type_=UpdateFinetunedModelResponse, object_=_response.json()))  # type: ignore
@@ -621,40 +493,10 @@ class FinetuningClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
+            f"finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/events",
             method="GET",
-            url=urllib.parse.urljoin(
-                f"{self._client_wrapper.get_base_url()}/",
-                f"finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/events",
-            ),
-            params=encode_query(
-                jsonable_encoder(
-                    remove_none_from_dict(
-                        {
-                            "page_size": page_size,
-                            "page_token": page_token,
-                            "order_by": order_by,
-                            **(
-                                request_options.get("additional_query_parameters", {})
-                                if request_options is not None
-                                else {}
-                            ),
-                        }
-                    )
-                )
-            ),
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            params={"page_size": page_size, "page_token": page_token, "order_by": order_by},
+            request_options=request_options,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(ListEventsResponse, construct_type(type_=ListEventsResponse, object_=_response.json()))  # type: ignore
@@ -729,39 +571,10 @@ class FinetuningClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
+            f"finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/training-step-metrics",
             method="GET",
-            url=urllib.parse.urljoin(
-                f"{self._client_wrapper.get_base_url()}/",
-                f"finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/training-step-metrics",
-            ),
-            params=encode_query(
-                jsonable_encoder(
-                    remove_none_from_dict(
-                        {
-                            "page_size": page_size,
-                            "page_token": page_token,
-                            **(
-                                request_options.get("additional_query_parameters", {})
-                                if request_options is not None
-                                else {}
-                            ),
-                        }
-                    )
-                )
-            ),
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            params={"page_size": page_size, "page_token": page_token},
+            request_options=request_options,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(ListTrainingStepMetricsResponse, construct_type(type_=ListTrainingStepMetricsResponse, object_=_response.json()))  # type: ignore
@@ -845,37 +658,10 @@ class AsyncFinetuningClient:
         await client.finetuning.list_finetuned_models()
         """
         _response = await self._client_wrapper.httpx_client.request(
+            "finetuning/finetuned-models",
             method="GET",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "finetuning/finetuned-models"),
-            params=encode_query(
-                jsonable_encoder(
-                    remove_none_from_dict(
-                        {
-                            "page_size": page_size,
-                            "page_token": page_token,
-                            "order_by": order_by,
-                            **(
-                                request_options.get("additional_query_parameters", {})
-                                if request_options is not None
-                                else {}
-                            ),
-                        }
-                    )
-                )
-            ),
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            params={"page_size": page_size, "page_token": page_token, "order_by": order_by},
+            request_options=request_options,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(ListFinetunedModelsResponse, construct_type(type_=ListFinetunedModelsResponse, object_=_response.json()))  # type: ignore
@@ -947,32 +733,7 @@ class AsyncFinetuningClient:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
-            method="POST",
-            url=urllib.parse.urljoin(f"{self._client_wrapper.get_base_url()}/", "finetuning/finetuned-models"),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
-            },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            "finetuning/finetuned-models", method="POST", json=request, request_options=request_options, omit=OMIT
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(CreateFinetunedModelResponse, construct_type(type_=CreateFinetunedModelResponse, object_=_response.json()))  # type: ignore
@@ -1036,28 +797,7 @@ class AsyncFinetuningClient:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
-            method="GET",
-            url=urllib.parse.urljoin(
-                f"{self._client_wrapper.get_base_url()}/", f"finetuning/finetuned-models/{jsonable_encoder(id)}"
-            ),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            f"finetuning/finetuned-models/{jsonable_encoder(id)}", method="GET", request_options=request_options
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(GetFinetunedModelResponse, construct_type(type_=GetFinetunedModelResponse, object_=_response.json()))  # type: ignore
@@ -1121,31 +861,7 @@ class AsyncFinetuningClient:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
-            method="DELETE",
-            url=urllib.parse.urljoin(
-                f"{self._client_wrapper.get_base_url()}/", f"finetuning/finetuned-models/{jsonable_encoder(id)}"
-            ),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))
-            if request_options is not None
-            else None,
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            f"finetuning/finetuned-models/{jsonable_encoder(id)}", method="DELETE", request_options=request_options
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(DeleteFinetunedModelResponse, construct_type(type_=DeleteFinetunedModelResponse, object_=_response.json()))  # type: ignore
@@ -1255,50 +971,22 @@ class AsyncFinetuningClient:
             ),
         )
         """
-        _request: typing.Dict[str, typing.Any] = {"name": name, "settings": settings}
-        if creator_id is not OMIT:
-            _request["creator_id"] = creator_id
-        if organization_id is not OMIT:
-            _request["organization_id"] = organization_id
-        if status is not OMIT:
-            _request["status"] = status
-        if created_at is not OMIT:
-            _request["created_at"] = created_at
-        if updated_at is not OMIT:
-            _request["updated_at"] = updated_at
-        if completed_at is not OMIT:
-            _request["completed_at"] = completed_at
-        if last_used is not OMIT:
-            _request["last_used"] = last_used
         _response = await self._client_wrapper.httpx_client.request(
+            f"finetuning/finetuned-models/{jsonable_encoder(id)}",
             method="PATCH",
-            url=urllib.parse.urljoin(
-                f"{self._client_wrapper.get_base_url()}/", f"finetuning/finetuned-models/{jsonable_encoder(id)}"
-            ),
-            params=encode_query(
-                jsonable_encoder(
-                    request_options.get("additional_query_parameters") if request_options is not None else None
-                )
-            ),
-            json=jsonable_encoder(_request)
-            if request_options is None or request_options.get("additional_body_parameters") is None
-            else {
-                **jsonable_encoder(_request),
-                **(jsonable_encoder(remove_none_from_dict(request_options.get("additional_body_parameters", {})))),
+            json={
+                "name": name,
+                "creator_id": creator_id,
+                "organization_id": organization_id,
+                "settings": settings,
+                "status": status,
+                "created_at": created_at,
+                "updated_at": updated_at,
+                "completed_at": completed_at,
+                "last_used": last_used,
             },
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            request_options=request_options,
+            omit=OMIT,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(UpdateFinetunedModelResponse, construct_type(type_=UpdateFinetunedModelResponse, object_=_response.json()))  # type: ignore
@@ -1383,40 +1071,10 @@ class AsyncFinetuningClient:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
+            f"finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/events",
             method="GET",
-            url=urllib.parse.urljoin(
-                f"{self._client_wrapper.get_base_url()}/",
-                f"finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/events",
-            ),
-            params=encode_query(
-                jsonable_encoder(
-                    remove_none_from_dict(
-                        {
-                            "page_size": page_size,
-                            "page_token": page_token,
-                            "order_by": order_by,
-                            **(
-                                request_options.get("additional_query_parameters", {})
-                                if request_options is not None
-                                else {}
-                            ),
-                        }
-                    )
-                )
-            ),
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            params={"page_size": page_size, "page_token": page_token, "order_by": order_by},
+            request_options=request_options,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(ListEventsResponse, construct_type(type_=ListEventsResponse, object_=_response.json()))  # type: ignore
@@ -1491,39 +1149,10 @@ class AsyncFinetuningClient:
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
+            f"finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/training-step-metrics",
             method="GET",
-            url=urllib.parse.urljoin(
-                f"{self._client_wrapper.get_base_url()}/",
-                f"finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/training-step-metrics",
-            ),
-            params=encode_query(
-                jsonable_encoder(
-                    remove_none_from_dict(
-                        {
-                            "page_size": page_size,
-                            "page_token": page_token,
-                            **(
-                                request_options.get("additional_query_parameters", {})
-                                if request_options is not None
-                                else {}
-                            ),
-                        }
-                    )
-                )
-            ),
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **self._client_wrapper.get_headers(),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
-            timeout=request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
-            else self._client_wrapper.get_timeout(),
-            retries=0,
-            max_retries=request_options.get("max_retries") if request_options is not None else 0,  # type: ignore
+            params={"page_size": page_size, "page_token": page_token},
+            request_options=request_options,
         )
         if 200 <= _response.status_code < 300:
             return typing.cast(ListTrainingStepMetricsResponse, construct_type(type_=ListTrainingStepMetricsResponse, object_=_response.json()))  # type: ignore
