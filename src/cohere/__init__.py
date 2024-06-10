@@ -136,6 +136,7 @@ from .errors import (
     UnauthorizedError,
 )
 from . import connectors, datasets, embed_jobs, finetuning, models
+from .aws_client import AwsClient
 from .bedrock_client import BedrockClient
 from .client import AsyncClient, Client
 from .datasets import (
@@ -147,6 +148,7 @@ from .datasets import (
 )
 from .embed_jobs import CreateEmbedJobRequestTruncate
 from .environment import ClientEnvironment
+from .sagemaker_client import SagemakerClient
 from .version import __version__
 
 __all__ = [
@@ -156,6 +158,7 @@ __all__ = [
     "ApiMetaTokens",
     "AsyncClient",
     "AuthTokenType",
+    "AwsClient",
     "BadRequestError",
     "BedrockClient",
     "ChatCitation",
@@ -265,6 +268,7 @@ __all__ = [
     "RerankResponseResultsItem",
     "RerankResponseResultsItemDocument",
     "RerankerDataMetrics",
+    "SagemakerClient",
     "ServiceUnavailableError",
     "SingleGeneration",
     "SingleGenerationInStream",

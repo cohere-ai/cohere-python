@@ -1,45 +1,83 @@
 import os
 import unittest
 
+import typing
 import cohere
-
-co = cohere.BedrockClient(
-    timeout=10000,
-    aws_region="us-east-1",
-    chat_model="cohere.command-r-plus-v1:0",
-    embed_model="cohere.embed-multilingual-v3",
-    generate_model="cohere.command-text-v14",
-)
+from parameterized import parameterized_class  # type: ignore
 
 package_dir = os.path.dirname(os.path.abspath(__file__))
 embed_job = os.path.join(package_dir, 'embed_job.jsonl')
 
 
-@unittest.skip("Skip test in ci until auth is set up")
+models = {
+    "bedrock": {
+        "chat_model": "cohere.command-r-plus-v1:0",
+        "embed_model": "cohere.embed-multilingual-v3",
+        "generate_model": "cohere.command-text-v14",
+    },
+    "sagemaker": {
+        "chat_model": "cohere.command-r-plus-v1:0",
+        "embed_model": "cohere.embed-multilingual-v3",
+        "generate_model": "cohere-command-light",
+    },
+}
+
+
+@parameterized_class([
+    {
+        "client": cohere.BedrockClient(
+            timeout=10000,
+            aws_region="us-east-1",
+            aws_access_key="...",
+            aws_secret_key="...",
+            aws_session_token="...",
+        ),
+        "models": models["bedrock"],
+    },
+    {
+        "client": cohere.SagemakerClient(
+            timeout=10000,
+            aws_region="us-east-1",
+            aws_access_key="...",
+            aws_secret_key="...",
+            aws_session_token="...",
+        ),
+        "models": models["sagemaker"],
+    }
+])
+@unittest.skip("skip tests until they work in CI")
 class TestClient(unittest.TestCase):
+    client: cohere.AwsClient
+    models: typing.Dict[str, str]
+
     def test_embed(self) -> None:
-        response = co.embed(
+        response = self.client.embed(
+            model=self.models["embed_model"],
             texts=["I love Cohere!"],
             input_type="search_document",
         )
         print(response)
 
     def test_generate(self) -> None:
-        response = co.generate(
+        response = self.client.generate(
+            model=self.models["generate_model"],
             prompt='Please explain to me how LLMs work',
         )
         print(response)
 
     def test_generate_stream(self) -> None:
-        response = co.generate_stream(
+        response = self.client.generate_stream(
+            model=self.models["generate_model"],
             prompt='Please explain to me how LLMs work',
         )
         for event in response:
+            print(event)
             if event.event_type == "text-generation":
                 print(event.text, end='')
 
     def test_chat(self) -> None:
-        response = co.chat(
+        response = self.client.chat(
+            model=self.models["chat_model"],
             message='Please explain to me how LLMs work',
         )
         print(response)
@@ -50,7 +88,8 @@ class TestClient(unittest.TestCase):
 
     def test_chat_stream(self) -> None:
         response_types = set()
-        response = co.chat_stream(
+        response = self.client.chat_stream(
+            model=self.models["chat_model"],
             message='Please explain to me how LLMs work',
         )
         for event in response:

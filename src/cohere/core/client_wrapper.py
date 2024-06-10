@@ -25,7 +25,7 @@ class BaseClientWrapper:
         headers: typing.Dict[str, str] = {
             "X-Fern-Language": "Python",
             "X-Fern-SDK-Name": "cohere",
-            "X-Fern-SDK-Version": "5.5.3",
+            "X-Fern-SDK-Version": "5.5.6",
         }
         if self._client_name is not None:
             headers["X-Client-Name"] = self._client_name
@@ -56,7 +56,12 @@ class SyncClientWrapper(BaseClientWrapper):
         httpx_client: httpx.Client,
     ):
         super().__init__(client_name=client_name, token=token, base_url=base_url, timeout=timeout)
-        self.httpx_client = HttpClient(httpx_client=httpx_client)
+        self.httpx_client = HttpClient(
+            httpx_client=httpx_client,
+            base_headers=self.get_headers(),
+            base_timeout=self.get_timeout(),
+            base_url=self.get_base_url(),
+        )
 
 
 class AsyncClientWrapper(BaseClientWrapper):
@@ -70,4 +75,9 @@ class AsyncClientWrapper(BaseClientWrapper):
         httpx_client: httpx.AsyncClient,
     ):
         super().__init__(client_name=client_name, token=token, base_url=base_url, timeout=timeout)
-        self.httpx_client = AsyncHttpClient(httpx_client=httpx_client)
+        self.httpx_client = AsyncHttpClient(
+            httpx_client=httpx_client,
+            base_headers=self.get_headers(),
+            base_timeout=self.get_timeout(),
+            base_url=self.get_base_url(),
+        )

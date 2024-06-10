@@ -2,7 +2,7 @@ import os
 import unittest
 
 import cohere
-from cohere import ChatMessage, ChatConnector, ClassifyExample, CreateConnectorServiceAuth, Tool, \
+from cohere import ChatConnector, ClassifyExample, CreateConnectorServiceAuth, Tool, \
     ToolParameterDefinitionsValue, ToolResult, Message_Chatbot, Message_User
 
 co = cohere.Client(timeout=10000)
