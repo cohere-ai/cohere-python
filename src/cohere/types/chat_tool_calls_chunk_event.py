@@ -6,16 +6,11 @@ import typing
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import deep_union_pydantic_dicts, pydantic_v1
 from .chat_stream_event import ChatStreamEvent
-from .tool_call import ToolCall
+from .tool_call_delta import ToolCallDelta
 
 
-class ChatToolCallsGenerationEvent(ChatStreamEvent):
-    text: typing.Optional[str] = pydantic_v1.Field(default=None)
-    """
-    The text generated related to the tool calls generated
-    """
-
-    tool_calls: typing.List[ToolCall]
+class ChatToolCallsChunkEvent(ChatStreamEvent):
+    tool_call_delta: ToolCallDelta
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
