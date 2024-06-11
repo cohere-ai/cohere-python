@@ -34,7 +34,7 @@ model_mapping = {
             aws_secret_key="...",
             aws_session_token="...",
         ),
-        "models": models["bedrock"],
+        "models": model_mapping["bedrock"],
     },
     {
         "platform": "sagemaker",
@@ -45,7 +45,7 @@ model_mapping = {
             aws_secret_key="...",
             aws_session_token="...",
         ),
-        "models": models["sagemaker"],
+        "models": model_mapping["sagemaker"],
     }
 ])
 @unittest.skip("skip tests until they work in CI")
