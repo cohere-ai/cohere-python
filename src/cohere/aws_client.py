@@ -11,7 +11,7 @@ from httpx import URL, SyncByteStream, ByteStream
 from tokenizers import Tokenizer  # type: ignore
 
 from . import GenerateStreamedResponse, Generation, \
-    NonStreamedChatResponse, EmbedResponse, StreamedChatResponse
+    NonStreamedChatResponse, EmbedResponse, StreamedChatResponse, RerankResponse
 from .client import Client, ClientEnvironment
 from .core import construct_type
 
@@ -97,6 +97,7 @@ response_mapping: typing.Dict[str, typing.Any] = {
     "chat": NonStreamedChatResponse,
     "embed": EmbedResponse,
     "generate": Generation,
+    "rerank": RerankResponse
 }
 
 stream_response_mapping: typing.Dict[str, typing.Any] = {

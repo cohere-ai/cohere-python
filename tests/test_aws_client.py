@@ -9,7 +9,7 @@ package_dir = os.path.dirname(os.path.abspath(__file__))
 embed_job = os.path.join(package_dir, 'embed_job.jsonl')
 
 
-models = {
+model_mapping = {
     "bedrock": {
         "chat_model": "cohere.command-r-plus-v1:0",
         "embed_model": "cohere.embed-multilingual-v3",
@@ -19,12 +19,14 @@ models = {
         "chat_model": "cohere.command-r-plus-v1:0",
         "embed_model": "cohere.embed-multilingual-v3",
         "generate_model": "cohere-command-light",
+        "rerank_model": "rerank",
     },
 }
 
 
 @parameterized_class([
     {
+        "platform": "bedrock",
         "client": cohere.BedrockClient(
             timeout=10000,
             aws_region="us-east-1",
@@ -32,9 +34,10 @@ models = {
             aws_secret_key="...",
             aws_session_token="...",
         ),
-        "models": models["bedrock"],
+        "models": model_mapping["bedrock"],
     },
     {
+        "platform": "sagemaker",
         "client": cohere.SagemakerClient(
             timeout=10000,
             aws_region="us-east-1",
@@ -42,13 +45,33 @@ models = {
             aws_secret_key="...",
             aws_session_token="...",
         ),
-        "models": models["sagemaker"],
+        "models": model_mapping["sagemaker"],
     }
 ])
 @unittest.skip("skip tests until they work in CI")
 class TestClient(unittest.TestCase):
+    platform: str
     client: cohere.AwsClient
     models: typing.Dict[str, str]
+
+    def test_rerank(self) -> None:
+        if self.platform != "sagemaker":
+            self.skipTest("Only sagemaker supports rerank")
+
+        docs = [
+            'Carson City is the capital city of the American state of Nevada.',
+            'The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.',
+            'Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.',
+            'Capital punishment (the death penalty) has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states.']
+
+        response = self.client.rerank(
+            model=self.models["rerank_model"],
+            query='What is the capital of the United States?',
+            documents=docs,
+            top_n=3,
+        )
+
+        self.assertEqual(len(response.results), 3)
 
     def test_embed(self) -> None:
         response = self.client.embed(
