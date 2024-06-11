@@ -48,6 +48,10 @@ model_mapping = {
 ])
 @unittest.skip("skip tests until they work in CI")
 class TestClient(unittest.TestCase):
+    platform: str
+    client: cohere.AwsClient
+    models: typing.Dict[str, str]
+
     @unittest.skipIf(platform != "sagemaker", "Only sagemaker supports rerank")
     def test_rerank(self) -> None:
         docs = [
