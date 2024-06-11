@@ -5,17 +5,28 @@ import typing
 
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import deep_union_pydantic_dicts, pydantic_v1
-from .chat_stream_event import ChatStreamEvent
-from .tool_call import ToolCall
+from ..core.unchecked_base_model import UncheckedBaseModel
 
 
-class ChatToolCallsGenerationEvent(ChatStreamEvent):
-    text: typing.Optional[str] = pydantic_v1.Field(default=None)
+class ToolCallDelta(UncheckedBaseModel):
     """
-    The text generated related to the tool calls generated
+    Contains the chunk of the tool call generation in the stream.
     """
 
-    tool_calls: typing.List[ToolCall]
+    name: typing.Optional[str] = pydantic_v1.Field(default=None)
+    """
+    Name of the tool call
+    """
+
+    index: typing.Optional[float] = pydantic_v1.Field(default=None)
+    """
+    Index of the tool call generated
+    """
+
+    parameters: typing.Optional[str] = pydantic_v1.Field(default=None)
+    """
+    Chunk of the tool parameters
+    """
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
@@ -32,7 +43,5 @@ class ChatToolCallsGenerationEvent(ChatStreamEvent):
     class Config:
         frozen = True
         smart_union = True
-        allow_population_by_field_name = True
-        populate_by_name = True
         extra = pydantic_v1.Extra.allow
         json_encoders = {dt.datetime: serialize_datetime}

@@ -27,6 +27,7 @@ from .chat_stream_request_connectors_search_options import ChatStreamRequestConn
 from .chat_stream_request_prompt_truncation import ChatStreamRequestPromptTruncation
 from .chat_stream_start_event import ChatStreamStartEvent
 from .chat_text_generation_event import ChatTextGenerationEvent
+from .chat_tool_calls_chunk_event import ChatToolCallsChunkEvent
 from .chat_tool_calls_generation_event import ChatToolCallsGenerationEvent
 from .check_api_key_response import CheckApiKeyResponse
 from .classify_data_metrics import ClassifyDataMetrics
@@ -110,6 +111,7 @@ from .streamed_chat_response import (
     StreamedChatResponse_StreamEnd,
     StreamedChatResponse_StreamStart,
     StreamedChatResponse_TextGeneration,
+    StreamedChatResponse_ToolCallsChunk,
     StreamedChatResponse_ToolCallsGeneration,
 )
 from .summarize_request_extractiveness import SummarizeRequestExtractiveness
@@ -120,6 +122,7 @@ from .tokenize_response import TokenizeResponse
 from .too_many_requests_error_body import TooManyRequestsErrorBody
 from .tool import Tool
 from .tool_call import ToolCall
+from .tool_call_delta import ToolCallDelta
 from .tool_message import ToolMessage
 from .tool_parameter_definitions_value import ToolParameterDefinitionsValue
 from .tool_result import ToolResult
@@ -153,6 +156,7 @@ __all__ = [
     "ChatStreamRequestPromptTruncation",
     "ChatStreamStartEvent",
     "ChatTextGenerationEvent",
+    "ChatToolCallsChunkEvent",
     "ChatToolCallsGenerationEvent",
     "CheckApiKeyResponse",
     "ClassifyDataMetrics",
@@ -237,6 +241,7 @@ __all__ = [
     "StreamedChatResponse_StreamEnd",
     "StreamedChatResponse_StreamStart",
     "StreamedChatResponse_TextGeneration",
+    "StreamedChatResponse_ToolCallsChunk",
     "StreamedChatResponse_ToolCallsGeneration",
     "SummarizeRequestExtractiveness",
     "SummarizeRequestFormat",
@@ -246,6 +251,7 @@ __all__ = [
     "TooManyRequestsErrorBody",
     "Tool",
     "ToolCall",
+    "ToolCallDelta",
     "ToolMessage",
     "ToolParameterDefinitionsValue",
     "ToolResult",

@@ -17,6 +17,7 @@ from .chat_search_result import ChatSearchResult
 from .chat_stream_end_event_finish_reason import ChatStreamEndEventFinishReason
 from .non_streamed_chat_response import NonStreamedChatResponse
 from .tool_call import ToolCall
+from .tool_call_delta import ToolCallDelta
 
 
 class StreamedChatResponse_StreamStart(UncheckedBaseModel):
@@ -160,6 +161,7 @@ class StreamedChatResponse_ToolCallsGeneration(UncheckedBaseModel):
     StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
     """
 
+    text: typing.Optional[str] = None
     tool_calls: typing.List[ToolCall]
     event_type: typing.Literal["tool-calls-generation"] = "tool-calls-generation"
 
@@ -210,6 +212,33 @@ class StreamedChatResponse_StreamEnd(UncheckedBaseModel):
         json_encoders = {dt.datetime: serialize_datetime}
 
 
+class StreamedChatResponse_ToolCallsChunk(UncheckedBaseModel):
+    """
+    StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
+    """
+
+    tool_call_delta: ToolCallDelta
+    event_type: typing.Literal["tool-calls-chunk"] = "tool-calls-chunk"
+
+    def json(self, **kwargs: typing.Any) -> str:
+        kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
+        return super().json(**kwargs_with_defaults)
+
+    def dict(self, **kwargs: typing.Any) -> typing.Dict[str, typing.Any]:
+        kwargs_with_defaults_exclude_unset: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
+        kwargs_with_defaults_exclude_none: typing.Any = {"by_alias": True, "exclude_none": True, **kwargs}
+
+        return deep_union_pydantic_dicts(
+            super().dict(**kwargs_with_defaults_exclude_unset), super().dict(**kwargs_with_defaults_exclude_none)
+        )
+
+    class Config:
+        frozen = True
+        smart_union = True
+        extra = pydantic_v1.Extra.allow
+        json_encoders = {dt.datetime: serialize_datetime}
+
+
 StreamedChatResponse = typing_extensions.Annotated[
     typing.Union[
         StreamedChatResponse_StreamStart,
@@ -219,6 +248,7 @@ StreamedChatResponse = typing_extensions.Annotated[
         StreamedChatResponse_CitationGeneration,
         StreamedChatResponse_ToolCallsGeneration,
         StreamedChatResponse_StreamEnd,
+        StreamedChatResponse_ToolCallsChunk,
     ],
     UnionMetadata(discriminant="event_type"),
 ]
