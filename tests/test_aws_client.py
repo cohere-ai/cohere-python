@@ -54,8 +54,10 @@ class TestClient(unittest.TestCase):
     client: cohere.AwsClient
     models: typing.Dict[str, str]
 
-    @unittest.skipIf(platform != "sagemaker", "Only sagemaker supports rerank")
     def test_rerank(self) -> None:
+        if self.platform != "sagemaker":
+            self.skipTest("Only sagemaker supports rerank")
+
         docs = [
             'Carson City is the capital city of the American state of Nevada.',
             'The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.',
