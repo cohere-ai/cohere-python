@@ -26,6 +26,7 @@ model_mapping = {
 
 @parameterized_class([
     {
+        "platform": "bedrock",
         "client": cohere.BedrockClient(
             timeout=10000,
             aws_region="us-east-1",
@@ -36,6 +37,7 @@ model_mapping = {
         "models": models["bedrock"],
     },
     {
+        "platform": "sagemaker",
         "client": cohere.SagemakerClient(
             timeout=10000,
             aws_region="us-east-1",
