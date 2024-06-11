@@ -2,19 +2,11 @@
 
 ![](banner.png)
 
-![version badge](https://img.shields.io/pypi/v/cohere)
+[![version badge](https://img.shields.io/pypi/v/cohere)](https://pypi.org/project/cohere/)
 ![license badge](https://img.shields.io/github/license/cohere-ai/cohere-python)
 [![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-SDK%20generated%20by%20Fern-brightgreen)](https://github.com/fern-api/fern)
 
-The Cohere Python SDK provides access to the Cohere API from Python.
-
-## ✨🪩✨ Announcing Cohere's new Python SDK ✨🪩✨
-
-We are very excited to publish this brand-new Python SDK. We will continuously update this library with all the latest features in our API. Please create issues where you have feedback so that we can continue to improve the developer experience!
-
-## cohere==5.0.0 Migration Guide
-
-We have created a [migration guide](4.0.0-5.0.0-migration-guide.md) to help you through the process. If you have any questions, please feel free to open an issue and we will respond to you asap.
+The Cohere Python SDK allows access to Cohere models across many different platforms: the cohere platform, AWS (Bedrock, Sagemaker), Azure, GCP and Oracle OCI. For a full list of support and snippets, please take a look at the [SDK support docs page](https://docs.cohere.com/docs/cohere-works-everywhere).
 
 ## Documentation
 
