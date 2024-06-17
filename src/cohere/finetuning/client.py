@@ -17,7 +17,6 @@ from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.unauthorized_error import UnauthorizedError
 from .finetuning.types.create_finetuned_model_response import CreateFinetunedModelResponse
 from .finetuning.types.delete_finetuned_model_response import DeleteFinetunedModelResponse
-from .finetuning.types.error import Error
 from .finetuning.types.finetuned_model import FinetunedModel
 from .finetuning.types.get_finetuned_model_response import GetFinetunedModelResponse
 from .finetuning.types.list_events_response import ListEventsResponse
@@ -93,7 +92,7 @@ class FinetuningClient:
             )
         if _response.status_code == 401:
             raise UnauthorizedError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 403:
             raise ForbiddenError(
@@ -109,7 +108,7 @@ class FinetuningClient:
             )
         if _response.status_code == 503:
             raise ServiceUnavailableError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()
@@ -165,7 +164,7 @@ class FinetuningClient:
             )
         if _response.status_code == 401:
             raise UnauthorizedError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 403:
             raise ForbiddenError(
@@ -181,7 +180,7 @@ class FinetuningClient:
             )
         if _response.status_code == 503:
             raise ServiceUnavailableError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()
@@ -229,7 +228,7 @@ class FinetuningClient:
             )
         if _response.status_code == 401:
             raise UnauthorizedError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 403:
             raise ForbiddenError(
@@ -245,7 +244,7 @@ class FinetuningClient:
             )
         if _response.status_code == 503:
             raise ServiceUnavailableError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()
@@ -293,7 +292,7 @@ class FinetuningClient:
             )
         if _response.status_code == 401:
             raise UnauthorizedError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 403:
             raise ForbiddenError(
@@ -309,7 +308,7 @@ class FinetuningClient:
             )
         if _response.status_code == 503:
             raise ServiceUnavailableError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()
@@ -418,7 +417,7 @@ class FinetuningClient:
             )
         if _response.status_code == 401:
             raise UnauthorizedError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 403:
             raise ForbiddenError(
@@ -434,7 +433,7 @@ class FinetuningClient:
             )
         if _response.status_code == 503:
             raise ServiceUnavailableError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()
@@ -506,7 +505,7 @@ class FinetuningClient:
             )
         if _response.status_code == 401:
             raise UnauthorizedError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 403:
             raise ForbiddenError(
@@ -522,7 +521,7 @@ class FinetuningClient:
             )
         if _response.status_code == 503:
             raise ServiceUnavailableError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()
@@ -584,7 +583,7 @@ class FinetuningClient:
             )
         if _response.status_code == 401:
             raise UnauthorizedError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 403:
             raise ForbiddenError(
@@ -600,7 +599,7 @@ class FinetuningClient:
             )
         if _response.status_code == 503:
             raise ServiceUnavailableError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()
@@ -671,7 +670,7 @@ class AsyncFinetuningClient:
             )
         if _response.status_code == 401:
             raise UnauthorizedError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 403:
             raise ForbiddenError(
@@ -687,7 +686,7 @@ class AsyncFinetuningClient:
             )
         if _response.status_code == 503:
             raise ServiceUnavailableError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()
@@ -743,7 +742,7 @@ class AsyncFinetuningClient:
             )
         if _response.status_code == 401:
             raise UnauthorizedError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 403:
             raise ForbiddenError(
@@ -759,7 +758,7 @@ class AsyncFinetuningClient:
             )
         if _response.status_code == 503:
             raise ServiceUnavailableError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()
@@ -807,7 +806,7 @@ class AsyncFinetuningClient:
             )
         if _response.status_code == 401:
             raise UnauthorizedError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 403:
             raise ForbiddenError(
@@ -823,7 +822,7 @@ class AsyncFinetuningClient:
             )
         if _response.status_code == 503:
             raise ServiceUnavailableError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()
@@ -871,7 +870,7 @@ class AsyncFinetuningClient:
             )
         if _response.status_code == 401:
             raise UnauthorizedError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 403:
             raise ForbiddenError(
@@ -887,7 +886,7 @@ class AsyncFinetuningClient:
             )
         if _response.status_code == 503:
             raise ServiceUnavailableError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()
@@ -996,7 +995,7 @@ class AsyncFinetuningClient:
             )
         if _response.status_code == 401:
             raise UnauthorizedError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 403:
             raise ForbiddenError(
@@ -1012,7 +1011,7 @@ class AsyncFinetuningClient:
             )
         if _response.status_code == 503:
             raise ServiceUnavailableError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()
@@ -1084,7 +1083,7 @@ class AsyncFinetuningClient:
             )
         if _response.status_code == 401:
             raise UnauthorizedError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 403:
             raise ForbiddenError(
@@ -1100,7 +1099,7 @@ class AsyncFinetuningClient:
             )
         if _response.status_code == 503:
             raise ServiceUnavailableError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()
@@ -1162,7 +1161,7 @@ class AsyncFinetuningClient:
             )
         if _response.status_code == 401:
             raise UnauthorizedError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         if _response.status_code == 403:
             raise ForbiddenError(
@@ -1178,7 +1177,7 @@ class AsyncFinetuningClient:
             )
         if _response.status_code == 503:
             raise ServiceUnavailableError(
-                typing.cast(Error, construct_type(type_=Error, object_=_response.json()))  # type: ignore
+                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
             )
         try:
             _response_json = _response.json()

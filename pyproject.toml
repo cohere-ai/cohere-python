@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cohere"
-version = "5.5.7"
+version = "5.5.8"
 description = ""
 readme = "README.md"
 authors = []
@@ -27,9 +27,6 @@ packages = [
     { include = "cohere", from = "src"}
 ]
 
-[tool.poetry.group.dev.dependencies]
-parameterized = "^0.9.0"
-
 [project.urls]
 Repository = 'https://github.com/cohere-ai/cohere-python'
 
@@ -42,7 +39,7 @@ httpx-sse = "^0.4.0"
 parameterized = "^0.9.0"
 pydantic = ">= 1.9.2"
 requests = "^2.0.0"
-tokenizers = "^0.15"
+tokenizers = ">=0.15,<1"
 types-requests = "^2.0.0"
 typing_extensions = ">= 4.0.0"
 
