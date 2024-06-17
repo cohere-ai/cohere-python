@@ -8,30 +8,8 @@ from ..core.pydantic_utilities import deep_union_pydantic_dicts, pydantic_v1
 from ..core.unchecked_base_model import UncheckedBaseModel
 
 
-class ToolCallDelta(UncheckedBaseModel):
-    """
-    Contains the chunk of the tool call generation in the stream.
-    """
-
-    name: typing.Optional[str] = pydantic_v1.Field(default=None)
-    """
-    Name of the tool call
-    """
-
-    index: typing.Optional[float] = pydantic_v1.Field(default=None)
-    """
-    Index of the tool call generated
-    """
-
-    parameters: typing.Optional[str] = pydantic_v1.Field(default=None)
-    """
-    Chunk of the tool parameters
-    """
-
-    text: typing.Optional[str] = pydantic_v1.Field(default=None)
-    """
-    Chunk of the tool plan text
-    """
+class GatewayTimeoutErrorBody(UncheckedBaseModel):
+    data: typing.Optional[str] = None
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
