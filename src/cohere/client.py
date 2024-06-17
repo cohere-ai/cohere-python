@@ -212,7 +212,8 @@ class Client(BaseCohere, CacheMixin):
         if offline:
             try:
                 tokens = local_tokenizers.local_tokenize(self, text=text, model=model)
-                return TokenizeResponse(tokens=tokens, token_strings=[])
+                token_strings = local_tokenizers.local_tokens_to_token_strings(self, tokens=tokens, model=model)
+                return TokenizeResponse(tokens=tokens, token_strings=token_strings)
             except Exception:
                 # Fallback to calling the API.
                 opts["additional_headers"] = opts.get("additional_headers", {})
@@ -392,7 +393,8 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         if offline:
             try:
                 tokens = await local_tokenizers.async_local_tokenize(self, model=model, text=text)
-                return TokenizeResponse(tokens=tokens, token_strings=[])
+                token_strings = await local_tokenizers.async_local_tokens_to_token_strings(self, tokens=tokens, model=model)
+                return TokenizeResponse(tokens=tokens, token_strings=token_strings)
             except Exception:
                 opts["additional_headers"] = opts.get("additional_headers", {})
                 opts["additional_headers"]["sdk-api-warning-message"] = "offline_tokenizer_failed"
