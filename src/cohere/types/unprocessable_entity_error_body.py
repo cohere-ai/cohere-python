@@ -3,20 +3,13 @@
 import datetime as dt
 import typing
 
-from ....core.datetime_utils import serialize_datetime
-from ....core.pydantic_utilities import deep_union_pydantic_dicts, pydantic_v1
-from ....core.unchecked_base_model import UncheckedBaseModel
+from ..core.datetime_utils import serialize_datetime
+from ..core.pydantic_utilities import deep_union_pydantic_dicts, pydantic_v1
+from ..core.unchecked_base_model import UncheckedBaseModel
 
 
-class Error(UncheckedBaseModel):
-    """
-    Error is the response for any unsuccessful event.
-    """
-
-    message: typing.Optional[str] = pydantic_v1.Field(default=None)
-    """
-    A developer-facing error message.
-    """
+class UnprocessableEntityErrorBody(UncheckedBaseModel):
+    data: typing.Optional[str] = None
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

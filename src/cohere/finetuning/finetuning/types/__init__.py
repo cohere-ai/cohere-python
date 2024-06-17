@@ -4,7 +4,6 @@ from .base_model import BaseModel
 from .base_type import BaseType
 from .create_finetuned_model_response import CreateFinetunedModelResponse
 from .delete_finetuned_model_response import DeleteFinetunedModelResponse
-from .error import Error
 from .event import Event
 from .finetuned_model import FinetunedModel
 from .get_finetuned_model_response import GetFinetunedModelResponse
@@ -23,7 +22,6 @@ __all__ = [
     "BaseType",
     "CreateFinetunedModelResponse",
     "DeleteFinetunedModelResponse",
-    "Error",
     "Event",
     "FinetunedModel",
     "GetFinetunedModelResponse",
