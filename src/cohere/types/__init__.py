@@ -97,8 +97,8 @@ from .non_streamed_chat_response import NonStreamedChatResponse
 from .not_implemented_error_body import NotImplementedErrorBody
 from .o_auth_authorize_response import OAuthAuthorizeResponse
 from .parse_info import ParseInfo
+from .rerank_document import RerankDocument
 from .rerank_request_documents_item import RerankRequestDocumentsItem
-from .rerank_request_documents_item_text import RerankRequestDocumentsItemText
 from .rerank_response import RerankResponse
 from .rerank_response_results_item import RerankResponseResultsItem
 from .rerank_response_results_item_document import RerankResponseResultsItemDocument
@@ -232,8 +232,8 @@ __all__ = [
     "NotImplementedErrorBody",
     "OAuthAuthorizeResponse",
     "ParseInfo",
+    "RerankDocument",
     "RerankRequestDocumentsItem",
-    "RerankRequestDocumentsItemText",
     "RerankResponse",
     "RerankResponseResultsItem",
     "RerankResponseResultsItemDocument",
