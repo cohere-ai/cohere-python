@@ -38,8 +38,12 @@ jobs:
           CO_API_KEY: ${{ secrets.COHERE_API_KEY }}
       - name: Test langchain-cohere
         run: |
+          echo "Initial dir $(pwd)"
           git clone https://github.com/langchain-ai/langchain-cohere.git && cd langchain-cohere/libs/cohere
           poetry install --with test 
+          pip uninstall cohere
+          pip install -e ../cohere-python
+          echo "Current dir $(pwd)"
           make test
           echo "tests passed"
 
