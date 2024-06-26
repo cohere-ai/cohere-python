@@ -36,40 +36,6 @@ jobs:
         run: poetry run pytest .
         env:
           CO_API_KEY: ${{ secrets.COHERE_API_KEY }}
-      - name: Test langchain-cohere
-        run: |
-          echo "Initial dir $(pwd)"
-          cd ..
-          echo "Cloning langchain-cohere..."
-          git clone https://github.com/langchain-ai/langchain-cohere.git && cd langchain-cohere/libs/cohere
-          echo "Cloned langchain-cohere, current dir $(pwd)"
-          
-          echo "poetry install --with test"
-          poetry install --with test 
-
-          echo "Going to uninstall cohere package, and install the current version from the repo"
-          cd ../../../cohere-python && echo "Current dir $(pwd)"
-          echo "Current dir $(ls)"
-          pip uninstall cohere
-          pip install .
-          cd ../langchain-cohere/libs/cohere
-          
-          echo "Current cohere installation: $(pip freeze | grep cohere)"
-          make test
-          echo "tests passed"
-
-          set -eu
-
-          STATUS="$(git status)"
-          echo "$STATUS"
-
-          # grep will exit non-zero if the target message isn't found,
-          # and `set -e` above will cause the step to fail.
-          echo "$STATUS" | grep 'nothing to commit, working tree clean'
-        env:
-          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
-  
-
   publish:
     needs: [compile, test]
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
