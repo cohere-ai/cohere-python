@@ -36,6 +36,13 @@ jobs:
         run: poetry run pytest .
         env:
           CO_API_KEY: ${{ secrets.COHERE_API_KEY }}
+      - name: Test langchain-cohere
+        run: |
+          git clone https://github.com/langchain-ai/langchain-cohere.git && cd langchain-cohere/libs/cohere
+          poetry install --with test 
+          make test
+        env:
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
   
 
   publish:
