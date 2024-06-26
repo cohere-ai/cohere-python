@@ -32,25 +32,29 @@ jobs:
           curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
       - name: Install dependencies
         run: poetry install
-      # - name: Test
-      #   run: poetry run pytest .
-        # env:
-        #   CO_API_KEY: ${{ secrets.COHERE_API_KEY }}
+      - name: Test
+        run: poetry run pytest .
+        env:
+          CO_API_KEY: ${{ secrets.COHERE_API_KEY }}
       - name: Test langchain-cohere
         run: |
           echo "Initial dir $(pwd)"
           cd ..
+          echo "Cloning langchain-cohere..."
           git clone https://github.com/langchain-ai/langchain-cohere.git && cd langchain-cohere/libs/cohere
-          echo "Current langchain-cohere dir $(pwd)"
+          echo "Cloned langchain-cohere, current dir $(pwd)"
+          
+          echo "poetry install --with test"
           poetry install --with test 
-          echo "$(pip freeze | grep cohere)"
+
+          echo "Going to uninstall cohere package, and install the current version from the repo"
           cd ../../../cohere-python && echo "Current dir $(pwd)"
           echo "Current dir $(ls)"
           pip uninstall cohere
           pip install .
           cd ../langchain-cohere/libs/cohere
-          echo "Current dir $(pwd)"
-          echo "$(pip freeze | grep cohere)"
+          
+          echo "Current cohere installation: $(pip freeze | grep cohere)"
           make test
           echo "tests passed"
 
