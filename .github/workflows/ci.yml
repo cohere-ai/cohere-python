@@ -39,14 +39,16 @@ jobs:
       - name: Test langchain-cohere
         run: |
           echo "Initial dir $(pwd)"
-          git clone https://github.com/langchain-ai/langchain-cohere.git && cd langchain-cohere/libs/cohere
+          git clone https://github.com/langchain-ai/langchain-cohere.git && cd 
           poetry install --with test 
           echo "$(pip freeze | grep cohere)"
           cd ../cohere-python && echo "Current dir $(pwd)"
           echo "Current dir $(ls)"
           pip uninstall cohere
-          pip install -e ../cohere-python
+          pip install .
+          cd langchain-cohere/libs/cohere
           echo "Current dir $(pwd)"
+          echo "$(pip freeze | grep cohere)"
           make test
           echo "tests passed"
 
