@@ -1,0 +1,50 @@
+name: test-langchain-cohere
+
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Set up python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.10
+      - name: Bootstrap poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
+      - name: Install dependencies
+        run: poetry install
+      - name: Test langchain-cohere
+        run: |
+          echo "Initial dir $(pwd)"
+          cd ..
+          echo "Cloning langchain-cohere..."
+          git clone https://github.com/langchain-ai/langchain-cohere.git && cd langchain-cohere/libs/cohere
+          echo "Cloned langchain-cohere, current dir $(pwd)"
+          
+          echo "poetry install --with test"
+          poetry install --with test 
+
+          echo "Going to uninstall cohere package, and install the current version from the repo"
+          cd ../../../cohere-python && echo "Current dir $(pwd)"
+          echo "Current dir $(ls)"
+          pip uninstall cohere
+          pip install .
+          cd ../langchain-cohere/libs/cohere
+          
+          echo "Current cohere installation: $(pip freeze | grep cohere)"
+          make test
+          echo "tests passed"
+
+          set -eu
+
+          STATUS="$(git status)"
+          echo "$STATUS"
+
+          # grep will exit non-zero if the target message isn't found,
+          # and `set -e` above will cause the step to fail.
+          echo "$STATUS" | grep 'nothing to commit, working tree clean'
+        env:
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
