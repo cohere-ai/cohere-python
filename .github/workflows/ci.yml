@@ -46,7 +46,7 @@ jobs:
           echo "Current dir $(ls)"
           pip uninstall cohere
           pip install .
-          cd langchain-cohere/libs/cohere
+          cd ../langchain-cohere/libs/cohere
           echo "Current dir $(pwd)"
           echo "$(pip freeze | grep cohere)"
           make test
