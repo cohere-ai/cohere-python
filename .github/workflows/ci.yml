@@ -71,6 +71,7 @@ jobs:
           
           echo "Current cohere installation: $(pip freeze | grep cohere)"
           make test
+          make integration_test
           echo "tests passed"
 
           set -eu
