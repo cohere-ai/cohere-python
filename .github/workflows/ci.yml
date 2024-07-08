@@ -11,7 +11,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: 3.8
-      - name: Install and configure Poetry
+      - name: Bootstrap poetry
         uses: snok/install-poetry@v1
         with:
           version: 1.5.1
@@ -29,13 +29,13 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: 3.8
-      - name: Install and configure Poetry
+      - name: Bootstrap poetry
         uses: snok/install-poetry@v1
         with:
           version: 1.5.1
           virtualenvs-in-project: false
       - name: Install dependencies
-        run: poetry install --with test,test_integration
+        run: poetry install
       - name: Test
         run: poetry run pytest .
         env:
@@ -50,11 +50,13 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: 3.10.14
-      - name: Bootstrap poetry
-        run: |
-          curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
+      - name: Install and configure Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.5.1
+          virtualenvs-in-project: false
       - name: Install dependencies
-        run: poetry install
+        run: poetry install --with test,test_integration
       - name: Test langchain-cohere
         run: |
           echo "Initial dir $(pwd)"
