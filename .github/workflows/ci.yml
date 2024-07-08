@@ -56,7 +56,7 @@ jobs:
           version: 1.5.1
           virtualenvs-in-project: false
       - name: Install dependencies
-        run: poetry install --with test,test_integration
+        run: poetry install
       - name: Test langchain-cohere
         run: |
           echo "Initial dir $(pwd)"
@@ -65,8 +65,8 @@ jobs:
           git clone https://github.com/langchain-ai/langchain-cohere.git && cd langchain-cohere/libs/cohere
           echo "Cloned langchain-cohere, current dir $(pwd)"
           
-          echo "poetry install --with test"
-          poetry install --with test 
+          echo "poetry install --with test,test_integration"
+          poetry install --with test,test_integration 
 
           echo "Going to uninstall cohere package, and install the current version from the repo"
           cd ../../../cohere-python && echo "Current dir $(pwd)"
