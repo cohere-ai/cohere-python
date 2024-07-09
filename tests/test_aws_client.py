@@ -108,10 +108,18 @@ class TestClient(unittest.TestCase):
         self.assertIsNotNone(response.text)
         self.assertIsNotNone(response.generation_id)
         self.assertIsNotNone(response.finish_reason)
-        self.assertIsNotNone(response.meta.tokens.input_tokens)
-        self.assertIsNotNone(response.meta.tokens.input_tokens)
-        self.assertIsNotNone(response.meta.billed_units.input_tokens)
-        self.assertIsNotNone(response.meta.billed_units.input_tokens)
+        
+        self.assertIsNotNone(response.meta)
+        if response.meta is not None:
+            self.assertIsNotNone(response.meta.tokens)
+            if response.meta.tokens is not None:
+                self.assertIsNotNone(response.meta.tokens.input_tokens)
+                self.assertIsNotNone(response.meta.tokens.output_tokens)
+
+            self.assertIsNotNone(response.meta.billed_units)
+            if response.meta.billed_units is not None:
+                self.assertIsNotNone(response.meta.billed_units.input_tokens)
+                self.assertIsNotNone(response.meta.billed_units.input_tokens)
 
     def test_chat_stream(self) -> None:
         response_types = set()

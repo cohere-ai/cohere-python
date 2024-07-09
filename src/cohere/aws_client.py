@@ -150,7 +150,7 @@ def map_response_from_bedrock():
             response_type = response_mapping[endpoint]
             response_obj = json.loads(response.read())
             response_obj["meta"] = map_token_counts(response).dict()
-            cast_obj = typing.cast(response_type,  # type: ignore
+            cast_obj: typing.Any = typing.cast(response_type,  # type: ignore
                                    construct_type(
                                        type_=response_type,
                                        # type: ignore
