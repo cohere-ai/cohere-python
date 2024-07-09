@@ -11,7 +11,8 @@ from httpx import URL, SyncByteStream, ByteStream
 from tokenizers import Tokenizer  # type: ignore
 
 from . import GenerateStreamedResponse, Generation, \
-    NonStreamedChatResponse, EmbedResponse, StreamedChatResponse, RerankResponse
+    NonStreamedChatResponse, EmbedResponse, StreamedChatResponse, RerankResponse, ApiMeta, ApiMetaTokens, \
+    ApiMetaBilledUnits
 from .client import Client, ClientEnvironment
 from .core import construct_type
 
@@ -120,7 +121,16 @@ def stream_generator(response: httpx.Response, endpoint: str) -> typing.Iterator
                     response_type = stream_response_mapping[endpoint]
                     parsed = typing.cast(response_type,  # type: ignore
                                          construct_type(type_=response_type, object_=streamed_obj))
-                    yield (json.dumps(parsed.dict()) + "\n").encode("utf-8") # type: ignore
+                    yield (json.dumps(parsed.dict()) + "\n").encode("utf-8")  # type: ignore
+
+
+def map_token_counts(response: httpx.Response) -> ApiMeta:
+    input_tokens = int(response.headers["X-Amzn-Bedrock-Input-Token-Count"])
+    output_tokens = int(response.headers["X-Amzn-Bedrock-Output-Token-Count"])
+    return ApiMeta(
+        tokens=ApiMetaTokens(input_tokens=input_tokens, output_tokens=output_tokens),
+        billed_units=ApiMetaBilledUnits(input_tokens=input_tokens, output_tokens=output_tokens),
+    )
 
 
 def map_response_from_bedrock():
@@ -138,15 +148,20 @@ def map_response_from_bedrock():
             ), endpoint)
         else:
             response_type = response_mapping[endpoint]
-            output = iter([json.dumps(typing.cast(response_type,  # type: ignore
-                                                  construct_type(
-                                                      type_=response_type,
-                                                      # type: ignore
-                                                      object_=json.loads(response.read()))).dict()
-                                      ).encode(
-                "utf-8")])
+            response_obj = json.loads(response.read())
+            response_obj["meta"] = map_token_counts(response).dict()
+            cast_obj = typing.cast(response_type,  # type: ignore
+                                   construct_type(
+                                       type_=response_type,
+                                       # type: ignore
+                                       object_=response_obj))
+
+            output = iter([json.dumps(cast_obj.dict()).encode("utf-8")])
 
         response.stream = Streamer(output)
+        
+        # reset response object to allow for re-reading
+        del response._content
         response.is_stream_consumed = False
         response.is_closed = False
 
@@ -239,5 +254,3 @@ def get_url(
         endpoint = "invocations" if not stream else "invocations-response-stream"
         return f"https://runtime.sagemaker.{aws_region}.amazonaws.com/endpoints/{model}/{endpoint}"
     return ""
-
-
