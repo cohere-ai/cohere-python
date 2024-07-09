@@ -71,6 +71,8 @@ def deprecated_function(fn_name: str) -> typing.Any:
 
 
 class Client(BaseCohere, CacheMixin):
+    _executor: ThreadPoolExecutor
+
     def __init__(
         self,
         api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
@@ -80,9 +82,12 @@ class Client(BaseCohere, CacheMixin):
         client_name: typing.Optional[str] = None,
         timeout: typing.Optional[float] = None,
         httpx_client: typing.Optional[httpx.Client] = None,
+        thread_pool_executor: ThreadPoolExecutor = ThreadPoolExecutor(64)
     ):
         if api_key is None:
             api_key = _get_api_key_from_environment()
+
+        self._executor = thread_pool_executor
 
         BaseCohere.__init__(
             self,
@@ -107,8 +112,6 @@ class Client(BaseCohere, CacheMixin):
         self._client_wrapper.httpx_client.httpx_client.close()
 
     wait = wait
-
-    _executor = ThreadPoolExecutor(64)
 
     def embed(
         self,
@@ -250,6 +253,8 @@ class Client(BaseCohere, CacheMixin):
 
 
 class AsyncClient(AsyncBaseCohere, CacheMixin):
+    _executor: ThreadPoolExecutor
+
     def __init__(
         self,
         api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
@@ -259,9 +264,12 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         client_name: typing.Optional[str] = None,
         timeout: typing.Optional[float] = None,
         httpx_client: typing.Optional[httpx.AsyncClient] = None,
+        thread_pool_executor: ThreadPoolExecutor = ThreadPoolExecutor(64)
     ):
         if api_key is None:
             api_key = _get_api_key_from_environment()
+
+        self._executor = thread_pool_executor
 
         AsyncBaseCohere.__init__(
             self,
@@ -286,8 +294,6 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         await self._client_wrapper.httpx_client.httpx_client.aclose()
 
     wait = async_wait
-
-    _executor = ThreadPoolExecutor(64)
 
     async def embed(
         self,
