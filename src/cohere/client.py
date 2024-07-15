@@ -3,6 +3,7 @@ import os
 import typing
 from concurrent.futures import ThreadPoolExecutor
 from tokenizers import Tokenizer  # type: ignore
+import logging
 
 import httpx
 
@@ -19,6 +20,7 @@ from .manually_maintained import tokenizers as local_tokenizers
 from .overrides import run_overrides
 from .utils import wait, async_wait, merge_embed_responses, SyncSdkUtils, AsyncSdkUtils
 
+logger = logging.getLogger(__name__)
 run_overrides()
 
 # Use NoReturn as Never type for compatibility
@@ -68,6 +70,44 @@ def deprecated_function(fn_name: str) -> typing.Any:
         )
 
     return fn
+
+
+# Logs a warning when a user calls a function with an experimental parameter (kwarg in our case)
+# `deprecated_kwarg` is the name of the experimental parameter, which can be a dot-separated string for nested parameters
+def experimental_kwarg_decorator(func, deprecated_kwarg):
+    # Recursive utility function to check if a kwarg is present in the kwargs.
+    def check_kwarg(deprecated_kwarg: str, kwargs: typing.Dict[str, typing.Any]) -> bool:
+        if "." in deprecated_kwarg:
+            key, rest = deprecated_kwarg.split(".", 1)
+            if key in kwargs:
+                return check_kwarg(rest, kwargs[key])
+        else:
+            return deprecated_kwarg in kwargs
+
+    def _wrapped(*args, **kwargs):
+        if check_kwarg(deprecated_kwarg, kwargs):
+            logger.warning(
+                f"The `{deprecated_kwarg}` parameter is an experimental feature and may change in future releases. "
+                "Please use with caution."
+            )
+        return func(*args, **kwargs)
+
+    async def _async_wrapped(*args, **kwargs):
+        if check_kwarg(deprecated_kwarg, kwargs):
+            logger.warning(
+                f"The `{deprecated_kwarg}` parameter is an experimental feature and may change in future releases. "
+                "Please use with caution."
+            )
+        return await func(*args, **kwargs)
+
+    wrap = _wrapped
+    if asyncio.iscoroutinefunction(func):
+        wrap = _async_wrapped
+
+    wrap.__name__ = func.__name__
+    wrap.__doc__ = func.__doc__
+
+    return wrap
 
 
 class Client(BaseCohere, CacheMixin):
