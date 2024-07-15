@@ -81,8 +81,7 @@ def experimental_kwarg_decorator(func, deprecated_kwarg):
             key, rest = deprecated_kwarg.split(".", 1)
             if key in kwargs:
                 return check_kwarg(rest, kwargs[key])
-        else:
-            return deprecated_kwarg in kwargs
+        return deprecated_kwarg in kwargs
 
     def _wrapped(*args, **kwargs):
         if check_kwarg(deprecated_kwarg, kwargs):
