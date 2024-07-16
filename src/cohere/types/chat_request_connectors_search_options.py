@@ -19,7 +19,7 @@ class ChatRequestConnectorsSearchOptions(UncheckedBaseModel):
     deterministically, such that repeated requests with the same
     seed and parameters should return the same result. However,
     determinism cannot be totally guaranteed.
-    Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker, Private Deployments
+    Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
     """
 
     def json(self, **kwargs: typing.Any) -> str:
