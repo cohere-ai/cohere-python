@@ -58,7 +58,7 @@ class ModelsClient:
             token="YOUR_TOKEN",
         )
         client.models.get(
-            model="model",
+            model="command-r",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -254,7 +254,7 @@ class AsyncModelsClient:
             token="YOUR_TOKEN",
         )
         await client.models.get(
-            model="model",
+            model="command-r",
         )
         """
         _response = await self._client_wrapper.httpx_client.request(
