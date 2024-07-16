@@ -2,6 +2,6 @@
 
 import typing
 
-from .rerank_request_documents_item_text import RerankRequestDocumentsItemText
+from .rerank_document import RerankDocument
 
-RerankRequestDocumentsItem = typing.Union[str, RerankRequestDocumentsItemText]
+RerankRequestDocumentsItem = typing.Union[str, RerankDocument]
