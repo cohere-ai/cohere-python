@@ -86,16 +86,16 @@ def experimental_kwarg_decorator(func, deprecated_kwarg):
     def _wrapped(*args, **kwargs):
         if check_kwarg(deprecated_kwarg, kwargs):
             logger.warning(
-                f"The `{deprecated_kwarg}` parameter is an experimental feature and may change in future releases. "
-                "Please use with caution."
+                f"The `{deprecated_kwarg}` parameter is an experimental feature and may change in future releases.\n"
+                "To suppress this warning, set `log_warning_experimental_features=False` when initializing the client."
             )
         return func(*args, **kwargs)
 
     async def _async_wrapped(*args, **kwargs):
         if check_kwarg(deprecated_kwarg, kwargs):
             logger.warning(
-                f"The `{deprecated_kwarg}` parameter is an experimental feature and may change in future releases. "
-                "Please use with caution."
+                f"The `{deprecated_kwarg}` parameter is an experimental feature and may change in future releases.\n"
+                "To suppress this warning, set `log_warning_experimental_features=False` when initializing the client."
             )
         return await func(*args, **kwargs)
 
@@ -121,7 +121,8 @@ class Client(BaseCohere, CacheMixin):
         client_name: typing.Optional[str] = None,
         timeout: typing.Optional[float] = None,
         httpx_client: typing.Optional[httpx.Client] = None,
-        thread_pool_executor: ThreadPoolExecutor = ThreadPoolExecutor(64)
+        thread_pool_executor: ThreadPoolExecutor = ThreadPoolExecutor(64),
+        log_warning_experimental_features: bool = True,
     ):
         if api_key is None:
             api_key = _get_api_key_from_environment()
@@ -139,6 +140,9 @@ class Client(BaseCohere, CacheMixin):
         )
 
         validate_args(self, "chat", throw_if_stream_is_true)
+        if log_warning_experimental_features:
+            self.chat = experimental_kwarg_decorator(self.chat, "response_format.schema")
+            self.chat_stream = experimental_kwarg_decorator(self.chat_stream, "response_format.schema")
 
     utils = SyncSdkUtils()
 
@@ -303,7 +307,8 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         client_name: typing.Optional[str] = None,
         timeout: typing.Optional[float] = None,
         httpx_client: typing.Optional[httpx.AsyncClient] = None,
-        thread_pool_executor: ThreadPoolExecutor = ThreadPoolExecutor(64)
+        thread_pool_executor: ThreadPoolExecutor = ThreadPoolExecutor(64),
+        log_warning_experimental_features: bool = True,
     ):
         if api_key is None:
             api_key = _get_api_key_from_environment()
@@ -321,6 +326,9 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         )
 
         validate_args(self, "chat", throw_if_stream_is_true)
+        if log_warning_experimental_features:
+            self.chat = experimental_kwarg_decorator(self.chat, "response_format.schema")
+            self.chat_stream = experimental_kwarg_decorator(self.chat_stream, "response_format.schema")
 
     utils = AsyncSdkUtils()
 
