@@ -141,8 +141,8 @@ class Client(BaseCohere, CacheMixin):
 
         validate_args(self, "chat", throw_if_stream_is_true)
         if log_warning_experimental_features:
-            self.chat = experimental_kwarg_decorator(self.chat, "response_format.schema")
-            self.chat_stream = experimental_kwarg_decorator(self.chat_stream, "response_format.schema")
+            self.chat = experimental_kwarg_decorator(self.chat, "response_format.schema")  # type: ignore
+            self.chat_stream = experimental_kwarg_decorator(self.chat_stream, "response_format.schema")  # type: ignore
 
     utils = SyncSdkUtils()
 
@@ -327,8 +327,8 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
 
         validate_args(self, "chat", throw_if_stream_is_true)
         if log_warning_experimental_features:
-            self.chat = experimental_kwarg_decorator(self.chat, "response_format.schema")
-            self.chat_stream = experimental_kwarg_decorator(self.chat_stream, "response_format.schema")
+            self.chat = experimental_kwarg_decorator(self.chat, "response_format.schema")  # type: ignore
+            self.chat_stream = experimental_kwarg_decorator(self.chat_stream, "response_format.schema")  # type: ignore
 
     utils = AsyncSdkUtils()
 
