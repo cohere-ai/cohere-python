@@ -14,8 +14,6 @@ from .chat_message import ChatMessage
 from .chat_request_citation_quality import ChatRequestCitationQuality
 from .chat_request_connectors_search_options import ChatRequestConnectorsSearchOptions
 from .chat_request_prompt_truncation import ChatRequestPromptTruncation
-from .chat_request_response_format import ChatRequestResponseFormat
-from .chat_request_response_format_type import ChatRequestResponseFormatType
 from .chat_search_queries_generation_event import ChatSearchQueriesGenerationEvent
 from .chat_search_query import ChatSearchQuery
 from .chat_search_result import ChatSearchResult
@@ -27,8 +25,6 @@ from .chat_stream_event import ChatStreamEvent
 from .chat_stream_request_citation_quality import ChatStreamRequestCitationQuality
 from .chat_stream_request_connectors_search_options import ChatStreamRequestConnectorsSearchOptions
 from .chat_stream_request_prompt_truncation import ChatStreamRequestPromptTruncation
-from .chat_stream_request_response_format import ChatStreamRequestResponseFormat
-from .chat_stream_request_response_format_type import ChatStreamRequestResponseFormatType
 from .chat_stream_start_event import ChatStreamStartEvent
 from .chat_text_generation_event import ChatTextGenerationEvent
 from .chat_tool_calls_chunk_event import ChatToolCallsChunkEvent
@@ -89,6 +85,7 @@ from .generate_streamed_response import (
 from .generation import Generation
 from .get_connector_response import GetConnectorResponse
 from .get_model_response import GetModelResponse
+from .json_response_format import JsonResponseFormat
 from .label_metric import LabelMetric
 from .list_connectors_response import ListConnectorsResponse
 from .list_embed_job_response import ListEmbedJobResponse
@@ -107,6 +104,7 @@ from .rerank_response import RerankResponse
 from .rerank_response_results_item import RerankResponseResultsItem
 from .rerank_response_results_item_document import RerankResponseResultsItemDocument
 from .reranker_data_metrics import RerankerDataMetrics
+from .response_format import ResponseFormat, ResponseFormat_JsonObject, ResponseFormat_Text
 from .single_generation import SingleGeneration
 from .single_generation_in_stream import SingleGenerationInStream
 from .single_generation_token_likelihoods_item import SingleGenerationTokenLikelihoodsItem
@@ -125,6 +123,7 @@ from .summarize_request_extractiveness import SummarizeRequestExtractiveness
 from .summarize_request_format import SummarizeRequestFormat
 from .summarize_request_length import SummarizeRequestLength
 from .summarize_response import SummarizeResponse
+from .text_response_format import TextResponseFormat
 from .tokenize_response import TokenizeResponse
 from .too_many_requests_error_body import TooManyRequestsErrorBody
 from .tool import Tool
@@ -151,8 +150,6 @@ __all__ = [
     "ChatRequestCitationQuality",
     "ChatRequestConnectorsSearchOptions",
     "ChatRequestPromptTruncation",
-    "ChatRequestResponseFormat",
-    "ChatRequestResponseFormatType",
     "ChatSearchQueriesGenerationEvent",
     "ChatSearchQuery",
     "ChatSearchResult",
@@ -164,8 +161,6 @@ __all__ = [
     "ChatStreamRequestCitationQuality",
     "ChatStreamRequestConnectorsSearchOptions",
     "ChatStreamRequestPromptTruncation",
-    "ChatStreamRequestResponseFormat",
-    "ChatStreamRequestResponseFormatType",
     "ChatStreamStartEvent",
     "ChatTextGenerationEvent",
     "ChatToolCallsChunkEvent",
@@ -224,6 +219,7 @@ __all__ = [
     "Generation",
     "GetConnectorResponse",
     "GetModelResponse",
+    "JsonResponseFormat",
     "LabelMetric",
     "ListConnectorsResponse",
     "ListEmbedJobResponse",
@@ -246,6 +242,9 @@ __all__ = [
     "RerankResponseResultsItem",
     "RerankResponseResultsItemDocument",
     "RerankerDataMetrics",
+    "ResponseFormat",
+    "ResponseFormat_JsonObject",
+    "ResponseFormat_Text",
     "SingleGeneration",
     "SingleGenerationInStream",
     "SingleGenerationTokenLikelihoodsItem",
@@ -262,6 +261,7 @@ __all__ = [
     "SummarizeRequestFormat",
     "SummarizeRequestLength",
     "SummarizeResponse",
+    "TextResponseFormat",
     "TokenizeResponse",
     "TooManyRequestsErrorBody",
     "Tool",
