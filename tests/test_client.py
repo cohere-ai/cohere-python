@@ -1,9 +1,10 @@
+import json
 import os
 import unittest
 
 import cohere
 from cohere import ChatConnector, ClassifyExample, CreateConnectorServiceAuth, Tool, \
-    ToolParameterDefinitionsValue, ToolResult, Message_Chatbot, Message_User
+    ToolParameterDefinitionsValue, ToolResult, Message_Chatbot, Message_User, ResponseFormat_JsonObject
 
 co = cohere.Client(timeout=10000)
 
@@ -27,7 +28,7 @@ class TestClient(unittest.TestCase):
                 Message_User(
                     message="Who discovered gravity?"),
                 Message_Chatbot(message="The man who is widely credited with discovering "
-                                "gravity is Sir Isaac Newton")
+                                        "gravity is Sir Isaac Newton")
             ],
             message="What year was he born?",
             connectors=[ChatConnector(id="web-search")]
@@ -35,13 +36,34 @@ class TestClient(unittest.TestCase):
 
         print(chat)
 
+    def test_response_format(self) -> None:
+        chat = co.chat(
+            message="imagine a character from the tv show severance",
+            response_format=ResponseFormat_JsonObject(
+                schema={
+                    "type": "object",
+                    "properties": {
+                        "name": {"type": "string"},
+                        "age": {"type": "integer"},
+                        "description": {"type": "string"},
+                    },
+                    "required": ["name", "age", "description"]
+                }
+            )
+        )
+
+        obj = json.loads(chat.text)
+        self.assertIsNotNone(obj.get("name"))
+        self.assertIsNotNone(obj.get("age"))
+        self.assertIsNotNone(obj.get("description"))
+
     def test_chat_stream(self) -> None:
         stream = co.chat_stream(
             chat_history=[
                 Message_User(
                     message="Who discovered gravity?"),
                 Message_Chatbot(message="The man who is widely credited with discovering "
-                                "gravity is Sir Isaac Newton")
+                                        "gravity is Sir Isaac Newton")
             ],
             message="What year was he born?",
             connectors=[ChatConnector(id="web-search")]
@@ -108,7 +130,7 @@ class TestClient(unittest.TestCase):
     def test_embed_batch_types(self) -> None:
         # batch more than 96 texts
         response = co.embed(
-            texts=['hello']*100,
+            texts=['hello'] * 100,
             model='embed-english-v3.0',
             input_type="classification",
             embedding_types=["float", "int8", "uint8", "binary", "ubinary"]
@@ -129,7 +151,7 @@ class TestClient(unittest.TestCase):
     def test_embed_batch_v1(self) -> None:
         # batch more than 96 texts
         response = co.embed(
-            texts=['hello']*100,
+            texts=['hello'] * 100,
             model='embed-english-v3.0',
             input_type="classification",
         )
@@ -361,7 +383,7 @@ class TestClient(unittest.TestCase):
             self.assertEqual(
                 tool_parameters_response.tool_calls[0].name, "sales_database")
             self.assertEqual(tool_parameters_response.tool_calls[0].parameters, {
-                             "day": "2023-09-29"})
+                "day": "2023-09-29"})
         else:
             raise ValueError("Expected tool calls to be present")
 
