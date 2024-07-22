@@ -32,10 +32,8 @@ from .types.chat_connector import ChatConnector
 from .types.chat_document import ChatDocument
 from .types.chat_request_citation_quality import ChatRequestCitationQuality
 from .types.chat_request_prompt_truncation import ChatRequestPromptTruncation
-from .types.chat_request_response_format import ChatRequestResponseFormat
 from .types.chat_stream_request_citation_quality import ChatStreamRequestCitationQuality
 from .types.chat_stream_request_prompt_truncation import ChatStreamRequestPromptTruncation
-from .types.chat_stream_request_response_format import ChatStreamRequestResponseFormat
 from .types.check_api_key_response import CheckApiKeyResponse
 from .types.classify_example import ClassifyExample
 from .types.classify_request_truncate import ClassifyRequestTruncate
@@ -170,7 +168,6 @@ class BaseCohere:
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         force_single_step: typing.Optional[bool] = OMIT,
-        response_format: typing.Optional[ChatStreamRequestResponseFormat] = OMIT,
         request_options: typing.Optional[RequestOptions] = None
     ) -> typing.Iterator[StreamedChatResponse]:
         """
@@ -230,7 +227,7 @@ class BaseCohere:
         connectors : typing.Optional[typing.Sequence[ChatConnector]]
             Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
 
-            When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
+            When specified, the model's reply will be enriched with information found by querying each of the connectors (RAG).
             Compatible Deployments: Cohere Platform
 
 
@@ -373,16 +370,6 @@ class BaseCohere:
         force_single_step : typing.Optional[bool]
             Forces the chat to be single step. Defaults to `false`.
 
-        response_format : typing.Optional[ChatStreamRequestResponseFormat]
-            Configuration for forcing the model output to adhere to the specified format. Supported on [Command R](https://docs.cohere.com/docs/command-r), [Command R+](https://docs.cohere.com/docs/command-r-plus) and newer models.
-
-            The model can be forced into outputting JSON objects (with up to 5 levels of nesting) by setting `{ "type": "json_object" }`.
-
-            A [JSON Schema](https://json-schema.org/) can optionally be provided, to ensure a specific structure.
-
-            **Note**: When using  `{ "type": "json_object" }` your `message` should always explicitly instruct the model to generate a JSON (eg: _"Generate a JSON ..."_) . Otherwise the model may end up getting stuck generating an infinite stream of characters and eventually run out of context length.
-
-
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -396,8 +383,8 @@ class BaseCohere:
         from cohere import (
             ChatConnector,
             ChatStreamRequestConnectorsSearchOptions,
-            ChatStreamRequestResponseFormat,
             Message_Chatbot,
+            ResponseFormat_Text,
             Tool,
             ToolCall,
             ToolParameterDefinitionsValue,
@@ -474,10 +461,7 @@ class BaseCohere:
                 )
             ],
             force_single_step=True,
-            response_format=ChatStreamRequestResponseFormat(
-                type="text",
-                schema={"string": {"key": "value"}},
-            ),
+            response_format=ResponseFormat_Text(),
         )
         for chunk in response:
             yield chunk
@@ -510,7 +494,6 @@ class BaseCohere:
                 "tools": tools,
                 "tool_results": tool_results,
                 "force_single_step": force_single_step,
-                "response_format": response_format,
                 "stream": True,
             },
             request_options=request_options,
@@ -600,7 +583,6 @@ class BaseCohere:
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         force_single_step: typing.Optional[bool] = OMIT,
-        response_format: typing.Optional[ChatRequestResponseFormat] = OMIT,
         request_options: typing.Optional[RequestOptions] = None
     ) -> NonStreamedChatResponse:
         """
@@ -660,7 +642,7 @@ class BaseCohere:
         connectors : typing.Optional[typing.Sequence[ChatConnector]]
             Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
 
-            When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
+            When specified, the model's reply will be enriched with information found by querying each of the connectors (RAG).
             Compatible Deployments: Cohere Platform
 
 
@@ -803,16 +785,6 @@ class BaseCohere:
         force_single_step : typing.Optional[bool]
             Forces the chat to be single step. Defaults to `false`.
 
-        response_format : typing.Optional[ChatRequestResponseFormat]
-            Configuration for forcing the model output to adhere to the specified format. Supported on [Command R](https://docs.cohere.com/docs/command-r), [Command R+](https://docs.cohere.com/docs/command-r-plus) and newer models.
-
-            The model can be forced into outputting JSON objects (with up to 5 levels of nesting) by setting `{ "type": "json_object" }`.
-
-            A [JSON Schema](https://json-schema.org/) can optionally be provided, to ensure a specific structure.
-
-            **Note**: When using  `{ "type": "json_object" }` your `message` should always explicitly instruct the model to generate a JSON (eg: _"Generate a JSON ..."_) . Otherwise the model may end up getting stuck generating an infinite stream of characters and eventually run out of context length.
-
-
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -863,7 +835,6 @@ class BaseCohere:
                 "tools": tools,
                 "tool_results": tool_results,
                 "force_single_step": force_single_step,
-                "response_format": response_format,
                 "stream": False,
             },
             request_options=request_options,
@@ -2300,7 +2271,6 @@ class AsyncBaseCohere:
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         force_single_step: typing.Optional[bool] = OMIT,
-        response_format: typing.Optional[ChatStreamRequestResponseFormat] = OMIT,
         request_options: typing.Optional[RequestOptions] = None
     ) -> typing.AsyncIterator[StreamedChatResponse]:
         """
@@ -2360,7 +2330,7 @@ class AsyncBaseCohere:
         connectors : typing.Optional[typing.Sequence[ChatConnector]]
             Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
 
-            When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
+            When specified, the model's reply will be enriched with information found by querying each of the connectors (RAG).
             Compatible Deployments: Cohere Platform
 
 
@@ -2503,16 +2473,6 @@ class AsyncBaseCohere:
         force_single_step : typing.Optional[bool]
             Forces the chat to be single step. Defaults to `false`.
 
-        response_format : typing.Optional[ChatStreamRequestResponseFormat]
-            Configuration for forcing the model output to adhere to the specified format. Supported on [Command R](https://docs.cohere.com/docs/command-r), [Command R+](https://docs.cohere.com/docs/command-r-plus) and newer models.
-
-            The model can be forced into outputting JSON objects (with up to 5 levels of nesting) by setting `{ "type": "json_object" }`.
-
-            A [JSON Schema](https://json-schema.org/) can optionally be provided, to ensure a specific structure.
-
-            **Note**: When using  `{ "type": "json_object" }` your `message` should always explicitly instruct the model to generate a JSON (eg: _"Generate a JSON ..."_) . Otherwise the model may end up getting stuck generating an infinite stream of characters and eventually run out of context length.
-
-
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -2526,8 +2486,8 @@ class AsyncBaseCohere:
         from cohere import (
             ChatConnector,
             ChatStreamRequestConnectorsSearchOptions,
-            ChatStreamRequestResponseFormat,
             Message_Chatbot,
+            ResponseFormat_Text,
             Tool,
             ToolCall,
             ToolParameterDefinitionsValue,
@@ -2604,10 +2564,7 @@ class AsyncBaseCohere:
                 )
             ],
             force_single_step=True,
-            response_format=ChatStreamRequestResponseFormat(
-                type="text",
-                schema={"string": {"key": "value"}},
-            ),
+            response_format=ResponseFormat_Text(),
         )
         async for chunk in response:
             yield chunk
@@ -2640,7 +2597,6 @@ class AsyncBaseCohere:
                 "tools": tools,
                 "tool_results": tool_results,
                 "force_single_step": force_single_step,
-                "response_format": response_format,
                 "stream": True,
             },
             request_options=request_options,
@@ -2730,7 +2686,6 @@ class AsyncBaseCohere:
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         force_single_step: typing.Optional[bool] = OMIT,
-        response_format: typing.Optional[ChatRequestResponseFormat] = OMIT,
         request_options: typing.Optional[RequestOptions] = None
     ) -> NonStreamedChatResponse:
         """
@@ -2790,7 +2745,7 @@ class AsyncBaseCohere:
         connectors : typing.Optional[typing.Sequence[ChatConnector]]
             Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
 
-            When specified, the model's reply will be enriched with information found by quering each of the connectors (RAG).
+            When specified, the model's reply will be enriched with information found by querying each of the connectors (RAG).
             Compatible Deployments: Cohere Platform
 
 
@@ -2933,16 +2888,6 @@ class AsyncBaseCohere:
         force_single_step : typing.Optional[bool]
             Forces the chat to be single step. Defaults to `false`.
 
-        response_format : typing.Optional[ChatRequestResponseFormat]
-            Configuration for forcing the model output to adhere to the specified format. Supported on [Command R](https://docs.cohere.com/docs/command-r), [Command R+](https://docs.cohere.com/docs/command-r-plus) and newer models.
-
-            The model can be forced into outputting JSON objects (with up to 5 levels of nesting) by setting `{ "type": "json_object" }`.
-
-            A [JSON Schema](https://json-schema.org/) can optionally be provided, to ensure a specific structure.
-
-            **Note**: When using  `{ "type": "json_object" }` your `message` should always explicitly instruct the model to generate a JSON (eg: _"Generate a JSON ..."_) . Otherwise the model may end up getting stuck generating an infinite stream of characters and eventually run out of context length.
-
-
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -2993,7 +2938,6 @@ class AsyncBaseCohere:
                 "tools": tools,
                 "tool_results": tool_results,
                 "force_single_step": force_single_step,
-                "response_format": response_format,
                 "stream": False,
             },
             request_options=request_options,

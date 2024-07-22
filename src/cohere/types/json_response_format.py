@@ -6,28 +6,12 @@ import typing
 from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import deep_union_pydantic_dicts, pydantic_v1
 from ..core.unchecked_base_model import UncheckedBaseModel
-from .chat_stream_request_response_format_type import ChatStreamRequestResponseFormatType
 
 
-class ChatStreamRequestResponseFormat(UncheckedBaseModel):
-    """
-    Configuration for forcing the model output to adhere to the specified format. Supported on [Command R](https://docs.cohere.com/docs/command-r), [Command R+](https://docs.cohere.com/docs/command-r-plus) and newer models.
-
-    The model can be forced into outputting JSON objects (with up to 5 levels of nesting) by setting `{ "type": "json_object" }`.
-
-    A [JSON Schema](https://json-schema.org/) can optionally be provided, to ensure a specific structure.
-
-    **Note**: When using `{ "type": "json_object" }` your `message` should always explicitly instruct the model to generate a JSON (eg: _"Generate a JSON ..."_) . Otherwise the model may end up getting stuck generating an infinite stream of characters and eventually run out of context length.
-    """
-
-    type: ChatStreamRequestResponseFormatType = pydantic_v1.Field()
-    """
-    When set to JSON, the model will return valid JSON. Note that running out of tokens will result in an invalid JSON.
-    """
-
+class JsonResponseFormat(UncheckedBaseModel):
     schema_: typing.Optional[typing.Dict[str, typing.Any]] = pydantic_v1.Field(alias="schema", default=None)
     """
-    [BETA] A JSON schema object that the output will adhere to. There are some restrictions we have on the schema, refer to [our guide]() for more information.
+    [BETA] A JSON schema object that the output will adhere to. There are some restrictions we have on the schema, refer to [our guide](/docs/structured-outputs-json#schema-constraints) for more information.
     Example (required name and age object):
     
     ```json
@@ -40,6 +24,8 @@ class ChatStreamRequestResponseFormat(UncheckedBaseModel):
       "required": ["name", "age"]
     }
     ```
+    
+    **Note**: This field must not be specified when the `type` is set to `"text"`.
     """
 
     def json(self, **kwargs: typing.Any) -> str:
