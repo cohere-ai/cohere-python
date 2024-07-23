@@ -4,6 +4,7 @@ README.md
 src/cohere/client.py
 tests
 .github/workflows/ci.yml
+.github/ISSUE_TEMPLATE
 LICENSE
 .github/workflows/tests.yml
 src/cohere/utils.py
