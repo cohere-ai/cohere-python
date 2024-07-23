@@ -504,58 +504,61 @@ class BaseCohere:
             request_options=request_options,
             omit=OMIT,
         ) as _response:
-            if 200 <= _response.status_code < 300:
-                for _text in _response.iter_lines():
-                    if len(_text) == 0:
-                        continue
-                    yield typing.cast(StreamedChatResponse, construct_type(type_=StreamedChatResponse, object_=json.loads(_text)))  # type: ignore
-                return
-            _response.read()
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 401:
-                raise UnauthorizedError(
-                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 422:
-                raise UnprocessableEntityError(
-                    typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 429:
-                raise TooManyRequestsError(
-                    typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 499:
-                raise ClientClosedRequestError(
-                    typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 500:
-                raise InternalServerError(
-                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 501:
-                raise NotImplementedError(
-                    typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 503:
-                raise ServiceUnavailableError(
-                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 504:
-                raise GatewayTimeoutError(
-                    typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
-                )
             try:
+                if 200 <= _response.status_code < 300:
+                    for _text in _response.iter_lines():
+                        try:
+                            if len(_text) == 0:
+                                continue
+                            yield typing.cast(StreamedChatResponse, construct_type(type_=StreamedChatResponse, object_=json.loads(_text)))  # type: ignore
+                        except:
+                            pass
+                    return
+                _response.read()
+                if _response.status_code == 400:
+                    raise BadRequestError(
+                        typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 401:
+                    raise UnauthorizedError(
+                        typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 403:
+                    raise ForbiddenError(
+                        typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 404:
+                    raise NotFoundError(
+                        typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 422:
+                    raise UnprocessableEntityError(
+                        typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 429:
+                    raise TooManyRequestsError(
+                        typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 499:
+                    raise ClientClosedRequestError(
+                        typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 500:
+                    raise InternalServerError(
+                        typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 501:
+                    raise NotImplementedError(
+                        typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 503:
+                    raise ServiceUnavailableError(
+                        typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 504:
+                    raise GatewayTimeoutError(
+                        typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
+                    )
                 _response_json = _response.json()
             except JSONDecodeError:
                 raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -849,53 +852,53 @@ class BaseCohere:
             request_options=request_options,
             omit=OMIT,
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(NonStreamedChatResponse, construct_type(type_=NonStreamedChatResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 422:
-            raise UnprocessableEntityError(
-                typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 429:
-            raise TooManyRequestsError(
-                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 499:
-            raise ClientClosedRequestError(
-                typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 501:
-            raise NotImplementedError(
-                typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 504:
-            raise GatewayTimeoutError(
-                typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(NonStreamedChatResponse, construct_type(type_=NonStreamedChatResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 499:
+                raise ClientClosedRequestError(
+                    typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 504:
+                raise GatewayTimeoutError(
+                    typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -1079,58 +1082,61 @@ class BaseCohere:
             request_options=request_options,
             omit=OMIT,
         ) as _response:
-            if 200 <= _response.status_code < 300:
-                for _text in _response.iter_lines():
-                    if len(_text) == 0:
-                        continue
-                    yield typing.cast(GenerateStreamedResponse, construct_type(type_=GenerateStreamedResponse, object_=json.loads(_text)))  # type: ignore
-                return
-            _response.read()
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 401:
-                raise UnauthorizedError(
-                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 422:
-                raise UnprocessableEntityError(
-                    typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 429:
-                raise TooManyRequestsError(
-                    typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 499:
-                raise ClientClosedRequestError(
-                    typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 500:
-                raise InternalServerError(
-                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 501:
-                raise NotImplementedError(
-                    typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 503:
-                raise ServiceUnavailableError(
-                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 504:
-                raise GatewayTimeoutError(
-                    typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
-                )
             try:
+                if 200 <= _response.status_code < 300:
+                    for _text in _response.iter_lines():
+                        try:
+                            if len(_text) == 0:
+                                continue
+                            yield typing.cast(GenerateStreamedResponse, construct_type(type_=GenerateStreamedResponse, object_=json.loads(_text)))  # type: ignore
+                        except:
+                            pass
+                    return
+                _response.read()
+                if _response.status_code == 400:
+                    raise BadRequestError(
+                        typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 401:
+                    raise UnauthorizedError(
+                        typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 403:
+                    raise ForbiddenError(
+                        typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 404:
+                    raise NotFoundError(
+                        typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 422:
+                    raise UnprocessableEntityError(
+                        typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 429:
+                    raise TooManyRequestsError(
+                        typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 499:
+                    raise ClientClosedRequestError(
+                        typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 500:
+                    raise InternalServerError(
+                        typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 501:
+                    raise NotImplementedError(
+                        typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 503:
+                    raise ServiceUnavailableError(
+                        typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 504:
+                    raise GatewayTimeoutError(
+                        typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
+                    )
                 _response_json = _response.json()
             except JSONDecodeError:
                 raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -1297,53 +1303,53 @@ class BaseCohere:
             request_options=request_options,
             omit=OMIT,
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(Generation, construct_type(type_=Generation, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 422:
-            raise UnprocessableEntityError(
-                typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 429:
-            raise TooManyRequestsError(
-                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 499:
-            raise ClientClosedRequestError(
-                typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 501:
-            raise NotImplementedError(
-                typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 504:
-            raise GatewayTimeoutError(
-                typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(Generation, construct_type(type_=Generation, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 499:
+                raise ClientClosedRequestError(
+                    typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 504:
+                raise GatewayTimeoutError(
+                    typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -1442,53 +1448,53 @@ class BaseCohere:
             request_options=request_options,
             omit=OMIT,
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(EmbedResponse, construct_type(type_=EmbedResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 422:
-            raise UnprocessableEntityError(
-                typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 429:
-            raise TooManyRequestsError(
-                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 499:
-            raise ClientClosedRequestError(
-                typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 501:
-            raise NotImplementedError(
-                typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 504:
-            raise GatewayTimeoutError(
-                typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(EmbedResponse, construct_type(type_=EmbedResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 499:
+                raise ClientClosedRequestError(
+                    typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 504:
+                raise GatewayTimeoutError(
+                    typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -1580,53 +1586,53 @@ class BaseCohere:
             request_options=request_options,
             omit=OMIT,
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(RerankResponse, construct_type(type_=RerankResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 422:
-            raise UnprocessableEntityError(
-                typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 429:
-            raise TooManyRequestsError(
-                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 499:
-            raise ClientClosedRequestError(
-                typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 501:
-            raise NotImplementedError(
-                typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 504:
-            raise GatewayTimeoutError(
-                typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(RerankResponse, construct_type(type_=RerankResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 499:
+                raise ClientClosedRequestError(
+                    typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 504:
+                raise GatewayTimeoutError(
+                    typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -1738,53 +1744,53 @@ class BaseCohere:
             request_options=request_options,
             omit=OMIT,
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(ClassifyResponse, construct_type(type_=ClassifyResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 422:
-            raise UnprocessableEntityError(
-                typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 429:
-            raise TooManyRequestsError(
-                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 499:
-            raise ClientClosedRequestError(
-                typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 501:
-            raise NotImplementedError(
-                typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 504:
-            raise GatewayTimeoutError(
-                typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(ClassifyResponse, construct_type(type_=ClassifyResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 499:
+                raise ClientClosedRequestError(
+                    typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 504:
+                raise GatewayTimeoutError(
+                    typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -1867,53 +1873,53 @@ class BaseCohere:
             request_options=request_options,
             omit=OMIT,
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(SummarizeResponse, construct_type(type_=SummarizeResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 422:
-            raise UnprocessableEntityError(
-                typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 429:
-            raise TooManyRequestsError(
-                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 499:
-            raise ClientClosedRequestError(
-                typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 501:
-            raise NotImplementedError(
-                typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 504:
-            raise GatewayTimeoutError(
-                typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(SummarizeResponse, construct_type(type_=SummarizeResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 499:
+                raise ClientClosedRequestError(
+                    typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 504:
+                raise GatewayTimeoutError(
+                    typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -1957,53 +1963,53 @@ class BaseCohere:
         _response = self._client_wrapper.httpx_client.request(
             "tokenize", method="POST", json={"text": text, "model": model}, request_options=request_options, omit=OMIT
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(TokenizeResponse, construct_type(type_=TokenizeResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 422:
-            raise UnprocessableEntityError(
-                typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 429:
-            raise TooManyRequestsError(
-                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 499:
-            raise ClientClosedRequestError(
-                typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 501:
-            raise NotImplementedError(
-                typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 504:
-            raise GatewayTimeoutError(
-                typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(TokenizeResponse, construct_type(type_=TokenizeResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 499:
+                raise ClientClosedRequestError(
+                    typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 504:
+                raise GatewayTimeoutError(
+                    typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -2051,53 +2057,53 @@ class BaseCohere:
             request_options=request_options,
             omit=OMIT,
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(DetokenizeResponse, construct_type(type_=DetokenizeResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 422:
-            raise UnprocessableEntityError(
-                typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 429:
-            raise TooManyRequestsError(
-                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 499:
-            raise ClientClosedRequestError(
-                typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 501:
-            raise NotImplementedError(
-                typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 504:
-            raise GatewayTimeoutError(
-                typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(DetokenizeResponse, construct_type(type_=DetokenizeResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 499:
+                raise ClientClosedRequestError(
+                    typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 504:
+                raise GatewayTimeoutError(
+                    typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -2130,53 +2136,53 @@ class BaseCohere:
         _response = self._client_wrapper.httpx_client.request(
             "check-api-key", method="POST", request_options=request_options
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(CheckApiKeyResponse, construct_type(type_=CheckApiKeyResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 422:
-            raise UnprocessableEntityError(
-                typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 429:
-            raise TooManyRequestsError(
-                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 499:
-            raise ClientClosedRequestError(
-                typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 501:
-            raise NotImplementedError(
-                typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 504:
-            raise GatewayTimeoutError(
-                typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(CheckApiKeyResponse, construct_type(type_=CheckApiKeyResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 499:
+                raise ClientClosedRequestError(
+                    typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 504:
+                raise GatewayTimeoutError(
+                    typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -2495,6 +2501,8 @@ class AsyncBaseCohere:
 
         Examples
         --------
+        import asyncio
+
         from cohere import (
             ChatConnector,
             ChatStreamRequestConnectorsSearchOptions,
@@ -2511,75 +2519,81 @@ class AsyncBaseCohere:
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        response = await client.chat_stream(
-            message="string",
-            model="string",
-            preamble="string",
-            chat_history=[
-                Message_Chatbot(
-                    message="string",
-                    tool_calls=[
-                        ToolCall(
+
+
+        async def main() -> None:
+            response = await client.chat_stream(
+                message="string",
+                model="string",
+                preamble="string",
+                chat_history=[
+                    Message_Chatbot(
+                        message="string",
+                        tool_calls=[
+                            ToolCall(
+                                name="string",
+                                parameters={"string": {"key": "value"}},
+                            )
+                        ],
+                    )
+                ],
+                conversation_id="string",
+                prompt_truncation="OFF",
+                connectors=[
+                    ChatConnector(
+                        id="string",
+                        user_access_token="string",
+                        continue_on_failure=True,
+                        options={"string": {"key": "value"}},
+                    )
+                ],
+                search_queries_only=True,
+                documents=[{"string": {"key": "value"}}],
+                citation_quality="fast",
+                temperature=1.1,
+                max_tokens=1,
+                max_input_tokens=1,
+                k=1,
+                p=1.1,
+                seed=1,
+                stop_sequences=["string"],
+                connectors_search_options=ChatStreamRequestConnectorsSearchOptions(
+                    seed=1,
+                ),
+                frequency_penalty=1.1,
+                presence_penalty=1.1,
+                raw_prompting=True,
+                return_prompt=True,
+                tools=[
+                    Tool(
+                        name="string",
+                        description="string",
+                        parameter_definitions={
+                            "string": ToolParameterDefinitionsValue(
+                                description="string",
+                                type="string",
+                                required=True,
+                            )
+                        },
+                    )
+                ],
+                tool_results=[
+                    ToolResult(
+                        call=ToolCall(
                             name="string",
                             parameters={"string": {"key": "value"}},
-                        )
-                    ],
-                )
-            ],
-            conversation_id="string",
-            prompt_truncation="OFF",
-            connectors=[
-                ChatConnector(
-                    id="string",
-                    user_access_token="string",
-                    continue_on_failure=True,
-                    options={"string": {"key": "value"}},
-                )
-            ],
-            search_queries_only=True,
-            documents=[{"string": {"key": "value"}}],
-            citation_quality="fast",
-            temperature=1.1,
-            max_tokens=1,
-            max_input_tokens=1,
-            k=1,
-            p=1.1,
-            seed=1,
-            stop_sequences=["string"],
-            connectors_search_options=ChatStreamRequestConnectorsSearchOptions(
-                seed=1,
-            ),
-            frequency_penalty=1.1,
-            presence_penalty=1.1,
-            raw_prompting=True,
-            return_prompt=True,
-            tools=[
-                Tool(
-                    name="string",
-                    description="string",
-                    parameter_definitions={
-                        "string": ToolParameterDefinitionsValue(
-                            description="string",
-                            type="string",
-                            required=True,
-                        )
-                    },
-                )
-            ],
-            tool_results=[
-                ToolResult(
-                    call=ToolCall(
-                        name="string",
-                        parameters={"string": {"key": "value"}},
-                    ),
-                    outputs=[{"string": {"key": "value"}}],
-                )
-            ],
-            force_single_step=True,
-            response_format=ResponseFormat_Text(),
-        )
-        async for chunk in response:
-            yield chunk
+                        ),
+                        outputs=[{"string": {"key": "value"}}],
+                    )
+                ],
+                force_single_step=True,
+                response_format=ResponseFormat_Text(),
+            )
+            async for chunk in response:
+                yield chunk
+
+
+        asyncio.run(main())
         """
         async with self._client_wrapper.httpx_client.stream(
             "chat",
@@ -2615,58 +2629,61 @@ class AsyncBaseCohere:
             request_options=request_options,
             omit=OMIT,
         ) as _response:
-            if 200 <= _response.status_code < 300:
-                async for _text in _response.aiter_lines():
-                    if len(_text) == 0:
-                        continue
-                    yield typing.cast(StreamedChatResponse, construct_type(type_=StreamedChatResponse, object_=json.loads(_text)))  # type: ignore
-                return
-            await _response.aread()
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 401:
-                raise UnauthorizedError(
-                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 422:
-                raise UnprocessableEntityError(
-                    typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 429:
-                raise TooManyRequestsError(
-                    typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 499:
-                raise ClientClosedRequestError(
-                    typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 500:
-                raise InternalServerError(
-                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 501:
-                raise NotImplementedError(
-                    typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 503:
-                raise ServiceUnavailableError(
-                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 504:
-                raise GatewayTimeoutError(
-                    typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
-                )
             try:
+                if 200 <= _response.status_code < 300:
+                    async for _text in _response.aiter_lines():
+                        try:
+                            if len(_text) == 0:
+                                continue
+                            yield typing.cast(StreamedChatResponse, construct_type(type_=StreamedChatResponse, object_=json.loads(_text)))  # type: ignore
+                        except:
+                            pass
+                    return
+                await _response.aread()
+                if _response.status_code == 400:
+                    raise BadRequestError(
+                        typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 401:
+                    raise UnauthorizedError(
+                        typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 403:
+                    raise ForbiddenError(
+                        typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 404:
+                    raise NotFoundError(
+                        typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 422:
+                    raise UnprocessableEntityError(
+                        typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 429:
+                    raise TooManyRequestsError(
+                        typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 499:
+                    raise ClientClosedRequestError(
+                        typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 500:
+                    raise InternalServerError(
+                        typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 501:
+                    raise NotImplementedError(
+                        typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 503:
+                    raise ServiceUnavailableError(
+                        typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 504:
+                    raise GatewayTimeoutError(
+                        typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
+                    )
                 _response_json = _response.json()
             except JSONDecodeError:
                 raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -2914,17 +2931,25 @@ class AsyncBaseCohere:
 
         Examples
         --------
+        import asyncio
+
         from cohere.client import AsyncClient
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        await client.chat(
-            message="Can you give me a global market overview of solar panels?",
-            prompt_truncation="OFF",
-            temperature=0.3,
-        )
+
+
+        async def main() -> None:
+            await client.chat(
+                message="Can you give me a global market overview of solar panels?",
+                prompt_truncation="OFF",
+                temperature=0.3,
+            )
+
+
+        asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
             "chat",
@@ -2960,53 +2985,53 @@ class AsyncBaseCohere:
             request_options=request_options,
             omit=OMIT,
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(NonStreamedChatResponse, construct_type(type_=NonStreamedChatResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 422:
-            raise UnprocessableEntityError(
-                typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 429:
-            raise TooManyRequestsError(
-                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 499:
-            raise ClientClosedRequestError(
-                typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 501:
-            raise NotImplementedError(
-                typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 504:
-            raise GatewayTimeoutError(
-                typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(NonStreamedChatResponse, construct_type(type_=NonStreamedChatResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 499:
+                raise ClientClosedRequestError(
+                    typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 504:
+                raise GatewayTimeoutError(
+                    typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -3138,32 +3163,40 @@ class AsyncBaseCohere:
 
         Examples
         --------
+        import asyncio
+
         from cohere.client import AsyncClient
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        response = await client.generate_stream(
-            prompt="string",
-            model="string",
-            num_generations=1,
-            max_tokens=1,
-            truncate="NONE",
-            temperature=1.1,
-            seed=1,
-            preset="string",
-            end_sequences=["string"],
-            stop_sequences=["string"],
-            k=1,
-            p=1.1,
-            frequency_penalty=1.1,
-            presence_penalty=1.1,
-            return_likelihoods="GENERATION",
-            raw_prompting=True,
-        )
-        async for chunk in response:
-            yield chunk
+
+
+        async def main() -> None:
+            response = await client.generate_stream(
+                prompt="string",
+                model="string",
+                num_generations=1,
+                max_tokens=1,
+                truncate="NONE",
+                temperature=1.1,
+                seed=1,
+                preset="string",
+                end_sequences=["string"],
+                stop_sequences=["string"],
+                k=1,
+                p=1.1,
+                frequency_penalty=1.1,
+                presence_penalty=1.1,
+                return_likelihoods="GENERATION",
+                raw_prompting=True,
+            )
+            async for chunk in response:
+                yield chunk
+
+
+        asyncio.run(main())
         """
         async with self._client_wrapper.httpx_client.stream(
             "generate",
@@ -3190,58 +3223,61 @@ class AsyncBaseCohere:
             request_options=request_options,
             omit=OMIT,
         ) as _response:
-            if 200 <= _response.status_code < 300:
-                async for _text in _response.aiter_lines():
-                    if len(_text) == 0:
-                        continue
-                    yield typing.cast(GenerateStreamedResponse, construct_type(type_=GenerateStreamedResponse, object_=json.loads(_text)))  # type: ignore
-                return
-            await _response.aread()
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 401:
-                raise UnauthorizedError(
-                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 422:
-                raise UnprocessableEntityError(
-                    typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 429:
-                raise TooManyRequestsError(
-                    typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 499:
-                raise ClientClosedRequestError(
-                    typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 500:
-                raise InternalServerError(
-                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 501:
-                raise NotImplementedError(
-                    typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 503:
-                raise ServiceUnavailableError(
-                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-                )
-            if _response.status_code == 504:
-                raise GatewayTimeoutError(
-                    typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
-                )
             try:
+                if 200 <= _response.status_code < 300:
+                    async for _text in _response.aiter_lines():
+                        try:
+                            if len(_text) == 0:
+                                continue
+                            yield typing.cast(GenerateStreamedResponse, construct_type(type_=GenerateStreamedResponse, object_=json.loads(_text)))  # type: ignore
+                        except:
+                            pass
+                    return
+                await _response.aread()
+                if _response.status_code == 400:
+                    raise BadRequestError(
+                        typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 401:
+                    raise UnauthorizedError(
+                        typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 403:
+                    raise ForbiddenError(
+                        typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 404:
+                    raise NotFoundError(
+                        typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 422:
+                    raise UnprocessableEntityError(
+                        typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 429:
+                    raise TooManyRequestsError(
+                        typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 499:
+                    raise ClientClosedRequestError(
+                        typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 500:
+                    raise InternalServerError(
+                        typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 501:
+                    raise NotImplementedError(
+                        typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 503:
+                    raise ServiceUnavailableError(
+                        typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                    )
+                if _response.status_code == 504:
+                    raise GatewayTimeoutError(
+                        typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
+                    )
                 _response_json = _response.json()
             except JSONDecodeError:
                 raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -3373,15 +3409,23 @@ class AsyncBaseCohere:
 
         Examples
         --------
+        import asyncio
+
         from cohere.client import AsyncClient
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        await client.generate(
-            prompt="Please explain to me how LLMs work",
-        )
+
+
+        async def main() -> None:
+            await client.generate(
+                prompt="Please explain to me how LLMs work",
+            )
+
+
+        asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
             "generate",
@@ -3408,53 +3452,53 @@ class AsyncBaseCohere:
             request_options=request_options,
             omit=OMIT,
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(Generation, construct_type(type_=Generation, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 422:
-            raise UnprocessableEntityError(
-                typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 429:
-            raise TooManyRequestsError(
-                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 499:
-            raise ClientClosedRequestError(
-                typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 501:
-            raise NotImplementedError(
-                typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 504:
-            raise GatewayTimeoutError(
-                typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(Generation, construct_type(type_=Generation, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 499:
+                raise ClientClosedRequestError(
+                    typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 504:
+                raise GatewayTimeoutError(
+                    typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -3526,19 +3570,27 @@ class AsyncBaseCohere:
 
         Examples
         --------
+        import asyncio
+
         from cohere.client import AsyncClient
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        await client.embed(
-            texts=["string"],
-            model="string",
-            input_type="search_document",
-            embedding_types=["float"],
-            truncate="NONE",
-        )
+
+
+        async def main() -> None:
+            await client.embed(
+                texts=["string"],
+                model="string",
+                input_type="search_document",
+                embedding_types=["float"],
+                truncate="NONE",
+            )
+
+
+        asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
             "embed",
@@ -3553,53 +3605,53 @@ class AsyncBaseCohere:
             request_options=request_options,
             omit=OMIT,
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(EmbedResponse, construct_type(type_=EmbedResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 422:
-            raise UnprocessableEntityError(
-                typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 429:
-            raise TooManyRequestsError(
-                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 499:
-            raise ClientClosedRequestError(
-                typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 501:
-            raise NotImplementedError(
-                typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 504:
-            raise GatewayTimeoutError(
-                typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(EmbedResponse, construct_type(type_=EmbedResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 499:
+                raise ClientClosedRequestError(
+                    typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 504:
+                raise GatewayTimeoutError(
+                    typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -3659,22 +3711,30 @@ class AsyncBaseCohere:
 
         Examples
         --------
+        import asyncio
+
         from cohere.client import AsyncClient
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        await client.rerank(
-            model="rerank-english-v3.0",
-            query="What is the capital of the United States?",
-            documents=[
-                "Carson City is the capital city of the American state of Nevada.",
-                "The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.",
-                "Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.",
-                "Capital punishment (the death penalty) has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states.",
-            ],
-        )
+
+
+        async def main() -> None:
+            await client.rerank(
+                model="rerank-english-v3.0",
+                query="What is the capital of the United States?",
+                documents=[
+                    "Carson City is the capital city of the American state of Nevada.",
+                    "The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.",
+                    "Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.",
+                    "Capital punishment (the death penalty) has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states.",
+                ],
+            )
+
+
+        asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
             "rerank",
@@ -3691,53 +3751,53 @@ class AsyncBaseCohere:
             request_options=request_options,
             omit=OMIT,
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(RerankResponse, construct_type(type_=RerankResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 422:
-            raise UnprocessableEntityError(
-                typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 429:
-            raise TooManyRequestsError(
-                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 499:
-            raise ClientClosedRequestError(
-                typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 501:
-            raise NotImplementedError(
-                typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 504:
-            raise GatewayTimeoutError(
-                typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(RerankResponse, construct_type(type_=RerankResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 499:
+                raise ClientClosedRequestError(
+                    typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 504:
+                raise GatewayTimeoutError(
+                    typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -3789,6 +3849,8 @@ class AsyncBaseCohere:
 
         Examples
         --------
+        import asyncio
+
         from cohere import ClassifyExample
         from cohere.client import AsyncClient
 
@@ -3796,51 +3858,57 @@ class AsyncBaseCohere:
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        await client.classify(
-            inputs=["Confirm your email address", "hey i need u to send some $"],
-            examples=[
-                ClassifyExample(
-                    text="Dermatologists don't like her!",
-                    label="Spam",
-                ),
-                ClassifyExample(
-                    text="Hello, open to this?",
-                    label="Spam",
-                ),
-                ClassifyExample(
-                    text="I need help please wire me $1000 right now",
-                    label="Spam",
-                ),
-                ClassifyExample(
-                    text="Nice to know you ;)",
-                    label="Spam",
-                ),
-                ClassifyExample(
-                    text="Please help me?",
-                    label="Spam",
-                ),
-                ClassifyExample(
-                    text="Your parcel will be delivered today",
-                    label="Not spam",
-                ),
-                ClassifyExample(
-                    text="Review changes to our Terms and Conditions",
-                    label="Not spam",
-                ),
-                ClassifyExample(
-                    text="Weekly sync notes",
-                    label="Not spam",
-                ),
-                ClassifyExample(
-                    text="Re: Follow up from today’s meeting",
-                    label="Not spam",
-                ),
-                ClassifyExample(
-                    text="Pre-read for tomorrow",
-                    label="Not spam",
-                ),
-            ],
-        )
+
+
+        async def main() -> None:
+            await client.classify(
+                inputs=["Confirm your email address", "hey i need u to send some $"],
+                examples=[
+                    ClassifyExample(
+                        text="Dermatologists don't like her!",
+                        label="Spam",
+                    ),
+                    ClassifyExample(
+                        text="Hello, open to this?",
+                        label="Spam",
+                    ),
+                    ClassifyExample(
+                        text="I need help please wire me $1000 right now",
+                        label="Spam",
+                    ),
+                    ClassifyExample(
+                        text="Nice to know you ;)",
+                        label="Spam",
+                    ),
+                    ClassifyExample(
+                        text="Please help me?",
+                        label="Spam",
+                    ),
+                    ClassifyExample(
+                        text="Your parcel will be delivered today",
+                        label="Not spam",
+                    ),
+                    ClassifyExample(
+                        text="Review changes to our Terms and Conditions",
+                        label="Not spam",
+                    ),
+                    ClassifyExample(
+                        text="Weekly sync notes",
+                        label="Not spam",
+                    ),
+                    ClassifyExample(
+                        text="Re: Follow up from today’s meeting",
+                        label="Not spam",
+                    ),
+                    ClassifyExample(
+                        text="Pre-read for tomorrow",
+                        label="Not spam",
+                    ),
+                ],
+            )
+
+
+        asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
             "classify",
@@ -3849,53 +3917,53 @@ class AsyncBaseCohere:
             request_options=request_options,
             omit=OMIT,
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(ClassifyResponse, construct_type(type_=ClassifyResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 422:
-            raise UnprocessableEntityError(
-                typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 429:
-            raise TooManyRequestsError(
-                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 499:
-            raise ClientClosedRequestError(
-                typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 501:
-            raise NotImplementedError(
-                typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 504:
-            raise GatewayTimeoutError(
-                typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(ClassifyResponse, construct_type(type_=ClassifyResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 499:
+                raise ClientClosedRequestError(
+                    typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 504:
+                raise GatewayTimeoutError(
+                    typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -3953,15 +4021,23 @@ class AsyncBaseCohere:
 
         Examples
         --------
+        import asyncio
+
         from cohere.client import AsyncClient
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        await client.summarize(
-            text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.\n\nThe meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo\r all variants. Analogues made from dairy alternatives, such as goat\'s or sheep\'s milk, or milk substitutes (e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are lactose intolerant, allergic to dairy protein or vegan.',
-        )
+
+
+        async def main() -> None:
+            await client.summarize(
+                text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.\n\nThe meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo\r all variants. Analogues made from dairy alternatives, such as goat\'s or sheep\'s milk, or milk substitutes (e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are lactose intolerant, allergic to dairy protein or vegan.',
+            )
+
+
+        asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
             "summarize",
@@ -3978,53 +4054,53 @@ class AsyncBaseCohere:
             request_options=request_options,
             omit=OMIT,
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(SummarizeResponse, construct_type(type_=SummarizeResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 422:
-            raise UnprocessableEntityError(
-                typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 429:
-            raise TooManyRequestsError(
-                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 499:
-            raise ClientClosedRequestError(
-                typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 501:
-            raise NotImplementedError(
-                typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 504:
-            raise GatewayTimeoutError(
-                typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(SummarizeResponse, construct_type(type_=SummarizeResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 499:
+                raise ClientClosedRequestError(
+                    typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 504:
+                raise GatewayTimeoutError(
+                    typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -4054,67 +4130,75 @@ class AsyncBaseCohere:
 
         Examples
         --------
+        import asyncio
+
         from cohere.client import AsyncClient
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        await client.tokenize(
-            text="tokenize me! :D",
-            model="command",
-        )
+
+
+        async def main() -> None:
+            await client.tokenize(
+                text="tokenize me! :D",
+                model="command",
+            )
+
+
+        asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
             "tokenize", method="POST", json={"text": text, "model": model}, request_options=request_options, omit=OMIT
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(TokenizeResponse, construct_type(type_=TokenizeResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 422:
-            raise UnprocessableEntityError(
-                typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 429:
-            raise TooManyRequestsError(
-                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 499:
-            raise ClientClosedRequestError(
-                typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 501:
-            raise NotImplementedError(
-                typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 504:
-            raise GatewayTimeoutError(
-                typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(TokenizeResponse, construct_type(type_=TokenizeResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 499:
+                raise ClientClosedRequestError(
+                    typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 504:
+                raise GatewayTimeoutError(
+                    typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -4144,16 +4228,24 @@ class AsyncBaseCohere:
 
         Examples
         --------
+        import asyncio
+
         from cohere.client import AsyncClient
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        await client.detokenize(
-            tokens=[10104, 12221, 1315, 34, 1420, 69],
-            model="command",
-        )
+
+
+        async def main() -> None:
+            await client.detokenize(
+                tokens=[10104, 12221, 1315, 34, 1420, 69],
+                model="command",
+            )
+
+
+        asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
             "detokenize",
@@ -4162,53 +4254,53 @@ class AsyncBaseCohere:
             request_options=request_options,
             omit=OMIT,
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(DetokenizeResponse, construct_type(type_=DetokenizeResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 422:
-            raise UnprocessableEntityError(
-                typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 429:
-            raise TooManyRequestsError(
-                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 499:
-            raise ClientClosedRequestError(
-                typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 501:
-            raise NotImplementedError(
-                typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 504:
-            raise GatewayTimeoutError(
-                typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(DetokenizeResponse, construct_type(type_=DetokenizeResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 499:
+                raise ClientClosedRequestError(
+                    typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 504:
+                raise GatewayTimeoutError(
+                    typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -4230,64 +4322,72 @@ class AsyncBaseCohere:
 
         Examples
         --------
+        import asyncio
+
         from cohere.client import AsyncClient
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        await client.check_api_key()
+
+
+        async def main() -> None:
+            await client.check_api_key()
+
+
+        asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
             "check-api-key", method="POST", request_options=request_options
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(CheckApiKeyResponse, construct_type(type_=CheckApiKeyResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 422:
-            raise UnprocessableEntityError(
-                typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 429:
-            raise TooManyRequestsError(
-                typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 499:
-            raise ClientClosedRequestError(
-                typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 501:
-            raise NotImplementedError(
-                typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 504:
-            raise GatewayTimeoutError(
-                typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(CheckApiKeyResponse, construct_type(type_=CheckApiKeyResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    typing.cast(UnprocessableEntityErrorBody, construct_type(type_=UnprocessableEntityErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(TooManyRequestsErrorBody, construct_type(type_=TooManyRequestsErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 499:
+                raise ClientClosedRequestError(
+                    typing.cast(ClientClosedRequestErrorBody, construct_type(type_=ClientClosedRequestErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    typing.cast(NotImplementedErrorBody, construct_type(type_=NotImplementedErrorBody, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 504:
+                raise GatewayTimeoutError(
+                    typing.cast(GatewayTimeoutErrorBody, construct_type(type_=GatewayTimeoutErrorBody, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
