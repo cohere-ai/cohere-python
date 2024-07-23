@@ -84,33 +84,33 @@ class FinetuningClient:
             params={"page_size": page_size, "page_token": page_token, "order_by": order_by},
             request_options=request_options,
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(ListFinetunedModelsResponse, construct_type(type_=ListFinetunedModelsResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(ListFinetunedModelsResponse, construct_type(type_=ListFinetunedModelsResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -156,33 +156,33 @@ class FinetuningClient:
         _response = self._client_wrapper.httpx_client.request(
             "finetuning/finetuned-models", method="POST", json=request, request_options=request_options, omit=OMIT
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(CreateFinetunedModelResponse, construct_type(type_=CreateFinetunedModelResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(CreateFinetunedModelResponse, construct_type(type_=CreateFinetunedModelResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -220,33 +220,33 @@ class FinetuningClient:
         _response = self._client_wrapper.httpx_client.request(
             f"finetuning/finetuned-models/{jsonable_encoder(id)}", method="GET", request_options=request_options
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(GetFinetunedModelResponse, construct_type(type_=GetFinetunedModelResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(GetFinetunedModelResponse, construct_type(type_=GetFinetunedModelResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -284,33 +284,33 @@ class FinetuningClient:
         _response = self._client_wrapper.httpx_client.request(
             f"finetuning/finetuned-models/{jsonable_encoder(id)}", method="DELETE", request_options=request_options
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(DeleteFinetunedModelResponse, construct_type(type_=DeleteFinetunedModelResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(DeleteFinetunedModelResponse, construct_type(type_=DeleteFinetunedModelResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -409,33 +409,33 @@ class FinetuningClient:
             request_options=request_options,
             omit=OMIT,
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(UpdateFinetunedModelResponse, construct_type(type_=UpdateFinetunedModelResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(UpdateFinetunedModelResponse, construct_type(type_=UpdateFinetunedModelResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -497,33 +497,33 @@ class FinetuningClient:
             params={"page_size": page_size, "page_token": page_token, "order_by": order_by},
             request_options=request_options,
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(ListEventsResponse, construct_type(type_=ListEventsResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(ListEventsResponse, construct_type(type_=ListEventsResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -575,33 +575,33 @@ class FinetuningClient:
             params={"page_size": page_size, "page_token": page_token},
             request_options=request_options,
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(ListTrainingStepMetricsResponse, construct_type(type_=ListTrainingStepMetricsResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(ListTrainingStepMetricsResponse, construct_type(type_=ListTrainingStepMetricsResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -648,13 +648,21 @@ class AsyncFinetuningClient:
 
         Examples
         --------
+        import asyncio
+
         from cohere.client import AsyncClient
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        await client.finetuning.list_finetuned_models()
+
+
+        async def main() -> None:
+            await client.finetuning.list_finetuned_models()
+
+
+        asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
             "finetuning/finetuned-models",
@@ -662,33 +670,33 @@ class AsyncFinetuningClient:
             params={"page_size": page_size, "page_token": page_token, "order_by": order_by},
             request_options=request_options,
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(ListFinetunedModelsResponse, construct_type(type_=ListFinetunedModelsResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(ListFinetunedModelsResponse, construct_type(type_=ListFinetunedModelsResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -712,6 +720,8 @@ class AsyncFinetuningClient:
 
         Examples
         --------
+        import asyncio
+
         from cohere.client import AsyncClient
         from cohere.finetuning import BaseModel, FinetunedModel, Settings
 
@@ -719,48 +729,54 @@ class AsyncFinetuningClient:
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        await client.finetuning.create_finetuned_model(
-            request=FinetunedModel(
-                name="api-test",
-                settings=Settings(
-                    base_model=BaseModel(
-                        base_type="BASE_TYPE_GENERATIVE",
+
+
+        async def main() -> None:
+            await client.finetuning.create_finetuned_model(
+                request=FinetunedModel(
+                    name="api-test",
+                    settings=Settings(
+                        base_model=BaseModel(
+                            base_type="BASE_TYPE_GENERATIVE",
+                        ),
+                        dataset_id="my-dataset-id",
                     ),
-                    dataset_id="my-dataset-id",
                 ),
-            ),
-        )
+            )
+
+
+        asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
             "finetuning/finetuned-models", method="POST", json=request, request_options=request_options, omit=OMIT
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(CreateFinetunedModelResponse, construct_type(type_=CreateFinetunedModelResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(CreateFinetunedModelResponse, construct_type(type_=CreateFinetunedModelResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -785,46 +801,54 @@ class AsyncFinetuningClient:
 
         Examples
         --------
+        import asyncio
+
         from cohere.client import AsyncClient
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        await client.finetuning.get_finetuned_model(
-            id="id",
-        )
+
+
+        async def main() -> None:
+            await client.finetuning.get_finetuned_model(
+                id="id",
+            )
+
+
+        asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"finetuning/finetuned-models/{jsonable_encoder(id)}", method="GET", request_options=request_options
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(GetFinetunedModelResponse, construct_type(type_=GetFinetunedModelResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(GetFinetunedModelResponse, construct_type(type_=GetFinetunedModelResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -849,46 +873,54 @@ class AsyncFinetuningClient:
 
         Examples
         --------
+        import asyncio
+
         from cohere.client import AsyncClient
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        await client.finetuning.delete_finetuned_model(
-            id="id",
-        )
+
+
+        async def main() -> None:
+            await client.finetuning.delete_finetuned_model(
+                id="id",
+            )
+
+
+        asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"finetuning/finetuned-models/{jsonable_encoder(id)}", method="DELETE", request_options=request_options
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(DeleteFinetunedModelResponse, construct_type(type_=DeleteFinetunedModelResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(DeleteFinetunedModelResponse, construct_type(type_=DeleteFinetunedModelResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -952,6 +984,8 @@ class AsyncFinetuningClient:
 
         Examples
         --------
+        import asyncio
+
         from cohere.client import AsyncClient
         from cohere.finetuning import BaseModel, Settings
 
@@ -959,16 +993,22 @@ class AsyncFinetuningClient:
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        await client.finetuning.update_finetuned_model(
-            id="id",
-            name="name",
-            settings=Settings(
-                base_model=BaseModel(
-                    base_type="BASE_TYPE_UNSPECIFIED",
+
+
+        async def main() -> None:
+            await client.finetuning.update_finetuned_model(
+                id="id",
+                name="name",
+                settings=Settings(
+                    base_model=BaseModel(
+                        base_type="BASE_TYPE_UNSPECIFIED",
+                    ),
+                    dataset_id="dataset_id",
                 ),
-                dataset_id="dataset_id",
-            ),
-        )
+            )
+
+
+        asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"finetuning/finetuned-models/{jsonable_encoder(id)}",
@@ -987,33 +1027,33 @@ class AsyncFinetuningClient:
             request_options=request_options,
             omit=OMIT,
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(UpdateFinetunedModelResponse, construct_type(type_=UpdateFinetunedModelResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(UpdateFinetunedModelResponse, construct_type(type_=UpdateFinetunedModelResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -1059,15 +1099,23 @@ class AsyncFinetuningClient:
 
         Examples
         --------
+        import asyncio
+
         from cohere.client import AsyncClient
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        await client.finetuning.list_events(
-            finetuned_model_id="finetuned_model_id",
-        )
+
+
+        async def main() -> None:
+            await client.finetuning.list_events(
+                finetuned_model_id="finetuned_model_id",
+            )
+
+
+        asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/events",
@@ -1075,33 +1123,33 @@ class AsyncFinetuningClient:
             params={"page_size": page_size, "page_token": page_token, "order_by": order_by},
             request_options=request_options,
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(ListEventsResponse, construct_type(type_=ListEventsResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(ListEventsResponse, construct_type(type_=ListEventsResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -1137,15 +1185,23 @@ class AsyncFinetuningClient:
 
         Examples
         --------
+        import asyncio
+
         from cohere.client import AsyncClient
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        await client.finetuning.list_training_step_metrics(
-            finetuned_model_id="finetuned_model_id",
-        )
+
+
+        async def main() -> None:
+            await client.finetuning.list_training_step_metrics(
+                finetuned_model_id="finetuned_model_id",
+            )
+
+
+        asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/training-step-metrics",
@@ -1153,33 +1209,33 @@ class AsyncFinetuningClient:
             params={"page_size": page_size, "page_token": page_token},
             request_options=request_options,
         )
-        if 200 <= _response.status_code < 300:
-            return typing.cast(ListTrainingStepMetricsResponse, construct_type(type_=ListTrainingStepMetricsResponse, object_=_response.json()))  # type: ignore
-        if _response.status_code == 400:
-            raise BadRequestError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 401:
-            raise UnauthorizedError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 403:
-            raise ForbiddenError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 404:
-            raise NotFoundError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 500:
-            raise InternalServerError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
-        if _response.status_code == 503:
-            raise ServiceUnavailableError(
-                typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
-            )
         try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(ListTrainingStepMetricsResponse, construct_type(type_=ListTrainingStepMetricsResponse, object_=_response.json()))  # type: ignore
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    typing.cast(typing.Any, construct_type(type_=typing.Any, object_=_response.json()))  # type: ignore
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
