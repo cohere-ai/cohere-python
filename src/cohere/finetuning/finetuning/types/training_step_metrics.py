@@ -3,9 +3,8 @@
 import datetime as dt
 import typing
 
-import pydantic
-
-from ....core.pydantic_utilities import IS_PYDANTIC_V2
+from ....core.datetime_utils import serialize_datetime
+from ....core.pydantic_utilities import deep_union_pydantic_dicts, pydantic_v1
 from ....core.unchecked_base_model import UncheckedBaseModel
 
 
@@ -14,26 +13,35 @@ class TrainingStepMetrics(UncheckedBaseModel):
     The evaluation metrics at a given step of the training of a fine-tuned model.
     """
 
-    created_at: typing.Optional[dt.datetime] = pydantic.Field(default=None)
+    created_at: typing.Optional[dt.datetime] = pydantic_v1.Field(default=None)
     """
     Creation timestamp.
     """
 
-    step_number: typing.Optional[int] = pydantic.Field(default=None)
+    step_number: typing.Optional[int] = pydantic_v1.Field(default=None)
     """
     Step number.
     """
 
-    metrics: typing.Optional[typing.Dict[str, float]] = pydantic.Field(default=None)
+    metrics: typing.Optional[typing.Dict[str, float]] = pydantic_v1.Field(default=None)
     """
     Map of names and values for each evaluation metrics.
     """
 
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
+    def json(self, **kwargs: typing.Any) -> str:
+        kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
+        return super().json(**kwargs_with_defaults)
 
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
+    def dict(self, **kwargs: typing.Any) -> typing.Dict[str, typing.Any]:
+        kwargs_with_defaults_exclude_unset: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
+        kwargs_with_defaults_exclude_none: typing.Any = {"by_alias": True, "exclude_none": True, **kwargs}
+
+        return deep_union_pydantic_dicts(
+            super().dict(**kwargs_with_defaults_exclude_unset), super().dict(**kwargs_with_defaults_exclude_none)
+        )
+
+    class Config:
+        frozen = True
+        smart_union = True
+        extra = pydantic_v1.Extra.allow
+        json_encoders = {dt.datetime: serialize_datetime}

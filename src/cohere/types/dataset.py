@@ -3,9 +3,8 @@
 import datetime as dt
 import typing
 
-import pydantic
-
-from ..core.pydantic_utilities import IS_PYDANTIC_V2
+from ..core.datetime_utils import serialize_datetime
+from ..core.pydantic_utilities import deep_union_pydantic_dicts, pydantic_v1
 from ..core.unchecked_base_model import UncheckedBaseModel
 from .dataset_part import DatasetPart
 from .dataset_type import DatasetType
@@ -13,55 +12,66 @@ from .dataset_validation_status import DatasetValidationStatus
 
 
 class Dataset(UncheckedBaseModel):
-    id: str = pydantic.Field()
+    id: str = pydantic_v1.Field()
     """
     The dataset ID
     """
 
-    name: str = pydantic.Field()
+    name: str = pydantic_v1.Field()
     """
     The name of the dataset
     """
 
-    created_at: dt.datetime = pydantic.Field()
+    created_at: dt.datetime = pydantic_v1.Field()
     """
     The creation date
     """
 
-    updated_at: dt.datetime = pydantic.Field()
+    updated_at: dt.datetime = pydantic_v1.Field()
     """
     The last update date
     """
 
     dataset_type: DatasetType
     validation_status: DatasetValidationStatus
-    validation_error: typing.Optional[str] = pydantic.Field(default=None)
+    validation_error: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     Errors found during validation
     """
 
-    schema_: typing.Optional[str] = pydantic.Field(alias="schema", default=None)
+    schema_: typing.Optional[str] = pydantic_v1.Field(alias="schema", default=None)
     """
     the avro schema of the dataset
     """
 
     required_fields: typing.Optional[typing.List[str]] = None
     preserve_fields: typing.Optional[typing.List[str]] = None
-    dataset_parts: typing.Optional[typing.List[DatasetPart]] = pydantic.Field(default=None)
+    dataset_parts: typing.Optional[typing.List[DatasetPart]] = pydantic_v1.Field(default=None)
     """
     the underlying files that make up the dataset
     """
 
-    validation_warnings: typing.Optional[typing.List[str]] = pydantic.Field(default=None)
+    validation_warnings: typing.Optional[typing.List[str]] = pydantic_v1.Field(default=None)
     """
     warnings found during validation
     """
 
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
+    def json(self, **kwargs: typing.Any) -> str:
+        kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
+        return super().json(**kwargs_with_defaults)
 
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
+    def dict(self, **kwargs: typing.Any) -> typing.Dict[str, typing.Any]:
+        kwargs_with_defaults_exclude_unset: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
+        kwargs_with_defaults_exclude_none: typing.Any = {"by_alias": True, "exclude_none": True, **kwargs}
+
+        return deep_union_pydantic_dicts(
+            super().dict(**kwargs_with_defaults_exclude_unset), super().dict(**kwargs_with_defaults_exclude_none)
+        )
+
+    class Config:
+        frozen = True
+        smart_union = True
+        allow_population_by_field_name = True
+        populate_by_name = True
+        extra = pydantic_v1.Extra.allow
+        json_encoders = {dt.datetime: serialize_datetime}

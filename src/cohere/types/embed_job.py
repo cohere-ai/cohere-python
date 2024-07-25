@@ -3,9 +3,8 @@
 import datetime as dt
 import typing
 
-import pydantic
-
-from ..core.pydantic_utilities import IS_PYDANTIC_V2
+from ..core.datetime_utils import serialize_datetime
+from ..core.pydantic_utilities import deep_union_pydantic_dicts, pydantic_v1
 from ..core.unchecked_base_model import UncheckedBaseModel
 from .api_meta import ApiMeta
 from .embed_job_status import EmbedJobStatus
@@ -13,53 +12,62 @@ from .embed_job_truncate import EmbedJobTruncate
 
 
 class EmbedJob(UncheckedBaseModel):
-    job_id: str = pydantic.Field()
+    job_id: str = pydantic_v1.Field()
     """
     ID of the embed job
     """
 
-    name: typing.Optional[str] = pydantic.Field(default=None)
+    name: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     The name of the embed job
     """
 
-    status: EmbedJobStatus = pydantic.Field()
+    status: EmbedJobStatus = pydantic_v1.Field()
     """
     The status of the embed job
     """
 
-    created_at: dt.datetime = pydantic.Field()
+    created_at: dt.datetime = pydantic_v1.Field()
     """
     The creation date of the embed job
     """
 
-    input_dataset_id: str = pydantic.Field()
+    input_dataset_id: str = pydantic_v1.Field()
     """
     ID of the input dataset
     """
 
-    output_dataset_id: typing.Optional[str] = pydantic.Field(default=None)
+    output_dataset_id: typing.Optional[str] = pydantic_v1.Field(default=None)
     """
     ID of the resulting output dataset
     """
 
-    model: str = pydantic.Field()
+    model: str = pydantic_v1.Field()
     """
     ID of the model used to embed
     """
 
-    truncate: EmbedJobTruncate = pydantic.Field()
+    truncate: EmbedJobTruncate = pydantic_v1.Field()
     """
     The truncation option used
     """
 
     meta: typing.Optional[ApiMeta] = None
 
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
+    def json(self, **kwargs: typing.Any) -> str:
+        kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
+        return super().json(**kwargs_with_defaults)
 
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
+    def dict(self, **kwargs: typing.Any) -> typing.Dict[str, typing.Any]:
+        kwargs_with_defaults_exclude_unset: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}
+        kwargs_with_defaults_exclude_none: typing.Any = {"by_alias": True, "exclude_none": True, **kwargs}
+
+        return deep_union_pydantic_dicts(
+            super().dict(**kwargs_with_defaults_exclude_unset), super().dict(**kwargs_with_defaults_exclude_none)
+        )
+
+    class Config:
+        frozen = True
+        smart_union = True
+        extra = pydantic_v1.Extra.allow
+        json_encoders = {dt.datetime: serialize_datetime}
