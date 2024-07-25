@@ -38,17 +38,17 @@ trio = ["trio (>=0.23)"]
 
 [[package]]
 name = "boto3"
-version = "1.34.145"
+version = "1.34.148"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "boto3-1.34.145-py3-none-any.whl", hash = "sha256:69d5afb7a017d07dd6bdfb680d2912d5d369b3fafa0a45161207d9f393b14d7e"},
-    {file = "boto3-1.34.145.tar.gz", hash = "sha256:ac770fb53dde1743aec56bd8e56b7ee2e2f5ad42a37825968ec4ff8428822640"},
+    {file = "boto3-1.34.148-py3-none-any.whl", hash = "sha256:d63d36e5a34533ba69188d56f96da132730d5e9932c4e11c02d79319cd1afcec"},
+    {file = "boto3-1.34.148.tar.gz", hash = "sha256:2058397f0a92c301e3116e9e65fbbc70ea49270c250882d65043d19b7c6e2d17"},
 ]
 
 [package.dependencies]
-botocore = ">=1.34.145,<1.35.0"
+botocore = ">=1.34.148,<1.35.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.10.0,<0.11.0"
 
@@ -57,13 +57,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.34.145"
+version = "1.34.148"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "botocore-1.34.145-py3-none-any.whl", hash = "sha256:2e72e262de02adcb0264ac2bac159a28f55dbba8d9e52aa0308773a42950dff5"},
-    {file = "botocore-1.34.145.tar.gz", hash = "sha256:edf0fb4c02186ae29b76263ac5fda18b0a085d334a310551c9984407cf1079e6"},
+    {file = "botocore-1.34.148-py3-none-any.whl", hash = "sha256:9e09428b0bc4d0c1cf5e368dd6ab18eabf6047304060f8b5dd8391677cfe00e6"},
+    {file = "botocore-1.34.148.tar.gz", hash = "sha256:258dd95570b43db9fa21cce5426eabaea5867e3a61224157650448b5019d1bbd"},
 ]
 
 [package.dependencies]
@@ -382,13 +382,13 @@ files = [
 
 [[package]]
 name = "huggingface-hub"
-version = "0.24.0"
+version = "0.24.2"
 description = "Client library to download and publish models, datasets and other repos on the huggingface.co hub"
 optional = false
 python-versions = ">=3.8.0"
 files = [
-    {file = "huggingface_hub-0.24.0-py3-none-any.whl", hash = "sha256:7ad92edefb93d8145c061f6df8d99df2ff85f8379ba5fac8a95aca0642afa5d7"},
-    {file = "huggingface_hub-0.24.0.tar.gz", hash = "sha256:6c7092736b577d89d57b3cdfea026f1b0dc2234ae783fa0d59caf1bf7d52dfa7"},
+    {file = "huggingface_hub-0.24.2-py3-none-any.whl", hash = "sha256:abdf3244d3a274c4b1fbc5c4a1ef700032b3f60ba93cc63e4f036fd082aa2805"},
+    {file = "huggingface_hub-0.24.2.tar.gz", hash = "sha256:92be892405d2f6a7a8479016f9a5662354f202b2c6c1ff499609621aed1fae10"},
 ]
 
 [package.dependencies]
@@ -1086,4 +1086,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "9b7a0f3e6027d6e2d5e1ec9c45a405f776b03c9c7935cb30b7fe8aec23683ce2"
+content-hash = "318623e66274694b6aa5af32280d5f81b82e6df59bd4cebeb8a8c840ad235b4d"
