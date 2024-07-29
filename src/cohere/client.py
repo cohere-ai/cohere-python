@@ -8,15 +8,9 @@ import httpx
 from tokenizers import Tokenizer  # type: ignore
 
 from .base_client import BaseCohere, AsyncBaseCohere
-from .config import embed_batch_size
-from .core import RequestOptions
 from .environment import ClientEnvironment
-from .manually_maintained.cache import CacheMixin
-from .overrides import run_overrides
-from .utils import wait, async_wait, merge_embed_responses, SyncSdkUtils, AsyncSdkUtils
 
 logger = logging.getLogger(__name__)
-run_overrides()
 
 # Use NoReturn as Never type for compatibility
 Never = typing.NoReturn
@@ -115,7 +109,7 @@ def experimental_kwarg_decorator(func, deprecated_kwarg):
     return wrap
 
 
-class Client(BaseCohere, CacheMixin):
+class Client(BaseCohere):
     _executor: ThreadPoolExecutor
 
     def __init__(
@@ -148,7 +142,6 @@ class Client(BaseCohere, CacheMixin):
             self.chat = experimental_kwarg_decorator(self.chat, "response_format.schema")  # type: ignore
             self.chat_stream = experimental_kwarg_decorator(self.chat_stream, "response_format.schema")  # type: ignore
 
-    utils = SyncSdkUtils()
 
     # support context manager until Fern upstreams
     # https://linear.app/buildwithfern/issue/FER-1242/expose-a-context-manager-interface-or-the-http-client-easily
@@ -157,8 +150,6 @@ class Client(BaseCohere, CacheMixin):
 
     def __exit__(self, exc_type, exc_value, traceback):
         self._client_wrapper.httpx_client.httpx_client.close()
-
-    wait = wait
 
     """
     The following methods have been moved or deprecated in cohere==5.0.0. Please update your usage.
@@ -206,7 +197,7 @@ class Client(BaseCohere, CacheMixin):
     oauth_authorize_connector: Never = moved_function("oauth_authorize_connector", ".connectors.o_auth_authorize")
 
 
-class AsyncClient(AsyncBaseCohere, CacheMixin):
+class AsyncClient(AsyncBaseCohere):
     _executor: ThreadPoolExecutor
 
     def __init__(
@@ -239,8 +230,6 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
             self.chat = experimental_kwarg_decorator(self.chat, "response_format.schema")  # type: ignore
             self.chat_stream = experimental_kwarg_decorator(self.chat_stream, "response_format.schema")  # type: ignore
 
-    utils = AsyncSdkUtils()
-
     # support context manager until Fern upstreams
     # https://linear.app/buildwithfern/issue/FER-1242/expose-a-context-manager-interface-or-the-http-client-easily
     async def __aenter__(self):
@@ -248,8 +237,6 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
 
     async def __aexit__(self, exc_type, exc_value, traceback):
         await self._client_wrapper.httpx_client.httpx_client.aclose()
-
-    wait = async_wait
 
 
 def _get_api_key_from_environment() -> typing.Optional[str]:
