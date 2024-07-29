@@ -92,7 +92,7 @@ jobs:
   #         COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
 
   publish:
-    needs: [compile, test]
+    needs: [compile]
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     runs-on: ubuntu-20.04
     steps:
