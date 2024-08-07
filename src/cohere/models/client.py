@@ -62,7 +62,7 @@ class ModelsClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"models/{jsonable_encoder(model)}", method="GET", request_options=request_options
+            f"v1/models/{jsonable_encoder(model)}", method="GET", request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -162,7 +162,7 @@ class ModelsClient:
         client.models.list()
         """
         _response = self._client_wrapper.httpx_client.request(
-            "models",
+            "v1/models",
             method="GET",
             params={
                 "page_size": page_size,
@@ -266,7 +266,7 @@ class AsyncModelsClient:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"models/{jsonable_encoder(model)}", method="GET", request_options=request_options
+            f"v1/models/{jsonable_encoder(model)}", method="GET", request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -374,7 +374,7 @@ class AsyncModelsClient:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "models",
+            "v1/models",
             method="GET",
             params={
                 "page_size": page_size,
