@@ -79,7 +79,7 @@ class FinetuningClient:
         client.finetuning.list_finetuned_models()
         """
         _response = self._client_wrapper.httpx_client.request(
-            "finetuning/finetuned-models",
+            "v1/finetuning/finetuned-models",
             method="GET",
             params={"page_size": page_size, "page_token": page_token, "order_by": order_by},
             request_options=request_options,
@@ -154,7 +154,7 @@ class FinetuningClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "finetuning/finetuned-models", method="POST", json=request, request_options=request_options, omit=OMIT
+            "v1/finetuning/finetuned-models", method="POST", json=request, request_options=request_options, omit=OMIT
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -218,7 +218,7 @@ class FinetuningClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"finetuning/finetuned-models/{jsonable_encoder(id)}", method="GET", request_options=request_options
+            f"v1/finetuning/finetuned-models/{jsonable_encoder(id)}", method="GET", request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -282,7 +282,7 @@ class FinetuningClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"finetuning/finetuned-models/{jsonable_encoder(id)}", method="DELETE", request_options=request_options
+            f"v1/finetuning/finetuned-models/{jsonable_encoder(id)}", method="DELETE", request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -393,7 +393,7 @@ class FinetuningClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"finetuning/finetuned-models/{jsonable_encoder(id)}",
+            f"v1/finetuning/finetuned-models/{jsonable_encoder(id)}",
             method="PATCH",
             json={
                 "name": name,
@@ -492,7 +492,7 @@ class FinetuningClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/events",
+            f"v1/finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/events",
             method="GET",
             params={"page_size": page_size, "page_token": page_token, "order_by": order_by},
             request_options=request_options,
@@ -570,7 +570,7 @@ class FinetuningClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/training-step-metrics",
+            f"v1/finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/training-step-metrics",
             method="GET",
             params={"page_size": page_size, "page_token": page_token},
             request_options=request_options,
@@ -665,7 +665,7 @@ class AsyncFinetuningClient:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "finetuning/finetuned-models",
+            "v1/finetuning/finetuned-models",
             method="GET",
             params={"page_size": page_size, "page_token": page_token, "order_by": order_by},
             request_options=request_options,
@@ -748,7 +748,7 @@ class AsyncFinetuningClient:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "finetuning/finetuned-models", method="POST", json=request, request_options=request_options, omit=OMIT
+            "v1/finetuning/finetuned-models", method="POST", json=request, request_options=request_options, omit=OMIT
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -820,7 +820,7 @@ class AsyncFinetuningClient:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"finetuning/finetuned-models/{jsonable_encoder(id)}", method="GET", request_options=request_options
+            f"v1/finetuning/finetuned-models/{jsonable_encoder(id)}", method="GET", request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -892,7 +892,7 @@ class AsyncFinetuningClient:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"finetuning/finetuned-models/{jsonable_encoder(id)}", method="DELETE", request_options=request_options
+            f"v1/finetuning/finetuned-models/{jsonable_encoder(id)}", method="DELETE", request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -1011,7 +1011,7 @@ class AsyncFinetuningClient:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"finetuning/finetuned-models/{jsonable_encoder(id)}",
+            f"v1/finetuning/finetuned-models/{jsonable_encoder(id)}",
             method="PATCH",
             json={
                 "name": name,
@@ -1118,7 +1118,7 @@ class AsyncFinetuningClient:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/events",
+            f"v1/finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/events",
             method="GET",
             params={"page_size": page_size, "page_token": page_token, "order_by": order_by},
             request_options=request_options,
@@ -1204,7 +1204,7 @@ class AsyncFinetuningClient:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/training-step-metrics",
+            f"v1/finetuning/finetuned-models/{jsonable_encoder(finetuned_model_id)}/training-step-metrics",
             method="GET",
             params={"page_size": page_size, "page_token": page_token},
             request_options=request_options,
