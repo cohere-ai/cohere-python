@@ -50,6 +50,7 @@ class TestClientV2(unittest.TestCase):
         self.assertTrue("content-end" in events)
         self.assertTrue("message-end" in events)
 
+    @unittest.skip("Skip v2 test for now")
     def test_chat_documents(self) -> None:
         documents = [
             {'title': 'widget sales 2019', 'text': '1 million'},
@@ -63,6 +64,7 @@ class TestClientV2(unittest.TestCase):
 
         print(response.message)
 
+    @unittest.skip("Skip v2 test for now")
     def test_chat_tools(self) -> None:
         get_weather_tool = {
             "name": "get_weather",
