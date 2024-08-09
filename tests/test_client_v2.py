@@ -52,9 +52,9 @@ class TestClientV2(unittest.TestCase):
 
     def test_chat_documents(self) -> None:
         documents = [
-        {'title': 'widget sales 2019', 'text': '1 million'},
-        {'title': 'widget sales 2020', 'text': '2 million'},
-        {'title': 'widget sales 2021', 'text': '4 million'}
+            'widget sales 2019: 1 million',
+            'widget sales 2020: 2 million',
+            'widget sales 2021: 4 million'
         ]
         content: typing.List[TextContent | DocumentContent] = [cohere.v2.TextContent(text="how many widges were sold in 2020?")]
         for doc in documents:
@@ -80,7 +80,7 @@ class TestClientV2(unittest.TestCase):
         }
         tools = [cohere.v2.Tool2(type='function', function=get_weather_tool)]
         messages: typing.List[UserMessage | AssistantMessage | None | ToolMessage2] = [cohere.v2.UserMessage(content='what is the weather in Toronto?')]
-        res = co.chat(tools=tools, messages=messages)
+        res = co.chat(model="command-r-plus", tools=tools, messages=messages)
 
         # call the get_weather tool
         tool_result = {"temperature": "30C"}
