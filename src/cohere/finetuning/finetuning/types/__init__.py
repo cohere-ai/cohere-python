@@ -16,6 +16,7 @@ from .status import Status
 from .strategy import Strategy
 from .training_step_metrics import TrainingStepMetrics
 from .update_finetuned_model_response import UpdateFinetunedModelResponse
+from .wandb_config import WandbConfig
 
 __all__ = [
     "BaseModel",
@@ -34,4 +35,5 @@ __all__ = [
     "Strategy",
     "TrainingStepMetrics",
     "UpdateFinetunedModelResponse",
+    "WandbConfig",
 ]

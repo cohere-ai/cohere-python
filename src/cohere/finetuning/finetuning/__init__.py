@@ -17,6 +17,7 @@ from .types import (
     Strategy,
     TrainingStepMetrics,
     UpdateFinetunedModelResponse,
+    WandbConfig,
 )
 
 __all__ = [
@@ -36,4 +37,5 @@ __all__ = [
     "Strategy",
     "TrainingStepMetrics",
     "UpdateFinetunedModelResponse",
+    "WandbConfig",
 ]

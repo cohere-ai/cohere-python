@@ -2246,6 +2246,448 @@ client.check_api_key()
 </dl>
 </details>
 
+## V2
+<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">chat_stream</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cohere import (
+    ChatMessage2_Assistant,
+    Citation,
+    Source_Tool,
+    TextContent,
+    Tool2,
+    Tool2Function,
+    ToolCall2,
+    ToolCall2Function,
+    V2ChatStreamRequestResponseFormat,
+)
+from cohere.client import Client
+
+client = Client(
+    client_name="YOUR_CLIENT_NAME",
+    token="YOUR_TOKEN",
+)
+response = client.v2.chat_stream(
+    model="string",
+    messages=[
+        ChatMessage2_Assistant(
+            tool_calls=[
+                ToolCall2(
+                    id="string",
+                    function=ToolCall2Function(
+                        name="string",
+                        arguments="string",
+                    ),
+                )
+            ],
+            tool_plan="string",
+            content=[
+                TextContent(
+                    text="string",
+                )
+            ],
+            citations=[
+                Citation(
+                    start="string",
+                    end="string",
+                    text="string",
+                    sources=[
+                        Source_Tool(
+                            id="string",
+                            tool_output={"string": {"key": "value"}},
+                        )
+                    ],
+                )
+            ],
+        )
+    ],
+    tools=[
+        Tool2(
+            function=Tool2Function(
+                name="string",
+                description="string",
+                parameters={"string": {"key": "value"}},
+            ),
+        )
+    ],
+    tool_choice="AUTO",
+    citation_mode="FAST",
+    truncation_mode="OFF",
+    response_format=V2ChatStreamRequestResponseFormat(
+        schema={"string": {"key": "value"}},
+    ),
+    max_tokens=1,
+    stop_sequences=["string"],
+    max_input_tokens=1,
+    temperature=1.1,
+    seed=1,
+    frequency_penalty=1.1,
+    presence_penalty=1.1,
+    k=1,
+    p=1,
+    return_prompt=True,
+)
+for chunk in response:
+    yield chunk
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**model:** `str` — The model to use for the chat.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**messages:** `ChatMessages` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**tools:** `typing.Optional[typing.Sequence[Tool2]]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**tool_choice:** `typing.Optional[V2ChatStreamRequestToolChoice]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**citation_mode:** `typing.Optional[V2ChatStreamRequestCitationMode]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**truncation_mode:** `typing.Optional[V2ChatStreamRequestTruncationMode]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**response_format:** `typing.Optional[V2ChatStreamRequestResponseFormat]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_tokens:** `typing.Optional[int]` — The maximum number of tokens to generate.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**stop_sequences:** `typing.Optional[typing.Sequence[str]]` — A list of strings that the model will stop generating at.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_input_tokens:** `typing.Optional[int]` — The maximum number of tokens to feed into the model.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**temperature:** `typing.Optional[float]` — The temperature of the model.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**seed:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**frequency_penalty:** `typing.Optional[float]` — The frequency penalty of the model.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**presence_penalty:** `typing.Optional[float]` — The presence penalty of the model.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**k:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**p:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**return_prompt:** `typing.Optional[bool]` — Whether to return the prompt in the response.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">chat</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cohere.client import Client
+
+client = Client(
+    client_name="YOUR_CLIENT_NAME",
+    token="YOUR_TOKEN",
+)
+client.v2.chat(
+    model="model",
+    messages=[],
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**model:** `str` — The model to use for the chat.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**messages:** `ChatMessages` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**tools:** `typing.Optional[typing.Sequence[Tool2]]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**tool_choice:** `typing.Optional[V2ChatRequestToolChoice]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**citation_mode:** `typing.Optional[V2ChatRequestCitationMode]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**truncation_mode:** `typing.Optional[V2ChatRequestTruncationMode]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**response_format:** `typing.Optional[V2ChatRequestResponseFormat]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_tokens:** `typing.Optional[int]` — The maximum number of tokens to generate.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**stop_sequences:** `typing.Optional[typing.Sequence[str]]` — A list of strings that the model will stop generating at.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_input_tokens:** `typing.Optional[int]` — The maximum number of tokens to feed into the model.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**temperature:** `typing.Optional[float]` — The temperature of the model.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**seed:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**frequency_penalty:** `typing.Optional[float]` — The frequency penalty of the model.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**presence_penalty:** `typing.Optional[float]` — The presence penalty of the model.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**k:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**p:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**return_prompt:** `typing.Optional[bool]` — Whether to return the prompt in the response.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## EmbedJobs
 <details><summary><code>client.embed_jobs.<a href="src/cohere/embed_jobs/client.py">list</a>()</code></summary>
 <dl>

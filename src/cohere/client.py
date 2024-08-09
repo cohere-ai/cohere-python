@@ -120,6 +120,12 @@ def experimental_kwarg_decorator(func, deprecated_kwarg):
     return wrap
 
 
+def fix_base_url(base_url: typing.Optional[str]) -> typing.Optional[str]:
+    if base_url is not None:
+        return base_url.replace("/v1", "")
+    return None
+
+
 class Client(BaseCohere, CacheMixin):
     _executor: ThreadPoolExecutor
 
@@ -137,6 +143,8 @@ class Client(BaseCohere, CacheMixin):
     ):
         if api_key is None:
             api_key = _get_api_key_from_environment()
+
+        base_url = fix_base_url(base_url)
 
         self._executor = thread_pool_executor
 
@@ -323,6 +331,8 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
     ):
         if api_key is None:
             api_key = _get_api_key_from_environment()
+
+        base_url = fix_base_url(base_url)
 
         self._executor = thread_pool_executor
 
