@@ -1,8 +1,10 @@
 import json
 import os
+import typing
 import unittest
 
 import cohere
+from cohere import TextContent, DocumentContent, ToolMessage2, UserMessage, AssistantMessage
 
 co = cohere.ClientV2(timeout=10000)
 
@@ -54,9 +56,9 @@ class TestClientV2(unittest.TestCase):
         {'title': 'widget sales 2020', 'text': '2 million'},
         {'title': 'widget sales 2021', 'text': '4 million'}
         ]
-        content = [cohere.v2.TextContent("how many widges were sold in 2020?")]
+        content: typing.List[TextContent | DocumentContent] = [cohere.v2.TextContent(text="how many widges were sold in 2020?")]
         for doc in documents:
-            content.append(cohere.v2.DocumentContent(document=doc))
+            content.append(cohere.v2.DocumentContent(id=1, document=doc))
         response = co.chat(messages=cohere.v2.UserMessage(content=content))
 
         print(response.message)
@@ -76,15 +78,15 @@ class TestClientV2(unittest.TestCase):
                 "required": ["location"]
             }
         }
-        tools = [cohere.v2.Tool(type='function', function=get_weather_tool)]
-        messages = [cohere.v2.UserMessage(content='what is the weather in Toronto?')]
+        tools = [cohere.v2.Tool2(type='function', function=get_weather_tool)]
+        messages: typing.List[UserMessage | AssistantMessage | None | ToolMessage2] = [cohere.v2.UserMessage(content='what is the weather in Toronto?')]
         res = co.chat(tools=tools, messages=messages)
 
         # call the get_weather tool
         tool_result = {"temperature": "30C"}
         tool_content = [cohere.v2.ToolContent(output=tool_result)]
         messages.append(res.message)
-        messages.append(cohere.v2.ToolMessage(tool_call_id=res.message.tool_calls[0].id, tool_content=tool_content))
+        messages.append(cohere.v2.ToolMessage2(tool_call_id=res.message.tool_calls[0].id, tool_content=tool_content))
 
         res = co.chat(tools=tools, messages=messages)
         print(res.message)
