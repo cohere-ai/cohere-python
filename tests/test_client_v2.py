@@ -66,7 +66,7 @@ class TestClientV2(unittest.TestCase):
     def test_chat_tools(self) -> None:
         get_weather_tool = {
             "name": "get_weather",
-            "desctiption" : "gets the weather of a given location",
+            "description" : "gets the weather of a given location",
             "parameters": {
                 "type": "object",
                 "properties": {
