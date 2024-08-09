@@ -95,7 +95,7 @@ class DatasetsClient:
         client.datasets.list()
         """
         _response = self._client_wrapper.httpx_client.request(
-            "datasets",
+            "v1/datasets",
             method="GET",
             params={
                 "datasetType": dataset_type,
@@ -235,7 +235,7 @@ class DatasetsClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "datasets",
+            "v1/datasets",
             method="POST",
             params={
                 "name": name,
@@ -330,7 +330,7 @@ class DatasetsClient:
         client.datasets.get_usage()
         """
         _response = self._client_wrapper.httpx_client.request(
-            "datasets/usage", method="GET", request_options=request_options
+            "v1/datasets/usage", method="GET", request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -413,7 +413,7 @@ class DatasetsClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"datasets/{jsonable_encoder(id)}", method="GET", request_options=request_options
+            f"v1/datasets/{jsonable_encoder(id)}", method="GET", request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -498,7 +498,7 @@ class DatasetsClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"datasets/{jsonable_encoder(id)}", method="DELETE", request_options=request_options
+            f"v1/datasets/{jsonable_encoder(id)}", method="DELETE", request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -618,7 +618,7 @@ class AsyncDatasetsClient:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "datasets",
+            "v1/datasets",
             method="GET",
             params={
                 "datasetType": dataset_type,
@@ -766,7 +766,7 @@ class AsyncDatasetsClient:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "datasets",
+            "v1/datasets",
             method="POST",
             params={
                 "name": name,
@@ -869,7 +869,7 @@ class AsyncDatasetsClient:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "datasets/usage", method="GET", request_options=request_options
+            "v1/datasets/usage", method="GET", request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -960,7 +960,7 @@ class AsyncDatasetsClient:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"datasets/{jsonable_encoder(id)}", method="GET", request_options=request_options
+            f"v1/datasets/{jsonable_encoder(id)}", method="GET", request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -1053,7 +1053,7 @@ class AsyncDatasetsClient:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"datasets/{jsonable_encoder(id)}", method="DELETE", request_options=request_options
+            f"v1/datasets/{jsonable_encoder(id)}", method="DELETE", request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:

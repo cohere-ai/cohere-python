@@ -8,6 +8,7 @@ from ....core.pydantic_utilities import IS_PYDANTIC_V2
 from ....core.unchecked_base_model import UncheckedBaseModel
 from .base_model import BaseModel
 from .hyperparameters import Hyperparameters
+from .wandb_config import WandbConfig
 
 
 class Settings(UncheckedBaseModel):
@@ -33,6 +34,11 @@ class Settings(UncheckedBaseModel):
     multi_label: typing.Optional[bool] = pydantic.Field(default=None)
     """
     read-only. Whether the model is single-label or multi-label (only for classification).
+    """
+
+    wandb: typing.Optional[WandbConfig] = pydantic.Field(default=None)
+    """
+    The Weights & Biases configuration.
     """
 
     if IS_PYDANTIC_V2:

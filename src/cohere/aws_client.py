@@ -125,8 +125,8 @@ def stream_generator(response: httpx.Response, endpoint: str) -> typing.Iterator
 
 
 def map_token_counts(response: httpx.Response) -> ApiMeta:
-    input_tokens = int(response.headers["X-Amzn-Bedrock-Input-Token-Count"])
-    output_tokens = int(response.headers["X-Amzn-Bedrock-Output-Token-Count"])
+    input_tokens = int(response.headers.get("X-Amzn-Bedrock-Input-Token-Count", -1))
+    output_tokens = int(response.headers.get("X-Amzn-Bedrock-Output-Token-Count", -1))
     return ApiMeta(
         tokens=ApiMetaTokens(input_tokens=input_tokens, output_tokens=output_tokens),
         billed_units=ApiMetaBilledUnits(input_tokens=input_tokens, output_tokens=output_tokens),

@@ -67,6 +67,7 @@ from .types.too_many_requests_error_body import TooManyRequestsErrorBody
 from .types.tool import Tool
 from .types.tool_result import ToolResult
 from .types.unprocessable_entity_error_body import UnprocessableEntityErrorBody
+from .v2.client import AsyncV2Client, V2Client
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -136,6 +137,7 @@ class BaseCohere:
             else httpx.Client(timeout=_defaulted_timeout),
             timeout=_defaulted_timeout,
         )
+        self.v2 = V2Client(client_wrapper=self._client_wrapper)
         self.embed_jobs = EmbedJobsClient(client_wrapper=self._client_wrapper)
         self.datasets = DatasetsClient(client_wrapper=self._client_wrapper)
         self.connectors = ConnectorsClient(client_wrapper=self._client_wrapper)
@@ -471,7 +473,7 @@ class BaseCohere:
             yield chunk
         """
         with self._client_wrapper.httpx_client.stream(
-            "chat",
+            "v1/chat",
             method="POST",
             json={
                 "message": message,
@@ -819,7 +821,7 @@ class BaseCohere:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "chat",
+            "v1/chat",
             method="POST",
             json={
                 "message": message,
@@ -1058,7 +1060,7 @@ class BaseCohere:
             yield chunk
         """
         with self._client_wrapper.httpx_client.stream(
-            "generate",
+            "v1/generate",
             method="POST",
             json={
                 "prompt": prompt,
@@ -1279,7 +1281,7 @@ class BaseCohere:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "generate",
+            "v1/generate",
             method="POST",
             json={
                 "prompt": prompt,
@@ -1436,7 +1438,7 @@ class BaseCohere:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "embed",
+            "v1/embed",
             method="POST",
             json={
                 "texts": texts,
@@ -1572,7 +1574,7 @@ class BaseCohere:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "rerank",
+            "v1/rerank",
             method="POST",
             json={
                 "model": model,
@@ -1738,7 +1740,7 @@ class BaseCohere:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "classify",
+            "v1/classify",
             method="POST",
             json={"inputs": inputs, "examples": examples, "model": model, "preset": preset, "truncate": truncate},
             request_options=request_options,
@@ -1859,7 +1861,7 @@ class BaseCohere:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "summarize",
+            "v1/summarize",
             method="POST",
             json={
                 "text": text,
@@ -1961,7 +1963,11 @@ class BaseCohere:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "tokenize", method="POST", json={"text": text, "model": model}, request_options=request_options, omit=OMIT
+            "v1/tokenize",
+            method="POST",
+            json={"text": text, "model": model},
+            request_options=request_options,
+            omit=OMIT,
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -2051,7 +2057,7 @@ class BaseCohere:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "detokenize",
+            "v1/detokenize",
             method="POST",
             json={"tokens": tokens, "model": model},
             request_options=request_options,
@@ -2134,7 +2140,7 @@ class BaseCohere:
         client.check_api_key()
         """
         _response = self._client_wrapper.httpx_client.request(
-            "check-api-key", method="POST", request_options=request_options
+            "v1/check-api-key", method="POST", request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -2253,6 +2259,7 @@ class AsyncBaseCohere:
             else httpx.AsyncClient(timeout=_defaulted_timeout),
             timeout=_defaulted_timeout,
         )
+        self.v2 = AsyncV2Client(client_wrapper=self._client_wrapper)
         self.embed_jobs = AsyncEmbedJobsClient(client_wrapper=self._client_wrapper)
         self.datasets = AsyncDatasetsClient(client_wrapper=self._client_wrapper)
         self.connectors = AsyncConnectorsClient(client_wrapper=self._client_wrapper)
@@ -2596,7 +2603,7 @@ class AsyncBaseCohere:
         asyncio.run(main())
         """
         async with self._client_wrapper.httpx_client.stream(
-            "chat",
+            "v1/chat",
             method="POST",
             json={
                 "message": message,
@@ -2952,7 +2959,7 @@ class AsyncBaseCohere:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "chat",
+            "v1/chat",
             method="POST",
             json={
                 "message": message,
@@ -3199,7 +3206,7 @@ class AsyncBaseCohere:
         asyncio.run(main())
         """
         async with self._client_wrapper.httpx_client.stream(
-            "generate",
+            "v1/generate",
             method="POST",
             json={
                 "prompt": prompt,
@@ -3428,7 +3435,7 @@ class AsyncBaseCohere:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "generate",
+            "v1/generate",
             method="POST",
             json={
                 "prompt": prompt,
@@ -3593,7 +3600,7 @@ class AsyncBaseCohere:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "embed",
+            "v1/embed",
             method="POST",
             json={
                 "texts": texts,
@@ -3737,7 +3744,7 @@ class AsyncBaseCohere:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "rerank",
+            "v1/rerank",
             method="POST",
             json={
                 "model": model,
@@ -3911,7 +3918,7 @@ class AsyncBaseCohere:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "classify",
+            "v1/classify",
             method="POST",
             json={"inputs": inputs, "examples": examples, "model": model, "preset": preset, "truncate": truncate},
             request_options=request_options,
@@ -4040,7 +4047,7 @@ class AsyncBaseCohere:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "summarize",
+            "v1/summarize",
             method="POST",
             json={
                 "text": text,
@@ -4150,7 +4157,11 @@ class AsyncBaseCohere:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "tokenize", method="POST", json={"text": text, "model": model}, request_options=request_options, omit=OMIT
+            "v1/tokenize",
+            method="POST",
+            json={"text": text, "model": model},
+            request_options=request_options,
+            omit=OMIT,
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -4248,7 +4259,7 @@ class AsyncBaseCohere:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "detokenize",
+            "v1/detokenize",
             method="POST",
             json={"tokens": tokens, "model": model},
             request_options=request_options,
@@ -4339,7 +4350,7 @@ class AsyncBaseCohere:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "check-api-key", method="POST", request_options=request_options
+            "v1/check-api-key", method="POST", request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:

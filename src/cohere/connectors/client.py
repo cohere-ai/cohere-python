@@ -78,7 +78,7 @@ class ConnectorsClient:
         client.connectors.list()
         """
         _response = self._client_wrapper.httpx_client.request(
-            "connectors", method="GET", params={"limit": limit, "offset": offset}, request_options=request_options
+            "v1/connectors", method="GET", params={"limit": limit, "offset": offset}, request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -196,7 +196,7 @@ class ConnectorsClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "connectors",
+            "v1/connectors",
             method="POST",
             json={
                 "name": name,
@@ -293,7 +293,7 @@ class ConnectorsClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"connectors/{jsonable_encoder(id)}", method="GET", request_options=request_options
+            f"v1/connectors/{jsonable_encoder(id)}", method="GET", request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -377,7 +377,7 @@ class ConnectorsClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"connectors/{jsonable_encoder(id)}", method="DELETE", request_options=request_options
+            f"v1/connectors/{jsonable_encoder(id)}", method="DELETE", request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -492,7 +492,7 @@ class ConnectorsClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"connectors/{jsonable_encoder(id)}",
+            f"v1/connectors/{jsonable_encoder(id)}",
             method="PATCH",
             json={
                 "name": name,
@@ -597,7 +597,7 @@ class ConnectorsClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"connectors/{jsonable_encoder(id)}/oauth/authorize",
+            f"v1/connectors/{jsonable_encoder(id)}/oauth/authorize",
             method="POST",
             params={"after_token_redirect": after_token_redirect},
             request_options=request_options,
@@ -704,7 +704,7 @@ class AsyncConnectorsClient:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "connectors", method="GET", params={"limit": limit, "offset": offset}, request_options=request_options
+            "v1/connectors", method="GET", params={"limit": limit, "offset": offset}, request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -830,7 +830,7 @@ class AsyncConnectorsClient:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "connectors",
+            "v1/connectors",
             method="POST",
             json={
                 "name": name,
@@ -935,7 +935,7 @@ class AsyncConnectorsClient:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"connectors/{jsonable_encoder(id)}", method="GET", request_options=request_options
+            f"v1/connectors/{jsonable_encoder(id)}", method="GET", request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -1029,7 +1029,7 @@ class AsyncConnectorsClient:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"connectors/{jsonable_encoder(id)}", method="DELETE", request_options=request_options
+            f"v1/connectors/{jsonable_encoder(id)}", method="DELETE", request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -1152,7 +1152,7 @@ class AsyncConnectorsClient:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"connectors/{jsonable_encoder(id)}",
+            f"v1/connectors/{jsonable_encoder(id)}",
             method="PATCH",
             json={
                 "name": name,
@@ -1265,7 +1265,7 @@ class AsyncConnectorsClient:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"connectors/{jsonable_encoder(id)}/oauth/authorize",
+            f"v1/connectors/{jsonable_encoder(id)}/oauth/authorize",
             method="POST",
             params={"after_token_redirect": after_token_redirect},
             request_options=request_options,

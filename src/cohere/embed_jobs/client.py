@@ -64,7 +64,7 @@ class EmbedJobsClient:
         client.embed_jobs.list()
         """
         _response = self._client_wrapper.httpx_client.request(
-            "embed-jobs", method="GET", request_options=request_options
+            "v1/embed-jobs", method="GET", request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -191,7 +191,7 @@ class EmbedJobsClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "embed-jobs",
+            "v1/embed-jobs",
             method="POST",
             json={
                 "model": model,
@@ -286,7 +286,7 @@ class EmbedJobsClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"embed-jobs/{jsonable_encoder(id)}", method="GET", request_options=request_options
+            f"v1/embed-jobs/{jsonable_encoder(id)}", method="GET", request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -369,7 +369,7 @@ class EmbedJobsClient:
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"embed-jobs/{jsonable_encoder(id)}/cancel", method="POST", request_options=request_options
+            f"v1/embed-jobs/{jsonable_encoder(id)}/cancel", method="POST", request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -461,7 +461,7 @@ class AsyncEmbedJobsClient:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "embed-jobs", method="GET", request_options=request_options
+            "v1/embed-jobs", method="GET", request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -596,7 +596,7 @@ class AsyncEmbedJobsClient:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "embed-jobs",
+            "v1/embed-jobs",
             method="POST",
             json={
                 "model": model,
@@ -699,7 +699,7 @@ class AsyncEmbedJobsClient:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"embed-jobs/{jsonable_encoder(id)}", method="GET", request_options=request_options
+            f"v1/embed-jobs/{jsonable_encoder(id)}", method="GET", request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -790,7 +790,7 @@ class AsyncEmbedJobsClient:
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"embed-jobs/{jsonable_encoder(id)}/cancel", method="POST", request_options=request_options
+            f"v1/embed-jobs/{jsonable_encoder(id)}/cancel", method="POST", request_options=request_options
         )
         try:
             if 200 <= _response.status_code < 300:
