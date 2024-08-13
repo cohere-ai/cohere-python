@@ -36,12 +36,14 @@ def get_validation_status(awaitable: typing.Union[EmbedJob, DatasetsGetResponse]
 
 
 def get_job(cohere: typing.Any,
-            awaitable: typing.Union[CreateEmbedJobResponse, DatasetsCreateResponse, EmbedJob, DatasetsGetResponse]) -> \
-        typing.Union[
+            awaitable: typing.Union[CreateEmbedJobResponse, DatasetsCreateResponse, EmbedJob, DatasetsGetResponse]) -> typing.Union[
             EmbedJob, DatasetsGetResponse]:
-    if awaitable.__class__.__name__ == "EmbedJob" or awaitable.__class__.__name__ == "CreateEmbedJobResponse":
+    if awaitable.__class__.__name__ in ["EmbedJob", "CreateEmbedJobResponse"]:
         return cohere.embed_jobs.get(id=get_id(awaitable))
-    elif awaitable.__class__.__name__ == "DatasetsGetResponse" or awaitable.__class__.__name__ == "DatasetsCreateResponse":
+    elif awaitable.__class__.__name__ in [
+        "DatasetsGetResponse",
+        "DatasetsCreateResponse",
+    ]:
         return cohere.datasets.get(id=get_id(awaitable))
     else:
         raise ValueError(f"Unexpected awaitable type {awaitable}")
