@@ -343,14 +343,13 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
             """
         )
 
-        if tool_parameters_response.tool_calls is not None:
-            self.assertEqual(
-                tool_parameters_response.tool_calls[0].name, "sales_database")
-            self.assertEqual(tool_parameters_response.tool_calls[0].parameters, {
-                             "day": "2023-09-29"})
-        else:
+        if tool_parameters_response.tool_calls is None:
             raise ValueError("Expected tool calls to be present")
 
+        self.assertEqual(
+            tool_parameters_response.tool_calls[0].name, "sales_database")
+        self.assertEqual(tool_parameters_response.tool_calls[0].parameters, {
+                         "day": "2023-09-29"})
         local_tools = {
             "sales_database": lambda day: {
                 "number_of_sales": 120,
