@@ -247,9 +247,9 @@ def get_url(
         stream: bool,
 ) -> str:
     if platform == "bedrock":
-        endpoint = "invoke" if not stream else "invoke-with-response-stream"
+        endpoint = "invoke-with-response-stream" if stream else "invoke"
         return f"https://{platform}-runtime.{aws_region}.amazonaws.com/model/{model}/{endpoint}"
     elif platform == "sagemaker":
-        endpoint = "invocations" if not stream else "invocations-response-stream"
+        endpoint = "invocations-response-stream" if stream else "invocations"
         return f"https://runtime.sagemaker.{aws_region}.amazonaws.com/endpoints/{model}/{endpoint}"
     return ""
