@@ -44,11 +44,11 @@ class TestClientV2(unittest.TestCase):
                 if chat_event.type == "content-delta":
                     print(chat_event.delta.message)
 
-        self.assertTrue("message-start" in events)
-        self.assertTrue("content-start" in events)
-        self.assertTrue("content-delta" in events)
-        self.assertTrue("content-end" in events)
-        self.assertTrue("message-end" in events)
+        self.assertIn("message-start" in events)
+        self.assertIn("content-start" in events)
+        self.assertIn("content-delta" in events)
+        self.assertIn("content-end" in events)
+        self.assertIn("message-end" in events)
 
     @unittest.skip("Skip v2 test for now")
     def test_chat_documents(self) -> None:
