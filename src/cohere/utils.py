@@ -22,7 +22,7 @@ def get_success_states():
 
 
 def get_failed_states():
-    return {"unknown", "failed", "skipped", "cancelled", "failed"}
+    return {"unknown", "skipped", "cancelled", "failed"}
 
 
 def get_id(
