@@ -111,8 +111,7 @@ def stream_generator(response: httpx.Response, endpoint: str) -> typing.Iterator
     regex = r"{[^\}]*}"
 
     for _text in response.iter_lines():
-        match = re.search(regex, _text)
-        if match:
+        if match := re.search(regex, _text):
             obj = json.loads(match.group())
             if "bytes" in obj:
                 base64_payload = base64.b64decode(obj["bytes"]).decode("utf-8")
