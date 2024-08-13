@@ -56,9 +56,9 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
             if chat_event.event_type == "text-generation":
                 print(chat_event.text)
 
-        self.assertTrue("text-generation" in events)
-        self.assertTrue("stream-start" in events)
-        self.assertTrue("stream-end" in events)
+        self.assertIn("text-generation" in events)
+        self.assertIn("stream-start" in events)
+        self.assertIn("stream-end" in events)
 
     async def test_stream_equals_true(self) -> None:
         with self.assertRaises(ValueError):
