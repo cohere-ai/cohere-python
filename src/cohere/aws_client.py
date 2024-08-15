@@ -160,7 +160,8 @@ def map_response_from_bedrock():
         response.stream = Streamer(output)
         
         # reset response object to allow for re-reading
-        del response._content
+        if hasattr(response, "_content"):
+            del response._content
         response.is_stream_consumed = False
         response.is_closed = False
 
