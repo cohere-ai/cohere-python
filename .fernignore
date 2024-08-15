@@ -14,3 +14,4 @@ src/cohere/manually_maintained
 src/cohere/bedrock_client.py
 src/cohere/aws_client.py
 src/cohere/sagemaker_client.py
+src/cohere/client_v2.py
