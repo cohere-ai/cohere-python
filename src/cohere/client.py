@@ -87,7 +87,9 @@ def deprecated_function(fn_name: str) -> typing.Any:
 # `deprecated_kwarg` is the name of the experimental parameter, which can be a dot-separated string for nested parameters
 def experimental_kwarg_decorator(func, deprecated_kwarg):
     # Recursive utility function to check if a kwarg is present in the kwargs.
-    def check_kwarg(deprecated_kwarg: str, kwargs: typing.Dict[str, typing.Any]) -> bool:
+    def check_kwarg(deprecated_kwarg: str, kwargs: typing.Optional[typing.Dict[str, typing.Any]]) -> bool:
+        if kwargs is None:
+            return False
         if "." in deprecated_kwarg:
             key, rest = deprecated_kwarg.split(".", 1)
             if key in kwargs:
