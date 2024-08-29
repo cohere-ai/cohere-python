@@ -9,6 +9,7 @@ import typing_extensions
 
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
 from ...core.unchecked_base_model import UncheckedBaseModel, UnionMetadata
+from .document_content_document import DocumentContentDocument
 
 
 class Content_Text(UncheckedBaseModel):
@@ -35,7 +36,7 @@ class Content_Document(UncheckedBaseModel):
     """
 
     id: str
-    document: typing.Dict[str, typing.Any]
+    document: DocumentContentDocument
     type: typing.Literal["document"] = "document"
 
     if IS_PYDANTIC_V2:

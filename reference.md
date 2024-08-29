@@ -2298,8 +2298,8 @@ response = client.v2.chat_stream(
             ],
             citations=[
                 Citation(
-                    start="string",
-                    end="string",
+                    start=1,
+                    end=1,
                     text="string",
                     sources=[
                         Source_Tool(

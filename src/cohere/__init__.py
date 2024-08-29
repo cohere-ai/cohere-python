@@ -31,6 +31,10 @@ from .types import (
     ChatToolCallsChunkEvent,
     ChatToolCallsGenerationEvent,
     CheckApiKeyResponse,
+    CitationEndEvent,
+    CitationStartEvent,
+    CitationStartEventDelta,
+    CitationStartEventDeltaMessage,
     ClassifyDataMetrics,
     ClassifyExample,
     ClassifyRequestTruncate,
@@ -153,7 +157,6 @@ from .errors import (
 )
 from . import connectors, datasets, embed_jobs, finetuning, models, v2
 from .aws_client import AwsClient
-from .client_v2 import AsyncClientV2, ClientV2
 from .bedrock_client import BedrockClient
 from .client import AsyncClient, Client
 from .datasets import (
@@ -206,12 +209,15 @@ from .v2 import (
     Content_Document,
     Content_Text,
     DocumentContent,
+    DocumentContentDocument,
     DocumentSource,
     NonStreamedChatResponse2,
     Source,
     Source_Document,
     Source_Tool,
     StreamedChatResponse2,
+    StreamedChatResponse2_CitationEnd,
+    StreamedChatResponse2_CitationStart,
     StreamedChatResponse2_ContentDelta,
     StreamedChatResponse2_ContentEnd,
     StreamedChatResponse2_ContentStart,
@@ -321,6 +327,10 @@ __all__ = [
     "ChatToolPlanDeltaEventDelta",
     "CheckApiKeyResponse",
     "Citation",
+    "CitationEndEvent",
+    "CitationStartEvent",
+    "CitationStartEventDelta",
+    "CitationStartEventDeltaMessage",
     "ClassifyDataMetrics",
     "ClassifyExample",
     "ClassifyRequestTruncate",
@@ -356,6 +366,7 @@ __all__ = [
     "DeleteConnectorResponse",
     "DetokenizeResponse",
     "DocumentContent",
+    "DocumentContentDocument",
     "DocumentSource",
     "EmbedByTypeResponse",
     "EmbedByTypeResponseEmbeddings",
@@ -430,6 +441,8 @@ __all__ = [
     "Source_Tool",
     "StreamedChatResponse",
     "StreamedChatResponse2",
+    "StreamedChatResponse2_CitationEnd",
+    "StreamedChatResponse2_CitationStart",
     "StreamedChatResponse2_ContentDelta",
     "StreamedChatResponse2_ContentEnd",
     "StreamedChatResponse2_ContentStart",

@@ -30,6 +30,10 @@ from .chat_text_generation_event import ChatTextGenerationEvent
 from .chat_tool_calls_chunk_event import ChatToolCallsChunkEvent
 from .chat_tool_calls_generation_event import ChatToolCallsGenerationEvent
 from .check_api_key_response import CheckApiKeyResponse
+from .citation_end_event import CitationEndEvent
+from .citation_start_event import CitationStartEvent
+from .citation_start_event_delta import CitationStartEventDelta
+from .citation_start_event_delta_message import CitationStartEventDeltaMessage
 from .classify_data_metrics import ClassifyDataMetrics
 from .classify_example import ClassifyExample
 from .classify_request_truncate import ClassifyRequestTruncate
@@ -166,6 +170,10 @@ __all__ = [
     "ChatToolCallsChunkEvent",
     "ChatToolCallsGenerationEvent",
     "CheckApiKeyResponse",
+    "CitationEndEvent",
+    "CitationStartEvent",
+    "CitationStartEventDelta",
+    "CitationStartEventDeltaMessage",
     "ClassifyDataMetrics",
     "ClassifyExample",
     "ClassifyRequestTruncate",

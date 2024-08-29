@@ -6,6 +6,7 @@ import pydantic
 
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
 from ...core.unchecked_base_model import UncheckedBaseModel
+from .document_content_document import DocumentContentDocument
 
 
 class DocumentContent(UncheckedBaseModel):
@@ -14,7 +15,12 @@ class DocumentContent(UncheckedBaseModel):
     """
 
     id: str
-    document: typing.Dict[str, typing.Any]
+    document: DocumentContentDocument = pydantic.Field()
+    """
+    Relevant information that could be used by the model to generate a more accurate reply.
+    The contents of each document are generally short (under 300 words), and are passed in the form of a
+    dictionary of strings or a single string. If a single string is passed, it will be treated as the value for key "content".
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

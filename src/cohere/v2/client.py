@@ -162,8 +162,8 @@ class V2Client:
                     ],
                     citations=[
                         Citation(
-                            start="string",
-                            end="string",
+                            start=1,
+                            end=1,
                             text="string",
                             sources=[
                                 Source_Tool(
@@ -580,8 +580,8 @@ class AsyncV2Client:
                         ],
                         citations=[
                             Citation(
-                                start="string",
-                                end="string",
+                                start=1,
+                                end=1,
                                 text="string",
                                 sources=[
                                     Source_Tool(
