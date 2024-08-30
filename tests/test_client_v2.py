@@ -45,7 +45,7 @@ class TestClientV2(unittest.TestCase):
         ]
         docs: typing.List[ChatDocument] = []
         for doc in documents:
-            docs.append(ChatDocument(id=1, document=doc))
+            docs.append(ChatDocument(id="1", document=doc))
         response = co.chat(
             messages=cohere.v2.UserMessage(
                 content=cohere.v2.TextContent(text="how many widges were sold in 2020?"),
