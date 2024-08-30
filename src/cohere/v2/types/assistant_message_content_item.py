@@ -11,11 +11,7 @@ from ...core.pydantic_utilities import IS_PYDANTIC_V2
 from ...core.unchecked_base_model import UncheckedBaseModel, UnionMetadata
 
 
-class Content_Text(UncheckedBaseModel):
-    """
-    A Content block which contains information about the content type and the content itself.
-    """
-
+class AssistantMessageContentItem_Text(UncheckedBaseModel):
     text: str
     type: typing.Literal["text"] = "text"
 
@@ -29,4 +25,6 @@ class Content_Text(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-Content = typing_extensions.Annotated[Content_Text, UnionMetadata(discriminant="type")]
+AssistantMessageContentItem = typing_extensions.Annotated[
+    AssistantMessageContentItem_Text, UnionMetadata(discriminant="type")
+]

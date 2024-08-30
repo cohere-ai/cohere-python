@@ -6,19 +6,20 @@ import pydantic
 
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
 from ...core.unchecked_base_model import UncheckedBaseModel
-from .assistant_message_content import AssistantMessageContent
+from .assistant_message_response_content_item import AssistantMessageResponseContentItem
 from .citation import Citation
 from .tool_call2 import ToolCall2
 
 
-class AssistantMessage(UncheckedBaseModel):
+class AssistantMessageResponse(UncheckedBaseModel):
     """
     A message from the assistant role can contain text and tool call information.
     """
 
+    role: typing.Literal["assistant"] = "assistant"
     tool_calls: typing.Optional[typing.List[ToolCall2]] = None
     tool_plan: typing.Optional[str] = None
-    content: typing.Optional[AssistantMessageContent] = None
+    content: typing.Optional[typing.List[AssistantMessageResponseContentItem]] = None
     citations: typing.Optional[typing.List[Citation]] = None
 
     if IS_PYDANTIC_V2:

@@ -4,17 +4,13 @@ import typing
 
 import pydantic
 
-from ...core.pydantic_utilities import IS_PYDANTIC_V2
-from ...core.unchecked_base_model import UncheckedBaseModel
+from ..core.pydantic_utilities import IS_PYDANTIC_V2
+from ..core.unchecked_base_model import UncheckedBaseModel
+from ..v2.types.citation import Citation
 
 
-class DocumentContent(UncheckedBaseModel):
-    """
-    Content block of the message that contains information about documents.
-    """
-
-    id: str
-    document: typing.Dict[str, typing.Any]
+class CitationStartEventDeltaMessage(UncheckedBaseModel):
+    citations: typing.Optional[Citation] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

@@ -9,8 +9,20 @@ from ...core.unchecked_base_model import UncheckedBaseModel
 
 
 class Tool2Function(UncheckedBaseModel):
-    name: typing.Optional[str] = None
-    description: typing.Optional[str] = None
+    """
+    The function to be executed.
+    """
+
+    name: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    The name of the function.
+    """
+
+    description: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    The description of the function.
+    """
+
     parameters: typing.Optional[typing.Dict[str, typing.Any]] = pydantic.Field(default=None)
     """
     The parameters of the function as a JSON schema.

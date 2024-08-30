@@ -9,6 +9,7 @@ import typing_extensions
 
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
 from ...core.unchecked_base_model import UncheckedBaseModel, UnionMetadata
+from ...types.citation_start_event_delta import CitationStartEventDelta
 from .chat_content_delta_event_delta import ChatContentDeltaEventDelta
 from .chat_content_start_event_delta import ChatContentStartEventDelta
 from .chat_message_end_event_delta import ChatMessageEndEventDelta
@@ -167,6 +168,43 @@ class StreamedChatResponse2_ToolCallEnd(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
+class StreamedChatResponse2_CitationStart(UncheckedBaseModel):
+    """
+    StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
+    """
+
+    index: typing.Optional[int] = None
+    delta: typing.Optional[CitationStartEventDelta] = None
+    type: typing.Literal["citation-start"] = "citation-start"
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
+class StreamedChatResponse2_CitationEnd(UncheckedBaseModel):
+    """
+    StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
+    """
+
+    index: typing.Optional[int] = None
+    type: typing.Literal["citation-end"] = "citation-end"
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 class StreamedChatResponse2_MessageEnd(UncheckedBaseModel):
     """
     StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
@@ -196,6 +234,8 @@ StreamedChatResponse2 = typing_extensions.Annotated[
         StreamedChatResponse2_ToolCallStart,
         StreamedChatResponse2_ToolCallDelta,
         StreamedChatResponse2_ToolCallEnd,
+        StreamedChatResponse2_CitationStart,
+        StreamedChatResponse2_CitationEnd,
         StreamedChatResponse2_MessageEnd,
     ],
     UnionMetadata(discriminant="type"),

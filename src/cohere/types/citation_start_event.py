@@ -4,17 +4,18 @@ import typing
 
 import pydantic
 
-from ...core.pydantic_utilities import IS_PYDANTIC_V2
-from ...core.unchecked_base_model import UncheckedBaseModel
-from .tool2function import Tool2Function
+from ..core.pydantic_utilities import IS_PYDANTIC_V2
+from ..v2.types.chat_stream_event_type import ChatStreamEventType
+from .citation_start_event_delta import CitationStartEventDelta
 
 
-class Tool2(UncheckedBaseModel):
-    type: typing.Optional[typing.Literal["function"]] = None
-    function: typing.Optional[Tool2Function] = pydantic.Field(default=None)
+class CitationStartEvent(ChatStreamEventType):
     """
-    The function to be executed.
+    A streamed event which signifies a citation has been created.
     """
+
+    index: typing.Optional[int] = None
+    delta: typing.Optional[CitationStartEventDelta] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

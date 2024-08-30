@@ -109,6 +109,7 @@ response = client.chat_stream(
     ],
     force_single_step=True,
     response_format=ResponseFormat_Text(),
+    safety_mode="CONTEXTUAL",
 )
 for chunk in response:
     yield chunk
@@ -130,6 +131,7 @@ for chunk in response:
 **message:** `str` 
 
 Text input for the model to respond to.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -141,9 +143,10 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 
 **model:** `typing.Optional[str]` 
 
-Defaults to `command-r-plus`.
+Defaults to `command-r-plus-08-2024`.
 
 The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
+
 Compatible Deployments: Cohere Platform, Private Deployments
 
     
@@ -158,6 +161,7 @@ Compatible Deployments: Cohere Platform, Private Deployments
 When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style, and use the `SYSTEM` role.
 
 The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -174,6 +178,7 @@ A list of previous messages between the user and the model, giving the model con
 Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
 
 The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -188,6 +193,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 An alternative to `chat_history`.
 
 Providing a `conversation_id` creates or resumes a persisted conversation with the specified ID. The ID can be any non empty string.
+
 Compatible Deployments: Cohere Platform
 
     
@@ -208,7 +214,10 @@ With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `d
 With `prompt_truncation` set to "AUTO_PRESERVE_ORDER", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be preserved as they are inputted into the API.
 
 With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
-Compatible Deployments: Cohere Platform Only AUTO_PRESERVE_ORDER: Azure, AWS Sagemaker/Bedrock, Private Deployments
+
+Compatible Deployments: 
+ - AUTO: Cohere Platform Only
+ - AUTO_PRESERVE_ORDER: Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
 </dd>
@@ -222,6 +231,7 @@ Compatible Deployments: Cohere Platform Only AUTO_PRESERVE_ORDER: Azure, AWS Sag
 Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
 
 When specified, the model's reply will be enriched with information found by querying each of the connectors (RAG).
+
 Compatible Deployments: Cohere Platform
 
     
@@ -236,6 +246,7 @@ Compatible Deployments: Cohere Platform
 Defaults to `false`.
 
 When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -250,10 +261,12 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
 
 Example:
-`[
+```
+[
   { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
   { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
-]`
+]
+```
 
 Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
 
@@ -264,6 +277,7 @@ An `id` field (string) can be optionally supplied to identify the document in th
 An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
 
 See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -278,6 +292,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 Defaults to `"accurate"`.
 
 Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -294,6 +309,7 @@ Defaults to `0.3`.
 A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
 
 Randomness can be further maximized by increasing the  value of the `p` parameter.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -306,6 +322,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 **max_tokens:** `typing.Optional[int]` 
 
 The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -320,6 +337,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 The maximum number of input tokens to send to the model. If not specified, `max_input_tokens` is the model's context length limit minus a small buffer.
 
 Input will be truncated according to the `prompt_truncation` parameter.
+
 Compatible Deployments: Cohere Platform
 
     
@@ -333,6 +351,7 @@ Compatible Deployments: Cohere Platform
 
 Ensures only the top `k` most likely tokens are considered for generation at each step.
 Defaults to `0`, min value of `0`, max value of `500`.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -346,6 +365,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 
 Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
 Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -361,6 +381,7 @@ If specified, the backend will make a best effort to sample tokens
 deterministically, such that repeated requests with the same
 seed and parameters should return the same result. However,
 determinism cannot be totally guaranteed.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -373,6 +394,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 **stop_sequences:** `typing.Optional[typing.Sequence[str]]` 
 
 A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -387,6 +409,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
 Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -401,6 +424,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
 Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -414,6 +438,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 
 When enabled, the user's prompt will be sent to the model without
 any pre-processing.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -436,6 +461,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
 When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -468,6 +494,7 @@ tool_results = [
 ]
 ```
 **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -486,6 +513,24 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dd>
 
 **response_format:** `typing.Optional[ResponseFormat]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**safety_mode:** `typing.Optional[ChatStreamRequestSafetyMode]` 
+
+Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+When `NONE` is specified, the safety instruction will be omitted.
+
+Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
+
+**Note**: This parameter is only compatible with models [Command R 08-2024](/docs/command-r#august-2024-release), [Command R+ 08-2024](/docs/command-r-plus#august-2024-release) and newer.
+
+Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+
     
 </dd>
 </dl>
@@ -562,6 +607,7 @@ client.chat(
 **message:** `str` 
 
 Text input for the model to respond to.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -573,9 +619,10 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 
 **model:** `typing.Optional[str]` 
 
-Defaults to `command-r-plus`.
+Defaults to `command-r-plus-08-2024`.
 
 The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
+
 Compatible Deployments: Cohere Platform, Private Deployments
 
     
@@ -590,6 +637,7 @@ Compatible Deployments: Cohere Platform, Private Deployments
 When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style, and use the `SYSTEM` role.
 
 The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -606,6 +654,7 @@ A list of previous messages between the user and the model, giving the model con
 Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
 
 The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -620,6 +669,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 An alternative to `chat_history`.
 
 Providing a `conversation_id` creates or resumes a persisted conversation with the specified ID. The ID can be any non empty string.
+
 Compatible Deployments: Cohere Platform
 
     
@@ -640,7 +690,10 @@ With `prompt_truncation` set to "AUTO", some elements from `chat_history` and `d
 With `prompt_truncation` set to "AUTO_PRESERVE_ORDER", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be preserved as they are inputted into the API.
 
 With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
-Compatible Deployments: Cohere Platform Only AUTO_PRESERVE_ORDER: Azure, AWS Sagemaker/Bedrock, Private Deployments
+
+Compatible Deployments: 
+ - AUTO: Cohere Platform Only
+ - AUTO_PRESERVE_ORDER: Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
 </dd>
@@ -654,6 +707,7 @@ Compatible Deployments: Cohere Platform Only AUTO_PRESERVE_ORDER: Azure, AWS Sag
 Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
 
 When specified, the model's reply will be enriched with information found by querying each of the connectors (RAG).
+
 Compatible Deployments: Cohere Platform
 
     
@@ -668,6 +722,7 @@ Compatible Deployments: Cohere Platform
 Defaults to `false`.
 
 When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -682,10 +737,12 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
 
 Example:
-`[
+```
+[
   { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
   { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
-]`
+]
+```
 
 Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
 
@@ -696,6 +753,7 @@ An `id` field (string) can be optionally supplied to identify the document in th
 An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
 
 See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -710,6 +768,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 Defaults to `"accurate"`.
 
 Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -726,6 +785,7 @@ Defaults to `0.3`.
 A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
 
 Randomness can be further maximized by increasing the  value of the `p` parameter.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -738,6 +798,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 **max_tokens:** `typing.Optional[int]` 
 
 The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -752,6 +813,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 The maximum number of input tokens to send to the model. If not specified, `max_input_tokens` is the model's context length limit minus a small buffer.
 
 Input will be truncated according to the `prompt_truncation` parameter.
+
 Compatible Deployments: Cohere Platform
 
     
@@ -765,6 +827,7 @@ Compatible Deployments: Cohere Platform
 
 Ensures only the top `k` most likely tokens are considered for generation at each step.
 Defaults to `0`, min value of `0`, max value of `500`.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -778,6 +841,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 
 Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
 Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -793,6 +857,7 @@ If specified, the backend will make a best effort to sample tokens
 deterministically, such that repeated requests with the same
 seed and parameters should return the same result. However,
 determinism cannot be totally guaranteed.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -805,6 +870,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 **stop_sequences:** `typing.Optional[typing.Sequence[str]]` 
 
 A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -819,6 +885,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
 Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -833,6 +900,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
 Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -846,6 +914,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 
 When enabled, the user's prompt will be sent to the model without
 any pre-processing.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -868,6 +937,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
 When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -900,6 +970,7 @@ tool_results = [
 ]
 ```
 **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -918,6 +989,24 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dd>
 
 **response_format:** `typing.Optional[ResponseFormat]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**safety_mode:** `typing.Optional[ChatRequestSafetyMode]` 
+
+Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+When `NONE` is specified, the safety instruction will be omitted.
+
+Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
+
+**Note**: This parameter is only compatible with models [Command R 08-2024](/docs/command-r#august-2024-release), [Command R+ 08-2024](/docs/command-r-plus#august-2024-release) and newer.
+
+Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+
     
 </dd>
 </dl>
@@ -949,10 +1038,9 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dl>
 <dd>
 
-> 🚧 Warning
->
-> This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
-
+<Warning>
+This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+</Warning>
 Generates realistic text conditioned on a given input.
 </dd>
 </dl>
@@ -1223,10 +1311,9 @@ If `ALL` is selected, the token likelihoods will be provided both for the prompt
 <dl>
 <dd>
 
-> 🚧 Warning
->
-> This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
-
+<Warning>
+This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+</Warning>
 Generates realistic text conditioned on a given input.
 </dd>
 </dl>
@@ -1507,6 +1594,7 @@ client = Client(
 )
 client.embed(
     texts=["string"],
+    images=["string"],
     model="string",
     input_type="search_document",
     embedding_types=["float"],
@@ -1642,14 +1730,8 @@ client = Client(
     token="YOUR_TOKEN",
 )
 client.rerank(
-    model="rerank-english-v3.0",
-    query="What is the capital of the United States?",
-    documents=[
-        "Carson City is the capital city of the American state of Nevada.",
-        "The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.",
-        "Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.",
-        "Capital punishment (the death penalty) has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states.",
-    ],
+    query="query",
+    documents=["documents"],
 )
 
 ```
@@ -1772,7 +1854,6 @@ Note: [Fine-tuned models](https://docs.cohere.com/docs/classify-fine-tuning) tra
 <dd>
 
 ```python
-from cohere import ClassifyExample
 from cohere.client import Client
 
 client = Client(
@@ -1780,49 +1861,7 @@ client = Client(
     token="YOUR_TOKEN",
 )
 client.classify(
-    inputs=["Confirm your email address", "hey i need u to send some $"],
-    examples=[
-        ClassifyExample(
-            text="Dermatologists don't like her!",
-            label="Spam",
-        ),
-        ClassifyExample(
-            text="Hello, open to this?",
-            label="Spam",
-        ),
-        ClassifyExample(
-            text="I need help please wire me $1000 right now",
-            label="Spam",
-        ),
-        ClassifyExample(
-            text="Nice to know you ;)",
-            label="Spam",
-        ),
-        ClassifyExample(
-            text="Please help me?",
-            label="Spam",
-        ),
-        ClassifyExample(
-            text="Your parcel will be delivered today",
-            label="Not spam",
-        ),
-        ClassifyExample(
-            text="Review changes to our Terms and Conditions",
-            label="Not spam",
-        ),
-        ClassifyExample(
-            text="Weekly sync notes",
-            label="Not spam",
-        ),
-        ClassifyExample(
-            text="Re: Follow up from today’s meeting",
-            label="Not spam",
-        ),
-        ClassifyExample(
-            text="Pre-read for tomorrow",
-            label="Not spam",
-        ),
-    ],
+    inputs=["inputs"],
 )
 
 ```
@@ -1914,10 +1953,9 @@ If `NONE` is selected, when the input exceeds the maximum input token length an 
 <dl>
 <dd>
 
-> 🚧 Warning
->
-> This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
-
+<Warning>
+This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+</Warning>
 Generates a summary in English for a given text.
 </dd>
 </dl>
@@ -1940,7 +1978,7 @@ client = Client(
     token="YOUR_TOKEN",
 )
 client.summarize(
-    text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.\n\nThe meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo\r all variants. Analogues made from dairy alternatives, such as goat\'s or sheep\'s milk, or milk substitutes (e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are lactose intolerant, allergic to dairy protein or vegan.',
+    text="text",
 )
 
 ```
@@ -2139,8 +2177,8 @@ client = Client(
     token="YOUR_TOKEN",
 )
 client.detokenize(
-    tokens=[10104, 12221, 1315, 34, 1420, 69],
-    model="command",
+    tokens=[1],
+    model="model",
 )
 
 ```
@@ -2251,6 +2289,20 @@ client.check_api_key()
 <dl>
 <dd>
 
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Generates a message from the model in response to a provided conversation. To learn how to use the Chat API with Streaming and RAG follow our Text Generation guides.
+</dd>
+</dl>
+</dd>
+</dl>
+
 #### 🔌 Usage
 
 <dl>
@@ -2260,17 +2312,7 @@ client.check_api_key()
 <dd>
 
 ```python
-from cohere import (
-    ChatMessage2_Assistant,
-    Citation,
-    Source_Tool,
-    TextContent,
-    Tool2,
-    Tool2Function,
-    ToolCall2,
-    ToolCall2Function,
-    V2ChatStreamRequestResponseFormat,
-)
+from cohere import ChatMessage2_User, ResponseFormat2_Text, Tool2, Tool2Function
 from cohere.client import Client
 
 client = Client(
@@ -2280,35 +2322,9 @@ client = Client(
 response = client.v2.chat_stream(
     model="string",
     messages=[
-        ChatMessage2_Assistant(
-            tool_calls=[
-                ToolCall2(
-                    id="string",
-                    function=ToolCall2Function(
-                        name="string",
-                        arguments="string",
-                    ),
-                )
-            ],
-            tool_plan="string",
-            content=[
-                TextContent(
-                    text="string",
-                )
-            ],
-            citations=[
-                Citation(
-                    start="string",
-                    end="string",
-                    text="string",
-                    sources=[
-                        Source_Tool(
-                            id="string",
-                            tool_output={"string": {"key": "value"}},
-                        )
-                    ],
-                )
-            ],
+        ChatMessage2_User(
+            content="string",
+            documents=[{"string": {"key": "value"}}],
         )
     ],
     tools=[
@@ -2320,21 +2336,16 @@ response = client.v2.chat_stream(
             ),
         )
     ],
-    tool_choice="AUTO",
     citation_mode="FAST",
-    truncation_mode="OFF",
-    response_format=V2ChatStreamRequestResponseFormat(
-        schema={"string": {"key": "value"}},
-    ),
+    response_format=ResponseFormat2_Text(),
     max_tokens=1,
     stop_sequences=["string"],
-    max_input_tokens=1,
     temperature=1.1,
     seed=1,
     frequency_penalty=1.1,
     presence_penalty=1.1,
-    k=1,
-    p=1,
+    k=1.1,
+    p=1.1,
     return_prompt=True,
 )
 for chunk in response:
@@ -2354,7 +2365,7 @@ for chunk in response:
 <dl>
 <dd>
 
-**model:** `str` — The model to use for the chat.
+**model:** `str` — The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
     
 </dd>
 </dl>
@@ -2371,14 +2382,11 @@ for chunk in response:
 <dd>
 
 **tools:** `typing.Optional[typing.Sequence[Tool2]]` 
-    
-</dd>
-</dl>
 
-<dl>
-<dd>
+A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
-**tool_choice:** `typing.Optional[V2ChatStreamRequestToolChoice]` 
+When `tools` is passed (without `tool_results`), the `text` content in the response will be empty and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
+
     
 </dd>
 </dl>
@@ -2387,6 +2395,10 @@ for chunk in response:
 <dd>
 
 **citation_mode:** `typing.Optional[V2ChatStreamRequestCitationMode]` 
+
+Defaults to `"accurate"`.
+Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+
     
 </dd>
 </dl>
@@ -2394,7 +2406,7 @@ for chunk in response:
 <dl>
 <dd>
 
-**truncation_mode:** `typing.Optional[V2ChatStreamRequestTruncationMode]` 
+**response_format:** `typing.Optional[ResponseFormat2]` 
     
 </dd>
 </dl>
@@ -2402,7 +2414,8 @@ for chunk in response:
 <dl>
 <dd>
 
-**response_format:** `typing.Optional[V2ChatStreamRequestResponseFormat]` 
+**max_tokens:** `typing.Optional[int]` — The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+
     
 </dd>
 </dl>
@@ -2410,7 +2423,8 @@ for chunk in response:
 <dl>
 <dd>
 
-**max_tokens:** `typing.Optional[int]` — The maximum number of tokens to generate.
+**stop_sequences:** `typing.Optional[typing.Sequence[str]]` — A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
+
     
 </dd>
 </dl>
@@ -2418,23 +2432,14 @@ for chunk in response:
 <dl>
 <dd>
 
-**stop_sequences:** `typing.Optional[typing.Sequence[str]]` — A list of strings that the model will stop generating at.
-    
-</dd>
-</dl>
+**temperature:** `typing.Optional[float]` 
 
-<dl>
-<dd>
+Defaults to `0.3`.
 
-**max_input_tokens:** `typing.Optional[int]` — The maximum number of tokens to feed into the model.
-    
-</dd>
-</dl>
+A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
 
-<dl>
-<dd>
+Randomness can be further maximized by increasing the  value of the `p` parameter.
 
-**temperature:** `typing.Optional[float]` — The temperature of the model.
     
 </dd>
 </dl>
@@ -2443,6 +2448,12 @@ for chunk in response:
 <dd>
 
 **seed:** `typing.Optional[int]` 
+
+If specified, the backend will make a best effort to sample tokens
+deterministically, such that repeated requests with the same
+seed and parameters should return the same result. However,
+determinism cannot be totally guaranteed.
+
     
 </dd>
 </dl>
@@ -2450,7 +2461,11 @@ for chunk in response:
 <dl>
 <dd>
 
-**frequency_penalty:** `typing.Optional[float]` — The frequency penalty of the model.
+**frequency_penalty:** `typing.Optional[float]` 
+
+Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+
     
 </dd>
 </dl>
@@ -2458,7 +2473,11 @@ for chunk in response:
 <dl>
 <dd>
 
-**presence_penalty:** `typing.Optional[float]` — The presence penalty of the model.
+**presence_penalty:** `typing.Optional[float]` 
+
+Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+
     
 </dd>
 </dl>
@@ -2466,7 +2485,11 @@ for chunk in response:
 <dl>
 <dd>
 
-**k:** `typing.Optional[int]` 
+**k:** `typing.Optional[float]` 
+
+Ensures only the top `k` most likely tokens are considered for generation at each step.
+Defaults to `0`, min value of `0`, max value of `500`.
+
     
 </dd>
 </dl>
@@ -2474,7 +2497,11 @@ for chunk in response:
 <dl>
 <dd>
 
-**p:** `typing.Optional[int]` 
+**p:** `typing.Optional[float]` 
+
+Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
+Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
+
     
 </dd>
 </dl>
@@ -2505,6 +2532,20 @@ for chunk in response:
 <details><summary><code>client.v2.<a href="src/cohere/v2/client.py">chat</a>(...)</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Generates a message from the model in response to a provided conversation. To learn how to use the Chat API with Streaming and RAG follow our Text Generation guides.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -2540,7 +2581,7 @@ client.v2.chat(
 <dl>
 <dd>
 
-**model:** `str` — The model to use for the chat.
+**model:** `str` — The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
     
 </dd>
 </dl>
@@ -2557,14 +2598,11 @@ client.v2.chat(
 <dd>
 
 **tools:** `typing.Optional[typing.Sequence[Tool2]]` 
-    
-</dd>
-</dl>
 
-<dl>
-<dd>
+A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
-**tool_choice:** `typing.Optional[V2ChatRequestToolChoice]` 
+When `tools` is passed (without `tool_results`), the `text` content in the response will be empty and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
+
     
 </dd>
 </dl>
@@ -2573,6 +2611,10 @@ client.v2.chat(
 <dd>
 
 **citation_mode:** `typing.Optional[V2ChatRequestCitationMode]` 
+
+Defaults to `"accurate"`.
+Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+
     
 </dd>
 </dl>
@@ -2580,7 +2622,7 @@ client.v2.chat(
 <dl>
 <dd>
 
-**truncation_mode:** `typing.Optional[V2ChatRequestTruncationMode]` 
+**response_format:** `typing.Optional[ResponseFormat2]` 
     
 </dd>
 </dl>
@@ -2588,7 +2630,8 @@ client.v2.chat(
 <dl>
 <dd>
 
-**response_format:** `typing.Optional[V2ChatRequestResponseFormat]` 
+**max_tokens:** `typing.Optional[int]` — The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+
     
 </dd>
 </dl>
@@ -2596,7 +2639,8 @@ client.v2.chat(
 <dl>
 <dd>
 
-**max_tokens:** `typing.Optional[int]` — The maximum number of tokens to generate.
+**stop_sequences:** `typing.Optional[typing.Sequence[str]]` — A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
+
     
 </dd>
 </dl>
@@ -2604,23 +2648,14 @@ client.v2.chat(
 <dl>
 <dd>
 
-**stop_sequences:** `typing.Optional[typing.Sequence[str]]` — A list of strings that the model will stop generating at.
-    
-</dd>
-</dl>
+**temperature:** `typing.Optional[float]` 
 
-<dl>
-<dd>
+Defaults to `0.3`.
 
-**max_input_tokens:** `typing.Optional[int]` — The maximum number of tokens to feed into the model.
-    
-</dd>
-</dl>
+A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
 
-<dl>
-<dd>
+Randomness can be further maximized by increasing the  value of the `p` parameter.
 
-**temperature:** `typing.Optional[float]` — The temperature of the model.
     
 </dd>
 </dl>
@@ -2629,6 +2664,12 @@ client.v2.chat(
 <dd>
 
 **seed:** `typing.Optional[int]` 
+
+If specified, the backend will make a best effort to sample tokens
+deterministically, such that repeated requests with the same
+seed and parameters should return the same result. However,
+determinism cannot be totally guaranteed.
+
     
 </dd>
 </dl>
@@ -2636,7 +2677,11 @@ client.v2.chat(
 <dl>
 <dd>
 
-**frequency_penalty:** `typing.Optional[float]` — The frequency penalty of the model.
+**frequency_penalty:** `typing.Optional[float]` 
+
+Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+
     
 </dd>
 </dl>
@@ -2644,7 +2689,11 @@ client.v2.chat(
 <dl>
 <dd>
 
-**presence_penalty:** `typing.Optional[float]` — The presence penalty of the model.
+**presence_penalty:** `typing.Optional[float]` 
+
+Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+
     
 </dd>
 </dl>
@@ -2652,7 +2701,11 @@ client.v2.chat(
 <dl>
 <dd>
 
-**k:** `typing.Optional[int]` 
+**k:** `typing.Optional[float]` 
+
+Ensures only the top `k` most likely tokens are considered for generation at each step.
+Defaults to `0`, min value of `0`, max value of `500`.
+
     
 </dd>
 </dl>
@@ -2660,7 +2713,11 @@ client.v2.chat(
 <dl>
 <dd>
 
-**p:** `typing.Optional[int]` 
+**p:** `typing.Optional[float]` 
+
+Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
+Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
+
     
 </dd>
 </dl>
