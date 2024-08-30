@@ -8,10 +8,10 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2
 from ..core.unchecked_base_model import UncheckedBaseModel
 
 
-class JsonResponseFormat(UncheckedBaseModel):
-    schema_: typing.Optional[typing.Dict[str, typing.Any]] = pydantic.Field(alias="schema", default=None)
+class JsonResponseFormat2(UncheckedBaseModel):
+    json_schema: typing.Optional[typing.Dict[str, typing.Any]] = pydantic.Field(default=None)
     """
-    A JSON schema object that the output will adhere to. There are some restrictions we have on the schema, refer to [our guide](/docs/structured-outputs-json#schema-constraints) for more information.
+    [BETA] A JSON schema object that the output will adhere to. There are some restrictions we have on the schema, refer to [our guide](/docs/structured-outputs-json#schema-constraints) for more information.
     Example (required name and age object):
     
     ```json

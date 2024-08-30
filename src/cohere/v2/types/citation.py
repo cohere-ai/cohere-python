@@ -14,8 +14,8 @@ class Citation(UncheckedBaseModel):
     Citation information containing sources and the text cited.
     """
 
-    start: typing.Optional[str] = None
-    end: typing.Optional[str] = None
+    start: typing.Optional[int] = None
+    end: typing.Optional[int] = None
     text: typing.Optional[str] = None
     sources: typing.Optional[typing.List[Source]] = None
 

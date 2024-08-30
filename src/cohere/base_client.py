@@ -32,8 +32,10 @@ from .types.chat_connector import ChatConnector
 from .types.chat_document import ChatDocument
 from .types.chat_request_citation_quality import ChatRequestCitationQuality
 from .types.chat_request_prompt_truncation import ChatRequestPromptTruncation
+from .types.chat_request_safety_mode import ChatRequestSafetyMode
 from .types.chat_stream_request_citation_quality import ChatStreamRequestCitationQuality
 from .types.chat_stream_request_prompt_truncation import ChatStreamRequestPromptTruncation
+from .types.chat_stream_request_safety_mode import ChatStreamRequestSafetyMode
 from .types.check_api_key_response import CheckApiKeyResponse
 from .types.classify_example import ClassifyExample
 from .types.classify_request_truncate import ClassifyRequestTruncate
@@ -172,6 +174,7 @@ class BaseCohere:
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         force_single_step: typing.Optional[bool] = OMIT,
         response_format: typing.Optional[ResponseFormat] = OMIT,
+        safety_mode: typing.Optional[ChatStreamRequestSafetyMode] = OMIT,
         request_options: typing.Optional[RequestOptions] = None
     ) -> typing.Iterator[StreamedChatResponse]:
         """
@@ -182,13 +185,15 @@ class BaseCohere:
         ----------
         message : str
             Text input for the model to respond to.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
         model : typing.Optional[str]
-            Defaults to `command-r-plus`.
+            Defaults to `command-r-plus-08-2024`.
 
             The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
+
             Compatible Deployments: Cohere Platform, Private Deployments
 
 
@@ -196,6 +201,7 @@ class BaseCohere:
             When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style, and use the `SYSTEM` role.
 
             The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -205,6 +211,7 @@ class BaseCohere:
             Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
 
             The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -212,6 +219,7 @@ class BaseCohere:
             An alternative to `chat_history`.
 
             Providing a `conversation_id` creates or resumes a persisted conversation with the specified ID. The ID can be any non empty string.
+
             Compatible Deployments: Cohere Platform
 
 
@@ -225,13 +233,17 @@ class BaseCohere:
             With `prompt_truncation` set to "AUTO_PRESERVE_ORDER", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be preserved as they are inputted into the API.
 
             With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
-            Compatible Deployments: Cohere Platform Only AUTO_PRESERVE_ORDER: Azure, AWS Sagemaker/Bedrock, Private Deployments
+
+            Compatible Deployments:
+             - AUTO: Cohere Platform Only
+             - AUTO_PRESERVE_ORDER: Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
         connectors : typing.Optional[typing.Sequence[ChatConnector]]
             Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
 
             When specified, the model's reply will be enriched with information found by querying each of the connectors (RAG).
+
             Compatible Deployments: Cohere Platform
 
 
@@ -239,6 +251,7 @@ class BaseCohere:
             Defaults to `false`.
 
             When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -246,10 +259,12 @@ class BaseCohere:
             A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
 
             Example:
-            `[
+            ```
+            [
               { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
               { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
-            ]`
+            ]
+            ```
 
             Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
 
@@ -260,6 +275,7 @@ class BaseCohere:
             An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
 
             See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -267,6 +283,7 @@ class BaseCohere:
             Defaults to `"accurate"`.
 
             Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -276,11 +293,13 @@ class BaseCohere:
             A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
 
             Randomness can be further maximized by increasing the  value of the `p` parameter.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
         max_tokens : typing.Optional[int]
             The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -288,18 +307,21 @@ class BaseCohere:
             The maximum number of input tokens to send to the model. If not specified, `max_input_tokens` is the model's context length limit minus a small buffer.
 
             Input will be truncated according to the `prompt_truncation` parameter.
+
             Compatible Deployments: Cohere Platform
 
 
         k : typing.Optional[int]
             Ensures only the top `k` most likely tokens are considered for generation at each step.
             Defaults to `0`, min value of `0`, max value of `500`.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
         p : typing.Optional[float]
             Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
             Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -308,11 +330,13 @@ class BaseCohere:
             deterministically, such that repeated requests with the same
             seed and parameters should return the same result. However,
             determinism cannot be totally guaranteed.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
         stop_sequences : typing.Optional[typing.Sequence[str]]
             A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -320,6 +344,7 @@ class BaseCohere:
             Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
             Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -327,12 +352,14 @@ class BaseCohere:
             Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
             Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
         raw_prompting : typing.Optional[bool]
             When enabled, the user's prompt will be sent to the model without
             any pre-processing.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -343,6 +370,7 @@ class BaseCohere:
             A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
             When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -368,6 +396,7 @@ class BaseCohere:
             ]
             ```
             **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -375,6 +404,17 @@ class BaseCohere:
             Forces the chat to be single step. Defaults to `false`.
 
         response_format : typing.Optional[ResponseFormat]
+
+        safety_mode : typing.Optional[ChatStreamRequestSafetyMode]
+            Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+            When `NONE` is specified, the safety instruction will be omitted.
+
+            Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
+
+            **Note**: This parameter is only compatible with models [Command R 08-2024](/docs/command-r#august-2024-release), [Command R+ 08-2024](/docs/command-r-plus#august-2024-release) and newer.
+
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -468,6 +508,7 @@ class BaseCohere:
             ],
             force_single_step=True,
             response_format=ResponseFormat_Text(),
+            safety_mode="CONTEXTUAL",
         )
         for chunk in response:
             yield chunk
@@ -501,6 +542,7 @@ class BaseCohere:
                 "tool_results": tool_results,
                 "force_single_step": force_single_step,
                 "response_format": response_format,
+                "safety_mode": safety_mode,
                 "stream": True,
             },
             request_options=request_options,
@@ -594,6 +636,7 @@ class BaseCohere:
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         force_single_step: typing.Optional[bool] = OMIT,
         response_format: typing.Optional[ResponseFormat] = OMIT,
+        safety_mode: typing.Optional[ChatRequestSafetyMode] = OMIT,
         request_options: typing.Optional[RequestOptions] = None
     ) -> NonStreamedChatResponse:
         """
@@ -604,13 +647,15 @@ class BaseCohere:
         ----------
         message : str
             Text input for the model to respond to.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
         model : typing.Optional[str]
-            Defaults to `command-r-plus`.
+            Defaults to `command-r-plus-08-2024`.
 
             The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
+
             Compatible Deployments: Cohere Platform, Private Deployments
 
 
@@ -618,6 +663,7 @@ class BaseCohere:
             When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style, and use the `SYSTEM` role.
 
             The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -627,6 +673,7 @@ class BaseCohere:
             Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
 
             The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -634,6 +681,7 @@ class BaseCohere:
             An alternative to `chat_history`.
 
             Providing a `conversation_id` creates or resumes a persisted conversation with the specified ID. The ID can be any non empty string.
+
             Compatible Deployments: Cohere Platform
 
 
@@ -647,13 +695,17 @@ class BaseCohere:
             With `prompt_truncation` set to "AUTO_PRESERVE_ORDER", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be preserved as they are inputted into the API.
 
             With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
-            Compatible Deployments: Cohere Platform Only AUTO_PRESERVE_ORDER: Azure, AWS Sagemaker/Bedrock, Private Deployments
+
+            Compatible Deployments:
+             - AUTO: Cohere Platform Only
+             - AUTO_PRESERVE_ORDER: Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
         connectors : typing.Optional[typing.Sequence[ChatConnector]]
             Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
 
             When specified, the model's reply will be enriched with information found by querying each of the connectors (RAG).
+
             Compatible Deployments: Cohere Platform
 
 
@@ -661,6 +713,7 @@ class BaseCohere:
             Defaults to `false`.
 
             When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -668,10 +721,12 @@ class BaseCohere:
             A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
 
             Example:
-            `[
+            ```
+            [
               { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
               { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
-            ]`
+            ]
+            ```
 
             Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
 
@@ -682,6 +737,7 @@ class BaseCohere:
             An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
 
             See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -689,6 +745,7 @@ class BaseCohere:
             Defaults to `"accurate"`.
 
             Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -698,11 +755,13 @@ class BaseCohere:
             A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
 
             Randomness can be further maximized by increasing the  value of the `p` parameter.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
         max_tokens : typing.Optional[int]
             The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -710,18 +769,21 @@ class BaseCohere:
             The maximum number of input tokens to send to the model. If not specified, `max_input_tokens` is the model's context length limit minus a small buffer.
 
             Input will be truncated according to the `prompt_truncation` parameter.
+
             Compatible Deployments: Cohere Platform
 
 
         k : typing.Optional[int]
             Ensures only the top `k` most likely tokens are considered for generation at each step.
             Defaults to `0`, min value of `0`, max value of `500`.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
         p : typing.Optional[float]
             Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
             Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -730,11 +792,13 @@ class BaseCohere:
             deterministically, such that repeated requests with the same
             seed and parameters should return the same result. However,
             determinism cannot be totally guaranteed.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
         stop_sequences : typing.Optional[typing.Sequence[str]]
             A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -742,6 +806,7 @@ class BaseCohere:
             Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
             Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -749,12 +814,14 @@ class BaseCohere:
             Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
             Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
         raw_prompting : typing.Optional[bool]
             When enabled, the user's prompt will be sent to the model without
             any pre-processing.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -765,6 +832,7 @@ class BaseCohere:
             A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
             When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -790,6 +858,7 @@ class BaseCohere:
             ]
             ```
             **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -797,6 +866,17 @@ class BaseCohere:
             Forces the chat to be single step. Defaults to `false`.
 
         response_format : typing.Optional[ResponseFormat]
+
+        safety_mode : typing.Optional[ChatRequestSafetyMode]
+            Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+            When `NONE` is specified, the safety instruction will be omitted.
+
+            Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
+
+            **Note**: This parameter is only compatible with models [Command R 08-2024](/docs/command-r#august-2024-release), [Command R+ 08-2024](/docs/command-r-plus#august-2024-release) and newer.
+
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -849,6 +929,7 @@ class BaseCohere:
                 "tool_results": tool_results,
                 "force_single_step": force_single_step,
                 "response_format": response_format,
+                "safety_mode": safety_mode,
                 "stream": False,
             },
             request_options=request_options,
@@ -928,10 +1009,9 @@ class BaseCohere:
         request_options: typing.Optional[RequestOptions] = None
     ) -> typing.Iterator[GenerateStreamedResponse]:
         """
-        > 🚧 Warning
-        >
-        > This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
-
+        <Warning>
+        This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+        </Warning>
         Generates realistic text conditioned on a given input.
 
         Parameters
@@ -1166,10 +1246,9 @@ class BaseCohere:
         request_options: typing.Optional[RequestOptions] = None
     ) -> Generation:
         """
-        > 🚧 Warning
-        >
-        > This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
-
+        <Warning>
+        This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+        </Warning>
         Generates realistic text conditioned on a given input.
 
         Parameters
@@ -1431,6 +1510,7 @@ class BaseCohere:
         )
         client.embed(
             texts=["string"],
+            images=["string"],
             model="string",
             input_type="search_document",
             embedding_types=["float"],
@@ -1563,14 +1643,8 @@ class BaseCohere:
             token="YOUR_TOKEN",
         )
         client.rerank(
-            model="rerank-english-v3.0",
-            query="What is the capital of the United States?",
-            documents=[
-                "Carson City is the capital city of the American state of Nevada.",
-                "The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.",
-                "Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.",
-                "Capital punishment (the death penalty) has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states.",
-            ],
+            query="query",
+            documents=["documents"],
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -1686,7 +1760,6 @@ class BaseCohere:
 
         Examples
         --------
-        from cohere import ClassifyExample
         from cohere.client import Client
 
         client = Client(
@@ -1694,49 +1767,7 @@ class BaseCohere:
             token="YOUR_TOKEN",
         )
         client.classify(
-            inputs=["Confirm your email address", "hey i need u to send some $"],
-            examples=[
-                ClassifyExample(
-                    text="Dermatologists don't like her!",
-                    label="Spam",
-                ),
-                ClassifyExample(
-                    text="Hello, open to this?",
-                    label="Spam",
-                ),
-                ClassifyExample(
-                    text="I need help please wire me $1000 right now",
-                    label="Spam",
-                ),
-                ClassifyExample(
-                    text="Nice to know you ;)",
-                    label="Spam",
-                ),
-                ClassifyExample(
-                    text="Please help me?",
-                    label="Spam",
-                ),
-                ClassifyExample(
-                    text="Your parcel will be delivered today",
-                    label="Not spam",
-                ),
-                ClassifyExample(
-                    text="Review changes to our Terms and Conditions",
-                    label="Not spam",
-                ),
-                ClassifyExample(
-                    text="Weekly sync notes",
-                    label="Not spam",
-                ),
-                ClassifyExample(
-                    text="Re: Follow up from today’s meeting",
-                    label="Not spam",
-                ),
-                ClassifyExample(
-                    text="Pre-read for tomorrow",
-                    label="Not spam",
-                ),
-            ],
+            inputs=["inputs"],
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -1811,10 +1842,9 @@ class BaseCohere:
         request_options: typing.Optional[RequestOptions] = None
     ) -> SummarizeResponse:
         """
-        > 🚧 Warning
-        >
-        > This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
-
+        <Warning>
+        This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+        </Warning>
         Generates a summary in English for a given text.
 
         Parameters
@@ -1857,7 +1887,7 @@ class BaseCohere:
             token="YOUR_TOKEN",
         )
         client.summarize(
-            text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.\n\nThe meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo\r all variants. Analogues made from dairy alternatives, such as goat\'s or sheep\'s milk, or milk substitutes (e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are lactose intolerant, allergic to dairy protein or vegan.',
+            text="text",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -2052,8 +2082,8 @@ class BaseCohere:
             token="YOUR_TOKEN",
         )
         client.detokenize(
-            tokens=[10104, 12221, 1315, 34, 1420, 69],
-            model="command",
+            tokens=[1],
+            model="model",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -2294,6 +2324,7 @@ class AsyncBaseCohere:
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         force_single_step: typing.Optional[bool] = OMIT,
         response_format: typing.Optional[ResponseFormat] = OMIT,
+        safety_mode: typing.Optional[ChatStreamRequestSafetyMode] = OMIT,
         request_options: typing.Optional[RequestOptions] = None
     ) -> typing.AsyncIterator[StreamedChatResponse]:
         """
@@ -2304,13 +2335,15 @@ class AsyncBaseCohere:
         ----------
         message : str
             Text input for the model to respond to.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
         model : typing.Optional[str]
-            Defaults to `command-r-plus`.
+            Defaults to `command-r-plus-08-2024`.
 
             The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
+
             Compatible Deployments: Cohere Platform, Private Deployments
 
 
@@ -2318,6 +2351,7 @@ class AsyncBaseCohere:
             When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style, and use the `SYSTEM` role.
 
             The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -2327,6 +2361,7 @@ class AsyncBaseCohere:
             Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
 
             The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -2334,6 +2369,7 @@ class AsyncBaseCohere:
             An alternative to `chat_history`.
 
             Providing a `conversation_id` creates or resumes a persisted conversation with the specified ID. The ID can be any non empty string.
+
             Compatible Deployments: Cohere Platform
 
 
@@ -2347,13 +2383,17 @@ class AsyncBaseCohere:
             With `prompt_truncation` set to "AUTO_PRESERVE_ORDER", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be preserved as they are inputted into the API.
 
             With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
-            Compatible Deployments: Cohere Platform Only AUTO_PRESERVE_ORDER: Azure, AWS Sagemaker/Bedrock, Private Deployments
+
+            Compatible Deployments:
+             - AUTO: Cohere Platform Only
+             - AUTO_PRESERVE_ORDER: Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
         connectors : typing.Optional[typing.Sequence[ChatConnector]]
             Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
 
             When specified, the model's reply will be enriched with information found by querying each of the connectors (RAG).
+
             Compatible Deployments: Cohere Platform
 
 
@@ -2361,6 +2401,7 @@ class AsyncBaseCohere:
             Defaults to `false`.
 
             When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -2368,10 +2409,12 @@ class AsyncBaseCohere:
             A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
 
             Example:
-            `[
+            ```
+            [
               { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
               { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
-            ]`
+            ]
+            ```
 
             Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
 
@@ -2382,6 +2425,7 @@ class AsyncBaseCohere:
             An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
 
             See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -2389,6 +2433,7 @@ class AsyncBaseCohere:
             Defaults to `"accurate"`.
 
             Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -2398,11 +2443,13 @@ class AsyncBaseCohere:
             A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
 
             Randomness can be further maximized by increasing the  value of the `p` parameter.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
         max_tokens : typing.Optional[int]
             The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -2410,18 +2457,21 @@ class AsyncBaseCohere:
             The maximum number of input tokens to send to the model. If not specified, `max_input_tokens` is the model's context length limit minus a small buffer.
 
             Input will be truncated according to the `prompt_truncation` parameter.
+
             Compatible Deployments: Cohere Platform
 
 
         k : typing.Optional[int]
             Ensures only the top `k` most likely tokens are considered for generation at each step.
             Defaults to `0`, min value of `0`, max value of `500`.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
         p : typing.Optional[float]
             Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
             Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -2430,11 +2480,13 @@ class AsyncBaseCohere:
             deterministically, such that repeated requests with the same
             seed and parameters should return the same result. However,
             determinism cannot be totally guaranteed.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
         stop_sequences : typing.Optional[typing.Sequence[str]]
             A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -2442,6 +2494,7 @@ class AsyncBaseCohere:
             Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
             Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -2449,12 +2502,14 @@ class AsyncBaseCohere:
             Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
             Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
         raw_prompting : typing.Optional[bool]
             When enabled, the user's prompt will be sent to the model without
             any pre-processing.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -2465,6 +2520,7 @@ class AsyncBaseCohere:
             A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
             When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -2490,6 +2546,7 @@ class AsyncBaseCohere:
             ]
             ```
             **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -2497,6 +2554,17 @@ class AsyncBaseCohere:
             Forces the chat to be single step. Defaults to `false`.
 
         response_format : typing.Optional[ResponseFormat]
+
+        safety_mode : typing.Optional[ChatStreamRequestSafetyMode]
+            Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+            When `NONE` is specified, the safety instruction will be omitted.
+
+            Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
+
+            **Note**: This parameter is only compatible with models [Command R 08-2024](/docs/command-r#august-2024-release), [Command R+ 08-2024](/docs/command-r-plus#august-2024-release) and newer.
+
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -2595,6 +2663,7 @@ class AsyncBaseCohere:
                 ],
                 force_single_step=True,
                 response_format=ResponseFormat_Text(),
+                safety_mode="CONTEXTUAL",
             )
             async for chunk in response:
                 yield chunk
@@ -2631,6 +2700,7 @@ class AsyncBaseCohere:
                 "tool_results": tool_results,
                 "force_single_step": force_single_step,
                 "response_format": response_format,
+                "safety_mode": safety_mode,
                 "stream": True,
             },
             request_options=request_options,
@@ -2724,6 +2794,7 @@ class AsyncBaseCohere:
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         force_single_step: typing.Optional[bool] = OMIT,
         response_format: typing.Optional[ResponseFormat] = OMIT,
+        safety_mode: typing.Optional[ChatRequestSafetyMode] = OMIT,
         request_options: typing.Optional[RequestOptions] = None
     ) -> NonStreamedChatResponse:
         """
@@ -2734,13 +2805,15 @@ class AsyncBaseCohere:
         ----------
         message : str
             Text input for the model to respond to.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
         model : typing.Optional[str]
-            Defaults to `command-r-plus`.
+            Defaults to `command-r-plus-08-2024`.
 
             The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
+
             Compatible Deployments: Cohere Platform, Private Deployments
 
 
@@ -2748,6 +2821,7 @@ class AsyncBaseCohere:
             When specified, the default Cohere preamble will be replaced with the provided one. Preambles are a part of the prompt used to adjust the model's overall behavior and conversation style, and use the `SYSTEM` role.
 
             The `SYSTEM` role is also used for the contents of the optional `chat_history=` parameter. When used with the `chat_history=` parameter it adds content throughout a conversation. Conversely, when used with the `preamble=` parameter it adds content at the start of the conversation only.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -2757,6 +2831,7 @@ class AsyncBaseCohere:
             Each item represents a single message in the chat history, excluding the current user turn. It has two properties: `role` and `message`. The `role` identifies the sender (`CHATBOT`, `SYSTEM`, or `USER`), while the `message` contains the text content.
 
             The chat_history parameter should not be used for `SYSTEM` messages in most cases. Instead, to add a `SYSTEM` role message at the beginning of a conversation, the `preamble` parameter should be used.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -2764,6 +2839,7 @@ class AsyncBaseCohere:
             An alternative to `chat_history`.
 
             Providing a `conversation_id` creates or resumes a persisted conversation with the specified ID. The ID can be any non empty string.
+
             Compatible Deployments: Cohere Platform
 
 
@@ -2777,13 +2853,17 @@ class AsyncBaseCohere:
             With `prompt_truncation` set to "AUTO_PRESERVE_ORDER", some elements from `chat_history` and `documents` will be dropped in an attempt to construct a prompt that fits within the model's context length limit. During this process the order of the documents and chat history will be preserved as they are inputted into the API.
 
             With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
-            Compatible Deployments: Cohere Platform Only AUTO_PRESERVE_ORDER: Azure, AWS Sagemaker/Bedrock, Private Deployments
+
+            Compatible Deployments:
+             - AUTO: Cohere Platform Only
+             - AUTO_PRESERVE_ORDER: Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
         connectors : typing.Optional[typing.Sequence[ChatConnector]]
             Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
 
             When specified, the model's reply will be enriched with information found by querying each of the connectors (RAG).
+
             Compatible Deployments: Cohere Platform
 
 
@@ -2791,6 +2871,7 @@ class AsyncBaseCohere:
             Defaults to `false`.
 
             When `true`, the response will only contain a list of generated search queries, but no search will take place, and no reply from the model to the user's `message` will be generated.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -2798,10 +2879,12 @@ class AsyncBaseCohere:
             A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
 
             Example:
-            `[
+            ```
+            [
               { "title": "Tall penguins", "text": "Emperor penguins are the tallest." },
               { "title": "Penguin habitats", "text": "Emperor penguins only live in Antarctica." },
-            ]`
+            ]
+            ```
 
             Keys and values from each document will be serialized to a string and passed to the model. The resulting generation will include citations that reference some of these documents.
 
@@ -2812,6 +2895,7 @@ class AsyncBaseCohere:
             An `_excludes` field (array of strings) can be optionally supplied to omit some key-value pairs from being shown to the model. The omitted fields will still show up in the citation object. The "_excludes" field will not be passed to the model.
 
             See ['Document Mode'](https://docs.cohere.com/docs/retrieval-augmented-generation-rag#document-mode) in the guide for more information.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -2819,6 +2903,7 @@ class AsyncBaseCohere:
             Defaults to `"accurate"`.
 
             Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -2828,11 +2913,13 @@ class AsyncBaseCohere:
             A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
 
             Randomness can be further maximized by increasing the  value of the `p` parameter.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
         max_tokens : typing.Optional[int]
             The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -2840,18 +2927,21 @@ class AsyncBaseCohere:
             The maximum number of input tokens to send to the model. If not specified, `max_input_tokens` is the model's context length limit minus a small buffer.
 
             Input will be truncated according to the `prompt_truncation` parameter.
+
             Compatible Deployments: Cohere Platform
 
 
         k : typing.Optional[int]
             Ensures only the top `k` most likely tokens are considered for generation at each step.
             Defaults to `0`, min value of `0`, max value of `500`.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
         p : typing.Optional[float]
             Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
             Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -2860,11 +2950,13 @@ class AsyncBaseCohere:
             deterministically, such that repeated requests with the same
             seed and parameters should return the same result. However,
             determinism cannot be totally guaranteed.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
         stop_sequences : typing.Optional[typing.Sequence[str]]
             A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -2872,6 +2964,7 @@ class AsyncBaseCohere:
             Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
             Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -2879,12 +2972,14 @@ class AsyncBaseCohere:
             Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
 
             Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
         raw_prompting : typing.Optional[bool]
             When enabled, the user's prompt will be sent to the model without
             any pre-processing.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -2895,6 +2990,7 @@ class AsyncBaseCohere:
             A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
             When `tools` is passed (without `tool_results`), the `text` field in the response will be `""` and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -2920,6 +3016,7 @@ class AsyncBaseCohere:
             ]
             ```
             **Note**: Chat calls with `tool_results` should not be included in the Chat history to avoid duplication of the message text.
+
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
@@ -2927,6 +3024,17 @@ class AsyncBaseCohere:
             Forces the chat to be single step. Defaults to `false`.
 
         response_format : typing.Optional[ResponseFormat]
+
+        safety_mode : typing.Optional[ChatRequestSafetyMode]
+            Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+            When `NONE` is specified, the safety instruction will be omitted.
+
+            Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
+
+            **Note**: This parameter is only compatible with models [Command R 08-2024](/docs/command-r#august-2024-release), [Command R+ 08-2024](/docs/command-r-plus#august-2024-release) and newer.
+
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -2987,6 +3095,7 @@ class AsyncBaseCohere:
                 "tool_results": tool_results,
                 "force_single_step": force_single_step,
                 "response_format": response_format,
+                "safety_mode": safety_mode,
                 "stream": False,
             },
             request_options=request_options,
@@ -3066,10 +3175,9 @@ class AsyncBaseCohere:
         request_options: typing.Optional[RequestOptions] = None
     ) -> typing.AsyncIterator[GenerateStreamedResponse]:
         """
-        > 🚧 Warning
-        >
-        > This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
-
+        <Warning>
+        This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+        </Warning>
         Generates realistic text conditioned on a given input.
 
         Parameters
@@ -3312,10 +3420,9 @@ class AsyncBaseCohere:
         request_options: typing.Optional[RequestOptions] = None
     ) -> Generation:
         """
-        > 🚧 Warning
-        >
-        > This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
-
+        <Warning>
+        This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+        </Warning>
         Generates realistic text conditioned on a given input.
 
         Parameters
@@ -3590,6 +3697,7 @@ class AsyncBaseCohere:
         async def main() -> None:
             await client.embed(
                 texts=["string"],
+                images=["string"],
                 model="string",
                 input_type="search_document",
                 embedding_types=["float"],
@@ -3730,14 +3838,8 @@ class AsyncBaseCohere:
 
         async def main() -> None:
             await client.rerank(
-                model="rerank-english-v3.0",
-                query="What is the capital of the United States?",
-                documents=[
-                    "Carson City is the capital city of the American state of Nevada.",
-                    "The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.",
-                    "Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.",
-                    "Capital punishment (the death penalty) has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states.",
-                ],
+                query="query",
+                documents=["documents"],
             )
 
 
@@ -3858,7 +3960,6 @@ class AsyncBaseCohere:
         --------
         import asyncio
 
-        from cohere import ClassifyExample
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -3869,49 +3970,7 @@ class AsyncBaseCohere:
 
         async def main() -> None:
             await client.classify(
-                inputs=["Confirm your email address", "hey i need u to send some $"],
-                examples=[
-                    ClassifyExample(
-                        text="Dermatologists don't like her!",
-                        label="Spam",
-                    ),
-                    ClassifyExample(
-                        text="Hello, open to this?",
-                        label="Spam",
-                    ),
-                    ClassifyExample(
-                        text="I need help please wire me $1000 right now",
-                        label="Spam",
-                    ),
-                    ClassifyExample(
-                        text="Nice to know you ;)",
-                        label="Spam",
-                    ),
-                    ClassifyExample(
-                        text="Please help me?",
-                        label="Spam",
-                    ),
-                    ClassifyExample(
-                        text="Your parcel will be delivered today",
-                        label="Not spam",
-                    ),
-                    ClassifyExample(
-                        text="Review changes to our Terms and Conditions",
-                        label="Not spam",
-                    ),
-                    ClassifyExample(
-                        text="Weekly sync notes",
-                        label="Not spam",
-                    ),
-                    ClassifyExample(
-                        text="Re: Follow up from today’s meeting",
-                        label="Not spam",
-                    ),
-                    ClassifyExample(
-                        text="Pre-read for tomorrow",
-                        label="Not spam",
-                    ),
-                ],
+                inputs=["inputs"],
             )
 
 
@@ -3989,10 +4048,9 @@ class AsyncBaseCohere:
         request_options: typing.Optional[RequestOptions] = None
     ) -> SummarizeResponse:
         """
-        > 🚧 Warning
-        >
-        > This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
-
+        <Warning>
+        This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+        </Warning>
         Generates a summary in English for a given text.
 
         Parameters
@@ -4040,7 +4098,7 @@ class AsyncBaseCohere:
 
         async def main() -> None:
             await client.summarize(
-                text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.\n\nThe meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo\r all variants. Analogues made from dairy alternatives, such as goat\'s or sheep\'s milk, or milk substitutes (e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are lactose intolerant, allergic to dairy protein or vegan.',
+                text="text",
             )
 
 
@@ -4251,8 +4309,8 @@ class AsyncBaseCohere:
 
         async def main() -> None:
             await client.detokenize(
-                tokens=[10104, 12221, 1315, 34, 1420, 69],
-                model="command",
+                tokens=[1],
+                model="model",
             )
 
 
