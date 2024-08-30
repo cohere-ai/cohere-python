@@ -163,6 +163,7 @@ from .errors import (
 )
 from . import connectors, datasets, embed_jobs, finetuning, models, v2
 from .aws_client import AwsClient
+from .client_v2 import AsyncClientV2, ClientV2
 from .bedrock_client import BedrockClient
 from .client import AsyncClient, Client
 from .datasets import (
