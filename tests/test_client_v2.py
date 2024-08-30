@@ -1,10 +1,9 @@
-import json
 import os
 import typing
 import unittest
 
 import cohere
-from cohere import TextContent, ChatDocument, ToolMessage2, UserMessage, AssistantMessage
+from cohere import ToolMessage2, UserMessage, AssistantMessage
 
 co = cohere.ClientV2(timeout=10000)
 
@@ -43,13 +42,10 @@ class TestClientV2(unittest.TestCase):
             {"title": "widget sales 2020", "text": "2 million"},
             {"title": "widget sales 2021", "text": "4 million"},
         ]
-        docs: typing.List[ChatDocument] = []
-        for doc in documents:
-            docs.append(ChatDocument(id="1", document=doc))
         response = co.chat(
             messages=cohere.v2.UserMessage(
                 content=cohere.v2.TextContent(text="how many widges were sold in 2020?"),
-                documents=docs,
+                documents=documents,
             ),
         )
 
