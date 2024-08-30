@@ -9,12 +9,32 @@ import typing_extensions
 
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
 from ...core.unchecked_base_model import UncheckedBaseModel, UnionMetadata
+from ...types.chat_document import ChatDocument
+from .assistant_message_content import AssistantMessageContent
 from .citation import Citation
 from .system_message_content import SystemMessageContent
-from .text_content import TextContent
 from .tool_call2 import ToolCall2
 from .tool_message2tool_content_item import ToolMessage2ToolContentItem
 from .user_message_content import UserMessageContent
+
+
+class ChatMessage2_User(UncheckedBaseModel):
+    """
+    Represents a single message in the chat history from a given role.
+    """
+
+    content: UserMessageContent
+    documents: typing.Optional[typing.List[ChatDocument]] = None
+    role: typing.Literal["user"] = "user"
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
 
 
 class ChatMessage2_Assistant(UncheckedBaseModel):
@@ -24,7 +44,7 @@ class ChatMessage2_Assistant(UncheckedBaseModel):
 
     tool_calls: typing.Optional[typing.List[ToolCall2]] = None
     tool_plan: typing.Optional[str] = None
-    content: typing.Optional[typing.List[TextContent]] = None
+    content: typing.Optional[AssistantMessageContent] = None
     citations: typing.Optional[typing.List[Citation]] = None
     role: typing.Literal["assistant"] = "assistant"
 
@@ -56,24 +76,6 @@ class ChatMessage2_System(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class ChatMessage2_User(UncheckedBaseModel):
-    """
-    Represents a single message in the chat history from a given role.
-    """
-
-    content: UserMessageContent
-    role: typing.Literal["user"] = "user"
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
 class ChatMessage2_Tool(UncheckedBaseModel):
     """
     Represents a single message in the chat history from a given role.
@@ -94,6 +96,6 @@ class ChatMessage2_Tool(UncheckedBaseModel):
 
 
 ChatMessage2 = typing_extensions.Annotated[
-    typing.Union[ChatMessage2_Assistant, ChatMessage2_System, ChatMessage2_User, ChatMessage2_Tool],
+    typing.Union[ChatMessage2_User, ChatMessage2_Assistant, ChatMessage2_System, ChatMessage2_Tool],
     UnionMetadata(discriminant="role"),
 ]

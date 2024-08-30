@@ -11,9 +11,9 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2
 from ..core.unchecked_base_model import UncheckedBaseModel, UnionMetadata
 
 
-class ResponseFormat_Text(UncheckedBaseModel):
+class ResponseFormat2_Text(UncheckedBaseModel):
     """
-    Configuration for forcing the model output to adhere to the specified format. Supported on [Command R 03-2024](https://docs.cohere.com/docs/command-r), [Command R+ 04-2024](https://docs.cohere.com/docs/command-r-plus) and newer models.
+    Configuration for forcing the model output to adhere to the specified format. Supported on [Command R](https://docs.cohere.com/docs/command-r), [Command R+](https://docs.cohere.com/docs/command-r-plus) and newer models.
 
     The model can be forced into outputting JSON objects (with up to 5 levels of nesting) by setting `{ "type": "json_object" }`.
 
@@ -35,9 +35,9 @@ class ResponseFormat_Text(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class ResponseFormat_JsonObject(UncheckedBaseModel):
+class ResponseFormat2_JsonObject(UncheckedBaseModel):
     """
-    Configuration for forcing the model output to adhere to the specified format. Supported on [Command R 03-2024](https://docs.cohere.com/docs/command-r), [Command R+ 04-2024](https://docs.cohere.com/docs/command-r-plus) and newer models.
+    Configuration for forcing the model output to adhere to the specified format. Supported on [Command R](https://docs.cohere.com/docs/command-r), [Command R+](https://docs.cohere.com/docs/command-r-plus) and newer models.
 
     The model can be forced into outputting JSON objects (with up to 5 levels of nesting) by setting `{ "type": "json_object" }`.
 
@@ -47,7 +47,7 @@ class ResponseFormat_JsonObject(UncheckedBaseModel):
     **Limitation**: The parameter is not supported in RAG mode (when any of `connectors`, `documents`, `tools`, `tool_results` are provided).
     """
 
-    schema_: typing.Optional[typing.Dict[str, typing.Any]] = pydantic.Field(alias="schema", default=None)
+    json_schema: typing.Optional[typing.Dict[str, typing.Any]] = None
     type: typing.Literal["json_object"] = "json_object"
 
     if IS_PYDANTIC_V2:
@@ -60,6 +60,6 @@ class ResponseFormat_JsonObject(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-ResponseFormat = typing_extensions.Annotated[
-    typing.Union[ResponseFormat_Text, ResponseFormat_JsonObject], UnionMetadata(discriminant="type")
+ResponseFormat2 = typing_extensions.Annotated[
+    typing.Union[ResponseFormat2_Text, ResponseFormat2_JsonObject], UnionMetadata(discriminant="type")
 ]

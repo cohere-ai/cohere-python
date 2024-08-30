@@ -4,17 +4,13 @@ import typing
 
 import pydantic
 
-from ...core.pydantic_utilities import IS_PYDANTIC_V2
-from ...core.unchecked_base_model import UncheckedBaseModel
-from .tool2function import Tool2Function
+from ..core.pydantic_utilities import IS_PYDANTIC_V2
+from ..core.unchecked_base_model import UncheckedBaseModel
+from .citation_start_event_delta_message import CitationStartEventDeltaMessage
 
 
-class Tool2(UncheckedBaseModel):
-    type: typing.Optional[typing.Literal["function"]] = None
-    function: typing.Optional[Tool2Function] = pydantic.Field(default=None)
-    """
-    The function to be executed.
-    """
+class CitationStartEventDelta(UncheckedBaseModel):
+    message: typing.Optional[CitationStartEventDeltaMessage] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

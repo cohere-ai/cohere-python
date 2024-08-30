@@ -24,6 +24,7 @@ from ..errors.unprocessable_entity_error import UnprocessableEntityError
 from ..types.client_closed_request_error_body import ClientClosedRequestErrorBody
 from ..types.gateway_timeout_error_body import GatewayTimeoutErrorBody
 from ..types.not_implemented_error_body import NotImplementedErrorBody
+from ..types.response_format2 import ResponseFormat2
 from ..types.too_many_requests_error_body import TooManyRequestsErrorBody
 from ..types.unprocessable_entity_error_body import UnprocessableEntityErrorBody
 from .types.chat_messages import ChatMessages
@@ -31,13 +32,7 @@ from .types.non_streamed_chat_response2 import NonStreamedChatResponse2
 from .types.streamed_chat_response2 import StreamedChatResponse2
 from .types.tool2 import Tool2
 from .types.v2chat_request_citation_mode import V2ChatRequestCitationMode
-from .types.v2chat_request_response_format import V2ChatRequestResponseFormat
-from .types.v2chat_request_tool_choice import V2ChatRequestToolChoice
-from .types.v2chat_request_truncation_mode import V2ChatRequestTruncationMode
 from .types.v2chat_stream_request_citation_mode import V2ChatStreamRequestCitationMode
-from .types.v2chat_stream_request_response_format import V2ChatStreamRequestResponseFormat
-from .types.v2chat_stream_request_tool_choice import V2ChatStreamRequestToolChoice
-from .types.v2chat_stream_request_truncation_mode import V2ChatStreamRequestTruncationMode
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -53,63 +48,84 @@ class V2Client:
         model: str,
         messages: ChatMessages,
         tools: typing.Optional[typing.Sequence[Tool2]] = OMIT,
-        tool_choice: typing.Optional[V2ChatStreamRequestToolChoice] = OMIT,
         citation_mode: typing.Optional[V2ChatStreamRequestCitationMode] = OMIT,
-        truncation_mode: typing.Optional[V2ChatStreamRequestTruncationMode] = OMIT,
-        response_format: typing.Optional[V2ChatStreamRequestResponseFormat] = OMIT,
+        response_format: typing.Optional[ResponseFormat2] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
-        max_input_tokens: typing.Optional[int] = OMIT,
         temperature: typing.Optional[float] = OMIT,
         seed: typing.Optional[int] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
-        k: typing.Optional[int] = OMIT,
-        p: typing.Optional[int] = OMIT,
+        k: typing.Optional[float] = OMIT,
+        p: typing.Optional[float] = OMIT,
         return_prompt: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None
     ) -> typing.Iterator[StreamedChatResponse2]:
         """
+        Generates a message from the model in response to a provided conversation. To learn how to use the Chat API with Streaming and RAG follow our Text Generation guides.
+
         Parameters
         ----------
         model : str
-            The model to use for the chat.
+            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
         messages : ChatMessages
 
         tools : typing.Optional[typing.Sequence[Tool2]]
+            A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
-        tool_choice : typing.Optional[V2ChatStreamRequestToolChoice]
+            When `tools` is passed (without `tool_results`), the `text` content in the response will be empty and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
+
 
         citation_mode : typing.Optional[V2ChatStreamRequestCitationMode]
+            Defaults to `"accurate"`.
+            Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
 
-        truncation_mode : typing.Optional[V2ChatStreamRequestTruncationMode]
 
-        response_format : typing.Optional[V2ChatStreamRequestResponseFormat]
+        response_format : typing.Optional[ResponseFormat2]
 
         max_tokens : typing.Optional[int]
-            The maximum number of tokens to generate.
+            The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+
 
         stop_sequences : typing.Optional[typing.Sequence[str]]
-            A list of strings that the model will stop generating at.
+            A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
 
-        max_input_tokens : typing.Optional[int]
-            The maximum number of tokens to feed into the model.
 
         temperature : typing.Optional[float]
-            The temperature of the model.
+            Defaults to `0.3`.
+
+            A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
+
+            Randomness can be further maximized by increasing the  value of the `p` parameter.
+
 
         seed : typing.Optional[int]
+            If specified, the backend will make a best effort to sample tokens
+            deterministically, such that repeated requests with the same
+            seed and parameters should return the same result. However,
+            determinism cannot be totally guaranteed.
+
 
         frequency_penalty : typing.Optional[float]
-            The frequency penalty of the model.
+            Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+            Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+
 
         presence_penalty : typing.Optional[float]
-            The presence penalty of the model.
+            Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+            Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
 
-        k : typing.Optional[int]
 
-        p : typing.Optional[int]
+        k : typing.Optional[float]
+            Ensures only the top `k` most likely tokens are considered for generation at each step.
+            Defaults to `0`, min value of `0`, max value of `500`.
+
+
+        p : typing.Optional[float]
+            Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
+            Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
+
 
         return_prompt : typing.Optional[bool]
             Whether to return the prompt in the response.
@@ -124,17 +140,7 @@ class V2Client:
 
         Examples
         --------
-        from cohere import (
-            ChatMessage2_Assistant,
-            Citation,
-            Source_Tool,
-            TextContent,
-            Tool2,
-            Tool2Function,
-            ToolCall2,
-            ToolCall2Function,
-            V2ChatStreamRequestResponseFormat,
-        )
+        from cohere import ChatMessage2_User, ResponseFormat2_Text, Tool2, Tool2Function
         from cohere.client import Client
 
         client = Client(
@@ -144,35 +150,9 @@ class V2Client:
         response = client.v2.chat_stream(
             model="string",
             messages=[
-                ChatMessage2_Assistant(
-                    tool_calls=[
-                        ToolCall2(
-                            id="string",
-                            function=ToolCall2Function(
-                                name="string",
-                                arguments="string",
-                            ),
-                        )
-                    ],
-                    tool_plan="string",
-                    content=[
-                        TextContent(
-                            text="string",
-                        )
-                    ],
-                    citations=[
-                        Citation(
-                            start="string",
-                            end="string",
-                            text="string",
-                            sources=[
-                                Source_Tool(
-                                    id="string",
-                                    tool_output={"string": {"key": "value"}},
-                                )
-                            ],
-                        )
-                    ],
+                ChatMessage2_User(
+                    content="string",
+                    documents=[{"string": {"key": "value"}}],
                 )
             ],
             tools=[
@@ -184,21 +164,16 @@ class V2Client:
                     ),
                 )
             ],
-            tool_choice="AUTO",
             citation_mode="FAST",
-            truncation_mode="OFF",
-            response_format=V2ChatStreamRequestResponseFormat(
-                schema={"string": {"key": "value"}},
-            ),
+            response_format=ResponseFormat2_Text(),
             max_tokens=1,
             stop_sequences=["string"],
-            max_input_tokens=1,
             temperature=1.1,
             seed=1,
             frequency_penalty=1.1,
             presence_penalty=1.1,
-            k=1,
-            p=1,
+            k=1.1,
+            p=1.1,
             return_prompt=True,
         )
         for chunk in response:
@@ -211,13 +186,10 @@ class V2Client:
                 "model": model,
                 "messages": messages,
                 "tools": tools,
-                "tool_choice": tool_choice,
                 "citation_mode": citation_mode,
-                "truncation_mode": truncation_mode,
                 "response_format": response_format,
                 "max_tokens": max_tokens,
                 "stop_sequences": stop_sequences,
-                "max_input_tokens": max_input_tokens,
                 "temperature": temperature,
                 "seed": seed,
                 "frequency_penalty": frequency_penalty,
@@ -295,63 +267,84 @@ class V2Client:
         model: str,
         messages: ChatMessages,
         tools: typing.Optional[typing.Sequence[Tool2]] = OMIT,
-        tool_choice: typing.Optional[V2ChatRequestToolChoice] = OMIT,
         citation_mode: typing.Optional[V2ChatRequestCitationMode] = OMIT,
-        truncation_mode: typing.Optional[V2ChatRequestTruncationMode] = OMIT,
-        response_format: typing.Optional[V2ChatRequestResponseFormat] = OMIT,
+        response_format: typing.Optional[ResponseFormat2] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
-        max_input_tokens: typing.Optional[int] = OMIT,
         temperature: typing.Optional[float] = OMIT,
         seed: typing.Optional[int] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
-        k: typing.Optional[int] = OMIT,
-        p: typing.Optional[int] = OMIT,
+        k: typing.Optional[float] = OMIT,
+        p: typing.Optional[float] = OMIT,
         return_prompt: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None
     ) -> NonStreamedChatResponse2:
         """
+        Generates a message from the model in response to a provided conversation. To learn how to use the Chat API with Streaming and RAG follow our Text Generation guides.
+
         Parameters
         ----------
         model : str
-            The model to use for the chat.
+            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
         messages : ChatMessages
 
         tools : typing.Optional[typing.Sequence[Tool2]]
+            A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
-        tool_choice : typing.Optional[V2ChatRequestToolChoice]
+            When `tools` is passed (without `tool_results`), the `text` content in the response will be empty and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
+
 
         citation_mode : typing.Optional[V2ChatRequestCitationMode]
+            Defaults to `"accurate"`.
+            Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
 
-        truncation_mode : typing.Optional[V2ChatRequestTruncationMode]
 
-        response_format : typing.Optional[V2ChatRequestResponseFormat]
+        response_format : typing.Optional[ResponseFormat2]
 
         max_tokens : typing.Optional[int]
-            The maximum number of tokens to generate.
+            The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+
 
         stop_sequences : typing.Optional[typing.Sequence[str]]
-            A list of strings that the model will stop generating at.
+            A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
 
-        max_input_tokens : typing.Optional[int]
-            The maximum number of tokens to feed into the model.
 
         temperature : typing.Optional[float]
-            The temperature of the model.
+            Defaults to `0.3`.
+
+            A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
+
+            Randomness can be further maximized by increasing the  value of the `p` parameter.
+
 
         seed : typing.Optional[int]
+            If specified, the backend will make a best effort to sample tokens
+            deterministically, such that repeated requests with the same
+            seed and parameters should return the same result. However,
+            determinism cannot be totally guaranteed.
+
 
         frequency_penalty : typing.Optional[float]
-            The frequency penalty of the model.
+            Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+            Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+
 
         presence_penalty : typing.Optional[float]
-            The presence penalty of the model.
+            Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+            Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
 
-        k : typing.Optional[int]
 
-        p : typing.Optional[int]
+        k : typing.Optional[float]
+            Ensures only the top `k` most likely tokens are considered for generation at each step.
+            Defaults to `0`, min value of `0`, max value of `500`.
+
+
+        p : typing.Optional[float]
+            Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
+            Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
+
 
         return_prompt : typing.Optional[bool]
             Whether to return the prompt in the response.
@@ -384,13 +377,10 @@ class V2Client:
                 "model": model,
                 "messages": messages,
                 "tools": tools,
-                "tool_choice": tool_choice,
                 "citation_mode": citation_mode,
-                "truncation_mode": truncation_mode,
                 "response_format": response_format,
                 "max_tokens": max_tokens,
                 "stop_sequences": stop_sequences,
-                "max_input_tokens": max_input_tokens,
                 "temperature": temperature,
                 "seed": seed,
                 "frequency_penalty": frequency_penalty,
@@ -466,63 +456,84 @@ class AsyncV2Client:
         model: str,
         messages: ChatMessages,
         tools: typing.Optional[typing.Sequence[Tool2]] = OMIT,
-        tool_choice: typing.Optional[V2ChatStreamRequestToolChoice] = OMIT,
         citation_mode: typing.Optional[V2ChatStreamRequestCitationMode] = OMIT,
-        truncation_mode: typing.Optional[V2ChatStreamRequestTruncationMode] = OMIT,
-        response_format: typing.Optional[V2ChatStreamRequestResponseFormat] = OMIT,
+        response_format: typing.Optional[ResponseFormat2] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
-        max_input_tokens: typing.Optional[int] = OMIT,
         temperature: typing.Optional[float] = OMIT,
         seed: typing.Optional[int] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
-        k: typing.Optional[int] = OMIT,
-        p: typing.Optional[int] = OMIT,
+        k: typing.Optional[float] = OMIT,
+        p: typing.Optional[float] = OMIT,
         return_prompt: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None
     ) -> typing.AsyncIterator[StreamedChatResponse2]:
         """
+        Generates a message from the model in response to a provided conversation. To learn how to use the Chat API with Streaming and RAG follow our Text Generation guides.
+
         Parameters
         ----------
         model : str
-            The model to use for the chat.
+            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
         messages : ChatMessages
 
         tools : typing.Optional[typing.Sequence[Tool2]]
+            A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
-        tool_choice : typing.Optional[V2ChatStreamRequestToolChoice]
+            When `tools` is passed (without `tool_results`), the `text` content in the response will be empty and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
+
 
         citation_mode : typing.Optional[V2ChatStreamRequestCitationMode]
+            Defaults to `"accurate"`.
+            Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
 
-        truncation_mode : typing.Optional[V2ChatStreamRequestTruncationMode]
 
-        response_format : typing.Optional[V2ChatStreamRequestResponseFormat]
+        response_format : typing.Optional[ResponseFormat2]
 
         max_tokens : typing.Optional[int]
-            The maximum number of tokens to generate.
+            The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+
 
         stop_sequences : typing.Optional[typing.Sequence[str]]
-            A list of strings that the model will stop generating at.
+            A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
 
-        max_input_tokens : typing.Optional[int]
-            The maximum number of tokens to feed into the model.
 
         temperature : typing.Optional[float]
-            The temperature of the model.
+            Defaults to `0.3`.
+
+            A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
+
+            Randomness can be further maximized by increasing the  value of the `p` parameter.
+
 
         seed : typing.Optional[int]
+            If specified, the backend will make a best effort to sample tokens
+            deterministically, such that repeated requests with the same
+            seed and parameters should return the same result. However,
+            determinism cannot be totally guaranteed.
+
 
         frequency_penalty : typing.Optional[float]
-            The frequency penalty of the model.
+            Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+            Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+
 
         presence_penalty : typing.Optional[float]
-            The presence penalty of the model.
+            Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+            Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
 
-        k : typing.Optional[int]
 
-        p : typing.Optional[int]
+        k : typing.Optional[float]
+            Ensures only the top `k` most likely tokens are considered for generation at each step.
+            Defaults to `0`, min value of `0`, max value of `500`.
+
+
+        p : typing.Optional[float]
+            Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
+            Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
+
 
         return_prompt : typing.Optional[bool]
             Whether to return the prompt in the response.
@@ -539,17 +550,7 @@ class AsyncV2Client:
         --------
         import asyncio
 
-        from cohere import (
-            ChatMessage2_Assistant,
-            Citation,
-            Source_Tool,
-            TextContent,
-            Tool2,
-            Tool2Function,
-            ToolCall2,
-            ToolCall2Function,
-            V2ChatStreamRequestResponseFormat,
-        )
+        from cohere import ChatMessage2_User, ResponseFormat2_Text, Tool2, Tool2Function
         from cohere.client import AsyncClient
 
         client = AsyncClient(
@@ -562,35 +563,9 @@ class AsyncV2Client:
             response = await client.v2.chat_stream(
                 model="string",
                 messages=[
-                    ChatMessage2_Assistant(
-                        tool_calls=[
-                            ToolCall2(
-                                id="string",
-                                function=ToolCall2Function(
-                                    name="string",
-                                    arguments="string",
-                                ),
-                            )
-                        ],
-                        tool_plan="string",
-                        content=[
-                            TextContent(
-                                text="string",
-                            )
-                        ],
-                        citations=[
-                            Citation(
-                                start="string",
-                                end="string",
-                                text="string",
-                                sources=[
-                                    Source_Tool(
-                                        id="string",
-                                        tool_output={"string": {"key": "value"}},
-                                    )
-                                ],
-                            )
-                        ],
+                    ChatMessage2_User(
+                        content="string",
+                        documents=[{"string": {"key": "value"}}],
                     )
                 ],
                 tools=[
@@ -602,21 +577,16 @@ class AsyncV2Client:
                         ),
                     )
                 ],
-                tool_choice="AUTO",
                 citation_mode="FAST",
-                truncation_mode="OFF",
-                response_format=V2ChatStreamRequestResponseFormat(
-                    schema={"string": {"key": "value"}},
-                ),
+                response_format=ResponseFormat2_Text(),
                 max_tokens=1,
                 stop_sequences=["string"],
-                max_input_tokens=1,
                 temperature=1.1,
                 seed=1,
                 frequency_penalty=1.1,
                 presence_penalty=1.1,
-                k=1,
-                p=1,
+                k=1.1,
+                p=1.1,
                 return_prompt=True,
             )
             async for chunk in response:
@@ -632,13 +602,10 @@ class AsyncV2Client:
                 "model": model,
                 "messages": messages,
                 "tools": tools,
-                "tool_choice": tool_choice,
                 "citation_mode": citation_mode,
-                "truncation_mode": truncation_mode,
                 "response_format": response_format,
                 "max_tokens": max_tokens,
                 "stop_sequences": stop_sequences,
-                "max_input_tokens": max_input_tokens,
                 "temperature": temperature,
                 "seed": seed,
                 "frequency_penalty": frequency_penalty,
@@ -716,63 +683,84 @@ class AsyncV2Client:
         model: str,
         messages: ChatMessages,
         tools: typing.Optional[typing.Sequence[Tool2]] = OMIT,
-        tool_choice: typing.Optional[V2ChatRequestToolChoice] = OMIT,
         citation_mode: typing.Optional[V2ChatRequestCitationMode] = OMIT,
-        truncation_mode: typing.Optional[V2ChatRequestTruncationMode] = OMIT,
-        response_format: typing.Optional[V2ChatRequestResponseFormat] = OMIT,
+        response_format: typing.Optional[ResponseFormat2] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
-        max_input_tokens: typing.Optional[int] = OMIT,
         temperature: typing.Optional[float] = OMIT,
         seed: typing.Optional[int] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
-        k: typing.Optional[int] = OMIT,
-        p: typing.Optional[int] = OMIT,
+        k: typing.Optional[float] = OMIT,
+        p: typing.Optional[float] = OMIT,
         return_prompt: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None
     ) -> NonStreamedChatResponse2:
         """
+        Generates a message from the model in response to a provided conversation. To learn how to use the Chat API with Streaming and RAG follow our Text Generation guides.
+
         Parameters
         ----------
         model : str
-            The model to use for the chat.
+            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
         messages : ChatMessages
 
         tools : typing.Optional[typing.Sequence[Tool2]]
+            A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
-        tool_choice : typing.Optional[V2ChatRequestToolChoice]
+            When `tools` is passed (without `tool_results`), the `text` content in the response will be empty and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
+
 
         citation_mode : typing.Optional[V2ChatRequestCitationMode]
+            Defaults to `"accurate"`.
+            Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
 
-        truncation_mode : typing.Optional[V2ChatRequestTruncationMode]
 
-        response_format : typing.Optional[V2ChatRequestResponseFormat]
+        response_format : typing.Optional[ResponseFormat2]
 
         max_tokens : typing.Optional[int]
-            The maximum number of tokens to generate.
+            The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+
 
         stop_sequences : typing.Optional[typing.Sequence[str]]
-            A list of strings that the model will stop generating at.
+            A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
 
-        max_input_tokens : typing.Optional[int]
-            The maximum number of tokens to feed into the model.
 
         temperature : typing.Optional[float]
-            The temperature of the model.
+            Defaults to `0.3`.
+
+            A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
+
+            Randomness can be further maximized by increasing the  value of the `p` parameter.
+
 
         seed : typing.Optional[int]
+            If specified, the backend will make a best effort to sample tokens
+            deterministically, such that repeated requests with the same
+            seed and parameters should return the same result. However,
+            determinism cannot be totally guaranteed.
+
 
         frequency_penalty : typing.Optional[float]
-            The frequency penalty of the model.
+            Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+            Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
+
 
         presence_penalty : typing.Optional[float]
-            The presence penalty of the model.
+            Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
+            Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
 
-        k : typing.Optional[int]
 
-        p : typing.Optional[int]
+        k : typing.Optional[float]
+            Ensures only the top `k` most likely tokens are considered for generation at each step.
+            Defaults to `0`, min value of `0`, max value of `500`.
+
+
+        p : typing.Optional[float]
+            Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
+            Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
+
 
         return_prompt : typing.Optional[bool]
             Whether to return the prompt in the response.
@@ -813,13 +801,10 @@ class AsyncV2Client:
                 "model": model,
                 "messages": messages,
                 "tools": tools,
-                "tool_choice": tool_choice,
                 "citation_mode": citation_mode,
-                "truncation_mode": truncation_mode,
                 "response_format": response_format,
                 "max_tokens": max_tokens,
                 "stop_sequences": stop_sequences,
-                "max_input_tokens": max_input_tokens,
                 "temperature": temperature,
                 "seed": seed,
                 "frequency_penalty": frequency_penalty,

@@ -6,7 +6,7 @@ import pydantic
 
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
 from ...core.unchecked_base_model import UncheckedBaseModel
-from .assistant_message import AssistantMessage
+from .assistant_message_response import AssistantMessageResponse
 from .chat_finish_reason import ChatFinishReason
 from .usage import Usage
 
@@ -23,7 +23,7 @@ class NonStreamedChatResponse2(UncheckedBaseModel):
     The prompt that was used. Only present when `return_prompt` in the request is set to true.
     """
 
-    message: typing.Optional[AssistantMessage] = None
+    message: typing.Optional[AssistantMessageResponse] = None
     usage: typing.Optional[Usage] = None
 
     if IS_PYDANTIC_V2:
