@@ -1,9 +1,14 @@
+import typing
+
 from . import EmbedByTypeResponseEmbeddings
+from .core.pydantic_utilities import _get_model_fields, Model
 
+from pprint import pprint
 
-def allow_access_to_aliases(self, name):
-    for field_name, field_info in self.__fields__.items():
-        if field_info.alias == name:
+def allow_access_to_aliases(self: typing.Type["Model"], name):
+    for field_name, field_info in _get_model_fields(self).items():
+        alias = field_info.alias or (field_info and field_info.metadata and field_info.metadata[0] and field_info.metadata[0].alias)
+        if alias == name:
             return getattr(self, field_name)
     raise AttributeError(
         f"'{type(self).__name__}' object has no attribute '{name}'")
