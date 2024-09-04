@@ -30,6 +30,7 @@ To learn how to use the Chat API with Streaming and RAG follow our [Text Generat
 from cohere import (
     ChatConnector,
     ChatStreamRequestConnectorsSearchOptions,
+    Client,
     Message_Chatbot,
     ResponseFormat_Text,
     Tool,
@@ -37,7 +38,6 @@ from cohere import (
     ToolParameterDefinitionsValue,
     ToolResult,
 )
-from cohere.client import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -578,7 +578,7 @@ To learn how to use the Chat API with Streaming and RAG follow our [Text Generat
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -1056,7 +1056,7 @@ Generates realistic text conditioned on a given input.
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -1329,7 +1329,7 @@ Generates realistic text conditioned on a given input.
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -1586,7 +1586,7 @@ If you want to learn more how to use the embedding model, have a look at the [Se
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -1723,7 +1723,7 @@ This endpoint takes in a query and a list of texts and produces an ordered array
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -1854,7 +1854,7 @@ Note: [Fine-tuned models](https://docs.cohere.com/docs/classify-fine-tuning) tra
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -1971,7 +1971,7 @@ Generates a summary in English for a given text.
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -2090,7 +2090,7 @@ This endpoint splits input text into smaller units called tokens using byte-pair
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -2170,7 +2170,7 @@ This endpoint takes tokens using byte-pair encoding and returns their text repre
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -2250,7 +2250,7 @@ Checks that the api key in the Authorization header is valid and active
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -2312,8 +2312,8 @@ Generates a message from the model in response to a provided conversation. To le
 <dd>
 
 ```python
-from cohere import ChatMessage2_User, ResponseFormat2_Text, Tool2, Tool2Function
-from cohere.client import Client
+from cohere import Client, ResponseFormat2_Text
+from cohere.v2 import ChatMessage2_User, Tool2, Tool2Function
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -2556,7 +2556,7 @@ Generates a message from the model in response to a provided conversation. To le
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -2773,7 +2773,7 @@ The list embed job endpoint allows users to view all embed jobs history for that
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -2834,7 +2834,7 @@ This API launches an async Embed job for a [Dataset](https://docs.cohere.com/doc
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -2970,7 +2970,7 @@ This API retrieves the details about an embed job started by the same user.
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -3041,7 +3041,7 @@ This API allows users to cancel an active embed job. Once invoked, the embedding
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -3113,7 +3113,7 @@ List datasets that have been created.
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -3222,7 +3222,7 @@ Create a dataset by uploading a file. See ['Dataset Creation'](https://docs.cohe
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -3378,7 +3378,7 @@ View the dataset storage usage for your Organization. Each Organization can have
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -3439,7 +3439,7 @@ Retrieve a dataset by ID. See ['Datasets'](https://docs.cohere.com/docs/datasets
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -3510,7 +3510,7 @@ Delete a dataset by ID. Datasets are automatically deleted after 30 days, but th
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -3582,7 +3582,7 @@ Returns a list of connectors ordered by descending creation date (newer first). 
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -3659,7 +3659,7 @@ Creates a new connector. The connector is tested during registration and will ca
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -3787,7 +3787,7 @@ Retrieve a connector by ID. See ['Connectors'](https://docs.cohere.com/docs/conn
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -3858,7 +3858,7 @@ Delete a connector by ID. See ['Connectors'](https://docs.cohere.com/docs/connec
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -3929,7 +3929,7 @@ Update a connector by ID. Omitted fields will not be updated. See ['Managing you
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -4056,7 +4056,7 @@ Authorize the connector with the given ID for the connector oauth app. See ['Con
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -4136,7 +4136,7 @@ Returns the details of a model, provided its name.
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -4207,7 +4207,7 @@ Returns a list of models available for use. The list contains models from Cohere
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -4290,7 +4290,7 @@ Defaults to `20`, min value of `1`, max value of `1000`.
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -4369,8 +4369,8 @@ Supported sorting fields:
 <dd>
 
 ```python
-from cohere.client import Client
-from cohere.finetuning import BaseModel, FinetunedModel, Settings
+from cohere import Client
+from cohere.finetuning.finetuning import BaseModel, FinetunedModel, Settings
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -4381,7 +4381,7 @@ client.finetuning.create_finetuned_model(
         name="api-test",
         settings=Settings(
             base_model=BaseModel(
-                base_type="BASE_TYPE_GENERATIVE",
+                base_type="BASE_TYPE_CHAT",
             ),
             dataset_id="my-dataset-id",
         ),
@@ -4435,7 +4435,7 @@ client.finetuning.create_finetuned_model(
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -4492,7 +4492,7 @@ client.finetuning.get_finetuned_model(
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -4549,8 +4549,8 @@ client.finetuning.delete_finetuned_model(
 <dd>
 
 ```python
-from cohere.client import Client
-from cohere.finetuning import BaseModel, Settings
+from cohere import Client
+from cohere.finetuning.finetuning import BaseModel, Settings
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -4686,7 +4686,7 @@ client.finetuning.update_finetuned_model(
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -4775,7 +4775,7 @@ Supported sorting fields:
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",

@@ -2,4 +2,4 @@
 
 import typing
 
-DeleteFinetunedModelResponse = typing.Dict[str, typing.Any]
+DeleteFinetunedModelResponse = typing.Dict[str, typing.Optional[typing.Any]]

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cohere"
-version = "5.9.0"
+version = "3.9.1"
 description = ""
 readme = "README.md"
 authors = []
@@ -51,6 +51,7 @@ pytest-asyncio = "^0.23.5"
 python-dateutil = "^2.9.0"
 types-python-dateutil = "^2.9.0.20240316"
 parameterized = "^0.9.0"
+ruff = "^0.5.6"
 
 [tool.pytest.ini_options]
 testpaths = [ "tests" ]
@@ -58,6 +59,9 @@ asyncio_mode = "auto"
 
 [tool.mypy]
 plugins = ["pydantic.mypy"]
+
+[tool.ruff]
+line-length = 120
 
 
 [build-system]
