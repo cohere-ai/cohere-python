@@ -2,4 +2,4 @@
 
 import typing
 
-V2ChatRequestCitationMode = typing.Union[typing.Literal["FAST", "ACCURATE"], typing.Any]
+V2ChatRequestCitationMode = typing.Union[typing.Literal["FAST", "ACCURATE", "OFF"], typing.Any]

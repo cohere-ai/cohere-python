@@ -6,6 +6,7 @@ import pydantic
 
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
 from ...core.unchecked_base_model import UncheckedBaseModel
+from ...types.chat_document import ChatDocument
 from .user_message_content import UserMessageContent
 
 
@@ -14,7 +15,16 @@ class UserMessage(UncheckedBaseModel):
     A message from the user.
     """
 
-    content: UserMessageContent
+    content: UserMessageContent = pydantic.Field()
+    """
+    The content of the message. This can be a string or a list of content blocks.
+    If a string is provided, it will be treated as a text content block.
+    """
+
+    documents: typing.Optional[typing.List[ChatDocument]] = pydantic.Field(default=None)
+    """
+    Documents seen by the model when generating the reply.
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
