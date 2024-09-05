@@ -12,8 +12,7 @@ def get_fields(obj) -> typing.List[str]:
 
 def get_aliases_or_field(obj) -> typing.List[str]:
     return [
-        field_info.alias or (field_info and field_info.metadata and field_info.metadata[0] and field_info.metadata[
-            0].alias) or field_name
+        field_info.alias or (field_info and field_info.metadata and field_info.metadata[0] and field_info.metadata[0].alias) or field_name # type: ignore
         for field_name, field_info
         in _get_model_fields(obj).items()
     ]
@@ -27,7 +26,7 @@ def get_aliases_and_fields(obj):
 def allow_access_to_aliases(self: typing.Type["Model"], name):
     for field_name, field_info in _get_model_fields(self).items():
         alias = field_info.alias or (
-                    field_info and field_info.metadata and field_info.metadata[0] and field_info.metadata[0].alias)
+                    field_info and field_info.metadata and field_info.metadata[0] and field_info.metadata[0].alias) # type: ignore
         if alias == name or field_name == name:
             return getattr(self, field_name)
     raise AttributeError(
