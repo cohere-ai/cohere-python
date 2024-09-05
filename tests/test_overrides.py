@@ -3,7 +3,7 @@ from contextlib import redirect_stderr
 import logging
 
 
-from src.cohere import EmbedByTypeResponseEmbeddings
+from cohere import EmbedByTypeResponseEmbeddings
 
 LOGGER = logging.getLogger(__name__)
 
