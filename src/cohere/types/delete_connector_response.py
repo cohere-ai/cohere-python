@@ -2,4 +2,4 @@
 
 import typing
 
-DeleteConnectorResponse = typing.Dict[str, typing.Any]
+DeleteConnectorResponse = typing.Dict[str, typing.Optional[typing.Any]]

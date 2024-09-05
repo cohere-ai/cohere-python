@@ -8,7 +8,7 @@ ebt_1 = EmbedResponse_EmbeddingsByType(
     response_type="embeddings_by_type",
     id="1",
     embeddings=EmbedByTypeResponseEmbeddings(
-        float=[[0, 1, 2], [3, 4, 5]],
+        float_=[[0, 1, 2], [3, 4, 5]],
         int8=[[0, 1, 2], [3, 4, 5]],
         uint8=[[0, 1, 2], [3, 4, 5]],
         binary=[[0, 1, 2], [3, 4, 5]],
@@ -31,7 +31,7 @@ ebt_2 = EmbedResponse_EmbeddingsByType(
     response_type="embeddings_by_type",
     id="2",
     embeddings=EmbedByTypeResponseEmbeddings(
-        float=[[7, 8, 9], [10, 11, 12]],
+        float_=[[7, 8, 9], [10, 11, 12]],
         int8=[[7, 8, 9], [10, 11, 12]],
         uint8=[[7, 8, 9], [10, 11, 12]],
         binary=[[7, 8, 9], [10, 11, 12]],
@@ -54,7 +54,7 @@ ebt_partial_1 = EmbedResponse_EmbeddingsByType(
     response_type="embeddings_by_type",
     id="1",
     embeddings=EmbedByTypeResponseEmbeddings(
-        float=[[0, 1, 2], [3, 4, 5]],
+        float_=[[0, 1, 2], [3, 4, 5]],
         int8=[[0, 1, 2], [3, 4, 5]],
         binary=[[5, 6, 7], [8, 9, 10]],
     ),
@@ -75,7 +75,7 @@ ebt_partial_2 = EmbedResponse_EmbeddingsByType(
     response_type="embeddings_by_type",
     id="2",
     embeddings=EmbedByTypeResponseEmbeddings(
-        float=[[7, 8, 9], [10, 11, 12]],
+        float_=[[7, 8, 9], [10, 11, 12]],
         int8=[[7, 8, 9], [10, 11, 12]],
         binary=[[14, 15, 16], [17, 18, 19]],
     ),
@@ -143,7 +143,7 @@ class TestClient(unittest.TestCase):
             response_type="embeddings_by_type",
             id="1, 2",
             embeddings=EmbedByTypeResponseEmbeddings(
-                float=[[0, 1, 2], [3, 4, 5], [7, 8, 9], [10, 11, 12]],
+                float_=[[0, 1, 2], [3, 4, 5], [7, 8, 9], [10, 11, 12]],
                 int8=[[0, 1, 2], [3, 4, 5], [7, 8, 9], [10, 11, 12]],
                 uint8=[[0, 1, 2], [3, 4, 5], [7, 8, 9], [10, 11, 12]],
                 binary=[[0, 1, 2], [3, 4, 5], [7, 8, 9], [10, 11, 12]],
@@ -203,7 +203,7 @@ class TestClient(unittest.TestCase):
             response_type="embeddings_by_type",
             id="1, 2",
             embeddings=EmbedByTypeResponseEmbeddings(
-                float=[[0, 1, 2], [3, 4, 5], [7, 8, 9], [10, 11, 12]],
+                float_=[[0, 1, 2], [3, 4, 5], [7, 8, 9], [10, 11, 12]],
                 int8=[[0, 1, 2], [3, 4, 5], [7, 8, 9], [10, 11, 12]],
                 binary=[[5, 6, 7], [8, 9, 10], [14, 15, 16], [17, 18, 19]],
             ),
