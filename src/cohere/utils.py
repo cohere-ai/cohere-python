@@ -11,6 +11,7 @@ from fastavro import parse_schema, reader, writer
 from . import EmbedResponse, EmbedResponse_EmbeddingsFloats, EmbedResponse_EmbeddingsByType, ApiMeta, \
     EmbedByTypeResponseEmbeddings, ApiMetaBilledUnits, EmbedJob, CreateEmbedJobResponse, Dataset
 from .datasets import DatasetsCreateResponse, DatasetsGetResponse
+from .overrides import get_fields
 
 
 def get_terminal_states():
@@ -217,7 +218,7 @@ def merge_embed_responses(responses: typing.List[EmbedResponse]) -> EmbedRespons
         ]
 
         # only get set keys from the pydantic model (i.e. exclude fields that are set to 'None')
-        fields = embeddings_type[0].embeddings.dict(exclude_unset=True).keys()
+        fields = [x for x in get_fields(embeddings_type[0].embeddings) if getattr(embeddings_type[0].embeddings, x) is not None]
 
         merged_dicts = {
             field: [
