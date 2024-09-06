@@ -3,7 +3,7 @@ import unittest
 
 import cohere
 from cohere import ChatConnector, ClassifyExample, CreateConnectorServiceAuth, Tool, \
-    ToolParameterDefinitionsValue, ToolResult, Message_User, Message_Chatbot
+    ToolParameterDefinitionsValue, ToolResult, UserMessage, ChatbotMessage
 
 package_dir = os.path.dirname(os.path.abspath(__file__))
 embed_job = os.path.join(package_dir, 'embed_job.jsonl')
@@ -26,10 +26,10 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
     async def test_chat(self) -> None:
         chat = await self.co.chat(
             chat_history=[
-                Message_User(
+                UserMessage(
                     message="Who discovered gravity?"),
-                Message_Chatbot(message="The man who is widely credited with discovering "
-                                "gravity is Sir Isaac Newton")
+                ChatbotMessage(message="The man who is widely credited with discovering "
+                               "gravity is Sir Isaac Newton")
             ],
             message="What year was he born?",
             connectors=[ChatConnector(id="web-search")]
@@ -40,10 +40,10 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
     async def test_chat_stream(self) -> None:
         stream = self.co.chat_stream(
             chat_history=[
-                Message_User(
+                UserMessage(
                     message="Who discovered gravity?"),
-                Message_Chatbot(message="The man who is widely credited with discovering "
-                                "gravity is Sir Isaac Newton")
+                ChatbotMessage(message="The man who is widely credited with discovering "
+                               "gravity is Sir Isaac Newton")
             ],
             message="What year was he born?",
             connectors=[ChatConnector(id="web-search")]
@@ -73,7 +73,7 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
 
     async def test_moved_fn(self) -> None:
         with self.assertRaises(ValueError):
-            await self.co.list_connectors("dummy", dummy="dummy")   # type: ignore
+            await self.co.list_connectors("dummy", dummy="dummy")  # type: ignore
 
     @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     async def test_generate(self) -> None:

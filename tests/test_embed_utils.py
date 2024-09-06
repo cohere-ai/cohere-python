@@ -1,10 +1,11 @@
 import unittest
 
-from cohere import EmbedResponse_EmbeddingsByType, EmbedByTypeResponseEmbeddings, ApiMeta, ApiMetaBilledUnits, \
-    ApiMetaApiVersion, EmbedResponse_EmbeddingsFloats
+from cohere import EmbedByTypeResponseEmbeddings, EmbedByTypeResponseEmbeddings, ApiMeta, ApiMetaBilledUnits, \
+    ApiMetaApiVersion, EmbeddingsFloatsEmbedResponse, EmbeddingsByTypeEmbedResponse
 from cohere.utils import merge_embed_responses
 
-ebt_1 = EmbedResponse_EmbeddingsByType(
+
+ebt_1 = EmbeddingsByTypeEmbedResponse(
     response_type="embeddings_by_type",
     id="1",
     embeddings=EmbedByTypeResponseEmbeddings(
@@ -27,7 +28,7 @@ ebt_1 = EmbedResponse_EmbeddingsByType(
     )
 )
 
-ebt_2 = EmbedResponse_EmbeddingsByType(
+ebt_2 = EmbeddingsByTypeEmbedResponse(
     response_type="embeddings_by_type",
     id="2",
     embeddings=EmbedByTypeResponseEmbeddings(
@@ -50,7 +51,7 @@ ebt_2 = EmbedResponse_EmbeddingsByType(
     )
 )
 
-ebt_partial_1 = EmbedResponse_EmbeddingsByType(
+ebt_partial_1 = EmbeddingsByTypeEmbedResponse(
     response_type="embeddings_by_type",
     id="1",
     embeddings=EmbedByTypeResponseEmbeddings(
@@ -71,7 +72,7 @@ ebt_partial_1 = EmbedResponse_EmbeddingsByType(
     )
 )
 
-ebt_partial_2 = EmbedResponse_EmbeddingsByType(
+ebt_partial_2 = EmbeddingsByTypeEmbedResponse(
     response_type="embeddings_by_type",
     id="2",
     embeddings=EmbedByTypeResponseEmbeddings(
@@ -92,7 +93,7 @@ ebt_partial_2 = EmbedResponse_EmbeddingsByType(
     )
 )
 
-ebf_1 = EmbedResponse_EmbeddingsFloats(
+ebf_1 = EmbeddingsFloatsEmbedResponse(
     response_type="embeddings_floats",
     id="1",
     texts=["hello", "goodbye"],
@@ -109,7 +110,7 @@ ebf_1 = EmbedResponse_EmbeddingsFloats(
     )
 )
 
-ebf_2 = EmbedResponse_EmbeddingsFloats(
+ebf_2 = EmbeddingsFloatsEmbedResponse(
     response_type="embeddings_floats",
     id="2",
     texts=["bye", "seeya"],
@@ -138,8 +139,9 @@ class TestClient(unittest.TestCase):
         if resp.meta is None:
             raise Exception("this is just for mpy")
 
-        self.assertEqual(set(resp.meta.warnings or []), {"test_warning_1", "test_warning_2"})
-        self.assertEqual(resp, EmbedResponse_EmbeddingsByType(
+        self.assertEqual(set(resp.meta.warnings or []), {
+                         "test_warning_1", "test_warning_2"})
+        self.assertEqual(resp, EmbeddingsByTypeEmbedResponse(
             response_type="embeddings_by_type",
             id="1, 2",
             embeddings=EmbedByTypeResponseEmbeddings(
@@ -171,8 +173,9 @@ class TestClient(unittest.TestCase):
         if resp.meta is None:
             raise Exception("this is just for mpy")
 
-        self.assertEqual(set(resp.meta.warnings or []), {"test_warning_1", "test_warning_2"})
-        self.assertEqual(resp, EmbedResponse_EmbeddingsFloats(
+        self.assertEqual(set(resp.meta.warnings or []), {
+                         "test_warning_1", "test_warning_2"})
+        self.assertEqual(resp, EmbeddingsFloatsEmbedResponse(
             response_type="embeddings_floats",
             id="1, 2",
             texts=["hello", "goodbye", "bye", "seeya"],
@@ -198,8 +201,9 @@ class TestClient(unittest.TestCase):
         if resp.meta is None:
             raise Exception("this is just for mpy")
 
-        self.assertEqual(set(resp.meta.warnings or []), {"test_warning_1", "test_warning_2"})
-        self.assertEqual(resp, EmbedResponse_EmbeddingsByType(
+        self.assertEqual(set(resp.meta.warnings or []), {
+                         "test_warning_1", "test_warning_2"})
+        self.assertEqual(resp, EmbeddingsByTypeEmbedResponse(
             response_type="embeddings_by_type",
             id="1, 2",
             embeddings=EmbedByTypeResponseEmbeddings(
