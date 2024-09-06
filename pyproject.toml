@@ -29,7 +29,7 @@ packages = [
 ]
 
 [project.urls]
-Repository = 'https://github.com/cohere-ai/cohere-python'
+source = "https://github.com/cohere-ai/cohere-python"
 
 [tool.poetry.dependencies]
 python = "^3.8"
