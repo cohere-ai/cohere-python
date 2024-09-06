@@ -28,11 +28,11 @@ To learn how to use the Chat API with Streaming and RAG follow our [Text Generat
 
 ```python
 from cohere import (
+    ChatbotMessage,
     ChatConnector,
     ChatStreamRequestConnectorsSearchOptions,
     Client,
-    Message_Chatbot,
-    ResponseFormat_Text,
+    TextResponseFormat,
     Tool,
     ToolCall,
     ToolParameterDefinitionsValue,
@@ -48,7 +48,7 @@ response = client.chat_stream(
     model="string",
     preamble="string",
     chat_history=[
-        Message_Chatbot(
+        ChatbotMessage(
             message="string",
             tool_calls=[
                 ToolCall(
@@ -108,7 +108,7 @@ response = client.chat_stream(
         )
     ],
     force_single_step=True,
-    response_format=ResponseFormat_Text(),
+    response_format=TextResponseFormat(),
     safety_mode="CONTEXTUAL",
 )
 for chunk in response:
@@ -2312,8 +2312,8 @@ Generates a message from the model in response to a provided conversation. To le
 <dd>
 
 ```python
-from cohere import Client, ResponseFormat2_Text
-from cohere.v2 import ChatMessage2_User, Tool2, Tool2Function
+from cohere import Client, TextResponseFormat2
+from cohere.v2 import Tool2, Tool2Function, UserChatMessage2
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -2322,7 +2322,7 @@ client = Client(
 response = client.v2.chat_stream(
     model="string",
     messages=[
-        ChatMessage2_User(
+        UserChatMessage2(
             content="string",
             documents=[{"string": {"key": "value"}}],
         )
@@ -2337,7 +2337,7 @@ response = client.v2.chat_stream(
         )
     ],
     citation_mode="FAST",
-    response_format=ResponseFormat2_Text(),
+    response_format=TextResponseFormat2(),
     max_tokens=1,
     stop_sequences=["string"],
     temperature=1.1,

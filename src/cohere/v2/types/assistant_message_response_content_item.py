@@ -9,7 +9,7 @@ import typing_extensions
 from ...core.unchecked_base_model import UnionMetadata
 
 
-class AssistantMessageResponseContentItem_Text(UncheckedBaseModel):
+class TextAssistantMessageResponseContentItem(UncheckedBaseModel):
     type: typing.Literal["text"] = "text"
     text: str
 
@@ -24,5 +24,5 @@ class AssistantMessageResponseContentItem_Text(UncheckedBaseModel):
 
 
 AssistantMessageResponseContentItem = typing_extensions.Annotated[
-    AssistantMessageResponseContentItem_Text, UnionMetadata(discriminant="type")
+    TextAssistantMessageResponseContentItem, UnionMetadata(discriminant="type")
 ]

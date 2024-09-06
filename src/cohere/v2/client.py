@@ -140,8 +140,8 @@ class V2Client:
 
         Examples
         --------
-        from cohere import Client, ResponseFormat2_Text
-        from cohere.v2 import ChatMessage2_User, Tool2, Tool2Function
+        from cohere import Client, TextResponseFormat2
+        from cohere.v2 import Tool2, Tool2Function, UserChatMessage2
 
         client = Client(
             client_name="YOUR_CLIENT_NAME",
@@ -150,7 +150,7 @@ class V2Client:
         response = client.v2.chat_stream(
             model="string",
             messages=[
-                ChatMessage2_User(
+                UserChatMessage2(
                     content="string",
                     documents=[{"string": {"key": "value"}}],
                 )
@@ -165,7 +165,7 @@ class V2Client:
                 )
             ],
             citation_mode="FAST",
-            response_format=ResponseFormat2_Text(),
+            response_format=TextResponseFormat2(),
             max_tokens=1,
             stop_sequences=["string"],
             temperature=1.1,
@@ -706,8 +706,8 @@ class AsyncV2Client:
         --------
         import asyncio
 
-        from cohere import AsyncClient, ResponseFormat2_Text
-        from cohere.v2 import ChatMessage2_User, Tool2, Tool2Function
+        from cohere import AsyncClient, TextResponseFormat2
+        from cohere.v2 import Tool2, Tool2Function, UserChatMessage2
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
@@ -719,7 +719,7 @@ class AsyncV2Client:
             response = await client.v2.chat_stream(
                 model="string",
                 messages=[
-                    ChatMessage2_User(
+                    UserChatMessage2(
                         content="string",
                         documents=[{"string": {"key": "value"}}],
                     )
@@ -734,7 +734,7 @@ class AsyncV2Client:
                     )
                 ],
                 citation_mode="FAST",
-                response_format=ResponseFormat2_Text(),
+                response_format=TextResponseFormat2(),
                 max_tokens=1,
                 stop_sequences=["string"],
                 temperature=1.1,

@@ -17,7 +17,7 @@ import typing_extensions
 from ..core.unchecked_base_model import UnionMetadata
 
 
-class StreamedChatResponse_StreamStart(UncheckedBaseModel):
+class StreamStartStreamedChatResponse(UncheckedBaseModel):
     """
     StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
     """
@@ -35,7 +35,7 @@ class StreamedChatResponse_StreamStart(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class StreamedChatResponse_SearchQueriesGeneration(UncheckedBaseModel):
+class SearchQueriesGenerationStreamedChatResponse(UncheckedBaseModel):
     """
     StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
     """
@@ -53,7 +53,7 @@ class StreamedChatResponse_SearchQueriesGeneration(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class StreamedChatResponse_SearchResults(UncheckedBaseModel):
+class SearchResultsStreamedChatResponse(UncheckedBaseModel):
     """
     StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
     """
@@ -72,7 +72,7 @@ class StreamedChatResponse_SearchResults(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class StreamedChatResponse_TextGeneration(UncheckedBaseModel):
+class TextGenerationStreamedChatResponse(UncheckedBaseModel):
     """
     StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
     """
@@ -90,7 +90,7 @@ class StreamedChatResponse_TextGeneration(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class StreamedChatResponse_CitationGeneration(UncheckedBaseModel):
+class CitationGenerationStreamedChatResponse(UncheckedBaseModel):
     """
     StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
     """
@@ -108,7 +108,7 @@ class StreamedChatResponse_CitationGeneration(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class StreamedChatResponse_ToolCallsGeneration(UncheckedBaseModel):
+class ToolCallsGenerationStreamedChatResponse(UncheckedBaseModel):
     """
     StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
     """
@@ -127,7 +127,7 @@ class StreamedChatResponse_ToolCallsGeneration(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class StreamedChatResponse_StreamEnd(UncheckedBaseModel):
+class StreamEndStreamedChatResponse(UncheckedBaseModel):
     """
     StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
     """
@@ -146,7 +146,7 @@ class StreamedChatResponse_StreamEnd(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class StreamedChatResponse_ToolCallsChunk(UncheckedBaseModel):
+class ToolCallsChunkStreamedChatResponse(UncheckedBaseModel):
     """
     StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
     """
@@ -166,14 +166,14 @@ class StreamedChatResponse_ToolCallsChunk(UncheckedBaseModel):
 
 StreamedChatResponse = typing_extensions.Annotated[
     typing.Union[
-        StreamedChatResponse_StreamStart,
-        StreamedChatResponse_SearchQueriesGeneration,
-        StreamedChatResponse_SearchResults,
-        StreamedChatResponse_TextGeneration,
-        StreamedChatResponse_CitationGeneration,
-        StreamedChatResponse_ToolCallsGeneration,
-        StreamedChatResponse_StreamEnd,
-        StreamedChatResponse_ToolCallsChunk,
+        StreamStartStreamedChatResponse,
+        SearchQueriesGenerationStreamedChatResponse,
+        SearchResultsStreamedChatResponse,
+        TextGenerationStreamedChatResponse,
+        CitationGenerationStreamedChatResponse,
+        ToolCallsGenerationStreamedChatResponse,
+        StreamEndStreamedChatResponse,
+        ToolCallsChunkStreamedChatResponse,
     ],
     UnionMetadata(discriminant="event_type"),
 ]

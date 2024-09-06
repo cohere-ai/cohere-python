@@ -9,7 +9,7 @@ import typing_extensions
 from ...core.unchecked_base_model import UnionMetadata
 
 
-class Content_Text(UncheckedBaseModel):
+class TextContent(UncheckedBaseModel):
     """
     A Content block which contains information about the content type and the content itself.
     """
@@ -27,4 +27,4 @@ class Content_Text(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-Content = typing_extensions.Annotated[Content_Text, UnionMetadata(discriminant="type")]
+Content = typing_extensions.Annotated[TextContent, UnionMetadata(discriminant="type")]

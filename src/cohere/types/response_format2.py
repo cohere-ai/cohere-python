@@ -9,7 +9,7 @@ import typing_extensions
 from ..core.unchecked_base_model import UnionMetadata
 
 
-class ResponseFormat2_Text(UncheckedBaseModel):
+class TextResponseFormat2(UncheckedBaseModel):
     """
     Configuration for forcing the model output to adhere to the specified format. Supported on [Command R](https://docs.cohere.com/docs/command-r), [Command R+](https://docs.cohere.com/docs/command-r-plus) and newer models.
 
@@ -33,7 +33,7 @@ class ResponseFormat2_Text(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class ResponseFormat2_JsonObject(UncheckedBaseModel):
+class JsonObjectResponseFormat2(UncheckedBaseModel):
     """
     Configuration for forcing the model output to adhere to the specified format. Supported on [Command R](https://docs.cohere.com/docs/command-r), [Command R+](https://docs.cohere.com/docs/command-r-plus) and newer models.
 
@@ -59,5 +59,5 @@ class ResponseFormat2_JsonObject(UncheckedBaseModel):
 
 
 ResponseFormat2 = typing_extensions.Annotated[
-    typing.Union[ResponseFormat2_Text, ResponseFormat2_JsonObject], UnionMetadata(discriminant="type")
+    typing.Union[TextResponseFormat2, JsonObjectResponseFormat2], UnionMetadata(discriminant="type")
 ]

@@ -9,7 +9,7 @@ import typing_extensions
 from ...core.unchecked_base_model import UnionMetadata
 
 
-class Source_Tool(UncheckedBaseModel):
+class ToolSource(UncheckedBaseModel):
     """
     A source object containing information about the source of the data cited.
     """
@@ -28,7 +28,7 @@ class Source_Tool(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class Source_Document(UncheckedBaseModel):
+class DocumentSource(UncheckedBaseModel):
     """
     A source object containing information about the source of the data cited.
     """
@@ -47,4 +47,4 @@ class Source_Document(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-Source = typing_extensions.Annotated[typing.Union[Source_Tool, Source_Document], UnionMetadata(discriminant="type")]
+Source = typing_extensions.Annotated[typing.Union[ToolSource, DocumentSource], UnionMetadata(discriminant="type")]

@@ -2,11 +2,11 @@
 
 from .assistant_message import AssistantMessage
 from .assistant_message_content import AssistantMessageContent
-from .assistant_message_content_item import AssistantMessageContentItem, AssistantMessageContentItem_Text
+from .assistant_message_content_item import AssistantMessageContentItem, TextAssistantMessageContentItem
 from .assistant_message_response import AssistantMessageResponse
 from .assistant_message_response_content_item import (
     AssistantMessageResponseContentItem,
-    AssistantMessageResponseContentItem_Text,
+    TextAssistantMessageResponseContentItem,
 )
 from .chat_content_delta_event import ChatContentDeltaEvent
 from .chat_content_delta_event_delta import ChatContentDeltaEventDelta
@@ -18,13 +18,7 @@ from .chat_content_start_event_delta import ChatContentStartEventDelta
 from .chat_content_start_event_delta_message import ChatContentStartEventDeltaMessage
 from .chat_content_start_event_delta_message_content import ChatContentStartEventDeltaMessageContent
 from .chat_finish_reason import ChatFinishReason
-from .chat_message2 import (
-    ChatMessage2,
-    ChatMessage2_Assistant,
-    ChatMessage2_System,
-    ChatMessage2_Tool,
-    ChatMessage2_User,
-)
+from .chat_message2 import AssistantChatMessage2, ChatMessage2, SystemChatMessage2, ToolChatMessage2, UserChatMessage2
 from .chat_message_end_event import ChatMessageEndEvent
 from .chat_message_end_event_delta import ChatMessageEndEventDelta
 from .chat_message_start_event import ChatMessageStartEvent
@@ -44,35 +38,33 @@ from .chat_tool_call_start_event_delta_tool_call_function import ChatToolCallSta
 from .chat_tool_plan_delta_event import ChatToolPlanDeltaEvent
 from .chat_tool_plan_delta_event_delta import ChatToolPlanDeltaEventDelta
 from .citation import Citation
-from .content import Content, Content_Text
+from .content import Content, TextContent
 from .document_source import DocumentSource
 from .non_streamed_chat_response2 import NonStreamedChatResponse2
-from .source import Source, Source_Document, Source_Tool
+from .source import DocumentSource, Source, ToolSource
 from .streamed_chat_response2 import (
+    CitationEndStreamedChatResponse2,
+    CitationStartStreamedChatResponse2,
+    ContentDeltaStreamedChatResponse2,
+    ContentEndStreamedChatResponse2,
+    ContentStartStreamedChatResponse2,
+    MessageEndStreamedChatResponse2,
+    MessageStartStreamedChatResponse2,
     StreamedChatResponse2,
-    StreamedChatResponse2_CitationEnd,
-    StreamedChatResponse2_CitationStart,
-    StreamedChatResponse2_ContentDelta,
-    StreamedChatResponse2_ContentEnd,
-    StreamedChatResponse2_ContentStart,
-    StreamedChatResponse2_MessageEnd,
-    StreamedChatResponse2_MessageStart,
-    StreamedChatResponse2_ToolCallDelta,
-    StreamedChatResponse2_ToolCallEnd,
-    StreamedChatResponse2_ToolCallStart,
-    StreamedChatResponse2_ToolPlanDelta,
+    ToolCallDeltaStreamedChatResponse2,
+    ToolCallEndStreamedChatResponse2,
+    ToolCallStartStreamedChatResponse2,
+    ToolPlanDeltaStreamedChatResponse2,
 )
 from .system_message import SystemMessage
 from .system_message_content import SystemMessageContent
-from .system_message_content_item import SystemMessageContentItem, SystemMessageContentItem_Text
+from .system_message_content_item import SystemMessageContentItem, TextSystemMessageContentItem
 from .text_content import TextContent
 from .tool2 import Tool2
 from .tool2function import Tool2Function
 from .tool_call2 import ToolCall2
 from .tool_call2function import ToolCall2Function
-from .tool_content import ToolContent
 from .tool_message2 import ToolMessage2
-from .tool_message2tool_content_item import ToolMessage2ToolContentItem, ToolMessage2ToolContentItem_ToolResultObject
 from .tool_source import ToolSource
 from .usage import Usage
 from .usage_billed_units import UsageBilledUnits
@@ -83,13 +75,12 @@ from .v2chat_request_citation_mode import V2ChatRequestCitationMode
 from .v2chat_stream_request_citation_mode import V2ChatStreamRequestCitationMode
 
 __all__ = [
+    "AssistantChatMessage2",
     "AssistantMessage",
     "AssistantMessageContent",
     "AssistantMessageContentItem",
-    "AssistantMessageContentItem_Text",
     "AssistantMessageResponse",
     "AssistantMessageResponseContentItem",
-    "AssistantMessageResponseContentItem_Text",
     "ChatContentDeltaEvent",
     "ChatContentDeltaEventDelta",
     "ChatContentDeltaEventDeltaMessage",
@@ -101,10 +92,6 @@ __all__ = [
     "ChatContentStartEventDeltaMessageContent",
     "ChatFinishReason",
     "ChatMessage2",
-    "ChatMessage2_Assistant",
-    "ChatMessage2_System",
-    "ChatMessage2_Tool",
-    "ChatMessage2_User",
     "ChatMessageEndEvent",
     "ChatMessageEndEventDelta",
     "ChatMessageStartEvent",
@@ -124,42 +111,41 @@ __all__ = [
     "ChatToolPlanDeltaEvent",
     "ChatToolPlanDeltaEventDelta",
     "Citation",
+    "CitationEndStreamedChatResponse2",
+    "CitationStartStreamedChatResponse2",
     "Content",
-    "Content_Text",
+    "ContentDeltaStreamedChatResponse2",
+    "ContentEndStreamedChatResponse2",
+    "ContentStartStreamedChatResponse2",
     "DocumentSource",
+    "MessageEndStreamedChatResponse2",
+    "MessageStartStreamedChatResponse2",
     "NonStreamedChatResponse2",
     "Source",
-    "Source_Document",
-    "Source_Tool",
     "StreamedChatResponse2",
-    "StreamedChatResponse2_CitationEnd",
-    "StreamedChatResponse2_CitationStart",
-    "StreamedChatResponse2_ContentDelta",
-    "StreamedChatResponse2_ContentEnd",
-    "StreamedChatResponse2_ContentStart",
-    "StreamedChatResponse2_MessageEnd",
-    "StreamedChatResponse2_MessageStart",
-    "StreamedChatResponse2_ToolCallDelta",
-    "StreamedChatResponse2_ToolCallEnd",
-    "StreamedChatResponse2_ToolCallStart",
-    "StreamedChatResponse2_ToolPlanDelta",
+    "SystemChatMessage2",
     "SystemMessage",
     "SystemMessageContent",
     "SystemMessageContentItem",
-    "SystemMessageContentItem_Text",
+    "TextAssistantMessageContentItem",
+    "TextAssistantMessageResponseContentItem",
     "TextContent",
+    "TextSystemMessageContentItem",
     "Tool2",
     "Tool2Function",
     "ToolCall2",
     "ToolCall2Function",
-    "ToolContent",
+    "ToolCallDeltaStreamedChatResponse2",
+    "ToolCallEndStreamedChatResponse2",
+    "ToolCallStartStreamedChatResponse2",
+    "ToolChatMessage2",
     "ToolMessage2",
-    "ToolMessage2ToolContentItem",
-    "ToolMessage2ToolContentItem_ToolResultObject",
+    "ToolPlanDeltaStreamedChatResponse2",
     "ToolSource",
     "Usage",
     "UsageBilledUnits",
     "UsageTokens",
+    "UserChatMessage2",
     "UserMessage",
     "UserMessageContent",
     "V2ChatRequestCitationMode",

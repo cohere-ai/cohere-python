@@ -433,11 +433,11 @@ class BaseCohere:
         Examples
         --------
         from cohere import (
+            ChatbotMessage,
             ChatConnector,
             ChatStreamRequestConnectorsSearchOptions,
             Client,
-            Message_Chatbot,
-            ResponseFormat_Text,
+            TextResponseFormat,
             Tool,
             ToolCall,
             ToolParameterDefinitionsValue,
@@ -453,7 +453,7 @@ class BaseCohere:
             model="string",
             preamble="string",
             chat_history=[
-                Message_Chatbot(
+                ChatbotMessage(
                     message="string",
                     tool_calls=[
                         ToolCall(
@@ -513,7 +513,7 @@ class BaseCohere:
                 )
             ],
             force_single_step=True,
-            response_format=ResponseFormat_Text(),
+            response_format=TextResponseFormat(),
             safety_mode="CONTEXTUAL",
         )
         for chunk in response:
@@ -3416,10 +3416,10 @@ class AsyncBaseCohere:
 
         from cohere import (
             AsyncClient,
+            ChatbotMessage,
             ChatConnector,
             ChatStreamRequestConnectorsSearchOptions,
-            Message_Chatbot,
-            ResponseFormat_Text,
+            TextResponseFormat,
             Tool,
             ToolCall,
             ToolParameterDefinitionsValue,
@@ -3438,7 +3438,7 @@ class AsyncBaseCohere:
                 model="string",
                 preamble="string",
                 chat_history=[
-                    Message_Chatbot(
+                    ChatbotMessage(
                         message="string",
                         tool_calls=[
                             ToolCall(
@@ -3498,7 +3498,7 @@ class AsyncBaseCohere:
                     )
                 ],
                 force_single_step=True,
-                response_format=ResponseFormat_Text(),
+                response_format=TextResponseFormat(),
                 safety_mode="CONTEXTUAL",
             )
             async for chunk in response:
