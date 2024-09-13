@@ -75,7 +75,7 @@ class TestClientV2(unittest.TestCase):
 
         # call the get_weather tool
         tool_result = {"temperature": "30C"}
-        tool_content = [cohere.v2.ToolContent(output=tool_result)]
+        tool_content = [cohere.v2.Content(output=tool_result, text="The weather in Toronto is 30C")]
         messages.append(res.message)
         messages.append(cohere.v2.ToolMessage2(tool_call_id=res.message.tool_calls[0].id, tool_content=tool_content))
 
