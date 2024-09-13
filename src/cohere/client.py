@@ -200,7 +200,8 @@ class Client(BaseCohere, CacheMixin):
                 request_options=request_options,
             )
 
-        texts_batches = [texts[i : i + embed_batch_size] for i in range(0, len(texts), embed_batch_size)]
+        textsarr: typing.Sequence[str]  = texts if texts is not OMIT and texts is not None else []
+        texts_batches = [textsarr[i : i + embed_batch_size] for i in range(0, len(textsarr), embed_batch_size)]
 
         responses = [
             response
@@ -391,7 +392,8 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
                 request_options=request_options,
             )
 
-        texts_batches = [texts[i : i + embed_batch_size] for i in range(0, len(texts), embed_batch_size)]
+        textsarr: typing.Sequence[str]  = texts if texts is not OMIT and texts is not None else []
+        texts_batches = [textsarr[i : i + embed_batch_size] for i in range(0, len(textsarr), embed_batch_size)]
 
         responses = typing.cast(
             typing.List[EmbedResponse],
