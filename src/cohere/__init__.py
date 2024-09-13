@@ -163,9 +163,9 @@ from .errors import (
 )
 from . import connectors, datasets, embed_jobs, finetuning, models, v2
 from .aws_client import AwsClient
-from .client_v2 import AsyncClientV2, ClientV2
 from .bedrock_client import BedrockClient
 from .client import AsyncClient, Client
+from .client_v2 import AsyncClientV2, ClientV2
 from .datasets import (
     DatasetsCreateResponse,
     DatasetsCreateResponseDatasetPartsItem,
@@ -246,10 +246,7 @@ from .v2 import (
     Tool2Function,
     ToolCall2,
     ToolCall2Function,
-    ToolContent,
     ToolMessage2,
-    ToolMessage2ToolContentItem,
-    ToolMessage2ToolContentItem_ToolResultObject,
     ToolSource,
     Usage,
     UsageBilledUnits,
@@ -257,7 +254,9 @@ from .v2 import (
     UserMessage,
     UserMessageContent,
     V2ChatRequestCitationMode,
+    V2ChatRequestSafetyMode,
     V2ChatStreamRequestCitationMode,
+    V2ChatStreamRequestSafetyMode,
 )
 from .version import __version__
 
@@ -274,6 +273,7 @@ __all__ = [
     "AssistantMessageResponseContentItem",
     "AssistantMessageResponseContentItem_Text",
     "AsyncClient",
+    "AsyncClientV2",
     "AuthTokenType",
     "AwsClient",
     "BadRequestError",
@@ -354,6 +354,7 @@ __all__ = [
     "ClientClosedRequestError",
     "ClientClosedRequestErrorBody",
     "ClientEnvironment",
+    "ClientV2",
     "CompatibleEndpoint",
     "Connector",
     "ConnectorAuthStatus",
@@ -493,11 +494,8 @@ __all__ = [
     "ToolCall2",
     "ToolCall2Function",
     "ToolCallDelta",
-    "ToolContent",
     "ToolMessage",
     "ToolMessage2",
-    "ToolMessage2ToolContentItem",
-    "ToolMessage2ToolContentItem_ToolResultObject",
     "ToolParameterDefinitionsValue",
     "ToolResult",
     "ToolSource",
@@ -511,7 +509,9 @@ __all__ = [
     "UserMessage",
     "UserMessageContent",
     "V2ChatRequestCitationMode",
+    "V2ChatRequestSafetyMode",
     "V2ChatStreamRequestCitationMode",
+    "V2ChatStreamRequestSafetyMode",
     "__version__",
     "connectors",
     "datasets",

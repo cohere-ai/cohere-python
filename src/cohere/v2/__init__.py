@@ -70,10 +70,7 @@ from .types import (
     Tool2Function,
     ToolCall2,
     ToolCall2Function,
-    ToolContent,
     ToolMessage2,
-    ToolMessage2ToolContentItem,
-    ToolMessage2ToolContentItem_ToolResultObject,
     ToolSource,
     Usage,
     UsageBilledUnits,
@@ -81,7 +78,9 @@ from .types import (
     UserMessage,
     UserMessageContent,
     V2ChatRequestCitationMode,
+    V2ChatRequestSafetyMode,
     V2ChatStreamRequestCitationMode,
+    V2ChatStreamRequestSafetyMode,
 )
 
 __all__ = [
@@ -154,10 +153,7 @@ __all__ = [
     "Tool2Function",
     "ToolCall2",
     "ToolCall2Function",
-    "ToolContent",
     "ToolMessage2",
-    "ToolMessage2ToolContentItem",
-    "ToolMessage2ToolContentItem_ToolResultObject",
     "ToolSource",
     "Usage",
     "UsageBilledUnits",
@@ -165,5 +161,7 @@ __all__ = [
     "UserMessage",
     "UserMessageContent",
     "V2ChatRequestCitationMode",
+    "V2ChatRequestSafetyMode",
     "V2ChatStreamRequestCitationMode",
+    "V2ChatStreamRequestSafetyMode",
 ]
