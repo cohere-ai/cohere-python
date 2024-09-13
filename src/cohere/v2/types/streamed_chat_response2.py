@@ -11,7 +11,7 @@ from .chat_content_delta_event_delta import ChatContentDeltaEventDelta
 from .chat_tool_plan_delta_event_delta import ChatToolPlanDeltaEventDelta
 from .chat_tool_call_start_event_delta import ChatToolCallStartEventDelta
 from .chat_tool_call_delta_event_delta import ChatToolCallDeltaEventDelta
-from ...types.citation_start_event_delta import CitationStartEventDelta
+from .citation_start_event_delta import CitationStartEventDelta
 from .chat_message_end_event_delta import ChatMessageEndEventDelta
 import typing_extensions
 from ...core.unchecked_base_model import UnionMetadata
