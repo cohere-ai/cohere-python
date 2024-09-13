@@ -5,7 +5,8 @@ from ..core.client_wrapper import SyncClientWrapper
 from .types.chat_messages import ChatMessages
 from .types.tool2 import Tool2
 from .types.v2chat_stream_request_citation_mode import V2ChatStreamRequestCitationMode
-from ..types.response_format2 import ResponseFormat2
+from .types.response_format2 import ResponseFormat2
+from .types.v2chat_stream_request_safety_mode import V2ChatStreamRequestSafetyMode
 from ..core.request_options import RequestOptions
 from .types.streamed_chat_response2 import StreamedChatResponse2
 from ..core.serialization import convert_and_respect_annotation_metadata
@@ -31,6 +32,7 @@ from ..types.gateway_timeout_error_body import GatewayTimeoutErrorBody
 from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
 from .types.v2chat_request_citation_mode import V2ChatRequestCitationMode
+from .types.v2chat_request_safety_mode import V2ChatRequestSafetyMode
 from .types.non_streamed_chat_response2 import NonStreamedChatResponse2
 from ..core.client_wrapper import AsyncClientWrapper
 
@@ -50,6 +52,7 @@ class V2Client:
         tools: typing.Optional[typing.Sequence[Tool2]] = OMIT,
         citation_mode: typing.Optional[V2ChatStreamRequestCitationMode] = OMIT,
         response_format: typing.Optional[ResponseFormat2] = OMIT,
+        safety_mode: typing.Optional[V2ChatStreamRequestSafetyMode] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         temperature: typing.Optional[float] = OMIT,
@@ -83,6 +86,17 @@ class V2Client:
 
 
         response_format : typing.Optional[ResponseFormat2]
+
+        safety_mode : typing.Optional[V2ChatStreamRequestSafetyMode]
+            Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+            When `NONE` is specified, the safety instruction will be omitted.
+
+            Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
+
+            **Note**: This parameter is only compatible with models [Command R 08-2024](/docs/command-r#august-2024-release), [Command R+ 08-2024](/docs/command-r-plus#august-2024-release) and newer.
+
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+
 
         max_tokens : typing.Optional[int]
             The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
@@ -140,8 +154,13 @@ class V2Client:
 
         Examples
         --------
-        from cohere import Client, ResponseFormat2_Text
-        from cohere.v2 import ChatMessage2_User, Tool2, Tool2Function
+        from cohere import Client
+        from cohere.v2 import (
+            ChatMessage2_User,
+            ResponseFormat2_Text,
+            Tool2,
+            Tool2Function,
+        )
 
         client = Client(
             client_name="YOUR_CLIENT_NAME",
@@ -166,6 +185,7 @@ class V2Client:
             ],
             citation_mode="FAST",
             response_format=ResponseFormat2_Text(),
+            safety_mode="CONTEXTUAL",
             max_tokens=1,
             stop_sequences=["string"],
             temperature=1.1,
@@ -194,6 +214,7 @@ class V2Client:
                 "response_format": convert_and_respect_annotation_metadata(
                     object_=response_format, annotation=ResponseFormat2, direction="write"
                 ),
+                "safety_mode": safety_mode,
                 "max_tokens": max_tokens,
                 "stop_sequences": stop_sequences,
                 "temperature": temperature,
@@ -347,6 +368,7 @@ class V2Client:
         tools: typing.Optional[typing.Sequence[Tool2]] = OMIT,
         citation_mode: typing.Optional[V2ChatRequestCitationMode] = OMIT,
         response_format: typing.Optional[ResponseFormat2] = OMIT,
+        safety_mode: typing.Optional[V2ChatRequestSafetyMode] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         temperature: typing.Optional[float] = OMIT,
@@ -380,6 +402,17 @@ class V2Client:
 
 
         response_format : typing.Optional[ResponseFormat2]
+
+        safety_mode : typing.Optional[V2ChatRequestSafetyMode]
+            Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+            When `NONE` is specified, the safety instruction will be omitted.
+
+            Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
+
+            **Note**: This parameter is only compatible with models [Command R 08-2024](/docs/command-r#august-2024-release), [Command R+ 08-2024](/docs/command-r-plus#august-2024-release) and newer.
+
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+
 
         max_tokens : typing.Optional[int]
             The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
@@ -438,6 +471,7 @@ class V2Client:
         Examples
         --------
         from cohere import Client
+        from cohere.v2 import ChatMessage2_Tool
 
         client = Client(
             client_name="YOUR_CLIENT_NAME",
@@ -445,7 +479,12 @@ class V2Client:
         )
         client.v2.chat(
             model="model",
-            messages=[],
+            messages=[
+                ChatMessage2_Tool(
+                    tool_call_id="messages",
+                    tool_content=["messages"],
+                )
+            ],
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -463,6 +502,7 @@ class V2Client:
                 "response_format": convert_and_respect_annotation_metadata(
                     object_=response_format, annotation=ResponseFormat2, direction="write"
                 ),
+                "safety_mode": safety_mode,
                 "max_tokens": max_tokens,
                 "stop_sequences": stop_sequences,
                 "temperature": temperature,
@@ -614,6 +654,7 @@ class AsyncV2Client:
         tools: typing.Optional[typing.Sequence[Tool2]] = OMIT,
         citation_mode: typing.Optional[V2ChatStreamRequestCitationMode] = OMIT,
         response_format: typing.Optional[ResponseFormat2] = OMIT,
+        safety_mode: typing.Optional[V2ChatStreamRequestSafetyMode] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         temperature: typing.Optional[float] = OMIT,
@@ -647,6 +688,17 @@ class AsyncV2Client:
 
 
         response_format : typing.Optional[ResponseFormat2]
+
+        safety_mode : typing.Optional[V2ChatStreamRequestSafetyMode]
+            Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+            When `NONE` is specified, the safety instruction will be omitted.
+
+            Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
+
+            **Note**: This parameter is only compatible with models [Command R 08-2024](/docs/command-r#august-2024-release), [Command R+ 08-2024](/docs/command-r-plus#august-2024-release) and newer.
+
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+
 
         max_tokens : typing.Optional[int]
             The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
@@ -706,8 +758,13 @@ class AsyncV2Client:
         --------
         import asyncio
 
-        from cohere import AsyncClient, ResponseFormat2_Text
-        from cohere.v2 import ChatMessage2_User, Tool2, Tool2Function
+        from cohere import AsyncClient
+        from cohere.v2 import (
+            ChatMessage2_User,
+            ResponseFormat2_Text,
+            Tool2,
+            Tool2Function,
+        )
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
@@ -735,6 +792,7 @@ class AsyncV2Client:
                 ],
                 citation_mode="FAST",
                 response_format=ResponseFormat2_Text(),
+                safety_mode="CONTEXTUAL",
                 max_tokens=1,
                 stop_sequences=["string"],
                 temperature=1.1,
@@ -766,6 +824,7 @@ class AsyncV2Client:
                 "response_format": convert_and_respect_annotation_metadata(
                     object_=response_format, annotation=ResponseFormat2, direction="write"
                 ),
+                "safety_mode": safety_mode,
                 "max_tokens": max_tokens,
                 "stop_sequences": stop_sequences,
                 "temperature": temperature,
@@ -919,6 +978,7 @@ class AsyncV2Client:
         tools: typing.Optional[typing.Sequence[Tool2]] = OMIT,
         citation_mode: typing.Optional[V2ChatRequestCitationMode] = OMIT,
         response_format: typing.Optional[ResponseFormat2] = OMIT,
+        safety_mode: typing.Optional[V2ChatRequestSafetyMode] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         temperature: typing.Optional[float] = OMIT,
@@ -952,6 +1012,17 @@ class AsyncV2Client:
 
 
         response_format : typing.Optional[ResponseFormat2]
+
+        safety_mode : typing.Optional[V2ChatRequestSafetyMode]
+            Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+            When `NONE` is specified, the safety instruction will be omitted.
+
+            Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
+
+            **Note**: This parameter is only compatible with models [Command R 08-2024](/docs/command-r#august-2024-release), [Command R+ 08-2024](/docs/command-r-plus#august-2024-release) and newer.
+
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+
 
         max_tokens : typing.Optional[int]
             The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
@@ -1012,6 +1083,7 @@ class AsyncV2Client:
         import asyncio
 
         from cohere import AsyncClient
+        from cohere.v2 import ChatMessage2_Tool
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
@@ -1022,7 +1094,12 @@ class AsyncV2Client:
         async def main() -> None:
             await client.v2.chat(
                 model="model",
-                messages=[],
+                messages=[
+                    ChatMessage2_Tool(
+                        tool_call_id="messages",
+                        tool_content=["messages"],
+                    )
+                ],
             )
 
 
@@ -1043,6 +1120,7 @@ class AsyncV2Client:
                 "response_format": convert_and_respect_annotation_metadata(
                     object_=response_format, annotation=ResponseFormat2, direction="write"
                 ),
+                "safety_mode": safety_mode,
                 "max_tokens": max_tokens,
                 "stop_sequences": stop_sequences,
                 "temperature": temperature,

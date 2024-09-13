@@ -141,6 +141,14 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dl>
 <dd>
 
+**accepts:** `typing.Optional[typing.Literal["text/event-stream"]]` — Pass text/event-stream to receive the streamed response as server-sent events. The default is `\n` delimited events.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **model:** `typing.Optional[str]` 
 
 Defaults to `command-r-plus-08-2024`.
@@ -578,7 +586,7 @@ To learn how to use the Chat API with Streaming and RAG follow our [Text Generat
 <dd>
 
 ```python
-from cohere import Client
+from cohere import Client, Message_Tool
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -586,6 +594,7 @@ client = Client(
 )
 client.chat(
     message="Can you give me a global market overview of solar panels?",
+    chat_history=[Message_Tool(), Message_Tool()],
     prompt_truncation="OFF",
     temperature=0.3,
 )
@@ -610,6 +619,14 @@ Text input for the model to respond to.
 
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**accepts:** `typing.Optional[typing.Literal["text/event-stream"]]` — Pass text/event-stream to receive the streamed response as server-sent events. The default is `\n` delimited events.
     
 </dd>
 </dl>
@@ -1592,14 +1609,7 @@ client = Client(
     client_name="YOUR_CLIENT_NAME",
     token="YOUR_TOKEN",
 )
-client.embed(
-    texts=["string"],
-    images=["string"],
-    model="string",
-    input_type="search_document",
-    embedding_types=["float"],
-    truncate="NONE",
-)
+client.embed()
 
 ```
 </dd>
@@ -1615,7 +1625,19 @@ client.embed(
 <dl>
 <dd>
 
-**texts:** `typing.Sequence[str]` — An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
+**texts:** `typing.Optional[typing.Sequence[str]]` — An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**images:** `typing.Optional[typing.Sequence[str]]` 
+
+An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
+
+The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
     
 </dd>
 </dl>
@@ -2312,8 +2334,13 @@ Generates a message from the model in response to a provided conversation. To le
 <dd>
 
 ```python
-from cohere import Client, ResponseFormat2_Text
-from cohere.v2 import ChatMessage2_User, Tool2, Tool2Function
+from cohere import Client
+from cohere.v2 import (
+    ChatMessage2_User,
+    ResponseFormat2_Text,
+    Tool2,
+    Tool2Function,
+)
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -2338,6 +2365,7 @@ response = client.v2.chat_stream(
     ],
     citation_mode="FAST",
     response_format=ResponseFormat2_Text(),
+    safety_mode="CONTEXTUAL",
     max_tokens=1,
     stop_sequences=["string"],
     temperature=1.1,
@@ -2407,6 +2435,24 @@ Dictates the approach taken to generating citations as part of the RAG flow by a
 <dd>
 
 **response_format:** `typing.Optional[ResponseFormat2]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**safety_mode:** `typing.Optional[V2ChatStreamRequestSafetyMode]` 
+
+Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+When `NONE` is specified, the safety instruction will be omitted.
+
+Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
+
+**Note**: This parameter is only compatible with models [Command R 08-2024](/docs/command-r#august-2024-release), [Command R+ 08-2024](/docs/command-r-plus#august-2024-release) and newer.
+
+Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+
     
 </dd>
 </dl>
@@ -2557,6 +2603,7 @@ Generates a message from the model in response to a provided conversation. To le
 
 ```python
 from cohere import Client
+from cohere.v2 import ChatMessage2_Tool
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -2564,7 +2611,12 @@ client = Client(
 )
 client.v2.chat(
     model="model",
-    messages=[],
+    messages=[
+        ChatMessage2_Tool(
+            tool_call_id="messages",
+            tool_content=["messages"],
+        )
+    ],
 )
 
 ```
@@ -2623,6 +2675,24 @@ Dictates the approach taken to generating citations as part of the RAG flow by a
 <dd>
 
 **response_format:** `typing.Optional[ResponseFormat2]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**safety_mode:** `typing.Optional[V2ChatRequestSafetyMode]` 
+
+Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+When `NONE` is specified, the safety instruction will be omitted.
+
+Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
+
+**Note**: This parameter is only compatible with models [Command R 08-2024](/docs/command-r#august-2024-release), [Command R+ 08-2024](/docs/command-r-plus#august-2024-release) and newer.
+
+Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+
     
 </dd>
 </dl>

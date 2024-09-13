@@ -11,7 +11,6 @@ from .tool_call2 import ToolCall2
 from .assistant_message_content import AssistantMessageContent
 from .citation import Citation
 from .system_message_content import SystemMessageContent
-from .tool_message2tool_content_item import ToolMessage2ToolContentItem
 import typing_extensions
 from ...core.unchecked_base_model import UnionMetadata
 
@@ -81,7 +80,7 @@ class ChatMessage2_Tool(UncheckedBaseModel):
 
     role: typing.Literal["tool"] = "tool"
     tool_call_id: str
-    tool_content: typing.List[ToolMessage2ToolContentItem]
+    tool_content: typing.List[str]
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
