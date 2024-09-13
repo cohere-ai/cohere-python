@@ -156,6 +156,7 @@ class BaseCohere:
         self,
         *,
         message: str,
+        accepts: typing.Optional[typing.Literal["text/event-stream"]] = None,
         model: typing.Optional[str] = OMIT,
         preamble: typing.Optional[str] = OMIT,
         chat_history: typing.Optional[typing.Sequence[Message]] = OMIT,
@@ -194,6 +195,9 @@ class BaseCohere:
 
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
+
+        accepts : typing.Optional[typing.Literal["text/event-stream"]]
+            Pass text/event-stream to receive the streamed response as server-sent events. The default is `\n` delimited events.
 
         model : typing.Optional[str]
             Defaults to `command-r-plus-08-2024`.
@@ -433,11 +437,11 @@ class BaseCohere:
         Examples
         --------
         from cohere import (
+            ChatbotMessage,
             ChatConnector,
             ChatStreamRequestConnectorsSearchOptions,
             Client,
-            Message_Chatbot,
-            ResponseFormat_Text,
+            TextResponseFormat,
             Tool,
             ToolCall,
             ToolParameterDefinitionsValue,
@@ -453,7 +457,7 @@ class BaseCohere:
             model="string",
             preamble="string",
             chat_history=[
-                Message_Chatbot(
+                ChatbotMessage(
                     message="string",
                     tool_calls=[
                         ToolCall(
@@ -513,7 +517,7 @@ class BaseCohere:
                 )
             ],
             force_single_step=True,
-            response_format=ResponseFormat_Text(),
+            response_format=TextResponseFormat(),
             safety_mode="CONTEXTUAL",
         )
         for chunk in response:
@@ -560,6 +564,9 @@ class BaseCohere:
                 ),
                 "safety_mode": safety_mode,
                 "stream": True,
+            },
+            headers={
+                "Accepts": str(accepts) if accepts is not None else None,
             },
             request_options=request_options,
             omit=OMIT,
@@ -700,6 +707,7 @@ class BaseCohere:
         self,
         *,
         message: str,
+        accepts: typing.Optional[typing.Literal["text/event-stream"]] = None,
         model: typing.Optional[str] = OMIT,
         preamble: typing.Optional[str] = OMIT,
         chat_history: typing.Optional[typing.Sequence[Message]] = OMIT,
@@ -738,6 +746,9 @@ class BaseCohere:
 
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
+
+        accepts : typing.Optional[typing.Literal["text/event-stream"]]
+            Pass text/event-stream to receive the streamed response as server-sent events. The default is `\n` delimited events.
 
         model : typing.Optional[str]
             Defaults to `command-r-plus-08-2024`.
@@ -976,7 +987,7 @@ class BaseCohere:
 
         Examples
         --------
-        from cohere import Client
+        from cohere import Client, ToolMessage
 
         client = Client(
             client_name="YOUR_CLIENT_NAME",
@@ -984,6 +995,7 @@ class BaseCohere:
         )
         client.chat(
             message="Can you give me a global market overview of solar panels?",
+            chat_history=[ToolMessage(), ToolMessage()],
             prompt_truncation="OFF",
             temperature=0.3,
         )
@@ -1029,6 +1041,9 @@ class BaseCohere:
                 ),
                 "safety_mode": safety_mode,
                 "stream": False,
+            },
+            headers={
+                "Accepts": str(accepts) if accepts is not None else None,
             },
             request_options=request_options,
             omit=OMIT,
@@ -1753,7 +1768,8 @@ class BaseCohere:
     def embed(
         self,
         *,
-        texts: typing.Sequence[str],
+        texts: typing.Optional[typing.Sequence[str]] = OMIT,
+        images: typing.Optional[typing.Sequence[str]] = OMIT,
         model: typing.Optional[str] = OMIT,
         input_type: typing.Optional[EmbedInputType] = OMIT,
         embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
@@ -1769,8 +1785,13 @@ class BaseCohere:
 
         Parameters
         ----------
-        texts : typing.Sequence[str]
+        texts : typing.Optional[typing.Sequence[str]]
             An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
+
+        images : typing.Optional[typing.Sequence[str]]
+            An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
+
+            The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
 
         model : typing.Optional[str]
             Defaults to embed-english-v2.0
@@ -1822,20 +1843,14 @@ class BaseCohere:
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        client.embed(
-            texts=["string"],
-            images=["string"],
-            model="string",
-            input_type="search_document",
-            embedding_types=["float"],
-            truncate="NONE",
-        )
+        client.embed()
         """
         _response = self._client_wrapper.httpx_client.request(
             "v1/embed",
             method="POST",
             json={
                 "texts": texts,
+                "images": images,
                 "model": model,
                 "input_type": input_type,
                 "embedding_types": embedding_types,
@@ -3136,6 +3151,7 @@ class AsyncBaseCohere:
         self,
         *,
         message: str,
+        accepts: typing.Optional[typing.Literal["text/event-stream"]] = None,
         model: typing.Optional[str] = OMIT,
         preamble: typing.Optional[str] = OMIT,
         chat_history: typing.Optional[typing.Sequence[Message]] = OMIT,
@@ -3174,6 +3190,9 @@ class AsyncBaseCohere:
 
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
+
+        accepts : typing.Optional[typing.Literal["text/event-stream"]]
+            Pass text/event-stream to receive the streamed response as server-sent events. The default is `\n` delimited events.
 
         model : typing.Optional[str]
             Defaults to `command-r-plus-08-2024`.
@@ -3416,10 +3435,10 @@ class AsyncBaseCohere:
 
         from cohere import (
             AsyncClient,
+            ChatbotMessage,
             ChatConnector,
             ChatStreamRequestConnectorsSearchOptions,
-            Message_Chatbot,
-            ResponseFormat_Text,
+            TextResponseFormat,
             Tool,
             ToolCall,
             ToolParameterDefinitionsValue,
@@ -3438,7 +3457,7 @@ class AsyncBaseCohere:
                 model="string",
                 preamble="string",
                 chat_history=[
-                    Message_Chatbot(
+                    ChatbotMessage(
                         message="string",
                         tool_calls=[
                             ToolCall(
@@ -3498,7 +3517,7 @@ class AsyncBaseCohere:
                     )
                 ],
                 force_single_step=True,
-                response_format=ResponseFormat_Text(),
+                response_format=TextResponseFormat(),
                 safety_mode="CONTEXTUAL",
             )
             async for chunk in response:
@@ -3548,6 +3567,9 @@ class AsyncBaseCohere:
                 ),
                 "safety_mode": safety_mode,
                 "stream": True,
+            },
+            headers={
+                "Accepts": str(accepts) if accepts is not None else None,
             },
             request_options=request_options,
             omit=OMIT,
@@ -3688,6 +3710,7 @@ class AsyncBaseCohere:
         self,
         *,
         message: str,
+        accepts: typing.Optional[typing.Literal["text/event-stream"]] = None,
         model: typing.Optional[str] = OMIT,
         preamble: typing.Optional[str] = OMIT,
         chat_history: typing.Optional[typing.Sequence[Message]] = OMIT,
@@ -3726,6 +3749,9 @@ class AsyncBaseCohere:
 
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
+
+        accepts : typing.Optional[typing.Literal["text/event-stream"]]
+            Pass text/event-stream to receive the streamed response as server-sent events. The default is `\n` delimited events.
 
         model : typing.Optional[str]
             Defaults to `command-r-plus-08-2024`.
@@ -3966,7 +3992,7 @@ class AsyncBaseCohere:
         --------
         import asyncio
 
-        from cohere import AsyncClient
+        from cohere import AsyncClient, ToolMessage
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
@@ -3977,6 +4003,7 @@ class AsyncBaseCohere:
         async def main() -> None:
             await client.chat(
                 message="Can you give me a global market overview of solar panels?",
+                chat_history=[ToolMessage(), ToolMessage()],
                 prompt_truncation="OFF",
                 temperature=0.3,
             )
@@ -4025,6 +4052,9 @@ class AsyncBaseCohere:
                 ),
                 "safety_mode": safety_mode,
                 "stream": False,
+            },
+            headers={
+                "Accepts": str(accepts) if accepts is not None else None,
             },
             request_options=request_options,
             omit=OMIT,
@@ -4765,7 +4795,8 @@ class AsyncBaseCohere:
     async def embed(
         self,
         *,
-        texts: typing.Sequence[str],
+        texts: typing.Optional[typing.Sequence[str]] = OMIT,
+        images: typing.Optional[typing.Sequence[str]] = OMIT,
         model: typing.Optional[str] = OMIT,
         input_type: typing.Optional[EmbedInputType] = OMIT,
         embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
@@ -4781,8 +4812,13 @@ class AsyncBaseCohere:
 
         Parameters
         ----------
-        texts : typing.Sequence[str]
+        texts : typing.Optional[typing.Sequence[str]]
             An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
+
+        images : typing.Optional[typing.Sequence[str]]
+            An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
+
+            The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
 
         model : typing.Optional[str]
             Defaults to embed-english-v2.0
@@ -4839,14 +4875,7 @@ class AsyncBaseCohere:
 
 
         async def main() -> None:
-            await client.embed(
-                texts=["string"],
-                images=["string"],
-                model="string",
-                input_type="search_document",
-                embedding_types=["float"],
-                truncate="NONE",
-            )
+            await client.embed()
 
 
         asyncio.run(main())
@@ -4856,6 +4885,7 @@ class AsyncBaseCohere:
             method="POST",
             json={
                 "texts": texts,
+                "images": images,
                 "model": model,
                 "input_type": input_type,
                 "embedding_types": embedding_types,
