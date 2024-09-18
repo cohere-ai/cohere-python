@@ -4,25 +4,24 @@ from __future__ import annotations
 from ...core.unchecked_base_model import UncheckedBaseModel
 import typing
 from .user_message_content import UserMessageContent
-from ...types.chat_document import ChatDocument
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
 import pydantic
 from .tool_call2 import ToolCall2
 from .assistant_message_content import AssistantMessageContent
 from .citation import Citation
 from .system_message_content import SystemMessageContent
+from .tool_message2tool_content import ToolMessage2ToolContent
 import typing_extensions
 from ...core.unchecked_base_model import UnionMetadata
 
 
-class ChatMessage2_User(UncheckedBaseModel):
+class UserChatMessage2(UncheckedBaseModel):
     """
     Represents a single message in the chat history from a given role.
     """
 
     role: typing.Literal["user"] = "user"
     content: UserMessageContent
-    documents: typing.Optional[typing.List[ChatDocument]] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -34,7 +33,7 @@ class ChatMessage2_User(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class ChatMessage2_Assistant(UncheckedBaseModel):
+class AssistantChatMessage2(UncheckedBaseModel):
     """
     Represents a single message in the chat history from a given role.
     """
@@ -55,7 +54,7 @@ class ChatMessage2_Assistant(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class ChatMessage2_System(UncheckedBaseModel):
+class SystemChatMessage2(UncheckedBaseModel):
     """
     Represents a single message in the chat history from a given role.
     """
@@ -73,14 +72,14 @@ class ChatMessage2_System(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class ChatMessage2_Tool(UncheckedBaseModel):
+class ToolChatMessage2(UncheckedBaseModel):
     """
     Represents a single message in the chat history from a given role.
     """
 
     role: typing.Literal["tool"] = "tool"
     tool_call_id: str
-    tool_content: typing.List[str]
+    tool_content: ToolMessage2ToolContent
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -93,6 +92,6 @@ class ChatMessage2_Tool(UncheckedBaseModel):
 
 
 ChatMessage2 = typing_extensions.Annotated[
-    typing.Union[ChatMessage2_User, ChatMessage2_Assistant, ChatMessage2_System, ChatMessage2_Tool],
+    typing.Union[UserChatMessage2, AssistantChatMessage2, SystemChatMessage2, ToolChatMessage2],
     UnionMetadata(discriminant="role"),
 ]

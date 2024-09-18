@@ -3,9 +3,8 @@
 from ...core.unchecked_base_model import UncheckedBaseModel
 from .user_message_content import UserMessageContent
 import pydantic
-import typing
-from ...types.chat_document import ChatDocument
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
+import typing
 
 
 class UserMessage(UncheckedBaseModel):
@@ -17,11 +16,6 @@ class UserMessage(UncheckedBaseModel):
     """
     The content of the message. This can be a string or a list of content blocks.
     If a string is provided, it will be treated as a text content block.
-    """
-
-    documents: typing.Optional[typing.List[ChatDocument]] = pydantic.Field(default=None)
-    """
-    Documents seen by the model when generating the reply.
     """
 
     if IS_PYDANTIC_V2:

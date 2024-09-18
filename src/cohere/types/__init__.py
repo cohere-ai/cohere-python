@@ -64,7 +64,7 @@ from .embed_job import EmbedJob
 from .embed_job_status import EmbedJobStatus
 from .embed_job_truncate import EmbedJobTruncate
 from .embed_request_truncate import EmbedRequestTruncate
-from .embed_response import EmbedResponse, EmbedResponse_EmbeddingsByType, EmbedResponse_EmbeddingsFloats
+from .embed_response import EmbedResponse, EmbeddingsByTypeEmbedResponse, EmbeddingsFloatsEmbedResponse
 from .embedding_type import EmbeddingType
 from .finetune_dataset_metrics import FinetuneDatasetMetrics
 from .finish_reason import FinishReason
@@ -80,9 +80,9 @@ from .generate_stream_request_truncate import GenerateStreamRequestTruncate
 from .generate_stream_text import GenerateStreamText
 from .generate_streamed_response import (
     GenerateStreamedResponse,
-    GenerateStreamedResponse_StreamEnd,
-    GenerateStreamedResponse_StreamError,
-    GenerateStreamedResponse_TextGeneration,
+    StreamEndGenerateStreamedResponse,
+    StreamErrorGenerateStreamedResponse,
+    TextGenerationGenerateStreamedResponse,
 )
 from .generation import Generation
 from .get_connector_response import GetConnectorResponse
@@ -92,7 +92,7 @@ from .label_metric import LabelMetric
 from .list_connectors_response import ListConnectorsResponse
 from .list_embed_job_response import ListEmbedJobResponse
 from .list_models_response import ListModelsResponse
-from .message import Message, Message_Chatbot, Message_System, Message_Tool, Message_User
+from .message import ChatbotMessage, Message, SystemMessage, ToolMessage, UserMessage
 from .metrics import Metrics
 from .metrics_embed_data import MetricsEmbedData
 from .metrics_embed_data_fields_item import MetricsEmbedDataFieldsItem
@@ -106,20 +106,20 @@ from .rerank_response import RerankResponse
 from .rerank_response_results_item import RerankResponseResultsItem
 from .rerank_response_results_item_document import RerankResponseResultsItemDocument
 from .reranker_data_metrics import RerankerDataMetrics
-from .response_format import ResponseFormat, ResponseFormat_JsonObject, ResponseFormat_Text
+from .response_format import JsonObjectResponseFormat, ResponseFormat, TextResponseFormat
 from .single_generation import SingleGeneration
 from .single_generation_in_stream import SingleGenerationInStream
 from .single_generation_token_likelihoods_item import SingleGenerationTokenLikelihoodsItem
 from .streamed_chat_response import (
+    CitationGenerationStreamedChatResponse,
+    SearchQueriesGenerationStreamedChatResponse,
+    SearchResultsStreamedChatResponse,
+    StreamEndStreamedChatResponse,
+    StreamStartStreamedChatResponse,
     StreamedChatResponse,
-    StreamedChatResponse_CitationGeneration,
-    StreamedChatResponse_SearchQueriesGeneration,
-    StreamedChatResponse_SearchResults,
-    StreamedChatResponse_StreamEnd,
-    StreamedChatResponse_StreamStart,
-    StreamedChatResponse_TextGeneration,
-    StreamedChatResponse_ToolCallsChunk,
-    StreamedChatResponse_ToolCallsGeneration,
+    TextGenerationStreamedChatResponse,
+    ToolCallsChunkStreamedChatResponse,
+    ToolCallsGenerationStreamedChatResponse,
 )
 from .summarize_request_extractiveness import SummarizeRequestExtractiveness
 from .summarize_request_format import SummarizeRequestFormat
@@ -169,7 +169,9 @@ __all__ = [
     "ChatTextGenerationEvent",
     "ChatToolCallsChunkEvent",
     "ChatToolCallsGenerationEvent",
+    "ChatbotMessage",
     "CheckApiKeyResponse",
+    "CitationGenerationStreamedChatResponse",
     "ClassifyDataMetrics",
     "ClassifyExample",
     "ClassifyRequestTruncate",
@@ -201,9 +203,9 @@ __all__ = [
     "EmbedJobTruncate",
     "EmbedRequestTruncate",
     "EmbedResponse",
-    "EmbedResponse_EmbeddingsByType",
-    "EmbedResponse_EmbeddingsFloats",
     "EmbeddingType",
+    "EmbeddingsByTypeEmbedResponse",
+    "EmbeddingsFloatsEmbedResponse",
     "FinetuneDatasetMetrics",
     "FinishReason",
     "GatewayTimeoutErrorBody",
@@ -217,22 +219,16 @@ __all__ = [
     "GenerateStreamRequestTruncate",
     "GenerateStreamText",
     "GenerateStreamedResponse",
-    "GenerateStreamedResponse_StreamEnd",
-    "GenerateStreamedResponse_StreamError",
-    "GenerateStreamedResponse_TextGeneration",
     "Generation",
     "GetConnectorResponse",
     "GetModelResponse",
+    "JsonObjectResponseFormat",
     "JsonResponseFormat",
     "LabelMetric",
     "ListConnectorsResponse",
     "ListEmbedJobResponse",
     "ListModelsResponse",
     "Message",
-    "Message_Chatbot",
-    "Message_System",
-    "Message_Tool",
-    "Message_User",
     "Metrics",
     "MetricsEmbedData",
     "MetricsEmbedDataFieldsItem",
@@ -247,33 +243,35 @@ __all__ = [
     "RerankResponseResultsItemDocument",
     "RerankerDataMetrics",
     "ResponseFormat",
-    "ResponseFormat_JsonObject",
-    "ResponseFormat_Text",
+    "SearchQueriesGenerationStreamedChatResponse",
+    "SearchResultsStreamedChatResponse",
     "SingleGeneration",
     "SingleGenerationInStream",
     "SingleGenerationTokenLikelihoodsItem",
+    "StreamEndGenerateStreamedResponse",
+    "StreamEndStreamedChatResponse",
+    "StreamErrorGenerateStreamedResponse",
+    "StreamStartStreamedChatResponse",
     "StreamedChatResponse",
-    "StreamedChatResponse_CitationGeneration",
-    "StreamedChatResponse_SearchQueriesGeneration",
-    "StreamedChatResponse_SearchResults",
-    "StreamedChatResponse_StreamEnd",
-    "StreamedChatResponse_StreamStart",
-    "StreamedChatResponse_TextGeneration",
-    "StreamedChatResponse_ToolCallsChunk",
-    "StreamedChatResponse_ToolCallsGeneration",
     "SummarizeRequestExtractiveness",
     "SummarizeRequestFormat",
     "SummarizeRequestLength",
     "SummarizeResponse",
+    "SystemMessage",
+    "TextGenerationGenerateStreamedResponse",
+    "TextGenerationStreamedChatResponse",
     "TextResponseFormat",
     "TokenizeResponse",
     "TooManyRequestsErrorBody",
     "Tool",
     "ToolCall",
     "ToolCallDelta",
+    "ToolCallsChunkStreamedChatResponse",
+    "ToolCallsGenerationStreamedChatResponse",
     "ToolMessage",
     "ToolParameterDefinitionsValue",
     "ToolResult",
     "UnprocessableEntityErrorBody",
     "UpdateConnectorResponse",
+    "UserMessage",
 ]

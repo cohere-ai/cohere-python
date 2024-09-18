@@ -17,7 +17,7 @@ import typing_extensions
 from ...core.unchecked_base_model import UnionMetadata
 
 
-class StreamedChatResponse2_MessageStart(UncheckedBaseModel):
+class MessageStartStreamedChatResponse2(UncheckedBaseModel):
     """
     StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
     """
@@ -36,7 +36,7 @@ class StreamedChatResponse2_MessageStart(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class StreamedChatResponse2_ContentStart(UncheckedBaseModel):
+class ContentStartStreamedChatResponse2(UncheckedBaseModel):
     """
     StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
     """
@@ -55,7 +55,7 @@ class StreamedChatResponse2_ContentStart(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class StreamedChatResponse2_ContentDelta(UncheckedBaseModel):
+class ContentDeltaStreamedChatResponse2(UncheckedBaseModel):
     """
     StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
     """
@@ -74,7 +74,7 @@ class StreamedChatResponse2_ContentDelta(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class StreamedChatResponse2_ContentEnd(UncheckedBaseModel):
+class ContentEndStreamedChatResponse2(UncheckedBaseModel):
     """
     StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
     """
@@ -92,7 +92,7 @@ class StreamedChatResponse2_ContentEnd(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class StreamedChatResponse2_ToolPlanDelta(UncheckedBaseModel):
+class ToolPlanDeltaStreamedChatResponse2(UncheckedBaseModel):
     """
     StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
     """
@@ -110,7 +110,7 @@ class StreamedChatResponse2_ToolPlanDelta(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class StreamedChatResponse2_ToolCallStart(UncheckedBaseModel):
+class ToolCallStartStreamedChatResponse2(UncheckedBaseModel):
     """
     StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
     """
@@ -129,7 +129,7 @@ class StreamedChatResponse2_ToolCallStart(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class StreamedChatResponse2_ToolCallDelta(UncheckedBaseModel):
+class ToolCallDeltaStreamedChatResponse2(UncheckedBaseModel):
     """
     StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
     """
@@ -148,7 +148,7 @@ class StreamedChatResponse2_ToolCallDelta(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class StreamedChatResponse2_ToolCallEnd(UncheckedBaseModel):
+class ToolCallEndStreamedChatResponse2(UncheckedBaseModel):
     """
     StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
     """
@@ -166,7 +166,7 @@ class StreamedChatResponse2_ToolCallEnd(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class StreamedChatResponse2_CitationStart(UncheckedBaseModel):
+class CitationStartStreamedChatResponse2(UncheckedBaseModel):
     """
     StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
     """
@@ -185,7 +185,7 @@ class StreamedChatResponse2_CitationStart(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class StreamedChatResponse2_CitationEnd(UncheckedBaseModel):
+class CitationEndStreamedChatResponse2(UncheckedBaseModel):
     """
     StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
     """
@@ -203,7 +203,7 @@ class StreamedChatResponse2_CitationEnd(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class StreamedChatResponse2_MessageEnd(UncheckedBaseModel):
+class MessageEndStreamedChatResponse2(UncheckedBaseModel):
     """
     StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
     """
@@ -224,17 +224,17 @@ class StreamedChatResponse2_MessageEnd(UncheckedBaseModel):
 
 StreamedChatResponse2 = typing_extensions.Annotated[
     typing.Union[
-        StreamedChatResponse2_MessageStart,
-        StreamedChatResponse2_ContentStart,
-        StreamedChatResponse2_ContentDelta,
-        StreamedChatResponse2_ContentEnd,
-        StreamedChatResponse2_ToolPlanDelta,
-        StreamedChatResponse2_ToolCallStart,
-        StreamedChatResponse2_ToolCallDelta,
-        StreamedChatResponse2_ToolCallEnd,
-        StreamedChatResponse2_CitationStart,
-        StreamedChatResponse2_CitationEnd,
-        StreamedChatResponse2_MessageEnd,
+        MessageStartStreamedChatResponse2,
+        ContentStartStreamedChatResponse2,
+        ContentDeltaStreamedChatResponse2,
+        ContentEndStreamedChatResponse2,
+        ToolPlanDeltaStreamedChatResponse2,
+        ToolCallStartStreamedChatResponse2,
+        ToolCallDeltaStreamedChatResponse2,
+        ToolCallEndStreamedChatResponse2,
+        CitationStartStreamedChatResponse2,
+        CitationEndStreamedChatResponse2,
+        MessageEndStreamedChatResponse2,
     ],
     UnionMetadata(discriminant="type"),
 ]

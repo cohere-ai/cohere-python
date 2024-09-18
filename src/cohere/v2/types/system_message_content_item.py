@@ -9,7 +9,7 @@ import typing_extensions
 from ...core.unchecked_base_model import UnionMetadata
 
 
-class SystemMessageContentItem_Text(UncheckedBaseModel):
+class TextSystemMessageContentItem(UncheckedBaseModel):
     type: typing.Literal["text"] = "text"
     text: str
 
@@ -23,6 +23,4 @@ class SystemMessageContentItem_Text(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-SystemMessageContentItem = typing_extensions.Annotated[
-    SystemMessageContentItem_Text, UnionMetadata(discriminant="type")
-]
+SystemMessageContentItem = typing_extensions.Annotated[TextSystemMessageContentItem, UnionMetadata(discriminant="type")]
