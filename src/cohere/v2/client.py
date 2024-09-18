@@ -2,38 +2,45 @@
 
 import typing
 from ..core.client_wrapper import SyncClientWrapper
-from .types.chat_messages import ChatMessages
-from .types.tool2 import Tool2
-from .types.v2chat_stream_request_citation_mode import V2ChatStreamRequestCitationMode
-from .types.response_format2 import ResponseFormat2
+from .v2.types.chat_messages import ChatMessages
+from .v2.types.tool import Tool
+from .types.v2chat_stream_request_documents_item import V2ChatStreamRequestDocumentsItem
+from .v2.types.citation_options import CitationOptions
+from .v2.types.response_format import ResponseFormat
 from .types.v2chat_stream_request_safety_mode import V2ChatStreamRequestSafetyMode
 from ..core.request_options import RequestOptions
-from .types.streamed_chat_response2 import StreamedChatResponse2
+from .v2.types.streamed_chat_response import StreamedChatResponse
 from ..core.serialization import convert_and_respect_annotation_metadata
 import httpx_sse
 from ..core.unchecked_base_model import construct_type
 import json
-from ..errors.bad_request_error import BadRequestError
-from ..errors.unauthorized_error import UnauthorizedError
-from ..errors.forbidden_error import ForbiddenError
-from ..errors.not_found_error import NotFoundError
-from ..errors.unprocessable_entity_error import UnprocessableEntityError
-from ..types.unprocessable_entity_error_body import UnprocessableEntityErrorBody
-from ..errors.too_many_requests_error import TooManyRequestsError
-from ..types.too_many_requests_error_body import TooManyRequestsErrorBody
-from ..errors.client_closed_request_error import ClientClosedRequestError
-from ..types.client_closed_request_error_body import ClientClosedRequestErrorBody
-from ..errors.internal_server_error import InternalServerError
-from ..errors.not_implemented_error import NotImplementedError
-from ..types.not_implemented_error_body import NotImplementedErrorBody
-from ..errors.service_unavailable_error import ServiceUnavailableError
-from ..errors.gateway_timeout_error import GatewayTimeoutError
-from ..types.gateway_timeout_error_body import GatewayTimeoutErrorBody
+from .errors.bad_request_error import BadRequestError
+from .types.bad_request_error_body import BadRequestErrorBody
+from .errors.unauthorized_error import UnauthorizedError
+from .types.unauthorized_error_body import UnauthorizedErrorBody
+from .errors.forbidden_error import ForbiddenError
+from .types.forbidden_error_body import ForbiddenErrorBody
+from .errors.not_found_error import NotFoundError
+from .types.not_found_error_body import NotFoundErrorBody
+from .errors.unprocessable_entity_error import UnprocessableEntityError
+from .types.unprocessable_entity_error_body import UnprocessableEntityErrorBody
+from .errors.too_many_requests_error import TooManyRequestsError
+from .types.too_many_requests_error_body import TooManyRequestsErrorBody
+from .errors.client_closed_request_error import ClientClosedRequestError
+from .types.client_closed_request_error_body import ClientClosedRequestErrorBody
+from .errors.internal_server_error import InternalServerError
+from .types.internal_server_error_body import InternalServerErrorBody
+from .errors.not_implemented_error import NotImplementedError
+from .types.not_implemented_error_body import NotImplementedErrorBody
+from .errors.service_unavailable_error import ServiceUnavailableError
+from .types.service_unavailable_error_body import ServiceUnavailableErrorBody
+from .errors.gateway_timeout_error import GatewayTimeoutError
+from .types.gateway_timeout_error_body import GatewayTimeoutErrorBody
 from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
-from .types.v2chat_request_citation_mode import V2ChatRequestCitationMode
+from .types.v2chat_request_documents_item import V2ChatRequestDocumentsItem
 from .types.v2chat_request_safety_mode import V2ChatRequestSafetyMode
-from .types.non_streamed_chat_response2 import NonStreamedChatResponse2
+from .v2.types.non_streamed_chat_response import NonStreamedChatResponse
 from ..core.client_wrapper import AsyncClientWrapper
 
 # this is used as the default value for optional parameters
@@ -49,9 +56,10 @@ class V2Client:
         *,
         model: str,
         messages: ChatMessages,
-        tools: typing.Optional[typing.Sequence[Tool2]] = OMIT,
-        citation_mode: typing.Optional[V2ChatStreamRequestCitationMode] = OMIT,
-        response_format: typing.Optional[ResponseFormat2] = OMIT,
+        tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
+        documents: typing.Optional[typing.Sequence[V2ChatStreamRequestDocumentsItem]] = OMIT,
+        citation_options: typing.Optional[CitationOptions] = OMIT,
+        response_format: typing.Optional[ResponseFormat] = OMIT,
         safety_mode: typing.Optional[V2ChatStreamRequestSafetyMode] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
@@ -63,7 +71,7 @@ class V2Client:
         p: typing.Optional[float] = OMIT,
         return_prompt: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> typing.Iterator[StreamedChatResponse2]:
+    ) -> typing.Iterator[StreamedChatResponse]:
         """
         Generates a message from the model in response to a provided conversation. To learn how to use the Chat API with Streaming and RAG follow our Text Generation guides.
 
@@ -74,18 +82,19 @@ class V2Client:
 
         messages : ChatMessages
 
-        tools : typing.Optional[typing.Sequence[Tool2]]
+        tools : typing.Optional[typing.Sequence[Tool]]
             A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
             When `tools` is passed (without `tool_results`), the `text` content in the response will be empty and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
 
 
-        citation_mode : typing.Optional[V2ChatStreamRequestCitationMode]
-            Defaults to `"accurate"`.
-            Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+        documents : typing.Optional[typing.Sequence[V2ChatStreamRequestDocumentsItem]]
+            A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
 
 
-        response_format : typing.Optional[ResponseFormat2]
+        citation_options : typing.Optional[CitationOptions]
+
+        response_format : typing.Optional[ResponseFormat]
 
         safety_mode : typing.Optional[V2ChatStreamRequestSafetyMode]
             Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
@@ -149,17 +158,18 @@ class V2Client:
 
         Yields
         ------
-        typing.Iterator[StreamedChatResponse2]
+        typing.Iterator[StreamedChatResponse]
 
 
         Examples
         --------
         from cohere import Client
-        from cohere.v2 import (
-            ChatMessage2_User,
-            ResponseFormat2_Text,
-            Tool2,
-            Tool2Function,
+        from cohere.v2.v2 import (
+            CitationOptions,
+            TextResponseFormat,
+            Tool,
+            ToolFunction,
+            UserMessage,
         )
 
         client = Client(
@@ -169,22 +179,24 @@ class V2Client:
         response = client.v2.chat_stream(
             model="string",
             messages=[
-                ChatMessage2_User(
+                UserMessage(
                     content="string",
-                    documents=[{"string": {"key": "value"}}],
                 )
             ],
             tools=[
-                Tool2(
-                    function=Tool2Function(
+                Tool(
+                    function=ToolFunction(
                         name="string",
                         description="string",
                         parameters={"string": {"key": "value"}},
                     ),
                 )
             ],
-            citation_mode="FAST",
-            response_format=ResponseFormat2_Text(),
+            documents=["string"],
+            citation_options=CitationOptions(
+                mode="FAST",
+            ),
+            response_format=TextResponseFormat(),
             safety_mode="CONTEXTUAL",
             max_tokens=1,
             stop_sequences=["string"],
@@ -208,11 +220,16 @@ class V2Client:
                     object_=messages, annotation=ChatMessages, direction="write"
                 ),
                 "tools": convert_and_respect_annotation_metadata(
-                    object_=tools, annotation=typing.Sequence[Tool2], direction="write"
+                    object_=tools, annotation=typing.Sequence[Tool], direction="write"
                 ),
-                "citation_mode": citation_mode,
+                "documents": convert_and_respect_annotation_metadata(
+                    object_=documents, annotation=typing.Sequence[V2ChatStreamRequestDocumentsItem], direction="write"
+                ),
+                "citation_options": convert_and_respect_annotation_metadata(
+                    object_=citation_options, annotation=CitationOptions, direction="write"
+                ),
                 "response_format": convert_and_respect_annotation_metadata(
-                    object_=response_format, annotation=ResponseFormat2, direction="write"
+                    object_=response_format, annotation=ResponseFormat, direction="write"
                 ),
                 "safety_mode": safety_mode,
                 "max_tokens": max_tokens,
@@ -235,9 +252,9 @@ class V2Client:
                     for _sse in _event_source.iter_sse():
                         try:
                             yield typing.cast(
-                                StreamedChatResponse2,
+                                StreamedChatResponse,
                                 construct_type(
-                                    type_=StreamedChatResponse2,  # type: ignore
+                                    type_=StreamedChatResponse,  # type: ignore
                                     object_=json.loads(_sse.data),
                                 ),
                             )
@@ -248,9 +265,9 @@ class V2Client:
                 if _response.status_code == 400:
                     raise BadRequestError(
                         typing.cast(
-                            typing.Optional[typing.Any],
+                            BadRequestErrorBody,
                             construct_type(
-                                type_=typing.Optional[typing.Any],  # type: ignore
+                                type_=BadRequestErrorBody,  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -258,9 +275,9 @@ class V2Client:
                 if _response.status_code == 401:
                     raise UnauthorizedError(
                         typing.cast(
-                            typing.Optional[typing.Any],
+                            UnauthorizedErrorBody,
                             construct_type(
-                                type_=typing.Optional[typing.Any],  # type: ignore
+                                type_=UnauthorizedErrorBody,  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -268,9 +285,9 @@ class V2Client:
                 if _response.status_code == 403:
                     raise ForbiddenError(
                         typing.cast(
-                            typing.Optional[typing.Any],
+                            ForbiddenErrorBody,
                             construct_type(
-                                type_=typing.Optional[typing.Any],  # type: ignore
+                                type_=ForbiddenErrorBody,  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -278,9 +295,9 @@ class V2Client:
                 if _response.status_code == 404:
                     raise NotFoundError(
                         typing.cast(
-                            typing.Optional[typing.Any],
+                            NotFoundErrorBody,
                             construct_type(
-                                type_=typing.Optional[typing.Any],  # type: ignore
+                                type_=NotFoundErrorBody,  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -318,9 +335,9 @@ class V2Client:
                 if _response.status_code == 500:
                     raise InternalServerError(
                         typing.cast(
-                            typing.Optional[typing.Any],
+                            InternalServerErrorBody,
                             construct_type(
-                                type_=typing.Optional[typing.Any],  # type: ignore
+                                type_=InternalServerErrorBody,  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -338,9 +355,9 @@ class V2Client:
                 if _response.status_code == 503:
                     raise ServiceUnavailableError(
                         typing.cast(
-                            typing.Optional[typing.Any],
+                            ServiceUnavailableErrorBody,
                             construct_type(
-                                type_=typing.Optional[typing.Any],  # type: ignore
+                                type_=ServiceUnavailableErrorBody,  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -365,9 +382,10 @@ class V2Client:
         *,
         model: str,
         messages: ChatMessages,
-        tools: typing.Optional[typing.Sequence[Tool2]] = OMIT,
-        citation_mode: typing.Optional[V2ChatRequestCitationMode] = OMIT,
-        response_format: typing.Optional[ResponseFormat2] = OMIT,
+        tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
+        documents: typing.Optional[typing.Sequence[V2ChatRequestDocumentsItem]] = OMIT,
+        citation_options: typing.Optional[CitationOptions] = OMIT,
+        response_format: typing.Optional[ResponseFormat] = OMIT,
         safety_mode: typing.Optional[V2ChatRequestSafetyMode] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
@@ -379,7 +397,7 @@ class V2Client:
         p: typing.Optional[float] = OMIT,
         return_prompt: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> NonStreamedChatResponse2:
+    ) -> NonStreamedChatResponse:
         """
         Generates a message from the model in response to a provided conversation. To learn how to use the Chat API with Streaming and RAG follow our Text Generation guides.
 
@@ -390,18 +408,19 @@ class V2Client:
 
         messages : ChatMessages
 
-        tools : typing.Optional[typing.Sequence[Tool2]]
+        tools : typing.Optional[typing.Sequence[Tool]]
             A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
             When `tools` is passed (without `tool_results`), the `text` content in the response will be empty and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
 
 
-        citation_mode : typing.Optional[V2ChatRequestCitationMode]
-            Defaults to `"accurate"`.
-            Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+        documents : typing.Optional[typing.Sequence[V2ChatRequestDocumentsItem]]
+            A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
 
 
-        response_format : typing.Optional[ResponseFormat2]
+        citation_options : typing.Optional[CitationOptions]
+
+        response_format : typing.Optional[ResponseFormat]
 
         safety_mode : typing.Optional[V2ChatRequestSafetyMode]
             Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
@@ -465,13 +484,13 @@ class V2Client:
 
         Returns
         -------
-        NonStreamedChatResponse2
+        NonStreamedChatResponse
 
 
         Examples
         --------
         from cohere import Client
-        from cohere.v2 import ChatMessage2_Tool
+        from cohere.v2.v2 import UserMessage
 
         client = Client(
             client_name="YOUR_CLIENT_NAME",
@@ -480,9 +499,8 @@ class V2Client:
         client.v2.chat(
             model="model",
             messages=[
-                ChatMessage2_Tool(
-                    tool_call_id="messages",
-                    tool_content=["messages"],
+                UserMessage(
+                    content="content",
                 )
             ],
         )
@@ -496,11 +514,16 @@ class V2Client:
                     object_=messages, annotation=ChatMessages, direction="write"
                 ),
                 "tools": convert_and_respect_annotation_metadata(
-                    object_=tools, annotation=typing.Sequence[Tool2], direction="write"
+                    object_=tools, annotation=typing.Sequence[Tool], direction="write"
                 ),
-                "citation_mode": citation_mode,
+                "documents": convert_and_respect_annotation_metadata(
+                    object_=documents, annotation=typing.Sequence[V2ChatRequestDocumentsItem], direction="write"
+                ),
+                "citation_options": convert_and_respect_annotation_metadata(
+                    object_=citation_options, annotation=CitationOptions, direction="write"
+                ),
                 "response_format": convert_and_respect_annotation_metadata(
-                    object_=response_format, annotation=ResponseFormat2, direction="write"
+                    object_=response_format, annotation=ResponseFormat, direction="write"
                 ),
                 "safety_mode": safety_mode,
                 "max_tokens": max_tokens,
@@ -520,18 +543,18 @@ class V2Client:
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    NonStreamedChatResponse2,
+                    NonStreamedChatResponse,
                     construct_type(
-                        type_=NonStreamedChatResponse2,  # type: ignore
+                        type_=NonStreamedChatResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
             if _response.status_code == 400:
                 raise BadRequestError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        BadRequestErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=BadRequestErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -539,9 +562,9 @@ class V2Client:
             if _response.status_code == 401:
                 raise UnauthorizedError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        UnauthorizedErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=UnauthorizedErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -549,9 +572,9 @@ class V2Client:
             if _response.status_code == 403:
                 raise ForbiddenError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        ForbiddenErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=ForbiddenErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -559,9 +582,9 @@ class V2Client:
             if _response.status_code == 404:
                 raise NotFoundError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        NotFoundErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=NotFoundErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -599,9 +622,9 @@ class V2Client:
             if _response.status_code == 500:
                 raise InternalServerError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        InternalServerErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=InternalServerErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -619,9 +642,9 @@ class V2Client:
             if _response.status_code == 503:
                 raise ServiceUnavailableError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        ServiceUnavailableErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=ServiceUnavailableErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -651,9 +674,10 @@ class AsyncV2Client:
         *,
         model: str,
         messages: ChatMessages,
-        tools: typing.Optional[typing.Sequence[Tool2]] = OMIT,
-        citation_mode: typing.Optional[V2ChatStreamRequestCitationMode] = OMIT,
-        response_format: typing.Optional[ResponseFormat2] = OMIT,
+        tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
+        documents: typing.Optional[typing.Sequence[V2ChatStreamRequestDocumentsItem]] = OMIT,
+        citation_options: typing.Optional[CitationOptions] = OMIT,
+        response_format: typing.Optional[ResponseFormat] = OMIT,
         safety_mode: typing.Optional[V2ChatStreamRequestSafetyMode] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
@@ -665,7 +689,7 @@ class AsyncV2Client:
         p: typing.Optional[float] = OMIT,
         return_prompt: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> typing.AsyncIterator[StreamedChatResponse2]:
+    ) -> typing.AsyncIterator[StreamedChatResponse]:
         """
         Generates a message from the model in response to a provided conversation. To learn how to use the Chat API with Streaming and RAG follow our Text Generation guides.
 
@@ -676,18 +700,19 @@ class AsyncV2Client:
 
         messages : ChatMessages
 
-        tools : typing.Optional[typing.Sequence[Tool2]]
+        tools : typing.Optional[typing.Sequence[Tool]]
             A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
             When `tools` is passed (without `tool_results`), the `text` content in the response will be empty and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
 
 
-        citation_mode : typing.Optional[V2ChatStreamRequestCitationMode]
-            Defaults to `"accurate"`.
-            Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+        documents : typing.Optional[typing.Sequence[V2ChatStreamRequestDocumentsItem]]
+            A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
 
 
-        response_format : typing.Optional[ResponseFormat2]
+        citation_options : typing.Optional[CitationOptions]
+
+        response_format : typing.Optional[ResponseFormat]
 
         safety_mode : typing.Optional[V2ChatStreamRequestSafetyMode]
             Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
@@ -751,7 +776,7 @@ class AsyncV2Client:
 
         Yields
         ------
-        typing.AsyncIterator[StreamedChatResponse2]
+        typing.AsyncIterator[StreamedChatResponse]
 
 
         Examples
@@ -759,11 +784,12 @@ class AsyncV2Client:
         import asyncio
 
         from cohere import AsyncClient
-        from cohere.v2 import (
-            ChatMessage2_User,
-            ResponseFormat2_Text,
-            Tool2,
-            Tool2Function,
+        from cohere.v2.v2 import (
+            CitationOptions,
+            TextResponseFormat,
+            Tool,
+            ToolFunction,
+            UserMessage,
         )
 
         client = AsyncClient(
@@ -776,22 +802,24 @@ class AsyncV2Client:
             response = await client.v2.chat_stream(
                 model="string",
                 messages=[
-                    ChatMessage2_User(
+                    UserMessage(
                         content="string",
-                        documents=[{"string": {"key": "value"}}],
                     )
                 ],
                 tools=[
-                    Tool2(
-                        function=Tool2Function(
+                    Tool(
+                        function=ToolFunction(
                             name="string",
                             description="string",
                             parameters={"string": {"key": "value"}},
                         ),
                     )
                 ],
-                citation_mode="FAST",
-                response_format=ResponseFormat2_Text(),
+                documents=["string"],
+                citation_options=CitationOptions(
+                    mode="FAST",
+                ),
+                response_format=TextResponseFormat(),
                 safety_mode="CONTEXTUAL",
                 max_tokens=1,
                 stop_sequences=["string"],
@@ -818,11 +846,16 @@ class AsyncV2Client:
                     object_=messages, annotation=ChatMessages, direction="write"
                 ),
                 "tools": convert_and_respect_annotation_metadata(
-                    object_=tools, annotation=typing.Sequence[Tool2], direction="write"
+                    object_=tools, annotation=typing.Sequence[Tool], direction="write"
                 ),
-                "citation_mode": citation_mode,
+                "documents": convert_and_respect_annotation_metadata(
+                    object_=documents, annotation=typing.Sequence[V2ChatStreamRequestDocumentsItem], direction="write"
+                ),
+                "citation_options": convert_and_respect_annotation_metadata(
+                    object_=citation_options, annotation=CitationOptions, direction="write"
+                ),
                 "response_format": convert_and_respect_annotation_metadata(
-                    object_=response_format, annotation=ResponseFormat2, direction="write"
+                    object_=response_format, annotation=ResponseFormat, direction="write"
                 ),
                 "safety_mode": safety_mode,
                 "max_tokens": max_tokens,
@@ -845,9 +878,9 @@ class AsyncV2Client:
                     async for _sse in _event_source.aiter_sse():
                         try:
                             yield typing.cast(
-                                StreamedChatResponse2,
+                                StreamedChatResponse,
                                 construct_type(
-                                    type_=StreamedChatResponse2,  # type: ignore
+                                    type_=StreamedChatResponse,  # type: ignore
                                     object_=json.loads(_sse.data),
                                 ),
                             )
@@ -858,9 +891,9 @@ class AsyncV2Client:
                 if _response.status_code == 400:
                     raise BadRequestError(
                         typing.cast(
-                            typing.Optional[typing.Any],
+                            BadRequestErrorBody,
                             construct_type(
-                                type_=typing.Optional[typing.Any],  # type: ignore
+                                type_=BadRequestErrorBody,  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -868,9 +901,9 @@ class AsyncV2Client:
                 if _response.status_code == 401:
                     raise UnauthorizedError(
                         typing.cast(
-                            typing.Optional[typing.Any],
+                            UnauthorizedErrorBody,
                             construct_type(
-                                type_=typing.Optional[typing.Any],  # type: ignore
+                                type_=UnauthorizedErrorBody,  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -878,9 +911,9 @@ class AsyncV2Client:
                 if _response.status_code == 403:
                     raise ForbiddenError(
                         typing.cast(
-                            typing.Optional[typing.Any],
+                            ForbiddenErrorBody,
                             construct_type(
-                                type_=typing.Optional[typing.Any],  # type: ignore
+                                type_=ForbiddenErrorBody,  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -888,9 +921,9 @@ class AsyncV2Client:
                 if _response.status_code == 404:
                     raise NotFoundError(
                         typing.cast(
-                            typing.Optional[typing.Any],
+                            NotFoundErrorBody,
                             construct_type(
-                                type_=typing.Optional[typing.Any],  # type: ignore
+                                type_=NotFoundErrorBody,  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -928,9 +961,9 @@ class AsyncV2Client:
                 if _response.status_code == 500:
                     raise InternalServerError(
                         typing.cast(
-                            typing.Optional[typing.Any],
+                            InternalServerErrorBody,
                             construct_type(
-                                type_=typing.Optional[typing.Any],  # type: ignore
+                                type_=InternalServerErrorBody,  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -948,9 +981,9 @@ class AsyncV2Client:
                 if _response.status_code == 503:
                     raise ServiceUnavailableError(
                         typing.cast(
-                            typing.Optional[typing.Any],
+                            ServiceUnavailableErrorBody,
                             construct_type(
-                                type_=typing.Optional[typing.Any],  # type: ignore
+                                type_=ServiceUnavailableErrorBody,  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -975,9 +1008,10 @@ class AsyncV2Client:
         *,
         model: str,
         messages: ChatMessages,
-        tools: typing.Optional[typing.Sequence[Tool2]] = OMIT,
-        citation_mode: typing.Optional[V2ChatRequestCitationMode] = OMIT,
-        response_format: typing.Optional[ResponseFormat2] = OMIT,
+        tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
+        documents: typing.Optional[typing.Sequence[V2ChatRequestDocumentsItem]] = OMIT,
+        citation_options: typing.Optional[CitationOptions] = OMIT,
+        response_format: typing.Optional[ResponseFormat] = OMIT,
         safety_mode: typing.Optional[V2ChatRequestSafetyMode] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
@@ -989,7 +1023,7 @@ class AsyncV2Client:
         p: typing.Optional[float] = OMIT,
         return_prompt: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> NonStreamedChatResponse2:
+    ) -> NonStreamedChatResponse:
         """
         Generates a message from the model in response to a provided conversation. To learn how to use the Chat API with Streaming and RAG follow our Text Generation guides.
 
@@ -1000,18 +1034,19 @@ class AsyncV2Client:
 
         messages : ChatMessages
 
-        tools : typing.Optional[typing.Sequence[Tool2]]
+        tools : typing.Optional[typing.Sequence[Tool]]
             A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
             When `tools` is passed (without `tool_results`), the `text` content in the response will be empty and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
 
 
-        citation_mode : typing.Optional[V2ChatRequestCitationMode]
-            Defaults to `"accurate"`.
-            Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+        documents : typing.Optional[typing.Sequence[V2ChatRequestDocumentsItem]]
+            A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
 
 
-        response_format : typing.Optional[ResponseFormat2]
+        citation_options : typing.Optional[CitationOptions]
+
+        response_format : typing.Optional[ResponseFormat]
 
         safety_mode : typing.Optional[V2ChatRequestSafetyMode]
             Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
@@ -1075,7 +1110,7 @@ class AsyncV2Client:
 
         Returns
         -------
-        NonStreamedChatResponse2
+        NonStreamedChatResponse
 
 
         Examples
@@ -1083,7 +1118,7 @@ class AsyncV2Client:
         import asyncio
 
         from cohere import AsyncClient
-        from cohere.v2 import ChatMessage2_Tool
+        from cohere.v2.v2 import UserMessage
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
@@ -1095,9 +1130,8 @@ class AsyncV2Client:
             await client.v2.chat(
                 model="model",
                 messages=[
-                    ChatMessage2_Tool(
-                        tool_call_id="messages",
-                        tool_content=["messages"],
+                    UserMessage(
+                        content="content",
                     )
                 ],
             )
@@ -1114,11 +1148,16 @@ class AsyncV2Client:
                     object_=messages, annotation=ChatMessages, direction="write"
                 ),
                 "tools": convert_and_respect_annotation_metadata(
-                    object_=tools, annotation=typing.Sequence[Tool2], direction="write"
+                    object_=tools, annotation=typing.Sequence[Tool], direction="write"
                 ),
-                "citation_mode": citation_mode,
+                "documents": convert_and_respect_annotation_metadata(
+                    object_=documents, annotation=typing.Sequence[V2ChatRequestDocumentsItem], direction="write"
+                ),
+                "citation_options": convert_and_respect_annotation_metadata(
+                    object_=citation_options, annotation=CitationOptions, direction="write"
+                ),
                 "response_format": convert_and_respect_annotation_metadata(
-                    object_=response_format, annotation=ResponseFormat2, direction="write"
+                    object_=response_format, annotation=ResponseFormat, direction="write"
                 ),
                 "safety_mode": safety_mode,
                 "max_tokens": max_tokens,
@@ -1138,18 +1177,18 @@ class AsyncV2Client:
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    NonStreamedChatResponse2,
+                    NonStreamedChatResponse,
                     construct_type(
-                        type_=NonStreamedChatResponse2,  # type: ignore
+                        type_=NonStreamedChatResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
             if _response.status_code == 400:
                 raise BadRequestError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        BadRequestErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=BadRequestErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1157,9 +1196,9 @@ class AsyncV2Client:
             if _response.status_code == 401:
                 raise UnauthorizedError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        UnauthorizedErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=UnauthorizedErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1167,9 +1206,9 @@ class AsyncV2Client:
             if _response.status_code == 403:
                 raise ForbiddenError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        ForbiddenErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=ForbiddenErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1177,9 +1216,9 @@ class AsyncV2Client:
             if _response.status_code == 404:
                 raise NotFoundError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        NotFoundErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=NotFoundErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1217,9 +1256,9 @@ class AsyncV2Client:
             if _response.status_code == 500:
                 raise InternalServerError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        InternalServerErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=InternalServerErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1237,9 +1276,9 @@ class AsyncV2Client:
             if _response.status_code == 503:
                 raise ServiceUnavailableError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        ServiceUnavailableErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=ServiceUnavailableErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )

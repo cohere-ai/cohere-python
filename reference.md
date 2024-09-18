@@ -1,5 +1,6 @@
 # Reference
-<details><summary><code>client.<a href="src/cohere/base_client.py">chat_stream</a>(...)</code></summary>
+## V1
+<details><summary><code>client.v1.<a href="src/cohere/v1/client.py">list</a>(...)</code></summary>
 <dl>
 <dd>
 
@@ -11,8 +12,7 @@
 <dl>
 <dd>
 
-Generates a text response to a user message.
-To learn how to use the Chat API with Streaming and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
+Returns a list of models available for use. The list contains models from Cohere as well as your fine-tuned models.
 </dd>
 </dl>
 </dd>
@@ -27,28 +27,734 @@ To learn how to use the Chat API with Streaming and RAG follow our [Text Generat
 <dd>
 
 ```python
-from cohere import (
-    ChatConnector,
-    ChatStreamRequestConnectorsSearchOptions,
-    Client,
-    Message_Chatbot,
-    ResponseFormat_Text,
-    Tool,
-    ToolCall,
-    ToolParameterDefinitionsValue,
-    ToolResult,
-)
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
     token="YOUR_TOKEN",
 )
-response = client.chat_stream(
+client.v1.list()
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**page_size:** `typing.Optional[float]` 
+
+Maximum number of models to include in a page
+Defaults to `20`, min value of `1`, max value of `1000`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page_token:** `typing.Optional[str]` — Page token provided in the `next_page_token` field of a previous response.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**endpoint:** `typing.Optional[CompatibleEndpoint]` — When provided, filters the list of models to only those that are compatible with the specified endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**default_only:** `typing.Optional[bool]` — When provided, filters the list of models to only the default model to the endpoint. This parameter is only valid when `endpoint` is provided.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.v1.<a href="src/cohere/v1/client.py">create</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a new connector. The connector is tested during registration and will cancel registration when the test is unsuccessful. See ['Creating and Deploying a Connector'](https://docs.cohere.com/docs/creating-and-deploying-a-connector) for more information.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cohere import Client
+
+client = Client(
+    client_name="YOUR_CLIENT_NAME",
+    token="YOUR_TOKEN",
+)
+client.v1.create(
+    name="name",
+    url="url",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**name:** `str` — A human-readable name for the connector.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**url:** `str` — The URL of the connector that will be used to search for documents.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**description:** `typing.Optional[str]` — A description of the connector.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**excludes:** `typing.Optional[typing.Sequence[str]]` — A list of fields to exclude from the prompt (fields remain in the document).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**oauth:** `typing.Optional[CreateConnectorOAuth]` — The OAuth 2.0 configuration for the connector. Cannot be specified if service_auth is specified.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**active:** `typing.Optional[bool]` — Whether the connector is active or not.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**continue_on_failure:** `typing.Optional[bool]` — Whether a chat request should continue or not if the request to this connector fails.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**service_auth:** `typing.Optional[CreateConnectorServiceAuth]` — The service to service authentication configuration for the connector. Cannot be specified if oauth is specified.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.v1.<a href="src/cohere/v1/client.py">get</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the details of a model, provided its name.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cohere import Client
+
+client = Client(
+    client_name="YOUR_CLIENT_NAME",
+    token="YOUR_TOKEN",
+)
+client.v1.get(
+    model="command-r",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**model:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.v1.<a href="src/cohere/v1/client.py">cancel</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+This API allows users to cancel an active embed job. Once invoked, the embedding process will be terminated, and users will be charged for the embeddings processed up to the cancellation point. It's important to note that partial results will not be available to users after cancellation.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cohere import Client
+
+client = Client(
+    client_name="YOUR_CLIENT_NAME",
+    token="YOUR_TOKEN",
+)
+client.v1.cancel(
+    id="id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — The ID of the embed job to cancel.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.v1.<a href="src/cohere/v1/client.py">get_usage</a>()</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+View the dataset storage usage for your Organization. Each Organization can have up to 10GB of storage across all their users.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cohere import Client
+
+client = Client(
+    client_name="YOUR_CLIENT_NAME",
+    token="YOUR_TOKEN",
+)
+client.v1.get_usage()
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.v1.<a href="src/cohere/v1/client.py">delete</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Delete a connector by ID. See ['Connectors'](https://docs.cohere.com/docs/connectors) for more information.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cohere import Client
+
+client = Client(
+    client_name="YOUR_CLIENT_NAME",
+    token="YOUR_TOKEN",
+)
+client.v1.delete(
+    id="id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — The ID of the connector to delete.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.v1.<a href="src/cohere/v1/client.py">update</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Update a connector by ID. Omitted fields will not be updated. See ['Managing your Connector'](https://docs.cohere.com/docs/managing-your-connector) for more information.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cohere import Client
+
+client = Client(
+    client_name="YOUR_CLIENT_NAME",
+    token="YOUR_TOKEN",
+)
+client.v1.update(
+    id="id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — The ID of the connector to update.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**name:** `typing.Optional[str]` — A human-readable name for the connector.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**url:** `typing.Optional[str]` — The URL of the connector that will be used to search for documents.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**excludes:** `typing.Optional[typing.Sequence[str]]` — A list of fields to exclude from the prompt (fields remain in the document).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**oauth:** `typing.Optional[CreateConnectorOAuth]` — The OAuth 2.0 configuration for the connector. Cannot be specified if service_auth is specified.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**active:** `typing.Optional[bool]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**continue_on_failure:** `typing.Optional[bool]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**service_auth:** `typing.Optional[CreateConnectorServiceAuth]` — The service to service authentication configuration for the connector. Cannot be specified if oauth is specified.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.v1.<a href="src/cohere/v1/client.py">o_auth_authorize</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Authorize the connector with the given ID for the connector oauth app. See ['Connector Authentication'](https://docs.cohere.com/docs/connector-authentication) for more information.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cohere import Client
+
+client = Client(
+    client_name="YOUR_CLIENT_NAME",
+    token="YOUR_TOKEN",
+)
+client.v1.o_auth_authorize(
+    id="id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — The ID of the connector to authorize.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**after_token_redirect:** `typing.Optional[str]` — The URL to redirect to after the connector has been authorized.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## V1 V1
+<details><summary><code>client.v1.v1.<a href="src/cohere/v1/v1/client.py">chat_stream</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Generates a text response to a user message.
+To learn how to use the Chat API and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cohere import Client
+from cohere.v1 import (
+    ChatConnector,
+    ChatMessage,
+    TextResponseFormat,
+    Tool,
+    ToolCall,
+    ToolParameterDefinitionsValue,
+    ToolResult,
+)
+from cohere.v1.v1 import ChatStreamRequestConnectorsSearchOptions
+
+client = Client(
+    client_name="YOUR_CLIENT_NAME",
+    token="YOUR_TOKEN",
+)
+response = client.v1.v1.chat_stream(
     message="string",
     model="string",
     preamble="string",
     chat_history=[
-        Message_Chatbot(
+        ChatMessage(
             message="string",
             tool_calls=[
                 ToolCall(
@@ -108,7 +814,7 @@ response = client.chat_stream(
         )
     ],
     force_single_step=True,
-    response_format=ResponseFormat_Text(),
+    response_format=TextResponseFormat(),
     safety_mode="CONTEXTUAL",
 )
 for chunk in response:
@@ -558,7 +1264,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">chat</a>(...)</code></summary>
+<details><summary><code>client.v1.v1.<a href="src/cohere/v1/v1/client.py">chat</a>(...)</code></summary>
 <dl>
 <dd>
 
@@ -571,7 +1277,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dd>
 
 Generates a text response to a user message.
-To learn how to use the Chat API with Streaming and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
+To learn how to use the Chat API and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
 </dd>
 </dl>
 </dd>
@@ -586,15 +1292,23 @@ To learn how to use the Chat API with Streaming and RAG follow our [Text Generat
 <dd>
 
 ```python
-from cohere import Client, Message_Tool
+from cohere import Client
+from cohere.v1 import ChatMessage
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
     token="YOUR_TOKEN",
 )
-client.chat(
+client.v1.v1.chat(
     message="Can you give me a global market overview of solar panels?",
-    chat_history=[Message_Tool(), Message_Tool()],
+    chat_history=[
+        ChatMessage(
+            message="Hi!",
+        ),
+        ChatMessage(
+            message="How can I help you today?",
+        ),
+    ],
     prompt_truncation="OFF",
     temperature=0.3,
 )
@@ -1043,7 +1757,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">generate_stream</a>(...)</code></summary>
+<details><summary><code>client.v1.v1.<a href="src/cohere/v1/v1/client.py">generate_stream</a>(...)</code></summary>
 <dl>
 <dd>
 
@@ -1079,7 +1793,7 @@ client = Client(
     client_name="YOUR_CLIENT_NAME",
     token="YOUR_TOKEN",
 )
-response = client.generate_stream(
+response = client.v1.v1.generate_stream(
     prompt="string",
     model="string",
     num_generations=1,
@@ -1316,7 +2030,7 @@ If `ALL` is selected, the token likelihoods will be provided both for the prompt
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">generate</a>(...)</code></summary>
+<details><summary><code>client.v1.v1.<a href="src/cohere/v1/v1/client.py">generate</a>(...)</code></summary>
 <dl>
 <dd>
 
@@ -1352,7 +2066,7 @@ client = Client(
     client_name="YOUR_CLIENT_NAME",
     token="YOUR_TOKEN",
 )
-client.generate(
+client.v1.v1.generate(
     prompt="Please explain to me how LLMs work",
 )
 
@@ -1572,7 +2286,7 @@ If `ALL` is selected, the token likelihoods will be provided both for the prompt
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">embed</a>(...)</code></summary>
+<details><summary><code>client.v1.v1.<a href="src/cohere/v1/v1/client.py">embed</a>(...)</code></summary>
 <dl>
 <dd>
 
@@ -1609,7 +2323,7 @@ client = Client(
     client_name="YOUR_CLIENT_NAME",
     token="YOUR_TOKEN",
 )
-client.embed()
+client.v1.v1.embed()
 
 ```
 </dd>
@@ -1718,7 +2432,7 @@ If `NONE` is selected, when the input exceeds the maximum input token length an 
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">rerank</a>(...)</code></summary>
+<details><summary><code>client.v1.v1.<a href="src/cohere/v1/v1/client.py">rerank</a>(...)</code></summary>
 <dl>
 <dd>
 
@@ -1751,7 +2465,7 @@ client = Client(
     client_name="YOUR_CLIENT_NAME",
     token="YOUR_TOKEN",
 )
-client.rerank(
+client.v1.v1.rerank(
     query="query",
     documents=["documents"],
 )
@@ -1848,7 +2562,7 @@ We recommend a maximum of 1,000 documents for optimal endpoint performance.
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">classify</a>(...)</code></summary>
+<details><summary><code>client.v1.v1.<a href="src/cohere/v1/v1/client.py">classify</a>(...)</code></summary>
 <dl>
 <dd>
 
@@ -1882,7 +2596,7 @@ client = Client(
     client_name="YOUR_CLIENT_NAME",
     token="YOUR_TOKEN",
 )
-client.classify(
+client.v1.v1.classify(
     inputs=["inputs"],
 )
 
@@ -1963,7 +2677,7 @@ If `NONE` is selected, when the input exceeds the maximum input token length an 
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">summarize</a>(...)</code></summary>
+<details><summary><code>client.v1.v1.<a href="src/cohere/v1/v1/client.py">summarize</a>(...)</code></summary>
 <dl>
 <dd>
 
@@ -1999,7 +2713,7 @@ client = Client(
     client_name="YOUR_CLIENT_NAME",
     token="YOUR_TOKEN",
 )
-client.summarize(
+client.v1.v1.summarize(
     text="text",
 )
 
@@ -2085,7 +2799,7 @@ client.summarize(
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">tokenize</a>(...)</code></summary>
+<details><summary><code>client.v1.v1.<a href="src/cohere/v1/v1/client.py">tokenize</a>(...)</code></summary>
 <dl>
 <dd>
 
@@ -2118,7 +2832,7 @@ client = Client(
     client_name="YOUR_CLIENT_NAME",
     token="YOUR_TOKEN",
 )
-client.tokenize(
+client.v1.v1.tokenize(
     text="tokenize me! :D",
     model="command",
 )
@@ -2165,7 +2879,7 @@ client.tokenize(
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">detokenize</a>(...)</code></summary>
+<details><summary><code>client.v1.v1.<a href="src/cohere/v1/v1/client.py">detokenize</a>(...)</code></summary>
 <dl>
 <dd>
 
@@ -2198,7 +2912,7 @@ client = Client(
     client_name="YOUR_CLIENT_NAME",
     token="YOUR_TOKEN",
 )
-client.detokenize(
+client.v1.v1.detokenize(
     tokens=[1],
     model="model",
 )
@@ -2245,7 +2959,7 @@ client.detokenize(
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">check_api_key</a>()</code></summary>
+<details><summary><code>client.v1.v1.<a href="src/cohere/v1/v1/client.py">check_api_key</a>()</code></summary>
 <dl>
 <dd>
 
@@ -2278,7 +2992,7 @@ client = Client(
     client_name="YOUR_CLIENT_NAME",
     token="YOUR_TOKEN",
 )
-client.check_api_key()
+client.v1.v1.check_api_key()
 
 ```
 </dd>
@@ -2290,6 +3004,564 @@ client.check_api_key()
 
 <dl>
 <dd>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.v1.v1.<a href="src/cohere/v1/v1/client.py">list_finetuned_models</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cohere import Client
+
+client = Client(
+    client_name="YOUR_CLIENT_NAME",
+    token="YOUR_TOKEN",
+)
+client.v1.v1.list_finetuned_models()
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**page_size:** `typing.Optional[int]` — Maximum number of results to be returned by the server. If 0, defaults to 50.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page_token:** `typing.Optional[str]` — Request a specific page of the list results.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**order_by:** `typing.Optional[str]` 
+
+Comma separated list of fields. For example: "created_at,name". The default
+sorting order is ascending. To specify descending order for a field, append
+" desc" to the field name. For example: "created_at desc,name".
+
+Supported sorting fields:
+
+- created_at (default)
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.v1.v1.<a href="src/cohere/v1/v1/client.py">create_finetuned_model</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cohere import Client
+from cohere.v1.finetuning.finetuning import BaseModel, FinetunedModel, Settings
+
+client = Client(
+    client_name="YOUR_CLIENT_NAME",
+    token="YOUR_TOKEN",
+)
+client.v1.v1.create_finetuned_model(
+    request=FinetunedModel(
+        name="api-test",
+        settings=Settings(
+            base_model=BaseModel(
+                base_type="BASE_TYPE_CHAT",
+            ),
+            dataset_id="my-dataset-id",
+        ),
+    ),
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**request:** `FinetunedModel` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.v1.v1.<a href="src/cohere/v1/v1/client.py">get_finetuned_model</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cohere import Client
+
+client = Client(
+    client_name="YOUR_CLIENT_NAME",
+    token="YOUR_TOKEN",
+)
+client.v1.v1.get_finetuned_model(
+    id="id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — The fine-tuned model ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.v1.v1.<a href="src/cohere/v1/v1/client.py">delete_finetuned_model</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cohere import Client
+
+client = Client(
+    client_name="YOUR_CLIENT_NAME",
+    token="YOUR_TOKEN",
+)
+client.v1.v1.delete_finetuned_model(
+    id="id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — The fine-tuned model ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.v1.v1.<a href="src/cohere/v1/v1/client.py">update_finetuned_model</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cohere import Client
+from cohere.v1.finetuning.finetuning import BaseModel, Settings
+
+client = Client(
+    client_name="YOUR_CLIENT_NAME",
+    token="YOUR_TOKEN",
+)
+client.v1.v1.update_finetuned_model(
+    id="id",
+    name="name",
+    settings=Settings(
+        base_model=BaseModel(
+            base_type="BASE_TYPE_UNSPECIFIED",
+        ),
+        dataset_id="dataset_id",
+    ),
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — FinetunedModel ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**name:** `str` — FinetunedModel name (e.g. `foobar`).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**settings:** `Settings` — FinetunedModel settings such as dataset, hyperparameters...
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**creator_id:** `typing.Optional[str]` — User ID of the creator.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**organization_id:** `typing.Optional[str]` — Organization ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**status:** `typing.Optional[Status]` — Current stage in the life-cycle of the fine-tuned model.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**created_at:** `typing.Optional[dt.datetime]` — Creation timestamp.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**updated_at:** `typing.Optional[dt.datetime]` — Latest update timestamp.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**completed_at:** `typing.Optional[dt.datetime]` — Timestamp for the completed fine-tuning.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**last_used:** `typing.Optional[dt.datetime]` — Timestamp for the latest request to this fine-tuned model.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.v1.v1.<a href="src/cohere/v1/v1/client.py">list_events</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cohere import Client
+
+client = Client(
+    client_name="YOUR_CLIENT_NAME",
+    token="YOUR_TOKEN",
+)
+client.v1.v1.list_events(
+    finetuned_model_id="finetuned_model_id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**finetuned_model_id:** `str` — The parent fine-tuned model ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page_size:** `typing.Optional[int]` — Maximum number of results to be returned by the server. If 0, defaults to 50.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page_token:** `typing.Optional[str]` — Request a specific page of the list results.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**order_by:** `typing.Optional[str]` 
+
+Comma separated list of fields. For example: "created_at,name". The default
+sorting order is ascending. To specify descending order for a field, append
+" desc" to the field name. For example: "created_at desc,name".
+
+Supported sorting fields:
+
+- created_at (default)
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.v1.v1.<a href="src/cohere/v1/v1/client.py">list_training_step_metrics</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cohere import Client
+
+client = Client(
+    client_name="YOUR_CLIENT_NAME",
+    token="YOUR_TOKEN",
+)
+client.v1.v1.list_training_step_metrics(
+    finetuned_model_id="finetuned_model_id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**finetuned_model_id:** `str` — The parent fine-tuned model ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page_size:** `typing.Optional[int]` — Maximum number of results to be returned by the server. If 0, defaults to 50.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page_token:** `typing.Optional[str]` — Request a specific page of the list results.
+    
+</dd>
+</dl>
 
 <dl>
 <dd>
@@ -2335,11 +3607,12 @@ Generates a message from the model in response to a provided conversation. To le
 
 ```python
 from cohere import Client
-from cohere.v2 import (
-    ChatMessage2_User,
-    ResponseFormat2_Text,
-    Tool2,
-    Tool2Function,
+from cohere.v2.v2 import (
+    CitationOptions,
+    TextResponseFormat,
+    Tool,
+    ToolFunction,
+    UserMessage,
 )
 
 client = Client(
@@ -2349,22 +3622,24 @@ client = Client(
 response = client.v2.chat_stream(
     model="string",
     messages=[
-        ChatMessage2_User(
+        UserMessage(
             content="string",
-            documents=[{"string": {"key": "value"}}],
         )
     ],
     tools=[
-        Tool2(
-            function=Tool2Function(
+        Tool(
+            function=ToolFunction(
                 name="string",
                 description="string",
                 parameters={"string": {"key": "value"}},
             ),
         )
     ],
-    citation_mode="FAST",
-    response_format=ResponseFormat2_Text(),
+    documents=["string"],
+    citation_options=CitationOptions(
+        mode="FAST",
+    ),
+    response_format=TextResponseFormat(),
     safety_mode="CONTEXTUAL",
     max_tokens=1,
     stop_sequences=["string"],
@@ -2409,7 +3684,7 @@ for chunk in response:
 <dl>
 <dd>
 
-**tools:** `typing.Optional[typing.Sequence[Tool2]]` 
+**tools:** `typing.Optional[typing.Sequence[Tool]]` 
 
 A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
@@ -2422,10 +3697,7 @@ When `tools` is passed (without `tool_results`), the `text` content in the respo
 <dl>
 <dd>
 
-**citation_mode:** `typing.Optional[V2ChatStreamRequestCitationMode]` 
-
-Defaults to `"accurate"`.
-Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+**documents:** `typing.Optional[typing.Sequence[V2ChatStreamRequestDocumentsItem]]` — A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
 
     
 </dd>
@@ -2434,7 +3706,15 @@ Dictates the approach taken to generating citations as part of the RAG flow by a
 <dl>
 <dd>
 
-**response_format:** `typing.Optional[ResponseFormat2]` 
+**citation_options:** `typing.Optional[CitationOptions]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**response_format:** `typing.Optional[ResponseFormat]` 
     
 </dd>
 </dl>
@@ -2603,7 +3883,7 @@ Generates a message from the model in response to a provided conversation. To le
 
 ```python
 from cohere import Client
-from cohere.v2 import ChatMessage2_Tool
+from cohere.v2.v2 import UserMessage
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -2612,9 +3892,8 @@ client = Client(
 client.v2.chat(
     model="model",
     messages=[
-        ChatMessage2_Tool(
-            tool_call_id="messages",
-            tool_content=["messages"],
+        UserMessage(
+            content="content",
         )
     ],
 )
@@ -2649,7 +3928,7 @@ client.v2.chat(
 <dl>
 <dd>
 
-**tools:** `typing.Optional[typing.Sequence[Tool2]]` 
+**tools:** `typing.Optional[typing.Sequence[Tool]]` 
 
 A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
@@ -2662,10 +3941,7 @@ When `tools` is passed (without `tool_results`), the `text` content in the respo
 <dl>
 <dd>
 
-**citation_mode:** `typing.Optional[V2ChatRequestCitationMode]` 
-
-Defaults to `"accurate"`.
-Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+**documents:** `typing.Optional[typing.Sequence[V2ChatRequestDocumentsItem]]` — A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
 
     
 </dd>
@@ -2674,7 +3950,15 @@ Dictates the approach taken to generating citations as part of the RAG flow by a
 <dl>
 <dd>
 
-**response_format:** `typing.Optional[ResponseFormat2]` 
+**citation_options:** `typing.Optional[CitationOptions]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**response_format:** `typing.Optional[ResponseFormat]` 
     
 </dd>
 </dl>
@@ -2796,2096 +4080,6 @@ Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 <dd>
 
 **return_prompt:** `typing.Optional[bool]` — Whether to return the prompt in the response.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-## EmbedJobs
-<details><summary><code>client.embed_jobs.<a href="src/cohere/embed_jobs/client.py">list</a>()</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-The list embed job endpoint allows users to view all embed jobs history for that specific user.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import Client
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-client.embed_jobs.list()
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.embed_jobs.<a href="src/cohere/embed_jobs/client.py">create</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-This API launches an async Embed job for a [Dataset](https://docs.cohere.com/docs/datasets) of type `embed-input`. The result of a completed embed job is new Dataset of type `embed-output`, which contains the original text entries and the corresponding embeddings.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import Client
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-client.embed_jobs.create(
-    model="model",
-    dataset_id="dataset_id",
-    input_type="search_document",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**model:** `str` 
-
-ID of the embedding model.
-
-Available models and corresponding embedding dimensions:
-
-- `embed-english-v3.0` : 1024
-- `embed-multilingual-v3.0` : 1024
-- `embed-english-light-v3.0` : 384
-- `embed-multilingual-light-v3.0` : 384
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**dataset_id:** `str` — ID of a [Dataset](https://docs.cohere.com/docs/datasets). The Dataset must be of type `embed-input` and must have a validation status `Validated`
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**input_type:** `EmbedInputType` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**name:** `typing.Optional[str]` — The name of the embed job.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**embedding_types:** `typing.Optional[typing.Sequence[EmbeddingType]]` 
-
-Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
-
-* `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
-* `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
-* `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
-* `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
-* `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**truncate:** `typing.Optional[CreateEmbedJobRequestTruncate]` 
-
-One of `START|END` to specify how the API will handle inputs longer than the maximum token length.
-
-Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.embed_jobs.<a href="src/cohere/embed_jobs/client.py">get</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-This API retrieves the details about an embed job started by the same user.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import Client
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-client.embed_jobs.get(
-    id="id",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `str` — The ID of the embed job to retrieve.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.embed_jobs.<a href="src/cohere/embed_jobs/client.py">cancel</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-This API allows users to cancel an active embed job. Once invoked, the embedding process will be terminated, and users will be charged for the embeddings processed up to the cancellation point. It's important to note that partial results will not be available to users after cancellation.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import Client
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-client.embed_jobs.cancel(
-    id="id",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `str` — The ID of the embed job to cancel.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-## Datasets
-<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">list</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-List datasets that have been created.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import Client
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-client.datasets.list()
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**dataset_type:** `typing.Optional[str]` — optional filter by dataset type
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**before:** `typing.Optional[dt.datetime]` — optional filter before a date
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**after:** `typing.Optional[dt.datetime]` — optional filter after a date
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**limit:** `typing.Optional[float]` — optional limit to number of results
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**offset:** `typing.Optional[float]` — optional offset to start of results
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**validation_status:** `typing.Optional[DatasetValidationStatus]` — optional filter by validation status
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">create</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Create a dataset by uploading a file. See ['Dataset Creation'](https://docs.cohere.com/docs/datasets#dataset-creation) for more information.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import Client
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-client.datasets.create(
-    name="name",
-    type="embed-input",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**name:** `str` — The name of the uploaded dataset.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**type:** `DatasetType` — The dataset type, which is used to validate the data. Valid types are `embed-input`, `reranker-finetune-input`, `single-label-classification-finetune-input`, `chat-finetune-input`, and `multi-label-classification-finetune-input`.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**data:** `from __future__ import annotations
-
-core.File` — See core.File for more documentation
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**keep_original_file:** `typing.Optional[bool]` — Indicates if the original file should be stored.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**skip_malformed_input:** `typing.Optional[bool]` — Indicates whether rows with malformed input should be dropped (instead of failing the validation check). Dropped rows will be returned in the warnings field.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**keep_fields:** `typing.Optional[typing.Union[str, typing.Sequence[str]]]` — List of names of fields that will be persisted in the Dataset. By default the Dataset will retain only the required fields indicated in the [schema for the corresponding Dataset type](https://docs.cohere.com/docs/datasets#dataset-types). For example, datasets of type `embed-input` will drop all fields other than the required `text` field. If any of the fields in `keep_fields` are missing from the uploaded file, Dataset validation will fail.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**optional_fields:** `typing.Optional[typing.Union[str, typing.Sequence[str]]]` — List of names of fields that will be persisted in the Dataset. By default the Dataset will retain only the required fields indicated in the [schema for the corresponding Dataset type](https://docs.cohere.com/docs/datasets#dataset-types). For example, Datasets of type `embed-input` will drop all fields other than the required `text` field. If any of the fields in `optional_fields` are missing from the uploaded file, Dataset validation will pass.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**text_separator:** `typing.Optional[str]` — Raw .txt uploads will be split into entries using the text_separator value.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**csv_delimiter:** `typing.Optional[str]` — The delimiter used for .csv uploads.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**dry_run:** `typing.Optional[bool]` — flag to enable dry_run mode
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**eval_data:** `from __future__ import annotations
-
-typing.Optional[core.File]` — See core.File for more documentation
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">get_usage</a>()</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-View the dataset storage usage for your Organization. Each Organization can have up to 10GB of storage across all their users.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import Client
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-client.datasets.get_usage()
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">get</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Retrieve a dataset by ID. See ['Datasets'](https://docs.cohere.com/docs/datasets) for more information.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import Client
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-client.datasets.get(
-    id="id",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `str` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">delete</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Delete a dataset by ID. Datasets are automatically deleted after 30 days, but they can also be deleted manually.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import Client
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-client.datasets.delete(
-    id="id",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `str` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-## Connectors
-<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">list</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Returns a list of connectors ordered by descending creation date (newer first). See ['Managing your Connector'](https://docs.cohere.com/docs/managing-your-connector) for more information.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import Client
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-client.connectors.list()
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**limit:** `typing.Optional[float]` — Maximum number of connectors to return [0, 100].
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**offset:** `typing.Optional[float]` — Number of connectors to skip before returning results [0, inf].
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">create</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Creates a new connector. The connector is tested during registration and will cancel registration when the test is unsuccessful. See ['Creating and Deploying a Connector'](https://docs.cohere.com/docs/creating-and-deploying-a-connector) for more information.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import Client
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-client.connectors.create(
-    name="name",
-    url="url",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**name:** `str` — A human-readable name for the connector.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**url:** `str` — The URL of the connector that will be used to search for documents.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**description:** `typing.Optional[str]` — A description of the connector.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**excludes:** `typing.Optional[typing.Sequence[str]]` — A list of fields to exclude from the prompt (fields remain in the document).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**oauth:** `typing.Optional[CreateConnectorOAuth]` — The OAuth 2.0 configuration for the connector. Cannot be specified if service_auth is specified.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**active:** `typing.Optional[bool]` — Whether the connector is active or not.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**continue_on_failure:** `typing.Optional[bool]` — Whether a chat request should continue or not if the request to this connector fails.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**service_auth:** `typing.Optional[CreateConnectorServiceAuth]` — The service to service authentication configuration for the connector. Cannot be specified if oauth is specified.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">get</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Retrieve a connector by ID. See ['Connectors'](https://docs.cohere.com/docs/connectors) for more information.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import Client
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-client.connectors.get(
-    id="id",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `str` — The ID of the connector to retrieve.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">delete</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Delete a connector by ID. See ['Connectors'](https://docs.cohere.com/docs/connectors) for more information.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import Client
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-client.connectors.delete(
-    id="id",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `str` — The ID of the connector to delete.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">update</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Update a connector by ID. Omitted fields will not be updated. See ['Managing your Connector'](https://docs.cohere.com/docs/managing-your-connector) for more information.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import Client
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-client.connectors.update(
-    id="id",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `str` — The ID of the connector to update.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**name:** `typing.Optional[str]` — A human-readable name for the connector.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**url:** `typing.Optional[str]` — The URL of the connector that will be used to search for documents.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**excludes:** `typing.Optional[typing.Sequence[str]]` — A list of fields to exclude from the prompt (fields remain in the document).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**oauth:** `typing.Optional[CreateConnectorOAuth]` — The OAuth 2.0 configuration for the connector. Cannot be specified if service_auth is specified.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**active:** `typing.Optional[bool]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**continue_on_failure:** `typing.Optional[bool]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**service_auth:** `typing.Optional[CreateConnectorServiceAuth]` — The service to service authentication configuration for the connector. Cannot be specified if oauth is specified.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">o_auth_authorize</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Authorize the connector with the given ID for the connector oauth app. See ['Connector Authentication'](https://docs.cohere.com/docs/connector-authentication) for more information.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import Client
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-client.connectors.o_auth_authorize(
-    id="id",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `str` — The ID of the connector to authorize.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**after_token_redirect:** `typing.Optional[str]` — The URL to redirect to after the connector has been authorized.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-## Models
-<details><summary><code>client.models.<a href="src/cohere/models/client.py">get</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Returns the details of a model, provided its name.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import Client
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-client.models.get(
-    model="command-r",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**model:** `str` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.models.<a href="src/cohere/models/client.py">list</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Returns a list of models available for use. The list contains models from Cohere as well as your fine-tuned models.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import Client
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-client.models.list()
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**page_size:** `typing.Optional[float]` 
-
-Maximum number of models to include in a page
-Defaults to `20`, min value of `1`, max value of `1000`.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**page_token:** `typing.Optional[str]` — Page token provided in the `next_page_token` field of a previous response.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**endpoint:** `typing.Optional[CompatibleEndpoint]` — When provided, filters the list of models to only those that are compatible with the specified endpoint.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**default_only:** `typing.Optional[bool]` — When provided, filters the list of models to only the default model to the endpoint. This parameter is only valid when `endpoint` is provided.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-## /finetuning
-<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">list_finetuned_models</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import Client
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-client.finetuning.list_finetuned_models()
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**page_size:** `typing.Optional[int]` — Maximum number of results to be returned by the server. If 0, defaults to 50.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**page_token:** `typing.Optional[str]` — Request a specific page of the list results.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**order_by:** `typing.Optional[str]` 
-
-Comma separated list of fields. For example: "created_at,name". The default
-sorting order is ascending. To specify descending order for a field, append
-" desc" to the field name. For example: "created_at desc,name".
-
-Supported sorting fields:
-
-- created_at (default)
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">create_finetuned_model</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import Client
-from cohere.finetuning.finetuning import BaseModel, FinetunedModel, Settings
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-client.finetuning.create_finetuned_model(
-    request=FinetunedModel(
-        name="api-test",
-        settings=Settings(
-            base_model=BaseModel(
-                base_type="BASE_TYPE_CHAT",
-            ),
-            dataset_id="my-dataset-id",
-        ),
-    ),
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**request:** `FinetunedModel` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">get_finetuned_model</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import Client
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-client.finetuning.get_finetuned_model(
-    id="id",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `str` — The fine-tuned model ID.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">delete_finetuned_model</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import Client
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-client.finetuning.delete_finetuned_model(
-    id="id",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `str` — The fine-tuned model ID.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">update_finetuned_model</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import Client
-from cohere.finetuning.finetuning import BaseModel, Settings
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-client.finetuning.update_finetuned_model(
-    id="id",
-    name="name",
-    settings=Settings(
-        base_model=BaseModel(
-            base_type="BASE_TYPE_UNSPECIFIED",
-        ),
-        dataset_id="dataset_id",
-    ),
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**id:** `str` — FinetunedModel ID.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**name:** `str` — FinetunedModel name (e.g. `foobar`).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**settings:** `Settings` — FinetunedModel settings such as dataset, hyperparameters...
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**creator_id:** `typing.Optional[str]` — User ID of the creator.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**organization_id:** `typing.Optional[str]` — Organization ID.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**status:** `typing.Optional[Status]` — Current stage in the life-cycle of the fine-tuned model.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**created_at:** `typing.Optional[dt.datetime]` — Creation timestamp.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**updated_at:** `typing.Optional[dt.datetime]` — Latest update timestamp.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**completed_at:** `typing.Optional[dt.datetime]` — Timestamp for the completed fine-tuning.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**last_used:** `typing.Optional[dt.datetime]` — Timestamp for the latest request to this fine-tuned model.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">list_events</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import Client
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-client.finetuning.list_events(
-    finetuned_model_id="finetuned_model_id",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**finetuned_model_id:** `str` — The parent fine-tuned model ID.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**page_size:** `typing.Optional[int]` — Maximum number of results to be returned by the server. If 0, defaults to 50.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**page_token:** `typing.Optional[str]` — Request a specific page of the list results.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**order_by:** `typing.Optional[str]` 
-
-Comma separated list of fields. For example: "created_at,name". The default
-sorting order is ascending. To specify descending order for a field, append
-" desc" to the field name. For example: "created_at desc,name".
-
-Supported sorting fields:
-
-- created_at (default)
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">list_training_step_metrics</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import Client
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-client.finetuning.list_training_step_metrics(
-    finetuned_model_id="finetuned_model_id",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**finetuned_model_id:** `str` — The parent fine-tuned model ID.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**page_size:** `typing.Optional[int]` — Maximum number of results to be returned by the server. If 0, defaults to 50.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**page_token:** `typing.Optional[str]` — Request a specific page of the list results.
     
 </dd>
 </dl>
