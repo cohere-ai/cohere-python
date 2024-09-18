@@ -5,18 +5,18 @@ from ...core.unchecked_base_model import UncheckedBaseModel
 import typing
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
 import pydantic
+from .document import Document
 import typing_extensions
 from ...core.unchecked_base_model import UnionMetadata
 
 
-class ToolSource(UncheckedBaseModel):
+class TextToolContent(UncheckedBaseModel):
     """
-    A source object containing information about the source of the data cited.
+    A content block which contains information about the content of a tool result
     """
 
-    type: typing.Literal["tool"] = "tool"
-    id: typing.Optional[str] = None
-    tool_output: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = None
+    type: typing.Literal["text"] = "text"
+    text: str
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -28,14 +28,13 @@ class ToolSource(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class DocumentSource(UncheckedBaseModel):
+class DocumentToolContent(UncheckedBaseModel):
     """
-    A source object containing information about the source of the data cited.
+    A content block which contains information about the content of a tool result
     """
 
     type: typing.Literal["document"] = "document"
-    id: typing.Optional[str] = None
-    document: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = None
+    document: Document
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -47,4 +46,6 @@ class DocumentSource(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-Source = typing_extensions.Annotated[typing.Union[ToolSource, DocumentSource], UnionMetadata(discriminant="type")]
+ToolContent = typing_extensions.Annotated[
+    typing.Union[TextToolContent, DocumentToolContent], UnionMetadata(discriminant="type")
+]

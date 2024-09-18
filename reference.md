@@ -12,7 +12,7 @@
 <dd>
 
 Generates a text response to a user message.
-To learn how to use the Chat API with Streaming and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
+To learn how to use the Chat API and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
 </dd>
 </dl>
 </dd>
@@ -28,11 +28,11 @@ To learn how to use the Chat API with Streaming and RAG follow our [Text Generat
 
 ```python
 from cohere import (
+    ChatbotMessage,
     ChatConnector,
     ChatStreamRequestConnectorsSearchOptions,
     Client,
-    Message_Chatbot,
-    ResponseFormat_Text,
+    TextResponseFormat,
     Tool,
     ToolCall,
     ToolParameterDefinitionsValue,
@@ -48,7 +48,7 @@ response = client.chat_stream(
     model="string",
     preamble="string",
     chat_history=[
-        Message_Chatbot(
+        ChatbotMessage(
             message="string",
             tool_calls=[
                 ToolCall(
@@ -108,7 +108,7 @@ response = client.chat_stream(
         )
     ],
     force_single_step=True,
-    response_format=ResponseFormat_Text(),
+    response_format=TextResponseFormat(),
     safety_mode="CONTEXTUAL",
 )
 for chunk in response:
@@ -571,7 +571,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dd>
 
 Generates a text response to a user message.
-To learn how to use the Chat API with Streaming and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
+To learn how to use the Chat API and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
 </dd>
 </dl>
 </dd>
@@ -586,7 +586,7 @@ To learn how to use the Chat API with Streaming and RAG follow our [Text Generat
 <dd>
 
 ```python
-from cohere import Client, Message_Tool
+from cohere import Client, ToolMessage
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -594,7 +594,7 @@ client = Client(
 )
 client.chat(
     message="Can you give me a global market overview of solar panels?",
-    chat_history=[Message_Tool(), Message_Tool()],
+    chat_history=[ToolMessage(), ToolMessage()],
     prompt_truncation="OFF",
     temperature=0.3,
 )
@@ -2336,10 +2336,11 @@ Generates a message from the model in response to a provided conversation. To le
 ```python
 from cohere import Client
 from cohere.v2 import (
-    ChatMessage2_User,
-    ResponseFormat2_Text,
+    CitationOptions,
+    TextResponseFormat2,
     Tool2,
     Tool2Function,
+    UserChatMessage2,
 )
 
 client = Client(
@@ -2349,9 +2350,8 @@ client = Client(
 response = client.v2.chat_stream(
     model="string",
     messages=[
-        ChatMessage2_User(
+        UserChatMessage2(
             content="string",
-            documents=[{"string": {"key": "value"}}],
         )
     ],
     tools=[
@@ -2363,8 +2363,11 @@ response = client.v2.chat_stream(
             ),
         )
     ],
-    citation_mode="FAST",
-    response_format=ResponseFormat2_Text(),
+    documents=["string"],
+    citation_options=CitationOptions(
+        mode="FAST",
+    ),
+    response_format=TextResponseFormat2(),
     safety_mode="CONTEXTUAL",
     max_tokens=1,
     stop_sequences=["string"],
@@ -2422,11 +2425,16 @@ When `tools` is passed (without `tool_results`), the `text` content in the respo
 <dl>
 <dd>
 
-**citation_mode:** `typing.Optional[V2ChatStreamRequestCitationMode]` 
+**documents:** `typing.Optional[typing.Sequence[V2ChatStreamRequestDocumentsItem]]` — A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
 
-Defaults to `"accurate"`.
-Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+    
+</dd>
+</dl>
 
+<dl>
+<dd>
+
+**citation_options:** `typing.Optional[CitationOptions]` 
     
 </dd>
 </dl>
@@ -2603,7 +2611,7 @@ Generates a message from the model in response to a provided conversation. To le
 
 ```python
 from cohere import Client
-from cohere.v2 import ChatMessage2_Tool
+from cohere.v2 import ToolChatMessage2
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -2612,9 +2620,9 @@ client = Client(
 client.v2.chat(
     model="model",
     messages=[
-        ChatMessage2_Tool(
+        ToolChatMessage2(
             tool_call_id="messages",
-            tool_content=["messages"],
+            tool_content="messages",
         )
     ],
 )
@@ -2662,11 +2670,16 @@ When `tools` is passed (without `tool_results`), the `text` content in the respo
 <dl>
 <dd>
 
-**citation_mode:** `typing.Optional[V2ChatRequestCitationMode]` 
+**documents:** `typing.Optional[typing.Sequence[V2ChatRequestDocumentsItem]]` — A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
 
-Defaults to `"accurate"`.
-Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+    
+</dd>
+</dl>
 
+<dl>
+<dd>
+
+**citation_options:** `typing.Optional[CitationOptions]` 
     
 </dd>
 </dl>
@@ -2796,6 +2809,85 @@ Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 <dd>
 
 **return_prompt:** `typing.Optional[bool]` — Whether to return the prompt in the response.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">embed</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+This endpoint returns text embeddings. An embedding is a list of floating point numbers that captures semantic information about the text that it represents.
+
+Embeddings can be used to create text classifiers as well as empower semantic search. To learn more about embeddings, see the embedding page.
+
+If you want to learn more how to use the embedding model, have a look at the [Semantic Search Guide](/docs/semantic-search).
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cohere import Client
+from cohere.v2 import ImageV2EmbedRequest
+
+client = Client(
+    client_name="YOUR_CLIENT_NAME",
+    token="YOUR_TOKEN",
+)
+client.v2.embed(
+    request=ImageV2EmbedRequest(
+        images=["string"],
+        model="string",
+    ),
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**request:** `V2EmbedRequest` 
     
 </dd>
 </dl>
