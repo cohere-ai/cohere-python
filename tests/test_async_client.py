@@ -3,7 +3,7 @@ import unittest
 
 import cohere
 from cohere import ChatConnector, ClassifyExample, CreateConnectorServiceAuth, Tool, \
-    ToolParameterDefinitionsValue, ToolResult, Message_User, Message_Chatbot
+    ToolParameterDefinitionsValue, ToolResult, UserMessage, ChatbotMessage
 
 package_dir = os.path.dirname(os.path.abspath(__file__))
 embed_job = os.path.join(package_dir, 'embed_job.jsonl')
@@ -26,9 +26,9 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
     async def test_chat(self) -> None:
         chat = await self.co.chat(
             chat_history=[
-                Message_User(
+                UserMessage(
                     message="Who discovered gravity?"),
-                Message_Chatbot(message="The man who is widely credited with discovering "
+                ChatbotMessage(message="The man who is widely credited with discovering "
                                 "gravity is Sir Isaac Newton")
             ],
             message="What year was he born?",
@@ -40,9 +40,9 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
     async def test_chat_stream(self) -> None:
         stream = self.co.chat_stream(
             chat_history=[
-                Message_User(
+                UserMessage(
                     message="Who discovered gravity?"),
-                Message_Chatbot(message="The man who is widely credited with discovering "
+                ChatbotMessage(message="The man who is widely credited with discovering "
                                 "gravity is Sir Isaac Newton")
             ],
             message="What year was he born?",
