@@ -110,6 +110,7 @@ from .delete_connector_response import DeleteConnectorResponse
 from .detokenize_response import DetokenizeResponse
 from .document import Document
 from .document_content import DocumentContent
+from .document_source import DocumentSource
 from .embed_by_type_response import EmbedByTypeResponse
 from .embed_by_type_response_embeddings import EmbedByTypeResponseEmbeddings
 from .embed_floats_response import EmbedFloatsResponse
@@ -117,15 +118,8 @@ from .embed_input_type import EmbedInputType
 from .embed_job import EmbedJob
 from .embed_job_status import EmbedJobStatus
 from .embed_job_truncate import EmbedJobTruncate
-from .embed_request_truncate import EmbedRequestTruncate
-from .embed_request_v2 import (
-    ClassificationEmbedRequestV2,
-    ClusteringEmbedRequestV2,
-    EmbedRequestV2,
-    ImageEmbedRequestV2,
-    SearchDocumentEmbedRequestV2,
-    SearchQueryEmbedRequestV2,
-)
+from .embed_request_v2 import EmbedRequestV2
+from .embed_request_v2truncate import EmbedRequestV2Truncate
 from .embed_response import EmbedResponse, EmbeddingsByTypeEmbedResponse, EmbeddingsFloatsEmbedResponse
 from .embedding_type import EmbeddingType
 from .finetune_dataset_metrics import FinetuneDatasetMetrics
@@ -149,7 +143,6 @@ from .generate_streamed_response import (
 from .generation import Generation
 from .get_connector_response import GetConnectorResponse
 from .get_model_response import GetModelResponse
-from .images import Images
 from .json_response_format import JsonResponseFormat
 from .json_response_format_v2 import JsonResponseFormatV2
 from .label_metric import LabelMetric
@@ -205,10 +198,12 @@ from .summarize_request_extractiveness import SummarizeRequestExtractiveness
 from .summarize_request_format import SummarizeRequestFormat
 from .summarize_request_length import SummarizeRequestLength
 from .summarize_response import SummarizeResponse
+from .system_message import SystemMessage
 from .system_message_content import SystemMessageContent
 from .system_message_content_item import SystemMessageContentItem, TextSystemMessageContentItem
-from .texts import Texts
-from .texts_truncate import TextsTruncate
+from .text_content import TextContent
+from .text_response_format import TextResponseFormat
+from .text_response_format_v2 import TextResponseFormatV2
 from .tokenize_response import TokenizeResponse
 from .too_many_requests_error_body import TooManyRequestsErrorBody
 from .tool import Tool
@@ -217,10 +212,12 @@ from .tool_call_delta import ToolCallDelta
 from .tool_call_v2 import ToolCallV2
 from .tool_call_v2function import ToolCallV2Function
 from .tool_content import DocumentToolContent, TextToolContent, ToolContent
+from .tool_message import ToolMessage
 from .tool_message_v2 import ToolMessageV2
 from .tool_message_v2tool_content import ToolMessageV2ToolContent
 from .tool_parameter_definitions_value import ToolParameterDefinitionsValue
 from .tool_result import ToolResult
+from .tool_source import ToolSource
 from .tool_v2 import ToolV2
 from .tool_v2function import ToolV2Function
 from .unprocessable_entity_error_body import UnprocessableEntityErrorBody
@@ -228,6 +225,7 @@ from .update_connector_response import UpdateConnectorResponse
 from .usage import Usage
 from .usage_billed_units import UsageBilledUnits
 from .usage_tokens import UsageTokens
+from .user_message import UserMessage
 from .user_message_content import UserMessageContent
 
 __all__ = [
@@ -310,7 +308,6 @@ __all__ = [
     "CitationStartEventDelta",
     "CitationStartEventDeltaMessage",
     "CitationStartStreamedChatResponseV2",
-    "ClassificationEmbedRequestV2",
     "ClassifyDataMetrics",
     "ClassifyExample",
     "ClassifyRequestTruncate",
@@ -319,7 +316,6 @@ __all__ = [
     "ClassifyResponseClassificationsItemClassificationType",
     "ClassifyResponseClassificationsItemLabelsValue",
     "ClientClosedRequestErrorBody",
-    "ClusteringEmbedRequestV2",
     "CompatibleEndpoint",
     "Connector",
     "ConnectorAuthStatus",
@@ -349,8 +345,8 @@ __all__ = [
     "EmbedJob",
     "EmbedJobStatus",
     "EmbedJobTruncate",
-    "EmbedRequestTruncate",
     "EmbedRequestV2",
+    "EmbedRequestV2Truncate",
     "EmbedResponse",
     "EmbeddingType",
     "EmbeddingsByTypeEmbedResponse",
@@ -371,8 +367,6 @@ __all__ = [
     "Generation",
     "GetConnectorResponse",
     "GetModelResponse",
-    "ImageEmbedRequestV2",
-    "Images",
     "JsonObjectResponseFormat",
     "JsonObjectResponseFormatV2",
     "JsonResponseFormat",
@@ -399,9 +393,7 @@ __all__ = [
     "RerankerDataMetrics",
     "ResponseFormat",
     "ResponseFormatV2",
-    "SearchDocumentEmbedRequestV2",
     "SearchQueriesGenerationStreamedChatResponse",
-    "SearchQueryEmbedRequestV2",
     "SearchResultsStreamedChatResponse",
     "SingleGeneration",
     "SingleGenerationInStream",
@@ -430,8 +422,6 @@ __all__ = [
     "TextResponseFormatV2",
     "TextSystemMessageContentItem",
     "TextToolContent",
-    "Texts",
-    "TextsTruncate",
     "TokenizeResponse",
     "TooManyRequestsErrorBody",
     "Tool",

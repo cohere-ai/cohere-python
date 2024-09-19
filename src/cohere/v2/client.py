@@ -686,16 +686,15 @@ class V2Client:
 
         Examples
         --------
-        from cohere import Client, ImageEmbedRequestV2
+        from cohere import Client, EmbedRequestV2
 
         client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
         client.v2.embed(
-            request=ImageEmbedRequestV2(
-                images=["string"],
-                model="string",
+            request=EmbedRequestV2(
+                model="model",
             ),
         )
         """
@@ -1697,7 +1696,7 @@ class AsyncV2Client:
         --------
         import asyncio
 
-        from cohere import AsyncClient, ImageEmbedRequestV2
+        from cohere import AsyncClient, EmbedRequestV2
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
@@ -1707,9 +1706,8 @@ class AsyncV2Client:
 
         async def main() -> None:
             await client.v2.embed(
-                request=ImageEmbedRequestV2(
-                    images=["string"],
-                    model="string",
+                request=EmbedRequestV2(
+                    model="model",
                 ),
             )
 

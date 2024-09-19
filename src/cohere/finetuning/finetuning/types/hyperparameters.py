@@ -3,6 +3,7 @@
 from ....core.unchecked_base_model import UncheckedBaseModel
 import typing
 import pydantic
+from .lora_target_modules import LoraTargetModules
 from ....core.pydantic_utilities import IS_PYDANTIC_V2
 
 
@@ -36,6 +37,23 @@ class Hyperparameters(UncheckedBaseModel):
     learning_rate: typing.Optional[float] = pydantic.Field(default=None)
     """
     The learning rate to be used during training.
+    """
+
+    lora_alpha: typing.Optional[int] = pydantic.Field(default=None)
+    """
+    Controls the scaling factor for LoRA updates. Higher values make the
+    updates more impactful.
+    """
+
+    lora_rank: typing.Optional[int] = pydantic.Field(default=None)
+    """
+    Specifies the rank for low-rank matrices. Lower ranks reduce parameters
+    but may limit model flexibility.
+    """
+
+    lora_target_modules: typing.Optional[LoraTargetModules] = pydantic.Field(default=None)
+    """
+    The combination of LoRA modules to target.
     """
 
     if IS_PYDANTIC_V2:
