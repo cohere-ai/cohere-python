@@ -186,7 +186,7 @@ class BaseCohere:
     ) -> typing.Iterator[StreamedChatResponse]:
         """
         Generates a text response to a user message.
-        To learn how to use the Chat API with Streaming and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
+        To learn how to use the Chat API and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
 
         Parameters
         ----------
@@ -437,11 +437,11 @@ class BaseCohere:
         Examples
         --------
         from cohere import (
+            ChatbotMessage,
             ChatConnector,
             ChatStreamRequestConnectorsSearchOptions,
             Client,
-            Message_Chatbot,
-            ResponseFormat_Text,
+            TextResponseFormat,
             Tool,
             ToolCall,
             ToolParameterDefinitionsValue,
@@ -457,7 +457,7 @@ class BaseCohere:
             model="string",
             preamble="string",
             chat_history=[
-                Message_Chatbot(
+                ChatbotMessage(
                     message="string",
                     tool_calls=[
                         ToolCall(
@@ -517,7 +517,7 @@ class BaseCohere:
                 )
             ],
             force_single_step=True,
-            response_format=ResponseFormat_Text(),
+            response_format=TextResponseFormat(),
             safety_mode="CONTEXTUAL",
         )
         for chunk in response:
@@ -737,7 +737,7 @@ class BaseCohere:
     ) -> NonStreamedChatResponse:
         """
         Generates a text response to a user message.
-        To learn how to use the Chat API with Streaming and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
+        To learn how to use the Chat API and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
 
         Parameters
         ----------
@@ -987,7 +987,7 @@ class BaseCohere:
 
         Examples
         --------
-        from cohere import Client, Message_Tool
+        from cohere import Client, ToolMessage
 
         client = Client(
             client_name="YOUR_CLIENT_NAME",
@@ -995,7 +995,7 @@ class BaseCohere:
         )
         client.chat(
             message="Can you give me a global market overview of solar panels?",
-            chat_history=[Message_Tool(), Message_Tool()],
+            chat_history=[ToolMessage(), ToolMessage()],
             prompt_truncation="OFF",
             temperature=0.3,
         )
@@ -3181,7 +3181,7 @@ class AsyncBaseCohere:
     ) -> typing.AsyncIterator[StreamedChatResponse]:
         """
         Generates a text response to a user message.
-        To learn how to use the Chat API with Streaming and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
+        To learn how to use the Chat API and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
 
         Parameters
         ----------
@@ -3435,10 +3435,10 @@ class AsyncBaseCohere:
 
         from cohere import (
             AsyncClient,
+            ChatbotMessage,
             ChatConnector,
             ChatStreamRequestConnectorsSearchOptions,
-            Message_Chatbot,
-            ResponseFormat_Text,
+            TextResponseFormat,
             Tool,
             ToolCall,
             ToolParameterDefinitionsValue,
@@ -3457,7 +3457,7 @@ class AsyncBaseCohere:
                 model="string",
                 preamble="string",
                 chat_history=[
-                    Message_Chatbot(
+                    ChatbotMessage(
                         message="string",
                         tool_calls=[
                             ToolCall(
@@ -3517,7 +3517,7 @@ class AsyncBaseCohere:
                     )
                 ],
                 force_single_step=True,
-                response_format=ResponseFormat_Text(),
+                response_format=TextResponseFormat(),
                 safety_mode="CONTEXTUAL",
             )
             async for chunk in response:
@@ -3740,7 +3740,7 @@ class AsyncBaseCohere:
     ) -> NonStreamedChatResponse:
         """
         Generates a text response to a user message.
-        To learn how to use the Chat API with Streaming and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
+        To learn how to use the Chat API and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
 
         Parameters
         ----------
@@ -3992,7 +3992,7 @@ class AsyncBaseCohere:
         --------
         import asyncio
 
-        from cohere import AsyncClient, Message_Tool
+        from cohere import AsyncClient, ToolMessage
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
@@ -4003,7 +4003,7 @@ class AsyncBaseCohere:
         async def main() -> None:
             await client.chat(
                 message="Can you give me a global market overview of solar panels?",
-                chat_history=[Message_Tool(), Message_Tool()],
+                chat_history=[ToolMessage(), ToolMessage()],
                 prompt_truncation="OFF",
                 temperature=0.3,
             )

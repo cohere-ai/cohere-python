@@ -11,7 +11,7 @@ import typing_extensions
 from ..core.unchecked_base_model import UnionMetadata
 
 
-class GenerateStreamedResponse_TextGeneration(UncheckedBaseModel):
+class TextGenerationGenerateStreamedResponse(UncheckedBaseModel):
     """
     Response in content type stream when `stream` is `true` in the request parameters. Generation tokens are streamed with the GenerationStream response. The final response is of type GenerationFinalResponse.
     """
@@ -31,7 +31,7 @@ class GenerateStreamedResponse_TextGeneration(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class GenerateStreamedResponse_StreamEnd(UncheckedBaseModel):
+class StreamEndGenerateStreamedResponse(UncheckedBaseModel):
     """
     Response in content type stream when `stream` is `true` in the request parameters. Generation tokens are streamed with the GenerationStream response. The final response is of type GenerationFinalResponse.
     """
@@ -51,7 +51,7 @@ class GenerateStreamedResponse_StreamEnd(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class GenerateStreamedResponse_StreamError(UncheckedBaseModel):
+class StreamErrorGenerateStreamedResponse(UncheckedBaseModel):
     """
     Response in content type stream when `stream` is `true` in the request parameters. Generation tokens are streamed with the GenerationStream response. The final response is of type GenerationFinalResponse.
     """
@@ -74,9 +74,7 @@ class GenerateStreamedResponse_StreamError(UncheckedBaseModel):
 
 GenerateStreamedResponse = typing_extensions.Annotated[
     typing.Union[
-        GenerateStreamedResponse_TextGeneration,
-        GenerateStreamedResponse_StreamEnd,
-        GenerateStreamedResponse_StreamError,
+        TextGenerationGenerateStreamedResponse, StreamEndGenerateStreamedResponse, StreamErrorGenerateStreamedResponse
     ],
     UnionMetadata(discriminant="event_type"),
 ]
