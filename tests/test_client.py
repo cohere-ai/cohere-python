@@ -4,7 +4,7 @@ import unittest
 
 import cohere
 from cohere import ChatConnector, ClassifyExample, CreateConnectorServiceAuth, Tool, \
-    ToolParameterDefinitionsValue, ToolResult, Message_Chatbot, Message_User, ResponseFormat_JsonObject
+    ToolParameterDefinitionsValue, ToolResult, ChatbotMessage, UserMessage, JsonObjectResponseFormat
 
 co = cohere.Client(timeout=10000)
 
@@ -25,9 +25,9 @@ class TestClient(unittest.TestCase):
     def test_chat(self) -> None:
         chat = co.chat(
             chat_history=[
-                Message_User(
+                UserMessage(
                     message="Who discovered gravity?"),
-                Message_Chatbot(message="The man who is widely credited with discovering "
+                ChatbotMessage(message="The man who is widely credited with discovering "
                                         "gravity is Sir Isaac Newton")
             ],
             message="What year was he born?",
@@ -40,7 +40,7 @@ class TestClient(unittest.TestCase):
     def test_response_format(self) -> None:
         chat = co.chat(
             message="imagine a character from the tv show severance",
-            response_format=ResponseFormat_JsonObject(
+            response_format=JsonObjectResponseFormat(
                 schema={
                     "type": "object",
                     "properties": {
@@ -61,9 +61,9 @@ class TestClient(unittest.TestCase):
     def test_chat_stream(self) -> None:
         stream = co.chat_stream(
             chat_history=[
-                Message_User(
+                UserMessage(
                     message="Who discovered gravity?"),
-                Message_Chatbot(message="The man who is widely credited with discovering "
+                ChatbotMessage(message="The man who is widely credited with discovering "
                                         "gravity is Sir Isaac Newton")
             ],
             message="What year was he born?",

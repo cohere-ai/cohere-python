@@ -11,7 +11,7 @@ import typing_extensions
 from ..core.unchecked_base_model import UnionMetadata
 
 
-class Message_Chatbot(UncheckedBaseModel):
+class ChatbotMessage(UncheckedBaseModel):
     role: typing.Literal["CHATBOT"] = "CHATBOT"
     message: str
     tool_calls: typing.Optional[typing.List[ToolCall]] = None
@@ -26,7 +26,7 @@ class Message_Chatbot(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class Message_System(UncheckedBaseModel):
+class SystemMessage(UncheckedBaseModel):
     role: typing.Literal["SYSTEM"] = "SYSTEM"
     message: str
     tool_calls: typing.Optional[typing.List[ToolCall]] = None
@@ -41,7 +41,7 @@ class Message_System(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class Message_User(UncheckedBaseModel):
+class UserMessage(UncheckedBaseModel):
     role: typing.Literal["USER"] = "USER"
     message: str
     tool_calls: typing.Optional[typing.List[ToolCall]] = None
@@ -56,7 +56,7 @@ class Message_User(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class Message_Tool(UncheckedBaseModel):
+class ToolMessage(UncheckedBaseModel):
     role: typing.Literal["TOOL"] = "TOOL"
     tool_results: typing.Optional[typing.List[ToolResult]] = None
 
@@ -71,5 +71,5 @@ class Message_Tool(UncheckedBaseModel):
 
 
 Message = typing_extensions.Annotated[
-    typing.Union[Message_Chatbot, Message_System, Message_User, Message_Tool], UnionMetadata(discriminant="role")
+    typing.Union[ChatbotMessage, SystemMessage, UserMessage, ToolMessage], UnionMetadata(discriminant="role")
 ]
