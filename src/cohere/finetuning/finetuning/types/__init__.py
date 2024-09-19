@@ -11,6 +11,7 @@ from .hyperparameters import Hyperparameters
 from .list_events_response import ListEventsResponse
 from .list_finetuned_models_response import ListFinetunedModelsResponse
 from .list_training_step_metrics_response import ListTrainingStepMetricsResponse
+from .lora_target_modules import LoraTargetModules
 from .settings import Settings
 from .status import Status
 from .strategy import Strategy
@@ -30,6 +31,7 @@ __all__ = [
     "ListEventsResponse",
     "ListFinetunedModelsResponse",
     "ListTrainingStepMetricsResponse",
+    "LoraTargetModules",
     "Settings",
     "Status",
     "Strategy",

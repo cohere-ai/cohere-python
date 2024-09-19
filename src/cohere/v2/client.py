@@ -35,7 +35,9 @@ from ..core.api_error import ApiError
 from .types.v2chat_request_documents_item import V2ChatRequestDocumentsItem
 from .types.v2chat_request_safety_mode import V2ChatRequestSafetyMode
 from ..types.chat_response import ChatResponse
-from ..types.embed_request_v2 import EmbedRequestV2
+from ..types.embed_input_type import EmbedInputType
+from ..types.embedding_type import EmbeddingType
+from .types.v2embed_request_truncate import V2EmbedRequestTruncate
 from ..types.embed_by_type_response import EmbedByTypeResponse
 from .types.v2rerank_request_documents_item import V2RerankRequestDocumentsItem
 from .types.v2rerank_response import V2RerankResponse
@@ -663,7 +665,15 @@ class V2Client:
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
     def embed(
-        self, *, request: EmbedRequestV2, request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        model: str,
+        texts: typing.Optional[typing.Sequence[str]] = OMIT,
+        images: typing.Optional[typing.Sequence[str]] = OMIT,
+        input_type: typing.Optional[EmbedInputType] = OMIT,
+        embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
+        truncate: typing.Optional[V2EmbedRequestTruncate] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> EmbedByTypeResponse:
         """
         This endpoint returns text embeddings. An embedding is a list of floating point numbers that captures semantic information about the text that it represents.
@@ -674,7 +684,47 @@ class V2Client:
 
         Parameters
         ----------
-        request : EmbedRequestV2
+        model : str
+            Defaults to embed-english-v2.0
+
+            The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
+
+            Available models and corresponding embedding dimensions:
+
+            * `embed-english-v3.0`  1024
+            * `embed-multilingual-v3.0`  1024
+            * `embed-english-light-v3.0`  384
+            * `embed-multilingual-light-v3.0`  384
+
+            * `embed-english-v2.0`  4096
+            * `embed-english-light-v2.0`  1024
+            * `embed-multilingual-v2.0`  768
+
+        texts : typing.Optional[typing.Sequence[str]]
+            An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
+
+        images : typing.Optional[typing.Sequence[str]]
+            An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
+
+            The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
+
+        input_type : typing.Optional[EmbedInputType]
+
+        embedding_types : typing.Optional[typing.Sequence[EmbeddingType]]
+            Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
+
+            * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
+            * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
+            * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
+            * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
+            * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
+
+        truncate : typing.Optional[V2EmbedRequestTruncate]
+            One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
+
+            Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
+
+            If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -686,23 +736,27 @@ class V2Client:
 
         Examples
         --------
-        from cohere import Client, ImageEmbedRequestV2
+        from cohere import Client
 
         client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
         client.v2.embed(
-            request=ImageEmbedRequestV2(
-                images=["string"],
-                model="string",
-            ),
+            model="model",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
             "v2/embed",
             method="POST",
-            json=convert_and_respect_annotation_metadata(object_=request, annotation=EmbedRequestV2, direction="write"),
+            json={
+                "texts": texts,
+                "images": images,
+                "model": model,
+                "input_type": input_type,
+                "embedding_types": embedding_types,
+                "truncate": truncate,
+            },
             request_options=request_options,
             omit=OMIT,
         )
@@ -1672,7 +1726,15 @@ class AsyncV2Client:
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
     async def embed(
-        self, *, request: EmbedRequestV2, request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        model: str,
+        texts: typing.Optional[typing.Sequence[str]] = OMIT,
+        images: typing.Optional[typing.Sequence[str]] = OMIT,
+        input_type: typing.Optional[EmbedInputType] = OMIT,
+        embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
+        truncate: typing.Optional[V2EmbedRequestTruncate] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> EmbedByTypeResponse:
         """
         This endpoint returns text embeddings. An embedding is a list of floating point numbers that captures semantic information about the text that it represents.
@@ -1683,7 +1745,47 @@ class AsyncV2Client:
 
         Parameters
         ----------
-        request : EmbedRequestV2
+        model : str
+            Defaults to embed-english-v2.0
+
+            The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
+
+            Available models and corresponding embedding dimensions:
+
+            * `embed-english-v3.0`  1024
+            * `embed-multilingual-v3.0`  1024
+            * `embed-english-light-v3.0`  384
+            * `embed-multilingual-light-v3.0`  384
+
+            * `embed-english-v2.0`  4096
+            * `embed-english-light-v2.0`  1024
+            * `embed-multilingual-v2.0`  768
+
+        texts : typing.Optional[typing.Sequence[str]]
+            An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
+
+        images : typing.Optional[typing.Sequence[str]]
+            An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
+
+            The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
+
+        input_type : typing.Optional[EmbedInputType]
+
+        embedding_types : typing.Optional[typing.Sequence[EmbeddingType]]
+            Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
+
+            * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
+            * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
+            * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
+            * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
+            * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
+
+        truncate : typing.Optional[V2EmbedRequestTruncate]
+            One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
+
+            Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
+
+            If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1697,7 +1799,7 @@ class AsyncV2Client:
         --------
         import asyncio
 
-        from cohere import AsyncClient, ImageEmbedRequestV2
+        from cohere import AsyncClient
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
@@ -1707,10 +1809,7 @@ class AsyncV2Client:
 
         async def main() -> None:
             await client.v2.embed(
-                request=ImageEmbedRequestV2(
-                    images=["string"],
-                    model="string",
-                ),
+                model="model",
             )
 
 
@@ -1719,7 +1818,14 @@ class AsyncV2Client:
         _response = await self._client_wrapper.httpx_client.request(
             "v2/embed",
             method="POST",
-            json=convert_and_respect_annotation_metadata(object_=request, annotation=EmbedRequestV2, direction="write"),
+            json={
+                "texts": texts,
+                "images": images,
+                "model": model,
+                "input_type": input_type,
+                "embedding_types": embedding_types,
+                "truncate": truncate,
+            },
             request_options=request_options,
             omit=OMIT,
         )
