@@ -30,7 +30,7 @@ class BaseModel(UncheckedBaseModel):
 
     strategy: typing.Optional[Strategy] = pydantic.Field(default=None)
     """
-    The fine-tuning strategy.
+    Deprecated: The fine-tuning strategy.
     """
 
     if IS_PYDANTIC_V2:
