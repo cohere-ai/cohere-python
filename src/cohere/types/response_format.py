@@ -10,7 +10,7 @@ from ..core.serialization import FieldMetadata
 from ..core.unchecked_base_model import UnionMetadata
 
 
-class ResponseFormat_Text(UncheckedBaseModel):
+class TextResponseFormat(UncheckedBaseModel):
     """
     Configuration for forcing the model output to adhere to the specified format. Supported on [Command R 03-2024](https://docs.cohere.com/docs/command-r), [Command R+ 04-2024](https://docs.cohere.com/docs/command-r-plus) and newer models.
 
@@ -34,7 +34,7 @@ class ResponseFormat_Text(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class ResponseFormat_JsonObject(UncheckedBaseModel):
+class JsonObjectResponseFormat(UncheckedBaseModel):
     """
     Configuration for forcing the model output to adhere to the specified format. Supported on [Command R 03-2024](https://docs.cohere.com/docs/command-r), [Command R+ 04-2024](https://docs.cohere.com/docs/command-r-plus) and newer models.
 
@@ -62,5 +62,5 @@ class ResponseFormat_JsonObject(UncheckedBaseModel):
 
 
 ResponseFormat = typing_extensions.Annotated[
-    typing.Union[ResponseFormat_Text, ResponseFormat_JsonObject], UnionMetadata(discriminant="type")
+    typing.Union[TextResponseFormat, JsonObjectResponseFormat], UnionMetadata(discriminant="type")
 ]

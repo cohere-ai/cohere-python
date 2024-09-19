@@ -12,7 +12,7 @@
 <dd>
 
 Generates a text response to a user message.
-To learn how to use the Chat API with Streaming and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
+To learn how to use the Chat API and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
 </dd>
 </dl>
 </dd>
@@ -28,11 +28,11 @@ To learn how to use the Chat API with Streaming and RAG follow our [Text Generat
 
 ```python
 from cohere import (
+    ChatbotMessage,
     ChatConnector,
     ChatStreamRequestConnectorsSearchOptions,
     Client,
-    Message_Chatbot,
-    ResponseFormat_Text,
+    TextResponseFormat,
     Tool,
     ToolCall,
     ToolParameterDefinitionsValue,
@@ -48,7 +48,7 @@ response = client.chat_stream(
     model="string",
     preamble="string",
     chat_history=[
-        Message_Chatbot(
+        ChatbotMessage(
             message="string",
             tool_calls=[
                 ToolCall(
@@ -108,7 +108,7 @@ response = client.chat_stream(
         )
     ],
     force_single_step=True,
-    response_format=ResponseFormat_Text(),
+    response_format=TextResponseFormat(),
     safety_mode="CONTEXTUAL",
 )
 for chunk in response:
@@ -571,7 +571,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dd>
 
 Generates a text response to a user message.
-To learn how to use the Chat API with Streaming and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
+To learn how to use the Chat API and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
 </dd>
 </dl>
 </dd>
@@ -586,7 +586,7 @@ To learn how to use the Chat API with Streaming and RAG follow our [Text Generat
 <dd>
 
 ```python
-from cohere import Client, Message_Tool
+from cohere import Client, ToolMessage
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -594,7 +594,7 @@ client = Client(
 )
 client.chat(
     message="Can you give me a global market overview of solar panels?",
-    chat_history=[Message_Tool(), Message_Tool()],
+    chat_history=[ToolMessage(), ToolMessage()],
     prompt_truncation="OFF",
     temperature=0.3,
 )
@@ -2334,12 +2334,13 @@ Generates a message from the model in response to a provided conversation. To le
 <dd>
 
 ```python
-from cohere import Client
-from cohere.v2 import (
-    ChatMessage2_User,
-    ResponseFormat2_Text,
-    Tool2,
-    Tool2Function,
+from cohere import (
+    CitationOptions,
+    Client,
+    TextV2ResponseFormat,
+    UserV2ChatMessage,
+    V2Tool,
+    V2ToolFunction,
 )
 
 client = Client(
@@ -2349,22 +2350,24 @@ client = Client(
 response = client.v2.chat_stream(
     model="string",
     messages=[
-        ChatMessage2_User(
+        UserV2ChatMessage(
             content="string",
-            documents=[{"string": {"key": "value"}}],
         )
     ],
     tools=[
-        Tool2(
-            function=Tool2Function(
+        V2Tool(
+            function=V2ToolFunction(
                 name="string",
                 description="string",
                 parameters={"string": {"key": "value"}},
             ),
         )
     ],
-    citation_mode="FAST",
-    response_format=ResponseFormat2_Text(),
+    documents=["string"],
+    citation_options=CitationOptions(
+        mode="FAST",
+    ),
+    response_format=TextV2ResponseFormat(),
     safety_mode="CONTEXTUAL",
     max_tokens=1,
     stop_sequences=["string"],
@@ -2409,7 +2412,7 @@ for chunk in response:
 <dl>
 <dd>
 
-**tools:** `typing.Optional[typing.Sequence[Tool2]]` 
+**tools:** `typing.Optional[typing.Sequence[V2Tool]]` 
 
 A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
@@ -2422,10 +2425,7 @@ When `tools` is passed (without `tool_results`), the `text` content in the respo
 <dl>
 <dd>
 
-**citation_mode:** `typing.Optional[V2ChatStreamRequestCitationMode]` 
-
-Defaults to `"accurate"`.
-Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+**documents:** `typing.Optional[typing.Sequence[V2ChatStreamRequestDocumentsItem]]` — A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
 
     
 </dd>
@@ -2434,7 +2434,15 @@ Dictates the approach taken to generating citations as part of the RAG flow by a
 <dl>
 <dd>
 
-**response_format:** `typing.Optional[ResponseFormat2]` 
+**citation_options:** `typing.Optional[CitationOptions]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**response_format:** `typing.Optional[V2ResponseFormat]` 
     
 </dd>
 </dl>
@@ -2602,8 +2610,7 @@ Generates a message from the model in response to a provided conversation. To le
 <dd>
 
 ```python
-from cohere import Client
-from cohere.v2 import ChatMessage2_Tool
+from cohere import Client, ToolV2ChatMessage
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -2612,9 +2619,9 @@ client = Client(
 client.v2.chat(
     model="model",
     messages=[
-        ChatMessage2_Tool(
+        ToolV2ChatMessage(
             tool_call_id="messages",
-            tool_content=["messages"],
+            tool_content="messages",
         )
     ],
 )
@@ -2649,7 +2656,7 @@ client.v2.chat(
 <dl>
 <dd>
 
-**tools:** `typing.Optional[typing.Sequence[Tool2]]` 
+**tools:** `typing.Optional[typing.Sequence[V2Tool]]` 
 
 A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
@@ -2662,10 +2669,7 @@ When `tools` is passed (without `tool_results`), the `text` content in the respo
 <dl>
 <dd>
 
-**citation_mode:** `typing.Optional[V2ChatRequestCitationMode]` 
-
-Defaults to `"accurate"`.
-Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+**documents:** `typing.Optional[typing.Sequence[V2ChatRequestDocumentsItem]]` — A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
 
     
 </dd>
@@ -2674,7 +2678,15 @@ Dictates the approach taken to generating citations as part of the RAG flow by a
 <dl>
 <dd>
 
-**response_format:** `typing.Optional[ResponseFormat2]` 
+**citation_options:** `typing.Optional[CitationOptions]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**response_format:** `typing.Optional[V2ResponseFormat]` 
     
 </dd>
 </dl>
@@ -2796,6 +2808,215 @@ Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 <dd>
 
 **return_prompt:** `typing.Optional[bool]` — Whether to return the prompt in the response.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">embed</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+This endpoint returns text embeddings. An embedding is a list of floating point numbers that captures semantic information about the text that it represents.
+
+Embeddings can be used to create text classifiers as well as empower semantic search. To learn more about embeddings, see the embedding page.
+
+If you want to learn more how to use the embedding model, have a look at the [Semantic Search Guide](/docs/semantic-search).
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cohere import Client, ImageV2EmbedRequest
+
+client = Client(
+    client_name="YOUR_CLIENT_NAME",
+    token="YOUR_TOKEN",
+)
+client.v2.embed(
+    request=ImageV2EmbedRequest(
+        images=["string"],
+        model="string",
+    ),
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**request:** `V2EmbedRequest` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">rerank</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+This endpoint takes in a query and a list of texts and produces an ordered array with each text assigned a relevance score.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cohere import Client
+
+client = Client(
+    client_name="YOUR_CLIENT_NAME",
+    token="YOUR_TOKEN",
+)
+client.v2.rerank(
+    model="model",
+    query="query",
+    documents=["documents"],
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**model:** `str` — The identifier of the model to use, one of : `rerank-english-v3.0`, `rerank-multilingual-v3.0`, `rerank-english-v2.0`, `rerank-multilingual-v2.0`
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**query:** `str` — The search query
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**documents:** `typing.Sequence[V2RerankRequestDocumentsItem]` 
+
+A list of document objects or strings to rerank.
+If a document is provided the text fields is required and all other fields will be preserved in the response.
+
+The total max chunks (length of documents * max_chunks_per_doc) must be less than 10000.
+
+We recommend a maximum of 1,000 documents for optimal endpoint performance.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**top_n:** `typing.Optional[int]` — The number of most relevant documents or indices to return, defaults to the length of the documents
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**rank_fields:** `typing.Optional[typing.Sequence[str]]` — If a JSON object is provided, you can specify which keys you would like to have considered for reranking. The model will rerank based on order of the fields passed in (i.e. rank_fields=['title','author','text'] will rerank using the values in title, author, text  sequentially. If the length of title, author, and text exceeds the context length of the model, the chunking will not re-consider earlier fields). If not provided, the model will use the default text field for ranking.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**return_documents:** `typing.Optional[bool]` 
+
+- If false, returns results without the doc text - the api will return a list of {index, relevance score} where index is inferred from the list passed into the request.
+- If true, returns results with the doc text passed in - the api will return an ordered list of {index, text, relevance score} where index + text refers to the list passed into the request.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_chunks_per_doc:** `typing.Optional[int]` — The maximum number of chunks to produce internally from a document
     
 </dd>
 </dl>

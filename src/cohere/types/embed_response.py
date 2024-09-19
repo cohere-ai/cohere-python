@@ -11,7 +11,7 @@ import typing_extensions
 from ..core.unchecked_base_model import UnionMetadata
 
 
-class EmbedResponse_EmbeddingsFloats(UncheckedBaseModel):
+class EmbeddingsFloatsEmbedResponse(UncheckedBaseModel):
     response_type: typing.Literal["embeddings_floats"] = "embeddings_floats"
     id: str
     embeddings: typing.List[typing.List[float]]
@@ -28,7 +28,7 @@ class EmbedResponse_EmbeddingsFloats(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class EmbedResponse_EmbeddingsByType(UncheckedBaseModel):
+class EmbeddingsByTypeEmbedResponse(UncheckedBaseModel):
     response_type: typing.Literal["embeddings_by_type"] = "embeddings_by_type"
     id: str
     embeddings: EmbedByTypeResponseEmbeddings
@@ -46,6 +46,6 @@ class EmbedResponse_EmbeddingsByType(UncheckedBaseModel):
 
 
 EmbedResponse = typing_extensions.Annotated[
-    typing.Union[EmbedResponse_EmbeddingsFloats, EmbedResponse_EmbeddingsByType],
+    typing.Union[EmbeddingsFloatsEmbedResponse, EmbeddingsByTypeEmbedResponse],
     UnionMetadata(discriminant="response_type"),
 ]
