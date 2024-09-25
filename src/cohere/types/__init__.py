@@ -207,7 +207,7 @@ from .tool_call_v2 import ToolCallV2
 from .tool_call_v2function import ToolCallV2Function
 from .tool_content import DocumentToolContent, TextToolContent, ToolContent
 from .tool_message_v2 import ToolMessageV2
-from .tool_message_v2tool_content import ToolMessageV2ToolContent
+from .tool_message_v2content import ToolMessageV2Content
 from .tool_parameter_definitions_value import ToolParameterDefinitionsValue
 from .tool_result import ToolResult
 from .tool_v2 import ToolV2
@@ -428,7 +428,7 @@ __all__ = [
     "ToolContent",
     "ToolMessage",
     "ToolMessageV2",
-    "ToolMessageV2ToolContent",
+    "ToolMessageV2Content",
     "ToolParameterDefinitionsValue",
     "ToolPlanDeltaStreamedChatResponseV2",
     "ToolResult",

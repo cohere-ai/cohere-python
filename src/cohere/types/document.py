@@ -20,7 +20,7 @@ class Document(UncheckedBaseModel):
 
     id: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Unique identifier for this document which will be referenced in citations. If not provided an ID will be automatically generated
+    Unique identifier for this document which will be referenced in citations. If not provided an ID will be automatically generated.
     """
 
     if IS_PYDANTIC_V2:

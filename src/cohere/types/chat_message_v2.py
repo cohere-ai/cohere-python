@@ -10,7 +10,7 @@ from .tool_call_v2 import ToolCallV2
 from .assistant_message_content import AssistantMessageContent
 from .citation import Citation
 from .system_message_content import SystemMessageContent
-from .tool_message_v2tool_content import ToolMessageV2ToolContent
+from .tool_message_v2content import ToolMessageV2Content
 import typing_extensions
 from ..core.unchecked_base_model import UnionMetadata
 
@@ -79,7 +79,7 @@ class ToolChatMessageV2(UncheckedBaseModel):
 
     role: typing.Literal["tool"] = "tool"
     tool_call_id: str
-    tool_content: ToolMessageV2ToolContent
+    content: typing.Optional[ToolMessageV2Content] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
