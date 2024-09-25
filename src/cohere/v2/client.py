@@ -98,7 +98,7 @@ class V2Client:
 
         safety_mode : typing.Optional[V2ChatStreamRequestSafetyMode]
             Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
-            When `NONE` is specified, the safety instruction will be omitted.
+            When `OFF` is specified, the safety instruction will be omitted.
 
             Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
@@ -424,7 +424,7 @@ class V2Client:
 
         safety_mode : typing.Optional[V2ChatRequestSafetyMode]
             Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
-            When `NONE` is specified, the safety instruction will be omitted.
+            When `OFF` is specified, the safety instruction will be omitted.
 
             Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
@@ -500,7 +500,6 @@ class V2Client:
             messages=[
                 ToolChatMessageV2(
                     tool_call_id="messages",
-                    tool_content="messages",
                 )
             ],
         )
@@ -1143,7 +1142,7 @@ class AsyncV2Client:
 
         safety_mode : typing.Optional[V2ChatStreamRequestSafetyMode]
             Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
-            When `NONE` is specified, the safety instruction will be omitted.
+            When `OFF` is specified, the safety instruction will be omitted.
 
             Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
@@ -1477,7 +1476,7 @@ class AsyncV2Client:
 
         safety_mode : typing.Optional[V2ChatRequestSafetyMode]
             Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
-            When `NONE` is specified, the safety instruction will be omitted.
+            When `OFF` is specified, the safety instruction will be omitted.
 
             Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
@@ -1558,7 +1557,6 @@ class AsyncV2Client:
                 messages=[
                     ToolChatMessageV2(
                         tool_call_id="messages",
-                        tool_content="messages",
                     )
                 ],
             )

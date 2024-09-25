@@ -3,4 +3,4 @@
 import typing
 from .tool_content import ToolContent
 
-ToolMessageV2ToolContent = typing.Union[str, typing.List[ToolContent]]
+ToolMessageV2Content = typing.Union[str, typing.List[ToolContent]]
