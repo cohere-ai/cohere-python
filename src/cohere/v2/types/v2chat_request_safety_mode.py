@@ -2,4 +2,4 @@
 
 import typing
 
-V2ChatRequestSafetyMode = typing.Union[typing.Literal["CONTEXTUAL", "STRICT", "NONE"], typing.Any]
+V2ChatRequestSafetyMode = typing.Union[typing.Literal["CONTEXTUAL", "STRICT", "OFF"], typing.Any]
