@@ -11,16 +11,16 @@ from botocore.exceptions import (ClientError, EndpointConnectionError,
                                  ParamValidationError)
 from sagemaker.s3 import S3Downloader, S3Uploader, parse_s3_url
 
-from cohere_aws.classification import Classification, Classifications
-from cohere_aws.embeddings import Embeddings
-from cohere_aws.error import CohereError
-from cohere_aws.generation import (Generation, Generations,
+from .classification import Classification, Classifications
+from .embeddings import Embeddings
+from .error import CohereError
+from .generation import (Generation, Generations,
                                          StreamingGenerations,
                                          TokenLikelihood)
-from cohere_aws.chat import Chat, StreamingChat
-from cohere_aws.rerank import Reranking
-from cohere_aws.summary import Summary
-from cohere_aws.mode import Mode
+from .chat import Chat, StreamingChat
+from .rerank import Reranking
+from .summary import Summary
+from .mode import Mode
 
 
 class Client:

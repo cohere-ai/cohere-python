@@ -1,5 +1,5 @@
-from cohere_aws.error import CohereError
-from cohere_aws.response import CohereObject
+from .error import CohereError
+from .response import CohereObject
 from typing import Any, Dict, Optional
 
 

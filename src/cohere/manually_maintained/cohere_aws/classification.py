@@ -1,4 +1,4 @@
-from cohere_aws.response import CohereObject
+from .response import CohereObject
 from typing import Any, Dict, Iterator, List, Literal, Union
 
 Prediction = Union[str, int, List[str], List[int]]

@@ -1,6 +1,6 @@
 from typing import Any, Dict, Iterator, List, NamedTuple, Optional
 
-from cohere_aws.response import CohereObject
+from .response import CohereObject
 
 RerankDocument = NamedTuple("Document", [("text", str)])
 RerankDocument.__doc__ = """

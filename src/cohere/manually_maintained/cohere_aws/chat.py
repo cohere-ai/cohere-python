@@ -1,6 +1,6 @@
-from cohere_aws.response import CohereObject
-from cohere_aws.error import CohereError
-from cohere_aws.mode import Mode
+from .response import CohereObject
+from .error import CohereError
+from .mode import Mode
 from typing import List, Optional, Generator, Dict, Any, Union
 from enum import Enum
 import json
