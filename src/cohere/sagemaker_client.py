@@ -2,6 +2,7 @@ import typing
 
 from .aws_client import AwsClient
 from .manually_maintained.cohere_aws.client import Client
+from .manually_maintained.cohere_aws.mode import Mode
 
 
 class SagemakerClient(AwsClient):
@@ -25,4 +26,4 @@ class SagemakerClient(AwsClient):
             aws_region=aws_region,
             timeout=timeout,
         )
-        self.sagemaker_finetuning = Client(region_name=aws_region)
+        self.sagemaker_finetuning = Client(region_name=aws_region, mode=Mode.SAGEMAKER)
