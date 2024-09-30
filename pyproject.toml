@@ -43,6 +43,7 @@ requests = "^2.0.0"
 tokenizers = ">=0.15,<1"
 types-requests = "^2.0.0"
 typing_extensions = ">= 4.0.0"
+sagemaker = "^2.232.1"
 
 [tool.poetry.dev-dependencies]
 mypy = "1.0.1"
