@@ -1,11 +1,13 @@
 import typing
 
-from tokenizers import Tokenizer  # type: ignore
-
 from .aws_client import AwsClient
+from .manually_maintained.cohere_aws.client import Client
+from .manually_maintained.cohere_aws.mode import Mode
 
 
 class SagemakerClient(AwsClient):
+    sagemaker_finetuning: Client
+
     def __init__(
             self,
             *,
@@ -24,3 +26,4 @@ class SagemakerClient(AwsClient):
             aws_region=aws_region,
             timeout=timeout,
         )
+        self.sagemaker_finetuning = Client(aws_region=aws_region)
