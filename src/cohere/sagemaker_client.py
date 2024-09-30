@@ -26,4 +26,4 @@ class SagemakerClient(AwsClient):
             aws_region=aws_region,
             timeout=timeout,
         )
-        self.sagemaker_finetuning = Client(region_name=aws_region, mode=Mode.SAGEMAKER)
+        self.sagemaker_finetuning = Client(aws_region=aws_region)

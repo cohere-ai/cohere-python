@@ -21,33 +21,22 @@ from .chat import Chat, StreamingChat
 from .rerank import Reranking
 from .summary import Summary
 from .mode import Mode
+import typing
 
-
-class Client:
-    def __init__(self, endpoint_name: Optional[str] = None,
-                 region_name: Optional[str] = None,
-                 mode: Optional[Mode] = Mode.SAGEMAKER):
+class Client:    
+    def __init__(
+           self,
+            aws_region: typing.Optional[str] = None,
+        ):
         """
         By default we assume region configured in AWS CLI (`aws configure get region`). You can change the region with
         `aws configure set region us-west-2` or override it with `region_name` parameter.
         """
-        self._endpoint_name = endpoint_name  # deprecated, should use self.connect_to_endpoint() instead
+        self._client = boto3.client("sagemaker-runtime", region_name=aws_region)
+        self._service_client = boto3.client("sagemaker", region_name=aws_region)
+        self._sess = sage.Session(sagemaker_client=self._service_client)
+        self.mode = Mode.SAGEMAKER
 
-        if mode == Mode.SAGEMAKER:
-            self._client = boto3.client("sagemaker-runtime", region_name=region_name)
-            self._service_client = boto3.client("sagemaker", region_name=region_name)
-            self._sess = sage.Session(sagemaker_client=self._service_client)
-        elif mode == Mode.BEDROCK:
-            if not region_name:
-                region_name = boto3.Session().region_name
-            self._client = boto3.client(
-                        service_name="bedrock-runtime",
-                        region_name=region_name,
-            )
-            self._service_client = boto3.client("bedrock", region_name=region_name)
-        else:
-            raise CohereError("Unsupported mode")
-        self.mode = mode
 
 
     def _does_endpoint_exist(self, endpoint_name: str) -> bool:
