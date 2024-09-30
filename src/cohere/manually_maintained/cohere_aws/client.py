@@ -34,7 +34,7 @@ class Client:
         """
         self._client = boto3.client("sagemaker-runtime", region_name=aws_region)
         self._service_client = boto3.client("sagemaker", region_name=aws_region)
-        self._sess = sage.Session(sagemaker_client=self._service_client)
+        self._sess = sage.Session(sagemaker_client=self._service_client, region_name=aws_region)
         self.mode = Mode.SAGEMAKER
 
 
