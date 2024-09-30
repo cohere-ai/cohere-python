@@ -5,7 +5,7 @@ from .manually_maintained.cohere_aws.client import Client
 
 
 class SagemakerClient(AwsClient):
-    finetuning: Client
+    sagemaker_finetuning: Client
 
     def __init__(
             self,
@@ -25,4 +25,4 @@ class SagemakerClient(AwsClient):
             aws_region=aws_region,
             timeout=timeout,
         )
-        self.finetuning = Client(region_name=self._aws_region)
+        self.sagemaker_finetuning = Client(region_name=aws_region)
