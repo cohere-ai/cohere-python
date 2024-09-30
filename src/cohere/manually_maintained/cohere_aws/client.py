@@ -34,7 +34,9 @@ class Client:
         """
         self._client = boto3.client("sagemaker-runtime", region_name=aws_region)
         self._service_client = boto3.client("sagemaker", region_name=aws_region)
-        self._sess = sage.Session(boto3.session.Session())
+        if os.environ.get('AWS_DEFAULT_REGION') is None:
+            os.environ['AWS_DEFAULT_REGION'] = aws_region
+        self._sess = sage.Session(sagemaker_client=self._service_client)
         self.mode = Mode.SAGEMAKER
 
 
