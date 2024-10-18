@@ -19,7 +19,7 @@ try:
     from botocore.auth import SigV4Auth  # type: ignore
     from botocore.awsrequest import AWSRequest  # type: ignore
     AWS_DEPS_AVAILABLE = True
- except ImportError:
+except ImportError:
     AWS_DEPS_AVAILABLE = False
 
 class AwsClient(Client):
