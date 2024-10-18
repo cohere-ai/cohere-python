@@ -2319,7 +2319,9 @@ client.check_api_key()
 <dl>
 <dd>
 
-Generates a message from the model in response to a provided conversation. To learn how to use the Chat API with Streaming and RAG follow our Text Generation guides.
+Generates a message from the model in response to a provided conversation. To learn more about the features of the Chat API follow our [Text Generation guides](https://docs.cohere.com/v2/docs/chat-api).
+
+Follow the [Migration Guide](https://docs.cohere.com/v2/docs/migrating-v1-to-v2) for instructions on moving from API v1 to API v2.
 </dd>
 </dl>
 </dd>
@@ -2396,7 +2398,7 @@ for chunk in response:
 <dl>
 <dd>
 
-**model:** `str` — The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
+**model:** `str` — The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
     
 </dd>
 </dl>
@@ -2452,14 +2454,12 @@ When `tools` is passed (without `tool_results`), the `text` content in the respo
 
 **safety_mode:** `typing.Optional[V2ChatStreamRequestSafetyMode]` 
 
-Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+Used to select the [safety instruction](https://docs.cohere.com/v2/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
 When `OFF` is specified, the safety instruction will be omitted.
 
 Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
-**Note**: This parameter is only compatible with models [Command R 08-2024](/docs/command-r#august-2024-release), [Command R+ 08-2024](/docs/command-r-plus#august-2024-release) and newer.
-
-Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+**Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/v2/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/v2/docs/command-r-plus#august-2024-release) and newer.
 
     
 </dd>
@@ -2468,7 +2468,11 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dl>
 <dd>
 
-**max_tokens:** `typing.Optional[int]` — The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+**max_tokens:** `typing.Optional[int]` 
+
+The maximum number of tokens the model will generate as part of the response.
+
+**Note**: Setting a low value may result in incomplete generations.
 
     
 </dd>
@@ -2595,7 +2599,9 @@ Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 <dl>
 <dd>
 
-Generates a message from the model in response to a provided conversation. To learn how to use the Chat API with Streaming and RAG follow our Text Generation guides.
+Generates a message from the model in response to a provided conversation. To learn more about the features of the Chat API follow our [Text Generation guides](https://docs.cohere.com/v2/docs/chat-api).
+
+Follow the [Migration Guide](https://docs.cohere.com/v2/docs/migrating-v1-to-v2) for instructions on moving from API v1 to API v2.
 </dd>
 </dl>
 </dd>
@@ -2621,6 +2627,7 @@ client.v2.chat(
     messages=[
         ToolChatMessageV2(
             tool_call_id="messages",
+            content="messages",
         )
     ],
 )
@@ -2639,7 +2646,7 @@ client.v2.chat(
 <dl>
 <dd>
 
-**model:** `str` — The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
+**model:** `str` — The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
     
 </dd>
 </dl>
@@ -2695,14 +2702,12 @@ When `tools` is passed (without `tool_results`), the `text` content in the respo
 
 **safety_mode:** `typing.Optional[V2ChatRequestSafetyMode]` 
 
-Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+Used to select the [safety instruction](https://docs.cohere.com/v2/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
 When `OFF` is specified, the safety instruction will be omitted.
 
 Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
-**Note**: This parameter is only compatible with models [Command R 08-2024](/docs/command-r#august-2024-release), [Command R+ 08-2024](/docs/command-r-plus#august-2024-release) and newer.
-
-Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+**Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/v2/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/v2/docs/command-r-plus#august-2024-release) and newer.
 
     
 </dd>
@@ -2711,7 +2716,11 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dl>
 <dd>
 
-**max_tokens:** `typing.Optional[int]` — The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+**max_tokens:** `typing.Optional[int]` 
+
+The maximum number of tokens the model will generate as part of the response.
+
+**Note**: Setting a low value may result in incomplete generations.
 
     
 </dd>
@@ -2865,6 +2874,8 @@ client = Client(
 )
 client.v2.embed(
     model="model",
+    input_type="search_document",
+    embedding_types=["float"],
 )
 
 ```
@@ -2904,6 +2915,30 @@ Available models and corresponding embedding dimensions:
 <dl>
 <dd>
 
+**input_type:** `EmbedInputType` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**embedding_types:** `typing.Sequence[EmbeddingType]` 
+
+Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
+
+* `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
+* `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
+* `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
+* `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
+* `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **texts:** `typing.Optional[typing.Sequence[str]]` — An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
     
 </dd>
@@ -2917,30 +2952,6 @@ Available models and corresponding embedding dimensions:
 An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
 
 The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**input_type:** `typing.Optional[EmbedInputType]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**embedding_types:** `typing.Optional[typing.Sequence[EmbeddingType]]` 
-
-Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
-
-* `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
-* `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
-* `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
-* `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
-* `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
     
 </dd>
 </dl>

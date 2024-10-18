@@ -1,8 +1,5 @@
 import typing
 
-import boto3  # type: ignore
-from botocore.auth import SigV4Auth  # type: ignore
-from botocore.awsrequest import AWSRequest  # type: ignore
 from tokenizers import Tokenizer  # type: ignore
 
 from .aws_client import AwsClient

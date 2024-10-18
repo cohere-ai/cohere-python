@@ -2,9 +2,9 @@
 
 from ..core.unchecked_base_model import UncheckedBaseModel
 import typing
+import pydantic
 from .source import Source
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
-import pydantic
 
 
 class Citation(UncheckedBaseModel):
@@ -12,9 +12,21 @@ class Citation(UncheckedBaseModel):
     Citation information containing sources and the text cited.
     """
 
-    start: typing.Optional[int] = None
-    end: typing.Optional[int] = None
-    text: typing.Optional[str] = None
+    start: typing.Optional[int] = pydantic.Field(default=None)
+    """
+    Start index of the cited snippet in the original source text.
+    """
+
+    end: typing.Optional[int] = pydantic.Field(default=None)
+    """
+    End index of the cited snippet in the original source text.
+    """
+
+    text: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Text snippet that is being cited.
+    """
+
     sources: typing.Optional[typing.List[Source]] = None
 
     if IS_PYDANTIC_V2:
