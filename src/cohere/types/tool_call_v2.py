@@ -9,7 +9,7 @@ import pydantic
 
 class ToolCallV2(UncheckedBaseModel):
     """
-    A array of tool calls to be made.
+    An array of tool calls to be made.
     """
 
     id: typing.Optional[str] = None

@@ -73,12 +73,14 @@ class V2Client:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[StreamedChatResponseV2]:
         """
-        Generates a message from the model in response to a provided conversation. To learn how to use the Chat API with Streaming and RAG follow our Text Generation guides.
+        Generates a message from the model in response to a provided conversation. To learn more about the features of the Chat API follow our [Text Generation guides](https://docs.cohere.com/v2/docs/chat-api).
+
+        Follow the [Migration Guide](https://docs.cohere.com/v2/docs/migrating-v1-to-v2) for instructions on moving from API v1 to API v2.
 
         Parameters
         ----------
         model : str
-            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
+            The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
 
         messages : ChatMessages
 
@@ -97,18 +99,18 @@ class V2Client:
         response_format : typing.Optional[ResponseFormatV2]
 
         safety_mode : typing.Optional[V2ChatStreamRequestSafetyMode]
-            Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+            Used to select the [safety instruction](https://docs.cohere.com/v2/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
             When `OFF` is specified, the safety instruction will be omitted.
 
             Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
-            **Note**: This parameter is only compatible with models [Command R 08-2024](/docs/command-r#august-2024-release), [Command R+ 08-2024](/docs/command-r-plus#august-2024-release) and newer.
-
-            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+            **Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/v2/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/v2/docs/command-r-plus#august-2024-release) and newer.
 
 
         max_tokens : typing.Optional[int]
-            The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+            The maximum number of tokens the model will generate as part of the response.
+
+            **Note**: Setting a low value may result in incomplete generations.
 
 
         stop_sequences : typing.Optional[typing.Sequence[str]]
@@ -399,12 +401,14 @@ class V2Client:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ChatResponse:
         """
-        Generates a message from the model in response to a provided conversation. To learn how to use the Chat API with Streaming and RAG follow our Text Generation guides.
+        Generates a message from the model in response to a provided conversation. To learn more about the features of the Chat API follow our [Text Generation guides](https://docs.cohere.com/v2/docs/chat-api).
+
+        Follow the [Migration Guide](https://docs.cohere.com/v2/docs/migrating-v1-to-v2) for instructions on moving from API v1 to API v2.
 
         Parameters
         ----------
         model : str
-            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
+            The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
 
         messages : ChatMessages
 
@@ -423,18 +427,18 @@ class V2Client:
         response_format : typing.Optional[ResponseFormatV2]
 
         safety_mode : typing.Optional[V2ChatRequestSafetyMode]
-            Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+            Used to select the [safety instruction](https://docs.cohere.com/v2/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
             When `OFF` is specified, the safety instruction will be omitted.
 
             Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
-            **Note**: This parameter is only compatible with models [Command R 08-2024](/docs/command-r#august-2024-release), [Command R+ 08-2024](/docs/command-r-plus#august-2024-release) and newer.
-
-            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+            **Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/v2/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/v2/docs/command-r-plus#august-2024-release) and newer.
 
 
         max_tokens : typing.Optional[int]
-            The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+            The maximum number of tokens the model will generate as part of the response.
+
+            **Note**: Setting a low value may result in incomplete generations.
 
 
         stop_sequences : typing.Optional[typing.Sequence[str]]
@@ -500,6 +504,7 @@ class V2Client:
             messages=[
                 ToolChatMessageV2(
                     tool_call_id="messages",
+                    content="messages",
                 )
             ],
         )
@@ -667,10 +672,10 @@ class V2Client:
         self,
         *,
         model: str,
+        input_type: EmbedInputType,
+        embedding_types: typing.Sequence[EmbeddingType],
         texts: typing.Optional[typing.Sequence[str]] = OMIT,
         images: typing.Optional[typing.Sequence[str]] = OMIT,
-        input_type: typing.Optional[EmbedInputType] = OMIT,
-        embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
         truncate: typing.Optional[V2EmbedRequestTruncate] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> EmbedByTypeResponse:
@@ -699,17 +704,9 @@ class V2Client:
             * `embed-english-light-v2.0`  1024
             * `embed-multilingual-v2.0`  768
 
-        texts : typing.Optional[typing.Sequence[str]]
-            An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
+        input_type : EmbedInputType
 
-        images : typing.Optional[typing.Sequence[str]]
-            An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
-
-            The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
-
-        input_type : typing.Optional[EmbedInputType]
-
-        embedding_types : typing.Optional[typing.Sequence[EmbeddingType]]
+        embedding_types : typing.Sequence[EmbeddingType]
             Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
             * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
@@ -717,6 +714,14 @@ class V2Client:
             * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
             * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
             * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
+
+        texts : typing.Optional[typing.Sequence[str]]
+            An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
+
+        images : typing.Optional[typing.Sequence[str]]
+            An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
+
+            The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
 
         truncate : typing.Optional[V2EmbedRequestTruncate]
             One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
@@ -743,6 +748,8 @@ class V2Client:
         )
         client.v2.embed(
             model="model",
+            input_type="search_document",
+            embedding_types=["float"],
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -1117,12 +1124,14 @@ class AsyncV2Client:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[StreamedChatResponseV2]:
         """
-        Generates a message from the model in response to a provided conversation. To learn how to use the Chat API with Streaming and RAG follow our Text Generation guides.
+        Generates a message from the model in response to a provided conversation. To learn more about the features of the Chat API follow our [Text Generation guides](https://docs.cohere.com/v2/docs/chat-api).
+
+        Follow the [Migration Guide](https://docs.cohere.com/v2/docs/migrating-v1-to-v2) for instructions on moving from API v1 to API v2.
 
         Parameters
         ----------
         model : str
-            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
+            The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
 
         messages : ChatMessages
 
@@ -1141,18 +1150,18 @@ class AsyncV2Client:
         response_format : typing.Optional[ResponseFormatV2]
 
         safety_mode : typing.Optional[V2ChatStreamRequestSafetyMode]
-            Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+            Used to select the [safety instruction](https://docs.cohere.com/v2/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
             When `OFF` is specified, the safety instruction will be omitted.
 
             Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
-            **Note**: This parameter is only compatible with models [Command R 08-2024](/docs/command-r#august-2024-release), [Command R+ 08-2024](/docs/command-r-plus#august-2024-release) and newer.
-
-            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+            **Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/v2/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/v2/docs/command-r-plus#august-2024-release) and newer.
 
 
         max_tokens : typing.Optional[int]
-            The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+            The maximum number of tokens the model will generate as part of the response.
+
+            **Note**: Setting a low value may result in incomplete generations.
 
 
         stop_sequences : typing.Optional[typing.Sequence[str]]
@@ -1451,12 +1460,14 @@ class AsyncV2Client:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ChatResponse:
         """
-        Generates a message from the model in response to a provided conversation. To learn how to use the Chat API with Streaming and RAG follow our Text Generation guides.
+        Generates a message from the model in response to a provided conversation. To learn more about the features of the Chat API follow our [Text Generation guides](https://docs.cohere.com/v2/docs/chat-api).
+
+        Follow the [Migration Guide](https://docs.cohere.com/v2/docs/migrating-v1-to-v2) for instructions on moving from API v1 to API v2.
 
         Parameters
         ----------
         model : str
-            The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
+            The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
 
         messages : ChatMessages
 
@@ -1475,18 +1486,18 @@ class AsyncV2Client:
         response_format : typing.Optional[ResponseFormatV2]
 
         safety_mode : typing.Optional[V2ChatRequestSafetyMode]
-            Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+            Used to select the [safety instruction](https://docs.cohere.com/v2/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
             When `OFF` is specified, the safety instruction will be omitted.
 
             Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
-            **Note**: This parameter is only compatible with models [Command R 08-2024](/docs/command-r#august-2024-release), [Command R+ 08-2024](/docs/command-r-plus#august-2024-release) and newer.
-
-            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+            **Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/v2/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/v2/docs/command-r-plus#august-2024-release) and newer.
 
 
         max_tokens : typing.Optional[int]
-            The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+            The maximum number of tokens the model will generate as part of the response.
+
+            **Note**: Setting a low value may result in incomplete generations.
 
 
         stop_sequences : typing.Optional[typing.Sequence[str]]
@@ -1557,6 +1568,7 @@ class AsyncV2Client:
                 messages=[
                     ToolChatMessageV2(
                         tool_call_id="messages",
+                        content="messages",
                     )
                 ],
             )
@@ -1727,10 +1739,10 @@ class AsyncV2Client:
         self,
         *,
         model: str,
+        input_type: EmbedInputType,
+        embedding_types: typing.Sequence[EmbeddingType],
         texts: typing.Optional[typing.Sequence[str]] = OMIT,
         images: typing.Optional[typing.Sequence[str]] = OMIT,
-        input_type: typing.Optional[EmbedInputType] = OMIT,
-        embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
         truncate: typing.Optional[V2EmbedRequestTruncate] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> EmbedByTypeResponse:
@@ -1759,17 +1771,9 @@ class AsyncV2Client:
             * `embed-english-light-v2.0`  1024
             * `embed-multilingual-v2.0`  768
 
-        texts : typing.Optional[typing.Sequence[str]]
-            An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
+        input_type : EmbedInputType
 
-        images : typing.Optional[typing.Sequence[str]]
-            An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
-
-            The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
-
-        input_type : typing.Optional[EmbedInputType]
-
-        embedding_types : typing.Optional[typing.Sequence[EmbeddingType]]
+        embedding_types : typing.Sequence[EmbeddingType]
             Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
             * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
@@ -1777,6 +1781,14 @@ class AsyncV2Client:
             * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
             * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
             * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
+
+        texts : typing.Optional[typing.Sequence[str]]
+            An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
+
+        images : typing.Optional[typing.Sequence[str]]
+            An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
+
+            The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
 
         truncate : typing.Optional[V2EmbedRequestTruncate]
             One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
@@ -1808,6 +1820,8 @@ class AsyncV2Client:
         async def main() -> None:
             await client.v2.embed(
                 model="model",
+                input_type="search_document",
+                embedding_types=["float"],
             )
 
 

@@ -2,13 +2,14 @@
 
 from .chat_stream_event import ChatStreamEvent
 from .tool_call_delta import ToolCallDelta
-from ..core.pydantic_utilities import IS_PYDANTIC_V2
 import typing
+from ..core.pydantic_utilities import IS_PYDANTIC_V2
 import pydantic
 
 
 class ChatToolCallsChunkEvent(ChatStreamEvent):
     tool_call_delta: ToolCallDelta
+    text: typing.Optional[str] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

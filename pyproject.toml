@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cohere"
-version = "5.11.0"
+version = "5.11.1"
 description = ""
 readme = "README.md"
 authors = []
@@ -32,7 +32,7 @@ Repository = 'https://github.com/cohere-ai/cohere-python'
 
 [tool.poetry.dependencies]
 python = "^3.8"
-boto3 = "^1.34.0"
+boto3 = { version="^1.34.0", optional = true}
 fastavro = "^1.9.4"
 httpx = ">=0.21.2"
 httpx-sse = "0.4.0"
@@ -40,10 +40,10 @@ parameterized = "^0.9.0"
 pydantic = ">= 1.9.2"
 pydantic-core = "^2.18.2"
 requests = "^2.0.0"
+sagemaker = { version="^2.232.1", optional = true}
 tokenizers = ">=0.15,<1"
 types-requests = "^2.0.0"
 typing_extensions = ">= 4.0.0"
-sagemaker = "^2.232.1"
 
 [tool.poetry.dev-dependencies]
 mypy = "1.0.1"
@@ -68,3 +68,6 @@ line-length = 120
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.extras]
+aws=["sagemaker", "boto3"]

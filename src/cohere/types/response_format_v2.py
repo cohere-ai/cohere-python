@@ -11,14 +11,17 @@ from ..core.unchecked_base_model import UnionMetadata
 
 class TextResponseFormatV2(UncheckedBaseModel):
     """
-    Configuration for forcing the model output to adhere to the specified format. Supported on [Command R](https://docs.cohere.com/docs/command-r), [Command R+](https://docs.cohere.com/docs/command-r-plus) and newer models.
+    Configuration for forcing the model output to adhere to the specified format. Supported on [Command R](https://docs.cohere.com/v2/docs/command-r), [Command R+](https://docs.cohere.com/v2/docs/command-r-plus) and newer models.
 
-    The model can be forced into outputting JSON objects (with up to 5 levels of nesting) by setting `{ "type": "json_object" }`.
+    The model can be forced into outputting JSON objects by setting `{ "type": "json_object" }`.
 
     A [JSON Schema](https://json-schema.org/) can optionally be provided, to ensure a specific structure.
 
     **Note**: When using `{ "type": "json_object" }` your `message` should always explicitly instruct the model to generate a JSON (eg: _"Generate a JSON ..."_) . Otherwise the model may end up getting stuck generating an infinite stream of characters and eventually run out of context length.
-    **Limitation**: The parameter is not supported in RAG mode (when any of `connectors`, `documents`, `tools`, `tool_results` are provided).
+
+    **Note**: When `json_schema` is not specified, the generated object can have up to 5 layers of nesting.
+
+    **Limitation**: The parameter is not supported when used in combinations with the `documents` or `tools` parameters.
     """
 
     type: typing.Literal["text"] = "text"
@@ -35,14 +38,17 @@ class TextResponseFormatV2(UncheckedBaseModel):
 
 class JsonObjectResponseFormatV2(UncheckedBaseModel):
     """
-    Configuration for forcing the model output to adhere to the specified format. Supported on [Command R](https://docs.cohere.com/docs/command-r), [Command R+](https://docs.cohere.com/docs/command-r-plus) and newer models.
+    Configuration for forcing the model output to adhere to the specified format. Supported on [Command R](https://docs.cohere.com/v2/docs/command-r), [Command R+](https://docs.cohere.com/v2/docs/command-r-plus) and newer models.
 
-    The model can be forced into outputting JSON objects (with up to 5 levels of nesting) by setting `{ "type": "json_object" }`.
+    The model can be forced into outputting JSON objects by setting `{ "type": "json_object" }`.
 
     A [JSON Schema](https://json-schema.org/) can optionally be provided, to ensure a specific structure.
 
     **Note**: When using `{ "type": "json_object" }` your `message` should always explicitly instruct the model to generate a JSON (eg: _"Generate a JSON ..."_) . Otherwise the model may end up getting stuck generating an infinite stream of characters and eventually run out of context length.
-    **Limitation**: The parameter is not supported in RAG mode (when any of `connectors`, `documents`, `tools`, `tool_results` are provided).
+
+    **Note**: When `json_schema` is not specified, the generated object can have up to 5 layers of nesting.
+
+    **Limitation**: The parameter is not supported when used in combinations with the `documents` or `tools` parameters.
     """
 
     type: typing.Literal["json_object"] = "json_object"
