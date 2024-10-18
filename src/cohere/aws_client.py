@@ -3,10 +3,7 @@ import json
 import re
 import typing
 
-import boto3  # type: ignore
 import httpx
-from botocore.auth import SigV4Auth  # type: ignore
-from botocore.awsrequest import AWSRequest  # type: ignore
 from httpx import URL, SyncByteStream, ByteStream
 from tokenizers import Tokenizer  # type: ignore
 
@@ -16,6 +13,14 @@ from . import GenerateStreamedResponse, Generation, \
 from .client import Client, ClientEnvironment
 from .core import construct_type
 
+
+try:
+    import boto3  # type: ignore
+    from botocore.auth import SigV4Auth  # type: ignore
+    from botocore.awsrequest import AWSRequest  # type: ignore
+    AWS_DEPS_AVAILABLE = True
+ except ImportError:
+    AWS_DEPS_AVAILABLE = False
 
 class AwsClient(Client):
     def __init__(
@@ -28,6 +33,8 @@ class AwsClient(Client):
             timeout: typing.Optional[float] = None,
             service: typing.Union[typing.Literal["bedrock"], typing.Literal["sagemaker"]],
     ):
+        if not AWS_DEPS_AVAILABLE:
+            raise ImportError("AWS dependencies not available. Please install boto3 and botocore.")
         Client.__init__(
             self,
             base_url="https://api.cohere.com",  # this url is unused for BedrockClient
