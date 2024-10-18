@@ -3,6 +3,5 @@
 import typing
 
 ChatFinishReason = typing.Union[
-    typing.Literal["complete", "stop_sequence", "max_tokens", "tool_call", "error", "content_blocked", "error_limit"],
-    typing.Any,
+    typing.Literal["COMPLETE", "STOP_SEQUENCE", "MAX_TOKENS", "TOOL_CALL", "ERROR"], typing.Any
 ]

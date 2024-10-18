@@ -79,7 +79,7 @@ class ToolChatMessageV2(UncheckedBaseModel):
 
     role: typing.Literal["tool"] = "tool"
     tool_call_id: str
-    content: typing.Optional[ToolMessageV2Content] = None
+    content: ToolMessageV2Content
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
