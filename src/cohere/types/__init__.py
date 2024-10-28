@@ -141,6 +141,7 @@ from .generate_streamed_response import (
 from .generation import Generation
 from .get_connector_response import GetConnectorResponse
 from .get_model_response import GetModelResponse
+from .image import Image
 from .json_response_format import JsonResponseFormat
 from .json_response_format_v2 import JsonResponseFormatV2
 from .label_metric import LabelMetric
@@ -357,6 +358,7 @@ __all__ = [
     "Generation",
     "GetConnectorResponse",
     "GetModelResponse",
+    "Image",
     "JsonObjectResponseFormat",
     "JsonObjectResponseFormatV2",
     "JsonResponseFormat",

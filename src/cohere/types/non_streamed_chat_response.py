@@ -25,6 +25,11 @@ class NonStreamedChatResponse(UncheckedBaseModel):
     Unique identifier for the generated reply. Useful for submitting feedback.
     """
 
+    response_id: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Unique identifier for the response.
+    """
+
     citations: typing.Optional[typing.List[ChatCitation]] = pydantic.Field(default=None)
     """
     Inline citations for the generated reply.
@@ -65,10 +70,9 @@ class NonStreamedChatResponse(UncheckedBaseModel):
     meta: typing.Optional[ApiMeta] = None
 
     if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
     else:
 
         class Config:
-            frozen = True
             smart_union = True
             extra = pydantic.Extra.allow
