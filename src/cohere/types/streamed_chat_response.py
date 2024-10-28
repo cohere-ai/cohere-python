@@ -26,11 +26,10 @@ class StreamStartStreamedChatResponse(UncheckedBaseModel):
     generation_id: str
 
     if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
     else:
 
         class Config:
-            frozen = True
             smart_union = True
             extra = pydantic.Extra.allow
 
@@ -44,11 +43,10 @@ class SearchQueriesGenerationStreamedChatResponse(UncheckedBaseModel):
     search_queries: typing.List[ChatSearchQuery]
 
     if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
     else:
 
         class Config:
-            frozen = True
             smart_union = True
             extra = pydantic.Extra.allow
 
@@ -63,11 +61,10 @@ class SearchResultsStreamedChatResponse(UncheckedBaseModel):
     documents: typing.Optional[typing.List[ChatDocument]] = None
 
     if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
     else:
 
         class Config:
-            frozen = True
             smart_union = True
             extra = pydantic.Extra.allow
 
@@ -81,11 +78,10 @@ class TextGenerationStreamedChatResponse(UncheckedBaseModel):
     text: str
 
     if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
     else:
 
         class Config:
-            frozen = True
             smart_union = True
             extra = pydantic.Extra.allow
 
@@ -99,11 +95,10 @@ class CitationGenerationStreamedChatResponse(UncheckedBaseModel):
     citations: typing.List[ChatCitation]
 
     if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
     else:
 
         class Config:
-            frozen = True
             smart_union = True
             extra = pydantic.Extra.allow
 
@@ -118,11 +113,10 @@ class ToolCallsGenerationStreamedChatResponse(UncheckedBaseModel):
     tool_calls: typing.List[ToolCall]
 
     if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
     else:
 
         class Config:
-            frozen = True
             smart_union = True
             extra = pydantic.Extra.allow
 
@@ -137,11 +131,10 @@ class StreamEndStreamedChatResponse(UncheckedBaseModel):
     response: NonStreamedChatResponse
 
     if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
     else:
 
         class Config:
-            frozen = True
             smart_union = True
             extra = pydantic.Extra.allow
 
@@ -156,11 +149,10 @@ class ToolCallsChunkStreamedChatResponse(UncheckedBaseModel):
     text: typing.Optional[str] = None
 
     if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
     else:
 
         class Config:
-            frozen = True
             smart_union = True
             extra = pydantic.Extra.allow
 

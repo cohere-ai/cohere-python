@@ -2,18 +2,30 @@
 
 from ..core.unchecked_base_model import UncheckedBaseModel
 import pydantic
-import typing
-from .api_meta import ApiMeta
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
+import typing
 
 
-class DetokenizeResponse(UncheckedBaseModel):
-    text: str = pydantic.Field()
+class Image(UncheckedBaseModel):
+    width: int = pydantic.Field()
     """
-    A string representing the list of tokens.
+    Width of the image in pixels
     """
 
-    meta: typing.Optional[ApiMeta] = None
+    height: int = pydantic.Field()
+    """
+    Height of the image in pixels
+    """
+
+    format: str = pydantic.Field()
+    """
+    Format of the image
+    """
+
+    bit_depth: int = pydantic.Field()
+    """
+    Bit depth of the image
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2

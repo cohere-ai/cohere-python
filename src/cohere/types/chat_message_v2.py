@@ -24,11 +24,10 @@ class UserChatMessageV2(UncheckedBaseModel):
     content: UserMessageContent
 
     if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
     else:
 
         class Config:
-            frozen = True
             smart_union = True
             extra = pydantic.Extra.allow
 
@@ -45,11 +44,10 @@ class AssistantChatMessageV2(UncheckedBaseModel):
     citations: typing.Optional[typing.List[Citation]] = None
 
     if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
     else:
 
         class Config:
-            frozen = True
             smart_union = True
             extra = pydantic.Extra.allow
 
@@ -63,11 +61,10 @@ class SystemChatMessageV2(UncheckedBaseModel):
     content: SystemMessageContent
 
     if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
     else:
 
         class Config:
-            frozen = True
             smart_union = True
             extra = pydantic.Extra.allow
 
@@ -82,11 +79,10 @@ class ToolChatMessageV2(UncheckedBaseModel):
     content: ToolMessageV2Content
 
     if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
     else:
 
         class Config:
-            frozen = True
             smart_union = True
             extra = pydantic.Extra.allow
 
