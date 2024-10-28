@@ -225,7 +225,7 @@ class ConnectorsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateConnectorResponse:
         """
-        Creates a new connector. The connector is tested during registration and will cancel registration when the test is unsuccessful. See ['Creating and Deploying a Connector'](https://docs.cohere.com/docs/creating-and-deploying-a-connector) for more information.
+        Creates a new connector. The connector is tested during registration and will cancel registration when the test is unsuccessful. See ['Creating and Deploying a Connector'](https://docs.cohere.com/v1/docs/creating-and-deploying-a-connector) for more information.
 
         Parameters
         ----------
@@ -1303,7 +1303,7 @@ class AsyncConnectorsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateConnectorResponse:
         """
-        Creates a new connector. The connector is tested during registration and will cancel registration when the test is unsuccessful. See ['Creating and Deploying a Connector'](https://docs.cohere.com/docs/creating-and-deploying-a-connector) for more information.
+        Creates a new connector. The connector is tested during registration and will cancel registration when the test is unsuccessful. See ['Creating and Deploying a Connector'](https://docs.cohere.com/v1/docs/creating-and-deploying-a-connector) for more information.
 
         Parameters
         ----------

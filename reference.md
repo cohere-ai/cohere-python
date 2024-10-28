@@ -236,7 +236,7 @@ Compatible Deployments:
 
 **connectors:** `typing.Optional[typing.Sequence[ChatConnector]]` 
 
-Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
+Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/v1/docs/creating-and-deploying-a-connector) one.
 
 When specified, the model's reply will be enriched with information found by querying each of the connectors (RAG).
 
@@ -721,7 +721,7 @@ Compatible Deployments:
 
 **connectors:** `typing.Optional[typing.Sequence[ChatConnector]]` 
 
-Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
+Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/v1/docs/creating-and-deploying-a-connector) one.
 
 When specified, the model's reply will be enriched with information found by querying each of the connectors (RAG).
 
@@ -1584,9 +1584,9 @@ If `ALL` is selected, the token likelihoods will be provided both for the prompt
 <dl>
 <dd>
 
-This endpoint returns text embeddings. An embedding is a list of floating point numbers that captures semantic information about the text that it represents.
+This endpoint returns text and image embeddings. An embedding is a list of floating point numbers that captures semantic information about the content that it represents.
 
-Embeddings can be used to create text classifiers as well as empower semantic search. To learn more about embeddings, see the embedding page.
+Embeddings can be used to create classifiers as well as empower semantic search. To learn more about embeddings, see the embedding page.
 
 If you want to learn more how to use the embedding model, have a look at the [Semantic Search Guide](/docs/semantic-search).
 </dd>
@@ -4015,7 +4015,7 @@ client.connectors.list()
 <dl>
 <dd>
 
-Creates a new connector. The connector is tested during registration and will cancel registration when the test is unsuccessful. See ['Creating and Deploying a Connector'](https://docs.cohere.com/docs/creating-and-deploying-a-connector) for more information.
+Creates a new connector. The connector is tested during registration and will cancel registration when the test is unsuccessful. See ['Creating and Deploying a Connector'](https://docs.cohere.com/v1/docs/creating-and-deploying-a-connector) for more information.
 </dd>
 </dl>
 </dd>

@@ -4,6 +4,7 @@ from ..core.unchecked_base_model import UncheckedBaseModel
 from .embed_by_type_response_embeddings import EmbedByTypeResponseEmbeddings
 import pydantic
 import typing
+from .image import Image
 from .api_meta import ApiMeta
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
 
@@ -20,13 +21,17 @@ class EmbedByTypeResponse(UncheckedBaseModel):
     The text entries for which embeddings were returned.
     """
 
+    images: typing.Optional[typing.List[Image]] = pydantic.Field(default=None)
+    """
+    The image entries for which embeddings were returned.
+    """
+
     meta: typing.Optional[ApiMeta] = None
 
     if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
     else:
 
         class Config:
-            frozen = True
             smart_union = True
             extra = pydantic.Extra.allow

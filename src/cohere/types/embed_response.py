@@ -3,6 +3,7 @@
 from __future__ import annotations
 from ..core.unchecked_base_model import UncheckedBaseModel
 import typing
+from .image import Image
 from .api_meta import ApiMeta
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
 import pydantic
@@ -16,14 +17,14 @@ class EmbeddingsFloatsEmbedResponse(UncheckedBaseModel):
     id: str
     embeddings: typing.List[typing.List[float]]
     texts: typing.List[str]
+    images: typing.Optional[typing.List[Image]] = None
     meta: typing.Optional[ApiMeta] = None
 
     if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
     else:
 
         class Config:
-            frozen = True
             smart_union = True
             extra = pydantic.Extra.allow
 
@@ -33,14 +34,14 @@ class EmbeddingsByTypeEmbedResponse(UncheckedBaseModel):
     id: str
     embeddings: EmbedByTypeResponseEmbeddings
     texts: typing.List[str]
+    images: typing.Optional[typing.List[Image]] = None
     meta: typing.Optional[ApiMeta] = None
 
     if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
     else:
 
         class Config:
-            frozen = True
             smart_union = True
             extra = pydantic.Extra.allow
 
