@@ -39,7 +39,7 @@ class Client:
         """
         if not AWS_DEPS_AVAILABLE:
             raise CohereError("AWS dependencies not available. Please install boto3 and sagemaker.")
-        self._client = boto3.client()
+        self._client = boto3.client("sagemaker")
         if os.environ.get('AWS_DEFAULT_REGION') is None:
             os.environ['AWS_DEFAULT_REGION'] = aws_region
         self._sess = sage.Session(sagemaker_client=self._service_client)
