@@ -26,6 +26,7 @@ from .chat_content_start_event_delta import ChatContentStartEventDelta
 from .chat_content_start_event_delta_message import ChatContentStartEventDeltaMessage
 from .chat_content_start_event_delta_message_content import ChatContentStartEventDeltaMessageContent
 from .chat_data_metrics import ChatDataMetrics
+from .chat_debug_event import ChatDebugEvent
 from .chat_document import ChatDocument
 from .chat_finish_reason import ChatFinishReason
 from .chat_message import ChatMessage
@@ -170,6 +171,7 @@ from .single_generation_token_likelihoods_item import SingleGenerationTokenLikel
 from .source import DocumentSource, Source, ToolSource
 from .streamed_chat_response import (
     CitationGenerationStreamedChatResponse,
+    DebugStreamedChatResponse,
     SearchQueriesGenerationStreamedChatResponse,
     SearchResultsStreamedChatResponse,
     StreamEndStreamedChatResponse,
@@ -245,6 +247,7 @@ __all__ = [
     "ChatContentStartEventDeltaMessage",
     "ChatContentStartEventDeltaMessageContent",
     "ChatDataMetrics",
+    "ChatDebugEvent",
     "ChatDocument",
     "ChatFinishReason",
     "ChatMessage",
@@ -324,6 +327,7 @@ __all__ = [
     "DatasetPart",
     "DatasetType",
     "DatasetValidationStatus",
+    "DebugStreamedChatResponse",
     "DeleteConnectorResponse",
     "DetokenizeResponse",
     "Document",

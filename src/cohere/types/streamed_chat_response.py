@@ -157,6 +157,23 @@ class ToolCallsChunkStreamedChatResponse(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
+class DebugStreamedChatResponse(UncheckedBaseModel):
+    """
+    StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
+    """
+
+    event_type: typing.Literal["debug"] = "debug"
+    prompt: typing.Optional[str] = None
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 StreamedChatResponse = typing_extensions.Annotated[
     typing.Union[
         StreamStartStreamedChatResponse,
@@ -167,6 +184,7 @@ StreamedChatResponse = typing_extensions.Annotated[
         ToolCallsGenerationStreamedChatResponse,
         StreamEndStreamedChatResponse,
         ToolCallsChunkStreamedChatResponse,
+        DebugStreamedChatResponse,
     ],
     UnionMetadata(discriminant="event_type"),
 ]
