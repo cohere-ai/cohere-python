@@ -8,9 +8,10 @@ from typing import Optional
 import requests
 from fastavro import parse_schema, reader, writer
 
-from . import EmbedResponse, EmbedResponse_EmbeddingsFloats, EmbedResponse_EmbeddingsByType, ApiMeta, \
+from . import EmbedResponse, EmbeddingsFloatsEmbedResponse, EmbeddingsByTypeEmbedResponse, ApiMeta, \
     EmbedByTypeResponseEmbeddings, ApiMetaBilledUnits, EmbedJob, CreateEmbedJobResponse, Dataset
 from .datasets import DatasetsCreateResponse, DatasetsGetResponse
+from .overrides import get_fields
 
 
 def get_terminal_states():
@@ -195,7 +196,7 @@ def merge_embed_responses(responses: typing.List[EmbedResponse]) -> EmbedRespons
     ]
 
     if responses[0].response_type == "embeddings_floats":
-        embeddings_floats = typing.cast(typing.List[EmbedResponse_EmbeddingsFloats], responses)
+        embeddings_floats = typing.cast(typing.List[EmbeddingsFloatsEmbedResponse], responses)
 
         embeddings = [
             embedding
@@ -203,7 +204,7 @@ def merge_embed_responses(responses: typing.List[EmbedResponse]) -> EmbedRespons
             for embedding in embeddings_floats.embeddings
         ]
 
-        return EmbedResponse_EmbeddingsFloats(
+        return EmbeddingsFloatsEmbedResponse(
             response_type="embeddings_floats",
             id=response_id,
             texts=texts,
@@ -211,7 +212,7 @@ def merge_embed_responses(responses: typing.List[EmbedResponse]) -> EmbedRespons
             meta=meta
         )
     else:
-        embeddings_type = typing.cast(typing.List[EmbedResponse_EmbeddingsByType], responses)
+        embeddings_type = typing.cast(typing.List[EmbeddingsByTypeEmbedResponse], responses)
 
         embeddings_by_type = [
             response.embeddings
@@ -219,7 +220,7 @@ def merge_embed_responses(responses: typing.List[EmbedResponse]) -> EmbedRespons
         ]
 
         # only get set keys from the pydantic model (i.e. exclude fields that are set to 'None')
-        fields = embeddings_type[0].embeddings.dict(exclude_unset=True).keys()
+        fields = [x for x in get_fields(embeddings_type[0].embeddings) if getattr(embeddings_type[0].embeddings, x) is not None]
 
         merged_dicts = {
             field: [
@@ -232,7 +233,7 @@ def merge_embed_responses(responses: typing.List[EmbedResponse]) -> EmbedRespons
 
         embeddings_by_type_merged = EmbedByTypeResponseEmbeddings.parse_obj(merged_dicts)
 
-        return EmbedResponse_EmbeddingsByType(
+        return EmbeddingsByTypeEmbedResponse(
             response_type="embeddings_by_type",
             id=response_id,
             embeddings=embeddings_by_type_merged,

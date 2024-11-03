@@ -3,7 +3,7 @@ import typing
 import unittest
 
 import cohere
-from cohere import ToolMessage2, UserMessage, AssistantMessage
+from cohere import ToolMessage, UserMessage, AssistantMessage
 
 co = cohere.ClientV2(timeout=10000)
 
@@ -14,12 +14,12 @@ embed_job = os.path.join(package_dir, "embed_job.jsonl")
 class TestClientV2(unittest.TestCase):
 
     def test_chat(self) -> None:
-        response = co.chat(model="command-r-plus", messages=[cohere.v2.ChatMessage2_User(content="hello world!")])
+        response = co.chat(model="command-r-plus", messages=[cohere.UserChatMessageV2(content="hello world!")])
 
         print(response.message)
 
     def test_chat_stream(self) -> None:
-        stream = co.chat_stream(model="command-r-plus", messages=[cohere.v2.ChatMessage2_User(content="hello world!")])
+        stream = co.chat_stream(model="command-r-plus", messages=[cohere.UserChatMessageV2(content="hello world!")])
 
         events = set()
 
@@ -43,8 +43,8 @@ class TestClientV2(unittest.TestCase):
             {"title": "widget sales 2021", "text": "4 million"},
         ]
         response = co.chat(
-            messages=cohere.v2.UserMessage(
-                content=cohere.v2.TextContent(text="how many widges were sold in 2020?"),
+            messages=cohere.UserChatMessageV2(
+                content=cohere.TextContent(text="how many widges were sold in 2020?"),
                 documents=documents,
             ),
         )
@@ -67,17 +67,17 @@ class TestClientV2(unittest.TestCase):
                 "required": ["location"],
             },
         }
-        tools = [cohere.v2.Tool2(type="function", function=get_weather_tool)]
-        messages: typing.List[typing.Union[UserMessage, AssistantMessage, None, ToolMessage2]] = [
-            cohere.v2.UserMessage(content="what is the weather in Toronto?")
+        tools = [cohere.ToolV2(type="function", function=get_weather_tool)]
+        messages: cohere.ChatMessages = [
+            cohere.UserChatMessageV2(content="what is the weather in Toronto?")
         ]
         res = co.chat(model="command-r-plus", tools=tools, messages=messages)
 
         # call the get_weather tool
         tool_result = {"temperature": "30C"}
-        tool_content = [cohere.v2.ToolContent(output=tool_result)]
+        tool_content = [cohere.Content(output=tool_result, text="The weather in Toronto is 30C")]
         messages.append(res.message)
-        messages.append(cohere.v2.ToolMessage2(tool_call_id=res.message.tool_calls[0].id, tool_content=tool_content))
+        messages.append(cohere.ToolChatMessageV2(tool_call_id=res.message.tool_calls[0].id, tool_content=tool_content))
 
         res = co.chat(tools=tools, messages=messages)
         print(res.message)

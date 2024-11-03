@@ -12,7 +12,7 @@
 <dd>
 
 Generates a text response to a user message.
-To learn how to use the Chat API with Streaming and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
+To learn how to use the Chat API and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
 </dd>
 </dl>
 </dd>
@@ -28,16 +28,16 @@ To learn how to use the Chat API with Streaming and RAG follow our [Text Generat
 
 ```python
 from cohere import (
+    ChatbotMessage,
     ChatConnector,
     ChatStreamRequestConnectorsSearchOptions,
-    Message_Chatbot,
-    ResponseFormat_Text,
+    Client,
+    TextResponseFormat,
     Tool,
     ToolCall,
     ToolParameterDefinitionsValue,
     ToolResult,
 )
-from cohere.client import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -48,7 +48,7 @@ response = client.chat_stream(
     model="string",
     preamble="string",
     chat_history=[
-        Message_Chatbot(
+        ChatbotMessage(
             message="string",
             tool_calls=[
                 ToolCall(
@@ -108,7 +108,7 @@ response = client.chat_stream(
         )
     ],
     force_single_step=True,
-    response_format=ResponseFormat_Text(),
+    response_format=TextResponseFormat(),
     safety_mode="CONTEXTUAL",
 )
 for chunk in response:
@@ -134,6 +134,14 @@ Text input for the model to respond to.
 
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**accepts:** `typing.Optional[typing.Literal["text/event-stream"]]` — Pass text/event-stream to receive the streamed response as server-sent events. The default is `\n` delimited events.
     
 </dd>
 </dl>
@@ -228,7 +236,7 @@ Compatible Deployments:
 
 **connectors:** `typing.Optional[typing.Sequence[ChatConnector]]` 
 
-Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
+Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/v1/docs/creating-and-deploying-a-connector) one.
 
 When specified, the model's reply will be enriched with information found by querying each of the connectors (RAG).
 
@@ -563,7 +571,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dd>
 
 Generates a text response to a user message.
-To learn how to use the Chat API with Streaming and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
+To learn how to use the Chat API and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
 </dd>
 </dl>
 </dd>
@@ -578,7 +586,7 @@ To learn how to use the Chat API with Streaming and RAG follow our [Text Generat
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client, ToolMessage
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -586,6 +594,7 @@ client = Client(
 )
 client.chat(
     message="Can you give me a global market overview of solar panels?",
+    chat_history=[ToolMessage(), ToolMessage()],
     prompt_truncation="OFF",
     temperature=0.3,
 )
@@ -610,6 +619,14 @@ Text input for the model to respond to.
 
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**accepts:** `typing.Optional[typing.Literal["text/event-stream"]]` — Pass text/event-stream to receive the streamed response as server-sent events. The default is `\n` delimited events.
     
 </dd>
 </dl>
@@ -704,7 +721,7 @@ Compatible Deployments:
 
 **connectors:** `typing.Optional[typing.Sequence[ChatConnector]]` 
 
-Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/docs/creating-and-deploying-a-connector) one.
+Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/v1/docs/creating-and-deploying-a-connector) one.
 
 When specified, the model's reply will be enriched with information found by querying each of the connectors (RAG).
 
@@ -1056,7 +1073,7 @@ Generates realistic text conditioned on a given input.
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -1329,7 +1346,7 @@ Generates realistic text conditioned on a given input.
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -1567,9 +1584,9 @@ If `ALL` is selected, the token likelihoods will be provided both for the prompt
 <dl>
 <dd>
 
-This endpoint returns text embeddings. An embedding is a list of floating point numbers that captures semantic information about the text that it represents.
+This endpoint returns text and image embeddings. An embedding is a list of floating point numbers that captures semantic information about the content that it represents.
 
-Embeddings can be used to create text classifiers as well as empower semantic search. To learn more about embeddings, see the embedding page.
+Embeddings can be used to create classifiers as well as empower semantic search. To learn more about embeddings, see the embedding page.
 
 If you want to learn more how to use the embedding model, have a look at the [Semantic Search Guide](/docs/semantic-search).
 </dd>
@@ -1586,20 +1603,13 @@ If you want to learn more how to use the embedding model, have a look at the [Se
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
     token="YOUR_TOKEN",
 )
-client.embed(
-    texts=["string"],
-    images=["string"],
-    model="string",
-    input_type="search_document",
-    embedding_types=["float"],
-    truncate="NONE",
-)
+client.embed()
 
 ```
 </dd>
@@ -1615,7 +1625,19 @@ client.embed(
 <dl>
 <dd>
 
-**texts:** `typing.Sequence[str]` — An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
+**texts:** `typing.Optional[typing.Sequence[str]]` — An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**images:** `typing.Optional[typing.Sequence[str]]` 
+
+An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
+
+The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
     
 </dd>
 </dl>
@@ -1723,7 +1745,7 @@ This endpoint takes in a query and a list of texts and produces an ordered array
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -1854,7 +1876,7 @@ Note: [Fine-tuned models](https://docs.cohere.com/docs/classify-fine-tuning) tra
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -1971,7 +1993,7 @@ Generates a summary in English for a given text.
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -2090,7 +2112,7 @@ This endpoint splits input text into smaller units called tokens using byte-pair
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -2170,7 +2192,7 @@ This endpoint takes tokens using byte-pair encoding and returns their text repre
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -2250,7 +2272,7 @@ Checks that the api key in the Authorization header is valid and active
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -2297,7 +2319,9 @@ client.check_api_key()
 <dl>
 <dd>
 
-Generates a message from the model in response to a provided conversation. To learn how to use the Chat API with Streaming and RAG follow our Text Generation guides.
+Generates a text response to a user message and streams it down, token by token. To learn how to use the Chat API with streaming follow our [Text Generation guides](https://docs.cohere.com/v2/docs/chat-api).
+
+Follow the [Migration Guide](https://docs.cohere.com/v2/docs/migrating-v1-to-v2) for instructions on moving from API v1 to API v2.
 </dd>
 </dl>
 </dd>
@@ -2312,8 +2336,14 @@ Generates a message from the model in response to a provided conversation. To le
 <dd>
 
 ```python
-from cohere import ChatMessage2_User, ResponseFormat2_Text, Tool2, Tool2Function
-from cohere.client import Client
+from cohere import (
+    CitationOptions,
+    Client,
+    TextResponseFormatV2,
+    ToolV2,
+    ToolV2Function,
+    UserChatMessageV2,
+)
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -2322,22 +2352,25 @@ client = Client(
 response = client.v2.chat_stream(
     model="string",
     messages=[
-        ChatMessage2_User(
+        UserChatMessageV2(
             content="string",
-            documents=[{"string": {"key": "value"}}],
         )
     ],
     tools=[
-        Tool2(
-            function=Tool2Function(
+        ToolV2(
+            function=ToolV2Function(
                 name="string",
                 description="string",
                 parameters={"string": {"key": "value"}},
             ),
         )
     ],
-    citation_mode="FAST",
-    response_format=ResponseFormat2_Text(),
+    documents=["string"],
+    citation_options=CitationOptions(
+        mode="FAST",
+    ),
+    response_format=TextResponseFormatV2(),
+    safety_mode="CONTEXTUAL",
     max_tokens=1,
     stop_sequences=["string"],
     temperature=1.1,
@@ -2365,7 +2398,7 @@ for chunk in response:
 <dl>
 <dd>
 
-**model:** `str` — The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
+**model:** `str` — The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
     
 </dd>
 </dl>
@@ -2381,7 +2414,7 @@ for chunk in response:
 <dl>
 <dd>
 
-**tools:** `typing.Optional[typing.Sequence[Tool2]]` 
+**tools:** `typing.Optional[typing.Sequence[ToolV2]]` 
 
 A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
@@ -2394,10 +2427,7 @@ When `tools` is passed (without `tool_results`), the `text` content in the respo
 <dl>
 <dd>
 
-**citation_mode:** `typing.Optional[V2ChatStreamRequestCitationMode]` 
-
-Defaults to `"accurate"`.
-Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+**documents:** `typing.Optional[typing.Sequence[V2ChatStreamRequestDocumentsItem]]` — A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
 
     
 </dd>
@@ -2406,7 +2436,7 @@ Dictates the approach taken to generating citations as part of the RAG flow by a
 <dl>
 <dd>
 
-**response_format:** `typing.Optional[ResponseFormat2]` 
+**citation_options:** `typing.Optional[CitationOptions]` 
     
 </dd>
 </dl>
@@ -2414,7 +2444,35 @@ Dictates the approach taken to generating citations as part of the RAG flow by a
 <dl>
 <dd>
 
-**max_tokens:** `typing.Optional[int]` — The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+**response_format:** `typing.Optional[ResponseFormatV2]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**safety_mode:** `typing.Optional[V2ChatStreamRequestSafetyMode]` 
+
+Used to select the [safety instruction](https://docs.cohere.com/v2/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+When `OFF` is specified, the safety instruction will be omitted.
+
+Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
+
+**Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/v2/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/v2/docs/command-r-plus#august-2024-release) and newer.
+
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_tokens:** `typing.Optional[int]` 
+
+The maximum number of tokens the model will generate as part of the response.
+
+**Note**: Setting a low value may result in incomplete generations.
 
     
 </dd>
@@ -2541,7 +2599,9 @@ Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 <dl>
 <dd>
 
-Generates a message from the model in response to a provided conversation. To learn how to use the Chat API with Streaming and RAG follow our Text Generation guides.
+Generates a text response to a user message and streams it down, token by token. To learn how to use the Chat API with streaming follow our [Text Generation guides](https://docs.cohere.com/v2/docs/chat-api).
+
+Follow the [Migration Guide](https://docs.cohere.com/v2/docs/migrating-v1-to-v2) for instructions on moving from API v1 to API v2.
 </dd>
 </dl>
 </dd>
@@ -2556,7 +2616,7 @@ Generates a message from the model in response to a provided conversation. To le
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client, ToolChatMessageV2
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -2564,7 +2624,12 @@ client = Client(
 )
 client.v2.chat(
     model="model",
-    messages=[],
+    messages=[
+        ToolChatMessageV2(
+            tool_call_id="messages",
+            content="messages",
+        )
+    ],
 )
 
 ```
@@ -2581,7 +2646,7 @@ client.v2.chat(
 <dl>
 <dd>
 
-**model:** `str` — The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
+**model:** `str` — The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
     
 </dd>
 </dl>
@@ -2597,7 +2662,7 @@ client.v2.chat(
 <dl>
 <dd>
 
-**tools:** `typing.Optional[typing.Sequence[Tool2]]` 
+**tools:** `typing.Optional[typing.Sequence[ToolV2]]` 
 
 A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
@@ -2610,10 +2675,7 @@ When `tools` is passed (without `tool_results`), the `text` content in the respo
 <dl>
 <dd>
 
-**citation_mode:** `typing.Optional[V2ChatRequestCitationMode]` 
-
-Defaults to `"accurate"`.
-Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+**documents:** `typing.Optional[typing.Sequence[V2ChatRequestDocumentsItem]]` — A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
 
     
 </dd>
@@ -2622,7 +2684,7 @@ Dictates the approach taken to generating citations as part of the RAG flow by a
 <dl>
 <dd>
 
-**response_format:** `typing.Optional[ResponseFormat2]` 
+**citation_options:** `typing.Optional[CitationOptions]` 
     
 </dd>
 </dl>
@@ -2630,7 +2692,35 @@ Dictates the approach taken to generating citations as part of the RAG flow by a
 <dl>
 <dd>
 
-**max_tokens:** `typing.Optional[int]` — The maximum number of tokens the model will generate as part of the response. Note: Setting a low value may result in incomplete generations.
+**response_format:** `typing.Optional[ResponseFormatV2]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**safety_mode:** `typing.Optional[V2ChatRequestSafetyMode]` 
+
+Used to select the [safety instruction](https://docs.cohere.com/v2/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+When `OFF` is specified, the safety instruction will be omitted.
+
+Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
+
+**Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/v2/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/v2/docs/command-r-plus#august-2024-release) and newer.
+
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_tokens:** `typing.Optional[int]` 
+
+The maximum number of tokens the model will generate as part of the response.
+
+**Note**: Setting a low value may result in incomplete generations.
 
     
 </dd>
@@ -2745,6 +2835,287 @@ Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 </dl>
 </details>
 
+<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">embed</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+This endpoint returns text embeddings. An embedding is a list of floating point numbers that captures semantic information about the text that it represents.
+
+Embeddings can be used to create text classifiers as well as empower semantic search. To learn more about embeddings, see the embedding page.
+
+If you want to learn more how to use the embedding model, have a look at the [Semantic Search Guide](/docs/semantic-search).
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cohere import Client
+
+client = Client(
+    client_name="YOUR_CLIENT_NAME",
+    token="YOUR_TOKEN",
+)
+client.v2.embed(
+    model="model",
+    input_type="search_document",
+    embedding_types=["float"],
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**model:** `str` 
+
+Defaults to embed-english-v2.0
+
+The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
+
+Available models and corresponding embedding dimensions:
+
+* `embed-english-v3.0`  1024
+* `embed-multilingual-v3.0`  1024
+* `embed-english-light-v3.0`  384
+* `embed-multilingual-light-v3.0`  384
+
+* `embed-english-v2.0`  4096
+* `embed-english-light-v2.0`  1024
+* `embed-multilingual-v2.0`  768
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**input_type:** `EmbedInputType` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**embedding_types:** `typing.Sequence[EmbeddingType]` 
+
+Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
+
+* `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
+* `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
+* `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
+* `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
+* `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**texts:** `typing.Optional[typing.Sequence[str]]` — An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**images:** `typing.Optional[typing.Sequence[str]]` 
+
+An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
+
+The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**truncate:** `typing.Optional[V2EmbedRequestTruncate]` 
+
+One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
+
+Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
+
+If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">rerank</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+This endpoint takes in a query and a list of texts and produces an ordered array with each text assigned a relevance score.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cohere import Client
+
+client = Client(
+    client_name="YOUR_CLIENT_NAME",
+    token="YOUR_TOKEN",
+)
+client.v2.rerank(
+    model="model",
+    query="query",
+    documents=["documents"],
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**model:** `str` — The identifier of the model to use, one of : `rerank-english-v3.0`, `rerank-multilingual-v3.0`, `rerank-english-v2.0`, `rerank-multilingual-v2.0`
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**query:** `str` — The search query
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**documents:** `typing.Sequence[V2RerankRequestDocumentsItem]` 
+
+A list of document objects or strings to rerank.
+If a document is provided the text fields is required and all other fields will be preserved in the response.
+
+The total max chunks (length of documents * max_chunks_per_doc) must be less than 10000.
+
+We recommend a maximum of 1,000 documents for optimal endpoint performance.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**top_n:** `typing.Optional[int]` — The number of most relevant documents or indices to return, defaults to the length of the documents
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**rank_fields:** `typing.Optional[typing.Sequence[str]]` — If a JSON object is provided, you can specify which keys you would like to have considered for reranking. The model will rerank based on order of the fields passed in (i.e. rank_fields=['title','author','text'] will rerank using the values in title, author, text  sequentially. If the length of title, author, and text exceeds the context length of the model, the chunking will not re-consider earlier fields). If not provided, the model will use the default text field for ranking.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**return_documents:** `typing.Optional[bool]` 
+
+- If false, returns results without the doc text - the api will return a list of {index, relevance score} where index is inferred from the list passed into the request.
+- If true, returns results with the doc text passed in - the api will return an ordered list of {index, text, relevance score} where index + text refers to the list passed into the request.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_chunks_per_doc:** `typing.Optional[int]` — The maximum number of chunks to produce internally from a document
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## EmbedJobs
 <details><summary><code>client.embed_jobs.<a href="src/cohere/embed_jobs/client.py">list</a>()</code></summary>
 <dl>
@@ -2773,7 +3144,7 @@ The list embed job endpoint allows users to view all embed jobs history for that
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -2834,7 +3205,7 @@ This API launches an async Embed job for a [Dataset](https://docs.cohere.com/doc
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -2970,7 +3341,7 @@ This API retrieves the details about an embed job started by the same user.
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -3041,7 +3412,7 @@ This API allows users to cancel an active embed job. Once invoked, the embedding
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -3113,7 +3484,7 @@ List datasets that have been created.
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -3222,7 +3593,7 @@ Create a dataset by uploading a file. See ['Dataset Creation'](https://docs.cohe
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -3378,7 +3749,7 @@ View the dataset storage usage for your Organization. Each Organization can have
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -3439,7 +3810,7 @@ Retrieve a dataset by ID. See ['Datasets'](https://docs.cohere.com/docs/datasets
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -3510,7 +3881,7 @@ Delete a dataset by ID. Datasets are automatically deleted after 30 days, but th
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -3582,7 +3953,7 @@ Returns a list of connectors ordered by descending creation date (newer first). 
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -3644,7 +4015,7 @@ client.connectors.list()
 <dl>
 <dd>
 
-Creates a new connector. The connector is tested during registration and will cancel registration when the test is unsuccessful. See ['Creating and Deploying a Connector'](https://docs.cohere.com/docs/creating-and-deploying-a-connector) for more information.
+Creates a new connector. The connector is tested during registration and will cancel registration when the test is unsuccessful. See ['Creating and Deploying a Connector'](https://docs.cohere.com/v1/docs/creating-and-deploying-a-connector) for more information.
 </dd>
 </dl>
 </dd>
@@ -3659,7 +4030,7 @@ Creates a new connector. The connector is tested during registration and will ca
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -3787,7 +4158,7 @@ Retrieve a connector by ID. See ['Connectors'](https://docs.cohere.com/docs/conn
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -3858,7 +4229,7 @@ Delete a connector by ID. See ['Connectors'](https://docs.cohere.com/docs/connec
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -3929,7 +4300,7 @@ Update a connector by ID. Omitted fields will not be updated. See ['Managing you
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -4056,7 +4427,7 @@ Authorize the connector with the given ID for the connector oauth app. See ['Con
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -4136,7 +4507,7 @@ Returns the details of a model, provided its name.
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -4207,7 +4578,7 @@ Returns a list of models available for use. The list contains models from Cohere
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -4290,7 +4661,7 @@ Defaults to `20`, min value of `1`, max value of `1000`.
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -4369,8 +4740,8 @@ Supported sorting fields:
 <dd>
 
 ```python
-from cohere.client import Client
-from cohere.finetuning import BaseModel, FinetunedModel, Settings
+from cohere import Client
+from cohere.finetuning.finetuning import BaseModel, FinetunedModel, Settings
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -4381,7 +4752,7 @@ client.finetuning.create_finetuned_model(
         name="api-test",
         settings=Settings(
             base_model=BaseModel(
-                base_type="BASE_TYPE_GENERATIVE",
+                base_type="BASE_TYPE_CHAT",
             ),
             dataset_id="my-dataset-id",
         ),
@@ -4435,7 +4806,7 @@ client.finetuning.create_finetuned_model(
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -4492,7 +4863,7 @@ client.finetuning.get_finetuned_model(
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -4549,8 +4920,8 @@ client.finetuning.delete_finetuned_model(
 <dd>
 
 ```python
-from cohere.client import Client
-from cohere.finetuning import BaseModel, Settings
+from cohere import Client
+from cohere.finetuning.finetuning import BaseModel, Settings
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -4686,7 +5057,7 @@ client.finetuning.update_finetuned_model(
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
@@ -4775,7 +5146,7 @@ Supported sorting fields:
 <dd>
 
 ```python
-from cohere.client import Client
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",

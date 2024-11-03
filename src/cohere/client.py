@@ -178,7 +178,8 @@ class Client(BaseCohere, CacheMixin):
     def embed(
         self,
         *,
-        texts: typing.Sequence[str],
+        texts: typing.Optional[typing.Sequence[str]] = OMIT,
+        images: typing.Optional[typing.Sequence[str]] = OMIT,
         model: typing.Optional[str] = OMIT,
         input_type: typing.Optional[EmbedInputType] = OMIT,
         embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
@@ -186,10 +187,12 @@ class Client(BaseCohere, CacheMixin):
         request_options: typing.Optional[RequestOptions] = None,
         batching: typing.Optional[bool] = True,
     ) -> EmbedResponse:
-        if batching is False:
+        # skip batching for images for now
+        if batching is False or images is not OMIT:
             return BaseCohere.embed(
                 self,
                 texts=texts,
+                images=images,
                 model=model,
                 input_type=input_type,
                 embedding_types=embedding_types,
@@ -197,7 +200,8 @@ class Client(BaseCohere, CacheMixin):
                 request_options=request_options,
             )
 
-        texts_batches = [texts[i : i + embed_batch_size] for i in range(0, len(texts), embed_batch_size)]
+        textsarr: typing.Sequence[str]  = texts if texts is not OMIT and texts is not None else []
+        texts_batches = [textsarr[i : i + embed_batch_size] for i in range(0, len(textsarr), embed_batch_size)]
 
         responses = [
             response
@@ -366,7 +370,8 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
     async def embed(
         self,
         *,
-        texts: typing.Sequence[str],
+        texts: typing.Optional[typing.Sequence[str]] = OMIT,
+        images: typing.Optional[typing.Sequence[str]] = OMIT,
         model: typing.Optional[str] = OMIT,
         input_type: typing.Optional[EmbedInputType] = OMIT,
         embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
@@ -374,10 +379,12 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         request_options: typing.Optional[RequestOptions] = None,
         batching: typing.Optional[bool] = True,
     ) -> EmbedResponse:
-        if batching is False:
+        # skip batching for images for now
+        if batching is False or images is not OMIT:
             return await AsyncBaseCohere.embed(
                 self,
                 texts=texts,
+                images=images,
                 model=model,
                 input_type=input_type,
                 embedding_types=embedding_types,
@@ -385,7 +392,8 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
                 request_options=request_options,
             )
 
-        texts_batches = [texts[i : i + embed_batch_size] for i in range(0, len(texts), embed_batch_size)]
+        textsarr: typing.Sequence[str]  = texts if texts is not OMIT and texts is not None else []
+        texts_batches = [textsarr[i : i + embed_batch_size] for i in range(0, len(textsarr), embed_batch_size)]
 
         responses = typing.cast(
             typing.List[EmbedResponse],
