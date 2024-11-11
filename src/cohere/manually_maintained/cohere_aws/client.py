@@ -16,17 +16,7 @@ from .rerank import Reranking
 from .summary import Summary
 from .mode import Mode
 import typing
-
-# Try to import sagemaker and related modules
-try:
-    import sagemaker as sage
-    from sagemaker.s3 import S3Downloader, S3Uploader, parse_s3_url
-    import boto3
-    from botocore.exceptions import (
-        ClientError, EndpointConnectionError, ParamValidationError)
-    AWS_DEPS_AVAILABLE = True
-except ImportError:
-    AWS_DEPS_AVAILABLE = False
+from ..lazy_aws_deps import lazy_boto3, lazy_botocore, lazy_sagemaker
 
 class Client:
     def __init__(
@@ -37,13 +27,11 @@ class Client:
         By default we assume region configured in AWS CLI (`aws configure get region`). You can change the region with
         `aws configure set region us-west-2` or override it with `region_name` parameter.
         """
-        if not AWS_DEPS_AVAILABLE:
-            raise CohereError("AWS dependencies not available. Please install boto3 and sagemaker.")
-        self._client = boto3.client("sagemaker-runtime", region_name=aws_region)
-        self._service_client = boto3.client("sagemaker", region_name=aws_region)
+        self._client = lazy_boto3().client("sagemaker-runtime", region_name=aws_region)
+        self._service_client = lazy_boto3().client("sagemaker", region_name=aws_region)
         if os.environ.get('AWS_DEFAULT_REGION') is None:
             os.environ['AWS_DEFAULT_REGION'] = aws_region
-        self._sess = sage.Session(sagemaker_client=self._service_client)
+        self._sess = lazy_sagemaker().Session(sagemaker_client=self._service_client)
         self.mode = Mode.SAGEMAKER
 
 
@@ -51,7 +39,7 @@ class Client:
     def _does_endpoint_exist(self, endpoint_name: str) -> bool:
         try:
             self._service_client.describe_endpoint(EndpointName=endpoint_name)
-        except ClientError:
+        except lazy_botocore().ClientError:
             return False
         return True
 
@@ -87,7 +75,7 @@ class Client:
         # Links of all fine-tuned models in s3_models_dir. Their format should be .tar.gz
         s3_tar_models = [
             s3_path
-            for s3_path in S3Downloader.list(s3_models_dir, sagemaker_session=self._sess)
+            for s3_path in lazy_sagemaker().s3.S3Downloader.list(s3_models_dir, sagemaker_session=self._sess)
             if (
                 s3_path.endswith(".tar.gz")  # only .tar.gz files
                 and (s3_path.split("/")[-1] != "models.tar.gz")  # exclude the .tar.gz file we are creating
@@ -109,7 +97,7 @@ class Client:
             # Download and extract all fine-tuned models
             for s3_tar_model in s3_tar_models:
                 print(f"Adding fine-tuned model: {s3_tar_model}")
-                S3Downloader.download(s3_tar_model, local_tar_models_dir, sagemaker_session=self._sess)
+                lazy_sagemaker().s3.S3Downloader.download(s3_tar_model, local_tar_models_dir, sagemaker_session=self._sess)
                 with tarfile.open(os.path.join(local_tar_models_dir, s3_tar_model.split("/")[-1])) as tar:
                     tar.extractall(local_models_dir)
 
@@ -120,10 +108,10 @@ class Client:
 
             # Upload the new tarfile containing all models to s3
             # Very important to remove the trailing slash from s3_models_dir otherwise it just doesn't upload
-            model_tar_s3 = S3Uploader.upload(model_tar, s3_models_dir[:-1], sagemaker_session=self._sess)
+            model_tar_s3 = lazy_sagemaker().s3.S3Uploader.upload(model_tar, s3_models_dir[:-1], sagemaker_session=self._sess)
 
             # sanity check
-            assert s3_models_dir + "models.tar.gz" in S3Downloader.list(s3_models_dir, sagemaker_session=self._sess)
+            assert s3_models_dir + "models.tar.gz" in lazy_sagemaker().s3.S3Downloader.list(s3_models_dir, sagemaker_session=self._sess)
 
         return model_tar_s3
 
@@ -180,17 +168,17 @@ class Client:
         # Otherwise it might block deployment
         try:
             self._service_client.delete_endpoint_config(EndpointConfigName=endpoint_name)
-        except ClientError:
+        except lazy_botocore().ClientError:
             pass
 
         if role is None:
             try:
-                role = sage.get_execution_role()
+                role = lazy_sagemaker().get_execution_role()
             except ValueError:
                 print("Using default role: 'ServiceRoleSagemaker'.")
                 role = "ServiceRoleSagemaker"
 
-        model = sage.ModelPackage(
+        model = lazy_sagemaker().ModelPackage(
             role=role,
             model_data=model_data,
             sagemaker_session=self._sess,  # makes sure the right region is used
@@ -204,7 +192,7 @@ class Client:
                 endpoint_name=endpoint_name,
                 **validation_params
             )
-        except ParamValidationError:
+        except lazy_botocore().ParamValidationError:
             # For at least some versions of python 3.6, SageMaker SDK does not support the validation_params
             model.deploy(n_instances, instance_type, endpoint_name=endpoint_name)
         self.connect_to_endpoint(endpoint_name)
@@ -366,7 +354,7 @@ class Client:
             else:
                 result = self._client.invoke_endpoint(**params)
                 return Chat.from_dict(json.loads(result['Body'].read().decode()))
-        except EndpointConnectionError as e:
+        except lazy_botocore().EndpointConnectionError as e:
             raise CohereError(str(e))
         except Exception as e:
             # TODO should be client error - distinct type from CohereError?
@@ -398,7 +386,7 @@ class Client:
                 result = self._client.invoke_model(**params)
                 return Chat.from_dict(
                     json.loads(result['body'].read().decode()))
-        except EndpointConnectionError as e:
+        except lazy_botocore().EndpointConnectionError as e:
             raise CohereError(str(e))
         except Exception as e:
             # TODO should be client error - distinct type from CohereError?
@@ -473,7 +461,7 @@ class Client:
                 result = self._client.invoke_endpoint(**params)
                 return Generations(
                     json.loads(result['Body'].read().decode())['generations'])
-        except EndpointConnectionError as e:
+        except lazy_botocore().EndpointConnectionError as e:
             raise CohereError(str(e))
         except Exception as e:
             # TODO should be client error - distinct type from CohereError?
@@ -498,7 +486,7 @@ class Client:
                 result = self._client.invoke_model(**params)
                 return Generations(
                     json.loads(result['body'].read().decode())['generations'])
-        except EndpointConnectionError as e:
+        except lazy_botocore().EndpointConnectionError as e:
             raise CohereError(str(e))
         except Exception as e:
             # TODO should be client error - distinct type from CohereError?
@@ -546,7 +534,7 @@ class Client:
         try:
             result = self._client.invoke_endpoint(**params)
             response = json.loads(result['Body'].read().decode())
-        except EndpointConnectionError as e:
+        except lazy_botocore().EndpointConnectionError as e:
             raise CohereError(str(e))
         except Exception as e:
             # TODO should be client error - distinct type from CohereError?
@@ -567,7 +555,7 @@ class Client:
         try:
             result = self._client.invoke_model(**params)
             response = json.loads(result['body'].read().decode())
-        except EndpointConnectionError as e:
+        except lazy_botocore().EndpointConnectionError as e:
             raise CohereError(str(e))
         except Exception as e:
             # TODO should be client error - distinct type from CohereError?
@@ -631,7 +619,7 @@ class Client:
             reranking = Reranking(response)
             for rank in reranking.results:
                 rank.document = parsed_docs[rank.index]
-        except EndpointConnectionError as e:
+        except lazy_botocore().EndpointConnectionError as e:
             raise CohereError(str(e))
         except Exception as e:
             # TODO should be client error - distinct type from CohereError?
@@ -658,7 +646,7 @@ class Client:
         try:
             result = self._client.invoke_endpoint(**params)
             response = json.loads(result["Body"].read().decode())
-        except EndpointConnectionError as e:
+        except lazy_botocore().EndpointConnectionError as e:
             raise CohereError(str(e))
         except Exception as e:
             # TODO should be client error - distinct type from CohereError?
@@ -705,13 +693,13 @@ class Client:
 
         if role is None:
             try:
-                role = sage.get_execution_role()
+                role = lazy_sagemaker().get_execution_role()
             except ValueError:
                 print("Using default role: 'ServiceRoleSagemaker'.")
                 role = "ServiceRoleSagemaker"
 
         training_parameters.update({"name": name})
-        estimator = sage.algorithm.AlgorithmEstimator(
+        estimator = lazy_sagemaker().algorithm.AlgorithmEstimator(
             algorithm_arn=arn,
             role=role,
             instance_count=1,
@@ -734,7 +722,7 @@ class Client:
 
         current_filepath = f"{s3_models_dir}{job_name}/output/model.tar.gz"
 
-        s3_resource = boto3.resource("s3")
+        s3_resource = lazy_boto3().resource("s3")
 
         # Copy new model to root of output_model_dir
         bucket, old_key = parse_s3_url(current_filepath)
@@ -774,14 +762,14 @@ class Client:
 
         if role is None:
             try:
-                role = sage.get_execution_role()
+                role = lazy_sagemaker().get_execution_role()
             except ValueError:
                 print("Using default role: 'ServiceRoleSagemaker'.")
                 role = "ServiceRoleSagemaker"
 
         export_parameters = {"name": name}
 
-        estimator = sage.algorithm.AlgorithmEstimator(
+        estimator = lazy_sagemaker().algorithm.AlgorithmEstimator(
             algorithm_arn=arn,
             role=role,
             instance_count=1,
@@ -800,7 +788,7 @@ class Client:
         job_name = estimator.latest_training_job.name
         current_filepath = f"{s3_output_dir}{job_name}/output/model.tar.gz"
 
-        s3_resource = boto3.resource("s3")
+        s3_resource = lazy_boto3().resource("s3")
 
         # Copy the exported TensorRT-LLM engine to the root of s3_output_dir
         bucket, old_key = parse_s3_url(current_filepath)
@@ -940,7 +928,7 @@ class Client:
             result = self._client.invoke_endpoint(**params)
             response = json.loads(result['Body'].read().decode())
             summary = Summary(response)
-        except EndpointConnectionError as e:
+        except lazy_botocore().EndpointConnectionError as e:
             raise CohereError(str(e))
         except Exception as e:
             # TODO should be client error - distinct type from CohereError?
