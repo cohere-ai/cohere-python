@@ -5,22 +5,14 @@ import typing
 
 import httpx
 from httpx import URL, SyncByteStream, ByteStream
-from tokenizers import Tokenizer  # type: ignore
 
 from . import GenerateStreamedResponse, Generation, \
     NonStreamedChatResponse, EmbedResponse, StreamedChatResponse, RerankResponse, ApiMeta, ApiMetaTokens, \
     ApiMetaBilledUnits
 from .client import Client, ClientEnvironment
 from .core import construct_type
+from .manually_maintained.lazy_aws_deps import lazy_boto3, lazy_botocore
 
-
-try:
-    import boto3  # type: ignore
-    from botocore.auth import SigV4Auth  # type: ignore
-    from botocore.awsrequest import AWSRequest  # type: ignore
-    AWS_DEPS_AVAILABLE = True
-except ImportError:
-    AWS_DEPS_AVAILABLE = False
 
 class AwsClient(Client):
     def __init__(
@@ -33,8 +25,6 @@ class AwsClient(Client):
             timeout: typing.Optional[float] = None,
             service: typing.Union[typing.Literal["bedrock"], typing.Literal["sagemaker"]],
     ):
-        if not AWS_DEPS_AVAILABLE:
-            raise ImportError("AWS dependencies not available. Please install boto3 and botocore.")
         Client.__init__(
             self,
             base_url="https://api.cohere.com",  # this url is unused for BedrockClient
@@ -183,14 +173,14 @@ def map_request_to_bedrock(
         aws_session_token: typing.Optional[str] = None,
         aws_region: typing.Optional[str] = None,
 ) -> EventHook:
-    session = boto3.Session(
+    session = lazy_boto3().Session(
         region_name=aws_region,
         aws_access_key_id=aws_access_key,
         aws_secret_access_key=aws_secret_key,
         aws_session_token=aws_session_token,
     )
     credentials = session.get_credentials()
-    signer = SigV4Auth(credentials, service, session.region_name)
+    signer = lazy_botocore().auth.SigV4Auth(credentials, service, session.region_name)
 
     def _event_hook(request: httpx.Request) -> None:
         headers = request.headers.copy()
@@ -220,7 +210,7 @@ def map_request_to_bedrock(
         request._content = new_body
         headers["content-length"] = str(len(new_body))
 
-        aws_request = AWSRequest(
+        aws_request = lazy_botocore().awsrequest.AWSRequest(
             method=request.method,
             url=url,
             headers=headers,
