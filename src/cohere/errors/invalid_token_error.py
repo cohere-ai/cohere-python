@@ -4,6 +4,6 @@ from ..core.api_error import ApiError
 import typing
 
 
-class NotImplementedError(ApiError):
+class InvalidTokenError(ApiError):
     def __init__(self, body: typing.Optional[typing.Any]):
-        super().__init__(status_code=501, body=body)
+        super().__init__(status_code=498, body=body)
