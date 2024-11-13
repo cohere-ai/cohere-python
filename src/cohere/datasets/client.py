@@ -13,17 +13,13 @@ from ..errors.unauthorized_error import UnauthorizedError
 from ..errors.forbidden_error import ForbiddenError
 from ..errors.not_found_error import NotFoundError
 from ..errors.unprocessable_entity_error import UnprocessableEntityError
-from ..types.unprocessable_entity_error_body import UnprocessableEntityErrorBody
 from ..errors.too_many_requests_error import TooManyRequestsError
-from ..types.too_many_requests_error_body import TooManyRequestsErrorBody
+from ..errors.invalid_token_error import InvalidTokenError
 from ..errors.client_closed_request_error import ClientClosedRequestError
-from ..types.client_closed_request_error_body import ClientClosedRequestErrorBody
 from ..errors.internal_server_error import InternalServerError
 from ..errors.not_implemented_error import NotImplementedError
-from ..types.not_implemented_error_body import NotImplementedErrorBody
 from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.gateway_timeout_error import GatewayTimeoutError
-from ..types.gateway_timeout_error_body import GatewayTimeoutErrorBody
 from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
 from ..types.dataset_type import DatasetType
@@ -159,9 +155,9 @@ class DatasetsClient:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -169,9 +165,19 @@ class DatasetsClient:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -179,9 +185,9 @@ class DatasetsClient:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -199,9 +205,9 @@ class DatasetsClient:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -219,9 +225,9 @@ class DatasetsClient:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -380,9 +386,9 @@ class DatasetsClient:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -390,9 +396,19 @@ class DatasetsClient:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -400,9 +416,9 @@ class DatasetsClient:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -420,9 +436,9 @@ class DatasetsClient:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -440,9 +456,9 @@ class DatasetsClient:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -533,9 +549,9 @@ class DatasetsClient:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -543,9 +559,19 @@ class DatasetsClient:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -553,9 +579,9 @@ class DatasetsClient:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -573,9 +599,9 @@ class DatasetsClient:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -593,9 +619,9 @@ class DatasetsClient:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -690,9 +716,9 @@ class DatasetsClient:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -700,9 +726,19 @@ class DatasetsClient:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -710,9 +746,9 @@ class DatasetsClient:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -730,9 +766,9 @@ class DatasetsClient:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -750,9 +786,9 @@ class DatasetsClient:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -849,9 +885,9 @@ class DatasetsClient:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -859,9 +895,19 @@ class DatasetsClient:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -869,9 +915,9 @@ class DatasetsClient:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -889,9 +935,9 @@ class DatasetsClient:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -909,9 +955,9 @@ class DatasetsClient:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1051,9 +1097,9 @@ class AsyncDatasetsClient:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1061,9 +1107,19 @@ class AsyncDatasetsClient:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1071,9 +1127,9 @@ class AsyncDatasetsClient:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1091,9 +1147,9 @@ class AsyncDatasetsClient:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1111,9 +1167,9 @@ class AsyncDatasetsClient:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1280,9 +1336,9 @@ class AsyncDatasetsClient:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1290,9 +1346,19 @@ class AsyncDatasetsClient:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1300,9 +1366,9 @@ class AsyncDatasetsClient:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1320,9 +1386,9 @@ class AsyncDatasetsClient:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1340,9 +1406,9 @@ class AsyncDatasetsClient:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1441,9 +1507,9 @@ class AsyncDatasetsClient:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1451,9 +1517,19 @@ class AsyncDatasetsClient:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1461,9 +1537,9 @@ class AsyncDatasetsClient:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1481,9 +1557,9 @@ class AsyncDatasetsClient:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1501,9 +1577,9 @@ class AsyncDatasetsClient:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1606,9 +1682,9 @@ class AsyncDatasetsClient:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1616,9 +1692,19 @@ class AsyncDatasetsClient:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1626,9 +1712,9 @@ class AsyncDatasetsClient:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1646,9 +1732,9 @@ class AsyncDatasetsClient:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1666,9 +1752,9 @@ class AsyncDatasetsClient:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1773,9 +1859,9 @@ class AsyncDatasetsClient:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1783,9 +1869,19 @@ class AsyncDatasetsClient:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1793,9 +1889,9 @@ class AsyncDatasetsClient:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1813,9 +1909,9 @@ class AsyncDatasetsClient:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1833,9 +1929,9 @@ class AsyncDatasetsClient:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )

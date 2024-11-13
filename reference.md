@@ -11,7 +11,8 @@
 <dl>
 <dd>
 
-Generates a text response to a user message.
+Generates a streamed text response to a user message.
+
 To learn how to use the Chat API and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
 </dd>
 </dl>
@@ -27,89 +28,17 @@ To learn how to use the Chat API and RAG follow our [Text Generation guides](htt
 <dd>
 
 ```python
-from cohere import (
-    ChatbotMessage,
-    ChatConnector,
-    ChatStreamRequestConnectorsSearchOptions,
-    Client,
-    TextResponseFormat,
-    Tool,
-    ToolCall,
-    ToolParameterDefinitionsValue,
-    ToolResult,
-)
+from cohere import Client, ToolMessage
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
     token="YOUR_TOKEN",
 )
 response = client.chat_stream(
-    message="string",
-    model="string",
-    preamble="string",
-    chat_history=[
-        ChatbotMessage(
-            message="string",
-            tool_calls=[
-                ToolCall(
-                    name="string",
-                    parameters={"string": {"key": "value"}},
-                )
-            ],
-        )
-    ],
-    conversation_id="string",
+    message="Can you give me a global market overview of solar panels?",
+    chat_history=[ToolMessage(), ToolMessage()],
     prompt_truncation="OFF",
-    connectors=[
-        ChatConnector(
-            id="string",
-            user_access_token="string",
-            continue_on_failure=True,
-            options={"string": {"key": "value"}},
-        )
-    ],
-    search_queries_only=True,
-    documents=[{"string": {"key": "value"}}],
-    citation_quality="fast",
-    temperature=1.1,
-    max_tokens=1,
-    max_input_tokens=1,
-    k=1,
-    p=1.1,
-    seed=1,
-    stop_sequences=["string"],
-    connectors_search_options=ChatStreamRequestConnectorsSearchOptions(
-        seed=1,
-    ),
-    frequency_penalty=1.1,
-    presence_penalty=1.1,
-    raw_prompting=True,
-    return_prompt=True,
-    tools=[
-        Tool(
-            name="string",
-            description="string",
-            parameter_definitions={
-                "string": ToolParameterDefinitionsValue(
-                    description="string",
-                    type="string",
-                    required=True,
-                )
-            },
-        )
-    ],
-    tool_results=[
-        ToolResult(
-            call=ToolCall(
-                name="string",
-                parameters={"string": {"key": "value"}},
-            ),
-            outputs=[{"string": {"key": "value"}}],
-        )
-    ],
-    force_single_step=True,
-    response_format=TextResponseFormat(),
-    safety_mode="CONTEXTUAL",
+    temperature=0.3,
 )
 for chunk in response:
     yield chunk
@@ -1080,22 +1009,7 @@ client = Client(
     token="YOUR_TOKEN",
 )
 response = client.generate_stream(
-    prompt="string",
-    model="string",
-    num_generations=1,
-    max_tokens=1,
-    truncate="NONE",
-    temperature=1.1,
-    seed=1,
-    preset="string",
-    end_sequences=["string"],
-    stop_sequences=["string"],
-    k=1,
-    p=1.1,
-    frequency_penalty=1.1,
-    presence_penalty=1.1,
-    return_likelihoods="GENERATION",
-    raw_prompting=True,
+    prompt="Please explain to me how LLMs work",
 )
 for chunk in response:
     yield chunk
@@ -2307,286 +2221,6 @@ client.check_api_key()
 </details>
 
 ## V2
-<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">chat_stream</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Generates a text response to a user message and streams it down, token by token. To learn how to use the Chat API with streaming follow our [Text Generation guides](https://docs.cohere.com/v2/docs/chat-api).
-
-Follow the [Migration Guide](https://docs.cohere.com/v2/docs/migrating-v1-to-v2) for instructions on moving from API v1 to API v2.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from cohere import (
-    CitationOptions,
-    Client,
-    TextResponseFormatV2,
-    ToolV2,
-    ToolV2Function,
-    UserChatMessageV2,
-)
-
-client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
-)
-response = client.v2.chat_stream(
-    model="string",
-    messages=[
-        UserChatMessageV2(
-            content="string",
-        )
-    ],
-    tools=[
-        ToolV2(
-            function=ToolV2Function(
-                name="string",
-                description="string",
-                parameters={"string": {"key": "value"}},
-            ),
-        )
-    ],
-    documents=["string"],
-    citation_options=CitationOptions(
-        mode="FAST",
-    ),
-    response_format=TextResponseFormatV2(),
-    safety_mode="CONTEXTUAL",
-    max_tokens=1,
-    stop_sequences=["string"],
-    temperature=1.1,
-    seed=1,
-    frequency_penalty=1.1,
-    presence_penalty=1.1,
-    k=1.1,
-    p=1.1,
-    return_prompt=True,
-)
-for chunk in response:
-    yield chunk
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**model:** `str` — The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**messages:** `ChatMessages` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**tools:** `typing.Optional[typing.Sequence[ToolV2]]` 
-
-A list of available tools (functions) that the model may suggest invoking before producing a text response.
-
-When `tools` is passed (without `tool_results`), the `text` content in the response will be empty and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**documents:** `typing.Optional[typing.Sequence[V2ChatStreamRequestDocumentsItem]]` — A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**citation_options:** `typing.Optional[CitationOptions]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**response_format:** `typing.Optional[ResponseFormatV2]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**safety_mode:** `typing.Optional[V2ChatStreamRequestSafetyMode]` 
-
-Used to select the [safety instruction](https://docs.cohere.com/v2/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
-When `OFF` is specified, the safety instruction will be omitted.
-
-Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
-
-**Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/v2/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/v2/docs/command-r-plus#august-2024-release) and newer.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**max_tokens:** `typing.Optional[int]` 
-
-The maximum number of tokens the model will generate as part of the response.
-
-**Note**: Setting a low value may result in incomplete generations.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**stop_sequences:** `typing.Optional[typing.Sequence[str]]` — A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**temperature:** `typing.Optional[float]` 
-
-Defaults to `0.3`.
-
-A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
-
-Randomness can be further maximized by increasing the  value of the `p` parameter.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**seed:** `typing.Optional[int]` 
-
-If specified, the backend will make a best effort to sample tokens
-deterministically, such that repeated requests with the same
-seed and parameters should return the same result. However,
-determinism cannot be totally guaranteed.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**frequency_penalty:** `typing.Optional[float]` 
-
-Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
-Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**presence_penalty:** `typing.Optional[float]` 
-
-Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
-Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**k:** `typing.Optional[float]` 
-
-Ensures only the top `k` most likely tokens are considered for generation at each step.
-Defaults to `0`, min value of `0`, max value of `500`.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**p:** `typing.Optional[float]` 
-
-Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
-Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**return_prompt:** `typing.Optional[bool]` — Whether to return the prompt in the response.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
 <details><summary><code>client.v2.<a href="src/cohere/v2/client.py">chat</a>(...)</code></summary>
 <dl>
 <dd>
