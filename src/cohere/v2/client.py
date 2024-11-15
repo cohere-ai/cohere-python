@@ -70,6 +70,7 @@ class V2Client:
         k: typing.Optional[float] = OMIT,
         p: typing.Optional[float] = OMIT,
         return_prompt: typing.Optional[bool] = OMIT,
+        logprobs: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[StreamedChatResponseV2]:
         """
@@ -143,7 +144,7 @@ class V2Client:
 
 
         k : typing.Optional[float]
-            Ensures only the top `k` most likely tokens are considered for generation at each step.
+            Ensures that only the top `k` most likely tokens are considered for generation at each step. When `k` is set to `0`, k-sampling is disabled.
             Defaults to `0`, min value of `0`, max value of `500`.
 
 
@@ -154,6 +155,10 @@ class V2Client:
 
         return_prompt : typing.Optional[bool]
             Whether to return the prompt in the response.
+
+        logprobs : typing.Optional[bool]
+            Whether to return the log probabilities of the generated tokens. Defaults to false.
+
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -209,6 +214,7 @@ class V2Client:
             k=1.1,
             p=1.1,
             return_prompt=True,
+            logprobs=True,
         )
         for chunk in response:
             yield chunk
@@ -243,6 +249,7 @@ class V2Client:
                 "k": k,
                 "p": p,
                 "return_prompt": return_prompt,
+                "logprobs": logprobs,
                 "stream": True,
             },
             request_options=request_options,
@@ -398,6 +405,7 @@ class V2Client:
         k: typing.Optional[float] = OMIT,
         p: typing.Optional[float] = OMIT,
         return_prompt: typing.Optional[bool] = OMIT,
+        logprobs: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ChatResponse:
         """
@@ -471,7 +479,7 @@ class V2Client:
 
 
         k : typing.Optional[float]
-            Ensures only the top `k` most likely tokens are considered for generation at each step.
+            Ensures that only the top `k` most likely tokens are considered for generation at each step. When `k` is set to `0`, k-sampling is disabled.
             Defaults to `0`, min value of `0`, max value of `500`.
 
 
@@ -482,6 +490,10 @@ class V2Client:
 
         return_prompt : typing.Optional[bool]
             Whether to return the prompt in the response.
+
+        logprobs : typing.Optional[bool]
+            Whether to return the log probabilities of the generated tokens. Defaults to false.
+
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -539,6 +551,7 @@ class V2Client:
                 "k": k,
                 "p": p,
                 "return_prompt": return_prompt,
+                "logprobs": logprobs,
                 "stream": False,
             },
             request_options=request_options,
@@ -684,14 +697,14 @@ class V2Client:
 
         Embeddings can be used to create text classifiers as well as empower semantic search. To learn more about embeddings, see the embedding page.
 
-        If you want to learn more how to use the embedding model, have a look at the [Semantic Search Guide](/docs/semantic-search).
+        If you want to learn more how to use the embedding model, have a look at the [Semantic Search Guide](https://docs.cohere.com/docs/semantic-search).
 
         Parameters
         ----------
         model : str
             Defaults to embed-english-v2.0
 
-            The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
+            The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](https://docs.cohere.com/docs/training-custom-models) can also be supplied with their full ID.
 
             Available models and corresponding embedding dimensions:
 
@@ -1121,6 +1134,7 @@ class AsyncV2Client:
         k: typing.Optional[float] = OMIT,
         p: typing.Optional[float] = OMIT,
         return_prompt: typing.Optional[bool] = OMIT,
+        logprobs: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[StreamedChatResponseV2]:
         """
@@ -1194,7 +1208,7 @@ class AsyncV2Client:
 
 
         k : typing.Optional[float]
-            Ensures only the top `k` most likely tokens are considered for generation at each step.
+            Ensures that only the top `k` most likely tokens are considered for generation at each step. When `k` is set to `0`, k-sampling is disabled.
             Defaults to `0`, min value of `0`, max value of `500`.
 
 
@@ -1205,6 +1219,10 @@ class AsyncV2Client:
 
         return_prompt : typing.Optional[bool]
             Whether to return the prompt in the response.
+
+        logprobs : typing.Optional[bool]
+            Whether to return the log probabilities of the generated tokens. Defaults to false.
+
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1265,6 +1283,7 @@ class AsyncV2Client:
                 k=1.1,
                 p=1.1,
                 return_prompt=True,
+                logprobs=True,
             )
             async for chunk in response:
                 yield chunk
@@ -1302,6 +1321,7 @@ class AsyncV2Client:
                 "k": k,
                 "p": p,
                 "return_prompt": return_prompt,
+                "logprobs": logprobs,
                 "stream": True,
             },
             request_options=request_options,
@@ -1457,6 +1477,7 @@ class AsyncV2Client:
         k: typing.Optional[float] = OMIT,
         p: typing.Optional[float] = OMIT,
         return_prompt: typing.Optional[bool] = OMIT,
+        logprobs: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ChatResponse:
         """
@@ -1530,7 +1551,7 @@ class AsyncV2Client:
 
 
         k : typing.Optional[float]
-            Ensures only the top `k` most likely tokens are considered for generation at each step.
+            Ensures that only the top `k` most likely tokens are considered for generation at each step. When `k` is set to `0`, k-sampling is disabled.
             Defaults to `0`, min value of `0`, max value of `500`.
 
 
@@ -1541,6 +1562,10 @@ class AsyncV2Client:
 
         return_prompt : typing.Optional[bool]
             Whether to return the prompt in the response.
+
+        logprobs : typing.Optional[bool]
+            Whether to return the log probabilities of the generated tokens. Defaults to false.
+
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1606,6 +1631,7 @@ class AsyncV2Client:
                 "k": k,
                 "p": p,
                 "return_prompt": return_prompt,
+                "logprobs": logprobs,
                 "stream": False,
             },
             request_options=request_options,
@@ -1751,14 +1777,14 @@ class AsyncV2Client:
 
         Embeddings can be used to create text classifiers as well as empower semantic search. To learn more about embeddings, see the embedding page.
 
-        If you want to learn more how to use the embedding model, have a look at the [Semantic Search Guide](/docs/semantic-search).
+        If you want to learn more how to use the embedding model, have a look at the [Semantic Search Guide](https://docs.cohere.com/docs/semantic-search).
 
         Parameters
         ----------
         model : str
             Defaults to embed-english-v2.0
 
-            The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
+            The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](https://docs.cohere.com/docs/training-custom-models) can also be supplied with their full ID.
 
             Available models and corresponding embedding dimensions:
 
