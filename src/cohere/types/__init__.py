@@ -149,6 +149,7 @@ from .label_metric import LabelMetric
 from .list_connectors_response import ListConnectorsResponse
 from .list_embed_job_response import ListEmbedJobResponse
 from .list_models_response import ListModelsResponse
+from .logprob_item import LogprobItem
 from .message import ChatbotMessage, Message, SystemMessage, ToolMessage, UserMessage
 from .metrics import Metrics
 from .metrics_embed_data import MetricsEmbedData
@@ -371,6 +372,7 @@ __all__ = [
     "ListConnectorsResponse",
     "ListEmbedJobResponse",
     "ListModelsResponse",
+    "LogprobItem",
     "Message",
     "MessageEndStreamedChatResponseV2",
     "MessageStartStreamedChatResponseV2",
