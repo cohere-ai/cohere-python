@@ -6,6 +6,7 @@ from .chat_finish_reason import ChatFinishReason
 import typing
 from .assistant_message_response import AssistantMessageResponse
 from .usage import Usage
+from .logprob_item import LogprobItem
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
 
 
@@ -21,8 +22,9 @@ class ChatResponse(UncheckedBaseModel):
     The prompt that was used. Only present when `return_prompt` in the request is set to true.
     """
 
-    message: typing.Optional[AssistantMessageResponse] = None
+    message: AssistantMessageResponse
     usage: typing.Optional[Usage] = None
+    logprobs: typing.Optional[typing.List[LogprobItem]] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2

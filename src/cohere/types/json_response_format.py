@@ -13,7 +13,7 @@ class JsonResponseFormat(UncheckedBaseModel):
         typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]], FieldMetadata(alias="schema")
     ] = pydantic.Field(default=None)
     """
-    A JSON schema object that the output will adhere to. There are some restrictions we have on the schema, refer to [our guide](/docs/structured-outputs-json#schema-constraints) for more information.
+    A JSON schema object that the output will adhere to. There are some restrictions we have on the schema, refer to [our guide](https://docs.cohere.com/docs/structured-outputs-json#schema-constraints) for more information.
     Example (required name and age object):
     
     ```json
