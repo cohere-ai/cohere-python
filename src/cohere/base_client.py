@@ -416,12 +416,12 @@ class BaseCohere:
         response_format : typing.Optional[ResponseFormat]
 
         safety_mode : typing.Optional[ChatStreamRequestSafetyMode]
-            Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+            Used to select the [safety instruction](https://docs.cohere.com/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
             When `NONE` is specified, the safety instruction will be omitted.
 
             Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
-            **Note**: This parameter is only compatible with models [Command R 08-2024](/docs/command-r#august-2024-release), [Command R+ 08-2024](/docs/command-r-plus#august-2024-release) and newer.
+            **Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/docs/command-r-plus#august-2024-release) and newer.
 
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
@@ -967,12 +967,12 @@ class BaseCohere:
         response_format : typing.Optional[ResponseFormat]
 
         safety_mode : typing.Optional[ChatRequestSafetyMode]
-            Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+            Used to select the [safety instruction](https://docs.cohere.com/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
             When `NONE` is specified, the safety instruction will be omitted.
 
             Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
-            **Note**: This parameter is only compatible with models [Command R 08-2024](/docs/command-r#august-2024-release), [Command R+ 08-2024](/docs/command-r-plus#august-2024-release) and newer.
+            **Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/docs/command-r-plus#august-2024-release) and newer.
 
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
@@ -1195,7 +1195,7 @@ class BaseCohere:
     ) -> typing.Iterator[GenerateStreamedResponse]:
         """
         <Warning>
-        This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+        This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](https://docs.cohere.com/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
         </Warning>
         Generates realistic text conditioned on a given input.
 
@@ -1208,7 +1208,7 @@ class BaseCohere:
 
         model : typing.Optional[str]
             The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
-            Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
+            Smaller, "light" models are faster, while larger models will perform better. [Custom models](https://docs.cohere.com/docs/training-custom-models) can also be supplied with their full ID.
 
         num_generations : typing.Optional[int]
             The maximum number of generations that will be returned. Defaults to `1`, min value of `1`, max value of `5`.
@@ -1504,7 +1504,7 @@ class BaseCohere:
     ) -> Generation:
         """
         <Warning>
-        This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+        This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](https://docs.cohere.com/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
         </Warning>
         Generates realistic text conditioned on a given input.
 
@@ -1517,7 +1517,7 @@ class BaseCohere:
 
         model : typing.Optional[str]
             The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
-            Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
+            Smaller, "light" models are faster, while larger models will perform better. [Custom models](https://docs.cohere.com/docs/training-custom-models) can also be supplied with their full ID.
 
         num_generations : typing.Optional[int]
             The maximum number of generations that will be returned. Defaults to `1`, min value of `1`, max value of `5`.
@@ -1781,7 +1781,7 @@ class BaseCohere:
 
         Embeddings can be used to create classifiers as well as empower semantic search. To learn more about embeddings, see the embedding page.
 
-        If you want to learn more how to use the embedding model, have a look at the [Semantic Search Guide](/docs/semantic-search).
+        If you want to learn more how to use the embedding model, have a look at the [Semantic Search Guide](https://docs.cohere.com/docs/semantic-search).
 
         Parameters
         ----------
@@ -1796,7 +1796,7 @@ class BaseCohere:
         model : typing.Optional[str]
             Defaults to embed-english-v2.0
 
-            The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
+            The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](https://docs.cohere.com/docs/training-custom-models) can also be supplied with their full ID.
 
             Available models and corresponding embedding dimensions:
 
@@ -2398,7 +2398,7 @@ class BaseCohere:
     ) -> SummarizeResponse:
         """
         <Warning>
-        This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+        This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](https://docs.cohere.com/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
         </Warning>
         Generates a summary in English for a given text.
 
@@ -3411,12 +3411,12 @@ class AsyncBaseCohere:
         response_format : typing.Optional[ResponseFormat]
 
         safety_mode : typing.Optional[ChatStreamRequestSafetyMode]
-            Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+            Used to select the [safety instruction](https://docs.cohere.com/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
             When `NONE` is specified, the safety instruction will be omitted.
 
             Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
-            **Note**: This parameter is only compatible with models [Command R 08-2024](/docs/command-r#august-2024-release), [Command R+ 08-2024](/docs/command-r-plus#august-2024-release) and newer.
+            **Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/docs/command-r-plus#august-2024-release) and newer.
 
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
@@ -3970,12 +3970,12 @@ class AsyncBaseCohere:
         response_format : typing.Optional[ResponseFormat]
 
         safety_mode : typing.Optional[ChatRequestSafetyMode]
-            Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+            Used to select the [safety instruction](https://docs.cohere.com/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
             When `NONE` is specified, the safety instruction will be omitted.
 
             Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
-            **Note**: This parameter is only compatible with models [Command R 08-2024](/docs/command-r#august-2024-release), [Command R+ 08-2024](/docs/command-r-plus#august-2024-release) and newer.
+            **Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/docs/command-r-plus#august-2024-release) and newer.
 
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
@@ -4206,7 +4206,7 @@ class AsyncBaseCohere:
     ) -> typing.AsyncIterator[GenerateStreamedResponse]:
         """
         <Warning>
-        This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+        This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](https://docs.cohere.com/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
         </Warning>
         Generates realistic text conditioned on a given input.
 
@@ -4219,7 +4219,7 @@ class AsyncBaseCohere:
 
         model : typing.Optional[str]
             The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
-            Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
+            Smaller, "light" models are faster, while larger models will perform better. [Custom models](https://docs.cohere.com/docs/training-custom-models) can also be supplied with their full ID.
 
         num_generations : typing.Optional[int]
             The maximum number of generations that will be returned. Defaults to `1`, min value of `1`, max value of `5`.
@@ -4523,7 +4523,7 @@ class AsyncBaseCohere:
     ) -> Generation:
         """
         <Warning>
-        This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+        This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](https://docs.cohere.com/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
         </Warning>
         Generates realistic text conditioned on a given input.
 
@@ -4536,7 +4536,7 @@ class AsyncBaseCohere:
 
         model : typing.Optional[str]
             The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
-            Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
+            Smaller, "light" models are faster, while larger models will perform better. [Custom models](https://docs.cohere.com/docs/training-custom-models) can also be supplied with their full ID.
 
         num_generations : typing.Optional[int]
             The maximum number of generations that will be returned. Defaults to `1`, min value of `1`, max value of `5`.
@@ -4808,7 +4808,7 @@ class AsyncBaseCohere:
 
         Embeddings can be used to create classifiers as well as empower semantic search. To learn more about embeddings, see the embedding page.
 
-        If you want to learn more how to use the embedding model, have a look at the [Semantic Search Guide](/docs/semantic-search).
+        If you want to learn more how to use the embedding model, have a look at the [Semantic Search Guide](https://docs.cohere.com/docs/semantic-search).
 
         Parameters
         ----------
@@ -4823,7 +4823,7 @@ class AsyncBaseCohere:
         model : typing.Optional[str]
             Defaults to embed-english-v2.0
 
-            The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
+            The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](https://docs.cohere.com/docs/training-custom-models) can also be supplied with their full ID.
 
             Available models and corresponding embedding dimensions:
 
@@ -5449,7 +5449,7 @@ class AsyncBaseCohere:
     ) -> SummarizeResponse:
         """
         <Warning>
-        This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+        This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](https://docs.cohere.com/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
         </Warning>
         Generates a summary in English for a given text.
 

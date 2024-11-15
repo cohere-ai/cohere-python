@@ -8,6 +8,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2
 import pydantic
 from .chat_content_start_event_delta import ChatContentStartEventDelta
 from .chat_content_delta_event_delta import ChatContentDeltaEventDelta
+from .logprob_item import LogprobItem
 from .chat_tool_plan_delta_event_delta import ChatToolPlanDeltaEventDelta
 from .chat_tool_call_start_event_delta import ChatToolCallStartEventDelta
 from .chat_tool_call_delta_event_delta import ChatToolCallDeltaEventDelta
@@ -61,6 +62,7 @@ class ContentDeltaStreamedChatResponseV2(UncheckedBaseModel):
     type: typing.Literal["content-delta"] = "content-delta"
     index: typing.Optional[int] = None
     delta: typing.Optional[ChatContentDeltaEventDelta] = None
+    logprobs: typing.Optional[LogprobItem] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2

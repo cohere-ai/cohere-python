@@ -530,12 +530,12 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 
 **safety_mode:** `typing.Optional[ChatStreamRequestSafetyMode]` 
 
-Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+Used to select the [safety instruction](https://docs.cohere.com/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
 When `NONE` is specified, the safety instruction will be omitted.
 
 Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
-**Note**: This parameter is only compatible with models [Command R 08-2024](/docs/command-r#august-2024-release), [Command R+ 08-2024](/docs/command-r-plus#august-2024-release) and newer.
+**Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/docs/command-r-plus#august-2024-release) and newer.
 
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
@@ -1015,12 +1015,12 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 
 **safety_mode:** `typing.Optional[ChatRequestSafetyMode]` 
 
-Used to select the [safety instruction](/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
+Used to select the [safety instruction](https://docs.cohere.com/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
 When `NONE` is specified, the safety instruction will be omitted.
 
 Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
-**Note**: This parameter is only compatible with models [Command R 08-2024](/docs/command-r#august-2024-release), [Command R+ 08-2024](/docs/command-r-plus#august-2024-release) and newer.
+**Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/docs/command-r-plus#august-2024-release) and newer.
 
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
@@ -1056,7 +1056,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dd>
 
 <Warning>
-This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](https://docs.cohere.com/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
 </Warning>
 Generates realistic text conditioned on a given input.
 </dd>
@@ -1129,7 +1129,7 @@ Note: The prompt will be pre-processed and modified before reaching the model.
 **model:** `typing.Optional[str]` 
 
 The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
-Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
+Smaller, "light" models are faster, while larger models will perform better. [Custom models](https://docs.cohere.com/docs/training-custom-models) can also be supplied with their full ID.
     
 </dd>
 </dl>
@@ -1329,7 +1329,7 @@ If `ALL` is selected, the token likelihoods will be provided both for the prompt
 <dd>
 
 <Warning>
-This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](https://docs.cohere.com/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
 </Warning>
 Generates realistic text conditioned on a given input.
 </dd>
@@ -1385,7 +1385,7 @@ Note: The prompt will be pre-processed and modified before reaching the model.
 **model:** `typing.Optional[str]` 
 
 The identifier of the model to generate with. Currently available models are `command` (default), `command-nightly` (experimental), `command-light`, and `command-light-nightly` (experimental).
-Smaller, "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
+Smaller, "light" models are faster, while larger models will perform better. [Custom models](https://docs.cohere.com/docs/training-custom-models) can also be supplied with their full ID.
     
 </dd>
 </dl>
@@ -1588,7 +1588,7 @@ This endpoint returns text and image embeddings. An embedding is a list of float
 
 Embeddings can be used to create classifiers as well as empower semantic search. To learn more about embeddings, see the embedding page.
 
-If you want to learn more how to use the embedding model, have a look at the [Semantic Search Guide](/docs/semantic-search).
+If you want to learn more how to use the embedding model, have a look at the [Semantic Search Guide](https://docs.cohere.com/docs/semantic-search).
 </dd>
 </dl>
 </dd>
@@ -1649,7 +1649,7 @@ The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/We
 
 Defaults to embed-english-v2.0
 
-The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
+The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](https://docs.cohere.com/docs/training-custom-models) can also be supplied with their full ID.
 
 Available models and corresponding embedding dimensions:
 
@@ -1976,7 +1976,7 @@ If `NONE` is selected, when the input exceeds the maximum input token length an 
 <dd>
 
 <Warning>
-This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
+This API is marked as "Legacy" and is no longer maintained. Follow the [migration guide](https://docs.cohere.com/docs/migrating-from-cogenerate-to-cochat) to start using the Chat API.
 </Warning>
 Generates a summary in English for a given text.
 </dd>
@@ -2380,6 +2380,7 @@ response = client.v2.chat_stream(
     k=1.1,
     p=1.1,
     return_prompt=True,
+    logprobs=True,
 )
 for chunk in response:
     yield chunk
@@ -2545,7 +2546,7 @@ Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty
 
 **k:** `typing.Optional[float]` 
 
-Ensures only the top `k` most likely tokens are considered for generation at each step.
+Ensures that only the top `k` most likely tokens are considered for generation at each step. When `k` is set to `0`, k-sampling is disabled. 
 Defaults to `0`, min value of `0`, max value of `500`.
 
     
@@ -2568,6 +2569,15 @@ Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 <dd>
 
 **return_prompt:** `typing.Optional[bool]` — Whether to return the prompt in the response.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**logprobs:** `typing.Optional[bool]` — Whether to return the log probabilities of the generated tokens. Defaults to false.
+
     
 </dd>
 </dl>
@@ -2793,7 +2803,7 @@ Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty
 
 **k:** `typing.Optional[float]` 
 
-Ensures only the top `k` most likely tokens are considered for generation at each step.
+Ensures that only the top `k` most likely tokens are considered for generation at each step. When `k` is set to `0`, k-sampling is disabled. 
 Defaults to `0`, min value of `0`, max value of `500`.
 
     
@@ -2816,6 +2826,15 @@ Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 <dd>
 
 **return_prompt:** `typing.Optional[bool]` — Whether to return the prompt in the response.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**logprobs:** `typing.Optional[bool]` — Whether to return the log probabilities of the generated tokens. Defaults to false.
+
     
 </dd>
 </dl>
@@ -2851,7 +2870,7 @@ This endpoint returns text embeddings. An embedding is a list of floating point 
 
 Embeddings can be used to create text classifiers as well as empower semantic search. To learn more about embeddings, see the embedding page.
 
-If you want to learn more how to use the embedding model, have a look at the [Semantic Search Guide](/docs/semantic-search).
+If you want to learn more how to use the embedding model, have a look at the [Semantic Search Guide](https://docs.cohere.com/docs/semantic-search).
 </dd>
 </dl>
 </dd>
@@ -2896,7 +2915,7 @@ client.v2.embed(
 
 Defaults to embed-english-v2.0
 
-The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](/docs/training-custom-models) can also be supplied with their full ID.
+The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](https://docs.cohere.com/docs/training-custom-models) can also be supplied with their full ID.
 
 Available models and corresponding embedding dimensions:
 
