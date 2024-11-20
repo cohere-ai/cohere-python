@@ -3,14 +3,12 @@ import os
 import tarfile
 import tempfile
 import time
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Union
 
 from .classification import Classification, Classifications
 from .embeddings import Embeddings
 from .error import CohereError
-from .generation import (Generation, Generations,
-                                         StreamingGenerations,
-                                         TokenLikelihood)
+from .generation import Generations, StreamingGenerations
 from .chat import Chat, StreamingChat
 from .rerank import Reranking
 from .summary import Summary
@@ -777,12 +775,12 @@ class Client:
         s3_resource = lazy_boto3().resource("s3")
 
         # Copy new model to root of output_model_dir
-        bucket, old_key = parse_s3_url(current_filepath)
-        _, new_key = parse_s3_url(f"{s3_models_dir}{name}.tar.gz")
+        bucket, old_key = lazy_sagemaker().s3.parse_s3_url(current_filepath)
+        _, new_key = lazy_sagemaker().s3.parse_s3_url(f"{s3_models_dir}{name}.tar.gz")
         s3_resource.Object(bucket, new_key).copy(CopySource={"Bucket": bucket, "Key": old_key})
 
         # Delete old dir
-        bucket, old_short_key = parse_s3_url(s3_models_dir + job_name)
+        bucket, old_short_key = lazy_sagemaker().s3.parse_s3_url(s3_models_dir + job_name)
         s3_resource.Bucket(bucket).objects.filter(Prefix=old_short_key).delete()
 
     def export_finetune(
@@ -843,12 +841,12 @@ class Client:
         s3_resource = lazy_boto3().resource("s3")
 
         # Copy the exported TensorRT-LLM engine to the root of s3_output_dir
-        bucket, old_key = parse_s3_url(current_filepath)
-        _, new_key = parse_s3_url(f"{s3_output_dir}{name}.tar.gz")
+        bucket, old_key = lazy_sagemaker().s3.parse_s3_url(current_filepath)
+        _, new_key = lazy_sagemaker().s3.parse_s3_url(f"{s3_output_dir}{name}.tar.gz")
         s3_resource.Object(bucket, new_key).copy(CopySource={"Bucket": bucket, "Key": old_key})
 
         # Delete the old S3 directory
-        bucket, old_short_key = parse_s3_url(f"{s3_output_dir}{job_name}")
+        bucket, old_short_key = lazy_sagemaker().s3.parse_s3_url(f"{s3_output_dir}{job_name}")
         s3_resource.Bucket(bucket).objects.filter(Prefix=old_short_key).delete()
 
     def wait_for_finetune_job(self, job_id: str, timeout: int = 2*60*60) -> str:
