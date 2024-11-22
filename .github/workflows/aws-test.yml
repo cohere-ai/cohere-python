@@ -23,6 +23,6 @@ jobs:
         uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
         with:
           role-to-assume: arn:aws:iam::455073351313:role/deploy-sagemaker-endpoint-workflow
-          aws-region: ${{ matrix.region }}
+          aws-region: us-east-1
           role-session-name: ci_role_session
           output-credentials: true
