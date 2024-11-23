@@ -82,8 +82,11 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.exceptions import ConvergenceWarning
 import warnings
 
+from .manually_maintained.cache import ModelCache
+
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
+MODEL_CACHE = ModelCache()
 
 
 class BaseCohere:
@@ -2250,30 +2253,37 @@ class BaseCohere:
             inputs=["inputs"],
         )
         """
-        # TODO @coderham: Cache the LR model to speedup the classification process and save on API calls
-        example_embeds = self.embed(model=model, embedding_types=["float"], input_type="classification",
-                                    texts=[example.text for example in examples])
+        # We cache the LR model to speedup the classification process and save on API calls
+        model_cache_key = [(example.text, example.label) for example in examples]
+        cached_model = MODEL_CACHE.get(model_cache_key)
+        if cached_model is None:
+            example_embeds = self.embed(model=model, embedding_types=["float"], input_type="classification",
+                                        texts=[example.text for example in examples])
 
-        # in V2 client API the embeddings are not returned as a list but as EmbedByTypeResponseEmbeddings
-        if type(example_embeds.embeddings) is not list:
-            example_embedding_float = example_embeds.embeddings.float_
+            # in V2 client API the embeddings are not returned as a list but as EmbedByTypeResponseEmbeddings
+            if type(example_embeds.embeddings) is not list:
+                example_embedding_float = example_embeds.embeddings.float_
+            else:
+                example_embedding_float = example_embeds.embeddings
+
+            example_embeddings = np.zeros((len(examples), len(example_embedding_float[0])))
+            for i, embed in enumerate(example_embedding_float):
+                example_embeddings[i] = np.array(embed)
+            example_labels = np.array([example.label for example in examples])
+
+            convergence_warning = ""
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter("always", ConvergenceWarning)
+                clf = LogisticRegression(random_state=0).fit(example_embeddings, example_labels)
+                if any(issubclass(w_.category, ConvergenceWarning) for w_ in w):
+                    convergence_warning = str(w[-1].message)
+            
+            MODEL_CACHE.set(model_cache_key, clf)
+            if convergence_warning:
+                print(f"ConvergenceWarning: {convergence_warning}")
         else:
-            example_embedding_float = example_embeds.embeddings
+            clf = cached_model
 
-        example_embeddings = np.zeros((len(examples), len(example_embedding_float[0])))
-        for i, embed in enumerate(example_embedding_float):
-            example_embeddings[i] = np.array(embed)
-        example_labels = np.array([example.label for example in examples])
-
-        convergence_warning = ""
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always", ConvergenceWarning)
-            clf = LogisticRegression(random_state=0).fit(example_embeddings, example_labels)
-            if any(issubclass(w_.category, ConvergenceWarning) for w_ in w):
-                convergence_warning = str(w[-1].message)
-        if convergence_warning:
-            print(f"ConvergenceWarning: {convergence_warning}")
-    
         # Make predictions on the inputs
         input_embeds = self.embed(model=model, embedding_types=["float"], input_type="classification",
                                   texts=inputs)
