@@ -2365,6 +2365,7 @@ response = client.v2.chat_stream(
             ),
         )
     ],
+    strict_tools=True,
     documents=["string"],
     citation_options=CitationOptions(
         mode="FAST",
@@ -2381,6 +2382,7 @@ response = client.v2.chat_stream(
     p=1.1,
     return_prompt=True,
     logprobs=True,
+    stream=True,
 )
 for chunk in response:
     yield chunk
@@ -2399,184 +2401,11 @@ for chunk in response:
 <dl>
 <dd>
 
-**model:** `str` — The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
-    
-</dd>
-</dl>
+**strict_tools:** `typing.Optional[bool]` 
 
-<dl>
-<dd>
+When set to `true`, tool calls in the Assistant message will be forced to follow the tool definition strictly. Learn more in the [Strict Tools guide](https://docs.cohere.com/docs/structured-outputs-json#structured-outputs-tools).
 
-**messages:** `ChatMessages` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**tools:** `typing.Optional[typing.Sequence[ToolV2]]` 
-
-A list of available tools (functions) that the model may suggest invoking before producing a text response.
-
-When `tools` is passed (without `tool_results`), the `text` content in the response will be empty and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**documents:** `typing.Optional[typing.Sequence[V2ChatStreamRequestDocumentsItem]]` — A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**citation_options:** `typing.Optional[CitationOptions]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**response_format:** `typing.Optional[ResponseFormatV2]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**safety_mode:** `typing.Optional[V2ChatStreamRequestSafetyMode]` 
-
-Used to select the [safety instruction](https://docs.cohere.com/v2/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
-When `OFF` is specified, the safety instruction will be omitted.
-
-Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
-
-**Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/v2/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/v2/docs/command-r-plus#august-2024-release) and newer.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**max_tokens:** `typing.Optional[int]` 
-
-The maximum number of tokens the model will generate as part of the response.
-
-**Note**: Setting a low value may result in incomplete generations.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**stop_sequences:** `typing.Optional[typing.Sequence[str]]` — A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**temperature:** `typing.Optional[float]` 
-
-Defaults to `0.3`.
-
-A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
-
-Randomness can be further maximized by increasing the  value of the `p` parameter.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**seed:** `typing.Optional[int]` 
-
-If specified, the backend will make a best effort to sample tokens
-deterministically, such that repeated requests with the same
-seed and parameters should return the same result. However,
-determinism cannot be totally guaranteed.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**frequency_penalty:** `typing.Optional[float]` 
-
-Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
-Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**presence_penalty:** `typing.Optional[float]` 
-
-Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
-Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**k:** `typing.Optional[float]` 
-
-Ensures that only the top `k` most likely tokens are considered for generation at each step. When `k` is set to `0`, k-sampling is disabled. 
-Defaults to `0`, min value of `0`, max value of `500`.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**p:** `typing.Optional[float]` 
-
-Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
-Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**return_prompt:** `typing.Optional[bool]` — Whether to return the prompt in the response.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**logprobs:** `typing.Optional[bool]` — Whether to return the log probabilities of the generated tokens. Defaults to false.
+**Note**: The first few requests with a new set of tools will take longer to process.
 
     
 </dd>
@@ -2640,6 +2469,7 @@ client.v2.chat(
             content="messages",
         )
     ],
+    stream=False,
 )
 
 ```
@@ -2656,184 +2486,11 @@ client.v2.chat(
 <dl>
 <dd>
 
-**model:** `str` — The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
-    
-</dd>
-</dl>
+**strict_tools:** `typing.Optional[bool]` 
 
-<dl>
-<dd>
+When set to `true`, tool calls in the Assistant message will be forced to follow the tool definition strictly. Learn more in the [Strict Tools guide](https://docs.cohere.com/docs/structured-outputs-json#structured-outputs-tools).
 
-**messages:** `ChatMessages` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**tools:** `typing.Optional[typing.Sequence[ToolV2]]` 
-
-A list of available tools (functions) that the model may suggest invoking before producing a text response.
-
-When `tools` is passed (without `tool_results`), the `text` content in the response will be empty and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**documents:** `typing.Optional[typing.Sequence[V2ChatRequestDocumentsItem]]` — A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**citation_options:** `typing.Optional[CitationOptions]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**response_format:** `typing.Optional[ResponseFormatV2]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**safety_mode:** `typing.Optional[V2ChatRequestSafetyMode]` 
-
-Used to select the [safety instruction](https://docs.cohere.com/v2/docs/safety-modes) inserted into the prompt. Defaults to `CONTEXTUAL`.
-When `OFF` is specified, the safety instruction will be omitted.
-
-Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
-
-**Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/v2/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/v2/docs/command-r-plus#august-2024-release) and newer.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**max_tokens:** `typing.Optional[int]` 
-
-The maximum number of tokens the model will generate as part of the response.
-
-**Note**: Setting a low value may result in incomplete generations.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**stop_sequences:** `typing.Optional[typing.Sequence[str]]` — A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**temperature:** `typing.Optional[float]` 
-
-Defaults to `0.3`.
-
-A non-negative float that tunes the degree of randomness in generation. Lower temperatures mean less random generations, and higher temperatures mean more random generations.
-
-Randomness can be further maximized by increasing the  value of the `p` parameter.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**seed:** `typing.Optional[int]` 
-
-If specified, the backend will make a best effort to sample tokens
-deterministically, such that repeated requests with the same
-seed and parameters should return the same result. However,
-determinism cannot be totally guaranteed.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**frequency_penalty:** `typing.Optional[float]` 
-
-Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
-Used to reduce repetitiveness of generated tokens. The higher the value, the stronger a penalty is applied to previously present tokens, proportional to how many times they have already appeared in the prompt or prior generation.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**presence_penalty:** `typing.Optional[float]` 
-
-Defaults to `0.0`, min value of `0.0`, max value of `1.0`.
-Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty`, except that this penalty is applied equally to all tokens that have already appeared, regardless of their exact frequencies.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**k:** `typing.Optional[float]` 
-
-Ensures that only the top `k` most likely tokens are considered for generation at each step. When `k` is set to `0`, k-sampling is disabled. 
-Defaults to `0`, min value of `0`, max value of `500`.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**p:** `typing.Optional[float]` 
-
-Ensures that only the most likely tokens, with total probability mass of `p`, are considered for generation at each step. If both `k` and `p` are enabled, `p` acts after `k`.
-Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**return_prompt:** `typing.Optional[bool]` — Whether to return the prompt in the response.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**logprobs:** `typing.Optional[bool]` — Whether to return the log probabilities of the generated tokens. Defaults to false.
+**Note**: The first few requests with a new set of tools will take longer to process.
 
     
 </dd>
@@ -3057,7 +2714,15 @@ client.v2.rerank(
 <dl>
 <dd>
 
-**model:** `str` — The identifier of the model to use, one of : `rerank-english-v3.0`, `rerank-multilingual-v3.0`, `rerank-english-v2.0`, `rerank-multilingual-v2.0`
+**model:** `str` 
+
+The identifier of the model to use.
+
+Supported models:
+  - `rerank-english-v3.0`
+  - `rerank-multilingual-v3.0`
+  - `rerank-english-v2.0`
+  - `rerank-multilingual-v2.0`
     
 </dd>
 </dl>
@@ -3073,14 +2738,14 @@ client.v2.rerank(
 <dl>
 <dd>
 
-**documents:** `typing.Sequence[V2RerankRequestDocumentsItem]` 
+**documents:** `typing.Sequence[str]` 
 
-A list of document objects or strings to rerank.
-If a document is provided the text fields is required and all other fields will be preserved in the response.
+A list of texts that will be compared to the `query`.
+For optimal performance we recommend against sending more than 1,000 documents in a single request.
 
-The total max chunks (length of documents * max_chunks_per_doc) must be less than 10000.
+**Note**: long documents will automatically be truncated to the value of `max_tokens_per_doc`.
 
-We recommend a maximum of 1,000 documents for optimal endpoint performance.
+**Note**: structured data should be formatted as YAML strings for best performance.  
     
 </dd>
 </dl>
@@ -3088,15 +2753,7 @@ We recommend a maximum of 1,000 documents for optimal endpoint performance.
 <dl>
 <dd>
 
-**top_n:** `typing.Optional[int]` — The number of most relevant documents or indices to return, defaults to the length of the documents
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**rank_fields:** `typing.Optional[typing.Sequence[str]]` — If a JSON object is provided, you can specify which keys you would like to have considered for reranking. The model will rerank based on order of the fields passed in (i.e. rank_fields=['title','author','text'] will rerank using the values in title, author, text  sequentially. If the length of title, author, and text exceeds the context length of the model, the chunking will not re-consider earlier fields). If not provided, the model will use the default text field for ranking.
+**top_n:** `typing.Optional[int]` — Limits the number of returned rerank results to the specified value. If not passed, all the rerank results will be returned.
     
 </dd>
 </dl>
@@ -3115,7 +2772,7 @@ We recommend a maximum of 1,000 documents for optimal endpoint performance.
 <dl>
 <dd>
 
-**max_chunks_per_doc:** `typing.Optional[int]` — The maximum number of chunks to produce internally from a document
+**max_tokens_per_doc:** `typing.Optional[int]` — Defaults to `4096`. Long documents will be automatically truncated to the specified number of tokens.
     
 </dd>
 </dl>
@@ -5043,7 +4700,7 @@ client.finetuning.update_finetuned_model(
 <dl>
 <dd>
 
-**last_used:** `typing.Optional[dt.datetime]` — Timestamp for the latest request to this fine-tuned model.
+**last_used:** `typing.Optional[dt.datetime]` — Deprecated: Timestamp for the latest request to this fine-tuned model.
     
 </dd>
 </dl>
