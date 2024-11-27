@@ -259,6 +259,7 @@ class V2Client:
                 "p": p,
                 "return_prompt": return_prompt,
                 "logprobs": logprobs,
+                "stream": True,
             },
             request_options=request_options,
             omit=OMIT,
