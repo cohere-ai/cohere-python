@@ -2365,6 +2365,7 @@ response = client.v2.chat_stream(
             ),
         )
     ],
+    strict_tools=True,
     documents=["string"],
     citation_options=CitationOptions(
         mode="FAST",
@@ -2381,6 +2382,7 @@ response = client.v2.chat_stream(
     p=1.1,
     return_prompt=True,
     logprobs=True,
+    stream=True,
 )
 for chunk in response:
     yield chunk
@@ -2420,6 +2422,19 @@ for chunk in response:
 A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
 When `tools` is passed (without `tool_results`), the `text` content in the response will be empty and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
+
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**strict_tools:** `typing.Optional[bool]` 
+
+When set to `true`, tool calls in the Assistant message will be forced to follow the tool definition strictly. Learn more in the [Strict Tools guide](https://docs.cohere.com/docs/structured-outputs-json#structured-outputs-tools).
+
+**Note**: The first few requests with a new set of tools will take longer to process.
 
     
 </dd>
@@ -2546,7 +2561,7 @@ Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty
 
 **k:** `typing.Optional[float]` 
 
-Ensures that only the top `k` most likely tokens are considered for generation at each step. When `k` is set to `0`, k-sampling is disabled. 
+Ensures that only the top `k` most likely tokens are considered for generation at each step. When `k` is set to `0`, k-sampling is disabled.
 Defaults to `0`, min value of `0`, max value of `500`.
 
     
@@ -2576,7 +2591,7 @@ Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 <dl>
 <dd>
 
-**logprobs:** `typing.Optional[bool]` — Whether to return the log probabilities of the generated tokens. Defaults to false.
+**logprobs:** `typing.Optional[bool]` — Defaults to `false`. When set to `true`, the log probabilities of the generated tokens will be included in the response.
 
     
 </dd>
@@ -2640,6 +2655,7 @@ client.v2.chat(
             content="messages",
         )
     ],
+    stream=False,
 )
 
 ```
@@ -2677,6 +2693,19 @@ client.v2.chat(
 A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
 When `tools` is passed (without `tool_results`), the `text` content in the response will be empty and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
+
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**strict_tools:** `typing.Optional[bool]` 
+
+When set to `true`, tool calls in the Assistant message will be forced to follow the tool definition strictly. Learn more in the [Strict Tools guide](https://docs.cohere.com/docs/structured-outputs-json#structured-outputs-tools).
+
+**Note**: The first few requests with a new set of tools will take longer to process.
 
     
 </dd>
@@ -2803,7 +2832,7 @@ Used to reduce repetitiveness of generated tokens. Similar to `frequency_penalty
 
 **k:** `typing.Optional[float]` 
 
-Ensures that only the top `k` most likely tokens are considered for generation at each step. When `k` is set to `0`, k-sampling is disabled. 
+Ensures that only the top `k` most likely tokens are considered for generation at each step. When `k` is set to `0`, k-sampling is disabled.
 Defaults to `0`, min value of `0`, max value of `500`.
 
     
@@ -2833,7 +2862,7 @@ Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 <dl>
 <dd>
 
-**logprobs:** `typing.Optional[bool]` — Whether to return the log probabilities of the generated tokens. Defaults to false.
+**logprobs:** `typing.Optional[bool]` — Defaults to `false`. When set to `true`, the log probabilities of the generated tokens will be included in the response.
 
     
 </dd>
@@ -3057,7 +3086,15 @@ client.v2.rerank(
 <dl>
 <dd>
 
-**model:** `str` — The identifier of the model to use, one of : `rerank-english-v3.0`, `rerank-multilingual-v3.0`, `rerank-english-v2.0`, `rerank-multilingual-v2.0`
+**model:** `str` 
+
+The identifier of the model to use.
+
+Supported models:
+  - `rerank-english-v3.0`
+  - `rerank-multilingual-v3.0`
+  - `rerank-english-v2.0`
+  - `rerank-multilingual-v2.0`
     
 </dd>
 </dl>
@@ -3073,14 +3110,14 @@ client.v2.rerank(
 <dl>
 <dd>
 
-**documents:** `typing.Sequence[V2RerankRequestDocumentsItem]` 
+**documents:** `typing.Sequence[str]` 
 
-A list of document objects or strings to rerank.
-If a document is provided the text fields is required and all other fields will be preserved in the response.
+A list of texts that will be compared to the `query`.
+For optimal performance we recommend against sending more than 1,000 documents in a single request.
 
-The total max chunks (length of documents * max_chunks_per_doc) must be less than 10000.
+**Note**: long documents will automatically be truncated to the value of `max_tokens_per_doc`.
 
-We recommend a maximum of 1,000 documents for optimal endpoint performance.
+**Note**: structured data should be formatted as YAML strings for best performance.  
     
 </dd>
 </dl>
@@ -3088,15 +3125,7 @@ We recommend a maximum of 1,000 documents for optimal endpoint performance.
 <dl>
 <dd>
 
-**top_n:** `typing.Optional[int]` — The number of most relevant documents or indices to return, defaults to the length of the documents
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**rank_fields:** `typing.Optional[typing.Sequence[str]]` — If a JSON object is provided, you can specify which keys you would like to have considered for reranking. The model will rerank based on order of the fields passed in (i.e. rank_fields=['title','author','text'] will rerank using the values in title, author, text  sequentially. If the length of title, author, and text exceeds the context length of the model, the chunking will not re-consider earlier fields). If not provided, the model will use the default text field for ranking.
+**top_n:** `typing.Optional[int]` — Limits the number of returned rerank results to the specified value. If not passed, all the rerank results will be returned.
     
 </dd>
 </dl>
@@ -3115,7 +3144,7 @@ We recommend a maximum of 1,000 documents for optimal endpoint performance.
 <dl>
 <dd>
 
-**max_chunks_per_doc:** `typing.Optional[int]` — The maximum number of chunks to produce internally from a document
+**max_tokens_per_doc:** `typing.Optional[int]` — Defaults to `4096`. Long documents will be automatically truncated to the specified number of tokens.
     
 </dd>
 </dl>
@@ -5043,7 +5072,7 @@ client.finetuning.update_finetuned_model(
 <dl>
 <dd>
 
-**last_used:** `typing.Optional[dt.datetime]` — Timestamp for the latest request to this fine-tuned model.
+**last_used:** `typing.Optional[dt.datetime]` — Deprecated: Timestamp for the latest request to this fine-tuned model.
     
 </dd>
 </dl>

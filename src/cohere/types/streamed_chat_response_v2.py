@@ -213,6 +213,23 @@ class MessageEndStreamedChatResponseV2(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
+class DebugStreamedChatResponseV2(UncheckedBaseModel):
+    """
+    StreamedChatResponse is returned in streaming mode (specified with `stream=True` in the request).
+    """
+
+    type: typing.Literal["debug"] = "debug"
+    prompt: typing.Optional[str] = None
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 StreamedChatResponseV2 = typing_extensions.Annotated[
     typing.Union[
         MessageStartStreamedChatResponseV2,
@@ -226,6 +243,7 @@ StreamedChatResponseV2 = typing_extensions.Annotated[
         CitationStartStreamedChatResponseV2,
         CitationEndStreamedChatResponseV2,
         MessageEndStreamedChatResponseV2,
+        DebugStreamedChatResponseV2,
     ],
     UnionMetadata(discriminant="type"),
 ]

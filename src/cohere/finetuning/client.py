@@ -543,7 +543,7 @@ class FinetuningClient:
             Timestamp for the completed fine-tuning.
 
         last_used : typing.Optional[dt.datetime]
-            Timestamp for the latest request to this fine-tuned model.
+            Deprecated: Timestamp for the latest request to this fine-tuned model.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1468,7 +1468,7 @@ class AsyncFinetuningClient:
             Timestamp for the completed fine-tuning.
 
         last_used : typing.Optional[dt.datetime]
-            Timestamp for the latest request to this fine-tuned model.
+            Deprecated: Timestamp for the latest request to this fine-tuned model.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.

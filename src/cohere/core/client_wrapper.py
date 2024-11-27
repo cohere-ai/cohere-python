@@ -24,7 +24,7 @@ class BaseClientWrapper:
         headers: typing.Dict[str, str] = {
             "X-Fern-Language": "Python",
             "X-Fern-SDK-Name": "cohere",
-            "X-Fern-SDK-Version": "5.11.4",
+            "X-Fern-SDK-Version": "5.12.0",
         }
         if self._client_name is not None:
             headers["X-Client-Name"] = self._client_name

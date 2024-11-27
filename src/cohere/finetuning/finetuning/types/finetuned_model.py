@@ -61,7 +61,7 @@ class FinetunedModel(UncheckedBaseModel):
 
     last_used: typing.Optional[dt.datetime] = pydantic.Field(default=None)
     """
-    read-only. Timestamp for the latest request to this fine-tuned model.
+    read-only. Deprecated: Timestamp for the latest request to this fine-tuned model.
     """
 
     if IS_PYDANTIC_V2:
