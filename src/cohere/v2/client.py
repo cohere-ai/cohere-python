@@ -39,7 +39,6 @@ from ..types.embed_input_type import EmbedInputType
 from ..types.embedding_type import EmbeddingType
 from .types.v2embed_request_truncate import V2EmbedRequestTruncate
 from ..types.embed_by_type_response import EmbedByTypeResponse
-from .types.v2rerank_request_documents_item import V2RerankRequestDocumentsItem
 from .types.v2rerank_response import V2RerankResponse
 from ..core.client_wrapper import AsyncClientWrapper
 
@@ -57,6 +56,7 @@ class V2Client:
         model: str,
         messages: ChatMessages,
         tools: typing.Optional[typing.Sequence[ToolV2]] = OMIT,
+        strict_tools: typing.Optional[bool] = OMIT,
         documents: typing.Optional[typing.Sequence[V2ChatStreamRequestDocumentsItem]] = OMIT,
         citation_options: typing.Optional[CitationOptions] = OMIT,
         response_format: typing.Optional[ResponseFormatV2] = OMIT,
@@ -89,6 +89,12 @@ class V2Client:
             A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
             When `tools` is passed (without `tool_results`), the `text` content in the response will be empty and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
+
+
+        strict_tools : typing.Optional[bool]
+            When set to `true`, tool calls in the Assistant message will be forced to follow the tool definition strictly. Learn more in the [Strict Tools guide](https://docs.cohere.com/docs/structured-outputs-json#structured-outputs-tools).
+
+            **Note**: The first few requests with a new set of tools will take longer to process.
 
 
         documents : typing.Optional[typing.Sequence[V2ChatStreamRequestDocumentsItem]]
@@ -157,7 +163,7 @@ class V2Client:
             Whether to return the prompt in the response.
 
         logprobs : typing.Optional[bool]
-            Whether to return the log probabilities of the generated tokens. Defaults to false.
+            Defaults to `false`. When set to `true`, the log probabilities of the generated tokens will be included in the response.
 
 
         request_options : typing.Optional[RequestOptions]
@@ -199,6 +205,7 @@ class V2Client:
                     ),
                 )
             ],
+            strict_tools=True,
             documents=["string"],
             citation_options=CitationOptions(
                 mode="FAST",
@@ -215,6 +222,7 @@ class V2Client:
             p=1.1,
             return_prompt=True,
             logprobs=True,
+            stream=True,
         )
         for chunk in response:
             yield chunk
@@ -230,6 +238,7 @@ class V2Client:
                 "tools": convert_and_respect_annotation_metadata(
                     object_=tools, annotation=typing.Sequence[ToolV2], direction="write"
                 ),
+                "strict_tools": strict_tools,
                 "documents": convert_and_respect_annotation_metadata(
                     object_=documents, annotation=typing.Sequence[V2ChatStreamRequestDocumentsItem], direction="write"
                 ),
@@ -392,6 +401,7 @@ class V2Client:
         model: str,
         messages: ChatMessages,
         tools: typing.Optional[typing.Sequence[ToolV2]] = OMIT,
+        strict_tools: typing.Optional[bool] = OMIT,
         documents: typing.Optional[typing.Sequence[V2ChatRequestDocumentsItem]] = OMIT,
         citation_options: typing.Optional[CitationOptions] = OMIT,
         response_format: typing.Optional[ResponseFormatV2] = OMIT,
@@ -424,6 +434,12 @@ class V2Client:
             A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
             When `tools` is passed (without `tool_results`), the `text` content in the response will be empty and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
+
+
+        strict_tools : typing.Optional[bool]
+            When set to `true`, tool calls in the Assistant message will be forced to follow the tool definition strictly. Learn more in the [Strict Tools guide](https://docs.cohere.com/docs/structured-outputs-json#structured-outputs-tools).
+
+            **Note**: The first few requests with a new set of tools will take longer to process.
 
 
         documents : typing.Optional[typing.Sequence[V2ChatRequestDocumentsItem]]
@@ -492,7 +508,7 @@ class V2Client:
             Whether to return the prompt in the response.
 
         logprobs : typing.Optional[bool]
-            Whether to return the log probabilities of the generated tokens. Defaults to false.
+            Defaults to `false`. When set to `true`, the log probabilities of the generated tokens will be included in the response.
 
 
         request_options : typing.Optional[RequestOptions]
@@ -519,6 +535,7 @@ class V2Client:
                     content="messages",
                 )
             ],
+            stream=False,
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -532,6 +549,7 @@ class V2Client:
                 "tools": convert_and_respect_annotation_metadata(
                     object_=tools, annotation=typing.Sequence[ToolV2], direction="write"
                 ),
+                "strict_tools": strict_tools,
                 "documents": convert_and_respect_annotation_metadata(
                     object_=documents, annotation=typing.Sequence[V2ChatRequestDocumentsItem], direction="write"
                 ),
@@ -552,7 +570,6 @@ class V2Client:
                 "p": p,
                 "return_prompt": return_prompt,
                 "logprobs": logprobs,
-                "stream": False,
             },
             request_options=request_options,
             omit=OMIT,
@@ -908,11 +925,10 @@ class V2Client:
         *,
         model: str,
         query: str,
-        documents: typing.Sequence[V2RerankRequestDocumentsItem],
+        documents: typing.Sequence[str],
         top_n: typing.Optional[int] = OMIT,
-        rank_fields: typing.Optional[typing.Sequence[str]] = OMIT,
         return_documents: typing.Optional[bool] = OMIT,
-        max_chunks_per_doc: typing.Optional[int] = OMIT,
+        max_tokens_per_doc: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> V2RerankResponse:
         """
@@ -921,31 +937,34 @@ class V2Client:
         Parameters
         ----------
         model : str
-            The identifier of the model to use, one of : `rerank-english-v3.0`, `rerank-multilingual-v3.0`, `rerank-english-v2.0`, `rerank-multilingual-v2.0`
+            The identifier of the model to use.
+
+            Supported models:
+              - `rerank-english-v3.0`
+              - `rerank-multilingual-v3.0`
+              - `rerank-english-v2.0`
+              - `rerank-multilingual-v2.0`
 
         query : str
             The search query
 
-        documents : typing.Sequence[V2RerankRequestDocumentsItem]
-            A list of document objects or strings to rerank.
-            If a document is provided the text fields is required and all other fields will be preserved in the response.
+        documents : typing.Sequence[str]
+            A list of texts that will be compared to the `query`.
+            For optimal performance we recommend against sending more than 1,000 documents in a single request.
 
-            The total max chunks (length of documents * max_chunks_per_doc) must be less than 10000.
+            **Note**: long documents will automatically be truncated to the value of `max_tokens_per_doc`.
 
-            We recommend a maximum of 1,000 documents for optimal endpoint performance.
+            **Note**: structured data should be formatted as YAML strings for best performance.
 
         top_n : typing.Optional[int]
-            The number of most relevant documents or indices to return, defaults to the length of the documents
-
-        rank_fields : typing.Optional[typing.Sequence[str]]
-            If a JSON object is provided, you can specify which keys you would like to have considered for reranking. The model will rerank based on order of the fields passed in (i.e. rank_fields=['title','author','text'] will rerank using the values in title, author, text  sequentially. If the length of title, author, and text exceeds the context length of the model, the chunking will not re-consider earlier fields). If not provided, the model will use the default text field for ranking.
+            Limits the number of returned rerank results to the specified value. If not passed, all the rerank results will be returned.
 
         return_documents : typing.Optional[bool]
             - If false, returns results without the doc text - the api will return a list of {index, relevance score} where index is inferred from the list passed into the request.
             - If true, returns results with the doc text passed in - the api will return an ordered list of {index, text, relevance score} where index + text refers to the list passed into the request.
 
-        max_chunks_per_doc : typing.Optional[int]
-            The maximum number of chunks to produce internally from a document
+        max_tokens_per_doc : typing.Optional[int]
+            Defaults to `4096`. Long documents will be automatically truncated to the specified number of tokens.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -975,13 +994,10 @@ class V2Client:
             json={
                 "model": model,
                 "query": query,
-                "documents": convert_and_respect_annotation_metadata(
-                    object_=documents, annotation=typing.Sequence[V2RerankRequestDocumentsItem], direction="write"
-                ),
+                "documents": documents,
                 "top_n": top_n,
-                "rank_fields": rank_fields,
                 "return_documents": return_documents,
-                "max_chunks_per_doc": max_chunks_per_doc,
+                "max_tokens_per_doc": max_tokens_per_doc,
             },
             request_options=request_options,
             omit=OMIT,
@@ -1121,6 +1137,7 @@ class AsyncV2Client:
         model: str,
         messages: ChatMessages,
         tools: typing.Optional[typing.Sequence[ToolV2]] = OMIT,
+        strict_tools: typing.Optional[bool] = OMIT,
         documents: typing.Optional[typing.Sequence[V2ChatStreamRequestDocumentsItem]] = OMIT,
         citation_options: typing.Optional[CitationOptions] = OMIT,
         response_format: typing.Optional[ResponseFormatV2] = OMIT,
@@ -1153,6 +1170,12 @@ class AsyncV2Client:
             A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
             When `tools` is passed (without `tool_results`), the `text` content in the response will be empty and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
+
+
+        strict_tools : typing.Optional[bool]
+            When set to `true`, tool calls in the Assistant message will be forced to follow the tool definition strictly. Learn more in the [Strict Tools guide](https://docs.cohere.com/docs/structured-outputs-json#structured-outputs-tools).
+
+            **Note**: The first few requests with a new set of tools will take longer to process.
 
 
         documents : typing.Optional[typing.Sequence[V2ChatStreamRequestDocumentsItem]]
@@ -1221,7 +1244,7 @@ class AsyncV2Client:
             Whether to return the prompt in the response.
 
         logprobs : typing.Optional[bool]
-            Whether to return the log probabilities of the generated tokens. Defaults to false.
+            Defaults to `false`. When set to `true`, the log probabilities of the generated tokens will be included in the response.
 
 
         request_options : typing.Optional[RequestOptions]
@@ -1268,6 +1291,7 @@ class AsyncV2Client:
                         ),
                     )
                 ],
+                strict_tools=True,
                 documents=["string"],
                 citation_options=CitationOptions(
                     mode="FAST",
@@ -1284,6 +1308,7 @@ class AsyncV2Client:
                 p=1.1,
                 return_prompt=True,
                 logprobs=True,
+                stream=True,
             )
             async for chunk in response:
                 yield chunk
@@ -1302,6 +1327,7 @@ class AsyncV2Client:
                 "tools": convert_and_respect_annotation_metadata(
                     object_=tools, annotation=typing.Sequence[ToolV2], direction="write"
                 ),
+                "strict_tools": strict_tools,
                 "documents": convert_and_respect_annotation_metadata(
                     object_=documents, annotation=typing.Sequence[V2ChatStreamRequestDocumentsItem], direction="write"
                 ),
@@ -1322,7 +1348,6 @@ class AsyncV2Client:
                 "p": p,
                 "return_prompt": return_prompt,
                 "logprobs": logprobs,
-                "stream": True,
             },
             request_options=request_options,
             omit=OMIT,
@@ -1464,6 +1489,7 @@ class AsyncV2Client:
         model: str,
         messages: ChatMessages,
         tools: typing.Optional[typing.Sequence[ToolV2]] = OMIT,
+        strict_tools: typing.Optional[bool] = OMIT,
         documents: typing.Optional[typing.Sequence[V2ChatRequestDocumentsItem]] = OMIT,
         citation_options: typing.Optional[CitationOptions] = OMIT,
         response_format: typing.Optional[ResponseFormatV2] = OMIT,
@@ -1496,6 +1522,12 @@ class AsyncV2Client:
             A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
             When `tools` is passed (without `tool_results`), the `text` content in the response will be empty and the `tool_calls` field in the response will be populated with a list of tool calls that need to be made. If no calls need to be made, the `tool_calls` array will be empty.
+
+
+        strict_tools : typing.Optional[bool]
+            When set to `true`, tool calls in the Assistant message will be forced to follow the tool definition strictly. Learn more in the [Strict Tools guide](https://docs.cohere.com/docs/structured-outputs-json#structured-outputs-tools).
+
+            **Note**: The first few requests with a new set of tools will take longer to process.
 
 
         documents : typing.Optional[typing.Sequence[V2ChatRequestDocumentsItem]]
@@ -1564,7 +1596,7 @@ class AsyncV2Client:
             Whether to return the prompt in the response.
 
         logprobs : typing.Optional[bool]
-            Whether to return the log probabilities of the generated tokens. Defaults to false.
+            Defaults to `false`. When set to `true`, the log probabilities of the generated tokens will be included in the response.
 
 
         request_options : typing.Optional[RequestOptions]
@@ -1596,6 +1628,7 @@ class AsyncV2Client:
                         content="messages",
                     )
                 ],
+                stream=False,
             )
 
 
@@ -1612,6 +1645,7 @@ class AsyncV2Client:
                 "tools": convert_and_respect_annotation_metadata(
                     object_=tools, annotation=typing.Sequence[ToolV2], direction="write"
                 ),
+                "strict_tools": strict_tools,
                 "documents": convert_and_respect_annotation_metadata(
                     object_=documents, annotation=typing.Sequence[V2ChatRequestDocumentsItem], direction="write"
                 ),
@@ -1632,7 +1666,6 @@ class AsyncV2Client:
                 "p": p,
                 "return_prompt": return_prompt,
                 "logprobs": logprobs,
-                "stream": False,
             },
             request_options=request_options,
             omit=OMIT,
@@ -1996,11 +2029,10 @@ class AsyncV2Client:
         *,
         model: str,
         query: str,
-        documents: typing.Sequence[V2RerankRequestDocumentsItem],
+        documents: typing.Sequence[str],
         top_n: typing.Optional[int] = OMIT,
-        rank_fields: typing.Optional[typing.Sequence[str]] = OMIT,
         return_documents: typing.Optional[bool] = OMIT,
-        max_chunks_per_doc: typing.Optional[int] = OMIT,
+        max_tokens_per_doc: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> V2RerankResponse:
         """
@@ -2009,31 +2041,34 @@ class AsyncV2Client:
         Parameters
         ----------
         model : str
-            The identifier of the model to use, one of : `rerank-english-v3.0`, `rerank-multilingual-v3.0`, `rerank-english-v2.0`, `rerank-multilingual-v2.0`
+            The identifier of the model to use.
+
+            Supported models:
+              - `rerank-english-v3.0`
+              - `rerank-multilingual-v3.0`
+              - `rerank-english-v2.0`
+              - `rerank-multilingual-v2.0`
 
         query : str
             The search query
 
-        documents : typing.Sequence[V2RerankRequestDocumentsItem]
-            A list of document objects or strings to rerank.
-            If a document is provided the text fields is required and all other fields will be preserved in the response.
+        documents : typing.Sequence[str]
+            A list of texts that will be compared to the `query`.
+            For optimal performance we recommend against sending more than 1,000 documents in a single request.
 
-            The total max chunks (length of documents * max_chunks_per_doc) must be less than 10000.
+            **Note**: long documents will automatically be truncated to the value of `max_tokens_per_doc`.
 
-            We recommend a maximum of 1,000 documents for optimal endpoint performance.
+            **Note**: structured data should be formatted as YAML strings for best performance.
 
         top_n : typing.Optional[int]
-            The number of most relevant documents or indices to return, defaults to the length of the documents
-
-        rank_fields : typing.Optional[typing.Sequence[str]]
-            If a JSON object is provided, you can specify which keys you would like to have considered for reranking. The model will rerank based on order of the fields passed in (i.e. rank_fields=['title','author','text'] will rerank using the values in title, author, text  sequentially. If the length of title, author, and text exceeds the context length of the model, the chunking will not re-consider earlier fields). If not provided, the model will use the default text field for ranking.
+            Limits the number of returned rerank results to the specified value. If not passed, all the rerank results will be returned.
 
         return_documents : typing.Optional[bool]
             - If false, returns results without the doc text - the api will return a list of {index, relevance score} where index is inferred from the list passed into the request.
             - If true, returns results with the doc text passed in - the api will return an ordered list of {index, text, relevance score} where index + text refers to the list passed into the request.
 
-        max_chunks_per_doc : typing.Optional[int]
-            The maximum number of chunks to produce internally from a document
+        max_tokens_per_doc : typing.Optional[int]
+            Defaults to `4096`. Long documents will be automatically truncated to the specified number of tokens.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -2071,13 +2106,10 @@ class AsyncV2Client:
             json={
                 "model": model,
                 "query": query,
-                "documents": convert_and_respect_annotation_metadata(
-                    object_=documents, annotation=typing.Sequence[V2RerankRequestDocumentsItem], direction="write"
-                ),
+                "documents": documents,
                 "top_n": top_n,
-                "rank_fields": rank_fields,
                 "return_documents": return_documents,
-                "max_chunks_per_doc": max_chunks_per_doc,
+                "max_tokens_per_doc": max_tokens_per_doc,
             },
             request_options=request_options,
             omit=OMIT,
