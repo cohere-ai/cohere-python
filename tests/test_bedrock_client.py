@@ -10,7 +10,7 @@ aws_session_token = os.getenv("AWS_SESSION_TOKEN")
 aws_region = os.getenv("AWS_REGION")
 endpoint_type = os.getenv("ENDPOINT_TYPE")
 
-@unittest.skipIf(os.getenv("TEST_AWS"), "tests skipped because TEST_AWS is not set")
+@unittest.skipIf(None == os.getenv("TEST_AWS"), "tests skipped because TEST_AWS is not set")
 class TestClient(unittest.TestCase):
     platform: str = "bedrock"
     client: cohere.AwsClient = cohere.BedrockClient(
