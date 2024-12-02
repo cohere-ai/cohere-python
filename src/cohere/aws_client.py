@@ -12,9 +12,40 @@ from . import GenerateStreamedResponse, Generation, \
 from .client import Client, ClientEnvironment
 from .core import construct_type
 from .manually_maintained.lazy_aws_deps import lazy_boto3, lazy_botocore
-
+from .client_v2 import ClientV2
 
 class AwsClient(Client):
+    def __init__(
+            self,
+            *,
+            aws_access_key: typing.Optional[str] = None,
+            aws_secret_key: typing.Optional[str] = None,
+            aws_session_token: typing.Optional[str] = None,
+            aws_region: typing.Optional[str] = None,
+            timeout: typing.Optional[float] = None,
+            service: typing.Union[typing.Literal["bedrock"], typing.Literal["sagemaker"]],
+    ):
+        Client.__init__(
+            self,
+            base_url="https://api.cohere.com",  # this url is unused for BedrockClient
+            environment=ClientEnvironment.PRODUCTION,
+            client_name="n/a",
+            timeout=timeout,
+            api_key="n/a",
+            httpx_client=httpx.Client(
+                event_hooks=get_event_hooks(
+                    service=service,
+                    aws_access_key=aws_access_key,
+                    aws_secret_key=aws_secret_key,
+                    aws_session_token=aws_session_token,
+                    aws_region=aws_region,
+                ),
+                timeout=timeout,
+            ),
+        )
+
+
+class AwsClientV2(ClientV2):
     def __init__(
             self,
             *,
