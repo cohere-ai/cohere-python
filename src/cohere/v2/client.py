@@ -936,13 +936,7 @@ class V2Client:
         Parameters
         ----------
         model : str
-            The identifier of the model to use.
-
-            Supported models:
-              - `rerank-english-v3.0`
-              - `rerank-multilingual-v3.0`
-              - `rerank-english-v2.0`
-              - `rerank-multilingual-v2.0`
+            The identifier of the model to use, eg `rerank-v3.5`.
 
         query : str
             The search query
@@ -2040,13 +2034,7 @@ class AsyncV2Client:
         Parameters
         ----------
         model : str
-            The identifier of the model to use.
-
-            Supported models:
-              - `rerank-english-v3.0`
-              - `rerank-multilingual-v3.0`
-              - `rerank-english-v2.0`
-              - `rerank-multilingual-v2.0`
+            The identifier of the model to use, eg `rerank-v3.5`.
 
         query : str
             The search query
