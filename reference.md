@@ -1793,7 +1793,7 @@ We recommend a maximum of 1,000 documents for optimal endpoint performance.
 <dl>
 <dd>
 
-**model:** `typing.Optional[str]` — The identifier of the model to use, one of : `rerank-english-v3.0`, `rerank-multilingual-v3.0`, `rerank-english-v2.0`, `rerank-multilingual-v2.0`
+**model:** `typing.Optional[str]` — The identifier of the model to use, eg `rerank-v3.5`.
     
 </dd>
 </dl>
@@ -3084,15 +3084,7 @@ client.v2.rerank(
 <dl>
 <dd>
 
-**model:** `str` 
-
-The identifier of the model to use.
-
-Supported models:
-  - `rerank-english-v3.0`
-  - `rerank-multilingual-v3.0`
-  - `rerank-english-v2.0`
-  - `rerank-multilingual-v2.0`
+**model:** `str` — The identifier of the model to use, eg `rerank-v3.5`.
     
 </dd>
 </dl>
