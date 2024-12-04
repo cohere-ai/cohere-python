@@ -26,7 +26,7 @@ class BedrockClient(AwsClient):
         )
 
     def rerank(self, *, query, documents, model = ..., top_n = ..., rank_fields = ..., return_documents = ..., max_chunks_per_doc = ..., request_options = None):
-        raise NotImplementedError("Please use cohere.BedrockClientV2 instead: method rerank is not available in the v1 client, cohere.BedrockClient.")
+        raise NotImplementedError("Please use cohere.BedrockClientV2 instead: Rerank API on Bedrock is not supported with cohere.BedrockClient for this model.")
 
 class BedrockClientV2(AwsClientV2):
     def __init__(
