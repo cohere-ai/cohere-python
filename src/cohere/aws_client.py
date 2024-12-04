@@ -196,6 +196,13 @@ def map_response_from_bedrock():
 
     return _hook
 
+def get_boto3_session(
+    **kwargs: typing.Any,  
+):
+    non_none_args = {k: v for k, v in kwargs.items() if v is not None}
+    return lazy_boto3().Session(**non_none_args)
+
+
 
 def map_request_to_bedrock(
         service: str,
@@ -204,14 +211,15 @@ def map_request_to_bedrock(
         aws_session_token: typing.Optional[str] = None,
         aws_region: typing.Optional[str] = None,
 ) -> EventHook:
-    session = lazy_boto3().Session(
+    session = get_boto3_session(
         region_name=aws_region,
         aws_access_key_id=aws_access_key,
         aws_secret_access_key=aws_secret_key,
         aws_session_token=aws_session_token,
     )
+    aws_region = session.region_name
     credentials = session.get_credentials()
-    signer = lazy_botocore().auth.SigV4Auth(credentials, service, session.region_name)
+    signer = lazy_botocore().auth.SigV4Auth(credentials, service, aws_region)
 
     def _event_hook(request: httpx.Request) -> None:
         headers = request.headers.copy()
