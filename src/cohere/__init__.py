@@ -245,7 +245,7 @@ from .errors import (
 )
 from . import connectors, datasets, embed_jobs, finetuning, models, v2
 from .aws_client import AwsClient
-from .bedrock_client import BedrockClient, BedrockClientV2
+from .bedrock_client import BedrockClient
 from .client import AsyncClient, Client
 from .client_v2 import AsyncClientV2, ClientV2
 from .datasets import (
@@ -257,7 +257,7 @@ from .datasets import (
 )
 from .embed_jobs import CreateEmbedJobRequestTruncate
 from .environment import ClientEnvironment
-from .sagemaker_client import SagemakerClient, SagemakerClientV2
+from .sagemaker_client import SagemakerClient
 from .v2 import (
     V2ChatRequestDocumentsItem,
     V2ChatRequestSafetyMode,
@@ -287,7 +287,6 @@ __all__ = [
     "AwsClient",
     "BadRequestError",
     "BedrockClient",
-    "BedrockClientV2",
     "ChatCitation",
     "ChatCitationGenerationEvent",
     "ChatConnector",
@@ -461,7 +460,6 @@ __all__ = [
     "ResponseFormat",
     "ResponseFormatV2",
     "SagemakerClient",
-    "SagemakerClientV2",
     "SearchQueriesGenerationStreamedChatResponse",
     "SearchResultsStreamedChatResponse",
     "ServiceUnavailableError",

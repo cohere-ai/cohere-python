@@ -56,7 +56,7 @@ class AwsClientV2(ClientV2):
             timeout: typing.Optional[float] = None,
             service: typing.Union[typing.Literal["bedrock"], typing.Literal["sagemaker"]],
     ):
-        ClientV2.__init__(
+        Client.__init__(
             self,
             base_url="https://api.cohere.com",  # this url is unused for BedrockClient
             environment=ClientEnvironment.PRODUCTION,
@@ -196,13 +196,6 @@ def map_response_from_bedrock():
 
     return _hook
 
-def get_boto3_session(
-    **kwargs: typing.Any,  
-):
-    non_none_args = {k: v for k, v in kwargs.items() if v is not None}
-    return lazy_boto3().Session(**non_none_args)
-
-
 
 def map_request_to_bedrock(
         service: str,
@@ -211,22 +204,19 @@ def map_request_to_bedrock(
         aws_session_token: typing.Optional[str] = None,
         aws_region: typing.Optional[str] = None,
 ) -> EventHook:
-    session = get_boto3_session(
+    session = lazy_boto3().Session(
         region_name=aws_region,
         aws_access_key_id=aws_access_key,
         aws_secret_access_key=aws_secret_key,
         aws_session_token=aws_session_token,
     )
-    aws_region = session.region_name
     credentials = session.get_credentials()
-    signer = lazy_botocore().auth.SigV4Auth(credentials, service, aws_region)
+    signer = lazy_botocore().auth.SigV4Auth(credentials, service, session.region_name)
 
     def _event_hook(request: httpx.Request) -> None:
         headers = request.headers.copy()
         del headers["connection"]
 
-
-        api_version = request.url.path.split("/")[-2]
         endpoint = request.url.path.split("/")[-1]
         body = json.loads(request.read())
         model = body["model"]
@@ -239,9 +229,6 @@ def map_request_to_bedrock(
         )
         request.url = URL(url)
         request.headers["host"] = request.url.host
-
-        if endpoint == "rerank":
-            body["api_version"] = get_api_version(version=api_version)
 
         if "stream" in body:
             del body["stream"]
@@ -268,6 +255,20 @@ def map_request_to_bedrock(
     return _event_hook
 
 
+def get_endpoint_from_url(url: str,
+                          chat_model: typing.Optional[str] = None,
+                          embed_model: typing.Optional[str] = None,
+                          generate_model: typing.Optional[str] = None,
+                          ) -> str:
+    if chat_model and chat_model in url:
+        return "chat"
+    if embed_model and embed_model in url:
+        return "embed"
+    if generate_model and generate_model in url:
+        return "generate"
+    raise ValueError(f"Unknown endpoint in url: {url}")
+
+
 def get_url(
         *,
         platform: str,
@@ -282,12 +283,3 @@ def get_url(
         endpoint = "invocations" if not stream else "invocations-response-stream"
         return f"https://runtime.sagemaker.{aws_region}.amazonaws.com/endpoints/{model}/{endpoint}"
     return ""
-
-
-def get_api_version(*, version: str):
-    int_version = {
-        "v1": 1,
-        "v2": 2,
-    }
-
-    return int_version.get(version, 1)

@@ -1793,7 +1793,7 @@ We recommend a maximum of 1,000 documents for optimal endpoint performance.
 <dl>
 <dd>
 
-**model:** `typing.Optional[str]` — The identifier of the model to use, eg `rerank-v3.5`.
+**model:** `typing.Optional[str]` — The identifier of the model to use, one of : `rerank-english-v3.0`, `rerank-multilingual-v3.0`, `rerank-english-v2.0`, `rerank-multilingual-v2.0`
     
 </dd>
 </dl>
@@ -2382,6 +2382,7 @@ response = client.v2.chat_stream(
     p=1.1,
     return_prompt=True,
     logprobs=True,
+    stream=True,
 )
 for chunk in response:
     yield chunk
@@ -2654,6 +2655,7 @@ client.v2.chat(
             content="messages",
         )
     ],
+    stream=False,
 )
 
 ```
@@ -2971,7 +2973,7 @@ Available models and corresponding embedding dimensions:
 
 **embedding_types:** `typing.Sequence[EmbeddingType]` 
 
-Specifies the types of embeddings you want to get back. Can be one or more of the following types.
+Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
 * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
 * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
@@ -3084,7 +3086,15 @@ client.v2.rerank(
 <dl>
 <dd>
 
-**model:** `str` — The identifier of the model to use, eg `rerank-v3.5`.
+**model:** `str` 
+
+The identifier of the model to use.
+
+Supported models:
+  - `rerank-english-v3.0`
+  - `rerank-multilingual-v3.0`
+  - `rerank-english-v2.0`
+  - `rerank-multilingual-v2.0`
     
 </dd>
 </dl>

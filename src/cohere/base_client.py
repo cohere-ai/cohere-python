@@ -2012,7 +2012,7 @@ class BaseCohere:
             We recommend a maximum of 1,000 documents for optimal endpoint performance.
 
         model : typing.Optional[str]
-            The identifier of the model to use, eg `rerank-v3.5`.
+            The identifier of the model to use, one of : `rerank-english-v3.0`, `rerank-multilingual-v3.0`, `rerank-english-v2.0`, `rerank-multilingual-v2.0`
 
         top_n : typing.Optional[int]
             The number of most relevant documents or indices to return, defaults to the length of the documents
@@ -5047,7 +5047,7 @@ class AsyncBaseCohere:
             We recommend a maximum of 1,000 documents for optimal endpoint performance.
 
         model : typing.Optional[str]
-            The identifier of the model to use, eg `rerank-v3.5`.
+            The identifier of the model to use, one of : `rerank-english-v3.0`, `rerank-multilingual-v3.0`, `rerank-english-v2.0`, `rerank-multilingual-v2.0`
 
         top_n : typing.Optional[int]
             The number of most relevant documents or indices to return, defaults to the length of the documents

@@ -26,10 +26,7 @@ class SagemakerClient(AwsClient):
             aws_region=aws_region,
             timeout=timeout,
         )
-        try:
-            self.sagemaker_finetuning = Client(aws_region=aws_region)
-        except Exception:
-            pass
+        self.sagemaker_finetuning = Client(aws_region=aws_region)
 
 
 class SagemakerClientV2(AwsClientV2):
@@ -53,7 +50,4 @@ class SagemakerClientV2(AwsClientV2):
             aws_region=aws_region,
             timeout=timeout,
         )
-        try:
-            self.sagemaker_finetuning = Client(aws_region=aws_region)
-        except Exception:
-            pass
+        self.sagemaker_finetuning = Client(aws_region=aws_region)

@@ -222,6 +222,7 @@ class V2Client:
             p=1.1,
             return_prompt=True,
             logprobs=True,
+            stream=True,
         )
         for chunk in response:
             yield chunk
@@ -534,6 +535,7 @@ class V2Client:
                     content="messages",
                 )
             ],
+            stream=False,
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -568,7 +570,6 @@ class V2Client:
                 "p": p,
                 "return_prompt": return_prompt,
                 "logprobs": logprobs,
-                "stream": False,
             },
             request_options=request_options,
             omit=OMIT,
@@ -736,7 +737,7 @@ class V2Client:
         input_type : EmbedInputType
 
         embedding_types : typing.Sequence[EmbeddingType]
-            Specifies the types of embeddings you want to get back. Can be one or more of the following types.
+            Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
             * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
             * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
@@ -936,7 +937,13 @@ class V2Client:
         Parameters
         ----------
         model : str
-            The identifier of the model to use, eg `rerank-v3.5`.
+            The identifier of the model to use.
+
+            Supported models:
+              - `rerank-english-v3.0`
+              - `rerank-multilingual-v3.0`
+              - `rerank-english-v2.0`
+              - `rerank-multilingual-v2.0`
 
         query : str
             The search query
@@ -1301,6 +1308,7 @@ class AsyncV2Client:
                 p=1.1,
                 return_prompt=True,
                 logprobs=True,
+                stream=True,
             )
             async for chunk in response:
                 yield chunk
@@ -1340,7 +1348,6 @@ class AsyncV2Client:
                 "p": p,
                 "return_prompt": return_prompt,
                 "logprobs": logprobs,
-                "stream": True,
             },
             request_options=request_options,
             omit=OMIT,
@@ -1621,6 +1628,7 @@ class AsyncV2Client:
                         content="messages",
                     )
                 ],
+                stream=False,
             )
 
 
@@ -1658,7 +1666,6 @@ class AsyncV2Client:
                 "p": p,
                 "return_prompt": return_prompt,
                 "logprobs": logprobs,
-                "stream": False,
             },
             request_options=request_options,
             omit=OMIT,
@@ -1826,7 +1833,7 @@ class AsyncV2Client:
         input_type : EmbedInputType
 
         embedding_types : typing.Sequence[EmbeddingType]
-            Specifies the types of embeddings you want to get back. Can be one or more of the following types.
+            Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
             * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
             * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
@@ -2034,7 +2041,13 @@ class AsyncV2Client:
         Parameters
         ----------
         model : str
-            The identifier of the model to use, eg `rerank-v3.5`.
+            The identifier of the model to use.
+
+            Supported models:
+              - `rerank-english-v3.0`
+              - `rerank-multilingual-v3.0`
+              - `rerank-english-v2.0`
+              - `rerank-multilingual-v2.0`
 
         query : str
             The search query
