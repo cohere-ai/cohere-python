@@ -1970,4 +1970,4 @@ aws = ["boto3", "sagemaker"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "da6fb0dfc3791b4cab02a5e05ea4f507f6a99cc473dfab245bd082a51ca7fcd8"
+content-hash = "43bbf220ac38802e57b6e92b046aef0f02833a300b90bb74a0297bc5238312fc"
