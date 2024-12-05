@@ -10,7 +10,7 @@ jobs:
       - name: Set up python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: 3.9
       - name: Bootstrap poetry
         uses: snok/install-poetry@v1
         with:
@@ -28,7 +28,7 @@ jobs:
       - name: Set up python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: 3.9
       - name: Bootstrap poetry
         uses: snok/install-poetry@v1
         with:
@@ -64,9 +64,9 @@ jobs:
           echo "Cloning langchain-cohere..."
           git clone https://github.com/langchain-ai/langchain-cohere.git && cd langchain-cohere/libs/cohere
           echo "Cloned langchain-cohere, current dir $(pwd)"
-          
+
           echo "poetry install --with test,test_integration"
-          poetry install --with test,test_integration 
+          poetry install --with test,test_integration
 
           echo "Going to uninstall cohere package, and install the current version from the repo"
           cd ../../../cohere-python && echo "Current dir $(pwd)"
@@ -74,7 +74,7 @@ jobs:
           pip uninstall cohere
           pip install .
           cd ../langchain-cohere/libs/cohere
-          
+
           echo "Current cohere installation: $(pip freeze | grep cohere)"
           make test
           make integration_test
@@ -101,7 +101,7 @@ jobs:
       - name: Set up python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: 3.9
       - name: Bootstrap poetry
         run: |
           curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
