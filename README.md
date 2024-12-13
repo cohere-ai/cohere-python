@@ -23,16 +23,14 @@ pip install cohere
 ```Python
 import cohere
 
-co = cohere.Client(
-    api_key="YOUR_API_KEY",
+co = cohere.ClientV2()
+
+response = co.chat(
+    model="command-r-plus-08-2024",
+    messages=[{"role": "user", "content": "hello world!"}],
 )
 
-chat = co.chat(
-    message="hello world!",
-    model="command"
-)
-
-print(chat)
+print(response)
 ```
 
 > [!TIP]
@@ -48,17 +46,16 @@ use `chat_stream`.
 ```Python
 import cohere
 
-co = cohere.Client(
-    api_key="YOUR_API_KEY",
+co = cohere.ClientV2()
+
+response = co.chat_stream(
+    model="command-r-plus-08-2024",
+    messages=[{"role": "user", "content": "hello world!"}],
 )
 
-stream = co.chat_stream(
-    message="Tell me a short story"
-)
-
-for event in stream:
-    if event.event_type == "text-generation":
-        print(event.text, end='')
+for event in response:
+    if event.type == "content-delta":
+        print(event.delta.message.content.text, end="")
 ```
 
 ## Contributing
