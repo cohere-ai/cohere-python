@@ -7,6 +7,7 @@ authors = []
 keywords = []
 
 classifiers = [
+    "License :: OSI Approved :: MIT License",
     "Intended Audience :: Developers",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
@@ -28,7 +29,7 @@ packages = [
 ]
 
 [project.urls]
-Repository = 'https://github.com/cohere-ai/cohere-python'
+source = "https://github.com/cohere-ai/cohere-python"
 
 [tool.poetry.dependencies]
 python = "^3.9"
