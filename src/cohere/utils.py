@@ -274,7 +274,7 @@ def dataset_generator(dataset: Dataset):
         if not part.url:
             raise ValueError("Dataset part does not have a url")
         resp = requests.get(part.url, stream=True)
-        for record in reader(resp.raw):
+        for record in reader(resp.raw): # type: ignore
             yield record
 
 
