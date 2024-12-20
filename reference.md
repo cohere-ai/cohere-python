@@ -223,7 +223,7 @@ With `prompt_truncation` set to "AUTO_PRESERVE_ORDER", some elements from `chat_
 
 With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
 
-Compatible Deployments: 
+Compatible Deployments:
  - AUTO: Cohere Platform Only
  - AUTO_PRESERVE_ORDER: Azure, AWS Sagemaker/Bedrock, Private Deployments
 
@@ -537,6 +537,8 @@ Safety modes are not yet configurable in combination with `tools`, `tool_results
 
 **Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/docs/command-r-plus#august-2024-release) and newer.
 
+**Note**: `command-r7b-12-2024` only supports `"CONTEXTUAL"` and `"STRICT"` modes.
+
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
     
@@ -708,7 +710,7 @@ With `prompt_truncation` set to "AUTO_PRESERVE_ORDER", some elements from `chat_
 
 With `prompt_truncation` set to "OFF", no elements will be dropped. If the sum of the inputs exceeds the model's context length limit, a `TooManyTokens` error will be returned.
 
-Compatible Deployments: 
+Compatible Deployments:
  - AUTO: Cohere Platform Only
  - AUTO_PRESERVE_ORDER: Azure, AWS Sagemaker/Bedrock, Private Deployments
 
@@ -1021,6 +1023,8 @@ When `NONE` is specified, the safety instruction will be omitted.
 Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
 **Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/docs/command-r-plus#august-2024-release) and newer.
+
+**Note**: `command-r7b-12-2024` only supports `"CONTEXTUAL"` and `"STRICT"` modes.
 
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
@@ -2431,7 +2435,7 @@ When `tools` is passed (without `tool_results`), the `text` content in the respo
 
 **strict_tools:** `typing.Optional[bool]` 
 
-When set to `true`, tool calls in the Assistant message will be forced to follow the tool definition strictly. Learn more in the [Strict Tools guide](https://docs.cohere.com/docs/structured-outputs-json#structured-outputs-tools).
+When set to `true`, tool calls in the Assistant message will be forced to follow the tool definition strictly. Learn more in the [Structured Outputs (Tools) guide](https://docs.cohere.com/docs/structured-outputs-json#structured-outputs-tools).
 
 **Note**: The first few requests with a new set of tools will take longer to process.
 
@@ -2475,6 +2479,8 @@ When `OFF` is specified, the safety instruction will be omitted.
 Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
 **Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/v2/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/v2/docs/command-r-plus#august-2024-release) and newer.
+
+**Note**: `command-r7b-12-2024` only supports `"CONTEXTUAL"` and `"STRICT"` modes.
 
     
 </dd>
@@ -2701,7 +2707,7 @@ When `tools` is passed (without `tool_results`), the `text` content in the respo
 
 **strict_tools:** `typing.Optional[bool]` 
 
-When set to `true`, tool calls in the Assistant message will be forced to follow the tool definition strictly. Learn more in the [Strict Tools guide](https://docs.cohere.com/docs/structured-outputs-json#structured-outputs-tools).
+When set to `true`, tool calls in the Assistant message will be forced to follow the tool definition strictly. Learn more in the [Structured Outputs (Tools) guide](https://docs.cohere.com/docs/structured-outputs-json#structured-outputs-tools).
 
 **Note**: The first few requests with a new set of tools will take longer to process.
 
@@ -2745,6 +2751,8 @@ When `OFF` is specified, the safety instruction will be omitted.
 Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
 **Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/v2/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/v2/docs/command-r-plus#august-2024-release) and newer.
+
+**Note**: `command-r7b-12-2024` only supports `"CONTEXTUAL"` and `"STRICT"` modes.
 
     
 </dd>
