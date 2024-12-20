@@ -35,7 +35,9 @@ jobs:
           version: 1.5.1
           virtualenvs-in-project: false
       - name: Install dependencies
-        run: poetry install --extras aws
+        run: poetry install
+      - name: Install aws deps
+        run: poetry run pip install boto3 sagemaker botocore
       - name: Test
         run: poetry run pytest .
         env:
