@@ -65,17 +65,20 @@ from .chat_stream_start_event import ChatStreamStartEvent
 from .chat_text_generation_event import ChatTextGenerationEvent
 from .chat_tool_call_delta_event import ChatToolCallDeltaEvent
 from .chat_tool_call_delta_event_delta import ChatToolCallDeltaEventDelta
-from .chat_tool_call_delta_event_delta_tool_call import ChatToolCallDeltaEventDeltaToolCall
-from .chat_tool_call_delta_event_delta_tool_call_function import ChatToolCallDeltaEventDeltaToolCallFunction
+from .chat_tool_call_delta_event_delta_message import ChatToolCallDeltaEventDeltaMessage
+from .chat_tool_call_delta_event_delta_message_tool_calls import ChatToolCallDeltaEventDeltaMessageToolCalls
+from .chat_tool_call_delta_event_delta_message_tool_calls_function import (
+    ChatToolCallDeltaEventDeltaMessageToolCallsFunction,
+)
 from .chat_tool_call_end_event import ChatToolCallEndEvent
 from .chat_tool_call_start_event import ChatToolCallStartEvent
 from .chat_tool_call_start_event_delta import ChatToolCallStartEventDelta
-from .chat_tool_call_start_event_delta_tool_call import ChatToolCallStartEventDeltaToolCall
-from .chat_tool_call_start_event_delta_tool_call_function import ChatToolCallStartEventDeltaToolCallFunction
+from .chat_tool_call_start_event_delta_message import ChatToolCallStartEventDeltaMessage
 from .chat_tool_calls_chunk_event import ChatToolCallsChunkEvent
 from .chat_tool_calls_generation_event import ChatToolCallsGenerationEvent
 from .chat_tool_plan_delta_event import ChatToolPlanDeltaEvent
 from .chat_tool_plan_delta_event_delta import ChatToolPlanDeltaEventDelta
+from .chat_tool_plan_delta_event_delta_message import ChatToolPlanDeltaEventDeltaMessage
 from .check_api_key_response import CheckApiKeyResponse
 from .citation import Citation
 from .citation_end_event import CitationEndEvent
@@ -111,6 +114,7 @@ from .delete_connector_response import DeleteConnectorResponse
 from .detokenize_response import DetokenizeResponse
 from .document import Document
 from .document_content import DocumentContent
+from .document_source import DocumentSource
 from .embed_by_type_response import EmbedByTypeResponse
 from .embed_by_type_response_embeddings import EmbedByTypeResponseEmbeddings
 from .embed_floats_response import EmbedFloatsResponse
@@ -201,8 +205,12 @@ from .summarize_request_extractiveness import SummarizeRequestExtractiveness
 from .summarize_request_format import SummarizeRequestFormat
 from .summarize_request_length import SummarizeRequestLength
 from .summarize_response import SummarizeResponse
+from .system_message import SystemMessage
 from .system_message_content import SystemMessageContent
 from .system_message_content_item import SystemMessageContentItem, TextSystemMessageContentItem
+from .text_content import TextContent
+from .text_response_format import TextResponseFormat
+from .text_response_format_v2 import TextResponseFormatV2
 from .tokenize_response import TokenizeResponse
 from .too_many_requests_error_body import TooManyRequestsErrorBody
 from .tool import Tool
@@ -211,10 +219,12 @@ from .tool_call_delta import ToolCallDelta
 from .tool_call_v2 import ToolCallV2
 from .tool_call_v2function import ToolCallV2Function
 from .tool_content import DocumentToolContent, TextToolContent, ToolContent
+from .tool_message import ToolMessage
 from .tool_message_v2 import ToolMessageV2
 from .tool_message_v2content import ToolMessageV2Content
 from .tool_parameter_definitions_value import ToolParameterDefinitionsValue
 from .tool_result import ToolResult
+from .tool_source import ToolSource
 from .tool_v2 import ToolV2
 from .tool_v2function import ToolV2Function
 from .unprocessable_entity_error_body import UnprocessableEntityErrorBody
@@ -222,6 +232,7 @@ from .update_connector_response import UpdateConnectorResponse
 from .usage import Usage
 from .usage_billed_units import UsageBilledUnits
 from .usage_tokens import UsageTokens
+from .user_message import UserMessage
 from .user_message_content import UserMessageContent
 
 __all__ = [
@@ -282,17 +293,18 @@ __all__ = [
     "ChatTextGenerationEvent",
     "ChatToolCallDeltaEvent",
     "ChatToolCallDeltaEventDelta",
-    "ChatToolCallDeltaEventDeltaToolCall",
-    "ChatToolCallDeltaEventDeltaToolCallFunction",
+    "ChatToolCallDeltaEventDeltaMessage",
+    "ChatToolCallDeltaEventDeltaMessageToolCalls",
+    "ChatToolCallDeltaEventDeltaMessageToolCallsFunction",
     "ChatToolCallEndEvent",
     "ChatToolCallStartEvent",
     "ChatToolCallStartEventDelta",
-    "ChatToolCallStartEventDeltaToolCall",
-    "ChatToolCallStartEventDeltaToolCallFunction",
+    "ChatToolCallStartEventDeltaMessage",
     "ChatToolCallsChunkEvent",
     "ChatToolCallsGenerationEvent",
     "ChatToolPlanDeltaEvent",
     "ChatToolPlanDeltaEventDelta",
+    "ChatToolPlanDeltaEventDeltaMessage",
     "ChatbotMessage",
     "CheckApiKeyResponse",
     "Citation",

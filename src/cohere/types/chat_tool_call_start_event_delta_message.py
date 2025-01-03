@@ -2,13 +2,13 @@
 
 from ..core.unchecked_base_model import UncheckedBaseModel
 import typing
+from .tool_call_v2 import ToolCallV2
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
 import pydantic
 
 
-class ChatToolCallStartEventDeltaToolCallFunction(UncheckedBaseModel):
-    name: typing.Optional[str] = None
-    arguments: typing.Optional[str] = None
+class ChatToolCallStartEventDeltaMessage(UncheckedBaseModel):
+    tool_calls: typing.Optional[ToolCallV2] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2

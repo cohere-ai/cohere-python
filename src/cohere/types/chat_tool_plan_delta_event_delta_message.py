@@ -6,8 +6,8 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2
 import pydantic
 
 
-class ChatToolCallDeltaEventDeltaToolCallFunction(UncheckedBaseModel):
-    arguments: typing.Optional[str] = None
+class ChatToolPlanDeltaEventDeltaMessage(UncheckedBaseModel):
+    tool_plan: typing.Optional[str] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
