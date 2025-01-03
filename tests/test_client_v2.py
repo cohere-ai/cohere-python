@@ -14,7 +14,7 @@ embed_job = os.path.join(package_dir, "embed_job.jsonl")
 class TestClientV2(unittest.TestCase):
 
     def test_chat(self) -> None:
-        response = co.chat(model="command-r-plus", messages=[cohere.UserChatMessageV2(content="hello world!")])
+        response = co.chat(model="command-r-plus", documents=["yoyo"], messages=[cohere.UserChatMessageV2(content="hello world!")])
 
         print(response.message)
 
