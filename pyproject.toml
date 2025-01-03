@@ -1,11 +1,11 @@
 [tool.poetry]
 name = "cohere"
-version = "5.13.4"
+version = "5.13.5"
 description = ""
 readme = "README.md"
 authors = []
 keywords = []
-
+license = "MIT"
 classifiers = [
     "Intended Audience :: Developers",
     "Programming Language :: Python",
@@ -21,7 +21,8 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Operating System :: Microsoft :: Windows",
     "Topic :: Software Development :: Libraries :: Python Modules",
-    "Typing :: Typed"
+    "Typing :: Typed",
+    "License :: OSI Approved :: MIT License"
 ]
 packages = [
     { include = "cohere", from = "src"}

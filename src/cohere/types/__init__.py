@@ -65,17 +65,20 @@ from .chat_stream_start_event import ChatStreamStartEvent
 from .chat_text_generation_event import ChatTextGenerationEvent
 from .chat_tool_call_delta_event import ChatToolCallDeltaEvent
 from .chat_tool_call_delta_event_delta import ChatToolCallDeltaEventDelta
-from .chat_tool_call_delta_event_delta_tool_call import ChatToolCallDeltaEventDeltaToolCall
-from .chat_tool_call_delta_event_delta_tool_call_function import ChatToolCallDeltaEventDeltaToolCallFunction
+from .chat_tool_call_delta_event_delta_message import ChatToolCallDeltaEventDeltaMessage
+from .chat_tool_call_delta_event_delta_message_tool_calls import ChatToolCallDeltaEventDeltaMessageToolCalls
+from .chat_tool_call_delta_event_delta_message_tool_calls_function import (
+    ChatToolCallDeltaEventDeltaMessageToolCallsFunction,
+)
 from .chat_tool_call_end_event import ChatToolCallEndEvent
 from .chat_tool_call_start_event import ChatToolCallStartEvent
 from .chat_tool_call_start_event_delta import ChatToolCallStartEventDelta
-from .chat_tool_call_start_event_delta_tool_call import ChatToolCallStartEventDeltaToolCall
-from .chat_tool_call_start_event_delta_tool_call_function import ChatToolCallStartEventDeltaToolCallFunction
+from .chat_tool_call_start_event_delta_message import ChatToolCallStartEventDeltaMessage
 from .chat_tool_calls_chunk_event import ChatToolCallsChunkEvent
 from .chat_tool_calls_generation_event import ChatToolCallsGenerationEvent
 from .chat_tool_plan_delta_event import ChatToolPlanDeltaEvent
 from .chat_tool_plan_delta_event_delta import ChatToolPlanDeltaEventDelta
+from .chat_tool_plan_delta_event_delta_message import ChatToolPlanDeltaEventDeltaMessage
 from .check_api_key_response import CheckApiKeyResponse
 from .citation import Citation
 from .citation_end_event import CitationEndEvent
@@ -282,17 +285,18 @@ __all__ = [
     "ChatTextGenerationEvent",
     "ChatToolCallDeltaEvent",
     "ChatToolCallDeltaEventDelta",
-    "ChatToolCallDeltaEventDeltaToolCall",
-    "ChatToolCallDeltaEventDeltaToolCallFunction",
+    "ChatToolCallDeltaEventDeltaMessage",
+    "ChatToolCallDeltaEventDeltaMessageToolCalls",
+    "ChatToolCallDeltaEventDeltaMessageToolCallsFunction",
     "ChatToolCallEndEvent",
     "ChatToolCallStartEvent",
     "ChatToolCallStartEventDelta",
-    "ChatToolCallStartEventDeltaToolCall",
-    "ChatToolCallStartEventDeltaToolCallFunction",
+    "ChatToolCallStartEventDeltaMessage",
     "ChatToolCallsChunkEvent",
     "ChatToolCallsGenerationEvent",
     "ChatToolPlanDeltaEvent",
     "ChatToolPlanDeltaEventDelta",
+    "ChatToolPlanDeltaEventDeltaMessage",
     "ChatbotMessage",
     "CheckApiKeyResponse",
     "Citation",
