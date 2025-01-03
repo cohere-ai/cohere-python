@@ -2,13 +2,13 @@
 
 from ..core.unchecked_base_model import UncheckedBaseModel
 import typing
-from .chat_tool_call_start_event_delta_tool_call import ChatToolCallStartEventDeltaToolCall
+from .chat_tool_call_start_event_delta_message import ChatToolCallStartEventDeltaMessage
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
 import pydantic
 
 
 class ChatToolCallStartEventDelta(UncheckedBaseModel):
-    tool_call: typing.Optional[ChatToolCallStartEventDeltaToolCall] = None
+    message: typing.Optional[ChatToolCallStartEventDeltaMessage] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
