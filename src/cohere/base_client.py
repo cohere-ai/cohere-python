@@ -31,17 +31,13 @@ from .errors.unauthorized_error import UnauthorizedError
 from .errors.forbidden_error import ForbiddenError
 from .errors.not_found_error import NotFoundError
 from .errors.unprocessable_entity_error import UnprocessableEntityError
-from .types.unprocessable_entity_error_body import UnprocessableEntityErrorBody
 from .errors.too_many_requests_error import TooManyRequestsError
-from .types.too_many_requests_error_body import TooManyRequestsErrorBody
+from .errors.invalid_token_error import InvalidTokenError
 from .errors.client_closed_request_error import ClientClosedRequestError
-from .types.client_closed_request_error_body import ClientClosedRequestErrorBody
 from .errors.internal_server_error import InternalServerError
 from .errors.not_implemented_error import NotImplementedError
-from .types.not_implemented_error_body import NotImplementedErrorBody
 from .errors.service_unavailable_error import ServiceUnavailableError
 from .errors.gateway_timeout_error import GatewayTimeoutError
-from .types.gateway_timeout_error_body import GatewayTimeoutErrorBody
 from json.decoder import JSONDecodeError
 from .types.chat_request_prompt_truncation import ChatRequestPromptTruncation
 from .types.chat_request_citation_quality import ChatRequestCitationQuality
@@ -185,7 +181,8 @@ class BaseCohere:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[StreamedChatResponse]:
         """
-        Generates a text response to a user message.
+        Generates a streamed text response to a user message.
+
         To learn how to use the Chat API and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
 
         Parameters
@@ -438,89 +435,17 @@ class BaseCohere:
 
         Examples
         --------
-        from cohere import (
-            ChatbotMessage,
-            ChatConnector,
-            ChatStreamRequestConnectorsSearchOptions,
-            Client,
-            TextResponseFormat,
-            Tool,
-            ToolCall,
-            ToolParameterDefinitionsValue,
-            ToolResult,
-        )
+        from cohere import Client, ToolMessage
 
         client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
         response = client.chat_stream(
-            message="string",
-            model="string",
-            preamble="string",
-            chat_history=[
-                ChatbotMessage(
-                    message="string",
-                    tool_calls=[
-                        ToolCall(
-                            name="string",
-                            parameters={"string": {"key": "value"}},
-                        )
-                    ],
-                )
-            ],
-            conversation_id="string",
+            message="Can you give me a global market overview of solar panels?",
+            chat_history=[ToolMessage(), ToolMessage()],
             prompt_truncation="OFF",
-            connectors=[
-                ChatConnector(
-                    id="string",
-                    user_access_token="string",
-                    continue_on_failure=True,
-                    options={"string": {"key": "value"}},
-                )
-            ],
-            search_queries_only=True,
-            documents=[{"string": {"key": "value"}}],
-            citation_quality="fast",
-            temperature=1.1,
-            max_tokens=1,
-            max_input_tokens=1,
-            k=1,
-            p=1.1,
-            seed=1,
-            stop_sequences=["string"],
-            connectors_search_options=ChatStreamRequestConnectorsSearchOptions(
-                seed=1,
-            ),
-            frequency_penalty=1.1,
-            presence_penalty=1.1,
-            raw_prompting=True,
-            return_prompt=True,
-            tools=[
-                Tool(
-                    name="string",
-                    description="string",
-                    parameter_definitions={
-                        "string": ToolParameterDefinitionsValue(
-                            description="string",
-                            type="string",
-                            required=True,
-                        )
-                    },
-                )
-            ],
-            tool_results=[
-                ToolResult(
-                    call=ToolCall(
-                        name="string",
-                        parameters={"string": {"key": "value"}},
-                    ),
-                    outputs=[{"string": {"key": "value"}}],
-                )
-            ],
-            force_single_step=True,
-            response_format=TextResponseFormat(),
-            safety_mode="CONTEXTUAL",
+            temperature=0.3,
         )
         for chunk in response:
             yield chunk
@@ -568,6 +493,7 @@ class BaseCohere:
                 "stream": True,
             },
             headers={
+                "content-type": "application/json",
                 "Accepts": str(accepts) if accepts is not None else None,
             },
             request_options=request_options,
@@ -633,9 +559,9 @@ class BaseCohere:
                 if _response.status_code == 422:
                     raise UnprocessableEntityError(
                         typing.cast(
-                            UnprocessableEntityErrorBody,
+                            typing.Optional[typing.Any],
                             construct_type(
-                                type_=UnprocessableEntityErrorBody,  # type: ignore
+                                type_=typing.Optional[typing.Any],  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -643,9 +569,19 @@ class BaseCohere:
                 if _response.status_code == 429:
                     raise TooManyRequestsError(
                         typing.cast(
-                            TooManyRequestsErrorBody,
+                            typing.Optional[typing.Any],
                             construct_type(
-                                type_=TooManyRequestsErrorBody,  # type: ignore
+                                type_=typing.Optional[typing.Any],  # type: ignore
+                                object_=_response.json(),
+                            ),
+                        )
+                    )
+                if _response.status_code == 498:
+                    raise InvalidTokenError(
+                        typing.cast(
+                            typing.Optional[typing.Any],
+                            construct_type(
+                                type_=typing.Optional[typing.Any],  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -653,9 +589,9 @@ class BaseCohere:
                 if _response.status_code == 499:
                     raise ClientClosedRequestError(
                         typing.cast(
-                            ClientClosedRequestErrorBody,
+                            typing.Optional[typing.Any],
                             construct_type(
-                                type_=ClientClosedRequestErrorBody,  # type: ignore
+                                type_=typing.Optional[typing.Any],  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -673,9 +609,9 @@ class BaseCohere:
                 if _response.status_code == 501:
                     raise NotImplementedError(
                         typing.cast(
-                            NotImplementedErrorBody,
+                            typing.Optional[typing.Any],
                             construct_type(
-                                type_=NotImplementedErrorBody,  # type: ignore
+                                type_=typing.Optional[typing.Any],  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -693,9 +629,9 @@ class BaseCohere:
                 if _response.status_code == 504:
                     raise GatewayTimeoutError(
                         typing.cast(
-                            GatewayTimeoutErrorBody,
+                            typing.Optional[typing.Any],
                             construct_type(
-                                type_=GatewayTimeoutErrorBody,  # type: ignore
+                                type_=typing.Optional[typing.Any],  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -1047,6 +983,7 @@ class BaseCohere:
                 "stream": False,
             },
             headers={
+                "content-type": "application/json",
                 "Accepts": str(accepts) if accepts is not None else None,
             },
             request_options=request_options,
@@ -1104,9 +1041,9 @@ class BaseCohere:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1114,9 +1051,19 @@ class BaseCohere:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1124,9 +1071,9 @@ class BaseCohere:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1144,9 +1091,9 @@ class BaseCohere:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1164,9 +1111,9 @@ class BaseCohere:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1308,22 +1255,7 @@ class BaseCohere:
             token="YOUR_TOKEN",
         )
         response = client.generate_stream(
-            prompt="string",
-            model="string",
-            num_generations=1,
-            max_tokens=1,
-            truncate="NONE",
-            temperature=1.1,
-            seed=1,
-            preset="string",
-            end_sequences=["string"],
-            stop_sequences=["string"],
-            k=1,
-            p=1.1,
-            frequency_penalty=1.1,
-            presence_penalty=1.1,
-            return_likelihoods="GENERATION",
-            raw_prompting=True,
+            prompt="Please explain to me how LLMs work",
         )
         for chunk in response:
             yield chunk
@@ -1349,6 +1281,9 @@ class BaseCohere:
                 "return_likelihoods": return_likelihoods,
                 "raw_prompting": raw_prompting,
                 "stream": True,
+            },
+            headers={
+                "content-type": "application/json",
             },
             request_options=request_options,
             omit=OMIT,
@@ -1413,9 +1348,9 @@ class BaseCohere:
                 if _response.status_code == 422:
                     raise UnprocessableEntityError(
                         typing.cast(
-                            UnprocessableEntityErrorBody,
+                            typing.Optional[typing.Any],
                             construct_type(
-                                type_=UnprocessableEntityErrorBody,  # type: ignore
+                                type_=typing.Optional[typing.Any],  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -1423,9 +1358,19 @@ class BaseCohere:
                 if _response.status_code == 429:
                     raise TooManyRequestsError(
                         typing.cast(
-                            TooManyRequestsErrorBody,
+                            typing.Optional[typing.Any],
                             construct_type(
-                                type_=TooManyRequestsErrorBody,  # type: ignore
+                                type_=typing.Optional[typing.Any],  # type: ignore
+                                object_=_response.json(),
+                            ),
+                        )
+                    )
+                if _response.status_code == 498:
+                    raise InvalidTokenError(
+                        typing.cast(
+                            typing.Optional[typing.Any],
+                            construct_type(
+                                type_=typing.Optional[typing.Any],  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -1433,9 +1378,9 @@ class BaseCohere:
                 if _response.status_code == 499:
                     raise ClientClosedRequestError(
                         typing.cast(
-                            ClientClosedRequestErrorBody,
+                            typing.Optional[typing.Any],
                             construct_type(
-                                type_=ClientClosedRequestErrorBody,  # type: ignore
+                                type_=typing.Optional[typing.Any],  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -1453,9 +1398,9 @@ class BaseCohere:
                 if _response.status_code == 501:
                     raise NotImplementedError(
                         typing.cast(
-                            NotImplementedErrorBody,
+                            typing.Optional[typing.Any],
                             construct_type(
-                                type_=NotImplementedErrorBody,  # type: ignore
+                                type_=typing.Optional[typing.Any],  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -1473,9 +1418,9 @@ class BaseCohere:
                 if _response.status_code == 504:
                     raise GatewayTimeoutError(
                         typing.cast(
-                            GatewayTimeoutErrorBody,
+                            typing.Optional[typing.Any],
                             construct_type(
-                                type_=GatewayTimeoutErrorBody,  # type: ignore
+                                type_=typing.Optional[typing.Any],  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -1642,6 +1587,9 @@ class BaseCohere:
                 "raw_prompting": raw_prompting,
                 "stream": False,
             },
+            headers={
+                "content-type": "application/json",
+            },
             request_options=request_options,
             omit=OMIT,
         )
@@ -1697,9 +1645,9 @@ class BaseCohere:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1707,9 +1655,19 @@ class BaseCohere:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1717,9 +1675,9 @@ class BaseCohere:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1737,9 +1695,9 @@ class BaseCohere:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1757,9 +1715,9 @@ class BaseCohere:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1860,6 +1818,9 @@ class BaseCohere:
                 "embedding_types": embedding_types,
                 "truncate": truncate,
             },
+            headers={
+                "content-type": "application/json",
+            },
             request_options=request_options,
             omit=OMIT,
         )
@@ -1915,9 +1876,9 @@ class BaseCohere:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1925,9 +1886,19 @@ class BaseCohere:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1935,9 +1906,9 @@ class BaseCohere:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1955,9 +1926,9 @@ class BaseCohere:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1975,9 +1946,9 @@ class BaseCohere:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2066,6 +2037,9 @@ class BaseCohere:
                 "return_documents": return_documents,
                 "max_chunks_per_doc": max_chunks_per_doc,
             },
+            headers={
+                "content-type": "application/json",
+            },
             request_options=request_options,
             omit=OMIT,
         )
@@ -2121,9 +2095,9 @@ class BaseCohere:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2131,9 +2105,19 @@ class BaseCohere:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2141,9 +2125,9 @@ class BaseCohere:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2161,9 +2145,9 @@ class BaseCohere:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2181,9 +2165,9 @@ class BaseCohere:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2261,6 +2245,9 @@ class BaseCohere:
                 "preset": preset,
                 "truncate": truncate,
             },
+            headers={
+                "content-type": "application/json",
+            },
             request_options=request_options,
             omit=OMIT,
         )
@@ -2316,9 +2303,9 @@ class BaseCohere:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2326,9 +2313,19 @@ class BaseCohere:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2336,9 +2333,9 @@ class BaseCohere:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2356,9 +2353,9 @@ class BaseCohere:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2376,9 +2373,9 @@ class BaseCohere:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2461,6 +2458,9 @@ class BaseCohere:
                 "temperature": temperature,
                 "additional_command": additional_command,
             },
+            headers={
+                "content-type": "application/json",
+            },
             request_options=request_options,
             omit=OMIT,
         )
@@ -2516,9 +2516,9 @@ class BaseCohere:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2526,9 +2526,19 @@ class BaseCohere:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2536,9 +2546,9 @@ class BaseCohere:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2556,9 +2566,9 @@ class BaseCohere:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2576,9 +2586,9 @@ class BaseCohere:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2629,6 +2639,9 @@ class BaseCohere:
             json={
                 "text": text,
                 "model": model,
+            },
+            headers={
+                "content-type": "application/json",
             },
             request_options=request_options,
             omit=OMIT,
@@ -2685,9 +2698,9 @@ class BaseCohere:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2695,9 +2708,19 @@ class BaseCohere:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2705,9 +2728,9 @@ class BaseCohere:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2725,9 +2748,9 @@ class BaseCohere:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2745,9 +2768,9 @@ class BaseCohere:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2798,6 +2821,9 @@ class BaseCohere:
             json={
                 "tokens": tokens,
                 "model": model,
+            },
+            headers={
+                "content-type": "application/json",
             },
             request_options=request_options,
             omit=OMIT,
@@ -2854,9 +2880,9 @@ class BaseCohere:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2864,9 +2890,19 @@ class BaseCohere:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2874,9 +2910,9 @@ class BaseCohere:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2894,9 +2930,9 @@ class BaseCohere:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -2914,9 +2950,9 @@ class BaseCohere:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -3007,9 +3043,9 @@ class BaseCohere:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -3017,9 +3053,19 @@ class BaseCohere:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -3027,9 +3073,9 @@ class BaseCohere:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -3047,9 +3093,9 @@ class BaseCohere:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -3067,9 +3113,9 @@ class BaseCohere:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -3184,7 +3230,8 @@ class AsyncBaseCohere:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[StreamedChatResponse]:
         """
-        Generates a text response to a user message.
+        Generates a streamed text response to a user message.
+
         To learn how to use the Chat API and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
 
         Parameters
@@ -3439,17 +3486,7 @@ class AsyncBaseCohere:
         --------
         import asyncio
 
-        from cohere import (
-            AsyncClient,
-            ChatbotMessage,
-            ChatConnector,
-            ChatStreamRequestConnectorsSearchOptions,
-            TextResponseFormat,
-            Tool,
-            ToolCall,
-            ToolParameterDefinitionsValue,
-            ToolResult,
-        )
+        from cohere import AsyncClient, ToolMessage
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
@@ -3459,72 +3496,10 @@ class AsyncBaseCohere:
 
         async def main() -> None:
             response = await client.chat_stream(
-                message="string",
-                model="string",
-                preamble="string",
-                chat_history=[
-                    ChatbotMessage(
-                        message="string",
-                        tool_calls=[
-                            ToolCall(
-                                name="string",
-                                parameters={"string": {"key": "value"}},
-                            )
-                        ],
-                    )
-                ],
-                conversation_id="string",
+                message="Can you give me a global market overview of solar panels?",
+                chat_history=[ToolMessage(), ToolMessage()],
                 prompt_truncation="OFF",
-                connectors=[
-                    ChatConnector(
-                        id="string",
-                        user_access_token="string",
-                        continue_on_failure=True,
-                        options={"string": {"key": "value"}},
-                    )
-                ],
-                search_queries_only=True,
-                documents=[{"string": {"key": "value"}}],
-                citation_quality="fast",
-                temperature=1.1,
-                max_tokens=1,
-                max_input_tokens=1,
-                k=1,
-                p=1.1,
-                seed=1,
-                stop_sequences=["string"],
-                connectors_search_options=ChatStreamRequestConnectorsSearchOptions(
-                    seed=1,
-                ),
-                frequency_penalty=1.1,
-                presence_penalty=1.1,
-                raw_prompting=True,
-                return_prompt=True,
-                tools=[
-                    Tool(
-                        name="string",
-                        description="string",
-                        parameter_definitions={
-                            "string": ToolParameterDefinitionsValue(
-                                description="string",
-                                type="string",
-                                required=True,
-                            )
-                        },
-                    )
-                ],
-                tool_results=[
-                    ToolResult(
-                        call=ToolCall(
-                            name="string",
-                            parameters={"string": {"key": "value"}},
-                        ),
-                        outputs=[{"string": {"key": "value"}}],
-                    )
-                ],
-                force_single_step=True,
-                response_format=TextResponseFormat(),
-                safety_mode="CONTEXTUAL",
+                temperature=0.3,
             )
             async for chunk in response:
                 yield chunk
@@ -3575,6 +3550,7 @@ class AsyncBaseCohere:
                 "stream": True,
             },
             headers={
+                "content-type": "application/json",
                 "Accepts": str(accepts) if accepts is not None else None,
             },
             request_options=request_options,
@@ -3640,9 +3616,9 @@ class AsyncBaseCohere:
                 if _response.status_code == 422:
                     raise UnprocessableEntityError(
                         typing.cast(
-                            UnprocessableEntityErrorBody,
+                            typing.Optional[typing.Any],
                             construct_type(
-                                type_=UnprocessableEntityErrorBody,  # type: ignore
+                                type_=typing.Optional[typing.Any],  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -3650,9 +3626,19 @@ class AsyncBaseCohere:
                 if _response.status_code == 429:
                     raise TooManyRequestsError(
                         typing.cast(
-                            TooManyRequestsErrorBody,
+                            typing.Optional[typing.Any],
                             construct_type(
-                                type_=TooManyRequestsErrorBody,  # type: ignore
+                                type_=typing.Optional[typing.Any],  # type: ignore
+                                object_=_response.json(),
+                            ),
+                        )
+                    )
+                if _response.status_code == 498:
+                    raise InvalidTokenError(
+                        typing.cast(
+                            typing.Optional[typing.Any],
+                            construct_type(
+                                type_=typing.Optional[typing.Any],  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -3660,9 +3646,9 @@ class AsyncBaseCohere:
                 if _response.status_code == 499:
                     raise ClientClosedRequestError(
                         typing.cast(
-                            ClientClosedRequestErrorBody,
+                            typing.Optional[typing.Any],
                             construct_type(
-                                type_=ClientClosedRequestErrorBody,  # type: ignore
+                                type_=typing.Optional[typing.Any],  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -3680,9 +3666,9 @@ class AsyncBaseCohere:
                 if _response.status_code == 501:
                     raise NotImplementedError(
                         typing.cast(
-                            NotImplementedErrorBody,
+                            typing.Optional[typing.Any],
                             construct_type(
-                                type_=NotImplementedErrorBody,  # type: ignore
+                                type_=typing.Optional[typing.Any],  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -3700,9 +3686,9 @@ class AsyncBaseCohere:
                 if _response.status_code == 504:
                     raise GatewayTimeoutError(
                         typing.cast(
-                            GatewayTimeoutErrorBody,
+                            typing.Optional[typing.Any],
                             construct_type(
-                                type_=GatewayTimeoutErrorBody,  # type: ignore
+                                type_=typing.Optional[typing.Any],  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -4062,6 +4048,7 @@ class AsyncBaseCohere:
                 "stream": False,
             },
             headers={
+                "content-type": "application/json",
                 "Accepts": str(accepts) if accepts is not None else None,
             },
             request_options=request_options,
@@ -4119,9 +4106,9 @@ class AsyncBaseCohere:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -4129,9 +4116,19 @@ class AsyncBaseCohere:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -4139,9 +4136,9 @@ class AsyncBaseCohere:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -4159,9 +4156,9 @@ class AsyncBaseCohere:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -4179,9 +4176,9 @@ class AsyncBaseCohere:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -4328,22 +4325,7 @@ class AsyncBaseCohere:
 
         async def main() -> None:
             response = await client.generate_stream(
-                prompt="string",
-                model="string",
-                num_generations=1,
-                max_tokens=1,
-                truncate="NONE",
-                temperature=1.1,
-                seed=1,
-                preset="string",
-                end_sequences=["string"],
-                stop_sequences=["string"],
-                k=1,
-                p=1.1,
-                frequency_penalty=1.1,
-                presence_penalty=1.1,
-                return_likelihoods="GENERATION",
-                raw_prompting=True,
+                prompt="Please explain to me how LLMs work",
             )
             async for chunk in response:
                 yield chunk
@@ -4372,6 +4354,9 @@ class AsyncBaseCohere:
                 "return_likelihoods": return_likelihoods,
                 "raw_prompting": raw_prompting,
                 "stream": True,
+            },
+            headers={
+                "content-type": "application/json",
             },
             request_options=request_options,
             omit=OMIT,
@@ -4436,9 +4421,9 @@ class AsyncBaseCohere:
                 if _response.status_code == 422:
                     raise UnprocessableEntityError(
                         typing.cast(
-                            UnprocessableEntityErrorBody,
+                            typing.Optional[typing.Any],
                             construct_type(
-                                type_=UnprocessableEntityErrorBody,  # type: ignore
+                                type_=typing.Optional[typing.Any],  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -4446,9 +4431,19 @@ class AsyncBaseCohere:
                 if _response.status_code == 429:
                     raise TooManyRequestsError(
                         typing.cast(
-                            TooManyRequestsErrorBody,
+                            typing.Optional[typing.Any],
                             construct_type(
-                                type_=TooManyRequestsErrorBody,  # type: ignore
+                                type_=typing.Optional[typing.Any],  # type: ignore
+                                object_=_response.json(),
+                            ),
+                        )
+                    )
+                if _response.status_code == 498:
+                    raise InvalidTokenError(
+                        typing.cast(
+                            typing.Optional[typing.Any],
+                            construct_type(
+                                type_=typing.Optional[typing.Any],  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -4456,9 +4451,9 @@ class AsyncBaseCohere:
                 if _response.status_code == 499:
                     raise ClientClosedRequestError(
                         typing.cast(
-                            ClientClosedRequestErrorBody,
+                            typing.Optional[typing.Any],
                             construct_type(
-                                type_=ClientClosedRequestErrorBody,  # type: ignore
+                                type_=typing.Optional[typing.Any],  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -4476,9 +4471,9 @@ class AsyncBaseCohere:
                 if _response.status_code == 501:
                     raise NotImplementedError(
                         typing.cast(
-                            NotImplementedErrorBody,
+                            typing.Optional[typing.Any],
                             construct_type(
-                                type_=NotImplementedErrorBody,  # type: ignore
+                                type_=typing.Optional[typing.Any],  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -4496,9 +4491,9 @@ class AsyncBaseCohere:
                 if _response.status_code == 504:
                     raise GatewayTimeoutError(
                         typing.cast(
-                            GatewayTimeoutErrorBody,
+                            typing.Optional[typing.Any],
                             construct_type(
-                                type_=GatewayTimeoutErrorBody,  # type: ignore
+                                type_=typing.Optional[typing.Any],  # type: ignore
                                 object_=_response.json(),
                             ),
                         )
@@ -4673,6 +4668,9 @@ class AsyncBaseCohere:
                 "raw_prompting": raw_prompting,
                 "stream": False,
             },
+            headers={
+                "content-type": "application/json",
+            },
             request_options=request_options,
             omit=OMIT,
         )
@@ -4728,9 +4726,9 @@ class AsyncBaseCohere:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -4738,9 +4736,19 @@ class AsyncBaseCohere:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -4748,9 +4756,9 @@ class AsyncBaseCohere:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -4768,9 +4776,9 @@ class AsyncBaseCohere:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -4788,9 +4796,9 @@ class AsyncBaseCohere:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -4899,6 +4907,9 @@ class AsyncBaseCohere:
                 "embedding_types": embedding_types,
                 "truncate": truncate,
             },
+            headers={
+                "content-type": "application/json",
+            },
             request_options=request_options,
             omit=OMIT,
         )
@@ -4954,9 +4965,9 @@ class AsyncBaseCohere:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -4964,9 +4975,19 @@ class AsyncBaseCohere:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -4974,9 +4995,9 @@ class AsyncBaseCohere:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -4994,9 +5015,9 @@ class AsyncBaseCohere:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5014,9 +5035,9 @@ class AsyncBaseCohere:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5113,6 +5134,9 @@ class AsyncBaseCohere:
                 "return_documents": return_documents,
                 "max_chunks_per_doc": max_chunks_per_doc,
             },
+            headers={
+                "content-type": "application/json",
+            },
             request_options=request_options,
             omit=OMIT,
         )
@@ -5168,9 +5192,9 @@ class AsyncBaseCohere:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5178,9 +5202,19 @@ class AsyncBaseCohere:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5188,9 +5222,9 @@ class AsyncBaseCohere:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5208,9 +5242,9 @@ class AsyncBaseCohere:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5228,9 +5262,9 @@ class AsyncBaseCohere:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5316,6 +5350,9 @@ class AsyncBaseCohere:
                 "preset": preset,
                 "truncate": truncate,
             },
+            headers={
+                "content-type": "application/json",
+            },
             request_options=request_options,
             omit=OMIT,
         )
@@ -5371,9 +5408,9 @@ class AsyncBaseCohere:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5381,9 +5418,19 @@ class AsyncBaseCohere:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5391,9 +5438,9 @@ class AsyncBaseCohere:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5411,9 +5458,9 @@ class AsyncBaseCohere:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5431,9 +5478,9 @@ class AsyncBaseCohere:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5524,6 +5571,9 @@ class AsyncBaseCohere:
                 "temperature": temperature,
                 "additional_command": additional_command,
             },
+            headers={
+                "content-type": "application/json",
+            },
             request_options=request_options,
             omit=OMIT,
         )
@@ -5579,9 +5629,9 @@ class AsyncBaseCohere:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5589,9 +5639,19 @@ class AsyncBaseCohere:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5599,9 +5659,9 @@ class AsyncBaseCohere:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5619,9 +5679,9 @@ class AsyncBaseCohere:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5639,9 +5699,9 @@ class AsyncBaseCohere:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5701,6 +5761,9 @@ class AsyncBaseCohere:
                 "text": text,
                 "model": model,
             },
+            headers={
+                "content-type": "application/json",
+            },
             request_options=request_options,
             omit=OMIT,
         )
@@ -5756,9 +5819,9 @@ class AsyncBaseCohere:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5766,9 +5829,19 @@ class AsyncBaseCohere:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5776,9 +5849,9 @@ class AsyncBaseCohere:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5796,9 +5869,9 @@ class AsyncBaseCohere:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5816,9 +5889,9 @@ class AsyncBaseCohere:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5878,6 +5951,9 @@ class AsyncBaseCohere:
                 "tokens": tokens,
                 "model": model,
             },
+            headers={
+                "content-type": "application/json",
+            },
             request_options=request_options,
             omit=OMIT,
         )
@@ -5933,9 +6009,9 @@ class AsyncBaseCohere:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5943,9 +6019,19 @@ class AsyncBaseCohere:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5953,9 +6039,9 @@ class AsyncBaseCohere:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5973,9 +6059,9 @@ class AsyncBaseCohere:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -5993,9 +6079,9 @@ class AsyncBaseCohere:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -6094,9 +6180,9 @@ class AsyncBaseCohere:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        UnprocessableEntityErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=UnprocessableEntityErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -6104,9 +6190,19 @@ class AsyncBaseCohere:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        TooManyRequestsErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=TooManyRequestsErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 498:
+                raise InvalidTokenError(
+                    typing.cast(
+                        typing.Optional[typing.Any],
+                        construct_type(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -6114,9 +6210,9 @@ class AsyncBaseCohere:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        ClientClosedRequestErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=ClientClosedRequestErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -6134,9 +6230,9 @@ class AsyncBaseCohere:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        NotImplementedErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=NotImplementedErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -6154,9 +6250,9 @@ class AsyncBaseCohere:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        GatewayTimeoutErrorBody,
+                        typing.Optional[typing.Any],
                         construct_type(
-                            type_=GatewayTimeoutErrorBody,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     )

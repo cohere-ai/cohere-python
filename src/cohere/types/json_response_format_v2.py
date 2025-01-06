@@ -11,13 +11,12 @@ class JsonResponseFormatV2(UncheckedBaseModel):
     """
     A [JSON schema](https://json-schema.org/overview/what-is-jsonschema) object that the output will adhere to. There are some restrictions we have on the schema, refer to [our guide](https://docs.cohere.com/docs/structured-outputs-json#schema-constraints) for more information.
     Example (required name and age object):
-    
     ```json
     {
       "type": "object",
       "properties": {
-        "name": { "type": "string" },
-        "age": { "type": "integer" }
+        "name": {"type": "string"},
+        "age": {"type": "integer"}
       },
       "required": ["name", "age"]
     }
