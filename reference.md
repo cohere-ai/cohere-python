@@ -11,7 +11,8 @@
 <dl>
 <dd>
 
-Generates a text response to a user message.
+Generates a streamed text response to a user message.
+
 To learn how to use the Chat API and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
 </dd>
 </dl>
@@ -27,89 +28,17 @@ To learn how to use the Chat API and RAG follow our [Text Generation guides](htt
 <dd>
 
 ```python
-from cohere import (
-    ChatbotMessage,
-    ChatConnector,
-    ChatStreamRequestConnectorsSearchOptions,
-    Client,
-    TextResponseFormat,
-    Tool,
-    ToolCall,
-    ToolParameterDefinitionsValue,
-    ToolResult,
-)
+from cohere import Client, ToolMessage
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
     token="YOUR_TOKEN",
 )
 response = client.chat_stream(
-    message="string",
-    model="string",
-    preamble="string",
-    chat_history=[
-        ChatbotMessage(
-            message="string",
-            tool_calls=[
-                ToolCall(
-                    name="string",
-                    parameters={"string": {"key": "value"}},
-                )
-            ],
-        )
-    ],
-    conversation_id="string",
+    message="Can you give me a global market overview of solar panels?",
+    chat_history=[ToolMessage(), ToolMessage()],
     prompt_truncation="OFF",
-    connectors=[
-        ChatConnector(
-            id="string",
-            user_access_token="string",
-            continue_on_failure=True,
-            options={"string": {"key": "value"}},
-        )
-    ],
-    search_queries_only=True,
-    documents=[{"string": {"key": "value"}}],
-    citation_quality="fast",
-    temperature=1.1,
-    max_tokens=1,
-    max_input_tokens=1,
-    k=1,
-    p=1.1,
-    seed=1,
-    stop_sequences=["string"],
-    connectors_search_options=ChatStreamRequestConnectorsSearchOptions(
-        seed=1,
-    ),
-    frequency_penalty=1.1,
-    presence_penalty=1.1,
-    raw_prompting=True,
-    return_prompt=True,
-    tools=[
-        Tool(
-            name="string",
-            description="string",
-            parameter_definitions={
-                "string": ToolParameterDefinitionsValue(
-                    description="string",
-                    type="string",
-                    required=True,
-                )
-            },
-        )
-    ],
-    tool_results=[
-        ToolResult(
-            call=ToolCall(
-                name="string",
-                parameters={"string": {"key": "value"}},
-            ),
-            outputs=[{"string": {"key": "value"}}],
-        )
-    ],
-    force_single_step=True,
-    response_format=TextResponseFormat(),
-    safety_mode="CONTEXTUAL",
+    temperature=0.3,
 )
 for chunk in response:
     yield chunk
@@ -1084,22 +1013,7 @@ client = Client(
     token="YOUR_TOKEN",
 )
 response = client.generate_stream(
-    prompt="string",
-    model="string",
-    num_generations=1,
-    max_tokens=1,
-    truncate="NONE",
-    temperature=1.1,
-    seed=1,
-    preset="string",
-    end_sequences=["string"],
-    stop_sequences=["string"],
-    k=1,
-    p=1.1,
-    frequency_penalty=1.1,
-    presence_penalty=1.1,
-    return_likelihoods="GENERATION",
-    raw_prompting=True,
+    prompt="Please explain to me how LLMs work",
 )
 for chunk in response:
     yield chunk
@@ -2323,7 +2237,7 @@ client.check_api_key()
 <dl>
 <dd>
 
-Generates a text response to a user message and streams it down, token by token. To learn how to use the Chat API with streaming follow our [Text Generation guides](https://docs.cohere.com/v2/docs/chat-api).
+Generates a text response to a user message. To learn how to use the Chat API and RAG follow our [Text Generation guides](https://docs.cohere.com/v2/docs/chat-api).
 
 Follow the [Migration Guide](https://docs.cohere.com/v2/docs/migrating-v1-to-v2) for instructions on moving from API v1 to API v2.
 </dd>
@@ -2340,52 +2254,20 @@ Follow the [Migration Guide](https://docs.cohere.com/v2/docs/migrating-v1-to-v2)
 <dd>
 
 ```python
-from cohere import (
-    CitationOptions,
-    Client,
-    TextResponseFormatV2,
-    ToolV2,
-    ToolV2Function,
-    UserChatMessageV2,
-)
+from cohere import Client, ToolChatMessageV2
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
     token="YOUR_TOKEN",
 )
 response = client.v2.chat_stream(
-    model="string",
+    model="model",
     messages=[
-        UserChatMessageV2(
-            content="string",
+        ToolChatMessageV2(
+            tool_call_id="messages",
+            content="messages",
         )
     ],
-    tools=[
-        ToolV2(
-            function=ToolV2Function(
-                name="string",
-                description="string",
-                parameters={"string": {"key": "value"}},
-            ),
-        )
-    ],
-    strict_tools=True,
-    documents=["string"],
-    citation_options=CitationOptions(
-        mode="FAST",
-    ),
-    response_format=TextResponseFormatV2(),
-    safety_mode="CONTEXTUAL",
-    max_tokens=1,
-    stop_sequences=["string"],
-    temperature=1.1,
-    seed=1,
-    frequency_penalty=1.1,
-    presence_penalty=1.1,
-    k=1.1,
-    p=1.1,
-    return_prompt=True,
-    logprobs=True,
 )
 for chunk in response:
     yield chunk
@@ -4458,7 +4340,7 @@ client.connectors.update(
 <dl>
 <dd>
 
-Authorize the connector with the given ID for the connector oauth app. See ['Connector Authentication'](https://docs.cohere.com/docs/connector-authentication) for more information.
+Authorize the connector with the given ID for the connector oauth app.  See ['Connector Authentication'](https://docs.cohere.com/docs/connector-authentication) for more information.
 </dd>
 </dl>
 </dd>
@@ -4729,7 +4611,10 @@ client.finetuning.list_finetuned_models()
 <dl>
 <dd>
 
-**page_size:** `typing.Optional[int]` — Maximum number of results to be returned by the server. If 0, defaults to 50.
+**page_size:** `typing.Optional[int]` 
+
+Maximum number of results to be returned by the server. If 0, defaults to
+50.
     
 </dd>
 </dl>
@@ -4752,8 +4637,7 @@ sorting order is ascending. To specify descending order for a field, append
 " desc" to the field name. For example: "created_at desc,name".
 
 Supported sorting fields:
-
-- created_at (default)
+  - created_at (default)
     
 </dd>
 </dl>
@@ -5135,7 +5019,10 @@ client.finetuning.list_events(
 <dl>
 <dd>
 
-**page_size:** `typing.Optional[int]` — Maximum number of results to be returned by the server. If 0, defaults to 50.
+**page_size:** `typing.Optional[int]` 
+
+Maximum number of results to be returned by the server. If 0, defaults to
+50.
     
 </dd>
 </dl>
@@ -5158,8 +5045,7 @@ sorting order is ascending. To specify descending order for a field, append
 " desc" to the field name. For example: "created_at desc,name".
 
 Supported sorting fields:
-
-- created_at (default)
+  - created_at (default)
     
 </dd>
 </dl>
@@ -5224,7 +5110,10 @@ client.finetuning.list_training_step_metrics(
 <dl>
 <dd>
 
-**page_size:** `typing.Optional[int]` — Maximum number of results to be returned by the server. If 0, defaults to 50.
+**page_size:** `typing.Optional[int]` 
+
+Maximum number of results to be returned by the server. If 0, defaults to
+50.
     
 </dd>
 </dl>
