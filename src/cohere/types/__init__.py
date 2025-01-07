@@ -96,7 +96,6 @@ from .classify_response_classifications_item_classification_type import (
     ClassifyResponseClassificationsItemClassificationType,
 )
 from .classify_response_classifications_item_labels_value import ClassifyResponseClassificationsItemLabelsValue
-from .client_closed_request_error_body import ClientClosedRequestErrorBody
 from .compatible_endpoint import CompatibleEndpoint
 from .connector import Connector
 from .connector_auth_status import ConnectorAuthStatus
@@ -126,7 +125,6 @@ from .embed_response import EmbedResponse, EmbeddingsByTypeEmbedResponse, Embedd
 from .embedding_type import EmbeddingType
 from .finetune_dataset_metrics import FinetuneDatasetMetrics
 from .finish_reason import FinishReason
-from .gateway_timeout_error_body import GatewayTimeoutErrorBody
 from .generate_request_return_likelihoods import GenerateRequestReturnLikelihoods
 from .generate_request_truncate import GenerateRequestTruncate
 from .generate_stream_end import GenerateStreamEnd
@@ -158,7 +156,6 @@ from .metrics import Metrics
 from .metrics_embed_data import MetricsEmbedData
 from .metrics_embed_data_fields_item import MetricsEmbedDataFieldsItem
 from .non_streamed_chat_response import NonStreamedChatResponse
-from .not_implemented_error_body import NotImplementedErrorBody
 from .o_auth_authorize_response import OAuthAuthorizeResponse
 from .parse_info import ParseInfo
 from .rerank_document import RerankDocument
@@ -207,7 +204,6 @@ from .summarize_response import SummarizeResponse
 from .system_message_content import SystemMessageContent
 from .system_message_content_item import SystemMessageContentItem, TextSystemMessageContentItem
 from .tokenize_response import TokenizeResponse
-from .too_many_requests_error_body import TooManyRequestsErrorBody
 from .tool import Tool
 from .tool_call import ToolCall
 from .tool_call_delta import ToolCallDelta
@@ -220,7 +216,6 @@ from .tool_parameter_definitions_value import ToolParameterDefinitionsValue
 from .tool_result import ToolResult
 from .tool_v2 import ToolV2
 from .tool_v2function import ToolV2Function
-from .unprocessable_entity_error_body import UnprocessableEntityErrorBody
 from .update_connector_response import UpdateConnectorResponse
 from .usage import Usage
 from .usage_billed_units import UsageBilledUnits
@@ -316,7 +311,6 @@ __all__ = [
     "ClassifyResponseClassificationsItem",
     "ClassifyResponseClassificationsItemClassificationType",
     "ClassifyResponseClassificationsItemLabelsValue",
-    "ClientClosedRequestErrorBody",
     "CompatibleEndpoint",
     "Connector",
     "ConnectorAuthStatus",
@@ -355,7 +349,6 @@ __all__ = [
     "EmbeddingsFloatsEmbedResponse",
     "FinetuneDatasetMetrics",
     "FinishReason",
-    "GatewayTimeoutErrorBody",
     "GenerateRequestReturnLikelihoods",
     "GenerateRequestTruncate",
     "GenerateStreamEnd",
@@ -386,7 +379,6 @@ __all__ = [
     "MetricsEmbedData",
     "MetricsEmbedDataFieldsItem",
     "NonStreamedChatResponse",
-    "NotImplementedErrorBody",
     "OAuthAuthorizeResponse",
     "ParseInfo",
     "RerankDocument",
@@ -427,7 +419,6 @@ __all__ = [
     "TextSystemMessageContentItem",
     "TextToolContent",
     "TokenizeResponse",
-    "TooManyRequestsErrorBody",
     "Tool",
     "ToolCall",
     "ToolCallDelta",
@@ -449,7 +440,6 @@ __all__ = [
     "ToolSource",
     "ToolV2",
     "ToolV2Function",
-    "UnprocessableEntityErrorBody",
     "UpdateConnectorResponse",
     "Usage",
     "UsageBilledUnits",
