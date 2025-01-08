@@ -1,3 +1,6 @@
+[project]
+name = "cohere"
+
 [tool.poetry]
 name = "cohere"
 version = "5.13.6"
