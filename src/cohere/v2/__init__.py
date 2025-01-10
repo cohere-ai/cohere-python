@@ -3,8 +3,10 @@
 from .types import (
     V2ChatRequestDocumentsItem,
     V2ChatRequestSafetyMode,
+    V2ChatRequestToolChoice,
     V2ChatStreamRequestDocumentsItem,
     V2ChatStreamRequestSafetyMode,
+    V2ChatStreamRequestToolChoice,
     V2EmbedRequestTruncate,
     V2RerankResponse,
     V2RerankResponseResultsItem,
@@ -14,8 +16,10 @@ from .types import (
 __all__ = [
     "V2ChatRequestDocumentsItem",
     "V2ChatRequestSafetyMode",
+    "V2ChatRequestToolChoice",
     "V2ChatStreamRequestDocumentsItem",
     "V2ChatStreamRequestSafetyMode",
+    "V2ChatStreamRequestToolChoice",
     "V2EmbedRequestTruncate",
     "V2RerankResponse",
     "V2RerankResponseResultsItem",
