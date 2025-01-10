@@ -8,6 +8,7 @@ from .types.v2chat_stream_request_documents_item import V2ChatStreamRequestDocum
 from ..types.citation_options import CitationOptions
 from ..types.response_format_v2 import ResponseFormatV2
 from .types.v2chat_stream_request_safety_mode import V2ChatStreamRequestSafetyMode
+from .types.v2chat_stream_request_tool_choice import V2ChatStreamRequestToolChoice
 from ..core.request_options import RequestOptions
 from ..types.streamed_chat_response_v2 import StreamedChatResponseV2
 from ..core.serialization import convert_and_respect_annotation_metadata
@@ -30,6 +31,7 @@ from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
 from .types.v2chat_request_documents_item import V2ChatRequestDocumentsItem
 from .types.v2chat_request_safety_mode import V2ChatRequestSafetyMode
+from .types.v2chat_request_tool_choice import V2ChatRequestToolChoice
 from ..types.chat_response import ChatResponse
 from ..types.embed_input_type import EmbedInputType
 from ..types.embedding_type import EmbeddingType
@@ -67,6 +69,7 @@ class V2Client:
         p: typing.Optional[float] = OMIT,
         return_prompt: typing.Optional[bool] = OMIT,
         logprobs: typing.Optional[bool] = OMIT,
+        tool_choice: typing.Optional[V2ChatStreamRequestToolChoice] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[StreamedChatResponseV2]:
         """
@@ -164,6 +167,16 @@ class V2Client:
             Defaults to `false`. When set to `true`, the log probabilities of the generated tokens will be included in the response.
 
 
+        tool_choice : typing.Optional[V2ChatStreamRequestToolChoice]
+            Used to control whether or not the model will be forced to use a tool when answering. When `REQUIRED` is specified, the model will be forced to use at least one of the user-defined tools, and the `tools` parameter must be passed in the request.
+            When `NONE` is specified, the model will be forced **not** to use one of the specified tools, and give a direct response.
+            If tool_choice isn't specified, then the model is free to choose whether to use the specified tools or not.
+
+            **Note**: This parameter is only compatible with models [Command-r7b-12-2024](https://docs.cohere.com/v2/docs/command-r7b) and newer.
+
+            **Note**: The same functionality can be achieved in `/v1/chat` using the `force_single_step` parameter. If `force_single_step=true`, this is equivalent to specifying `REQUIRED`. While if `force_single_step=true` and `tool_results` are passed, this is equivalent to specifying `NONE`.
+
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -224,6 +237,7 @@ class V2Client:
                 "p": p,
                 "return_prompt": return_prompt,
                 "logprobs": logprobs,
+                "tool_choice": tool_choice,
                 "stream": True,
             },
             headers={
@@ -394,6 +408,7 @@ class V2Client:
         p: typing.Optional[float] = OMIT,
         return_prompt: typing.Optional[bool] = OMIT,
         logprobs: typing.Optional[bool] = OMIT,
+        tool_choice: typing.Optional[V2ChatRequestToolChoice] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ChatResponse:
         """
@@ -491,6 +506,16 @@ class V2Client:
             Defaults to `false`. When set to `true`, the log probabilities of the generated tokens will be included in the response.
 
 
+        tool_choice : typing.Optional[V2ChatRequestToolChoice]
+            Used to control whether or not the model will be forced to use a tool when answering. When `REQUIRED` is specified, the model will be forced to use at least one of the user-defined tools, and the `tools` parameter must be passed in the request.
+            When `NONE` is specified, the model will be forced **not** to use one of the specified tools, and give a direct response.
+            If tool_choice isn't specified, then the model is free to choose whether to use the specified tools or not.
+
+            **Note**: This parameter is only compatible with models [Command-r7b-12-2024](https://docs.cohere.com/v2/docs/command-r7b) and newer.
+
+            **Note**: The same functionality can be achieved in `/v1/chat` using the `force_single_step` parameter. If `force_single_step=true`, this is equivalent to specifying `REQUIRED`. While if `force_single_step=true` and `tool_results` are passed, this is equivalent to specifying `NONE`.
+
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -549,6 +574,7 @@ class V2Client:
                 "p": p,
                 "return_prompt": return_prompt,
                 "logprobs": logprobs,
+                "tool_choice": tool_choice,
                 "stream": False,
             },
             headers={
@@ -1165,6 +1191,7 @@ class AsyncV2Client:
         p: typing.Optional[float] = OMIT,
         return_prompt: typing.Optional[bool] = OMIT,
         logprobs: typing.Optional[bool] = OMIT,
+        tool_choice: typing.Optional[V2ChatStreamRequestToolChoice] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[StreamedChatResponseV2]:
         """
@@ -1262,6 +1289,16 @@ class AsyncV2Client:
             Defaults to `false`. When set to `true`, the log probabilities of the generated tokens will be included in the response.
 
 
+        tool_choice : typing.Optional[V2ChatStreamRequestToolChoice]
+            Used to control whether or not the model will be forced to use a tool when answering. When `REQUIRED` is specified, the model will be forced to use at least one of the user-defined tools, and the `tools` parameter must be passed in the request.
+            When `NONE` is specified, the model will be forced **not** to use one of the specified tools, and give a direct response.
+            If tool_choice isn't specified, then the model is free to choose whether to use the specified tools or not.
+
+            **Note**: This parameter is only compatible with models [Command-r7b-12-2024](https://docs.cohere.com/v2/docs/command-r7b) and newer.
+
+            **Note**: The same functionality can be achieved in `/v1/chat` using the `force_single_step` parameter. If `force_single_step=true`, this is equivalent to specifying `REQUIRED`. While if `force_single_step=true` and `tool_results` are passed, this is equivalent to specifying `NONE`.
+
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -1330,6 +1367,7 @@ class AsyncV2Client:
                 "p": p,
                 "return_prompt": return_prompt,
                 "logprobs": logprobs,
+                "tool_choice": tool_choice,
                 "stream": True,
             },
             headers={
@@ -1500,6 +1538,7 @@ class AsyncV2Client:
         p: typing.Optional[float] = OMIT,
         return_prompt: typing.Optional[bool] = OMIT,
         logprobs: typing.Optional[bool] = OMIT,
+        tool_choice: typing.Optional[V2ChatRequestToolChoice] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ChatResponse:
         """
@@ -1597,6 +1636,16 @@ class AsyncV2Client:
             Defaults to `false`. When set to `true`, the log probabilities of the generated tokens will be included in the response.
 
 
+        tool_choice : typing.Optional[V2ChatRequestToolChoice]
+            Used to control whether or not the model will be forced to use a tool when answering. When `REQUIRED` is specified, the model will be forced to use at least one of the user-defined tools, and the `tools` parameter must be passed in the request.
+            When `NONE` is specified, the model will be forced **not** to use one of the specified tools, and give a direct response.
+            If tool_choice isn't specified, then the model is free to choose whether to use the specified tools or not.
+
+            **Note**: This parameter is only compatible with models [Command-r7b-12-2024](https://docs.cohere.com/v2/docs/command-r7b) and newer.
+
+            **Note**: The same functionality can be achieved in `/v1/chat` using the `force_single_step` parameter. If `force_single_step=true`, this is equivalent to specifying `REQUIRED`. While if `force_single_step=true` and `tool_results` are passed, this is equivalent to specifying `NONE`.
+
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -1663,6 +1712,7 @@ class AsyncV2Client:
                 "p": p,
                 "return_prompt": return_prompt,
                 "logprobs": logprobs,
+                "tool_choice": tool_choice,
                 "stream": False,
             },
             headers={
