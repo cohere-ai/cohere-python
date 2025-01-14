@@ -331,7 +331,7 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
         ]
 
         tool_parameters_response = await self.co.chat(
-            message="How good were the sales on September 29?",
+            message="How good were the sales on September 29 2023?",
             tools=tools,
             model="command-nightly",
             preamble="""
