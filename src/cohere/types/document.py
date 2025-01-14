@@ -13,9 +13,9 @@ class Document(UncheckedBaseModel):
     passed to the model.
     """
 
-    data: typing.Dict[str, str] = pydantic.Field()
+    data: typing.Dict[str, typing.Optional[typing.Any]] = pydantic.Field()
     """
-    A relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
+    A relevant document that the model can cite to generate a more accurate reply. Each document is a string-any dictionary.
     """
 
     id: typing.Optional[str] = pydantic.Field(default=None)
