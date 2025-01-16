@@ -10,13 +10,17 @@ from ..errors.unauthorized_error import UnauthorizedError
 from ..errors.forbidden_error import ForbiddenError
 from ..errors.not_found_error import NotFoundError
 from ..errors.unprocessable_entity_error import UnprocessableEntityError
+from ..types.unprocessable_entity_error_body import UnprocessableEntityErrorBody
 from ..errors.too_many_requests_error import TooManyRequestsError
-from ..errors.invalid_token_error import InvalidTokenError
+from ..types.too_many_requests_error_body import TooManyRequestsErrorBody
 from ..errors.client_closed_request_error import ClientClosedRequestError
+from ..types.client_closed_request_error_body import ClientClosedRequestErrorBody
 from ..errors.internal_server_error import InternalServerError
 from ..errors.not_implemented_error import NotImplementedError
+from ..types.not_implemented_error_body import NotImplementedErrorBody
 from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.gateway_timeout_error import GatewayTimeoutError
+from ..types.gateway_timeout_error_body import GatewayTimeoutErrorBody
 from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
 from ..types.embed_input_type import EmbedInputType
@@ -116,9 +120,9 @@ class EmbedJobsClient:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        UnprocessableEntityErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=UnprocessableEntityErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -126,19 +130,9 @@ class EmbedJobsClient:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        TooManyRequestsErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    )
-                )
-            if _response.status_code == 498:
-                raise InvalidTokenError(
-                    typing.cast(
-                        typing.Optional[typing.Any],
-                        construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=TooManyRequestsErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -146,9 +140,9 @@ class EmbedJobsClient:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        ClientClosedRequestErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=ClientClosedRequestErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -166,9 +160,9 @@ class EmbedJobsClient:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        NotImplementedErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=NotImplementedErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -186,9 +180,9 @@ class EmbedJobsClient:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        GatewayTimeoutErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=GatewayTimeoutErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -281,9 +275,6 @@ class EmbedJobsClient:
                 "embedding_types": embedding_types,
                 "truncate": truncate,
             },
-            headers={
-                "content-type": "application/json",
-            },
             request_options=request_options,
             omit=OMIT,
         )
@@ -339,9 +330,9 @@ class EmbedJobsClient:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        UnprocessableEntityErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=UnprocessableEntityErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -349,19 +340,9 @@ class EmbedJobsClient:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        TooManyRequestsErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    )
-                )
-            if _response.status_code == 498:
-                raise InvalidTokenError(
-                    typing.cast(
-                        typing.Optional[typing.Any],
-                        construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=TooManyRequestsErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -369,9 +350,9 @@ class EmbedJobsClient:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        ClientClosedRequestErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=ClientClosedRequestErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -389,9 +370,9 @@ class EmbedJobsClient:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        NotImplementedErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=NotImplementedErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -409,9 +390,9 @@ class EmbedJobsClient:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        GatewayTimeoutErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=GatewayTimeoutErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -507,9 +488,9 @@ class EmbedJobsClient:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        UnprocessableEntityErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=UnprocessableEntityErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -517,19 +498,9 @@ class EmbedJobsClient:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        TooManyRequestsErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    )
-                )
-            if _response.status_code == 498:
-                raise InvalidTokenError(
-                    typing.cast(
-                        typing.Optional[typing.Any],
-                        construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=TooManyRequestsErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -537,9 +508,9 @@ class EmbedJobsClient:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        ClientClosedRequestErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=ClientClosedRequestErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -557,9 +528,9 @@ class EmbedJobsClient:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        NotImplementedErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=NotImplementedErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -577,9 +548,9 @@ class EmbedJobsClient:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        GatewayTimeoutErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=GatewayTimeoutErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -668,9 +639,9 @@ class EmbedJobsClient:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        UnprocessableEntityErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=UnprocessableEntityErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -678,19 +649,9 @@ class EmbedJobsClient:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        TooManyRequestsErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    )
-                )
-            if _response.status_code == 498:
-                raise InvalidTokenError(
-                    typing.cast(
-                        typing.Optional[typing.Any],
-                        construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=TooManyRequestsErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -698,9 +659,9 @@ class EmbedJobsClient:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        ClientClosedRequestErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=ClientClosedRequestErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -718,9 +679,9 @@ class EmbedJobsClient:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        NotImplementedErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=NotImplementedErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -738,9 +699,9 @@ class EmbedJobsClient:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        GatewayTimeoutErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=GatewayTimeoutErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -844,9 +805,9 @@ class AsyncEmbedJobsClient:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        UnprocessableEntityErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=UnprocessableEntityErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -854,19 +815,9 @@ class AsyncEmbedJobsClient:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        TooManyRequestsErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    )
-                )
-            if _response.status_code == 498:
-                raise InvalidTokenError(
-                    typing.cast(
-                        typing.Optional[typing.Any],
-                        construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=TooManyRequestsErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -874,9 +825,9 @@ class AsyncEmbedJobsClient:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        ClientClosedRequestErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=ClientClosedRequestErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -894,9 +845,9 @@ class AsyncEmbedJobsClient:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        NotImplementedErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=NotImplementedErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -914,9 +865,9 @@ class AsyncEmbedJobsClient:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        GatewayTimeoutErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=GatewayTimeoutErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1017,9 +968,6 @@ class AsyncEmbedJobsClient:
                 "embedding_types": embedding_types,
                 "truncate": truncate,
             },
-            headers={
-                "content-type": "application/json",
-            },
             request_options=request_options,
             omit=OMIT,
         )
@@ -1075,9 +1023,9 @@ class AsyncEmbedJobsClient:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        UnprocessableEntityErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=UnprocessableEntityErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1085,19 +1033,9 @@ class AsyncEmbedJobsClient:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        TooManyRequestsErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    )
-                )
-            if _response.status_code == 498:
-                raise InvalidTokenError(
-                    typing.cast(
-                        typing.Optional[typing.Any],
-                        construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=TooManyRequestsErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1105,9 +1043,9 @@ class AsyncEmbedJobsClient:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        ClientClosedRequestErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=ClientClosedRequestErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1125,9 +1063,9 @@ class AsyncEmbedJobsClient:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        NotImplementedErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=NotImplementedErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1145,9 +1083,9 @@ class AsyncEmbedJobsClient:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        GatewayTimeoutErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=GatewayTimeoutErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1251,9 +1189,9 @@ class AsyncEmbedJobsClient:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        UnprocessableEntityErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=UnprocessableEntityErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1261,19 +1199,9 @@ class AsyncEmbedJobsClient:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        TooManyRequestsErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    )
-                )
-            if _response.status_code == 498:
-                raise InvalidTokenError(
-                    typing.cast(
-                        typing.Optional[typing.Any],
-                        construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=TooManyRequestsErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1281,9 +1209,9 @@ class AsyncEmbedJobsClient:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        ClientClosedRequestErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=ClientClosedRequestErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1301,9 +1229,9 @@ class AsyncEmbedJobsClient:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        NotImplementedErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=NotImplementedErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1321,9 +1249,9 @@ class AsyncEmbedJobsClient:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        GatewayTimeoutErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=GatewayTimeoutErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1420,9 +1348,9 @@ class AsyncEmbedJobsClient:
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        UnprocessableEntityErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=UnprocessableEntityErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1430,19 +1358,9 @@ class AsyncEmbedJobsClient:
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        TooManyRequestsErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    )
-                )
-            if _response.status_code == 498:
-                raise InvalidTokenError(
-                    typing.cast(
-                        typing.Optional[typing.Any],
-                        construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=TooManyRequestsErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1450,9 +1368,9 @@ class AsyncEmbedJobsClient:
             if _response.status_code == 499:
                 raise ClientClosedRequestError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        ClientClosedRequestErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=ClientClosedRequestErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1470,9 +1388,9 @@ class AsyncEmbedJobsClient:
             if _response.status_code == 501:
                 raise NotImplementedError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        NotImplementedErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=NotImplementedErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -1490,9 +1408,9 @@ class AsyncEmbedJobsClient:
             if _response.status_code == 504:
                 raise GatewayTimeoutError(
                     typing.cast(
-                        typing.Optional[typing.Any],
+                        GatewayTimeoutErrorBody,
                         construct_type(
-                            type_=typing.Optional[typing.Any],  # type: ignore
+                            type_=GatewayTimeoutErrorBody,  # type: ignore
                             object_=_response.json(),
                         ),
                     )

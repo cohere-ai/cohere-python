@@ -47,8 +47,7 @@ class FinetuningClient:
         Parameters
         ----------
         page_size : typing.Optional[int]
-            Maximum number of results to be returned by the server. If 0, defaults to
-            50.
+            Maximum number of results to be returned by the server. If 0, defaults to 50.
 
         page_token : typing.Optional[str]
             Request a specific page of the list results.
@@ -59,7 +58,8 @@ class FinetuningClient:
             " desc" to the field name. For example: "created_at desc,name".
 
             Supported sorting fields:
-              - created_at (default)
+
+            - created_at (default)
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -589,9 +589,6 @@ class FinetuningClient:
                 "completed_at": completed_at,
                 "last_used": last_used,
             },
-            headers={
-                "content-type": "application/json",
-            },
             request_options=request_options,
             omit=OMIT,
         )
@@ -685,8 +682,7 @@ class FinetuningClient:
             The parent fine-tuned model ID.
 
         page_size : typing.Optional[int]
-            Maximum number of results to be returned by the server. If 0, defaults to
-            50.
+            Maximum number of results to be returned by the server. If 0, defaults to 50.
 
         page_token : typing.Optional[str]
             Request a specific page of the list results.
@@ -697,7 +693,8 @@ class FinetuningClient:
             " desc" to the field name. For example: "created_at desc,name".
 
             Supported sorting fields:
-              - created_at (default)
+
+            - created_at (default)
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -818,8 +815,7 @@ class FinetuningClient:
             The parent fine-tuned model ID.
 
         page_size : typing.Optional[int]
-            Maximum number of results to be returned by the server. If 0, defaults to
-            50.
+            Maximum number of results to be returned by the server. If 0, defaults to 50.
 
         page_token : typing.Optional[str]
             Request a specific page of the list results.
@@ -944,8 +940,7 @@ class AsyncFinetuningClient:
         Parameters
         ----------
         page_size : typing.Optional[int]
-            Maximum number of results to be returned by the server. If 0, defaults to
-            50.
+            Maximum number of results to be returned by the server. If 0, defaults to 50.
 
         page_token : typing.Optional[str]
             Request a specific page of the list results.
@@ -956,7 +951,8 @@ class AsyncFinetuningClient:
             " desc" to the field name. For example: "created_at desc,name".
 
             Supported sorting fields:
-              - created_at (default)
+
+            - created_at (default)
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1526,9 +1522,6 @@ class AsyncFinetuningClient:
                 "completed_at": completed_at,
                 "last_used": last_used,
             },
-            headers={
-                "content-type": "application/json",
-            },
             request_options=request_options,
             omit=OMIT,
         )
@@ -1622,8 +1615,7 @@ class AsyncFinetuningClient:
             The parent fine-tuned model ID.
 
         page_size : typing.Optional[int]
-            Maximum number of results to be returned by the server. If 0, defaults to
-            50.
+            Maximum number of results to be returned by the server. If 0, defaults to 50.
 
         page_token : typing.Optional[str]
             Request a specific page of the list results.
@@ -1634,7 +1626,8 @@ class AsyncFinetuningClient:
             " desc" to the field name. For example: "created_at desc,name".
 
             Supported sorting fields:
-              - created_at (default)
+
+            - created_at (default)
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1763,8 +1756,7 @@ class AsyncFinetuningClient:
             The parent fine-tuned model ID.
 
         page_size : typing.Optional[int]
-            Maximum number of results to be returned by the server. If 0, defaults to
-            50.
+            Maximum number of results to be returned by the server. If 0, defaults to 50.
 
         page_token : typing.Optional[str]
             Request a specific page of the list results.
