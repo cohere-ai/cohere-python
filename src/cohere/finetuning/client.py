@@ -21,7 +21,6 @@ from ..core.jsonable_encoder import jsonable_encoder
 from .finetuning.types.delete_finetuned_model_response import DeleteFinetunedModelResponse
 from .finetuning.types.settings import Settings
 from .finetuning.types.status import Status
-import datetime as dt
 from .finetuning.types.update_finetuned_model_response import UpdateFinetunedModelResponse
 from .finetuning.types.list_events_response import ListEventsResponse
 from .finetuning.types.list_training_step_metrics_response import ListTrainingStepMetricsResponse
@@ -503,13 +502,7 @@ class FinetuningClient:
         *,
         name: str,
         settings: Settings,
-        creator_id: typing.Optional[str] = OMIT,
-        organization_id: typing.Optional[str] = OMIT,
         status: typing.Optional[Status] = OMIT,
-        created_at: typing.Optional[dt.datetime] = OMIT,
-        updated_at: typing.Optional[dt.datetime] = OMIT,
-        completed_at: typing.Optional[dt.datetime] = OMIT,
-        last_used: typing.Optional[dt.datetime] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> UpdateFinetunedModelResponse:
         """
@@ -524,26 +517,8 @@ class FinetuningClient:
         settings : Settings
             FinetunedModel settings such as dataset, hyperparameters...
 
-        creator_id : typing.Optional[str]
-            User ID of the creator.
-
-        organization_id : typing.Optional[str]
-            Organization ID.
-
         status : typing.Optional[Status]
             Current stage in the life-cycle of the fine-tuned model.
-
-        created_at : typing.Optional[dt.datetime]
-            Creation timestamp.
-
-        updated_at : typing.Optional[dt.datetime]
-            Latest update timestamp.
-
-        completed_at : typing.Optional[dt.datetime]
-            Timestamp for the completed fine-tuning.
-
-        last_used : typing.Optional[dt.datetime]
-            Deprecated: Timestamp for the latest request to this fine-tuned model.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -578,16 +553,10 @@ class FinetuningClient:
             method="PATCH",
             json={
                 "name": name,
-                "creator_id": creator_id,
-                "organization_id": organization_id,
                 "settings": convert_and_respect_annotation_metadata(
                     object_=settings, annotation=Settings, direction="write"
                 ),
                 "status": status,
-                "created_at": created_at,
-                "updated_at": updated_at,
-                "completed_at": completed_at,
-                "last_used": last_used,
             },
             headers={
                 "content-type": "application/json",
@@ -1432,13 +1401,7 @@ class AsyncFinetuningClient:
         *,
         name: str,
         settings: Settings,
-        creator_id: typing.Optional[str] = OMIT,
-        organization_id: typing.Optional[str] = OMIT,
         status: typing.Optional[Status] = OMIT,
-        created_at: typing.Optional[dt.datetime] = OMIT,
-        updated_at: typing.Optional[dt.datetime] = OMIT,
-        completed_at: typing.Optional[dt.datetime] = OMIT,
-        last_used: typing.Optional[dt.datetime] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> UpdateFinetunedModelResponse:
         """
@@ -1453,26 +1416,8 @@ class AsyncFinetuningClient:
         settings : Settings
             FinetunedModel settings such as dataset, hyperparameters...
 
-        creator_id : typing.Optional[str]
-            User ID of the creator.
-
-        organization_id : typing.Optional[str]
-            Organization ID.
-
         status : typing.Optional[Status]
             Current stage in the life-cycle of the fine-tuned model.
-
-        created_at : typing.Optional[dt.datetime]
-            Creation timestamp.
-
-        updated_at : typing.Optional[dt.datetime]
-            Latest update timestamp.
-
-        completed_at : typing.Optional[dt.datetime]
-            Timestamp for the completed fine-tuning.
-
-        last_used : typing.Optional[dt.datetime]
-            Deprecated: Timestamp for the latest request to this fine-tuned model.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1515,16 +1460,10 @@ class AsyncFinetuningClient:
             method="PATCH",
             json={
                 "name": name,
-                "creator_id": creator_id,
-                "organization_id": organization_id,
                 "settings": convert_and_respect_annotation_metadata(
                     object_=settings, annotation=Settings, direction="write"
                 ),
                 "status": status,
-                "created_at": created_at,
-                "updated_at": updated_at,
-                "completed_at": completed_at,
-                "last_used": last_used,
             },
             headers={
                 "content-type": "application/json",
