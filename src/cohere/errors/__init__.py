@@ -5,7 +5,6 @@ from .client_closed_request_error import ClientClosedRequestError
 from .forbidden_error import ForbiddenError
 from .gateway_timeout_error import GatewayTimeoutError
 from .internal_server_error import InternalServerError
-from .invalid_token_error import InvalidTokenError
 from .not_found_error import NotFoundError
 from .not_implemented_error import NotImplementedError
 from .service_unavailable_error import ServiceUnavailableError
@@ -19,7 +18,6 @@ __all__ = [
     "ForbiddenError",
     "GatewayTimeoutError",
     "InternalServerError",
-    "InvalidTokenError",
     "NotFoundError",
     "NotImplementedError",
     "ServiceUnavailableError",
