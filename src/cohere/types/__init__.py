@@ -15,6 +15,7 @@ from .assistant_message_response_content_item import (
 from .auth_token_type import AuthTokenType
 from .chat_citation import ChatCitation
 from .chat_citation_generation_event import ChatCitationGenerationEvent
+from .chat_citation_type import ChatCitationType
 from .chat_connector import ChatConnector
 from .chat_content_delta_event import ChatContentDeltaEvent
 from .chat_content_delta_event_delta import ChatContentDeltaEventDelta
@@ -87,6 +88,7 @@ from .citation_options_mode import CitationOptionsMode
 from .citation_start_event import CitationStartEvent
 from .citation_start_event_delta import CitationStartEventDelta
 from .citation_start_event_delta_message import CitationStartEventDeltaMessage
+from .citation_type import CitationType
 from .classify_data_metrics import ClassifyDataMetrics
 from .classify_example import ClassifyExample
 from .classify_request_truncate import ClassifyRequestTruncate
@@ -113,6 +115,7 @@ from .delete_connector_response import DeleteConnectorResponse
 from .detokenize_response import DetokenizeResponse
 from .document import Document
 from .document_content import DocumentContent
+from .document_source import DocumentSource
 from .embed_by_type_response import EmbedByTypeResponse
 from .embed_by_type_response_embeddings import EmbedByTypeResponseEmbeddings
 from .embed_floats_response import EmbedFloatsResponse
@@ -201,8 +204,12 @@ from .summarize_request_extractiveness import SummarizeRequestExtractiveness
 from .summarize_request_format import SummarizeRequestFormat
 from .summarize_request_length import SummarizeRequestLength
 from .summarize_response import SummarizeResponse
+from .system_message import SystemMessage
 from .system_message_content import SystemMessageContent
 from .system_message_content_item import SystemMessageContentItem, TextSystemMessageContentItem
+from .text_content import TextContent
+from .text_response_format import TextResponseFormat
+from .text_response_format_v2 import TextResponseFormatV2
 from .tokenize_response import TokenizeResponse
 from .tool import Tool
 from .tool_call import ToolCall
@@ -210,16 +217,19 @@ from .tool_call_delta import ToolCallDelta
 from .tool_call_v2 import ToolCallV2
 from .tool_call_v2function import ToolCallV2Function
 from .tool_content import DocumentToolContent, TextToolContent, ToolContent
+from .tool_message import ToolMessage
 from .tool_message_v2 import ToolMessageV2
 from .tool_message_v2content import ToolMessageV2Content
 from .tool_parameter_definitions_value import ToolParameterDefinitionsValue
 from .tool_result import ToolResult
+from .tool_source import ToolSource
 from .tool_v2 import ToolV2
 from .tool_v2function import ToolV2Function
 from .update_connector_response import UpdateConnectorResponse
 from .usage import Usage
 from .usage_billed_units import UsageBilledUnits
 from .usage_tokens import UsageTokens
+from .user_message import UserMessage
 from .user_message_content import UserMessageContent
 
 __all__ = [
@@ -236,6 +246,7 @@ __all__ = [
     "AuthTokenType",
     "ChatCitation",
     "ChatCitationGenerationEvent",
+    "ChatCitationType",
     "ChatConnector",
     "ChatContentDeltaEvent",
     "ChatContentDeltaEventDelta",
@@ -304,6 +315,7 @@ __all__ = [
     "CitationStartEventDelta",
     "CitationStartEventDeltaMessage",
     "CitationStartStreamedChatResponseV2",
+    "CitationType",
     "ClassifyDataMetrics",
     "ClassifyExample",
     "ClassifyRequestTruncate",
