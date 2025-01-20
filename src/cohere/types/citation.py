@@ -4,7 +4,6 @@ from ..core.unchecked_base_model import UncheckedBaseModel
 import typing
 import pydantic
 from .source import Source
-from .citation_type import CitationType
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
 
 
@@ -29,7 +28,6 @@ class Citation(UncheckedBaseModel):
     """
 
     sources: typing.Optional[typing.List[Source]] = None
-    type: typing.Optional[CitationType] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2

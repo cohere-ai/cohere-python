@@ -15,7 +15,6 @@ from .assistant_message_response_content_item import (
 from .auth_token_type import AuthTokenType
 from .chat_citation import ChatCitation
 from .chat_citation_generation_event import ChatCitationGenerationEvent
-from .chat_citation_type import ChatCitationType
 from .chat_connector import ChatConnector
 from .chat_content_delta_event import ChatContentDeltaEvent
 from .chat_content_delta_event_delta import ChatContentDeltaEventDelta
@@ -45,10 +44,8 @@ from .chat_message_v2 import (
 )
 from .chat_messages import ChatMessages
 from .chat_request_citation_quality import ChatRequestCitationQuality
-from .chat_request_connectors_search_options import ChatRequestConnectorsSearchOptions
 from .chat_request_prompt_truncation import ChatRequestPromptTruncation
 from .chat_request_safety_mode import ChatRequestSafetyMode
-from .chat_response import ChatResponse
 from .chat_search_queries_generation_event import ChatSearchQueriesGenerationEvent
 from .chat_search_query import ChatSearchQuery
 from .chat_search_result import ChatSearchResult
@@ -59,7 +56,6 @@ from .chat_stream_end_event_finish_reason import ChatStreamEndEventFinishReason
 from .chat_stream_event import ChatStreamEvent
 from .chat_stream_event_type import ChatStreamEventType
 from .chat_stream_request_citation_quality import ChatStreamRequestCitationQuality
-from .chat_stream_request_connectors_search_options import ChatStreamRequestConnectorsSearchOptions
 from .chat_stream_request_prompt_truncation import ChatStreamRequestPromptTruncation
 from .chat_stream_request_safety_mode import ChatStreamRequestSafetyMode
 from .chat_stream_start_event import ChatStreamStartEvent
@@ -88,7 +84,6 @@ from .citation_options_mode import CitationOptionsMode
 from .citation_start_event import CitationStartEvent
 from .citation_start_event_delta import CitationStartEventDelta
 from .citation_start_event_delta_message import CitationStartEventDeltaMessage
-from .citation_type import CitationType
 from .classify_data_metrics import ClassifyDataMetrics
 from .classify_example import ClassifyExample
 from .classify_request_truncate import ClassifyRequestTruncate
@@ -98,6 +93,7 @@ from .classify_response_classifications_item_classification_type import (
     ClassifyResponseClassificationsItemClassificationType,
 )
 from .classify_response_classifications_item_labels_value import ClassifyResponseClassificationsItemLabelsValue
+from .client_closed_request_error_body import ClientClosedRequestErrorBody
 from .compatible_endpoint import CompatibleEndpoint
 from .connector import Connector
 from .connector_auth_status import ConnectorAuthStatus
@@ -115,6 +111,7 @@ from .delete_connector_response import DeleteConnectorResponse
 from .detokenize_response import DetokenizeResponse
 from .document import Document
 from .document_content import DocumentContent
+from .document_source import DocumentSource
 from .embed_by_type_response import EmbedByTypeResponse
 from .embed_by_type_response_embeddings import EmbedByTypeResponseEmbeddings
 from .embed_floats_response import EmbedFloatsResponse
@@ -127,6 +124,7 @@ from .embed_response import EmbedResponse, EmbeddingsByTypeEmbedResponse, Embedd
 from .embedding_type import EmbeddingType
 from .finetune_dataset_metrics import FinetuneDatasetMetrics
 from .finish_reason import FinishReason
+from .gateway_timeout_error_body import GatewayTimeoutErrorBody
 from .generate_request_return_likelihoods import GenerateRequestReturnLikelihoods
 from .generate_request_truncate import GenerateRequestTruncate
 from .generate_stream_end import GenerateStreamEnd
@@ -155,9 +153,8 @@ from .list_models_response import ListModelsResponse
 from .logprob_item import LogprobItem
 from .message import ChatbotMessage, Message, SystemMessage, ToolMessage, UserMessage
 from .metrics import Metrics
-from .metrics_embed_data import MetricsEmbedData
-from .metrics_embed_data_fields_item import MetricsEmbedDataFieldsItem
 from .non_streamed_chat_response import NonStreamedChatResponse
+from .not_implemented_error_body import NotImplementedErrorBody
 from .o_auth_authorize_response import OAuthAuthorizeResponse
 from .parse_info import ParseInfo
 from .rerank_document import RerankDocument
@@ -184,44 +181,38 @@ from .streamed_chat_response import (
     ToolCallsChunkStreamedChatResponse,
     ToolCallsGenerationStreamedChatResponse,
 )
-from .streamed_chat_response_v2 import (
-    CitationEndStreamedChatResponseV2,
-    CitationStartStreamedChatResponseV2,
-    ContentDeltaStreamedChatResponseV2,
-    ContentEndStreamedChatResponseV2,
-    ContentStartStreamedChatResponseV2,
-    DebugStreamedChatResponseV2,
-    MessageEndStreamedChatResponseV2,
-    MessageStartStreamedChatResponseV2,
-    StreamedChatResponseV2,
-    ToolCallDeltaStreamedChatResponseV2,
-    ToolCallEndStreamedChatResponseV2,
-    ToolCallStartStreamedChatResponseV2,
-    ToolPlanDeltaStreamedChatResponseV2,
-)
 from .summarize_request_extractiveness import SummarizeRequestExtractiveness
 from .summarize_request_format import SummarizeRequestFormat
 from .summarize_request_length import SummarizeRequestLength
 from .summarize_response import SummarizeResponse
+from .system_message import SystemMessage
 from .system_message_content import SystemMessageContent
 from .system_message_content_item import SystemMessageContentItem, TextSystemMessageContentItem
+from .text_content import TextContent
+from .text_response_format import TextResponseFormat
+from .text_response_format_v2 import TextResponseFormatV2
 from .tokenize_response import TokenizeResponse
+from .too_many_requests_error_body import TooManyRequestsErrorBody
 from .tool import Tool
 from .tool_call import ToolCall
 from .tool_call_delta import ToolCallDelta
 from .tool_call_v2 import ToolCallV2
 from .tool_call_v2function import ToolCallV2Function
 from .tool_content import DocumentToolContent, TextToolContent, ToolContent
+from .tool_message import ToolMessage
 from .tool_message_v2 import ToolMessageV2
 from .tool_message_v2content import ToolMessageV2Content
 from .tool_parameter_definitions_value import ToolParameterDefinitionsValue
 from .tool_result import ToolResult
+from .tool_source import ToolSource
 from .tool_v2 import ToolV2
 from .tool_v2function import ToolV2Function
+from .unprocessable_entity_error_body import UnprocessableEntityErrorBody
 from .update_connector_response import UpdateConnectorResponse
 from .usage import Usage
 from .usage_billed_units import UsageBilledUnits
 from .usage_tokens import UsageTokens
+from .user_message import UserMessage
 from .user_message_content import UserMessageContent
 
 __all__ = [
@@ -238,7 +229,6 @@ __all__ = [
     "AuthTokenType",
     "ChatCitation",
     "ChatCitationGenerationEvent",
-    "ChatCitationType",
     "ChatConnector",
     "ChatContentDeltaEvent",
     "ChatContentDeltaEventDelta",
@@ -262,10 +252,8 @@ __all__ = [
     "ChatMessageV2",
     "ChatMessages",
     "ChatRequestCitationQuality",
-    "ChatRequestConnectorsSearchOptions",
     "ChatRequestPromptTruncation",
     "ChatRequestSafetyMode",
-    "ChatResponse",
     "ChatSearchQueriesGenerationEvent",
     "ChatSearchQuery",
     "ChatSearchResult",
@@ -276,7 +264,6 @@ __all__ = [
     "ChatStreamEvent",
     "ChatStreamEventType",
     "ChatStreamRequestCitationQuality",
-    "ChatStreamRequestConnectorsSearchOptions",
     "ChatStreamRequestPromptTruncation",
     "ChatStreamRequestSafetyMode",
     "ChatStreamStartEvent",
@@ -299,15 +286,12 @@ __all__ = [
     "CheckApiKeyResponse",
     "Citation",
     "CitationEndEvent",
-    "CitationEndStreamedChatResponseV2",
     "CitationGenerationStreamedChatResponse",
     "CitationOptions",
     "CitationOptionsMode",
     "CitationStartEvent",
     "CitationStartEventDelta",
     "CitationStartEventDeltaMessage",
-    "CitationStartStreamedChatResponseV2",
-    "CitationType",
     "ClassifyDataMetrics",
     "ClassifyExample",
     "ClassifyRequestTruncate",
@@ -315,14 +299,12 @@ __all__ = [
     "ClassifyResponseClassificationsItem",
     "ClassifyResponseClassificationsItemClassificationType",
     "ClassifyResponseClassificationsItemLabelsValue",
+    "ClientClosedRequestErrorBody",
     "CompatibleEndpoint",
     "Connector",
     "ConnectorAuthStatus",
     "ConnectorOAuth",
     "Content",
-    "ContentDeltaStreamedChatResponseV2",
-    "ContentEndStreamedChatResponseV2",
-    "ContentStartStreamedChatResponseV2",
     "CreateConnectorOAuth",
     "CreateConnectorResponse",
     "CreateConnectorServiceAuth",
@@ -332,7 +314,6 @@ __all__ = [
     "DatasetType",
     "DatasetValidationStatus",
     "DebugStreamedChatResponse",
-    "DebugStreamedChatResponseV2",
     "DeleteConnectorResponse",
     "DetokenizeResponse",
     "Document",
@@ -353,6 +334,7 @@ __all__ = [
     "EmbeddingsFloatsEmbedResponse",
     "FinetuneDatasetMetrics",
     "FinishReason",
+    "GatewayTimeoutErrorBody",
     "GenerateRequestReturnLikelihoods",
     "GenerateRequestTruncate",
     "GenerateStreamEnd",
@@ -377,12 +359,9 @@ __all__ = [
     "ListModelsResponse",
     "LogprobItem",
     "Message",
-    "MessageEndStreamedChatResponseV2",
-    "MessageStartStreamedChatResponseV2",
     "Metrics",
-    "MetricsEmbedData",
-    "MetricsEmbedDataFieldsItem",
     "NonStreamedChatResponse",
+    "NotImplementedErrorBody",
     "OAuthAuthorizeResponse",
     "ParseInfo",
     "RerankDocument",
@@ -404,7 +383,6 @@ __all__ = [
     "StreamErrorGenerateStreamedResponse",
     "StreamStartStreamedChatResponse",
     "StreamedChatResponse",
-    "StreamedChatResponseV2",
     "SummarizeRequestExtractiveness",
     "SummarizeRequestFormat",
     "SummarizeRequestLength",
@@ -423,12 +401,10 @@ __all__ = [
     "TextSystemMessageContentItem",
     "TextToolContent",
     "TokenizeResponse",
+    "TooManyRequestsErrorBody",
     "Tool",
     "ToolCall",
     "ToolCallDelta",
-    "ToolCallDeltaStreamedChatResponseV2",
-    "ToolCallEndStreamedChatResponseV2",
-    "ToolCallStartStreamedChatResponseV2",
     "ToolCallV2",
     "ToolCallV2Function",
     "ToolCallsChunkStreamedChatResponse",
@@ -439,11 +415,11 @@ __all__ = [
     "ToolMessageV2",
     "ToolMessageV2Content",
     "ToolParameterDefinitionsValue",
-    "ToolPlanDeltaStreamedChatResponseV2",
     "ToolResult",
     "ToolSource",
     "ToolV2",
     "ToolV2Function",
+    "UnprocessableEntityErrorBody",
     "UpdateConnectorResponse",
     "Usage",
     "UsageBilledUnits",

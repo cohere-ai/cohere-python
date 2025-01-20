@@ -3,7 +3,6 @@
 from ..core.unchecked_base_model import UncheckedBaseModel
 import pydantic
 import typing
-from .chat_citation_type import ChatCitationType
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
 
 
@@ -30,11 +29,6 @@ class ChatCitation(UncheckedBaseModel):
     document_ids: typing.List[str] = pydantic.Field()
     """
     Identifiers of documents cited by this section of the generated reply.
-    """
-
-    type: typing.Optional[ChatCitationType] = pydantic.Field(default=None)
-    """
-    The type of citation which indicates what part of the response the citation is for.
     """
 
     if IS_PYDANTIC_V2:

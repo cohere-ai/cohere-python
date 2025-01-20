@@ -11,8 +11,7 @@
 <dl>
 <dd>
 
-Generates a streamed text response to a user message.
-
+Generates a text response to a user message.
 To learn how to use the Chat API and RAG follow our [Text Generation guides](https://docs.cohere.com/docs/chat-api).
 </dd>
 </dl>
@@ -28,17 +27,14 @@ To learn how to use the Chat API and RAG follow our [Text Generation guides](htt
 <dd>
 
 ```python
-from cohere import Client, ToolMessage
+from cohere import Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
     token="YOUR_TOKEN",
 )
 response = client.chat_stream(
-    message="Can you give me a global market overview of solar panels?",
-    chat_history=[ToolMessage(), ToolMessage()],
-    prompt_truncation="OFF",
-    temperature=0.3,
+    message="hello world!",
 )
 for chunk in response:
     yield chunk
@@ -371,28 +367,6 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dl>
 <dd>
 
-**raw_prompting:** `typing.Optional[bool]` 
-
-When enabled, the user's prompt will be sent to the model without
-any pre-processing.
-
-Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**return_prompt:** `typing.Optional[bool]` — The prompt is returned in the `prompt` response field when this is enabled.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
 **tools:** `typing.Optional[typing.Sequence[Tool]]` 
 
 A list of available tools (functions) that the model may suggest invoking before producing a text response.
@@ -517,17 +491,38 @@ To learn how to use the Chat API and RAG follow our [Text Generation guides](htt
 <dd>
 
 ```python
-from cohere import Client, ToolMessage
+from cohere import Client, Tool, ToolParameterDefinitionsValue
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
     token="YOUR_TOKEN",
 )
 client.chat(
-    message="Can you give me a global market overview of solar panels?",
-    chat_history=[ToolMessage(), ToolMessage()],
-    prompt_truncation="OFF",
-    temperature=0.3,
+    message="Can you provide a sales summary for 29th September 2023, and also give me some details about the products in the 'Electronics' category, for example their prices and stock levels?",
+    tools=[
+        Tool(
+            name="query_daily_sales_report",
+            description="Connects to a database to retrieve overall sales volumes and sales information for a given day.",
+            parameter_definitions={
+                "day": ToolParameterDefinitionsValue(
+                    description="Retrieves sales data for this day, formatted as YYYY-MM-DD.",
+                    type="str",
+                    required=True,
+                )
+            },
+        ),
+        Tool(
+            name="query_product_catalog",
+            description="Connects to a a product catalog with information about all the products being sold, including categories, prices, and stock levels.",
+            parameter_definitions={
+                "category": ToolParameterDefinitionsValue(
+                    description="Retrieves product information data for all products in this category.",
+                    type="str",
+                    required=True,
+                )
+            },
+        ),
+    ],
 )
 
 ```
@@ -858,28 +853,6 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dl>
 <dd>
 
-**raw_prompting:** `typing.Optional[bool]` 
-
-When enabled, the user's prompt will be sent to the model without
-any pre-processing.
-
-Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**return_prompt:** `typing.Optional[bool]` — The prompt is returned in the `prompt` response field when this is enabled.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
 **tools:** `typing.Optional[typing.Sequence[Tool]]` 
 
 A list of available tools (functions) that the model may suggest invoking before producing a text response.
@@ -1013,7 +986,22 @@ client = Client(
     token="YOUR_TOKEN",
 )
 response = client.generate_stream(
-    prompt="Please explain to me how LLMs work",
+    prompt="string",
+    model="string",
+    num_generations=1,
+    max_tokens=1,
+    truncate="NONE",
+    temperature=1.1,
+    seed=1,
+    preset="string",
+    end_sequences=["string"],
+    stop_sequences=["string"],
+    k=1,
+    p=1.1,
+    frequency_penalty=1.1,
+    presence_penalty=1.1,
+    return_likelihoods="GENERATION",
+    raw_prompting=True,
 )
 for chunk in response:
     yield chunk
@@ -1527,7 +1515,11 @@ client = Client(
     client_name="YOUR_CLIENT_NAME",
     token="YOUR_TOKEN",
 )
-client.embed()
+client.embed(
+    texts=["hello", "goodbye"],
+    model="embed-english-v3.0",
+    input_type="classification",
+)
 
 ```
 </dd>
@@ -1670,8 +1662,26 @@ client = Client(
     token="YOUR_TOKEN",
 )
 client.rerank(
-    query="query",
-    documents=["documents"],
+    documents=[
+        {
+            "text": "Carson City is the capital city of the American state of Nevada."
+        },
+        {
+            "text": "The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan."
+        },
+        {
+            "text": "Capitalization or capitalisation in English grammar is the use of a capital letter at the start of a word. English usage varies from capitalization in other languages."
+        },
+        {
+            "text": "Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district."
+        },
+        {
+            "text": "Capital punishment has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states."
+        },
+    ],
+    query="What is the capital of the United States?",
+    top_n=3,
+    model="rerank-v3.5",
 )
 
 ```
@@ -1794,14 +1804,56 @@ Note: [Fine-tuned models](https://docs.cohere.com/docs/classify-fine-tuning) tra
 <dd>
 
 ```python
-from cohere import Client
+from cohere import ClassifyExample, Client
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
     token="YOUR_TOKEN",
 )
 client.classify(
-    inputs=["inputs"],
+    examples=[
+        ClassifyExample(
+            text="Dermatologists don't like her!",
+            label="Spam",
+        ),
+        ClassifyExample(
+            text="'Hello, open to this?'",
+            label="Spam",
+        ),
+        ClassifyExample(
+            text="I need help please wire me $1000 right now",
+            label="Spam",
+        ),
+        ClassifyExample(
+            text="Nice to know you ;)",
+            label="Spam",
+        ),
+        ClassifyExample(
+            text="Please help me?",
+            label="Spam",
+        ),
+        ClassifyExample(
+            text="Your parcel will be delivered today",
+            label="Not spam",
+        ),
+        ClassifyExample(
+            text="Review changes to our Terms and Conditions",
+            label="Not spam",
+        ),
+        ClassifyExample(
+            text="Weekly sync notes",
+            label="Not spam",
+        ),
+        ClassifyExample(
+            text="'Re: Follow up from today's meeting'",
+            label="Not spam",
+        ),
+        ClassifyExample(
+            text="Pre-read for tomorrow",
+            label="Not spam",
+        ),
+    ],
+    inputs=["Confirm your email address", "hey i need u to send some $"],
 )
 
 ```
@@ -1918,7 +1970,7 @@ client = Client(
     token="YOUR_TOKEN",
 )
 client.summarize(
-    text="text",
+    text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.\n\nThe meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo\r all variants. Analogues made from dairy alternatives, such as goat\'s or sheep\'s milk, or milk substitutes (e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are lactose intolerant, allergic to dairy protein or vegan.',
 )
 
 ```
@@ -2117,8 +2169,8 @@ client = Client(
     token="YOUR_TOKEN",
 )
 client.detokenize(
-    tokens=[1],
-    model="model",
+    tokens=[10002, 2261, 2012, 8, 2792, 43],
+    model="command",
 )
 
 ```
@@ -2237,7 +2289,7 @@ client.check_api_key()
 <dl>
 <dd>
 
-Generates a text response to a user message. To learn how to use the Chat API and RAG follow our [Text Generation guides](https://docs.cohere.com/v2/docs/chat-api).
+Generates a text response to a user message and streams it down, token by token. To learn how to use the Chat API with streaming follow our [Text Generation guides](https://docs.cohere.com/v2/docs/chat-api).
 
 Follow the [Migration Guide](https://docs.cohere.com/v2/docs/migrating-v1-to-v2) for instructions on moving from API v1 to API v2.
 </dd>
@@ -2254,18 +2306,17 @@ Follow the [Migration Guide](https://docs.cohere.com/v2/docs/migrating-v1-to-v2)
 <dd>
 
 ```python
-from cohere import Client, ToolChatMessageV2
+from cohere import Client, UserChatMessageV2
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
     token="YOUR_TOKEN",
 )
 response = client.v2.chat_stream(
-    model="model",
+    model="command-r",
     messages=[
-        ToolChatMessageV2(
-            tool_call_id="messages",
-            content="messages",
+        UserChatMessageV2(
+            content="Hello!",
         )
     ],
 )
@@ -2470,14 +2521,6 @@ Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 <dl>
 <dd>
 
-**return_prompt:** `typing.Optional[bool]` — Whether to return the prompt in the response.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
 **logprobs:** `typing.Optional[bool]` — Defaults to `false`. When set to `true`, the log probabilities of the generated tokens will be included in the response.
 
     
@@ -2545,19 +2588,52 @@ Follow the [Migration Guide](https://docs.cohere.com/v2/docs/migrating-v1-to-v2)
 <dd>
 
 ```python
-from cohere import Client, ToolChatMessageV2
+from cohere import Client, ToolV2, ToolV2Function, UserChatMessageV2
 
 client = Client(
     client_name="YOUR_CLIENT_NAME",
     token="YOUR_TOKEN",
 )
 client.v2.chat(
-    model="model",
+    model="command-r",
     messages=[
-        ToolChatMessageV2(
-            tool_call_id="messages",
-            content="messages",
+        UserChatMessageV2(
+            content="Tell me about LLMs",
         )
+    ],
+    tools=[
+        ToolV2(
+            function=ToolV2Function(
+                name="query_daily_sales_report",
+                description="Connects to a database to retrieve overall sales volumes and sales information for a given day.",
+                parameters={
+                    "type": "object",
+                    "properties": {
+                        "day": {
+                            "description": "Retrieves sales data for this day, formatted as YYYY-MM-DD.",
+                            "type": "str",
+                        }
+                    },
+                    "required": ["day"],
+                },
+            ),
+        ),
+        ToolV2(
+            function=ToolV2Function(
+                name="query_product_catalog",
+                description="Connects to a a product catalog with information about all the products being sold, including categories, prices, and stock levels.",
+                parameters={
+                    "type": "object",
+                    "properties": {
+                        "category": {
+                            "description": "Retrieves product information data for all products in this category.",
+                            "type": "str",
+                        }
+                    },
+                    "required": ["category"],
+                },
+            ),
+        ),
     ],
 )
 
@@ -2759,14 +2835,6 @@ Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 <dl>
 <dd>
 
-**return_prompt:** `typing.Optional[bool]` — Whether to return the prompt in the response.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
 **logprobs:** `typing.Optional[bool]` — Defaults to `false`. When set to `true`, the log probabilities of the generated tokens will be included in the response.
 
     
@@ -2843,8 +2911,9 @@ client = Client(
     token="YOUR_TOKEN",
 )
 client.v2.embed(
-    model="model",
-    input_type="search_document",
+    texts=["hello", "goodbye"],
+    model="embed-english-v3.0",
+    input_type="classification",
     embedding_types=["float"],
 )
 
@@ -2989,9 +3058,16 @@ client = Client(
     token="YOUR_TOKEN",
 )
 client.v2.rerank(
-    model="model",
-    query="query",
-    documents=["documents"],
+    documents=[
+        "Carson City is the capital city of the American state of Nevada.",
+        "The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.",
+        "Capitalization or capitalisation in English grammar is the use of a capital letter at the start of a word. English usage varies from capitalization in other languages.",
+        "Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.",
+        "Capital punishment has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states.",
+    ],
+    query="What is the capital of the United States?",
+    top_n=3,
+    model="rerank-v3.5",
 )
 
 ```
@@ -3040,17 +3116,6 @@ For optimal performance we recommend against sending more than 1,000 documents i
 <dd>
 
 **top_n:** `typing.Optional[int]` — Limits the number of returned rerank results to the specified value. If not passed, all the rerank results will be returned.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**return_documents:** `typing.Optional[bool]` 
-
-- If false, returns results without the doc text - the api will return a list of {index, relevance score} where index is inferred from the list passed into the request.
-- If true, returns results with the doc text passed in - the api will return an ordered list of {index, text, relevance score} where index + text refers to the list passed into the request.
     
 </dd>
 </dl>
@@ -3647,14 +3712,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **csv_delimiter:** `typing.Optional[str]` — The delimiter used for .csv uploads.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**dry_run:** `typing.Optional[bool]` — flag to enable dry_run mode
     
 </dd>
 </dl>
@@ -4374,7 +4431,7 @@ client.connectors.update(
 <dl>
 <dd>
 
-Authorize the connector with the given ID for the connector oauth app.  See ['Connector Authentication'](https://docs.cohere.com/docs/connector-authentication) for more information.
+Authorize the connector with the given ID for the connector oauth app. See ['Connector Authentication'](https://docs.cohere.com/docs/connector-authentication) for more information.
 </dd>
 </dl>
 </dd>
@@ -4645,10 +4702,7 @@ client.finetuning.list_finetuned_models()
 <dl>
 <dd>
 
-**page_size:** `typing.Optional[int]` 
-
-Maximum number of results to be returned by the server. If 0, defaults to
-50.
+**page_size:** `typing.Optional[int]` — Maximum number of results to be returned by the server. If 0, defaults to 50.
     
 </dd>
 </dl>
@@ -4671,7 +4725,8 @@ sorting order is ascending. To specify descending order for a field, append
 " desc" to the field name. For example: "created_at desc,name".
 
 Supported sorting fields:
-  - created_at (default)
+
+- created_at (default)
     
 </dd>
 </dl>
@@ -5053,10 +5108,7 @@ client.finetuning.list_events(
 <dl>
 <dd>
 
-**page_size:** `typing.Optional[int]` 
-
-Maximum number of results to be returned by the server. If 0, defaults to
-50.
+**page_size:** `typing.Optional[int]` — Maximum number of results to be returned by the server. If 0, defaults to 50.
     
 </dd>
 </dl>
@@ -5079,7 +5131,8 @@ sorting order is ascending. To specify descending order for a field, append
 " desc" to the field name. For example: "created_at desc,name".
 
 Supported sorting fields:
-  - created_at (default)
+
+- created_at (default)
     
 </dd>
 </dl>
@@ -5144,10 +5197,7 @@ client.finetuning.list_training_step_metrics(
 <dl>
 <dd>
 
-**page_size:** `typing.Optional[int]` 
-
-Maximum number of results to be returned by the server. If 0, defaults to
-50.
+**page_size:** `typing.Optional[int]` — Maximum number of results to be returned by the server. If 0, defaults to 50.
     
 </dd>
 </dl>
