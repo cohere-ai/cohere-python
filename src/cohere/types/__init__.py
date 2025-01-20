@@ -15,6 +15,7 @@ from .assistant_message_response_content_item import (
 from .auth_token_type import AuthTokenType
 from .chat_citation import ChatCitation
 from .chat_citation_generation_event import ChatCitationGenerationEvent
+from .chat_citation_type import ChatCitationType
 from .chat_connector import ChatConnector
 from .chat_content_delta_event import ChatContentDeltaEvent
 from .chat_content_delta_event_delta import ChatContentDeltaEventDelta
@@ -87,6 +88,7 @@ from .citation_options_mode import CitationOptionsMode
 from .citation_start_event import CitationStartEvent
 from .citation_start_event_delta import CitationStartEventDelta
 from .citation_start_event_delta_message import CitationStartEventDeltaMessage
+from .citation_type import CitationType
 from .classify_data_metrics import ClassifyDataMetrics
 from .classify_example import ClassifyExample
 from .classify_request_truncate import ClassifyRequestTruncate
@@ -236,6 +238,7 @@ __all__ = [
     "AuthTokenType",
     "ChatCitation",
     "ChatCitationGenerationEvent",
+    "ChatCitationType",
     "ChatConnector",
     "ChatContentDeltaEvent",
     "ChatContentDeltaEventDelta",
@@ -304,6 +307,7 @@ __all__ = [
     "CitationStartEventDelta",
     "CitationStartEventDeltaMessage",
     "CitationStartStreamedChatResponseV2",
+    "CitationType",
     "ClassifyDataMetrics",
     "ClassifyExample",
     "ClassifyRequestTruncate",
