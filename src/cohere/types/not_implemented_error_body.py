@@ -2,13 +2,12 @@
 
 from ..core.unchecked_base_model import UncheckedBaseModel
 import typing
-from .finetune_dataset_metrics import FinetuneDatasetMetrics
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
 import pydantic
 
 
-class Metrics(UncheckedBaseModel):
-    finetune_dataset_metrics: typing.Optional[FinetuneDatasetMetrics] = None
+class NotImplementedErrorBody(UncheckedBaseModel):
+    data: typing.Optional[str] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
