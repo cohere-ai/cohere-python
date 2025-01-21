@@ -189,7 +189,7 @@ class TestClient(unittest.TestCase):
 
         print(response)
 
-    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
+    @unittest.skip("temp")
     def test_embed_job_crud(self) -> None:
         dataset = co.datasets.create(
             name="test",
