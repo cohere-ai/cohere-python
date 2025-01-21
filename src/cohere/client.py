@@ -121,7 +121,7 @@ def experimental_kwarg_decorator(func, deprecated_kwarg):
 
 
 def fix_base_url(base_url: typing.Optional[str]) -> typing.Optional[str]:
-    if base_url is not None:
+    if base_url is not None and ("cohere.com" in base_url or "cohere.ai" in base_url):
         return base_url.replace("/v1", "")
     return None
 
