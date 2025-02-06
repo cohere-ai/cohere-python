@@ -73,8 +73,8 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
 
     async def test_moved_fn(self) -> None:
         with self.assertRaises(ValueError):
-            # type: ignore
-            await self.co.list_connectors("dummy", dummy="dummy")
+            await self.co.list_connectors("dummy", dummy="dummy") # type: ignore
+
 
     @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     async def test_generate(self) -> None:
