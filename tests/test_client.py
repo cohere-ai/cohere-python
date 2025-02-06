@@ -28,7 +28,7 @@ class TestClient(unittest.TestCase):
                 UserMessage(
                     message="Who discovered gravity?"),
                 ChatbotMessage(message="The man who is widely credited with discovering "
-                                        "gravity is Sir Isaac Newton")
+                               "gravity is Sir Isaac Newton")
             ],
             message="What year was he born?",
             connectors=[ChatConnector(id="web-search")]
@@ -64,7 +64,7 @@ class TestClient(unittest.TestCase):
                 UserMessage(
                     message="Who discovered gravity?"),
                 ChatbotMessage(message="The man who is widely credited with discovering "
-                                        "gravity is Sir Isaac Newton")
+                               "gravity is Sir Isaac Newton")
             ],
             message="What year was he born?",
             connectors=[ChatConnector(id="web-search")]
@@ -236,35 +236,6 @@ class TestClient(unittest.TestCase):
             top_n=3,
         )
 
-        print(response)
-
-    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
-    def test_classify(self) -> None:
-        examples = [
-            ClassifyExample(
-                text="Dermatologists don't like her!", label="Spam"),
-            ClassifyExample(text="'Hello, open to this?'", label="Spam"),
-            ClassifyExample(
-                text="I need help please wire me $1000 right now", label="Spam"),
-            ClassifyExample(text="Nice to know you ;)", label="Spam"),
-            ClassifyExample(text="Please help me?", label="Spam"),
-            ClassifyExample(
-                text="Your parcel will be delivered today", label="Not spam"),
-            ClassifyExample(
-                text="Review changes to our Terms and Conditions", label="Not spam"),
-            ClassifyExample(text="Weekly sync notes", label="Not spam"),
-            ClassifyExample(
-                text="'Re: Follow up from today's meeting'", label="Not spam"),
-            ClassifyExample(text="Pre-read for tomorrow", label="Not spam"),
-        ]
-        inputs = [
-            "Confirm your email address",
-            "hey i need u to send some $",
-        ]
-        response = co.classify(
-            inputs=inputs,
-            examples=examples,
-        )
         print(response)
 
     @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
