@@ -102,7 +102,7 @@ from .compatible_endpoint import CompatibleEndpoint
 from .connector import Connector
 from .connector_auth_status import ConnectorAuthStatus
 from .connector_o_auth import ConnectorOAuth
-from .content import Content, TextContent
+from .content import Content, ImageUrlContent, TextContent
 from .create_connector_o_auth import CreateConnectorOAuth
 from .create_connector_response import CreateConnectorResponse
 from .create_connector_service_auth import CreateConnectorServiceAuth
@@ -146,6 +146,8 @@ from .generation import Generation
 from .get_connector_response import GetConnectorResponse
 from .get_model_response import GetModelResponse
 from .image import Image
+from .image_content import ImageContent
+from .image_url import ImageUrl
 from .json_response_format import JsonResponseFormat
 from .json_response_format_v2 import JsonResponseFormatV2
 from .label_metric import LabelMetric
@@ -367,6 +369,9 @@ __all__ = [
     "GetConnectorResponse",
     "GetModelResponse",
     "Image",
+    "ImageContent",
+    "ImageUrl",
+    "ImageUrlContent",
     "JsonObjectResponseFormat",
     "JsonObjectResponseFormatV2",
     "JsonResponseFormat",
