@@ -79,7 +79,7 @@ class TestClientV2(unittest.TestCase):
 
         # call the get_weather tool
         tool_result = {"temperature": "30C"}
-        tool_content = [cohere.Content(
+        tool_content = [cohere.TextContent(
             output=tool_result, text="The weather in Toronto is 30C")]
         messages.append(cohere.AssistantChatMessageV2(content=res.message))
         if res.message.tool_calls is not None:
