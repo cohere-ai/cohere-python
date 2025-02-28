@@ -102,7 +102,7 @@ from .compatible_endpoint import CompatibleEndpoint
 from .connector import Connector
 from .connector_auth_status import ConnectorAuthStatus
 from .connector_o_auth import ConnectorOAuth
-from .content import Content, TextContent
+from .content import Content, ImageUrlContent, TextContent
 from .create_connector_o_auth import CreateConnectorOAuth
 from .create_connector_response import CreateConnectorResponse
 from .create_connector_service_auth import CreateConnectorServiceAuth
@@ -115,6 +115,7 @@ from .delete_connector_response import DeleteConnectorResponse
 from .detokenize_response import DetokenizeResponse
 from .document import Document
 from .document_content import DocumentContent
+from .document_source import DocumentSource
 from .embed_by_type_response import EmbedByTypeResponse
 from .embed_by_type_response_embeddings import EmbedByTypeResponseEmbeddings
 from .embed_floats_response import EmbedFloatsResponse
@@ -146,6 +147,8 @@ from .generation import Generation
 from .get_connector_response import GetConnectorResponse
 from .get_model_response import GetModelResponse
 from .image import Image
+from .image_content import ImageContent
+from .image_url import ImageUrl
 from .json_response_format import JsonResponseFormat
 from .json_response_format_v2 import JsonResponseFormatV2
 from .label_metric import LabelMetric
@@ -203,8 +206,12 @@ from .summarize_request_extractiveness import SummarizeRequestExtractiveness
 from .summarize_request_format import SummarizeRequestFormat
 from .summarize_request_length import SummarizeRequestLength
 from .summarize_response import SummarizeResponse
+from .system_message import SystemMessage
 from .system_message_content import SystemMessageContent
 from .system_message_content_item import SystemMessageContentItem, TextSystemMessageContentItem
+from .text_content import TextContent
+from .text_response_format import TextResponseFormat
+from .text_response_format_v2 import TextResponseFormatV2
 from .tokenize_response import TokenizeResponse
 from .tool import Tool
 from .tool_call import ToolCall
@@ -212,16 +219,19 @@ from .tool_call_delta import ToolCallDelta
 from .tool_call_v2 import ToolCallV2
 from .tool_call_v2function import ToolCallV2Function
 from .tool_content import DocumentToolContent, TextToolContent, ToolContent
+from .tool_message import ToolMessage
 from .tool_message_v2 import ToolMessageV2
 from .tool_message_v2content import ToolMessageV2Content
 from .tool_parameter_definitions_value import ToolParameterDefinitionsValue
 from .tool_result import ToolResult
+from .tool_source import ToolSource
 from .tool_v2 import ToolV2
 from .tool_v2function import ToolV2Function
 from .update_connector_response import UpdateConnectorResponse
 from .usage import Usage
 from .usage_billed_units import UsageBilledUnits
 from .usage_tokens import UsageTokens
+from .user_message import UserMessage
 from .user_message_content import UserMessageContent
 
 __all__ = [
@@ -367,6 +377,9 @@ __all__ = [
     "GetConnectorResponse",
     "GetModelResponse",
     "Image",
+    "ImageContent",
+    "ImageUrl",
+    "ImageUrlContent",
     "JsonObjectResponseFormat",
     "JsonObjectResponseFormatV2",
     "JsonResponseFormat",
