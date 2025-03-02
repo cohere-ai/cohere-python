@@ -4,7 +4,7 @@ name = "cohere"
 [tool.poetry]
 name = "cohere"
 version = "5.14.0"
-description = ""
+description = "The Cohere Python SDK"
 readme = "README.md"
 authors = []
 keywords = []
