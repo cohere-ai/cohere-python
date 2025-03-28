@@ -47,6 +47,11 @@ class GetModelResponse(UncheckedBaseModel):
     The API endpoints that the model is default to.
     """
 
+    features: typing.Optional[typing.List[str]] = pydantic.Field(default=None)
+    """
+    The features that the model supports.
+    """
+
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
     else:

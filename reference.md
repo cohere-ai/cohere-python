@@ -1841,7 +1841,7 @@ Note: [Fine-tuned Models](https://docs.cohere.com/docs/classify-fine-tuning) tra
 <dl>
 <dd>
 
-**model:** `typing.Optional[str]` — The identifier of the model. Currently available models are `embed-multilingual-v2.0`, `embed-english-light-v2.0`, and `embed-english-v2.0` (default). Smaller "light" models are faster, while larger models will perform better. [Fine-tuned models](https://docs.cohere.com/docs/fine-tuning) can also be supplied with their full ID.
+**model:** `typing.Optional[str]` — ID of a [Fine-tuned](https://docs.cohere.com/v2/docs/classify-starting-the-training) Classify model
     
 </dd>
 </dl>
