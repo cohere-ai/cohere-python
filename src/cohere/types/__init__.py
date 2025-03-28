@@ -115,6 +115,7 @@ from .delete_connector_response import DeleteConnectorResponse
 from .detokenize_response import DetokenizeResponse
 from .document import Document
 from .document_content import DocumentContent
+from .document_source import DocumentSource
 from .embed_by_type_response import EmbedByTypeResponse
 from .embed_by_type_response_embeddings import EmbedByTypeResponseEmbeddings
 from .embed_floats_response import EmbedFloatsResponse
@@ -162,6 +163,7 @@ from .metrics_embed_data_fields_item import MetricsEmbedDataFieldsItem
 from .non_streamed_chat_response import NonStreamedChatResponse
 from .o_auth_authorize_response import OAuthAuthorizeResponse
 from .parse_info import ParseInfo
+from .reasoning_effort import ReasoningEffort
 from .rerank_document import RerankDocument
 from .rerank_request_documents_item import RerankRequestDocumentsItem
 from .rerank_response import RerankResponse
@@ -205,8 +207,12 @@ from .summarize_request_extractiveness import SummarizeRequestExtractiveness
 from .summarize_request_format import SummarizeRequestFormat
 from .summarize_request_length import SummarizeRequestLength
 from .summarize_response import SummarizeResponse
+from .system_message import SystemMessage
 from .system_message_content import SystemMessageContent
 from .system_message_content_item import SystemMessageContentItem, TextSystemMessageContentItem
+from .text_content import TextContent
+from .text_response_format import TextResponseFormat
+from .text_response_format_v2 import TextResponseFormatV2
 from .tokenize_response import TokenizeResponse
 from .tool import Tool
 from .tool_call import ToolCall
@@ -214,16 +220,22 @@ from .tool_call_delta import ToolCallDelta
 from .tool_call_v2 import ToolCallV2
 from .tool_call_v2function import ToolCallV2Function
 from .tool_content import DocumentToolContent, TextToolContent, ToolContent
+from .tool_message import ToolMessage
 from .tool_message_v2 import ToolMessageV2
 from .tool_message_v2content import ToolMessageV2Content
 from .tool_parameter_definitions_value import ToolParameterDefinitionsValue
 from .tool_result import ToolResult
+from .tool_source import ToolSource
 from .tool_v2 import ToolV2
 from .tool_v2function import ToolV2Function
+from .truncation_strategy import AutoTruncationStrategy, NoneTruncationStrategy, TruncationStrategy
+from .truncation_strategy_auto_preserve_order import TruncationStrategyAutoPreserveOrder
+from .truncation_strategy_none import TruncationStrategyNone
 from .update_connector_response import UpdateConnectorResponse
 from .usage import Usage
 from .usage_billed_units import UsageBilledUnits
 from .usage_tokens import UsageTokens
+from .user_message import UserMessage
 from .user_message_content import UserMessageContent
 
 __all__ = [
@@ -238,6 +250,7 @@ __all__ = [
     "AssistantMessageResponse",
     "AssistantMessageResponseContentItem",
     "AuthTokenType",
+    "AutoTruncationStrategy",
     "ChatCitation",
     "ChatCitationGenerationEvent",
     "ChatCitationType",
@@ -388,8 +401,10 @@ __all__ = [
     "MetricsEmbedData",
     "MetricsEmbedDataFieldsItem",
     "NonStreamedChatResponse",
+    "NoneTruncationStrategy",
     "OAuthAuthorizeResponse",
     "ParseInfo",
+    "ReasoningEffort",
     "RerankDocument",
     "RerankRequestDocumentsItem",
     "RerankResponse",
@@ -449,6 +464,9 @@ __all__ = [
     "ToolSource",
     "ToolV2",
     "ToolV2Function",
+    "TruncationStrategy",
+    "TruncationStrategyAutoPreserveOrder",
+    "TruncationStrategyNone",
     "UpdateConnectorResponse",
     "Usage",
     "UsageBilledUnits",
