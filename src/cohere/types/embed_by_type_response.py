@@ -16,7 +16,7 @@ class EmbedByTypeResponse(UncheckedBaseModel):
     An object with different embedding types. The length of each embedding type array will be the same as the length of the original `texts` array.
     """
 
-    texts: typing.Optional[typing.List[str]] = pydantic.Field(default=None)
+    texts: typing.List[str] = pydantic.Field()
     """
     The text entries for which embeddings were returned.
     """
