@@ -117,13 +117,18 @@ from .document import Document
 from .document_content import DocumentContent
 from .embed_by_type_response import EmbedByTypeResponse
 from .embed_by_type_response_embeddings import EmbedByTypeResponseEmbeddings
+from .embed_content import EmbedContent, ImageUrlEmbedContent, TextEmbedContent
 from .embed_floats_response import EmbedFloatsResponse
+from .embed_image import EmbedImage
+from .embed_image_properties import EmbedImageProperties
+from .embed_input import EmbedInput
 from .embed_input_type import EmbedInputType
 from .embed_job import EmbedJob
 from .embed_job_status import EmbedJobStatus
 from .embed_job_truncate import EmbedJobTruncate
 from .embed_request_truncate import EmbedRequestTruncate
 from .embed_response import EmbedResponse, EmbeddingsByTypeEmbedResponse, EmbeddingsFloatsEmbedResponse
+from .embed_text import EmbedText
 from .embedding_type import EmbeddingType
 from .finetune_dataset_metrics import FinetuneDatasetMetrics
 from .finish_reason import FinishReason
@@ -348,13 +353,18 @@ __all__ = [
     "DocumentToolContent",
     "EmbedByTypeResponse",
     "EmbedByTypeResponseEmbeddings",
+    "EmbedContent",
     "EmbedFloatsResponse",
+    "EmbedImage",
+    "EmbedImageProperties",
+    "EmbedInput",
     "EmbedInputType",
     "EmbedJob",
     "EmbedJobStatus",
     "EmbedJobTruncate",
     "EmbedRequestTruncate",
     "EmbedResponse",
+    "EmbedText",
     "EmbeddingType",
     "EmbeddingsByTypeEmbedResponse",
     "EmbeddingsFloatsEmbedResponse",
@@ -377,6 +387,7 @@ __all__ = [
     "ImageContent",
     "ImageUrl",
     "ImageUrlContent",
+    "ImageUrlEmbedContent",
     "JsonObjectResponseFormat",
     "JsonObjectResponseFormatV2",
     "JsonResponseFormat",
@@ -428,6 +439,7 @@ __all__ = [
     "TextAssistantMessageContentItem",
     "TextAssistantMessageResponseContentItem",
     "TextContent",
+    "TextEmbedContent",
     "TextGenerationGenerateStreamedResponse",
     "TextGenerationStreamedChatResponse",
     "TextResponseFormat",
