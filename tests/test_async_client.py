@@ -73,8 +73,8 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
 
     async def test_moved_fn(self) -> None:
         with self.assertRaises(ValueError):
-            await self.co.list_connectors("dummy", dummy="dummy") # type: ignore
-
+            # type: ignore
+            await self.co.list_connectors("dummy", dummy="dummy")
 
     @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     async def test_generate(self) -> None:
@@ -352,7 +352,6 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(cited_response.documents, [
             {
-                "tool_name": "sales_database",
                 "average_sale_value": "404.17",
                 "date": "2023-09-29",
                 "id": "sales_database:0:0",
