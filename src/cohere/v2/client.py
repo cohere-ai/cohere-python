@@ -35,6 +35,7 @@ from .types.v2chat_request_tool_choice import V2ChatRequestToolChoice
 from ..types.chat_response import ChatResponse
 from ..types.embed_input_type import EmbedInputType
 from ..types.embedding_type import EmbeddingType
+from ..types.embed_input import EmbedInput
 from .types.v2embed_request_truncate import V2EmbedRequestTruncate
 from ..types.embed_by_type_response import EmbedByTypeResponse
 from .types.v2rerank_response import V2RerankResponse
@@ -725,6 +726,8 @@ class V2Client:
         embedding_types: typing.Sequence[EmbeddingType],
         texts: typing.Optional[typing.Sequence[str]] = OMIT,
         images: typing.Optional[typing.Sequence[str]] = OMIT,
+        inputs: typing.Optional[typing.Sequence[EmbedInput]] = OMIT,
+        output_dimension: typing.Optional[int] = OMIT,
         truncate: typing.Optional[V2EmbedRequestTruncate] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> EmbedByTypeResponse:
@@ -772,6 +775,10 @@ class V2Client:
 
             The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
 
+        inputs : typing.Optional[typing.Sequence[EmbedInput]]
+
+        output_dimension : typing.Optional[int]
+
         truncate : typing.Optional[V2EmbedRequestTruncate]
             One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
 
@@ -809,6 +816,10 @@ class V2Client:
                 "images": images,
                 "model": model,
                 "input_type": input_type,
+                "inputs": convert_and_respect_annotation_metadata(
+                    object_=inputs, annotation=typing.Sequence[EmbedInput], direction="write"
+                ),
+                "output_dimension": output_dimension,
                 "embedding_types": embedding_types,
                 "truncate": truncate,
             },
@@ -1863,6 +1874,8 @@ class AsyncV2Client:
         embedding_types: typing.Sequence[EmbeddingType],
         texts: typing.Optional[typing.Sequence[str]] = OMIT,
         images: typing.Optional[typing.Sequence[str]] = OMIT,
+        inputs: typing.Optional[typing.Sequence[EmbedInput]] = OMIT,
+        output_dimension: typing.Optional[int] = OMIT,
         truncate: typing.Optional[V2EmbedRequestTruncate] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> EmbedByTypeResponse:
@@ -1910,6 +1923,10 @@ class AsyncV2Client:
 
             The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
 
+        inputs : typing.Optional[typing.Sequence[EmbedInput]]
+
+        output_dimension : typing.Optional[int]
+
         truncate : typing.Optional[V2EmbedRequestTruncate]
             One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
 
@@ -1955,6 +1972,10 @@ class AsyncV2Client:
                 "images": images,
                 "model": model,
                 "input_type": input_type,
+                "inputs": convert_and_respect_annotation_metadata(
+                    object_=inputs, annotation=typing.Sequence[EmbedInput], direction="write"
+                ),
+                "output_dimension": output_dimension,
                 "embedding_types": embedding_types,
                 "truncate": truncate,
             },

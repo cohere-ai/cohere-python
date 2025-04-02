@@ -2929,6 +2929,22 @@ The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/We
 <dl>
 <dd>
 
+**inputs:** `typing.Optional[typing.Sequence[EmbedInput]]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**output_dimension:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **truncate:** `typing.Optional[V2EmbedRequestTruncate]` 
 
 One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
