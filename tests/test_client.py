@@ -413,6 +413,7 @@ class TestClient(unittest.TestCase):
 
         self.assertEqual(cited_response.documents, [
             {
+                "tool_name": "sales_database",
                 "average_sale_value": "404.17",
                 "date": "2023-09-29",
                 "id": "sales_database:0:0",
