@@ -81,7 +81,7 @@ class V2Client:
         Parameters
         ----------
         model : str
-            The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
+            The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
 
         messages : ChatMessages
 
@@ -111,9 +111,9 @@ class V2Client:
 
             Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
-            **Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/v2/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/v2/docs/command-r-plus#august-2024-release) and newer.
+            **Note**: This parameter is only compatible newer Cohere models, starting with [Command R 08-2024](https://docs.cohere.com/docs/command-r#august-2024-release) and [Command R+ 08-2024](https://docs.cohere.com/docs/command-r-plus#august-2024-release).
 
-            **Note**: `command-r7b-12-2024` only supports `"CONTEXTUAL"` and `"STRICT"` modes.
+            **Note**: `command-r7b-12-2024` and newer models only support `"CONTEXTUAL"` and `"STRICT"` modes.
 
 
         max_tokens : typing.Optional[int]
@@ -420,7 +420,7 @@ class V2Client:
         Parameters
         ----------
         model : str
-            The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
+            The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
 
         messages : ChatMessages
 
@@ -450,9 +450,9 @@ class V2Client:
 
             Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
-            **Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/v2/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/v2/docs/command-r-plus#august-2024-release) and newer.
+            **Note**: This parameter is only compatible newer Cohere models, starting with [Command R 08-2024](https://docs.cohere.com/docs/command-r#august-2024-release) and [Command R+ 08-2024](https://docs.cohere.com/docs/command-r-plus#august-2024-release).
 
-            **Note**: `command-r7b-12-2024` only supports `"CONTEXTUAL"` and `"STRICT"` modes.
+            **Note**: `command-r7b-12-2024` and newer models only support `"CONTEXTUAL"` and `"STRICT"` modes.
 
 
         max_tokens : typing.Optional[int]
@@ -727,6 +727,7 @@ class V2Client:
         texts: typing.Optional[typing.Sequence[str]] = OMIT,
         images: typing.Optional[typing.Sequence[str]] = OMIT,
         inputs: typing.Optional[typing.Sequence[EmbedInput]] = OMIT,
+        max_tokens: typing.Optional[int] = OMIT,
         output_dimension: typing.Optional[int] = OMIT,
         truncate: typing.Optional[V2EmbedRequestTruncate] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
@@ -776,8 +777,14 @@ class V2Client:
             The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
 
         inputs : typing.Optional[typing.Sequence[EmbedInput]]
+            An array of inputs for the model to embed. Maximum number of inputs per call is `96`. An input can contain a mix of text and image components.
+
+        max_tokens : typing.Optional[int]
+            The maximum number of tokens to embed per input. If the input text is longer than this, it will be truncated according to the `truncate` parameter.
 
         output_dimension : typing.Optional[int]
+            The number of dimensions of the output embedding. This is only available for `embed-v4` and newer models.
+            Possible values are `256`, `512`, `1024`, and `1536`. The default is `1536`.
 
         truncate : typing.Optional[V2EmbedRequestTruncate]
             One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
@@ -819,6 +826,7 @@ class V2Client:
                 "inputs": convert_and_respect_annotation_metadata(
                     object_=inputs, annotation=typing.Sequence[EmbedInput], direction="write"
                 ),
+                "max_tokens": max_tokens,
                 "output_dimension": output_dimension,
                 "embedding_types": embedding_types,
                 "truncate": truncate,
@@ -1213,7 +1221,7 @@ class AsyncV2Client:
         Parameters
         ----------
         model : str
-            The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
+            The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
 
         messages : ChatMessages
 
@@ -1243,9 +1251,9 @@ class AsyncV2Client:
 
             Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
-            **Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/v2/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/v2/docs/command-r-plus#august-2024-release) and newer.
+            **Note**: This parameter is only compatible newer Cohere models, starting with [Command R 08-2024](https://docs.cohere.com/docs/command-r#august-2024-release) and [Command R+ 08-2024](https://docs.cohere.com/docs/command-r-plus#august-2024-release).
 
-            **Note**: `command-r7b-12-2024` only supports `"CONTEXTUAL"` and `"STRICT"` modes.
+            **Note**: `command-r7b-12-2024` and newer models only support `"CONTEXTUAL"` and `"STRICT"` modes.
 
 
         max_tokens : typing.Optional[int]
@@ -1560,7 +1568,7 @@ class AsyncV2Client:
         Parameters
         ----------
         model : str
-            The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
+            The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
 
         messages : ChatMessages
 
@@ -1590,9 +1598,9 @@ class AsyncV2Client:
 
             Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
-            **Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/v2/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/v2/docs/command-r-plus#august-2024-release) and newer.
+            **Note**: This parameter is only compatible newer Cohere models, starting with [Command R 08-2024](https://docs.cohere.com/docs/command-r#august-2024-release) and [Command R+ 08-2024](https://docs.cohere.com/docs/command-r-plus#august-2024-release).
 
-            **Note**: `command-r7b-12-2024` only supports `"CONTEXTUAL"` and `"STRICT"` modes.
+            **Note**: `command-r7b-12-2024` and newer models only support `"CONTEXTUAL"` and `"STRICT"` modes.
 
 
         max_tokens : typing.Optional[int]
@@ -1875,6 +1883,7 @@ class AsyncV2Client:
         texts: typing.Optional[typing.Sequence[str]] = OMIT,
         images: typing.Optional[typing.Sequence[str]] = OMIT,
         inputs: typing.Optional[typing.Sequence[EmbedInput]] = OMIT,
+        max_tokens: typing.Optional[int] = OMIT,
         output_dimension: typing.Optional[int] = OMIT,
         truncate: typing.Optional[V2EmbedRequestTruncate] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
@@ -1924,8 +1933,14 @@ class AsyncV2Client:
             The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
 
         inputs : typing.Optional[typing.Sequence[EmbedInput]]
+            An array of inputs for the model to embed. Maximum number of inputs per call is `96`. An input can contain a mix of text and image components.
+
+        max_tokens : typing.Optional[int]
+            The maximum number of tokens to embed per input. If the input text is longer than this, it will be truncated according to the `truncate` parameter.
 
         output_dimension : typing.Optional[int]
+            The number of dimensions of the output embedding. This is only available for `embed-v4` and newer models.
+            Possible values are `256`, `512`, `1024`, and `1536`. The default is `1536`.
 
         truncate : typing.Optional[V2EmbedRequestTruncate]
             One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
@@ -1975,6 +1990,7 @@ class AsyncV2Client:
                 "inputs": convert_and_respect_annotation_metadata(
                     object_=inputs, annotation=typing.Sequence[EmbedInput], direction="write"
                 ),
+                "max_tokens": max_tokens,
                 "output_dimension": output_dimension,
                 "embedding_types": embedding_types,
                 "truncate": truncate,
