@@ -80,8 +80,6 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 
 **model:** `typing.Optional[str]` 
 
-Defaults to `command-r-plus-08-2024`.
-
 The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
 Compatible Deployments: Cohere Platform, Private Deployments
@@ -464,9 +462,9 @@ When `NONE` is specified, the safety instruction will be omitted.
 
 Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
-**Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/docs/command-r-plus#august-2024-release) and newer.
+**Note**: This parameter is only compatible newer Cohere models, starting with [Command R 08-2024](https://docs.cohere.com/docs/command-r#august-2024-release) and [Command R+ 08-2024](https://docs.cohere.com/docs/command-r-plus#august-2024-release).
 
-**Note**: `command-r7b-12-2024` only supports `"CONTEXTUAL"` and `"STRICT"` modes.
+**Note**: `command-r7b-12-2024` and newer models only support `"CONTEXTUAL"` and `"STRICT"` modes.
 
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
@@ -566,8 +564,6 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dd>
 
 **model:** `typing.Optional[str]` 
-
-Defaults to `command-r-plus-08-2024`.
 
 The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
 
@@ -951,9 +947,9 @@ When `NONE` is specified, the safety instruction will be omitted.
 
 Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
-**Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/docs/command-r-plus#august-2024-release) and newer.
+**Note**: This parameter is only compatible newer Cohere models, starting with [Command R 08-2024](https://docs.cohere.com/docs/command-r#august-2024-release) and [Command R+ 08-2024](https://docs.cohere.com/docs/command-r-plus#august-2024-release).
 
-**Note**: `command-r7b-12-2024` only supports `"CONTEXTUAL"` and `"STRICT"` modes.
+**Note**: `command-r7b-12-2024` and newer models only support `"CONTEXTUAL"` and `"STRICT"` modes.
 
 Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
@@ -2286,7 +2282,7 @@ for chunk in response:
 <dl>
 <dd>
 
-**model:** `str` — The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
+**model:** `str` — The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
     
 </dd>
 </dl>
@@ -2360,9 +2356,9 @@ When `OFF` is specified, the safety instruction will be omitted.
 
 Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
-**Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/v2/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/v2/docs/command-r-plus#august-2024-release) and newer.
+**Note**: This parameter is only compatible newer Cohere models, starting with [Command R 08-2024](https://docs.cohere.com/docs/command-r#august-2024-release) and [Command R+ 08-2024](https://docs.cohere.com/docs/command-r-plus#august-2024-release).
 
-**Note**: `command-r7b-12-2024` only supports `"CONTEXTUAL"` and `"STRICT"` modes.
+**Note**: `command-r7b-12-2024` and newer models only support `"CONTEXTUAL"` and `"STRICT"` modes.
 
     
 </dd>
@@ -2575,7 +2571,7 @@ client.v2.chat(
 <dl>
 <dd>
 
-**model:** `str` — The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) (such as command-r or command-r-plus) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
+**model:** `str` — The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
     
 </dd>
 </dl>
@@ -2649,9 +2645,9 @@ When `OFF` is specified, the safety instruction will be omitted.
 
 Safety modes are not yet configurable in combination with `tools`, `tool_results` and `documents` parameters.
 
-**Note**: This parameter is only compatible with models [Command R 08-2024](https://docs.cohere.com/v2/docs/command-r#august-2024-release), [Command R+ 08-2024](https://docs.cohere.com/v2/docs/command-r-plus#august-2024-release) and newer.
+**Note**: This parameter is only compatible newer Cohere models, starting with [Command R 08-2024](https://docs.cohere.com/docs/command-r#august-2024-release) and [Command R+ 08-2024](https://docs.cohere.com/docs/command-r-plus#august-2024-release).
 
-**Note**: `command-r7b-12-2024` only supports `"CONTEXTUAL"` and `"STRICT"` modes.
+**Note**: `command-r7b-12-2024` and newer models only support `"CONTEXTUAL"` and `"STRICT"` modes.
 
     
 </dd>
@@ -2929,7 +2925,15 @@ The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/We
 <dl>
 <dd>
 
-**inputs:** `typing.Optional[typing.Sequence[EmbedInput]]` 
+**inputs:** `typing.Optional[typing.Sequence[EmbedInput]]` — An array of inputs for the model to embed. Maximum number of inputs per call is `96`. An input can contain a mix of text and image components.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_tokens:** `typing.Optional[int]` — The maximum number of tokens to embed per input. If the input text is longer than this, it will be truncated according to the `truncate` parameter.
     
 </dd>
 </dl>
@@ -2938,6 +2942,9 @@ The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/We
 <dd>
 
 **output_dimension:** `typing.Optional[int]` 
+
+The number of dimensions of the output embedding. This is only available for `embed-v4` and newer models.
+Possible values are `256`, `512`, `1024`, and `1536`. The default is `1536`.
     
 </dd>
 </dl>
@@ -4492,7 +4499,7 @@ client = Client(
     token="YOUR_TOKEN",
 )
 client.models.get(
-    model="command-r",
+    model="command-a-03-2025",
 )
 
 ```
