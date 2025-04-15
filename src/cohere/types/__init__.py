@@ -120,7 +120,7 @@ from .embed_by_type_response_embeddings import EmbedByTypeResponseEmbeddings
 from .embed_content import EmbedContent, ImageUrlEmbedContent, TextEmbedContent
 from .embed_floats_response import EmbedFloatsResponse
 from .embed_image import EmbedImage
-from .embed_image_properties import EmbedImageProperties
+from .embed_image_url import EmbedImageUrl
 from .embed_input import EmbedInput
 from .embed_input_type import EmbedInputType
 from .embed_job import EmbedJob
@@ -356,7 +356,7 @@ __all__ = [
     "EmbedContent",
     "EmbedFloatsResponse",
     "EmbedImage",
-    "EmbedImageProperties",
+    "EmbedImageUrl",
     "EmbedInput",
     "EmbedInputType",
     "EmbedJob",

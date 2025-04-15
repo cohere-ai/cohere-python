@@ -3,12 +3,15 @@
 from ..core.unchecked_base_model import UncheckedBaseModel
 import typing
 from .embed_content import EmbedContent
-from ..core.pydantic_utilities import IS_PYDANTIC_V2
 import pydantic
+from ..core.pydantic_utilities import IS_PYDANTIC_V2
 
 
 class EmbedInput(UncheckedBaseModel):
-    content: typing.List[EmbedContent]
+    content: typing.List[EmbedContent] = pydantic.Field()
+    """
+    An array of objects containing the input data for the model to embed.
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2

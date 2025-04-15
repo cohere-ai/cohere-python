@@ -2,13 +2,17 @@
 
 from ..core.unchecked_base_model import UncheckedBaseModel
 import typing
-from .embed_image_properties import EmbedImageProperties
+from .embed_image_url import EmbedImageUrl
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
 import pydantic
 
 
 class EmbedImage(UncheckedBaseModel):
-    image: typing.Optional[EmbedImageProperties] = None
+    """
+    Image content of the input.
+    """
+
+    image_url: typing.Optional[EmbedImageUrl] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
