@@ -59,7 +59,6 @@ from .chat_stream_end_event_finish_reason import ChatStreamEndEventFinishReason
 from .chat_stream_event import ChatStreamEvent
 from .chat_stream_event_type import ChatStreamEventType
 from .chat_stream_request_citation_quality import ChatStreamRequestCitationQuality
-from .chat_stream_request_connectors_search_options import ChatStreamRequestConnectorsSearchOptions
 from .chat_stream_request_prompt_truncation import ChatStreamRequestPromptTruncation
 from .chat_stream_request_safety_mode import ChatStreamRequestSafetyMode
 from .chat_stream_start_event import ChatStreamStartEvent
@@ -153,6 +152,7 @@ from .get_model_response import GetModelResponse
 from .image import Image
 from .image_content import ImageContent
 from .image_url import ImageUrl
+from .image_url_detail import ImageUrlDetail
 from .json_response_format import JsonResponseFormat
 from .json_response_format_v2 import JsonResponseFormatV2
 from .label_metric import LabelMetric
@@ -288,7 +288,6 @@ __all__ = [
     "ChatStreamEvent",
     "ChatStreamEventType",
     "ChatStreamRequestCitationQuality",
-    "ChatStreamRequestConnectorsSearchOptions",
     "ChatStreamRequestPromptTruncation",
     "ChatStreamRequestSafetyMode",
     "ChatStreamStartEvent",
@@ -387,6 +386,7 @@ __all__ = [
     "ImageContent",
     "ImageUrl",
     "ImageUrlContent",
+    "ImageUrlDetail",
     "ImageUrlEmbedContent",
     "JsonObjectResponseFormat",
     "JsonObjectResponseFormatV2",

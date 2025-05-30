@@ -9,7 +9,7 @@ import pydantic
 
 class EmbedImage(UncheckedBaseModel):
     """
-    Image content of the input.
+    Image content of the input. Supported with Embed v3.0 and newer models.
     """
 
     image_url: typing.Optional[EmbedImageUrl] = None
