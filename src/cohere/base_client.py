@@ -1744,39 +1744,28 @@ class BaseCohere:
         Parameters
         ----------
         texts : typing.Optional[typing.Sequence[str]]
-            An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
+            An array of strings for the model to embed. Maximum number of texts per call is `96`.
 
         images : typing.Optional[typing.Sequence[str]]
             An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
 
             The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
 
+            Images are only supported with Embed v3.0 and newer models.
+
         model : typing.Optional[str]
-            Defaults to embed-english-v2.0
-
-            The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](https://docs.cohere.com/docs/training-custom-models) can also be supplied with their full ID.
-
-            Available models and corresponding embedding dimensions:
-
-            * `embed-english-v3.0`  1024
-            * `embed-multilingual-v3.0`  1024
-            * `embed-english-light-v3.0`  384
-            * `embed-multilingual-light-v3.0`  384
-
-            * `embed-english-v2.0`  4096
-            * `embed-english-light-v2.0`  1024
-            * `embed-multilingual-v2.0`  768
+            ID of one of the available [Embedding models](https://docs.cohere.com/docs/cohere-embed).
 
         input_type : typing.Optional[EmbedInputType]
 
         embedding_types : typing.Optional[typing.Sequence[EmbeddingType]]
             Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
-            * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
-            * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
-            * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
-            * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
-            * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
+            * `"float"`: Use this when you want to get back the default float embeddings. Supported with all Embed models.
+            * `"int8"`: Use this when you want to get back signed int8 embeddings. Supported with Embed v3.0 and newer Embed models.
+            * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Supported with Embed v3.0 and newer Embed models.
+            * `"binary"`: Use this when you want to get back signed binary embeddings. Supported with Embed v3.0 and newer Embed models.
+            * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Supported with Embed v3.0 and newer Embed models.
 
         truncate : typing.Optional[EmbedRequestTruncate]
             One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
@@ -2606,7 +2595,7 @@ class BaseCohere:
             The string to be tokenized, the minimum text length is 1 character, and the maximum text length is 65536 characters.
 
         model : str
-            An optional parameter to provide the model name. This will ensure that the tokenization uses the tokenizer used by that model.
+            The input will be tokenized by the tokenizer that is used by this model.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -4821,39 +4810,28 @@ class AsyncBaseCohere:
         Parameters
         ----------
         texts : typing.Optional[typing.Sequence[str]]
-            An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
+            An array of strings for the model to embed. Maximum number of texts per call is `96`.
 
         images : typing.Optional[typing.Sequence[str]]
             An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
 
             The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
 
+            Images are only supported with Embed v3.0 and newer models.
+
         model : typing.Optional[str]
-            Defaults to embed-english-v2.0
-
-            The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](https://docs.cohere.com/docs/training-custom-models) can also be supplied with their full ID.
-
-            Available models and corresponding embedding dimensions:
-
-            * `embed-english-v3.0`  1024
-            * `embed-multilingual-v3.0`  1024
-            * `embed-english-light-v3.0`  384
-            * `embed-multilingual-light-v3.0`  384
-
-            * `embed-english-v2.0`  4096
-            * `embed-english-light-v2.0`  1024
-            * `embed-multilingual-v2.0`  768
+            ID of one of the available [Embedding models](https://docs.cohere.com/docs/cohere-embed).
 
         input_type : typing.Optional[EmbedInputType]
 
         embedding_types : typing.Optional[typing.Sequence[EmbeddingType]]
             Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
-            * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
-            * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
-            * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
-            * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
-            * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
+            * `"float"`: Use this when you want to get back the default float embeddings. Supported with all Embed models.
+            * `"int8"`: Use this when you want to get back signed int8 embeddings. Supported with Embed v3.0 and newer Embed models.
+            * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Supported with Embed v3.0 and newer Embed models.
+            * `"binary"`: Use this when you want to get back signed binary embeddings. Supported with Embed v3.0 and newer Embed models.
+            * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Supported with Embed v3.0 and newer Embed models.
 
         truncate : typing.Optional[EmbedRequestTruncate]
             One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
@@ -5715,7 +5693,7 @@ class AsyncBaseCohere:
             The string to be tokenized, the minimum text length is 1 character, and the maximum text length is 65536 characters.
 
         model : str
-            An optional parameter to provide the model name. This will ensure that the tokenization uses the tokenizer used by that model.
+            The input will be tokenized by the tokenizer that is used by this model.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.

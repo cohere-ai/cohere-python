@@ -1539,7 +1539,7 @@ client.embed()
 <dl>
 <dd>
 
-**texts:** `typing.Optional[typing.Sequence[str]]` — An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
+**texts:** `typing.Optional[typing.Sequence[str]]` — An array of strings for the model to embed. Maximum number of texts per call is `96`.
     
 </dd>
 </dl>
@@ -1552,6 +1552,8 @@ client.embed()
 An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
 
 The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
+
+Images are only supported with Embed v3.0 and newer models.
     
 </dd>
 </dl>
@@ -1559,22 +1561,7 @@ The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/We
 <dl>
 <dd>
 
-**model:** `typing.Optional[str]` 
-
-Defaults to embed-english-v2.0
-
-The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](https://docs.cohere.com/docs/training-custom-models) can also be supplied with their full ID.
-
-Available models and corresponding embedding dimensions:
-
-* `embed-english-v3.0`  1024
-* `embed-multilingual-v3.0`  1024
-* `embed-english-light-v3.0`  384
-* `embed-multilingual-light-v3.0`  384
-
-* `embed-english-v2.0`  4096
-* `embed-english-light-v2.0`  1024
-* `embed-multilingual-v2.0`  768
+**model:** `typing.Optional[str]` — ID of one of the available [Embedding models](https://docs.cohere.com/docs/cohere-embed).
     
 </dd>
 </dl>
@@ -1594,11 +1581,11 @@ Available models and corresponding embedding dimensions:
 
 Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
-* `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
-* `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
-* `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
-* `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
-* `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
+* `"float"`: Use this when you want to get back the default float embeddings. Supported with all Embed models.
+* `"int8"`: Use this when you want to get back signed int8 embeddings. Supported with Embed v3.0 and newer Embed models.
+* `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Supported with Embed v3.0 and newer Embed models.
+* `"binary"`: Use this when you want to get back signed binary embeddings. Supported with Embed v3.0 and newer Embed models.
+* `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Supported with Embed v3.0 and newer Embed models.
     
 </dd>
 </dl>
@@ -2059,7 +2046,7 @@ client.tokenize(
 <dl>
 <dd>
 
-**model:** `str` — An optional parameter to provide the model name. This will ensure that the tokenization uses the tokenizer used by that model.
+**model:** `str` — The input will be tokenized by the tokenizer that is used by this model.
     
 </dd>
 </dl>
@@ -2841,7 +2828,6 @@ client = Client(
 client.v2.embed(
     model="model",
     input_type="search_document",
-    embedding_types=["float"],
 )
 
 ```
@@ -2858,22 +2844,7 @@ client.v2.embed(
 <dl>
 <dd>
 
-**model:** `str` 
-
-Defaults to embed-english-v2.0
-
-The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](https://docs.cohere.com/docs/training-custom-models) can also be supplied with their full ID.
-
-Available models and corresponding embedding dimensions:
-
-* `embed-english-v3.0`  1024
-* `embed-multilingual-v3.0`  1024
-* `embed-english-light-v3.0`  384
-* `embed-multilingual-light-v3.0`  384
-
-* `embed-english-v2.0`  4096
-* `embed-english-light-v2.0`  1024
-* `embed-multilingual-v2.0`  768
+**model:** `str` — ID of one of the available [Embedding models](https://docs.cohere.com/docs/cohere-embed).
     
 </dd>
 </dl>
@@ -2889,23 +2860,7 @@ Available models and corresponding embedding dimensions:
 <dl>
 <dd>
 
-**embedding_types:** `typing.Sequence[EmbeddingType]` 
-
-Specifies the types of embeddings you want to get back. Can be one or more of the following types.
-
-* `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
-* `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
-* `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
-* `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
-* `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**texts:** `typing.Optional[typing.Sequence[str]]` — An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
+**texts:** `typing.Optional[typing.Sequence[str]]` — An array of strings for the model to embed. Maximum number of texts per call is `96`.
     
 </dd>
 </dl>
@@ -2918,6 +2873,8 @@ Specifies the types of embeddings you want to get back. Can be one or more of th
 An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
 
 The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
+
+Image embeddings are supported with Embed v3.0 and newer models.
     
 </dd>
 </dl>
@@ -2945,6 +2902,22 @@ The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/We
 
 The number of dimensions of the output embedding. This is only available for `embed-v4` and newer models.
 Possible values are `256`, `512`, `1024`, and `1536`. The default is `1536`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**embedding_types:** `typing.Optional[typing.Sequence[EmbeddingType]]` 
+
+Specifies the types of embeddings you want to get back. Can be one or more of the following types.
+
+* `"float"`: Use this when you want to get back the default float embeddings. Supported with all Embed models.
+* `"int8"`: Use this when you want to get back signed int8 embeddings. Supported with Embed v3.0 and newer Embed models.
+* `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Supported with Embed v3.0 and newer Embed models.
+* `"binary"`: Use this when you want to get back signed binary embeddings. Supported with Embed v3.0 and newer Embed models.
+* `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Supported with Embed v3.0 and newer Embed models.
     
 </dd>
 </dl>
@@ -3054,7 +3027,7 @@ For optimal performance we recommend against sending more than 1,000 documents i
 
 **Note**: long documents will automatically be truncated to the value of `max_tokens_per_doc`.
 
-**Note**: structured data should be formatted as YAML strings for best performance.  
+**Note**: structured data should be formatted as YAML strings for best performance.
     
 </dd>
 </dl>
@@ -3263,10 +3236,10 @@ Available models and corresponding embedding dimensions:
 Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
 * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
-* `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
-* `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
-* `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
-* `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
+* `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for v3 and newer model versions.
+* `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for v3 and newer model versions.
+* `"binary"`: Use this when you want to get back signed binary embeddings. Valid for v3 and newer model versions.
+* `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for v3 and newer model versions.
     
 </dd>
 </dl>
