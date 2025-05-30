@@ -45,7 +45,6 @@ from .chat_message_v2 import (
 )
 from .chat_messages import ChatMessages
 from .chat_request_citation_quality import ChatRequestCitationQuality
-from .chat_request_connectors_search_options import ChatRequestConnectorsSearchOptions
 from .chat_request_prompt_truncation import ChatRequestPromptTruncation
 from .chat_request_safety_mode import ChatRequestSafetyMode
 from .chat_response import ChatResponse
@@ -114,6 +113,7 @@ from .delete_connector_response import DeleteConnectorResponse
 from .detokenize_response import DetokenizeResponse
 from .document import Document
 from .document_content import DocumentContent
+from .document_source import DocumentSource
 from .embed_by_type_response import EmbedByTypeResponse
 from .embed_by_type_response_embeddings import EmbedByTypeResponseEmbeddings
 from .embed_content import EmbedContent, ImageUrlEmbedContent, TextEmbedContent
@@ -162,8 +162,6 @@ from .list_models_response import ListModelsResponse
 from .logprob_item import LogprobItem
 from .message import ChatbotMessage, Message, SystemMessage, ToolMessage, UserMessage
 from .metrics import Metrics
-from .metrics_embed_data import MetricsEmbedData
-from .metrics_embed_data_fields_item import MetricsEmbedDataFieldsItem
 from .non_streamed_chat_response import NonStreamedChatResponse
 from .o_auth_authorize_response import OAuthAuthorizeResponse
 from .parse_info import ParseInfo
@@ -211,8 +209,12 @@ from .summarize_request_extractiveness import SummarizeRequestExtractiveness
 from .summarize_request_format import SummarizeRequestFormat
 from .summarize_request_length import SummarizeRequestLength
 from .summarize_response import SummarizeResponse
+from .system_message import SystemMessage
 from .system_message_content import SystemMessageContent
 from .system_message_content_item import SystemMessageContentItem, TextSystemMessageContentItem
+from .text_content import TextContent
+from .text_response_format import TextResponseFormat
+from .text_response_format_v2 import TextResponseFormatV2
 from .tokenize_response import TokenizeResponse
 from .tool import Tool
 from .tool_call import ToolCall
@@ -220,19 +222,19 @@ from .tool_call_delta import ToolCallDelta
 from .tool_call_v2 import ToolCallV2
 from .tool_call_v2function import ToolCallV2Function
 from .tool_content import DocumentToolContent, TextToolContent, ToolContent
+from .tool_message import ToolMessage
 from .tool_message_v2 import ToolMessageV2
 from .tool_message_v2content import ToolMessageV2Content
 from .tool_parameter_definitions_value import ToolParameterDefinitionsValue
 from .tool_result import ToolResult
+from .tool_source import ToolSource
 from .tool_v2 import ToolV2
 from .tool_v2function import ToolV2Function
-from .truncation_strategy import AutoTruncationStrategy, NoneTruncationStrategy, TruncationStrategy
-from .truncation_strategy_auto_preserve_order import TruncationStrategyAutoPreserveOrder
-from .truncation_strategy_none import TruncationStrategyNone
 from .update_connector_response import UpdateConnectorResponse
 from .usage import Usage
 from .usage_billed_units import UsageBilledUnits
 from .usage_tokens import UsageTokens
+from .user_message import UserMessage
 from .user_message_content import UserMessageContent
 
 __all__ = [
@@ -247,7 +249,6 @@ __all__ = [
     "AssistantMessageResponse",
     "AssistantMessageResponseContentItem",
     "AuthTokenType",
-    "AutoTruncationStrategy",
     "ChatCitation",
     "ChatCitationGenerationEvent",
     "ChatCitationType",
@@ -274,7 +275,6 @@ __all__ = [
     "ChatMessageV2",
     "ChatMessages",
     "ChatRequestCitationQuality",
-    "ChatRequestConnectorsSearchOptions",
     "ChatRequestPromptTruncation",
     "ChatRequestSafetyMode",
     "ChatResponse",
@@ -401,10 +401,7 @@ __all__ = [
     "MessageEndStreamedChatResponseV2",
     "MessageStartStreamedChatResponseV2",
     "Metrics",
-    "MetricsEmbedData",
-    "MetricsEmbedDataFieldsItem",
     "NonStreamedChatResponse",
-    "NoneTruncationStrategy",
     "OAuthAuthorizeResponse",
     "ParseInfo",
     "ReasoningEffort",
@@ -468,9 +465,6 @@ __all__ = [
     "ToolSource",
     "ToolV2",
     "ToolV2Function",
-    "TruncationStrategy",
-    "TruncationStrategyAutoPreserveOrder",
-    "TruncationStrategyNone",
     "UpdateConnectorResponse",
     "Usage",
     "UsageBilledUnits",

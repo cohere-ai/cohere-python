@@ -12,7 +12,6 @@ from .types import (
     AssistantMessageResponse,
     AssistantMessageResponseContentItem,
     AuthTokenType,
-    AutoTruncationStrategy,
     ChatCitation,
     ChatCitationGenerationEvent,
     ChatCitationType,
@@ -39,7 +38,6 @@ from .types import (
     ChatMessageV2,
     ChatMessages,
     ChatRequestCitationQuality,
-    ChatRequestConnectorsSearchOptions,
     ChatRequestPromptTruncation,
     ChatRequestSafetyMode,
     ChatResponse,
@@ -166,10 +164,7 @@ from .types import (
     MessageEndStreamedChatResponseV2,
     MessageStartStreamedChatResponseV2,
     Metrics,
-    MetricsEmbedData,
-    MetricsEmbedDataFieldsItem,
     NonStreamedChatResponse,
-    NoneTruncationStrategy,
     OAuthAuthorizeResponse,
     ParseInfo,
     ReasoningEffort,
@@ -233,9 +228,6 @@ from .types import (
     ToolSource,
     ToolV2,
     ToolV2Function,
-    TruncationStrategy,
-    TruncationStrategyAutoPreserveOrder,
-    TruncationStrategyNone,
     UpdateConnectorResponse,
     Usage,
     UsageBilledUnits,
@@ -263,13 +255,7 @@ from .aws_client import AwsClient
 from .bedrock_client import BedrockClient, BedrockClientV2
 from .client import AsyncClient, Client
 from .client_v2 import AsyncClientV2, ClientV2
-from .datasets import (
-    DatasetsCreateResponse,
-    DatasetsCreateResponseDatasetPartsItem,
-    DatasetsGetResponse,
-    DatasetsGetUsageResponse,
-    DatasetsListResponse,
-)
+from .datasets import DatasetsCreateResponse, DatasetsGetResponse, DatasetsGetUsageResponse, DatasetsListResponse
 from .embed_jobs import CreateEmbedJobRequestTruncate
 from .environment import ClientEnvironment
 from .sagemaker_client import SagemakerClient, SagemakerClientV2
@@ -283,7 +269,6 @@ from .v2 import (
     V2EmbedRequestTruncate,
     V2RerankResponse,
     V2RerankResponseResultsItem,
-    V2RerankResponseResultsItemDocument,
 )
 from .version import __version__
 
@@ -301,7 +286,6 @@ __all__ = [
     "AsyncClient",
     "AsyncClientV2",
     "AuthTokenType",
-    "AutoTruncationStrategy",
     "AwsClient",
     "BadRequestError",
     "BedrockClient",
@@ -332,7 +316,6 @@ __all__ = [
     "ChatMessageV2",
     "ChatMessages",
     "ChatRequestCitationQuality",
-    "ChatRequestConnectorsSearchOptions",
     "ChatRequestPromptTruncation",
     "ChatRequestSafetyMode",
     "ChatResponse",
@@ -406,7 +389,6 @@ __all__ = [
     "DatasetType",
     "DatasetValidationStatus",
     "DatasetsCreateResponse",
-    "DatasetsCreateResponseDatasetPartsItem",
     "DatasetsGetResponse",
     "DatasetsGetUsageResponse",
     "DatasetsListResponse",
@@ -473,10 +455,7 @@ __all__ = [
     "MessageEndStreamedChatResponseV2",
     "MessageStartStreamedChatResponseV2",
     "Metrics",
-    "MetricsEmbedData",
-    "MetricsEmbedDataFieldsItem",
     "NonStreamedChatResponse",
-    "NoneTruncationStrategy",
     "NotFoundError",
     "NotImplementedError",
     "OAuthAuthorizeResponse",
@@ -546,9 +525,6 @@ __all__ = [
     "ToolSource",
     "ToolV2",
     "ToolV2Function",
-    "TruncationStrategy",
-    "TruncationStrategyAutoPreserveOrder",
-    "TruncationStrategyNone",
     "UnauthorizedError",
     "UnprocessableEntityError",
     "UpdateConnectorResponse",
@@ -567,7 +543,6 @@ __all__ = [
     "V2EmbedRequestTruncate",
     "V2RerankResponse",
     "V2RerankResponseResultsItem",
-    "V2RerankResponseResultsItemDocument",
     "__version__",
     "connectors",
     "datasets",
