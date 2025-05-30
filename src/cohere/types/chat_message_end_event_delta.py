@@ -2,13 +2,18 @@
 
 from ..core.unchecked_base_model import UncheckedBaseModel
 import typing
+import pydantic
 from .chat_finish_reason import ChatFinishReason
 from .usage import Usage
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
-import pydantic
 
 
 class ChatMessageEndEventDelta(UncheckedBaseModel):
+    error: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    An error message if an error occurred during the generation.
+    """
+
     finish_reason: typing.Optional[ChatFinishReason] = None
     usage: typing.Optional[Usage] = None
 
