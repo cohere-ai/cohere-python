@@ -10,7 +10,6 @@ from .types import (
     V2EmbedRequestTruncate,
     V2RerankResponse,
     V2RerankResponseResultsItem,
-    V2RerankResponseResultsItemDocument,
 )
 
 __all__ = [
@@ -23,5 +22,4 @@ __all__ = [
     "V2EmbedRequestTruncate",
     "V2RerankResponse",
     "V2RerankResponseResultsItem",
-    "V2RerankResponseResultsItemDocument",
 ]

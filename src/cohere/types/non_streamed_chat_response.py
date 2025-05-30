@@ -9,7 +9,6 @@ from .chat_search_query import ChatSearchQuery
 from .chat_search_result import ChatSearchResult
 from .finish_reason import FinishReason
 from .tool_call import ToolCall
-from .message import Message
 from .api_meta import ApiMeta
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
 
@@ -57,14 +56,9 @@ class NonStreamedChatResponse(UncheckedBaseModel):
 
     finish_reason: typing.Optional[FinishReason] = None
     tool_calls: typing.Optional[typing.List[ToolCall]] = None
-    chat_history: typing.Optional[typing.List[Message]] = pydantic.Field(default=None)
+    chat_history: typing.Optional[typing.List[typing.Optional[typing.Any]]] = pydantic.Field(default=None)
     """
     A list of previous messages between the user and the model, meant to give the model conversational context for responding to the user's `message`.
-    """
-
-    prompt: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    The prompt that was used. Only present when `return_prompt` in the request is set to true.
     """
 
     meta: typing.Optional[ApiMeta] = None
