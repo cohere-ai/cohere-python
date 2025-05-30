@@ -3,8 +3,8 @@
 from ..core.unchecked_base_model import UncheckedBaseModel
 import pydantic
 from .chat_finish_reason import ChatFinishReason
-import typing
 from .assistant_message_response import AssistantMessageResponse
+import typing
 from .usage import Usage
 from .logprob_item import LogprobItem
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
@@ -17,11 +17,6 @@ class ChatResponse(UncheckedBaseModel):
     """
 
     finish_reason: ChatFinishReason
-    prompt: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    The prompt that was used. Only present when `return_prompt` in the request is set to true.
-    """
-
     message: AssistantMessageResponse
     usage: typing.Optional[Usage] = None
     logprobs: typing.Optional[typing.List[LogprobItem]] = None

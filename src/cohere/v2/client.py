@@ -68,7 +68,6 @@ class V2Client:
         presence_penalty: typing.Optional[float] = OMIT,
         k: typing.Optional[float] = OMIT,
         p: typing.Optional[float] = OMIT,
-        return_prompt: typing.Optional[bool] = OMIT,
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatStreamRequestToolChoice] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
@@ -161,9 +160,6 @@ class V2Client:
             Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
 
-        return_prompt : typing.Optional[bool]
-            Whether to return the prompt in the response.
-
         logprobs : typing.Optional[bool]
             Defaults to `false`. When set to `true`, the log probabilities of the generated tokens will be included in the response.
 
@@ -188,18 +184,17 @@ class V2Client:
 
         Examples
         --------
-        from cohere import Client, ToolChatMessageV2
+        from cohere import Client, UserChatMessageV2
 
         client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
         response = client.v2.chat_stream(
-            model="model",
+            model="command-r",
             messages=[
-                ToolChatMessageV2(
-                    tool_call_id="messages",
-                    content="messages",
+                UserChatMessageV2(
+                    content="Hello!",
                 )
             ],
         )
@@ -236,7 +231,6 @@ class V2Client:
                 "presence_penalty": presence_penalty,
                 "k": k,
                 "p": p,
-                "return_prompt": return_prompt,
                 "logprobs": logprobs,
                 "tool_choice": tool_choice,
                 "stream": True,
@@ -407,7 +401,6 @@ class V2Client:
         presence_penalty: typing.Optional[float] = OMIT,
         k: typing.Optional[float] = OMIT,
         p: typing.Optional[float] = OMIT,
-        return_prompt: typing.Optional[bool] = OMIT,
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatRequestToolChoice] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
@@ -500,9 +493,6 @@ class V2Client:
             Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
 
-        return_prompt : typing.Optional[bool]
-            Whether to return the prompt in the response.
-
         logprobs : typing.Optional[bool]
             Defaults to `false`. When set to `true`, the log probabilities of the generated tokens will be included in the response.
 
@@ -527,18 +517,17 @@ class V2Client:
 
         Examples
         --------
-        from cohere import Client, ToolChatMessageV2
+        from cohere import Client, UserChatMessageV2
 
         client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
         client.v2.chat(
-            model="model",
+            model="command-a-03-2025",
             messages=[
-                ToolChatMessageV2(
-                    tool_call_id="messages",
-                    content="messages",
+                UserChatMessageV2(
+                    content="Tell me about LLMs",
                 )
             ],
         )
@@ -573,7 +562,6 @@ class V2Client:
                 "presence_penalty": presence_penalty,
                 "k": k,
                 "p": p,
-                "return_prompt": return_prompt,
                 "logprobs": logprobs,
                 "tool_choice": tool_choice,
                 "stream": False,
@@ -799,8 +787,10 @@ class V2Client:
             token="YOUR_TOKEN",
         )
         client.v2.embed(
-            model="model",
-            input_type="search_document",
+            texts=["hello", "goodbye"],
+            model="embed-v4.0",
+            input_type="classification",
+            embedding_types=["float"],
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -966,7 +956,6 @@ class V2Client:
         query: str,
         documents: typing.Sequence[str],
         top_n: typing.Optional[int] = OMIT,
-        return_documents: typing.Optional[bool] = OMIT,
         max_tokens_per_doc: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> V2RerankResponse:
@@ -992,10 +981,6 @@ class V2Client:
         top_n : typing.Optional[int]
             Limits the number of returned rerank results to the specified value. If not passed, all the rerank results will be returned.
 
-        return_documents : typing.Optional[bool]
-            - If false, returns results without the doc text - the api will return a list of {index, relevance score} where index is inferred from the list passed into the request.
-            - If true, returns results with the doc text passed in - the api will return an ordered list of {index, text, relevance score} where index + text refers to the list passed into the request.
-
         max_tokens_per_doc : typing.Optional[int]
             Defaults to `4096`. Long documents will be automatically truncated to the specified number of tokens.
 
@@ -1016,9 +1001,16 @@ class V2Client:
             token="YOUR_TOKEN",
         )
         client.v2.rerank(
-            model="model",
-            query="query",
-            documents=["documents"],
+            documents=[
+                "Carson City is the capital city of the American state of Nevada.",
+                "The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.",
+                "Capitalization or capitalisation in English grammar is the use of a capital letter at the start of a word. English usage varies from capitalization in other languages.",
+                "Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.",
+                "Capital punishment has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states.",
+            ],
+            query="What is the capital of the United States?",
+            top_n=3,
+            model="rerank-v3.5",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -1029,7 +1021,6 @@ class V2Client:
                 "query": query,
                 "documents": documents,
                 "top_n": top_n,
-                "return_documents": return_documents,
                 "max_tokens_per_doc": max_tokens_per_doc,
             },
             headers={
@@ -1196,7 +1187,6 @@ class AsyncV2Client:
         presence_penalty: typing.Optional[float] = OMIT,
         k: typing.Optional[float] = OMIT,
         p: typing.Optional[float] = OMIT,
-        return_prompt: typing.Optional[bool] = OMIT,
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatStreamRequestToolChoice] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
@@ -1289,9 +1279,6 @@ class AsyncV2Client:
             Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
 
-        return_prompt : typing.Optional[bool]
-            Whether to return the prompt in the response.
-
         logprobs : typing.Optional[bool]
             Defaults to `false`. When set to `true`, the log probabilities of the generated tokens will be included in the response.
 
@@ -1318,7 +1305,7 @@ class AsyncV2Client:
         --------
         import asyncio
 
-        from cohere import AsyncClient, ToolChatMessageV2
+        from cohere import AsyncClient, UserChatMessageV2
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
@@ -1328,11 +1315,10 @@ class AsyncV2Client:
 
         async def main() -> None:
             response = await client.v2.chat_stream(
-                model="model",
+                model="command-r",
                 messages=[
-                    ToolChatMessageV2(
-                        tool_call_id="messages",
-                        content="messages",
+                    UserChatMessageV2(
+                        content="Hello!",
                     )
                 ],
             )
@@ -1372,7 +1358,6 @@ class AsyncV2Client:
                 "presence_penalty": presence_penalty,
                 "k": k,
                 "p": p,
-                "return_prompt": return_prompt,
                 "logprobs": logprobs,
                 "tool_choice": tool_choice,
                 "stream": True,
@@ -1543,7 +1528,6 @@ class AsyncV2Client:
         presence_penalty: typing.Optional[float] = OMIT,
         k: typing.Optional[float] = OMIT,
         p: typing.Optional[float] = OMIT,
-        return_prompt: typing.Optional[bool] = OMIT,
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatRequestToolChoice] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
@@ -1636,9 +1620,6 @@ class AsyncV2Client:
             Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
 
-        return_prompt : typing.Optional[bool]
-            Whether to return the prompt in the response.
-
         logprobs : typing.Optional[bool]
             Defaults to `false`. When set to `true`, the log probabilities of the generated tokens will be included in the response.
 
@@ -1665,7 +1646,7 @@ class AsyncV2Client:
         --------
         import asyncio
 
-        from cohere import AsyncClient, ToolChatMessageV2
+        from cohere import AsyncClient, UserChatMessageV2
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
@@ -1675,11 +1656,10 @@ class AsyncV2Client:
 
         async def main() -> None:
             await client.v2.chat(
-                model="model",
+                model="command-a-03-2025",
                 messages=[
-                    ToolChatMessageV2(
-                        tool_call_id="messages",
-                        content="messages",
+                    UserChatMessageV2(
+                        content="Tell me about LLMs",
                     )
                 ],
             )
@@ -1717,7 +1697,6 @@ class AsyncV2Client:
                 "presence_penalty": presence_penalty,
                 "k": k,
                 "p": p,
-                "return_prompt": return_prompt,
                 "logprobs": logprobs,
                 "tool_choice": tool_choice,
                 "stream": False,
@@ -1948,8 +1927,10 @@ class AsyncV2Client:
 
         async def main() -> None:
             await client.v2.embed(
-                model="model",
-                input_type="search_document",
+                texts=["hello", "goodbye"],
+                model="embed-v4.0",
+                input_type="classification",
+                embedding_types=["float"],
             )
 
 
@@ -2118,7 +2099,6 @@ class AsyncV2Client:
         query: str,
         documents: typing.Sequence[str],
         top_n: typing.Optional[int] = OMIT,
-        return_documents: typing.Optional[bool] = OMIT,
         max_tokens_per_doc: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> V2RerankResponse:
@@ -2143,10 +2123,6 @@ class AsyncV2Client:
 
         top_n : typing.Optional[int]
             Limits the number of returned rerank results to the specified value. If not passed, all the rerank results will be returned.
-
-        return_documents : typing.Optional[bool]
-            - If false, returns results without the doc text - the api will return a list of {index, relevance score} where index is inferred from the list passed into the request.
-            - If true, returns results with the doc text passed in - the api will return an ordered list of {index, text, relevance score} where index + text refers to the list passed into the request.
 
         max_tokens_per_doc : typing.Optional[int]
             Defaults to `4096`. Long documents will be automatically truncated to the specified number of tokens.
@@ -2173,9 +2149,16 @@ class AsyncV2Client:
 
         async def main() -> None:
             await client.v2.rerank(
-                model="model",
-                query="query",
-                documents=["documents"],
+                documents=[
+                    "Carson City is the capital city of the American state of Nevada.",
+                    "The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.",
+                    "Capitalization or capitalisation in English grammar is the use of a capital letter at the start of a word. English usage varies from capitalization in other languages.",
+                    "Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.",
+                    "Capital punishment has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states.",
+                ],
+                query="What is the capital of the United States?",
+                top_n=3,
+                model="rerank-v3.5",
             )
 
 
@@ -2189,7 +2172,6 @@ class AsyncV2Client:
                 "query": query,
                 "documents": documents,
                 "top_n": top_n,
-                "return_documents": return_documents,
                 "max_tokens_per_doc": max_tokens_per_doc,
             },
             headers={
