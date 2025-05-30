@@ -6,11 +6,7 @@ import typing
 import pydantic
 
 
-class TruncationStrategyNone(UncheckedBaseModel):
-    """
-    Prohibits any prompt truncation; if the context length is exceeded, an error will be returned.
-    """
-
+class ChatTextResponseFormat(UncheckedBaseModel):
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
     else:

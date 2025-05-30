@@ -249,7 +249,6 @@ class DatasetsClient:
         optional_fields: typing.Optional[typing.Union[str, typing.Sequence[str]]] = None,
         text_separator: typing.Optional[str] = None,
         csv_delimiter: typing.Optional[str] = None,
-        dry_run: typing.Optional[bool] = None,
         eval_data: typing.Optional[core.File] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> DatasetsCreateResponse:
@@ -284,9 +283,6 @@ class DatasetsClient:
 
         csv_delimiter : typing.Optional[str]
             The delimiter used for .csv uploads.
-
-        dry_run : typing.Optional[bool]
-            flag to enable dry_run mode
 
         eval_data : typing.Optional[core.File]
             See core.File for more documentation
@@ -324,7 +320,6 @@ class DatasetsClient:
                 "optional_fields": optional_fields,
                 "text_separator": text_separator,
                 "csv_delimiter": csv_delimiter,
-                "dry_run": dry_run,
             },
             data={},
             files={
@@ -1191,7 +1186,6 @@ class AsyncDatasetsClient:
         optional_fields: typing.Optional[typing.Union[str, typing.Sequence[str]]] = None,
         text_separator: typing.Optional[str] = None,
         csv_delimiter: typing.Optional[str] = None,
-        dry_run: typing.Optional[bool] = None,
         eval_data: typing.Optional[core.File] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> DatasetsCreateResponse:
@@ -1226,9 +1220,6 @@ class AsyncDatasetsClient:
 
         csv_delimiter : typing.Optional[str]
             The delimiter used for .csv uploads.
-
-        dry_run : typing.Optional[bool]
-            flag to enable dry_run mode
 
         eval_data : typing.Optional[core.File]
             See core.File for more documentation
@@ -1274,7 +1265,6 @@ class AsyncDatasetsClient:
                 "optional_fields": optional_fields,
                 "text_separator": text_separator,
                 "csv_delimiter": csv_delimiter,
-                "dry_run": dry_run,
             },
             data={},
             files={

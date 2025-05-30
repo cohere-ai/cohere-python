@@ -3,4 +3,4 @@
 import typing
 from .content import Content
 
-UserMessageContent = typing.Union[str, typing.List[Content]]
+UserMessageV2Content = typing.Union[str, typing.List[Content]]

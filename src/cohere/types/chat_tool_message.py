@@ -2,21 +2,17 @@
 
 from ..core.unchecked_base_model import UncheckedBaseModel
 import typing
-import pydantic
+from .tool_result import ToolResult
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
+import pydantic
 
 
-class DocumentSource(UncheckedBaseModel):
+class ChatToolMessage(UncheckedBaseModel):
     """
-    A document source object containing the unique identifier of the document and the document itself.
-    """
-
-    id: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    The unique identifier of the document
+    Represents tool result in the chat history.
     """
 
-    document: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = None
+    tool_results: typing.Optional[typing.List[ToolResult]] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
