@@ -34,8 +34,8 @@ from .types.v2chat_request_safety_mode import V2ChatRequestSafetyMode
 from .types.v2chat_request_tool_choice import V2ChatRequestToolChoice
 from ..types.chat_response import ChatResponse
 from ..types.embed_input_type import EmbedInputType
-from ..types.embedding_type import EmbeddingType
 from ..types.embed_input import EmbedInput
+from ..types.embedding_type import EmbeddingType
 from .types.v2embed_request_truncate import V2EmbedRequestTruncate
 from ..types.embed_by_type_response import EmbedByTypeResponse
 from .types.v2rerank_response import V2RerankResponse
@@ -723,12 +723,12 @@ class V2Client:
         *,
         model: str,
         input_type: EmbedInputType,
-        embedding_types: typing.Sequence[EmbeddingType],
         texts: typing.Optional[typing.Sequence[str]] = OMIT,
         images: typing.Optional[typing.Sequence[str]] = OMIT,
         inputs: typing.Optional[typing.Sequence[EmbedInput]] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         output_dimension: typing.Optional[int] = OMIT,
+        embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
         truncate: typing.Optional[V2EmbedRequestTruncate] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> EmbedByTypeResponse:
@@ -742,39 +742,19 @@ class V2Client:
         Parameters
         ----------
         model : str
-            Defaults to embed-english-v2.0
-
-            The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](https://docs.cohere.com/docs/training-custom-models) can also be supplied with their full ID.
-
-            Available models and corresponding embedding dimensions:
-
-            * `embed-english-v3.0`  1024
-            * `embed-multilingual-v3.0`  1024
-            * `embed-english-light-v3.0`  384
-            * `embed-multilingual-light-v3.0`  384
-
-            * `embed-english-v2.0`  4096
-            * `embed-english-light-v2.0`  1024
-            * `embed-multilingual-v2.0`  768
+            ID of one of the available [Embedding models](https://docs.cohere.com/docs/cohere-embed).
 
         input_type : EmbedInputType
 
-        embedding_types : typing.Sequence[EmbeddingType]
-            Specifies the types of embeddings you want to get back. Can be one or more of the following types.
-
-            * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
-            * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
-            * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
-            * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
-            * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
-
         texts : typing.Optional[typing.Sequence[str]]
-            An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
+            An array of strings for the model to embed. Maximum number of texts per call is `96`.
 
         images : typing.Optional[typing.Sequence[str]]
             An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
 
             The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
+
+            Image embeddings are supported with Embed v3.0 and newer models.
 
         inputs : typing.Optional[typing.Sequence[EmbedInput]]
             An array of inputs for the model to embed. Maximum number of inputs per call is `96`. An input can contain a mix of text and image components.
@@ -785,6 +765,15 @@ class V2Client:
         output_dimension : typing.Optional[int]
             The number of dimensions of the output embedding. This is only available for `embed-v4` and newer models.
             Possible values are `256`, `512`, `1024`, and `1536`. The default is `1536`.
+
+        embedding_types : typing.Optional[typing.Sequence[EmbeddingType]]
+            Specifies the types of embeddings you want to get back. Can be one or more of the following types.
+
+            * `"float"`: Use this when you want to get back the default float embeddings. Supported with all Embed models.
+            * `"int8"`: Use this when you want to get back signed int8 embeddings. Supported with Embed v3.0 and newer Embed models.
+            * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Supported with Embed v3.0 and newer Embed models.
+            * `"binary"`: Use this when you want to get back signed binary embeddings. Supported with Embed v3.0 and newer Embed models.
+            * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Supported with Embed v3.0 and newer Embed models.
 
         truncate : typing.Optional[V2EmbedRequestTruncate]
             One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
@@ -812,7 +801,6 @@ class V2Client:
         client.v2.embed(
             model="model",
             input_type="search_document",
-            embedding_types=["float"],
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -1879,12 +1867,12 @@ class AsyncV2Client:
         *,
         model: str,
         input_type: EmbedInputType,
-        embedding_types: typing.Sequence[EmbeddingType],
         texts: typing.Optional[typing.Sequence[str]] = OMIT,
         images: typing.Optional[typing.Sequence[str]] = OMIT,
         inputs: typing.Optional[typing.Sequence[EmbedInput]] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         output_dimension: typing.Optional[int] = OMIT,
+        embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
         truncate: typing.Optional[V2EmbedRequestTruncate] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> EmbedByTypeResponse:
@@ -1898,39 +1886,19 @@ class AsyncV2Client:
         Parameters
         ----------
         model : str
-            Defaults to embed-english-v2.0
-
-            The identifier of the model. Smaller "light" models are faster, while larger models will perform better. [Custom models](https://docs.cohere.com/docs/training-custom-models) can also be supplied with their full ID.
-
-            Available models and corresponding embedding dimensions:
-
-            * `embed-english-v3.0`  1024
-            * `embed-multilingual-v3.0`  1024
-            * `embed-english-light-v3.0`  384
-            * `embed-multilingual-light-v3.0`  384
-
-            * `embed-english-v2.0`  4096
-            * `embed-english-light-v2.0`  1024
-            * `embed-multilingual-v2.0`  768
+            ID of one of the available [Embedding models](https://docs.cohere.com/docs/cohere-embed).
 
         input_type : EmbedInputType
 
-        embedding_types : typing.Sequence[EmbeddingType]
-            Specifies the types of embeddings you want to get back. Can be one or more of the following types.
-
-            * `"float"`: Use this when you want to get back the default float embeddings. Valid for all models.
-            * `"int8"`: Use this when you want to get back signed int8 embeddings. Valid for only v3 models.
-            * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Valid for only v3 models.
-            * `"binary"`: Use this when you want to get back signed binary embeddings. Valid for only v3 models.
-            * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Valid for only v3 models.
-
         texts : typing.Optional[typing.Sequence[str]]
-            An array of strings for the model to embed. Maximum number of texts per call is `96`. We recommend reducing the length of each text to be under `512` tokens for optimal quality.
+            An array of strings for the model to embed. Maximum number of texts per call is `96`.
 
         images : typing.Optional[typing.Sequence[str]]
             An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
 
             The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
+
+            Image embeddings are supported with Embed v3.0 and newer models.
 
         inputs : typing.Optional[typing.Sequence[EmbedInput]]
             An array of inputs for the model to embed. Maximum number of inputs per call is `96`. An input can contain a mix of text and image components.
@@ -1941,6 +1909,15 @@ class AsyncV2Client:
         output_dimension : typing.Optional[int]
             The number of dimensions of the output embedding. This is only available for `embed-v4` and newer models.
             Possible values are `256`, `512`, `1024`, and `1536`. The default is `1536`.
+
+        embedding_types : typing.Optional[typing.Sequence[EmbeddingType]]
+            Specifies the types of embeddings you want to get back. Can be one or more of the following types.
+
+            * `"float"`: Use this when you want to get back the default float embeddings. Supported with all Embed models.
+            * `"int8"`: Use this when you want to get back signed int8 embeddings. Supported with Embed v3.0 and newer Embed models.
+            * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Supported with Embed v3.0 and newer Embed models.
+            * `"binary"`: Use this when you want to get back signed binary embeddings. Supported with Embed v3.0 and newer Embed models.
+            * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Supported with Embed v3.0 and newer Embed models.
 
         truncate : typing.Optional[V2EmbedRequestTruncate]
             One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
@@ -1973,7 +1950,6 @@ class AsyncV2Client:
             await client.v2.embed(
                 model="model",
                 input_type="search_document",
-                embedding_types=["float"],
             )
 
 
