@@ -37,19 +37,9 @@ class GetModelResponse(UncheckedBaseModel):
     Public URL to the tokenizer's configuration file.
     """
 
-    supports_vision: typing.Optional[bool] = pydantic.Field(default=None)
-    """
-    Whether the model supports image inputs or not.
-    """
-
     default_endpoints: typing.Optional[typing.List[CompatibleEndpoint]] = pydantic.Field(default=None)
     """
     The API endpoints that the model is default to.
-    """
-
-    features: typing.Optional[typing.List[str]] = pydantic.Field(default=None)
-    """
-    The features that the model supports.
     """
 
     if IS_PYDANTIC_V2:

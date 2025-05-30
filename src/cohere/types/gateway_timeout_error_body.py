@@ -2,16 +2,12 @@
 
 from ..core.unchecked_base_model import UncheckedBaseModel
 import typing
-from .metrics_embed_data_fields_item import MetricsEmbedDataFieldsItem
-import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
+import pydantic
 
 
-class MetricsEmbedData(UncheckedBaseModel):
-    fields: typing.Optional[typing.List[MetricsEmbedDataFieldsItem]] = pydantic.Field(default=None)
-    """
-    the fields in the dataset
-    """
+class GatewayTimeoutErrorBody(UncheckedBaseModel):
+    data: typing.Optional[str] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2

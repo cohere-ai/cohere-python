@@ -3,7 +3,7 @@ name = "cohere"
 
 [tool.poetry]
 name = "cohere"
-version = "5.15.0"
+version = "6.0.0"
 description = ""
 readme = "README.md"
 authors = []
@@ -39,6 +39,7 @@ python = "^3.9"
 fastavro = "^1.9.4"
 httpx = ">=0.21.2"
 httpx-sse = "0.4.0"
+parameterized = "^0.9.0"
 pydantic = ">= 1.9.2"
 pydantic-core = "^2.18.2"
 requests = "^2.0.0"
@@ -52,6 +53,7 @@ pytest = "^7.4.0"
 pytest-asyncio = "^0.23.5"
 python-dateutil = "^2.9.0"
 types-python-dateutil = "^2.9.0.20240316"
+parameterized = "^0.9.0"
 ruff = "^0.5.6"
 
 [tool.pytest.ini_options]

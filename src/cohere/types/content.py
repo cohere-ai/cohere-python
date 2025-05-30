@@ -5,7 +5,6 @@ from ..core.unchecked_base_model import UncheckedBaseModel
 import typing
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
 import pydantic
-from .image_url import ImageUrl
 import typing_extensions
 from ..core.unchecked_base_model import UnionMetadata
 
@@ -27,21 +26,4 @@ class TextContent(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class ImageUrlContent(UncheckedBaseModel):
-    """
-    A Content block which contains information about the content type and the content itself.
-    """
-
-    type: typing.Literal["image_url"] = "image_url"
-    image_url: ImageUrl
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
-Content = typing_extensions.Annotated[typing.Union[TextContent, ImageUrlContent], UnionMetadata(discriminant="type")]
+Content = typing_extensions.Annotated[TextContent, UnionMetadata(discriminant="type")]
