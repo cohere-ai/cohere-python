@@ -33,7 +33,7 @@ class EmbeddingsByTypeEmbedResponse(UncheckedBaseModel):
     response_type: typing.Literal["embeddings_by_type"] = "embeddings_by_type"
     id: str
     embeddings: EmbedByTypeResponseEmbeddings
-    texts: typing.List[str]
+    texts: typing.Optional[typing.List[str]] = None
     images: typing.Optional[typing.List[Image]] = None
     meta: typing.Optional[ApiMeta] = None
 

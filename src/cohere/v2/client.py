@@ -10,7 +10,7 @@ from ..types.response_format_v2 import ResponseFormatV2
 from .types.v2chat_stream_request_safety_mode import V2ChatStreamRequestSafetyMode
 from .types.v2chat_stream_request_tool_choice import V2ChatStreamRequestToolChoice
 from ..core.request_options import RequestOptions
-from ..types.streamed_chat_response_v2 import StreamedChatResponseV2
+from .types.v2chat_stream_response import V2ChatStreamResponse
 from ..core.serialization import convert_and_respect_annotation_metadata
 import httpx_sse
 from ..core.unchecked_base_model import construct_type
@@ -32,7 +32,7 @@ from ..core.api_error import ApiError
 from .types.v2chat_request_documents_item import V2ChatRequestDocumentsItem
 from .types.v2chat_request_safety_mode import V2ChatRequestSafetyMode
 from .types.v2chat_request_tool_choice import V2ChatRequestToolChoice
-from ..types.chat_response import ChatResponse
+from .types.v2chat_response import V2ChatResponse
 from ..types.embed_input_type import EmbedInputType
 from ..types.embed_input import EmbedInput
 from ..types.embedding_type import EmbeddingType
@@ -68,11 +68,10 @@ class V2Client:
         presence_penalty: typing.Optional[float] = OMIT,
         k: typing.Optional[float] = OMIT,
         p: typing.Optional[float] = OMIT,
-        return_prompt: typing.Optional[bool] = OMIT,
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatStreamRequestToolChoice] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> typing.Iterator[StreamedChatResponseV2]:
+    ) -> typing.Iterator[V2ChatStreamResponse]:
         """
         Generates a text response to a user message. To learn how to use the Chat API and RAG follow our [Text Generation guides](https://docs.cohere.com/v2/docs/chat-api).
 
@@ -161,9 +160,6 @@ class V2Client:
             Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
 
-        return_prompt : typing.Optional[bool]
-            Whether to return the prompt in the response.
-
         logprobs : typing.Optional[bool]
             Defaults to `false`. When set to `true`, the log probabilities of the generated tokens will be included in the response.
 
@@ -183,23 +179,22 @@ class V2Client:
 
         Yields
         ------
-        typing.Iterator[StreamedChatResponseV2]
+        typing.Iterator[V2ChatStreamResponse]
 
 
         Examples
         --------
-        from cohere import Client, ToolChatMessageV2
+        from cohere import Client, UserChatMessageV2
 
         client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
         response = client.v2.chat_stream(
-            model="model",
+            model="command-r",
             messages=[
-                ToolChatMessageV2(
-                    tool_call_id="messages",
-                    content="messages",
+                UserChatMessageV2(
+                    content="Hello!",
                 )
             ],
         )
@@ -236,7 +231,6 @@ class V2Client:
                 "presence_penalty": presence_penalty,
                 "k": k,
                 "p": p,
-                "return_prompt": return_prompt,
                 "logprobs": logprobs,
                 "tool_choice": tool_choice,
                 "stream": True,
@@ -253,9 +247,9 @@ class V2Client:
                     for _sse in _event_source.iter_sse():
                         try:
                             yield typing.cast(
-                                StreamedChatResponseV2,
+                                V2ChatStreamResponse,
                                 construct_type(
-                                    type_=StreamedChatResponseV2,  # type: ignore
+                                    type_=V2ChatStreamResponse,  # type: ignore
                                     object_=json.loads(_sse.data),
                                 ),
                             )
@@ -407,11 +401,10 @@ class V2Client:
         presence_penalty: typing.Optional[float] = OMIT,
         k: typing.Optional[float] = OMIT,
         p: typing.Optional[float] = OMIT,
-        return_prompt: typing.Optional[bool] = OMIT,
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatRequestToolChoice] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> ChatResponse:
+    ) -> V2ChatResponse:
         """
         Generates a text response to a user message and streams it down, token by token. To learn how to use the Chat API with streaming follow our [Text Generation guides](https://docs.cohere.com/v2/docs/chat-api).
 
@@ -500,9 +493,6 @@ class V2Client:
             Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
 
-        return_prompt : typing.Optional[bool]
-            Whether to return the prompt in the response.
-
         logprobs : typing.Optional[bool]
             Defaults to `false`. When set to `true`, the log probabilities of the generated tokens will be included in the response.
 
@@ -522,23 +512,22 @@ class V2Client:
 
         Returns
         -------
-        ChatResponse
+        V2ChatResponse
 
 
         Examples
         --------
-        from cohere import Client, ToolChatMessageV2
+        from cohere import Client, UserChatMessageV2
 
         client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
         client.v2.chat(
-            model="model",
+            model="command-a-03-2025",
             messages=[
-                ToolChatMessageV2(
-                    tool_call_id="messages",
-                    content="messages",
+                UserChatMessageV2(
+                    content="Tell me about LLMs",
                 )
             ],
         )
@@ -573,7 +562,6 @@ class V2Client:
                 "presence_penalty": presence_penalty,
                 "k": k,
                 "p": p,
-                "return_prompt": return_prompt,
                 "logprobs": logprobs,
                 "tool_choice": tool_choice,
                 "stream": False,
@@ -587,9 +575,9 @@ class V2Client:
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    ChatResponse,
+                    V2ChatResponse,
                     construct_type(
-                        type_=ChatResponse,  # type: ignore
+                        type_=V2ChatResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -799,8 +787,10 @@ class V2Client:
             token="YOUR_TOKEN",
         )
         client.v2.embed(
-            model="model",
-            input_type="search_document",
+            texts=["hello", "goodbye"],
+            model="embed-v4.0",
+            input_type="classification",
+            embedding_types=["float"],
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -966,7 +956,6 @@ class V2Client:
         query: str,
         documents: typing.Sequence[str],
         top_n: typing.Optional[int] = OMIT,
-        return_documents: typing.Optional[bool] = OMIT,
         max_tokens_per_doc: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> V2RerankResponse:
@@ -992,10 +981,6 @@ class V2Client:
         top_n : typing.Optional[int]
             Limits the number of returned rerank results to the specified value. If not passed, all the rerank results will be returned.
 
-        return_documents : typing.Optional[bool]
-            - If false, returns results without the doc text - the api will return a list of {index, relevance score} where index is inferred from the list passed into the request.
-            - If true, returns results with the doc text passed in - the api will return an ordered list of {index, text, relevance score} where index + text refers to the list passed into the request.
-
         max_tokens_per_doc : typing.Optional[int]
             Defaults to `4096`. Long documents will be automatically truncated to the specified number of tokens.
 
@@ -1016,9 +1001,16 @@ class V2Client:
             token="YOUR_TOKEN",
         )
         client.v2.rerank(
-            model="model",
-            query="query",
-            documents=["documents"],
+            documents=[
+                "Carson City is the capital city of the American state of Nevada.",
+                "The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.",
+                "Capitalization or capitalisation in English grammar is the use of a capital letter at the start of a word. English usage varies from capitalization in other languages.",
+                "Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.",
+                "Capital punishment has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states.",
+            ],
+            query="What is the capital of the United States?",
+            top_n=3,
+            model="rerank-v3.5",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -1029,7 +1021,6 @@ class V2Client:
                 "query": query,
                 "documents": documents,
                 "top_n": top_n,
-                "return_documents": return_documents,
                 "max_tokens_per_doc": max_tokens_per_doc,
             },
             headers={
@@ -1196,11 +1187,10 @@ class AsyncV2Client:
         presence_penalty: typing.Optional[float] = OMIT,
         k: typing.Optional[float] = OMIT,
         p: typing.Optional[float] = OMIT,
-        return_prompt: typing.Optional[bool] = OMIT,
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatStreamRequestToolChoice] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> typing.AsyncIterator[StreamedChatResponseV2]:
+    ) -> typing.AsyncIterator[V2ChatStreamResponse]:
         """
         Generates a text response to a user message. To learn how to use the Chat API and RAG follow our [Text Generation guides](https://docs.cohere.com/v2/docs/chat-api).
 
@@ -1289,9 +1279,6 @@ class AsyncV2Client:
             Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
 
-        return_prompt : typing.Optional[bool]
-            Whether to return the prompt in the response.
-
         logprobs : typing.Optional[bool]
             Defaults to `false`. When set to `true`, the log probabilities of the generated tokens will be included in the response.
 
@@ -1311,14 +1298,14 @@ class AsyncV2Client:
 
         Yields
         ------
-        typing.AsyncIterator[StreamedChatResponseV2]
+        typing.AsyncIterator[V2ChatStreamResponse]
 
 
         Examples
         --------
         import asyncio
 
-        from cohere import AsyncClient, ToolChatMessageV2
+        from cohere import AsyncClient, UserChatMessageV2
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
@@ -1328,11 +1315,10 @@ class AsyncV2Client:
 
         async def main() -> None:
             response = await client.v2.chat_stream(
-                model="model",
+                model="command-r",
                 messages=[
-                    ToolChatMessageV2(
-                        tool_call_id="messages",
-                        content="messages",
+                    UserChatMessageV2(
+                        content="Hello!",
                     )
                 ],
             )
@@ -1372,7 +1358,6 @@ class AsyncV2Client:
                 "presence_penalty": presence_penalty,
                 "k": k,
                 "p": p,
-                "return_prompt": return_prompt,
                 "logprobs": logprobs,
                 "tool_choice": tool_choice,
                 "stream": True,
@@ -1389,9 +1374,9 @@ class AsyncV2Client:
                     async for _sse in _event_source.aiter_sse():
                         try:
                             yield typing.cast(
-                                StreamedChatResponseV2,
+                                V2ChatStreamResponse,
                                 construct_type(
-                                    type_=StreamedChatResponseV2,  # type: ignore
+                                    type_=V2ChatStreamResponse,  # type: ignore
                                     object_=json.loads(_sse.data),
                                 ),
                             )
@@ -1543,11 +1528,10 @@ class AsyncV2Client:
         presence_penalty: typing.Optional[float] = OMIT,
         k: typing.Optional[float] = OMIT,
         p: typing.Optional[float] = OMIT,
-        return_prompt: typing.Optional[bool] = OMIT,
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatRequestToolChoice] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> ChatResponse:
+    ) -> V2ChatResponse:
         """
         Generates a text response to a user message and streams it down, token by token. To learn how to use the Chat API with streaming follow our [Text Generation guides](https://docs.cohere.com/v2/docs/chat-api).
 
@@ -1636,9 +1620,6 @@ class AsyncV2Client:
             Defaults to `0.75`. min value of `0.01`, max value of `0.99`.
 
 
-        return_prompt : typing.Optional[bool]
-            Whether to return the prompt in the response.
-
         logprobs : typing.Optional[bool]
             Defaults to `false`. When set to `true`, the log probabilities of the generated tokens will be included in the response.
 
@@ -1658,14 +1639,14 @@ class AsyncV2Client:
 
         Returns
         -------
-        ChatResponse
+        V2ChatResponse
 
 
         Examples
         --------
         import asyncio
 
-        from cohere import AsyncClient, ToolChatMessageV2
+        from cohere import AsyncClient, UserChatMessageV2
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
@@ -1675,11 +1656,10 @@ class AsyncV2Client:
 
         async def main() -> None:
             await client.v2.chat(
-                model="model",
+                model="command-a-03-2025",
                 messages=[
-                    ToolChatMessageV2(
-                        tool_call_id="messages",
-                        content="messages",
+                    UserChatMessageV2(
+                        content="Tell me about LLMs",
                     )
                 ],
             )
@@ -1717,7 +1697,6 @@ class AsyncV2Client:
                 "presence_penalty": presence_penalty,
                 "k": k,
                 "p": p,
-                "return_prompt": return_prompt,
                 "logprobs": logprobs,
                 "tool_choice": tool_choice,
                 "stream": False,
@@ -1731,9 +1710,9 @@ class AsyncV2Client:
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    ChatResponse,
+                    V2ChatResponse,
                     construct_type(
-                        type_=ChatResponse,  # type: ignore
+                        type_=V2ChatResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1948,8 +1927,10 @@ class AsyncV2Client:
 
         async def main() -> None:
             await client.v2.embed(
-                model="model",
-                input_type="search_document",
+                texts=["hello", "goodbye"],
+                model="embed-v4.0",
+                input_type="classification",
+                embedding_types=["float"],
             )
 
 
@@ -2118,7 +2099,6 @@ class AsyncV2Client:
         query: str,
         documents: typing.Sequence[str],
         top_n: typing.Optional[int] = OMIT,
-        return_documents: typing.Optional[bool] = OMIT,
         max_tokens_per_doc: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> V2RerankResponse:
@@ -2143,10 +2123,6 @@ class AsyncV2Client:
 
         top_n : typing.Optional[int]
             Limits the number of returned rerank results to the specified value. If not passed, all the rerank results will be returned.
-
-        return_documents : typing.Optional[bool]
-            - If false, returns results without the doc text - the api will return a list of {index, relevance score} where index is inferred from the list passed into the request.
-            - If true, returns results with the doc text passed in - the api will return an ordered list of {index, text, relevance score} where index + text refers to the list passed into the request.
 
         max_tokens_per_doc : typing.Optional[int]
             Defaults to `4096`. Long documents will be automatically truncated to the specified number of tokens.
@@ -2173,9 +2149,16 @@ class AsyncV2Client:
 
         async def main() -> None:
             await client.v2.rerank(
-                model="model",
-                query="query",
-                documents=["documents"],
+                documents=[
+                    "Carson City is the capital city of the American state of Nevada.",
+                    "The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.",
+                    "Capitalization or capitalisation in English grammar is the use of a capital letter at the start of a word. English usage varies from capitalization in other languages.",
+                    "Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.",
+                    "Capital punishment has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states.",
+                ],
+                query="What is the capital of the United States?",
+                top_n=3,
+                model="rerank-v3.5",
             )
 
 
@@ -2189,7 +2172,6 @@ class AsyncV2Client:
                 "query": query,
                 "documents": documents,
                 "top_n": top_n,
-                "return_documents": return_documents,
                 "max_tokens_per_doc": max_tokens_per_doc,
             },
             headers={
