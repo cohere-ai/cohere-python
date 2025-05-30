@@ -171,8 +171,6 @@ class BaseCohere:
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
-        raw_prompting: typing.Optional[bool] = OMIT,
-        return_prompt: typing.Optional[bool] = OMIT,
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         force_single_step: typing.Optional[bool] = OMIT,
@@ -361,16 +359,6 @@ class BaseCohere:
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
-        raw_prompting : typing.Optional[bool]
-            When enabled, the user's prompt will be sent to the model without
-            any pre-processing.
-
-            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
-
-
-        return_prompt : typing.Optional[bool]
-            The prompt is returned in the `prompt` response field when this is enabled.
-
         tools : typing.Optional[typing.Sequence[Tool]]
             A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
@@ -433,17 +421,14 @@ class BaseCohere:
 
         Examples
         --------
-        from cohere import Client, ToolMessage
+        from cohere import Client
 
         client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
         response = client.chat_stream(
-            message="Can you give me a global market overview of solar panels?",
-            chat_history=[ToolMessage(), ToolMessage()],
-            prompt_truncation="OFF",
-            temperature=0.3,
+            message="hello world!",
         )
         for chunk in response:
             yield chunk
@@ -475,8 +460,6 @@ class BaseCohere:
                 "stop_sequences": stop_sequences,
                 "frequency_penalty": frequency_penalty,
                 "presence_penalty": presence_penalty,
-                "raw_prompting": raw_prompting,
-                "return_prompt": return_prompt,
                 "tools": convert_and_respect_annotation_metadata(
                     object_=tools, annotation=typing.Sequence[Tool], direction="write"
                 ),
@@ -662,8 +645,6 @@ class BaseCohere:
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
-        raw_prompting: typing.Optional[bool] = OMIT,
-        return_prompt: typing.Optional[bool] = OMIT,
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         force_single_step: typing.Optional[bool] = OMIT,
@@ -851,16 +832,6 @@ class BaseCohere:
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
-        raw_prompting : typing.Optional[bool]
-            When enabled, the user's prompt will be sent to the model without
-            any pre-processing.
-
-            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
-
-
-        return_prompt : typing.Optional[bool]
-            The prompt is returned in the `prompt` response field when this is enabled.
-
         tools : typing.Optional[typing.Sequence[Tool]]
             A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
@@ -923,17 +894,27 @@ class BaseCohere:
 
         Examples
         --------
-        from cohere import Client, ToolMessage
+        from cohere import ChatbotMessage, ChatConnector, Client, UserMessage
 
         client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
         client.chat(
-            message="Can you give me a global market overview of solar panels?",
-            chat_history=[ToolMessage(), ToolMessage()],
-            prompt_truncation="OFF",
-            temperature=0.3,
+            chat_history=[
+                UserMessage(
+                    message="Who discovered gravity?",
+                ),
+                ChatbotMessage(
+                    message="The man who is widely credited with discovering gravity is Sir Isaac Newton",
+                ),
+            ],
+            message="What year was he born?",
+            connectors=[
+                ChatConnector(
+                    id="web-search",
+                )
+            ],
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -963,8 +944,6 @@ class BaseCohere:
                 "stop_sequences": stop_sequences,
                 "frequency_penalty": frequency_penalty,
                 "presence_penalty": presence_penalty,
-                "raw_prompting": raw_prompting,
-                "return_prompt": return_prompt,
                 "tools": convert_and_respect_annotation_metadata(
                     object_=tools, annotation=typing.Sequence[Tool], direction="write"
                 ),
@@ -1790,7 +1769,11 @@ class BaseCohere:
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        client.embed()
+        client.embed(
+            texts=["hello", "goodbye"],
+            model="embed-v4.0",
+            input_type="classification",
+        )
         """
         _response = self._client_wrapper.httpx_client.request(
             "v1/embed",
@@ -2004,8 +1987,26 @@ class BaseCohere:
             token="YOUR_TOKEN",
         )
         client.rerank(
-            query="query",
-            documents=["documents"],
+            documents=[
+                {
+                    "text": "Carson City is the capital city of the American state of Nevada."
+                },
+                {
+                    "text": "The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan."
+                },
+                {
+                    "text": "Capitalization or capitalisation in English grammar is the use of a capital letter at the start of a word. English usage varies from capitalization in other languages."
+                },
+                {
+                    "text": "Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district."
+                },
+                {
+                    "text": "Capital punishment has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states."
+                },
+            ],
+            query="What is the capital of the United States?",
+            top_n=3,
+            model="rerank-v3.5",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -2208,14 +2209,57 @@ class BaseCohere:
 
         Examples
         --------
-        from cohere import Client
+        from cohere import ClassifyExample, Client
 
         client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
         client.classify(
-            inputs=["inputs"],
+            examples=[
+                ClassifyExample(
+                    text="Dermatologists don't like her!",
+                    label="Spam",
+                ),
+                ClassifyExample(
+                    text="'Hello, open to this?'",
+                    label="Spam",
+                ),
+                ClassifyExample(
+                    text="I need help please wire me $1000 right now",
+                    label="Spam",
+                ),
+                ClassifyExample(
+                    text="Nice to know you ;)",
+                    label="Spam",
+                ),
+                ClassifyExample(
+                    text="Please help me?",
+                    label="Spam",
+                ),
+                ClassifyExample(
+                    text="Your parcel will be delivered today",
+                    label="Not spam",
+                ),
+                ClassifyExample(
+                    text="Review changes to our Terms and Conditions",
+                    label="Not spam",
+                ),
+                ClassifyExample(
+                    text="Weekly sync notes",
+                    label="Not spam",
+                ),
+                ClassifyExample(
+                    text="'Re: Follow up from today's meeting'",
+                    label="Not spam",
+                ),
+                ClassifyExample(
+                    text="Pre-read for tomorrow",
+                    label="Not spam",
+                ),
+            ],
+            inputs=["Confirm your email address", "hey i need u to send some $"],
+            model="YOUR-FINE-TUNED-MODEL-ID",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -2428,7 +2472,7 @@ class BaseCohere:
             token="YOUR_TOKEN",
         )
         client.summarize(
-            text="text",
+            text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.\n\nThe meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo\r all variants. Analogues made from dairy alternatives, such as goat\'s or sheep\'s milk, or milk substitutes (e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are lactose intolerant, allergic to dairy protein or vegan.',
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -2796,8 +2840,8 @@ class BaseCohere:
             token="YOUR_TOKEN",
         )
         client.detokenize(
-            tokens=[1],
-            model="model",
+            tokens=[10002, 2261, 2012, 8, 2792, 43],
+            model="command",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -3205,8 +3249,6 @@ class AsyncBaseCohere:
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
-        raw_prompting: typing.Optional[bool] = OMIT,
-        return_prompt: typing.Optional[bool] = OMIT,
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         force_single_step: typing.Optional[bool] = OMIT,
@@ -3395,16 +3437,6 @@ class AsyncBaseCohere:
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
-        raw_prompting : typing.Optional[bool]
-            When enabled, the user's prompt will be sent to the model without
-            any pre-processing.
-
-            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
-
-
-        return_prompt : typing.Optional[bool]
-            The prompt is returned in the `prompt` response field when this is enabled.
-
         tools : typing.Optional[typing.Sequence[Tool]]
             A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
@@ -3469,7 +3501,7 @@ class AsyncBaseCohere:
         --------
         import asyncio
 
-        from cohere import AsyncClient, ToolMessage
+        from cohere import AsyncClient
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
@@ -3479,10 +3511,7 @@ class AsyncBaseCohere:
 
         async def main() -> None:
             response = await client.chat_stream(
-                message="Can you give me a global market overview of solar panels?",
-                chat_history=[ToolMessage(), ToolMessage()],
-                prompt_truncation="OFF",
-                temperature=0.3,
+                message="hello world!",
             )
             async for chunk in response:
                 yield chunk
@@ -3517,8 +3546,6 @@ class AsyncBaseCohere:
                 "stop_sequences": stop_sequences,
                 "frequency_penalty": frequency_penalty,
                 "presence_penalty": presence_penalty,
-                "raw_prompting": raw_prompting,
-                "return_prompt": return_prompt,
                 "tools": convert_and_respect_annotation_metadata(
                     object_=tools, annotation=typing.Sequence[Tool], direction="write"
                 ),
@@ -3704,8 +3731,6 @@ class AsyncBaseCohere:
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
-        raw_prompting: typing.Optional[bool] = OMIT,
-        return_prompt: typing.Optional[bool] = OMIT,
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         force_single_step: typing.Optional[bool] = OMIT,
@@ -3893,16 +3918,6 @@ class AsyncBaseCohere:
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
 
-        raw_prompting : typing.Optional[bool]
-            When enabled, the user's prompt will be sent to the model without
-            any pre-processing.
-
-            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
-
-
-        return_prompt : typing.Optional[bool]
-            The prompt is returned in the `prompt` response field when this is enabled.
-
         tools : typing.Optional[typing.Sequence[Tool]]
             A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
@@ -3967,7 +3982,7 @@ class AsyncBaseCohere:
         --------
         import asyncio
 
-        from cohere import AsyncClient, ToolMessage
+        from cohere import AsyncClient, ChatbotMessage, ChatConnector, UserMessage
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
@@ -3977,10 +3992,20 @@ class AsyncBaseCohere:
 
         async def main() -> None:
             await client.chat(
-                message="Can you give me a global market overview of solar panels?",
-                chat_history=[ToolMessage(), ToolMessage()],
-                prompt_truncation="OFF",
-                temperature=0.3,
+                chat_history=[
+                    UserMessage(
+                        message="Who discovered gravity?",
+                    ),
+                    ChatbotMessage(
+                        message="The man who is widely credited with discovering gravity is Sir Isaac Newton",
+                    ),
+                ],
+                message="What year was he born?",
+                connectors=[
+                    ChatConnector(
+                        id="web-search",
+                    )
+                ],
             )
 
 
@@ -4013,8 +4038,6 @@ class AsyncBaseCohere:
                 "stop_sequences": stop_sequences,
                 "frequency_penalty": frequency_penalty,
                 "presence_penalty": presence_penalty,
-                "raw_prompting": raw_prompting,
-                "return_prompt": return_prompt,
                 "tools": convert_and_respect_annotation_metadata(
                     object_=tools, annotation=typing.Sequence[Tool], direction="write"
                 ),
@@ -4861,7 +4884,11 @@ class AsyncBaseCohere:
 
 
         async def main() -> None:
-            await client.embed()
+            await client.embed(
+                texts=["hello", "goodbye"],
+                model="embed-v4.0",
+                input_type="classification",
+            )
 
 
         asyncio.run(main())
@@ -5083,8 +5110,26 @@ class AsyncBaseCohere:
 
         async def main() -> None:
             await client.rerank(
-                query="query",
-                documents=["documents"],
+                documents=[
+                    {
+                        "text": "Carson City is the capital city of the American state of Nevada."
+                    },
+                    {
+                        "text": "The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan."
+                    },
+                    {
+                        "text": "Capitalization or capitalisation in English grammar is the use of a capital letter at the start of a word. English usage varies from capitalization in other languages."
+                    },
+                    {
+                        "text": "Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district."
+                    },
+                    {
+                        "text": "Capital punishment has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states."
+                    },
+                ],
+                query="What is the capital of the United States?",
+                top_n=3,
+                model="rerank-v3.5",
             )
 
 
@@ -5292,7 +5337,7 @@ class AsyncBaseCohere:
         --------
         import asyncio
 
-        from cohere import AsyncClient
+        from cohere import AsyncClient, ClassifyExample
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
@@ -5302,7 +5347,50 @@ class AsyncBaseCohere:
 
         async def main() -> None:
             await client.classify(
-                inputs=["inputs"],
+                examples=[
+                    ClassifyExample(
+                        text="Dermatologists don't like her!",
+                        label="Spam",
+                    ),
+                    ClassifyExample(
+                        text="'Hello, open to this?'",
+                        label="Spam",
+                    ),
+                    ClassifyExample(
+                        text="I need help please wire me $1000 right now",
+                        label="Spam",
+                    ),
+                    ClassifyExample(
+                        text="Nice to know you ;)",
+                        label="Spam",
+                    ),
+                    ClassifyExample(
+                        text="Please help me?",
+                        label="Spam",
+                    ),
+                    ClassifyExample(
+                        text="Your parcel will be delivered today",
+                        label="Not spam",
+                    ),
+                    ClassifyExample(
+                        text="Review changes to our Terms and Conditions",
+                        label="Not spam",
+                    ),
+                    ClassifyExample(
+                        text="Weekly sync notes",
+                        label="Not spam",
+                    ),
+                    ClassifyExample(
+                        text="'Re: Follow up from today's meeting'",
+                        label="Not spam",
+                    ),
+                    ClassifyExample(
+                        text="Pre-read for tomorrow",
+                        label="Not spam",
+                    ),
+                ],
+                inputs=["Confirm your email address", "hey i need u to send some $"],
+                model="YOUR-FINE-TUNED-MODEL-ID",
             )
 
 
@@ -5523,7 +5611,7 @@ class AsyncBaseCohere:
 
         async def main() -> None:
             await client.summarize(
-                text="text",
+                text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.\n\nThe meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo\r all variants. Analogues made from dairy alternatives, such as goat\'s or sheep\'s milk, or milk substitutes (e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are lactose intolerant, allergic to dairy protein or vegan.',
             )
 
 
@@ -5907,8 +5995,8 @@ class AsyncBaseCohere:
 
         async def main() -> None:
             await client.detokenize(
-                tokens=[1],
-                model="model",
+                tokens=[10002, 2261, 2012, 8, 2792, 43],
+                model="command",
             )
 
 

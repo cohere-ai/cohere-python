@@ -9,7 +9,6 @@ from .v2chat_stream_request_tool_choice import V2ChatStreamRequestToolChoice
 from .v2embed_request_truncate import V2EmbedRequestTruncate
 from .v2rerank_response import V2RerankResponse
 from .v2rerank_response_results_item import V2RerankResponseResultsItem
-from .v2rerank_response_results_item_document import V2RerankResponseResultsItemDocument
 
 __all__ = [
     "V2ChatRequestDocumentsItem",
@@ -21,5 +20,4 @@ __all__ = [
     "V2EmbedRequestTruncate",
     "V2RerankResponse",
     "V2RerankResponseResultsItem",
-    "V2RerankResponseResultsItemDocument",
 ]

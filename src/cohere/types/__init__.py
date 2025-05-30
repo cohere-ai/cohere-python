@@ -29,6 +29,7 @@ from .chat_content_start_event_delta_message_content import ChatContentStartEven
 from .chat_data_metrics import ChatDataMetrics
 from .chat_debug_event import ChatDebugEvent
 from .chat_document import ChatDocument
+from .chat_document_source import ChatDocumentSource
 from .chat_finish_reason import ChatFinishReason
 from .chat_message import ChatMessage
 from .chat_message_end_event import ChatMessageEndEvent
@@ -45,7 +46,6 @@ from .chat_message_v2 import (
 )
 from .chat_messages import ChatMessages
 from .chat_request_citation_quality import ChatRequestCitationQuality
-from .chat_request_connectors_search_options import ChatRequestConnectorsSearchOptions
 from .chat_request_prompt_truncation import ChatRequestPromptTruncation
 from .chat_request_safety_mode import ChatRequestSafetyMode
 from .chat_response import ChatResponse
@@ -63,6 +63,8 @@ from .chat_stream_request_prompt_truncation import ChatStreamRequestPromptTrunca
 from .chat_stream_request_safety_mode import ChatStreamRequestSafetyMode
 from .chat_stream_start_event import ChatStreamStartEvent
 from .chat_text_generation_event import ChatTextGenerationEvent
+from .chat_text_response_format import ChatTextResponseFormat
+from .chat_text_response_format_v2 import ChatTextResponseFormatV2
 from .chat_tool_call_delta_event import ChatToolCallDeltaEvent
 from .chat_tool_call_delta_event_delta import ChatToolCallDeltaEventDelta
 from .chat_tool_call_delta_event_delta_message import ChatToolCallDeltaEventDeltaMessage
@@ -76,9 +78,11 @@ from .chat_tool_call_start_event_delta import ChatToolCallStartEventDelta
 from .chat_tool_call_start_event_delta_message import ChatToolCallStartEventDeltaMessage
 from .chat_tool_calls_chunk_event import ChatToolCallsChunkEvent
 from .chat_tool_calls_generation_event import ChatToolCallsGenerationEvent
+from .chat_tool_message import ChatToolMessage
 from .chat_tool_plan_delta_event import ChatToolPlanDeltaEvent
 from .chat_tool_plan_delta_event_delta import ChatToolPlanDeltaEventDelta
 from .chat_tool_plan_delta_event_delta_message import ChatToolPlanDeltaEventDeltaMessage
+from .chat_tool_source import ChatToolSource
 from .check_api_key_response import CheckApiKeyResponse
 from .citation import Citation
 from .citation_end_event import CitationEndEvent
@@ -162,8 +166,6 @@ from .list_models_response import ListModelsResponse
 from .logprob_item import LogprobItem
 from .message import ChatbotMessage, Message, SystemMessage, ToolMessage, UserMessage
 from .metrics import Metrics
-from .metrics_embed_data import MetricsEmbedData
-from .metrics_embed_data_fields_item import MetricsEmbedDataFieldsItem
 from .non_streamed_chat_response import NonStreamedChatResponse
 from .o_auth_authorize_response import OAuthAuthorizeResponse
 from .parse_info import ParseInfo
@@ -211,8 +213,10 @@ from .summarize_request_extractiveness import SummarizeRequestExtractiveness
 from .summarize_request_format import SummarizeRequestFormat
 from .summarize_request_length import SummarizeRequestLength
 from .summarize_response import SummarizeResponse
-from .system_message_content import SystemMessageContent
-from .system_message_content_item import SystemMessageContentItem, TextSystemMessageContentItem
+from .system_message_v2 import SystemMessageV2
+from .system_message_v2content import SystemMessageV2Content
+from .system_message_v2content_item import SystemMessageV2ContentItem, TextSystemMessageV2ContentItem
+from .text_content import TextContent
 from .tokenize_response import TokenizeResponse
 from .tool import Tool
 from .tool_call import ToolCall
@@ -226,13 +230,11 @@ from .tool_parameter_definitions_value import ToolParameterDefinitionsValue
 from .tool_result import ToolResult
 from .tool_v2 import ToolV2
 from .tool_v2function import ToolV2Function
-from .truncation_strategy import AutoTruncationStrategy, NoneTruncationStrategy, TruncationStrategy
-from .truncation_strategy_auto_preserve_order import TruncationStrategyAutoPreserveOrder
-from .truncation_strategy_none import TruncationStrategyNone
 from .update_connector_response import UpdateConnectorResponse
 from .usage import Usage
 from .usage_billed_units import UsageBilledUnits
 from .usage_tokens import UsageTokens
+from .user_message import UserMessage
 from .user_message_content import UserMessageContent
 
 __all__ = [
@@ -247,7 +249,6 @@ __all__ = [
     "AssistantMessageResponse",
     "AssistantMessageResponseContentItem",
     "AuthTokenType",
-    "AutoTruncationStrategy",
     "ChatCitation",
     "ChatCitationGenerationEvent",
     "ChatCitationType",
@@ -264,6 +265,7 @@ __all__ = [
     "ChatDataMetrics",
     "ChatDebugEvent",
     "ChatDocument",
+    "ChatDocumentSource",
     "ChatFinishReason",
     "ChatMessage",
     "ChatMessageEndEvent",
@@ -274,7 +276,6 @@ __all__ = [
     "ChatMessageV2",
     "ChatMessages",
     "ChatRequestCitationQuality",
-    "ChatRequestConnectorsSearchOptions",
     "ChatRequestPromptTruncation",
     "ChatRequestSafetyMode",
     "ChatResponse",
@@ -292,6 +293,8 @@ __all__ = [
     "ChatStreamRequestSafetyMode",
     "ChatStreamStartEvent",
     "ChatTextGenerationEvent",
+    "ChatTextResponseFormat",
+    "ChatTextResponseFormatV2",
     "ChatToolCallDeltaEvent",
     "ChatToolCallDeltaEventDelta",
     "ChatToolCallDeltaEventDeltaMessage",
@@ -303,9 +306,11 @@ __all__ = [
     "ChatToolCallStartEventDeltaMessage",
     "ChatToolCallsChunkEvent",
     "ChatToolCallsGenerationEvent",
+    "ChatToolMessage",
     "ChatToolPlanDeltaEvent",
     "ChatToolPlanDeltaEventDelta",
     "ChatToolPlanDeltaEventDeltaMessage",
+    "ChatToolSource",
     "ChatbotMessage",
     "CheckApiKeyResponse",
     "Citation",
@@ -401,10 +406,7 @@ __all__ = [
     "MessageEndStreamedChatResponseV2",
     "MessageStartStreamedChatResponseV2",
     "Metrics",
-    "MetricsEmbedData",
-    "MetricsEmbedDataFieldsItem",
     "NonStreamedChatResponse",
-    "NoneTruncationStrategy",
     "OAuthAuthorizeResponse",
     "ParseInfo",
     "ReasoningEffort",
@@ -434,8 +436,9 @@ __all__ = [
     "SummarizeResponse",
     "SystemChatMessageV2",
     "SystemMessage",
-    "SystemMessageContent",
-    "SystemMessageContentItem",
+    "SystemMessageV2",
+    "SystemMessageV2Content",
+    "SystemMessageV2ContentItem",
     "TextAssistantMessageContentItem",
     "TextAssistantMessageResponseContentItem",
     "TextContent",
@@ -444,7 +447,7 @@ __all__ = [
     "TextGenerationStreamedChatResponse",
     "TextResponseFormat",
     "TextResponseFormatV2",
-    "TextSystemMessageContentItem",
+    "TextSystemMessageV2ContentItem",
     "TextToolContent",
     "TokenizeResponse",
     "Tool",
@@ -468,9 +471,6 @@ __all__ = [
     "ToolSource",
     "ToolV2",
     "ToolV2Function",
-    "TruncationStrategy",
-    "TruncationStrategyAutoPreserveOrder",
-    "TruncationStrategyNone",
     "UpdateConnectorResponse",
     "Usage",
     "UsageBilledUnits",

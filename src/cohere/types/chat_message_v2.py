@@ -9,7 +9,7 @@ import pydantic
 from .tool_call_v2 import ToolCallV2
 from .assistant_message_content import AssistantMessageContent
 from .citation import Citation
-from .system_message_content import SystemMessageContent
+from .system_message_v2content import SystemMessageV2Content
 from .tool_message_v2content import ToolMessageV2Content
 import typing_extensions
 from ..core.unchecked_base_model import UnionMetadata
@@ -58,7 +58,7 @@ class SystemChatMessageV2(UncheckedBaseModel):
     """
 
     role: typing.Literal["system"] = "system"
-    content: SystemMessageContent
+    content: SystemMessageV2Content
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2

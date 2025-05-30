@@ -6,13 +6,17 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
 
 
-class ToolSource(UncheckedBaseModel):
+class ChatDocumentSource(UncheckedBaseModel):
+    """
+    A document source object containing the unique identifier of the document and the document itself.
+    """
+
     id: typing.Optional[str] = pydantic.Field(default=None)
     """
     The unique identifier of the document
     """
 
-    tool_output: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = None
+    document: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
