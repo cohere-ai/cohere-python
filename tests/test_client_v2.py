@@ -39,28 +39,29 @@ class TestClientV2(unittest.TestCase):
 
     @unittest.skip("Skip v2 test for now")
     def test_chat_documents(self) -> None:
+        from cohere import Document
         documents = [
-            {"title": "widget sales 2019", "text": "1 million"},
-            {"title": "widget sales 2020", "text": "2 million"},
-            {"title": "widget sales 2021", "text": "4 million"},
+            Document(data={"title": "widget sales 2019", "text": "1 million"}),
+            Document(data={"title": "widget sales 2020", "text": "2 million"}),
+            Document(data={"title": "widget sales 2021", "text": "4 million"}),
         ]
         response = co.chat(
             messages=[cohere.UserChatMessageV2(
-                content=cohere.TextContent(
-                    text="how many widges were sold in 2020?"),
-                documents=documents,
+                content=[cohere.TextContent(text="how many widges were sold in 2020?")],
             )],
             model="command-r-plus",
+            documents=documents,
         )
 
         print(response.message)
 
     @unittest.skip("Skip v2 test for now")
     def test_chat_tools(self) -> None:
-        get_weather_tool = {
-            "name": "get_weather",
-            "description": "gets the weather of a given location",
-            "parameters": {
+        from typing import Sequence
+        get_weather_tool = cohere.ToolV2Function(
+            name="get_weather",
+            description="gets the weather of a given location",
+            parameters={
                 "type": "object",
                 "properties": {
                     "location": {
@@ -70,7 +71,7 @@ class TestClientV2(unittest.TestCase):
                 },
                 "required": ["location"],
             },
-        }
+        )
         tools = [cohere.ToolV2(type="function", function=get_weather_tool)]
         messages: cohere.ChatMessages = [
             cohere.UserChatMessageV2(content="what is the weather in Toronto?")
@@ -79,12 +80,13 @@ class TestClientV2(unittest.TestCase):
 
         # call the get_weather tool
         tool_result = {"temperature": "30C"}
-        tool_content = [cohere.TextContent(
-            output=tool_result, text="The weather in Toronto is 30C")]
-        messages.append(cohere.AssistantChatMessageV2(content=res.message))
-        if res.message.tool_calls is not None:
+        tool_content: Sequence[cohere.TextToolContent] = [cohere.TextToolContent(text="The weather in Toronto is 30C")]
+        # Use the first text content from the response if available, else fallback to str
+        assistant_content = res.message.content[0].text if (hasattr(res.message, 'content') and isinstance(res.message.content, list) and len(res.message.content) > 0 and hasattr(res.message.content[0], 'text')) else str(res.message)
+        messages.append(cohere.AssistantChatMessageV2(content=[cohere.TextAssistantMessageV2ContentItem(text=assistant_content)]))
+        if res.message.tool_calls is not None and res.message.tool_calls[0].id is not None:
             messages.append(cohere.ToolChatMessageV2(
-                tool_call_id=res.message.tool_calls[0].id, tool_content=tool_content))
+                tool_call_id=res.message.tool_calls[0].id, content=list(tool_content)))
 
         res = co.chat(tools=tools, messages=messages, model="command-r-plus")
         print(res.message)

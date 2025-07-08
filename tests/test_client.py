@@ -41,7 +41,7 @@ class TestClient(unittest.TestCase):
         chat = co.chat(
             message="imagine a character from the tv show severance",
             response_format=JsonObjectResponseFormat(
-                schema={
+                schema_={
                     "type": "object",
                     "properties": {
                         "name": {"type": "string"},
