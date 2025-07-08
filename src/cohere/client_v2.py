@@ -7,7 +7,7 @@ import httpx
 from concurrent.futures import ThreadPoolExecutor
 
 
-class ClientV2(V2Client, Client):  # type: ignore
+class ClientV2(Client, V2Client):  # type: ignore
     def __init__(
         self,
         api_key: typing.Optional[typing.Union[str,
@@ -34,7 +34,7 @@ class ClientV2(V2Client, Client):  # type: ignore
         )
 
 
-class AsyncClientV2(AsyncV2Client, AsyncClient):  # type: ignore
+class AsyncClientV2(AsyncClient, AsyncV2Client):  # type: ignore
     def __init__(
         self,
         api_key: typing.Optional[typing.Union[str,
