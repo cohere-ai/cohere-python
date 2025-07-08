@@ -34,7 +34,7 @@ class ClientV2(V2Client, Client):  # type: ignore
         )
         V2Client.__init__(
             self,
-            self._client_wrapper
+            client_wrapper=self._client_wrapper
         )
 
 
@@ -65,5 +65,5 @@ class AsyncClientV2(AsyncV2Client, AsyncClient):  # type: ignore
         )
         AsyncV2Client.__init__(
             self,
-            self._client_wrapper
+            client_wrapper=self._client_wrapper
         )
