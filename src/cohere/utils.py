@@ -190,6 +190,7 @@ def merge_embed_responses(responses: typing.List[EmbedResponse]) -> EmbedRespons
     texts = [
         text
         for response in responses
+        if response.texts is not None
         for text in response.texts
     ]
 

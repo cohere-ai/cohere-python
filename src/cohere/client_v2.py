@@ -32,6 +32,10 @@ class ClientV2(V2Client, Client):  # type: ignore
             thread_pool_executor=thread_pool_executor,
             log_warning_experimental_features=log_warning_experimental_features,
         )
+        V2Client.__init__(
+            self,
+            client_wrapper=self._client_wrapper
+        )
 
 
 class AsyncClientV2(AsyncV2Client, AsyncClient):  # type: ignore
@@ -58,4 +62,8 @@ class AsyncClientV2(AsyncV2Client, AsyncClient):  # type: ignore
             httpx_client=httpx_client,
             thread_pool_executor=thread_pool_executor,
             log_warning_experimental_features=log_warning_experimental_features,
+        )
+        AsyncV2Client.__init__(
+            self,
+            client_wrapper=self._client_wrapper
         )
