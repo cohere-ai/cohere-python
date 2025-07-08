@@ -7,7 +7,7 @@ import httpx
 from concurrent.futures import ThreadPoolExecutor
 
 
-class ClientV2(Client, V2Client):  # type: ignore
+class ClientV2(V2Client, Client):  # type: ignore
     def __init__(
         self,
         api_key: typing.Optional[typing.Union[str,
@@ -32,9 +32,13 @@ class ClientV2(Client, V2Client):  # type: ignore
             thread_pool_executor=thread_pool_executor,
             log_warning_experimental_features=log_warning_experimental_features,
         )
+        V2Client.__init__(
+            self,
+            self._client_wrapper
+        )
 
 
-class AsyncClientV2(AsyncClient, AsyncV2Client):  # type: ignore
+class AsyncClientV2(AsyncV2Client, AsyncClient):  # type: ignore
     def __init__(
         self,
         api_key: typing.Optional[typing.Union[str,
@@ -58,4 +62,8 @@ class AsyncClientV2(AsyncClient, AsyncV2Client):  # type: ignore
             httpx_client=httpx_client,
             thread_pool_executor=thread_pool_executor,
             log_warning_experimental_features=log_warning_experimental_features,
+        )
+        AsyncV2Client.__init__(
+            self,
+            self._client_wrapper
         )
