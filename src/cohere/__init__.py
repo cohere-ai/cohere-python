@@ -248,6 +248,7 @@ from .errors import (
 )
 from . import connectors, datasets, embed_jobs, finetuning, models, v2
 from .aliases import (
+    ChatResponse,
     ContentDeltaStreamedChatResponseV2,
     ContentEndStreamedChatResponseV2,
     ContentStartStreamedChatResponseV2,
@@ -340,6 +341,7 @@ __all__ = [
     "ChatRequestCitationQuality",
     "ChatRequestPromptTruncation",
     "ChatRequestSafetyMode",
+    "ChatResponse",
     "ChatSearchQueriesGenerationEvent",
     "ChatSearchQuery",
     "ChatSearchResult",
