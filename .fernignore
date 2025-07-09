@@ -16,3 +16,4 @@ src/cohere/aws_client.py
 src/cohere/sagemaker_client.py
 src/cohere/client_v2.py
 mypy.ini
+src/cohere/aliases.py
