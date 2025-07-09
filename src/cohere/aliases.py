@@ -8,6 +8,7 @@ from .v2 import (
     ToolCallEndV2ChatStreamResponse,
     ToolCallStartV2ChatStreamResponse,
     V2ChatStreamResponse,
+    V2ChatResponse
 )
 
 # alias classes
@@ -20,4 +21,4 @@ ContentEndStreamedChatResponseV2 = ContentEndV2ChatStreamResponse
 ToolCallStartStreamedChatResponseV2 = ToolCallStartV2ChatStreamResponse
 ToolCallDeltaStreamedChatResponseV2 = ToolCallDeltaV2ChatStreamResponse
 ToolCallEndStreamedChatResponseV2 = ToolCallEndV2ChatStreamResponse
-
+ChatResponse = V2ChatResponse
