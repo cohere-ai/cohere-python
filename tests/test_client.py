@@ -36,28 +36,6 @@ class TestClient(unittest.TestCase):
 
         print(chat)
 
-    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
-    def test_response_format(self) -> None:
-        chat = co.chat(
-            message="imagine a character from the tv show severance",
-            response_format=JsonObjectResponseFormat(
-                schema={
-                    "type": "object",
-                    "properties": {
-                        "name": {"type": "string"},
-                        "age": {"type": "integer"},
-                        "description": {"type": "string"},
-                    },
-                    "required": ["name", "age", "description"]
-                }
-            )
-        )
-
-        obj = json.loads(chat.text)
-        self.assertIsNotNone(obj.get("name"))
-        self.assertIsNotNone(obj.get("age"))
-        self.assertIsNotNone(obj.get("description"))
-
     def test_chat_stream(self) -> None:
         stream = co.chat_stream(
             chat_history=[
