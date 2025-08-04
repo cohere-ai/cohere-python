@@ -61,6 +61,7 @@ class RawV2Client:
         strict_tools: typing.Optional[bool] = OMIT,
         documents: typing.Optional[typing.Sequence[V2ChatStreamRequestDocumentsItem]] = OMIT,
         citation_options: typing.Optional[CitationOptions] = OMIT,
+        raw_prompting: typing.Optional[bool] = OMIT,
         response_format: typing.Optional[ResponseFormatV2] = OMIT,
         safety_mode: typing.Optional[V2ChatStreamRequestSafetyMode] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
@@ -101,6 +102,12 @@ class RawV2Client:
             A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
 
         citation_options : typing.Optional[CitationOptions]
+
+        raw_prompting : typing.Optional[bool]
+            When enabled, the user's prompt will be sent to the model without
+            any pre-processing.
+
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
         response_format : typing.Optional[ResponseFormatV2]
 
@@ -189,6 +196,7 @@ class RawV2Client:
                 "citation_options": convert_and_respect_annotation_metadata(
                     object_=citation_options, annotation=CitationOptions, direction="write"
                 ),
+                "raw_prompting": raw_prompting,
                 "response_format": convert_and_respect_annotation_metadata(
                     object_=response_format, annotation=ResponseFormatV2, direction="write"
                 ),
@@ -385,6 +393,7 @@ class RawV2Client:
         strict_tools: typing.Optional[bool] = OMIT,
         documents: typing.Optional[typing.Sequence[V2ChatRequestDocumentsItem]] = OMIT,
         citation_options: typing.Optional[CitationOptions] = OMIT,
+        raw_prompting: typing.Optional[bool] = OMIT,
         response_format: typing.Optional[ResponseFormatV2] = OMIT,
         safety_mode: typing.Optional[V2ChatRequestSafetyMode] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
@@ -425,6 +434,12 @@ class RawV2Client:
             A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
 
         citation_options : typing.Optional[CitationOptions]
+
+        raw_prompting : typing.Optional[bool]
+            When enabled, the user's prompt will be sent to the model without
+            any pre-processing.
+
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
         response_format : typing.Optional[ResponseFormatV2]
 
@@ -513,6 +528,7 @@ class RawV2Client:
                 "citation_options": convert_and_respect_annotation_metadata(
                     object_=citation_options, annotation=CitationOptions, direction="write"
                 ),
+                "raw_prompting": raw_prompting,
                 "response_format": convert_and_respect_annotation_metadata(
                     object_=response_format, annotation=ResponseFormatV2, direction="write"
                 ),
@@ -1144,6 +1160,7 @@ class AsyncRawV2Client:
         strict_tools: typing.Optional[bool] = OMIT,
         documents: typing.Optional[typing.Sequence[V2ChatStreamRequestDocumentsItem]] = OMIT,
         citation_options: typing.Optional[CitationOptions] = OMIT,
+        raw_prompting: typing.Optional[bool] = OMIT,
         response_format: typing.Optional[ResponseFormatV2] = OMIT,
         safety_mode: typing.Optional[V2ChatStreamRequestSafetyMode] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
@@ -1184,6 +1201,12 @@ class AsyncRawV2Client:
             A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
 
         citation_options : typing.Optional[CitationOptions]
+
+        raw_prompting : typing.Optional[bool]
+            When enabled, the user's prompt will be sent to the model without
+            any pre-processing.
+
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
         response_format : typing.Optional[ResponseFormatV2]
 
@@ -1272,6 +1295,7 @@ class AsyncRawV2Client:
                 "citation_options": convert_and_respect_annotation_metadata(
                     object_=citation_options, annotation=CitationOptions, direction="write"
                 ),
+                "raw_prompting": raw_prompting,
                 "response_format": convert_and_respect_annotation_metadata(
                     object_=response_format, annotation=ResponseFormatV2, direction="write"
                 ),
@@ -1468,6 +1492,7 @@ class AsyncRawV2Client:
         strict_tools: typing.Optional[bool] = OMIT,
         documents: typing.Optional[typing.Sequence[V2ChatRequestDocumentsItem]] = OMIT,
         citation_options: typing.Optional[CitationOptions] = OMIT,
+        raw_prompting: typing.Optional[bool] = OMIT,
         response_format: typing.Optional[ResponseFormatV2] = OMIT,
         safety_mode: typing.Optional[V2ChatRequestSafetyMode] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
@@ -1508,6 +1533,12 @@ class AsyncRawV2Client:
             A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
 
         citation_options : typing.Optional[CitationOptions]
+
+        raw_prompting : typing.Optional[bool]
+            When enabled, the user's prompt will be sent to the model without
+            any pre-processing.
+
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
         response_format : typing.Optional[ResponseFormatV2]
 
@@ -1596,6 +1627,7 @@ class AsyncRawV2Client:
                 "citation_options": convert_and_respect_annotation_metadata(
                     object_=citation_options, annotation=CitationOptions, direction="write"
                 ),
+                "raw_prompting": raw_prompting,
                 "response_format": convert_and_respect_annotation_metadata(
                     object_=response_format, annotation=ResponseFormatV2, direction="write"
                 ),

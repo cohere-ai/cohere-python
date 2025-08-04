@@ -11,6 +11,7 @@ from .assistant_message_response import AssistantMessageResponse
 from .assistant_message_response_content_item import (
     AssistantMessageResponseContentItem,
     TextAssistantMessageResponseContentItem,
+    ThinkingAssistantMessageResponseContentItem,
 )
 from .assistant_message_v2content import AssistantMessageV2Content
 from .assistant_message_v2content_item import AssistantMessageV2ContentItem, TextAssistantMessageV2ContentItem
@@ -28,6 +29,7 @@ from .chat_content_start_event import ChatContentStartEvent
 from .chat_content_start_event_delta import ChatContentStartEventDelta
 from .chat_content_start_event_delta_message import ChatContentStartEventDeltaMessage
 from .chat_content_start_event_delta_message_content import ChatContentStartEventDeltaMessageContent
+from .chat_content_start_event_delta_message_content_type import ChatContentStartEventDeltaMessageContentType
 from .chat_data_metrics import ChatDataMetrics
 from .chat_debug_event import ChatDebugEvent
 from .chat_document import ChatDocument
@@ -248,6 +250,7 @@ __all__ = [
     "ChatContentStartEventDelta",
     "ChatContentStartEventDeltaMessage",
     "ChatContentStartEventDeltaMessageContent",
+    "ChatContentStartEventDeltaMessageContentType",
     "ChatDataMetrics",
     "ChatDebugEvent",
     "ChatDocument",
@@ -426,6 +429,7 @@ __all__ = [
     "TextResponseFormatV2",
     "TextSystemMessageV2ContentItem",
     "TextToolContent",
+    "ThinkingAssistantMessageResponseContentItem",
     "TokenizeResponse",
     "Tool",
     "ToolCall",

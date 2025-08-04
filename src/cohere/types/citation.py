@@ -30,6 +30,11 @@ class Citation(UncheckedBaseModel):
     """
 
     sources: typing.Optional[typing.List[Source]] = None
+    content_index: typing.Optional[int] = pydantic.Field(default=None)
+    """
+    Index of the content block in which this citation appears.
+    """
+
     type: typing.Optional[CitationType] = None
 
     if IS_PYDANTIC_V2:
