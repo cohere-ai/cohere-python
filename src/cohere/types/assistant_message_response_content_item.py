@@ -23,6 +23,17 @@ class TextAssistantMessageResponseContentItem(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
+class ThinkingAssistantMessageResponseContentItem(UncheckedBaseModel):
+    value: typing.Optional[typing.Any] = None
+    type: typing.Literal["thinking"] = "thinking"
+
+    if not IS_PYDANTIC_V2:
+
+        class Config:
+            smart_union = True
+
+
 AssistantMessageResponseContentItem = typing_extensions.Annotated[
-    TextAssistantMessageResponseContentItem, UnionMetadata(discriminant="type")
+    typing.Union[TextAssistantMessageResponseContentItem, ThinkingAssistantMessageResponseContentItem],
+    UnionMetadata(discriminant="type"),
 ]
