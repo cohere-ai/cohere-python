@@ -52,6 +52,7 @@ class V2Client:
         strict_tools: typing.Optional[bool] = OMIT,
         documents: typing.Optional[typing.Sequence[V2ChatStreamRequestDocumentsItem]] = OMIT,
         citation_options: typing.Optional[CitationOptions] = OMIT,
+        raw_prompting: typing.Optional[bool] = OMIT,
         response_format: typing.Optional[ResponseFormatV2] = OMIT,
         safety_mode: typing.Optional[V2ChatStreamRequestSafetyMode] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
@@ -92,6 +93,12 @@ class V2Client:
             A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
 
         citation_options : typing.Optional[CitationOptions]
+
+        raw_prompting : typing.Optional[bool]
+            When enabled, the user's prompt will be sent to the model without
+            any pre-processing.
+
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
         response_format : typing.Optional[ResponseFormatV2]
 
@@ -188,6 +195,7 @@ class V2Client:
             strict_tools=strict_tools,
             documents=documents,
             citation_options=citation_options,
+            raw_prompting=raw_prompting,
             response_format=response_format,
             safety_mode=safety_mode,
             max_tokens=max_tokens,
@@ -213,6 +221,7 @@ class V2Client:
         strict_tools: typing.Optional[bool] = OMIT,
         documents: typing.Optional[typing.Sequence[V2ChatRequestDocumentsItem]] = OMIT,
         citation_options: typing.Optional[CitationOptions] = OMIT,
+        raw_prompting: typing.Optional[bool] = OMIT,
         response_format: typing.Optional[ResponseFormatV2] = OMIT,
         safety_mode: typing.Optional[V2ChatRequestSafetyMode] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
@@ -253,6 +262,12 @@ class V2Client:
             A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
 
         citation_options : typing.Optional[CitationOptions]
+
+        raw_prompting : typing.Optional[bool]
+            When enabled, the user's prompt will be sent to the model without
+            any pre-processing.
+
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
         response_format : typing.Optional[ResponseFormatV2]
 
@@ -347,6 +362,7 @@ class V2Client:
             strict_tools=strict_tools,
             documents=documents,
             citation_options=citation_options,
+            raw_prompting=raw_prompting,
             response_format=response_format,
             safety_mode=safety_mode,
             max_tokens=max_tokens,
@@ -563,6 +579,7 @@ class AsyncV2Client:
         strict_tools: typing.Optional[bool] = OMIT,
         documents: typing.Optional[typing.Sequence[V2ChatStreamRequestDocumentsItem]] = OMIT,
         citation_options: typing.Optional[CitationOptions] = OMIT,
+        raw_prompting: typing.Optional[bool] = OMIT,
         response_format: typing.Optional[ResponseFormatV2] = OMIT,
         safety_mode: typing.Optional[V2ChatStreamRequestSafetyMode] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
@@ -603,6 +620,12 @@ class AsyncV2Client:
             A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
 
         citation_options : typing.Optional[CitationOptions]
+
+        raw_prompting : typing.Optional[bool]
+            When enabled, the user's prompt will be sent to the model without
+            any pre-processing.
+
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
         response_format : typing.Optional[ResponseFormatV2]
 
@@ -707,6 +730,7 @@ class AsyncV2Client:
             strict_tools=strict_tools,
             documents=documents,
             citation_options=citation_options,
+            raw_prompting=raw_prompting,
             response_format=response_format,
             safety_mode=safety_mode,
             max_tokens=max_tokens,
@@ -733,6 +757,7 @@ class AsyncV2Client:
         strict_tools: typing.Optional[bool] = OMIT,
         documents: typing.Optional[typing.Sequence[V2ChatRequestDocumentsItem]] = OMIT,
         citation_options: typing.Optional[CitationOptions] = OMIT,
+        raw_prompting: typing.Optional[bool] = OMIT,
         response_format: typing.Optional[ResponseFormatV2] = OMIT,
         safety_mode: typing.Optional[V2ChatRequestSafetyMode] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
@@ -773,6 +798,12 @@ class AsyncV2Client:
             A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
 
         citation_options : typing.Optional[CitationOptions]
+
+        raw_prompting : typing.Optional[bool]
+            When enabled, the user's prompt will be sent to the model without
+            any pre-processing.
+
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
         response_format : typing.Optional[ResponseFormatV2]
 
@@ -875,6 +906,7 @@ class AsyncV2Client:
             strict_tools=strict_tools,
             documents=documents,
             citation_options=citation_options,
+            raw_prompting=raw_prompting,
             response_format=response_format,
             safety_mode=safety_mode,
             max_tokens=max_tokens,
