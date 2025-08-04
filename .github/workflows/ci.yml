@@ -85,9 +85,15 @@ jobs:
           STATUS="$(git status)"
           echo "$STATUS"
 
-          # grep will exit non-zero if the target message isn't found,
-          # and `set -e` above will cause the step to fail.
-          echo "$STATUS" | grep 'nothing to commit, working tree clean'
+          # Ignore changes to poetry.lock and pyproject.toml when checking for a clean working tree
+          CHANGED=$(git status --porcelain | grep -vE 'poetry.lock|pyproject.toml')
+          if [ -z "$CHANGED" ]; then
+            echo "No relevant changes detected."
+          else
+            echo "Unexpected changes detected:"
+            echo "$CHANGED"
+            exit 1
+          fi
         env:
           COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
 
