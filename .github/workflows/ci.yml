@@ -71,16 +71,17 @@ jobs:
           poetry install --with test,test_integration
 
           echo "Going to uninstall cohere package, and install the current version from the repo"
-          cd ../../../cohere-python && echo "Current dir $(pwd)"
-          echo "Current dir $(ls)"
-          pip uninstall cohere
-          pip install .
-          cd ../langchain-cohere/libs/cohere
 
-          echo "Current cohere installation: $(pip freeze | grep cohere)"
+          poetry remove cohere
+          poetry add ../../../cohere-python
+
+          echo "Current cohere installation: $(poetry show cohere)"
           make test
           make integration_test
           echo "tests passed"
+
+          # reset poetry changes
+          git checkout -- poetry.lock pyproject.toml
 
           set -eu
 

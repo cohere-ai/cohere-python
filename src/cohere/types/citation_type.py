@@ -2,4 +2,4 @@
 
 import typing
 
-CitationType = typing.Union[typing.Literal["TEXT_CONTENT", "PLAN"], typing.Any]
+CitationType = typing.Union[typing.Literal["TEXT_CONTENT", "THINKING_CONTENT", "PLAN"], typing.Any]

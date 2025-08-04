@@ -44,6 +44,8 @@ class FinetuningClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListFinetunedModelsResponse:
         """
+        Returns a list of fine-tuned models that the user has access to.
+
         Parameters
         ----------
         page_size : typing.Optional[int]
@@ -88,6 +90,8 @@ class FinetuningClient:
         self, *, request: FinetunedModel, request_options: typing.Optional[RequestOptions] = None
     ) -> CreateFinetunedModelResponse:
         """
+        Creates a new fine-tuned model. The model will be trained on the dataset specified in the request body. The training process may take some time, and the model will be available once the training is complete.
+
         Parameters
         ----------
         request : FinetunedModel
@@ -128,6 +132,8 @@ class FinetuningClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> GetFinetunedModelResponse:
         """
+        Retrieve a fine-tuned model by its ID.
+
         Parameters
         ----------
         id : str
@@ -160,6 +166,9 @@ class FinetuningClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> DeleteFinetunedModelResponse:
         """
+        Deletes a fine-tuned model. The model will be removed from the system and will no longer be available for use.
+        This operation is irreversible.
+
         Parameters
         ----------
         id : str
@@ -198,6 +207,8 @@ class FinetuningClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> UpdateFinetunedModelResponse:
         """
+        Updates the fine-tuned model with the given ID. The model will be updated with the new settings and name provided in the request body.
+
         Parameters
         ----------
         id : str
@@ -255,6 +266,10 @@ class FinetuningClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListEventsResponse:
         """
+        Returns a list of events that occurred during the life-cycle of the fine-tuned model.
+        The events are ordered by creation time, with the most recent event first.
+        The list can be paginated using `page_size` and `page_token` parameters.
+
         Parameters
         ----------
         finetuned_model_id : str
@@ -313,6 +328,10 @@ class FinetuningClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListTrainingStepMetricsResponse:
         """
+        Returns a list of metrics measured during the training of a fine-tuned model.
+        The metrics are ordered by step number, with the most recent step first.
+        The list can be paginated using `page_size` and `page_token` parameters.
+
         Parameters
         ----------
         finetuned_model_id : str
@@ -375,6 +394,8 @@ class AsyncFinetuningClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListFinetunedModelsResponse:
         """
+        Returns a list of fine-tuned models that the user has access to.
+
         Parameters
         ----------
         page_size : typing.Optional[int]
@@ -427,6 +448,8 @@ class AsyncFinetuningClient:
         self, *, request: FinetunedModel, request_options: typing.Optional[RequestOptions] = None
     ) -> CreateFinetunedModelResponse:
         """
+        Creates a new fine-tuned model. The model will be trained on the dataset specified in the request body. The training process may take some time, and the model will be available once the training is complete.
+
         Parameters
         ----------
         request : FinetunedModel
@@ -475,6 +498,8 @@ class AsyncFinetuningClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> GetFinetunedModelResponse:
         """
+        Retrieve a fine-tuned model by its ID.
+
         Parameters
         ----------
         id : str
@@ -515,6 +540,9 @@ class AsyncFinetuningClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> DeleteFinetunedModelResponse:
         """
+        Deletes a fine-tuned model. The model will be removed from the system and will no longer be available for use.
+        This operation is irreversible.
+
         Parameters
         ----------
         id : str
@@ -561,6 +589,8 @@ class AsyncFinetuningClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> UpdateFinetunedModelResponse:
         """
+        Updates the fine-tuned model with the given ID. The model will be updated with the new settings and name provided in the request body.
+
         Parameters
         ----------
         id : str
@@ -626,6 +656,10 @@ class AsyncFinetuningClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListEventsResponse:
         """
+        Returns a list of events that occurred during the life-cycle of the fine-tuned model.
+        The events are ordered by creation time, with the most recent event first.
+        The list can be paginated using `page_size` and `page_token` parameters.
+
         Parameters
         ----------
         finetuned_model_id : str
@@ -692,6 +726,10 @@ class AsyncFinetuningClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListTrainingStepMetricsResponse:
         """
+        Returns a list of metrics measured during the training of a fine-tuned model.
+        The metrics are ordered by step number, with the most recent step first.
+        The list can be paginated using `page_size` and `page_token` parameters.
+
         Parameters
         ----------
         finetuned_model_id : str
