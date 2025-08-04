@@ -74,22 +74,24 @@ jobs:
 
           poetry remove cohere
           poetry add ../../../cohere-python
+          cd ../langchain-cohere/libs/cohere
 
           echo "Current cohere installation: $(poetry show cohere)"
           make test
           make integration_test
           echo "tests passed"
 
-          # Only fail if there are changes other than poetry.lock and pyproject.toml
-          CHANGED=$(git status --porcelain | grep -vE 'poetry.lock|pyproject.toml')
-          if [ -z "$CHANGED" ]; then
-            echo "No relevant changes detected."
-            exit 0
-          else
-            echo "Unexpected changes detected:"
-            echo "$CHANGED"
-            exit 1
-          fi
+          # reset poetry changes
+          git checkout -- poetry.lock pyproject.toml
+
+          set -eu
+
+          STATUS="$(git status)"
+          echo "$STATUS"
+
+          # grep will exit non-zero if the target message isn't found,
+          # and `set -e` above will cause the step to fail.
+          echo "$STATUS" | grep 'nothing to commit, working tree clean'
         env:
           COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
 
