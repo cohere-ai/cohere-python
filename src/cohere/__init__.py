@@ -249,18 +249,6 @@ from .errors import (
     UnprocessableEntityError,
 )
 from . import connectors, datasets, embed_jobs, finetuning, models, v2
-from .aliases import (
-    ChatResponse,
-    ContentDeltaStreamedChatResponseV2,
-    ContentEndStreamedChatResponseV2,
-    ContentStartStreamedChatResponseV2,
-    MessageEndStreamedChatResponseV2,
-    MessageStartStreamedChatResponseV2,
-    StreamedChatResponseV2,
-    ToolCallDeltaStreamedChatResponseV2,
-    ToolCallEndStreamedChatResponseV2,
-    ToolCallStartStreamedChatResponseV2,
-)
 from .aws_client import AwsClient
 from .bedrock_client import BedrockClient, BedrockClientV2
 from .client import AsyncClient, Client
@@ -344,7 +332,6 @@ __all__ = [
     "ChatRequestCitationQuality",
     "ChatRequestPromptTruncation",
     "ChatRequestSafetyMode",
-    "ChatResponse",
     "ChatSearchQueriesGenerationEvent",
     "ChatSearchQuery",
     "ChatSearchResult",
@@ -407,11 +394,8 @@ __all__ = [
     "ConnectorAuthStatus",
     "ConnectorOAuth",
     "Content",
-    "ContentDeltaStreamedChatResponseV2",
     "ContentDeltaV2ChatStreamResponse",
-    "ContentEndStreamedChatResponseV2",
     "ContentEndV2ChatStreamResponse",
-    "ContentStartStreamedChatResponseV2",
     "ContentStartV2ChatStreamResponse",
     "CreateConnectorOAuth",
     "CreateConnectorResponse",
@@ -486,9 +470,7 @@ __all__ = [
     "ListModelsResponse",
     "LogprobItem",
     "Message",
-    "MessageEndStreamedChatResponseV2",
     "MessageEndV2ChatStreamResponse",
-    "MessageStartStreamedChatResponseV2",
     "MessageStartV2ChatStreamResponse",
     "Metrics",
     "NonStreamedChatResponse",
@@ -519,7 +501,6 @@ __all__ = [
     "StreamErrorGenerateStreamedResponse",
     "StreamStartStreamedChatResponse",
     "StreamedChatResponse",
-    "StreamedChatResponseV2",
     "SummarizeRequestExtractiveness",
     "SummarizeRequestFormat",
     "SummarizeRequestLength",
@@ -545,11 +526,8 @@ __all__ = [
     "Tool",
     "ToolCall",
     "ToolCallDelta",
-    "ToolCallDeltaStreamedChatResponseV2",
     "ToolCallDeltaV2ChatStreamResponse",
-    "ToolCallEndStreamedChatResponseV2",
     "ToolCallEndV2ChatStreamResponse",
-    "ToolCallStartStreamedChatResponseV2",
     "ToolCallStartV2ChatStreamResponse",
     "ToolCallV2",
     "ToolCallV2Function",
