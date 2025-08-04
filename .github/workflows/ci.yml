@@ -80,8 +80,6 @@ jobs:
           make integration_test
           echo "tests passed"
 
-          set -eu
-
           # Only fail if there are changes other than poetry.lock and pyproject.toml
           CHANGED=$(git status --porcelain | grep -vE 'poetry.lock|pyproject.toml')
           if [ -z "$CHANGED" ]; then
