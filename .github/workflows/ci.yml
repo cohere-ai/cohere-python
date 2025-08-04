@@ -82,13 +82,11 @@ jobs:
 
           set -eu
 
-          STATUS="$(git status)"
-          echo "$STATUS"
-
-          # Ignore changes to poetry.lock and pyproject.toml when checking for a clean working tree
+          # Only fail if there are changes other than poetry.lock and pyproject.toml
           CHANGED=$(git status --porcelain | grep -vE 'poetry.lock|pyproject.toml')
           if [ -z "$CHANGED" ]; then
             echo "No relevant changes detected."
+            exit 0
           else
             echo "Unexpected changes detected:"
             echo "$CHANGED"
