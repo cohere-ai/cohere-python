@@ -74,7 +74,6 @@ jobs:
 
           poetry remove cohere
           poetry add ../../../cohere-python
-          cd ../langchain-cohere/libs/cohere
 
           echo "Current cohere installation: $(poetry show cohere)"
           make test
