@@ -74,7 +74,6 @@ class RawBaseCohere:
         *,
         message: str,
         accepts: typing.Optional[typing.Literal["text/event-stream"]] = None,
-        raw_prompting: typing.Optional[bool] = OMIT,
         model: typing.Optional[str] = OMIT,
         preamble: typing.Optional[str] = OMIT,
         chat_history: typing.Optional[typing.Sequence[Message]] = OMIT,
@@ -93,6 +92,7 @@ class RawBaseCohere:
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
+        raw_prompting: typing.Optional[bool] = OMIT,
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         force_single_step: typing.Optional[bool] = OMIT,
@@ -114,12 +114,6 @@ class RawBaseCohere:
 
         accepts : typing.Optional[typing.Literal["text/event-stream"]]
             Pass text/event-stream to receive the streamed response as server-sent events. The default is `\n` delimited events.
-
-        raw_prompting : typing.Optional[bool]
-            When enabled, the user's prompt will be sent to the model without
-            any pre-processing.
-
-            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
         model : typing.Optional[str]
             The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
@@ -268,6 +262,12 @@ class RawBaseCohere:
 
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
+        raw_prompting : typing.Optional[bool]
+            When enabled, the user's prompt will be sent to the model without
+            any pre-processing.
+
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+
         tools : typing.Optional[typing.Sequence[Tool]]
             A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
@@ -329,7 +329,6 @@ class RawBaseCohere:
             "v1/chat",
             method="POST",
             json={
-                "raw_prompting": raw_prompting,
                 "message": message,
                 "model": model,
                 "preamble": preamble,
@@ -353,6 +352,7 @@ class RawBaseCohere:
                 "stop_sequences": stop_sequences,
                 "frequency_penalty": frequency_penalty,
                 "presence_penalty": presence_penalty,
+                "raw_prompting": raw_prompting,
                 "tools": convert_and_respect_annotation_metadata(
                     object_=tools, annotation=typing.Sequence[Tool], direction="write"
                 ),
@@ -542,7 +542,6 @@ class RawBaseCohere:
         *,
         message: str,
         accepts: typing.Optional[typing.Literal["text/event-stream"]] = None,
-        raw_prompting: typing.Optional[bool] = OMIT,
         model: typing.Optional[str] = OMIT,
         preamble: typing.Optional[str] = OMIT,
         chat_history: typing.Optional[typing.Sequence[Message]] = OMIT,
@@ -561,6 +560,7 @@ class RawBaseCohere:
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
+        raw_prompting: typing.Optional[bool] = OMIT,
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         force_single_step: typing.Optional[bool] = OMIT,
@@ -581,12 +581,6 @@ class RawBaseCohere:
 
         accepts : typing.Optional[typing.Literal["text/event-stream"]]
             Pass text/event-stream to receive the streamed response as server-sent events. The default is `\n` delimited events.
-
-        raw_prompting : typing.Optional[bool]
-            When enabled, the user's prompt will be sent to the model without
-            any pre-processing.
-
-            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
         model : typing.Optional[str]
             The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
@@ -735,6 +729,12 @@ class RawBaseCohere:
 
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
+        raw_prompting : typing.Optional[bool]
+            When enabled, the user's prompt will be sent to the model without
+            any pre-processing.
+
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+
         tools : typing.Optional[typing.Sequence[Tool]]
             A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
@@ -796,7 +796,6 @@ class RawBaseCohere:
             "v1/chat",
             method="POST",
             json={
-                "raw_prompting": raw_prompting,
                 "message": message,
                 "model": model,
                 "preamble": preamble,
@@ -820,6 +819,7 @@ class RawBaseCohere:
                 "stop_sequences": stop_sequences,
                 "frequency_penalty": frequency_penalty,
                 "presence_penalty": presence_penalty,
+                "raw_prompting": raw_prompting,
                 "tools": convert_and_respect_annotation_metadata(
                     object_=tools, annotation=typing.Sequence[Tool], direction="write"
                 ),
@@ -2989,7 +2989,6 @@ class AsyncRawBaseCohere:
         *,
         message: str,
         accepts: typing.Optional[typing.Literal["text/event-stream"]] = None,
-        raw_prompting: typing.Optional[bool] = OMIT,
         model: typing.Optional[str] = OMIT,
         preamble: typing.Optional[str] = OMIT,
         chat_history: typing.Optional[typing.Sequence[Message]] = OMIT,
@@ -3008,6 +3007,7 @@ class AsyncRawBaseCohere:
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
+        raw_prompting: typing.Optional[bool] = OMIT,
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         force_single_step: typing.Optional[bool] = OMIT,
@@ -3029,12 +3029,6 @@ class AsyncRawBaseCohere:
 
         accepts : typing.Optional[typing.Literal["text/event-stream"]]
             Pass text/event-stream to receive the streamed response as server-sent events. The default is `\n` delimited events.
-
-        raw_prompting : typing.Optional[bool]
-            When enabled, the user's prompt will be sent to the model without
-            any pre-processing.
-
-            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
         model : typing.Optional[str]
             The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
@@ -3183,6 +3177,12 @@ class AsyncRawBaseCohere:
 
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
+        raw_prompting : typing.Optional[bool]
+            When enabled, the user's prompt will be sent to the model without
+            any pre-processing.
+
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+
         tools : typing.Optional[typing.Sequence[Tool]]
             A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
@@ -3244,7 +3244,6 @@ class AsyncRawBaseCohere:
             "v1/chat",
             method="POST",
             json={
-                "raw_prompting": raw_prompting,
                 "message": message,
                 "model": model,
                 "preamble": preamble,
@@ -3268,6 +3267,7 @@ class AsyncRawBaseCohere:
                 "stop_sequences": stop_sequences,
                 "frequency_penalty": frequency_penalty,
                 "presence_penalty": presence_penalty,
+                "raw_prompting": raw_prompting,
                 "tools": convert_and_respect_annotation_metadata(
                     object_=tools, annotation=typing.Sequence[Tool], direction="write"
                 ),
@@ -3457,7 +3457,6 @@ class AsyncRawBaseCohere:
         *,
         message: str,
         accepts: typing.Optional[typing.Literal["text/event-stream"]] = None,
-        raw_prompting: typing.Optional[bool] = OMIT,
         model: typing.Optional[str] = OMIT,
         preamble: typing.Optional[str] = OMIT,
         chat_history: typing.Optional[typing.Sequence[Message]] = OMIT,
@@ -3476,6 +3475,7 @@ class AsyncRawBaseCohere:
         stop_sequences: typing.Optional[typing.Sequence[str]] = OMIT,
         frequency_penalty: typing.Optional[float] = OMIT,
         presence_penalty: typing.Optional[float] = OMIT,
+        raw_prompting: typing.Optional[bool] = OMIT,
         tools: typing.Optional[typing.Sequence[Tool]] = OMIT,
         tool_results: typing.Optional[typing.Sequence[ToolResult]] = OMIT,
         force_single_step: typing.Optional[bool] = OMIT,
@@ -3496,12 +3496,6 @@ class AsyncRawBaseCohere:
 
         accepts : typing.Optional[typing.Literal["text/event-stream"]]
             Pass text/event-stream to receive the streamed response as server-sent events. The default is `\n` delimited events.
-
-        raw_prompting : typing.Optional[bool]
-            When enabled, the user's prompt will be sent to the model without
-            any pre-processing.
-
-            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
         model : typing.Optional[str]
             The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
@@ -3650,6 +3644,12 @@ class AsyncRawBaseCohere:
 
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
+        raw_prompting : typing.Optional[bool]
+            When enabled, the user's prompt will be sent to the model without
+            any pre-processing.
+
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+
         tools : typing.Optional[typing.Sequence[Tool]]
             A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
@@ -3711,7 +3711,6 @@ class AsyncRawBaseCohere:
             "v1/chat",
             method="POST",
             json={
-                "raw_prompting": raw_prompting,
                 "message": message,
                 "model": model,
                 "preamble": preamble,
@@ -3735,6 +3734,7 @@ class AsyncRawBaseCohere:
                 "stop_sequences": stop_sequences,
                 "frequency_penalty": frequency_penalty,
                 "presence_penalty": presence_penalty,
+                "raw_prompting": raw_prompting,
                 "tools": convert_and_respect_annotation_metadata(
                     object_=tools, annotation=typing.Sequence[Tool], direction="write"
                 ),
