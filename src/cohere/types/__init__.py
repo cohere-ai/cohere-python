@@ -173,7 +173,6 @@ from .metrics import Metrics
 from .non_streamed_chat_response import NonStreamedChatResponse
 from .o_auth_authorize_response import OAuthAuthorizeResponse
 from .parse_info import ParseInfo
-from .reasoning_effort import ReasoningEffort
 from .rerank_document import RerankDocument
 from .rerank_request_documents_item import RerankRequestDocumentsItem
 from .rerank_response import RerankResponse
@@ -390,7 +389,6 @@ __all__ = [
     "NonStreamedChatResponse",
     "OAuthAuthorizeResponse",
     "ParseInfo",
-    "ReasoningEffort",
     "RerankDocument",
     "RerankRequestDocumentsItem",
     "RerankResponse",
