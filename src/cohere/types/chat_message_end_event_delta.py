@@ -5,8 +5,6 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
 from ..core.unchecked_base_model import UncheckedBaseModel
-from .chat_finish_reason import ChatFinishReason
-from .usage import Usage
 
 
 class ChatMessageEndEventDelta(UncheckedBaseModel):
@@ -14,9 +12,6 @@ class ChatMessageEndEventDelta(UncheckedBaseModel):
     """
     An error message if an error occurred during the generation.
     """
-
-    finish_reason: typing.Optional[ChatFinishReason] = None
-    usage: typing.Optional[Usage] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
