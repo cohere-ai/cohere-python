@@ -11,6 +11,7 @@ from ..types.embed_input import EmbedInput
 from ..types.embed_input_type import EmbedInputType
 from ..types.embedding_type import EmbeddingType
 from ..types.response_format_v2 import ResponseFormatV2
+from ..types.thinking import Thinking
 from ..types.tool_v2 import ToolV2
 from .raw_client import AsyncRawV2Client, RawV2Client
 from .types.v2chat_request_documents_item import V2ChatRequestDocumentsItem
@@ -52,7 +53,6 @@ class V2Client:
         strict_tools: typing.Optional[bool] = OMIT,
         documents: typing.Optional[typing.Sequence[V2ChatStreamRequestDocumentsItem]] = OMIT,
         citation_options: typing.Optional[CitationOptions] = OMIT,
-        raw_prompting: typing.Optional[bool] = OMIT,
         response_format: typing.Optional[ResponseFormatV2] = OMIT,
         safety_mode: typing.Optional[V2ChatStreamRequestSafetyMode] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
@@ -65,6 +65,8 @@ class V2Client:
         p: typing.Optional[float] = OMIT,
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatStreamRequestToolChoice] = OMIT,
+        thinking: typing.Optional[Thinking] = OMIT,
+        raw_prompting: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[V2ChatStreamResponse]:
         """
@@ -94,12 +96,6 @@ class V2Client:
 
         citation_options : typing.Optional[CitationOptions]
 
-        raw_prompting : typing.Optional[bool]
-            When enabled, the user's prompt will be sent to the model without
-            any pre-processing.
-
-            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
-
         response_format : typing.Optional[ResponseFormatV2]
 
         safety_mode : typing.Optional[V2ChatStreamRequestSafetyMode]
@@ -113,9 +109,11 @@ class V2Client:
             **Note**: `command-r7b-12-2024` and newer models only support `"CONTEXTUAL"` and `"STRICT"` modes.
 
         max_tokens : typing.Optional[int]
-            The maximum number of tokens the model will generate as part of the response.
+            The maximum number of output tokens the model will generate in the response. If not set, `max_tokens` defaults to the model's maximum output token limit. You can find the maximum output token limits for each model in the [model documentation](https://docs.cohere.com/docs/models).
 
-            **Note**: Setting a low value may result in incomplete generations.
+            **Note**: Setting a low value may result in incomplete generations. In such cases, the `finish_reason` field in the response will be set to `"MAX_TOKENS"`.
+
+            **Note**: If `max_tokens` is set higher than the model's maximum output token limit, the generation will be capped at that model-specific maximum limit.
 
         stop_sequences : typing.Optional[typing.Sequence[str]]
             A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
@@ -161,6 +159,14 @@ class V2Client:
 
             **Note**: The same functionality can be achieved in `/v1/chat` using the `force_single_step` parameter. If `force_single_step=true`, this is equivalent to specifying `REQUIRED`. While if `force_single_step=true` and `tool_results` are passed, this is equivalent to specifying `NONE`.
 
+        thinking : typing.Optional[Thinking]
+
+        raw_prompting : typing.Optional[bool]
+            When enabled, the user's prompt will be sent to the model without
+            any pre-processing.
+
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -195,7 +201,6 @@ class V2Client:
             strict_tools=strict_tools,
             documents=documents,
             citation_options=citation_options,
-            raw_prompting=raw_prompting,
             response_format=response_format,
             safety_mode=safety_mode,
             max_tokens=max_tokens,
@@ -208,6 +213,8 @@ class V2Client:
             p=p,
             logprobs=logprobs,
             tool_choice=tool_choice,
+            thinking=thinking,
+            raw_prompting=raw_prompting,
             request_options=request_options,
         ) as r:
             yield from r.data
@@ -221,7 +228,6 @@ class V2Client:
         strict_tools: typing.Optional[bool] = OMIT,
         documents: typing.Optional[typing.Sequence[V2ChatRequestDocumentsItem]] = OMIT,
         citation_options: typing.Optional[CitationOptions] = OMIT,
-        raw_prompting: typing.Optional[bool] = OMIT,
         response_format: typing.Optional[ResponseFormatV2] = OMIT,
         safety_mode: typing.Optional[V2ChatRequestSafetyMode] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
@@ -234,6 +240,8 @@ class V2Client:
         p: typing.Optional[float] = OMIT,
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatRequestToolChoice] = OMIT,
+        thinking: typing.Optional[Thinking] = OMIT,
+        raw_prompting: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> V2ChatResponse:
         """
@@ -263,12 +271,6 @@ class V2Client:
 
         citation_options : typing.Optional[CitationOptions]
 
-        raw_prompting : typing.Optional[bool]
-            When enabled, the user's prompt will be sent to the model without
-            any pre-processing.
-
-            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
-
         response_format : typing.Optional[ResponseFormatV2]
 
         safety_mode : typing.Optional[V2ChatRequestSafetyMode]
@@ -282,9 +284,11 @@ class V2Client:
             **Note**: `command-r7b-12-2024` and newer models only support `"CONTEXTUAL"` and `"STRICT"` modes.
 
         max_tokens : typing.Optional[int]
-            The maximum number of tokens the model will generate as part of the response.
+            The maximum number of output tokens the model will generate in the response. If not set, `max_tokens` defaults to the model's maximum output token limit. You can find the maximum output token limits for each model in the [model documentation](https://docs.cohere.com/docs/models).
 
-            **Note**: Setting a low value may result in incomplete generations.
+            **Note**: Setting a low value may result in incomplete generations. In such cases, the `finish_reason` field in the response will be set to `"MAX_TOKENS"`.
+
+            **Note**: If `max_tokens` is set higher than the model's maximum output token limit, the generation will be capped at that model-specific maximum limit.
 
         stop_sequences : typing.Optional[typing.Sequence[str]]
             A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
@@ -330,6 +334,14 @@ class V2Client:
 
             **Note**: The same functionality can be achieved in `/v1/chat` using the `force_single_step` parameter. If `force_single_step=true`, this is equivalent to specifying `REQUIRED`. While if `force_single_step=true` and `tool_results` are passed, this is equivalent to specifying `NONE`.
 
+        thinking : typing.Optional[Thinking]
+
+        raw_prompting : typing.Optional[bool]
+            When enabled, the user's prompt will be sent to the model without
+            any pre-processing.
+
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -362,7 +374,6 @@ class V2Client:
             strict_tools=strict_tools,
             documents=documents,
             citation_options=citation_options,
-            raw_prompting=raw_prompting,
             response_format=response_format,
             safety_mode=safety_mode,
             max_tokens=max_tokens,
@@ -375,6 +386,8 @@ class V2Client:
             p=p,
             logprobs=logprobs,
             tool_choice=tool_choice,
+            thinking=thinking,
+            raw_prompting=raw_prompting,
             request_options=request_options,
         )
         return _response.data
@@ -579,7 +592,6 @@ class AsyncV2Client:
         strict_tools: typing.Optional[bool] = OMIT,
         documents: typing.Optional[typing.Sequence[V2ChatStreamRequestDocumentsItem]] = OMIT,
         citation_options: typing.Optional[CitationOptions] = OMIT,
-        raw_prompting: typing.Optional[bool] = OMIT,
         response_format: typing.Optional[ResponseFormatV2] = OMIT,
         safety_mode: typing.Optional[V2ChatStreamRequestSafetyMode] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
@@ -592,6 +604,8 @@ class AsyncV2Client:
         p: typing.Optional[float] = OMIT,
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatStreamRequestToolChoice] = OMIT,
+        thinking: typing.Optional[Thinking] = OMIT,
+        raw_prompting: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[V2ChatStreamResponse]:
         """
@@ -621,12 +635,6 @@ class AsyncV2Client:
 
         citation_options : typing.Optional[CitationOptions]
 
-        raw_prompting : typing.Optional[bool]
-            When enabled, the user's prompt will be sent to the model without
-            any pre-processing.
-
-            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
-
         response_format : typing.Optional[ResponseFormatV2]
 
         safety_mode : typing.Optional[V2ChatStreamRequestSafetyMode]
@@ -640,9 +648,11 @@ class AsyncV2Client:
             **Note**: `command-r7b-12-2024` and newer models only support `"CONTEXTUAL"` and `"STRICT"` modes.
 
         max_tokens : typing.Optional[int]
-            The maximum number of tokens the model will generate as part of the response.
+            The maximum number of output tokens the model will generate in the response. If not set, `max_tokens` defaults to the model's maximum output token limit. You can find the maximum output token limits for each model in the [model documentation](https://docs.cohere.com/docs/models).
 
-            **Note**: Setting a low value may result in incomplete generations.
+            **Note**: Setting a low value may result in incomplete generations. In such cases, the `finish_reason` field in the response will be set to `"MAX_TOKENS"`.
+
+            **Note**: If `max_tokens` is set higher than the model's maximum output token limit, the generation will be capped at that model-specific maximum limit.
 
         stop_sequences : typing.Optional[typing.Sequence[str]]
             A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
@@ -688,6 +698,14 @@ class AsyncV2Client:
 
             **Note**: The same functionality can be achieved in `/v1/chat` using the `force_single_step` parameter. If `force_single_step=true`, this is equivalent to specifying `REQUIRED`. While if `force_single_step=true` and `tool_results` are passed, this is equivalent to specifying `NONE`.
 
+        thinking : typing.Optional[Thinking]
+
+        raw_prompting : typing.Optional[bool]
+            When enabled, the user's prompt will be sent to the model without
+            any pre-processing.
+
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -730,7 +748,6 @@ class AsyncV2Client:
             strict_tools=strict_tools,
             documents=documents,
             citation_options=citation_options,
-            raw_prompting=raw_prompting,
             response_format=response_format,
             safety_mode=safety_mode,
             max_tokens=max_tokens,
@@ -743,6 +760,8 @@ class AsyncV2Client:
             p=p,
             logprobs=logprobs,
             tool_choice=tool_choice,
+            thinking=thinking,
+            raw_prompting=raw_prompting,
             request_options=request_options,
         ) as r:
             async for _chunk in r.data:
@@ -757,7 +776,6 @@ class AsyncV2Client:
         strict_tools: typing.Optional[bool] = OMIT,
         documents: typing.Optional[typing.Sequence[V2ChatRequestDocumentsItem]] = OMIT,
         citation_options: typing.Optional[CitationOptions] = OMIT,
-        raw_prompting: typing.Optional[bool] = OMIT,
         response_format: typing.Optional[ResponseFormatV2] = OMIT,
         safety_mode: typing.Optional[V2ChatRequestSafetyMode] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
@@ -770,6 +788,8 @@ class AsyncV2Client:
         p: typing.Optional[float] = OMIT,
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatRequestToolChoice] = OMIT,
+        thinking: typing.Optional[Thinking] = OMIT,
+        raw_prompting: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> V2ChatResponse:
         """
@@ -799,12 +819,6 @@ class AsyncV2Client:
 
         citation_options : typing.Optional[CitationOptions]
 
-        raw_prompting : typing.Optional[bool]
-            When enabled, the user's prompt will be sent to the model without
-            any pre-processing.
-
-            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
-
         response_format : typing.Optional[ResponseFormatV2]
 
         safety_mode : typing.Optional[V2ChatRequestSafetyMode]
@@ -818,9 +832,11 @@ class AsyncV2Client:
             **Note**: `command-r7b-12-2024` and newer models only support `"CONTEXTUAL"` and `"STRICT"` modes.
 
         max_tokens : typing.Optional[int]
-            The maximum number of tokens the model will generate as part of the response.
+            The maximum number of output tokens the model will generate in the response. If not set, `max_tokens` defaults to the model's maximum output token limit. You can find the maximum output token limits for each model in the [model documentation](https://docs.cohere.com/docs/models).
 
-            **Note**: Setting a low value may result in incomplete generations.
+            **Note**: Setting a low value may result in incomplete generations. In such cases, the `finish_reason` field in the response will be set to `"MAX_TOKENS"`.
+
+            **Note**: If `max_tokens` is set higher than the model's maximum output token limit, the generation will be capped at that model-specific maximum limit.
 
         stop_sequences : typing.Optional[typing.Sequence[str]]
             A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
@@ -866,6 +882,14 @@ class AsyncV2Client:
 
             **Note**: The same functionality can be achieved in `/v1/chat` using the `force_single_step` parameter. If `force_single_step=true`, this is equivalent to specifying `REQUIRED`. While if `force_single_step=true` and `tool_results` are passed, this is equivalent to specifying `NONE`.
 
+        thinking : typing.Optional[Thinking]
+
+        raw_prompting : typing.Optional[bool]
+            When enabled, the user's prompt will be sent to the model without
+            any pre-processing.
+
+            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -906,7 +930,6 @@ class AsyncV2Client:
             strict_tools=strict_tools,
             documents=documents,
             citation_options=citation_options,
-            raw_prompting=raw_prompting,
             response_format=response_format,
             safety_mode=safety_mode,
             max_tokens=max_tokens,
@@ -919,6 +942,8 @@ class AsyncV2Client:
             p=p,
             logprobs=logprobs,
             tool_choice=tool_choice,
+            thinking=thinking,
+            raw_prompting=raw_prompting,
             request_options=request_options,
         )
         return _response.data

@@ -173,7 +173,6 @@ from .metrics import Metrics
 from .non_streamed_chat_response import NonStreamedChatResponse
 from .o_auth_authorize_response import OAuthAuthorizeResponse
 from .parse_info import ParseInfo
-from .reasoning_effort import ReasoningEffort
 from .rerank_document import RerankDocument
 from .rerank_request_documents_item import RerankRequestDocumentsItem
 from .rerank_response import RerankResponse
@@ -205,6 +204,8 @@ from .summarize_response import SummarizeResponse
 from .system_message_v2 import SystemMessageV2
 from .system_message_v2content import SystemMessageV2Content
 from .system_message_v2content_item import SystemMessageV2ContentItem, TextSystemMessageV2ContentItem
+from .thinking import Thinking
+from .thinking_type import ThinkingType
 from .tokenize_response import TokenizeResponse
 from .tool import Tool
 from .tool_call import ToolCall
@@ -390,7 +391,6 @@ __all__ = [
     "NonStreamedChatResponse",
     "OAuthAuthorizeResponse",
     "ParseInfo",
-    "ReasoningEffort",
     "RerankDocument",
     "RerankRequestDocumentsItem",
     "RerankResponse",
@@ -429,7 +429,9 @@ __all__ = [
     "TextResponseFormatV2",
     "TextSystemMessageV2ContentItem",
     "TextToolContent",
+    "Thinking",
     "ThinkingAssistantMessageResponseContentItem",
+    "ThinkingType",
     "TokenizeResponse",
     "Tool",
     "ToolCall",
