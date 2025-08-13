@@ -166,8 +166,6 @@ class RawV2Client:
 
             **Note**: This parameter is only compatible with models [Command-r7b](https://docs.cohere.com/v2/docs/command-r7b) and newer.
 
-            **Note**: The same functionality can be achieved in `/v1/chat` using the `force_single_step` parameter. If `force_single_step=true`, this is equivalent to specifying `REQUIRED`. While if `force_single_step=true` and `tool_results` are passed, this is equivalent to specifying `NONE`.
-
         thinking : typing.Optional[Thinking]
 
         raw_prompting : typing.Optional[bool]
@@ -505,8 +503,6 @@ class RawV2Client:
             If tool_choice isn't specified, then the model is free to choose whether to use the specified tools or not.
 
             **Note**: This parameter is only compatible with models [Command-r7b](https://docs.cohere.com/v2/docs/command-r7b) and newer.
-
-            **Note**: The same functionality can be achieved in `/v1/chat` using the `force_single_step` parameter. If `force_single_step=true`, this is equivalent to specifying `REQUIRED`. While if `force_single_step=true` and `tool_results` are passed, this is equivalent to specifying `NONE`.
 
         thinking : typing.Optional[Thinking]
 
@@ -1281,8 +1277,6 @@ class AsyncRawV2Client:
 
             **Note**: This parameter is only compatible with models [Command-r7b](https://docs.cohere.com/v2/docs/command-r7b) and newer.
 
-            **Note**: The same functionality can be achieved in `/v1/chat` using the `force_single_step` parameter. If `force_single_step=true`, this is equivalent to specifying `REQUIRED`. While if `force_single_step=true` and `tool_results` are passed, this is equivalent to specifying `NONE`.
-
         thinking : typing.Optional[Thinking]
 
         raw_prompting : typing.Optional[bool]
@@ -1620,8 +1614,6 @@ class AsyncRawV2Client:
             If tool_choice isn't specified, then the model is free to choose whether to use the specified tools or not.
 
             **Note**: This parameter is only compatible with models [Command-r7b](https://docs.cohere.com/v2/docs/command-r7b) and newer.
-
-            **Note**: The same functionality can be achieved in `/v1/chat` using the `force_single_step` parameter. If `force_single_step=true`, this is equivalent to specifying `REQUIRED`. While if `force_single_step=true` and `tool_results` are passed, this is equivalent to specifying `NONE`.
 
         thinking : typing.Optional[Thinking]
 
