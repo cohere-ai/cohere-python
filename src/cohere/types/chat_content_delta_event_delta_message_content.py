@@ -8,6 +8,7 @@ from ..core.unchecked_base_model import UncheckedBaseModel
 
 
 class ChatContentDeltaEventDeltaMessageContent(UncheckedBaseModel):
+    thinking: typing.Optional[str] = None
     text: typing.Optional[str] = None
 
     if IS_PYDANTIC_V2:

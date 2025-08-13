@@ -14,7 +14,11 @@ from .assistant_message_response_content_item import (
     ThinkingAssistantMessageResponseContentItem,
 )
 from .assistant_message_v2content import AssistantMessageV2Content
-from .assistant_message_v2content_item import AssistantMessageV2ContentItem, TextAssistantMessageV2ContentItem
+from .assistant_message_v2content_item import (
+    AssistantMessageV2ContentItem,
+    TextAssistantMessageV2ContentItem,
+    ThinkingAssistantMessageV2ContentItem,
+)
 from .auth_token_type import AuthTokenType
 from .chat_citation import ChatCitation
 from .chat_citation_generation_event import ChatCitationGenerationEvent
@@ -431,6 +435,7 @@ __all__ = [
     "TextToolContent",
     "Thinking",
     "ThinkingAssistantMessageResponseContentItem",
+    "ThinkingAssistantMessageV2ContentItem",
     "ThinkingType",
     "TokenizeResponse",
     "Tool",
