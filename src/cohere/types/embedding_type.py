@@ -2,4 +2,4 @@
 
 import typing
 
-EmbeddingType = typing.Union[typing.Literal["float", "int8", "uint8", "binary", "ubinary"], typing.Any]
+EmbeddingType = typing.Union[typing.Literal["float", "int8", "uint8", "binary", "ubinary", "base64"], typing.Any]
