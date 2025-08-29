@@ -41,6 +41,11 @@ class EmbedByTypeResponseEmbeddings(UncheckedBaseModel):
     An array of packed unsigned binary embeddings. The length of each binary embedding is 1/8 the length of the float embeddings of the provided model. Each value is between 0 and 255.
     """
 
+    base64: typing.Optional[typing.List[str]] = pydantic.Field(default=None)
+    """
+    An array of base64 embeddings. Each string is the result of appending the float embedding bytes together and base64 encoding that.
+    """
+
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
     else:

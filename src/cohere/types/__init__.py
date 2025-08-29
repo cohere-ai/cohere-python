@@ -73,6 +73,7 @@ from .chat_text_content import ChatTextContent
 from .chat_text_generation_event import ChatTextGenerationEvent
 from .chat_text_response_format import ChatTextResponseFormat
 from .chat_text_response_format_v2 import ChatTextResponseFormatV2
+from .chat_thinking_content import ChatThinkingContent
 from .chat_tool_call_delta_event import ChatToolCallDeltaEvent
 from .chat_tool_call_delta_event_delta import ChatToolCallDeltaEventDelta
 from .chat_tool_call_delta_event_delta_message import ChatToolCallDeltaEventDeltaMessage
@@ -289,6 +290,7 @@ __all__ = [
     "ChatTextGenerationEvent",
     "ChatTextResponseFormat",
     "ChatTextResponseFormatV2",
+    "ChatThinkingContent",
     "ChatToolCallDeltaEvent",
     "ChatToolCallDeltaEventDelta",
     "ChatToolCallDeltaEventDeltaMessage",
