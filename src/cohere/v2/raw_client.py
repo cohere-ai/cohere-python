@@ -767,6 +767,7 @@ class RawV2Client:
             * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Supported with Embed v3.0 and newer Embed models.
             * `"binary"`: Use this when you want to get back signed binary embeddings. Supported with Embed v3.0 and newer Embed models.
             * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Supported with Embed v3.0 and newer Embed models.
+            * `"base64"`: Use this when you want to get back base64 embeddings. Supported with Embed v3.0 and newer Embed models.
 
         truncate : typing.Optional[V2EmbedRequestTruncate]
             One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
@@ -1878,6 +1879,7 @@ class AsyncRawV2Client:
             * `"uint8"`: Use this when you want to get back unsigned int8 embeddings. Supported with Embed v3.0 and newer Embed models.
             * `"binary"`: Use this when you want to get back signed binary embeddings. Supported with Embed v3.0 and newer Embed models.
             * `"ubinary"`: Use this when you want to get back unsigned binary embeddings. Supported with Embed v3.0 and newer Embed models.
+            * `"base64"`: Use this when you want to get back base64 embeddings. Supported with Embed v3.0 and newer Embed models.
 
         truncate : typing.Optional[V2EmbedRequestTruncate]
             One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.

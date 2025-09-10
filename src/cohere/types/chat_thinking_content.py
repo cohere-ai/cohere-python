@@ -5,13 +5,14 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
 from ..core.unchecked_base_model import UncheckedBaseModel
-from .chat_content_start_event_delta_message_content_type import ChatContentStartEventDeltaMessageContentType
 
 
-class ChatContentStartEventDeltaMessageContent(UncheckedBaseModel):
-    thinking: typing.Optional[str] = None
-    text: typing.Optional[str] = None
-    type: typing.Optional[ChatContentStartEventDeltaMessageContentType] = None
+class ChatThinkingContent(UncheckedBaseModel):
+    """
+    Thinking content of the message. This will be present when `thinking` is enabled, and will contain the models internal reasoning.
+    """
+
+    thinking: str
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
