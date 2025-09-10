@@ -24,13 +24,16 @@ class TextAssistantMessageV2ContentItem(UncheckedBaseModel):
 
 
 class ThinkingAssistantMessageV2ContentItem(UncheckedBaseModel):
-    value: typing.Optional[typing.Any] = None
     type: typing.Literal["thinking"] = "thinking"
+    thinking: str
 
-    if not IS_PYDANTIC_V2:
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
+    else:
 
         class Config:
             smart_union = True
+            extra = pydantic.Extra.allow
 
 
 AssistantMessageV2ContentItem = typing_extensions.Annotated[
