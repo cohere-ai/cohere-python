@@ -115,12 +115,12 @@ class FinetuningClient:
         )
         client.finetuning.create_finetuned_model(
             request=FinetunedModel(
-                name="api-test",
+                name="name",
                 settings=Settings(
                     base_model=BaseModel(
-                        base_type="BASE_TYPE_CHAT",
+                        base_type="BASE_TYPE_UNSPECIFIED",
                     ),
-                    dataset_id="my-dataset-id",
+                    dataset_id="dataset_id",
                 ),
             ),
         )
@@ -478,12 +478,12 @@ class AsyncFinetuningClient:
         async def main() -> None:
             await client.finetuning.create_finetuned_model(
                 request=FinetunedModel(
-                    name="api-test",
+                    name="name",
                     settings=Settings(
                         base_model=BaseModel(
-                            base_type="BASE_TYPE_CHAT",
+                            base_type="BASE_TYPE_UNSPECIFIED",
                         ),
-                        dataset_id="my-dataset-id",
+                        dataset_id="dataset_id",
                     ),
                 ),
             )
