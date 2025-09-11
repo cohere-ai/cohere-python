@@ -66,7 +66,6 @@ class V2Client:
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatStreamRequestToolChoice] = OMIT,
         thinking: typing.Optional[Thinking] = OMIT,
-        raw_prompting: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[V2ChatStreamResponse]:
         """
@@ -159,12 +158,6 @@ class V2Client:
 
         thinking : typing.Optional[Thinking]
 
-        raw_prompting : typing.Optional[bool]
-            When enabled, the user's prompt will be sent to the model without
-            any pre-processing.
-
-            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
-
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -212,7 +205,6 @@ class V2Client:
             logprobs=logprobs,
             tool_choice=tool_choice,
             thinking=thinking,
-            raw_prompting=raw_prompting,
             request_options=request_options,
         ) as r:
             yield from r.data
@@ -239,7 +231,6 @@ class V2Client:
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatRequestToolChoice] = OMIT,
         thinking: typing.Optional[Thinking] = OMIT,
-        raw_prompting: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> V2ChatResponse:
         """
@@ -332,12 +323,6 @@ class V2Client:
 
         thinking : typing.Optional[Thinking]
 
-        raw_prompting : typing.Optional[bool]
-            When enabled, the user's prompt will be sent to the model without
-            any pre-processing.
-
-            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
-
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -383,7 +368,6 @@ class V2Client:
             logprobs=logprobs,
             tool_choice=tool_choice,
             thinking=thinking,
-            raw_prompting=raw_prompting,
             request_options=request_options,
         )
         return _response.data
@@ -602,7 +586,6 @@ class AsyncV2Client:
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatStreamRequestToolChoice] = OMIT,
         thinking: typing.Optional[Thinking] = OMIT,
-        raw_prompting: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[V2ChatStreamResponse]:
         """
@@ -695,12 +678,6 @@ class AsyncV2Client:
 
         thinking : typing.Optional[Thinking]
 
-        raw_prompting : typing.Optional[bool]
-            When enabled, the user's prompt will be sent to the model without
-            any pre-processing.
-
-            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
-
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -756,7 +733,6 @@ class AsyncV2Client:
             logprobs=logprobs,
             tool_choice=tool_choice,
             thinking=thinking,
-            raw_prompting=raw_prompting,
             request_options=request_options,
         ) as r:
             async for _chunk in r.data:
@@ -784,7 +760,6 @@ class AsyncV2Client:
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatRequestToolChoice] = OMIT,
         thinking: typing.Optional[Thinking] = OMIT,
-        raw_prompting: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> V2ChatResponse:
         """
@@ -877,12 +852,6 @@ class AsyncV2Client:
 
         thinking : typing.Optional[Thinking]
 
-        raw_prompting : typing.Optional[bool]
-            When enabled, the user's prompt will be sent to the model without
-            any pre-processing.
-
-            Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
-
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -936,7 +905,6 @@ class AsyncV2Client:
             logprobs=logprobs,
             tool_choice=tool_choice,
             thinking=thinking,
-            raw_prompting=raw_prompting,
             request_options=request_options,
         )
         return _response.data
