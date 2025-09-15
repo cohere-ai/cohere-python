@@ -15,13 +15,13 @@ class TestClientV2(unittest.TestCase):
 
     def test_chat(self) -> None:
         response = co.chat(
-            model="command-r-plus", messages=[cohere.UserChatMessageV2(content="hello world!")])
+            model="command-a-03-2025", messages=[cohere.UserChatMessageV2(content="hello world!")])
 
         print(response.message)
 
     def test_chat_stream(self) -> None:
         stream = co.chat_stream(
-            model="command-r-plus", messages=[cohere.UserChatMessageV2(content="hello world!")])
+            model="command-a-03-2025", messages=[cohere.UserChatMessageV2(content="hello world!")])
 
         events = set()
 
@@ -49,7 +49,7 @@ class TestClientV2(unittest.TestCase):
             messages=[cohere.UserChatMessageV2(
                 content=[cohere.TextContent(text="how many widges were sold in 2020?")],
             )],
-            model="command-r-plus",
+            model="command-a-03-2025",
             documents=documents,
         )
 
@@ -76,7 +76,7 @@ class TestClientV2(unittest.TestCase):
         messages: cohere.ChatMessages = [
             cohere.UserChatMessageV2(content="what is the weather in Toronto?")
         ]
-        res = co.chat(model="command-r-plus", tools=tools, messages=messages)
+        res = co.chat(model="command-a-03-2025", tools=tools, messages=messages)
 
         # call the get_weather tool
         tool_result = {"temperature": "30C"}
@@ -88,5 +88,5 @@ class TestClientV2(unittest.TestCase):
             messages.append(cohere.ToolChatMessageV2(
                 tool_call_id=res.message.tool_calls[0].id, content=list(tool_content)))
 
-        res = co.chat(tools=tools, messages=messages, model="command-r-plus")
+        res = co.chat(tools=tools, messages=messages, model="command-a-03-2025")
         print(res.message)
