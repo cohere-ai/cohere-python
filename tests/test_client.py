@@ -31,7 +31,6 @@ class TestClient(unittest.TestCase):
                                "gravity is Sir Isaac Newton")
             ],
             message="What year was he born?",
-            connectors=[ChatConnector(id="web-search")]
         )
 
         print(chat)
@@ -45,7 +44,6 @@ class TestClient(unittest.TestCase):
                                "gravity is Sir Isaac Newton")
             ],
             message="What year was he born?",
-            connectors=[ChatConnector(id="web-search")]
         )
 
         events = set()
@@ -257,40 +255,10 @@ class TestClient(unittest.TestCase):
 
         co.datasets.delete(my_dataset.id or "")
 
-    def test_summarize(self) -> None:
-        text = (
-            "Ice cream is a sweetened frozen food typically eaten as a snack or dessert. "
-            "It may be made from milk or cream and is flavoured with a sweetener, "
-            "either sugar or an alternative, and a spice, such as cocoa or vanilla, "
-            "or with fruit such as strawberries or peaches. "
-            "It can also be made by whisking a flavored cream base and liquid nitrogen together. "
-            "Food coloring is sometimes added, in addition to stabilizers. "
-            "The mixture is cooled below the freezing point of water and stirred to incorporate air spaces "
-            "and to prevent detectable ice crystals from forming. The result is a smooth, "
-            "semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). "
-            "It becomes more malleable as its temperature increases.\n\n"
-            "The meaning of the name \"ice cream\" varies from one country to another. "
-            "In some countries, such as the United States, \"ice cream\" applies only to a specific variety, "
-            "and most governments regulate the commercial use of the various terms according to the "
-            "relative quantities of the main ingredients, notably the amount of cream. "
-            "Products that do not meet the criteria to be called ice cream are sometimes labelled "
-            "\"frozen dairy dessert\" instead. In other countries, such as Italy and Argentina, "
-            "one word is used fo\r all variants. Analogues made from dairy alternatives, "
-            "such as goat's or sheep's milk, or milk substitutes "
-            "(e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are "
-            "lactose intolerant, allergic to dairy protein or vegan."
-        )
-
-        response = co.summarize(
-            text=text,
-        )
-
-        print(response)
-
     def test_tokenize(self) -> None:
         response = co.tokenize(
             text='tokenize me! :D',
-            model='command',
+            model='command-a-03-2025',
             offline=False,
         )
         print(response)
@@ -298,33 +266,11 @@ class TestClient(unittest.TestCase):
     def test_detokenize(self) -> None:
         response = co.detokenize(
             tokens=[10104, 12221, 1315, 34, 1420, 69],
-            model="command",
+            model="command-a-03-2025",
             offline=False,
         )
         print(response)
 
-    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
-    def test_connectors_crud(self) -> None:
-        created_connector = co.connectors.create(
-            name="Example connector",
-            url="https://dummy-connector-o5btz7ucgq-uc.a.run.app/search",
-            service_auth=CreateConnectorServiceAuth(
-                token="dummy-connector-token",
-                type="bearer",
-            )
-        )
-        print(created_connector)
-
-        connector = co.connectors.get(created_connector.connector.id)
-
-        print(connector)
-
-        updated_connector = co.connectors.update(
-            id=connector.connector.id, name="new name")
-
-        print(updated_connector)
-
-        co.connectors.delete(created_connector.connector.id)
 
     @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     def test_tool_use(self) -> None:
@@ -401,14 +347,14 @@ class TestClient(unittest.TestCase):
 
     def test_local_tokenize(self) -> None:
         response = co.tokenize(
-            model="command",
+            model="command-a-03-2025",
             text="tokenize me! :D"
         )
         print(response)
 
     def test_local_detokenize(self) -> None:
         response = co.detokenize(
-            model="command",
+            model="command-a-03-2025",
             tokens=[10104, 12221, 1315, 34, 1420, 69]
         )
         print(response)
