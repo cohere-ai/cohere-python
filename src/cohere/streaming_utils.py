@@ -134,7 +134,12 @@ class StreamingEmbedParser:
     def _iter_embeddings_fallback(self) -> Iterator[StreamedEmbedding]:
         """Fallback method using regular JSON parsing."""
         # This still loads the full response but at least provides the same interface
-        data = self.response.json()
+        if hasattr(self.response, 'json'):
+            data = self.response.json()
+        elif hasattr(self.response, '_response'):
+            data = self.response._response.json()  # type: ignore
+        else:
+            raise ValueError("Response object does not have a json() method")
         response_type = data.get('response_type', '')
         
         if response_type == 'embeddings_floats':
