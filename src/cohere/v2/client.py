@@ -487,7 +487,7 @@ class V2Client:
         truncate: typing.Optional[V2EmbedRequestTruncate] = OMIT,
         batch_size: int = 10,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> typing.Iterator["StreamedEmbedding"]:
+    ) -> typing.Iterator[typing.Any]:  # Returns Iterator[StreamedEmbedding]
         """
         Memory-efficient streaming version of embed that yields embeddings one at a time.
         
@@ -555,7 +555,7 @@ class V2Client:
         if not texts:
             return
             
-        from ..streaming_utils import StreamingEmbedParser, StreamedEmbedding
+        from ..streaming_utils import StreamingEmbedParser
         
         # Process texts in batches
         texts_list = list(texts) if texts else []
