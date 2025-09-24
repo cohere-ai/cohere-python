@@ -16,7 +16,7 @@ class TestEmbedStreaming(unittest.TestCase):
 
     def test_streaming_embed_parser_fallback(self):
         """Test that StreamingEmbedParser works with fallback JSON parsing."""
-        # Mock response with JSON data
+        # Mock response with JSON data - simulating httpx.Response
         mock_response = MagicMock()
         mock_response.json.return_value = {
             "response_type": "embeddings_floats",
@@ -24,6 +24,8 @@ class TestEmbedStreaming(unittest.TestCase):
             "texts": ["hello", "world"],
             "id": "test-id"
         }
+        # StreamingEmbedParser expects an httpx.Response object
+        mock_response.iter_bytes = MagicMock(side_effect=Exception("Force fallback"))
         
         # Test parser
         parser = StreamingEmbedParser(mock_response, ["hello", "world"])
@@ -46,14 +48,14 @@ class TestEmbedStreaming(unittest.TestCase):
         
         # Mock the raw client's embed method
         mock_response_1 = MagicMock()
-        mock_response_1.response.json.return_value = {
+        mock_response_1._response.json.return_value = {
             "response_type": "embeddings_floats",
             "embeddings": [[0.1, 0.2], [0.3, 0.4]],
             "texts": ["text1", "text2"]
         }
         
         mock_response_2 = MagicMock()
-        mock_response_2.response.json.return_value = {
+        mock_response_2._response.json.return_value = {
             "response_type": "embeddings_floats",
             "embeddings": [[0.5, 0.6]],
             "texts": ["text3"]
@@ -134,7 +136,7 @@ class TestEmbedStreaming(unittest.TestCase):
         
         # Mock the raw client's embed method
         mock_response = MagicMock()
-        mock_response.response.json.return_value = {
+        mock_response._response.json.return_value = {
             "response_type": "embeddings_by_type",
             "embeddings": {
                 "float": [[0.1, 0.2], [0.3, 0.4]]
@@ -167,7 +169,7 @@ class TestEmbedStreaming(unittest.TestCase):
         # Mock a large response
         large_embedding = [0.1] * 1536  # Typical embedding size
         mock_response = MagicMock()
-        mock_response.response.json.return_value = {
+        mock_response._response.json.return_value = {
             "response_type": "embeddings_floats",
             "embeddings": [large_embedding] * 10,
             "texts": [f"text{i}" for i in range(10)]
