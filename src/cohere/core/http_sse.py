@@ -155,18 +155,23 @@ class EventSource:
         self._check_content_type()
         decoder = SSEDecoder()
         
-        # Process the raw stream instead of using iter_lines() which may truncate
-        # Read the entire response as bytes and process it manually
-        raw_data = b""
+        buffer = ""
         for chunk in self._response.iter_bytes():
-            raw_data += chunk
+            # Decode chunk and add to buffer
+            text_chunk = chunk.decode('utf-8', errors='replace')
+            buffer += text_chunk
+            
+            # Process complete lines
+            while '\n' in buffer:
+                line, buffer = buffer.split('\n', 1)
+                line = line.rstrip('\r')
+                sse = decoder.decode(line)
+                if sse is not None:
+                    yield sse
         
-        # Convert to string and split on newlines manually
-        text_data = raw_data.decode('utf-8', errors='replace')
-        lines = text_data.split('\n')
-        
-        for line in lines:
-            line = line.rstrip("\r")
+        # Process any remaining data in buffer
+        if buffer.strip():
+            line = buffer.rstrip('\r')
             sse = decoder.decode(line)
             if sse is not None:
                 yield sse
