@@ -5,7 +5,7 @@ import json
 import typing
 from json.decoder import JSONDecodeError
 
-from ..core.httpx_sse import EventSource
+from ..core.http_sse import EventSource
 from ..core.api_error import ApiError
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.http_response import AsyncHttpResponse, HttpResponse
