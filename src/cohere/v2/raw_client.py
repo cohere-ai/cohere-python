@@ -5,7 +5,7 @@ import json
 import typing
 from json.decoder import JSONDecodeError
 
-import httpx_sse
+from ..core.httpx_sse import EventSource
 from ..core.api_error import ApiError
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.http_response import AsyncHttpResponse, HttpResponse
@@ -224,20 +224,35 @@ class RawV2Client:
                     if 200 <= _response.status_code < 300:
 
                         def _iter():
-                            _event_source = httpx_sse.EventSource(_response)
+                            _event_source = EventSource(_response)
                             for _sse in _event_source.iter_sse():
-                                if _sse.data == None:
-                                    return
                                 try:
+                                    # Skip empty events
+                                    if not _sse.data or _sse.data.strip() == "":
+                                        continue
+                                        
+                                    # Handle [DONE] token from OpenAI-style APIs
+                                    if _sse.data.strip() == '[DONE]':
+                                        continue
+                                        
+                                    parsed_data = json.loads(_sse.data)
+
                                     yield typing.cast(
                                         V2ChatStreamResponse,
                                         construct_type(
                                             type_=V2ChatStreamResponse,  # type: ignore
-                                            object_=json.loads(_sse.data),
+                                            object_=parsed_data,
                                         ),
                                     )
-                                except Exception:
-                                    pass
+                                except json.JSONDecodeError as e:
+                                    # Log the problematic data for debugging
+                                    print(f"JSON decode error: {e}, data: {repr(_sse.data)}")
+                                    continue
+                                except Exception as e:
+                                    # Log other parsing errors
+                                    print(f"Parsing error: {e}, event: {_sse.event}, data: {repr(_sse.data)}")
+                                    continue
+                                
                             return
 
                         return HttpResponse(response=_response, data=_iter())
