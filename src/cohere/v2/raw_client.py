@@ -3,6 +3,7 @@
 import contextlib
 from dataclasses import asdict
 import json
+import logging
 import typing
 from json.decoder import JSONDecodeError
 
@@ -44,6 +45,8 @@ from .types.v2chat_stream_request_tool_choice import V2ChatStreamRequestToolChoi
 from .types.v2chat_stream_response import V2ChatStreamResponse
 from .types.v2embed_request_truncate import V2EmbedRequestTruncate
 from .types.v2rerank_response import V2RerankResponse
+
+logger = logging.getLogger(__name__)
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -236,11 +239,17 @@ class RawV2Client:
                                         ),
                                     )
                                 except json.JSONDecodeError as e:
-                                    print(f"JSON decode error: {e}, data: {repr(_sse.data)}")
-                                    continue
+                                    logger.warning(
+                                        f"Skipping SSE event with invalid JSON: {e}, sse: {_sse!r}"
+                                    )
+                                except (TypeError, ValueError, KeyError, AttributeError) as e:
+                                    logger.warning(
+                                        f"Skipping SSE event due to model construction error: {type(e).__name__}: {e}, sse: {_sse!r}"
+                                    )
                                 except Exception as e:
-                                    print(f"Parsing error: {e}, event: {_sse.event}, data: {repr(_sse.data)}")
-                                    continue
+                                    logger.error(
+                                        f"Unexpected error processing SSE event: {type(e).__name__}: {e}, sse: {_sse!r}"
+                                    )
                                 
                             return
 
@@ -1327,29 +1336,25 @@ class AsyncRawV2Client:
                             _event_source = EventSource(_response)
                             async for _sse in _event_source.aiter_sse():
                                 try:
-                                    # Skip empty events
-                                    if not _sse.data or _sse.data.strip() == "":
-                                        continue
-                                        
-                                    # Handle [DONE] token from OpenAI-style APIs
-                                    if _sse.data.strip() == '[DONE]':
-                                        continue
-                                        
-                                    parsed_data = json.loads(_sse.data)
-
                                     yield typing.cast(
                                         V2ChatStreamResponse,
                                         construct_type(
                                             type_=V2ChatStreamResponse,  # type: ignore
-                                            object_=parsed_data,
+                                            object_=_sse.json(),
                                         ),
                                     )
                                 except json.JSONDecodeError as e:
-                                    print(f"JSON decode error: {e}, data: {repr(_sse.data)}")
-                                    continue
+                                    logger.warning(
+                                        f"Skipping SSE event with invalid JSON: {e}, sse: {_sse!r}"
+                                    )
+                                except (TypeError, ValueError, KeyError, AttributeError) as e:
+                                    logger.warning(
+                                        f"Skipping SSE event due to model construction error: {type(e).__name__}: {e}, sse: {_sse!r}"
+                                    )
                                 except Exception as e:
-                                    print(f"Parsing error: {e}, event: {_sse.event}, data: {repr(_sse.data)}")
-                                    continue
+                                    logger.error(
+                                        f"Unexpected error processing SSE event: {type(e).__name__}: {e}, sse: {_sse!r}"
+                                    )
                                 
                             return
 

@@ -3,7 +3,7 @@ import json
 from typing import Any, Optional
 
 
-@dataclass
+@dataclass(frozen=True)
 class ServerSentEvent:
     event: str = "message"
     data: str = ""
