@@ -40,6 +40,8 @@ class EventSource:
                 line, buffer = buffer.split('\n', 1)
                 line = line.rstrip('\r')
                 sse = decoder.decode(line)
+                # when we reach a "\n\n" => line = '' 
+                # => decoder will attempt to return an SSE Event
                 if sse is not None:
                     yield sse
         
