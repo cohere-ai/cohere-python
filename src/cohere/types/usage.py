@@ -5,13 +5,13 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
 from ..core.unchecked_base_model import UncheckedBaseModel
-from .usage_billed_units import UsageBilledUnits
-from .usage_tokens import UsageTokens
 
 
 class Usage(UncheckedBaseModel):
-    billed_units: typing.Optional[UsageBilledUnits] = None
-    tokens: typing.Optional[UsageTokens] = None
+    cached_tokens: typing.Optional[float] = pydantic.Field(default=None)
+    """
+    The number of prompt tokens that hit the inference cache.
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2

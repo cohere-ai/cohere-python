@@ -2,4 +2,4 @@
 
 import typing
 
-CitationOptionsMode = typing.Union[typing.Literal["FAST", "ACCURATE", "OFF"], typing.Any]
+CitationOptionsMode = typing.Union[typing.Literal["ENABLED", "DISABLED", "FAST", "ACCURATE", "OFF"], typing.Any]
