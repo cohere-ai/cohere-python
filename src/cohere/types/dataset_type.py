@@ -12,6 +12,10 @@ DatasetType = typing.Union[
         "single-label-classification-finetune-input",
         "chat-finetune-input",
         "multi-label-classification-finetune-input",
+        "batch-chat-input",
+        "batch-openai-chat-input",
+        "batch-embed-v2-input",
+        "batch-chat-v2-input",
     ],
     typing.Any,
 ]

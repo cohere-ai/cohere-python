@@ -210,7 +210,7 @@ class RawModelsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ListModelsResponse]:
         """
-        Returns a list of models available for use. The list contains models from Cohere as well as your fine-tuned models.
+        Returns a list of models available for use.
 
         Parameters
         ----------
@@ -578,7 +578,7 @@ class AsyncRawModelsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ListModelsResponse]:
         """
-        Returns a list of models available for use. The list contains models from Cohere as well as your fine-tuned models.
+        Returns a list of models available for use.
 
         Parameters
         ----------

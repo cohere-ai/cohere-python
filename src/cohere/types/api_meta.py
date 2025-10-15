@@ -14,6 +14,11 @@ class ApiMeta(UncheckedBaseModel):
     api_version: typing.Optional[ApiMetaApiVersion] = None
     billed_units: typing.Optional[ApiMetaBilledUnits] = None
     tokens: typing.Optional[ApiMetaTokens] = None
+    cached_tokens: typing.Optional[float] = pydantic.Field(default=None)
+    """
+    The number of prompt tokens that hit the inference cache.
+    """
+
     warnings: typing.Optional[typing.List[str]] = None
 
     if IS_PYDANTIC_V2:

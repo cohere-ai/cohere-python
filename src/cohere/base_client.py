@@ -268,9 +268,8 @@ class BaseCohere:
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
         citation_quality : typing.Optional[ChatStreamRequestCitationQuality]
-            Defaults to `"accurate"`.
-
-            Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+            Defaults to `"enabled"`.
+            Citations are enabled by default for models that support it, but can be turned off by setting `"type": "disabled"`.
 
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
@@ -406,7 +405,8 @@ class BaseCohere:
             token="YOUR_TOKEN",
         )
         response = client.chat_stream(
-            message="hello world!",
+            model="command-a-03-2025",
+            message="hello!",
         )
         for chunk in response:
             yield chunk
@@ -568,9 +568,8 @@ class BaseCohere:
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
         citation_quality : typing.Optional[ChatRequestCitationQuality]
-            Defaults to `"accurate"`.
-
-            Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+            Defaults to `"enabled"`.
+            Citations are enabled by default for models that support it, but can be turned off by setting `"type": "disabled"`.
 
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
@@ -699,27 +698,15 @@ class BaseCohere:
 
         Examples
         --------
-        from cohere import ChatbotMessage, ChatConnector, Client, UserMessage
+        from cohere import Client
 
         client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
         client.chat(
-            chat_history=[
-                UserMessage(
-                    message="Who discovered gravity?",
-                ),
-                ChatbotMessage(
-                    message="The man who is widely credited with discovering gravity is Sir Isaac Newton",
-                ),
-            ],
-            message="What year was he born?",
-            connectors=[
-                ChatConnector(
-                    id="web-search",
-                )
-            ],
+            model="command-a-03-2025",
+            message="Tell me about LLMs",
         )
         """
         _response = self._raw_client.chat(
@@ -1073,7 +1060,7 @@ class BaseCohere:
         images : typing.Optional[typing.Sequence[str]]
             An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
 
-            The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
+            The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg`, `image/png`, `image/webp`, or `image/gif` format and has a maximum size of 5MB.
 
             Images are only supported with Embed v3.0 and newer models.
 
@@ -1724,9 +1711,8 @@ class AsyncBaseCohere:
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
         citation_quality : typing.Optional[ChatStreamRequestCitationQuality]
-            Defaults to `"accurate"`.
-
-            Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+            Defaults to `"enabled"`.
+            Citations are enabled by default for models that support it, but can be turned off by setting `"type": "disabled"`.
 
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
@@ -1867,7 +1853,8 @@ class AsyncBaseCohere:
 
         async def main() -> None:
             response = await client.chat_stream(
-                message="hello world!",
+                model="command-a-03-2025",
+                message="hello!",
             )
             async for chunk in response:
                 yield chunk
@@ -2033,9 +2020,8 @@ class AsyncBaseCohere:
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
         citation_quality : typing.Optional[ChatRequestCitationQuality]
-            Defaults to `"accurate"`.
-
-            Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+            Defaults to `"enabled"`.
+            Citations are enabled by default for models that support it, but can be turned off by setting `"type": "disabled"`.
 
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
@@ -2166,7 +2152,7 @@ class AsyncBaseCohere:
         --------
         import asyncio
 
-        from cohere import AsyncClient, ChatbotMessage, ChatConnector, UserMessage
+        from cohere import AsyncClient
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
@@ -2176,20 +2162,8 @@ class AsyncBaseCohere:
 
         async def main() -> None:
             await client.chat(
-                chat_history=[
-                    UserMessage(
-                        message="Who discovered gravity?",
-                    ),
-                    ChatbotMessage(
-                        message="The man who is widely credited with discovering gravity is Sir Isaac Newton",
-                    ),
-                ],
-                message="What year was he born?",
-                connectors=[
-                    ChatConnector(
-                        id="web-search",
-                    )
-                ],
+                model="command-a-03-2025",
+                message="Tell me about LLMs",
             )
 
 
@@ -2563,7 +2537,7 @@ class AsyncBaseCohere:
         images : typing.Optional[typing.Sequence[str]]
             An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
 
-            The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
+            The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg`, `image/png`, `image/webp`, or `image/gif` format and has a maximum size of 5MB.
 
             Images are only supported with Embed v3.0 and newer models.
 
