@@ -3,14 +3,19 @@
 import typing
 
 import pydantic
-from ..core.pydantic_utilities import IS_PYDANTIC_V2
-from ..core.unchecked_base_model import UncheckedBaseModel
+from ...core.pydantic_utilities import IS_PYDANTIC_V2
+from ...core.unchecked_base_model import UncheckedBaseModel
+from .batch import Batch
 
 
-class Usage(UncheckedBaseModel):
-    cached_tokens: typing.Optional[float] = pydantic.Field(default=None)
+class GetBatchResponse(UncheckedBaseModel):
     """
-    The number of prompt tokens that hit the inference cache.
+    Response to a request to get a batch.
+    """
+
+    batch: Batch = pydantic.Field()
+    """
+    Information about the batch.
     """
 
     if IS_PYDANTIC_V2:

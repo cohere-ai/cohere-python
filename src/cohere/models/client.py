@@ -66,7 +66,7 @@ class ModelsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListModelsResponse:
         """
-        Returns a list of models available for use. The list contains models from Cohere as well as your fine-tuned models.
+        Returns a list of models available for use.
 
         Parameters
         ----------
@@ -175,7 +175,7 @@ class AsyncModelsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListModelsResponse:
         """
-        Returns a list of models available for use. The list contains models from Cohere as well as your fine-tuned models.
+        Returns a list of models available for use.
 
         Parameters
         ----------
