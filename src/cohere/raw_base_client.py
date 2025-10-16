@@ -196,9 +196,8 @@ class RawBaseCohere:
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
         citation_quality : typing.Optional[ChatStreamRequestCitationQuality]
-            Defaults to `"accurate"`.
-
-            Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+            Defaults to `"enabled"`.
+            Citations are enabled by default for models that support it, but can be turned off by setting `"type": "disabled"`.
 
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
@@ -663,9 +662,8 @@ class RawBaseCohere:
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
         citation_quality : typing.Optional[ChatRequestCitationQuality]
-            Defaults to `"accurate"`.
-
-            Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+            Defaults to `"enabled"`.
+            Citations are enabled by default for models that support it, but can be turned off by setting `"type": "disabled"`.
 
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
@@ -1607,7 +1605,7 @@ class RawBaseCohere:
         images : typing.Optional[typing.Sequence[str]]
             An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
 
-            The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
+            The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg`, `image/png`, `image/webp`, or `image/gif` format and has a maximum size of 5MB.
 
             Images are only supported with Embed v3.0 and newer models.
 
@@ -3111,9 +3109,8 @@ class AsyncRawBaseCohere:
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
         citation_quality : typing.Optional[ChatStreamRequestCitationQuality]
-            Defaults to `"accurate"`.
-
-            Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+            Defaults to `"enabled"`.
+            Citations are enabled by default for models that support it, but can be turned off by setting `"type": "disabled"`.
 
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
@@ -3578,9 +3575,8 @@ class AsyncRawBaseCohere:
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
         citation_quality : typing.Optional[ChatRequestCitationQuality]
-            Defaults to `"accurate"`.
-
-            Dictates the approach taken to generating citations as part of the RAG flow by allowing the user to specify whether they want `"accurate"` results, `"fast"` results or no results.
+            Defaults to `"enabled"`.
+            Citations are enabled by default for models that support it, but can be turned off by setting `"type": "disabled"`.
 
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
@@ -4522,7 +4518,7 @@ class AsyncRawBaseCohere:
         images : typing.Optional[typing.Sequence[str]]
             An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
 
-            The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
+            The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg`, `image/png`, `image/webp`, or `image/gif` format and has a maximum size of 5MB.
 
             Images are only supported with Embed v3.0 and newer models.
 
