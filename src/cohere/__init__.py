@@ -251,7 +251,7 @@ from .errors import (
     UnauthorizedError,
     UnprocessableEntityError,
 )
-from . import connectors, datasets, embed_jobs, finetuning, models, v2
+from . import batches, connectors, datasets, embed_jobs, finetuning, models, v2
 from .aliases import (
     ChatResponse,
     ContentDeltaStreamedChatResponseV2,
@@ -265,6 +265,7 @@ from .aliases import (
     ToolCallStartStreamedChatResponseV2,
 )
 from .aws_client import AwsClient
+from .batches import Batch, BatchStatus, CancelBatchResponse, CreateBatchResponse, GetBatchResponse, ListBatchesResponse
 from .bedrock_client import BedrockClient, BedrockClientV2
 from .client import AsyncClient, Client
 from .client_v2 import AsyncClientV2, ClientV2
@@ -315,8 +316,11 @@ __all__ = [
     "AuthTokenType",
     "AwsClient",
     "BadRequestError",
+    "Batch",
+    "BatchStatus",
     "BedrockClient",
     "BedrockClientV2",
+    "CancelBatchResponse",
     "ChatCitation",
     "ChatCitationGenerationEvent",
     "ChatCitationType",
@@ -417,6 +421,7 @@ __all__ = [
     "ContentEndV2ChatStreamResponse",
     "ContentStartStreamedChatResponseV2",
     "ContentStartV2ChatStreamResponse",
+    "CreateBatchResponse",
     "CreateConnectorOAuth",
     "CreateConnectorResponse",
     "CreateConnectorServiceAuth",
@@ -470,6 +475,7 @@ __all__ = [
     "GenerateStreamText",
     "GenerateStreamedResponse",
     "Generation",
+    "GetBatchResponse",
     "GetConnectorResponse",
     "GetModelResponse",
     "Image",
@@ -485,6 +491,7 @@ __all__ = [
     "JsonResponseFormat",
     "JsonResponseFormatV2",
     "LabelMetric",
+    "ListBatchesResponse",
     "ListConnectorsResponse",
     "ListEmbedJobResponse",
     "ListModelsResponse",
@@ -594,6 +601,7 @@ __all__ = [
     "V2RerankResponse",
     "V2RerankResponseResultsItem",
     "__version__",
+    "batches",
     "connectors",
     "datasets",
     "embed_jobs",

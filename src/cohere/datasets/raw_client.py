@@ -265,7 +265,7 @@ class RawDatasetsClient:
             The name of the uploaded dataset.
 
         type : DatasetType
-            The dataset type, which is used to validate the data. Valid types are `embed-input`, `reranker-finetune-input`, `single-label-classification-finetune-input`, `chat-finetune-input`, and `multi-label-classification-finetune-input`.
+            The dataset type, which is used to validate the data. The only valid type is `embed-input` used in conjunction with the Embed Jobs API.
 
         data : core.File
             See core.File for more documentation
@@ -1207,7 +1207,7 @@ class AsyncRawDatasetsClient:
             The name of the uploaded dataset.
 
         type : DatasetType
-            The dataset type, which is used to validate the data. Valid types are `embed-input`, `reranker-finetune-input`, `single-label-classification-finetune-input`, `chat-finetune-input`, and `multi-label-classification-finetune-input`.
+            The dataset type, which is used to validate the data. The only valid type is `embed-input` used in conjunction with the Embed Jobs API.
 
         data : core.File
             See core.File for more documentation
