@@ -118,9 +118,24 @@ class BaseCohere:
             token=token,
             httpx_client=httpx_client
             if httpx_client is not None
-            else httpx.Client(timeout=_defaulted_timeout, follow_redirects=follow_redirects)
+            else httpx.Client(
+                timeout=_defaulted_timeout,
+                follow_redirects=follow_redirects,
+                limits=httpx.Limits(
+                    max_keepalive_connections=20,
+                    max_connections=100,
+                    keepalive_expiry=30.0
+                )
+            )
             if follow_redirects is not None
-            else httpx.Client(timeout=_defaulted_timeout),
+            else httpx.Client(
+                timeout=_defaulted_timeout,
+                limits=httpx.Limits(
+                    max_keepalive_connections=20,
+                    max_connections=100,
+                    keepalive_expiry=30.0
+                )
+            ),
             timeout=_defaulted_timeout,
         )
         self._raw_client = RawBaseCohere(client_wrapper=self._client_wrapper)
@@ -1562,9 +1577,24 @@ class AsyncBaseCohere:
             token=token,
             httpx_client=httpx_client
             if httpx_client is not None
-            else httpx.AsyncClient(timeout=_defaulted_timeout, follow_redirects=follow_redirects)
+            else httpx.AsyncClient(
+                timeout=_defaulted_timeout,
+                follow_redirects=follow_redirects,
+                limits=httpx.Limits(
+                    max_keepalive_connections=20,
+                    max_connections=100,
+                    keepalive_expiry=30.0
+                )
+            )
             if follow_redirects is not None
-            else httpx.AsyncClient(timeout=_defaulted_timeout),
+            else httpx.AsyncClient(
+                timeout=_defaulted_timeout,
+                limits=httpx.Limits(
+                    max_keepalive_connections=20,
+                    max_connections=100,
+                    keepalive_expiry=30.0
+                )
+            ),
             timeout=_defaulted_timeout,
         )
         self._raw_client = AsyncRawBaseCohere(client_wrapper=self._client_wrapper)
