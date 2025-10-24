@@ -66,6 +66,7 @@ class V2Client:
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatStreamRequestToolChoice] = OMIT,
         thinking: typing.Optional[Thinking] = OMIT,
+        priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[V2ChatStreamResponse]:
         """
@@ -158,6 +159,10 @@ class V2Client:
 
         thinking : typing.Optional[Thinking]
 
+        priority : typing.Optional[int]
+            The priority of the request (lower means earlier handling; default 0 highest priority).
+            Higher priority requests are handled first, and dropped last when the system is under load.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -205,6 +210,7 @@ class V2Client:
             logprobs=logprobs,
             tool_choice=tool_choice,
             thinking=thinking,
+            priority=priority,
             request_options=request_options,
         ) as r:
             yield from r.data
@@ -231,6 +237,7 @@ class V2Client:
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatRequestToolChoice] = OMIT,
         thinking: typing.Optional[Thinking] = OMIT,
+        priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> V2ChatResponse:
         """
@@ -323,6 +330,10 @@ class V2Client:
 
         thinking : typing.Optional[Thinking]
 
+        priority : typing.Optional[int]
+            The priority of the request (lower means earlier handling; default 0 highest priority).
+            Higher priority requests are handled first, and dropped last when the system is under load.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -368,6 +379,7 @@ class V2Client:
             logprobs=logprobs,
             tool_choice=tool_choice,
             thinking=thinking,
+            priority=priority,
             request_options=request_options,
         )
         return _response.data
@@ -384,6 +396,7 @@ class V2Client:
         output_dimension: typing.Optional[int] = OMIT,
         embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
         truncate: typing.Optional[V2EmbedRequestTruncate] = OMIT,
+        priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> EmbedByTypeResponse:
         """
@@ -437,6 +450,10 @@ class V2Client:
 
             If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
 
+        priority : typing.Optional[int]
+            The priority of the request (lower means earlier handling; default 0 highest priority).
+            Higher priority requests are handled first, and dropped last when the system is under load.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -470,6 +487,7 @@ class V2Client:
             output_dimension=output_dimension,
             embedding_types=embedding_types,
             truncate=truncate,
+            priority=priority,
             request_options=request_options,
         )
         return _response.data
@@ -482,6 +500,7 @@ class V2Client:
         documents: typing.Sequence[str],
         top_n: typing.Optional[int] = OMIT,
         max_tokens_per_doc: typing.Optional[int] = OMIT,
+        priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> V2RerankResponse:
         """
@@ -508,6 +527,10 @@ class V2Client:
 
         max_tokens_per_doc : typing.Optional[int]
             Defaults to `4096`. Long documents will be automatically truncated to the specified number of tokens.
+
+        priority : typing.Optional[int]
+            The priority of the request (lower means earlier handling; default 0 highest priority).
+            Higher priority requests are handled first, and dropped last when the system is under load.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -544,6 +567,7 @@ class V2Client:
             documents=documents,
             top_n=top_n,
             max_tokens_per_doc=max_tokens_per_doc,
+            priority=priority,
             request_options=request_options,
         )
         return _response.data
@@ -586,6 +610,7 @@ class AsyncV2Client:
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatStreamRequestToolChoice] = OMIT,
         thinking: typing.Optional[Thinking] = OMIT,
+        priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[V2ChatStreamResponse]:
         """
@@ -678,6 +703,10 @@ class AsyncV2Client:
 
         thinking : typing.Optional[Thinking]
 
+        priority : typing.Optional[int]
+            The priority of the request (lower means earlier handling; default 0 highest priority).
+            Higher priority requests are handled first, and dropped last when the system is under load.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -733,6 +762,7 @@ class AsyncV2Client:
             logprobs=logprobs,
             tool_choice=tool_choice,
             thinking=thinking,
+            priority=priority,
             request_options=request_options,
         ) as r:
             async for _chunk in r.data:
@@ -760,6 +790,7 @@ class AsyncV2Client:
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatRequestToolChoice] = OMIT,
         thinking: typing.Optional[Thinking] = OMIT,
+        priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> V2ChatResponse:
         """
@@ -852,6 +883,10 @@ class AsyncV2Client:
 
         thinking : typing.Optional[Thinking]
 
+        priority : typing.Optional[int]
+            The priority of the request (lower means earlier handling; default 0 highest priority).
+            Higher priority requests are handled first, and dropped last when the system is under load.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -905,6 +940,7 @@ class AsyncV2Client:
             logprobs=logprobs,
             tool_choice=tool_choice,
             thinking=thinking,
+            priority=priority,
             request_options=request_options,
         )
         return _response.data
@@ -921,6 +957,7 @@ class AsyncV2Client:
         output_dimension: typing.Optional[int] = OMIT,
         embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
         truncate: typing.Optional[V2EmbedRequestTruncate] = OMIT,
+        priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> EmbedByTypeResponse:
         """
@@ -974,6 +1011,10 @@ class AsyncV2Client:
 
             If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
 
+        priority : typing.Optional[int]
+            The priority of the request (lower means earlier handling; default 0 highest priority).
+            Higher priority requests are handled first, and dropped last when the system is under load.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -1015,6 +1056,7 @@ class AsyncV2Client:
             output_dimension=output_dimension,
             embedding_types=embedding_types,
             truncate=truncate,
+            priority=priority,
             request_options=request_options,
         )
         return _response.data
@@ -1027,6 +1069,7 @@ class AsyncV2Client:
         documents: typing.Sequence[str],
         top_n: typing.Optional[int] = OMIT,
         max_tokens_per_doc: typing.Optional[int] = OMIT,
+        priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> V2RerankResponse:
         """
@@ -1053,6 +1096,10 @@ class AsyncV2Client:
 
         max_tokens_per_doc : typing.Optional[int]
             Defaults to `4096`. Long documents will be automatically truncated to the specified number of tokens.
+
+        priority : typing.Optional[int]
+            The priority of the request (lower means earlier handling; default 0 highest priority).
+            Higher priority requests are handled first, and dropped last when the system is under load.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1097,6 +1144,7 @@ class AsyncV2Client:
             documents=documents,
             top_n=top_n,
             max_tokens_per_doc=max_tokens_per_doc,
+            priority=priority,
             request_options=request_options,
         )
         return _response.data

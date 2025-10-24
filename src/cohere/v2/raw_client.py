@@ -75,6 +75,7 @@ class RawV2Client:
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatStreamRequestToolChoice] = OMIT,
         thinking: typing.Optional[Thinking] = OMIT,
+        priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[HttpResponse[typing.Iterator[V2ChatStreamResponse]]]:
         """
@@ -167,6 +168,10 @@ class RawV2Client:
 
         thinking : typing.Optional[Thinking]
 
+        priority : typing.Optional[int]
+            The priority of the request (lower means earlier handling; default 0 highest priority).
+            Higher priority requests are handled first, and dropped last when the system is under load.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -210,6 +215,7 @@ class RawV2Client:
                 "thinking": convert_and_respect_annotation_metadata(
                     object_=thinking, annotation=Thinking, direction="write"
                 ),
+                "priority": priority,
                 "stream": True,
             },
             headers={
@@ -405,6 +411,7 @@ class RawV2Client:
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatRequestToolChoice] = OMIT,
         thinking: typing.Optional[Thinking] = OMIT,
+        priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[V2ChatResponse]:
         """
@@ -497,6 +504,10 @@ class RawV2Client:
 
         thinking : typing.Optional[Thinking]
 
+        priority : typing.Optional[int]
+            The priority of the request (lower means earlier handling; default 0 highest priority).
+            Higher priority requests are handled first, and dropped last when the system is under load.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -540,6 +551,7 @@ class RawV2Client:
                 "thinking": convert_and_respect_annotation_metadata(
                     object_=thinking, annotation=Thinking, direction="write"
                 ),
+                "priority": priority,
                 "stream": False,
             },
             headers={
@@ -707,6 +719,7 @@ class RawV2Client:
         output_dimension: typing.Optional[int] = OMIT,
         embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
         truncate: typing.Optional[V2EmbedRequestTruncate] = OMIT,
+        priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[EmbedByTypeResponse]:
         """
@@ -760,6 +773,10 @@ class RawV2Client:
 
             If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
 
+        priority : typing.Optional[int]
+            The priority of the request (lower means earlier handling; default 0 highest priority).
+            Higher priority requests are handled first, and dropped last when the system is under load.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -783,6 +800,7 @@ class RawV2Client:
                 "output_dimension": output_dimension,
                 "embedding_types": embedding_types,
                 "truncate": truncate,
+                "priority": priority,
             },
             headers={
                 "content-type": "application/json",
@@ -945,6 +963,7 @@ class RawV2Client:
         documents: typing.Sequence[str],
         top_n: typing.Optional[int] = OMIT,
         max_tokens_per_doc: typing.Optional[int] = OMIT,
+        priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[V2RerankResponse]:
         """
@@ -972,6 +991,10 @@ class RawV2Client:
         max_tokens_per_doc : typing.Optional[int]
             Defaults to `4096`. Long documents will be automatically truncated to the specified number of tokens.
 
+        priority : typing.Optional[int]
+            The priority of the request (lower means earlier handling; default 0 highest priority).
+            Higher priority requests are handled first, and dropped last when the system is under load.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -989,6 +1012,7 @@ class RawV2Client:
                 "documents": documents,
                 "top_n": top_n,
                 "max_tokens_per_doc": max_tokens_per_doc,
+                "priority": priority,
             },
             headers={
                 "content-type": "application/json",
@@ -1171,6 +1195,7 @@ class AsyncRawV2Client:
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatStreamRequestToolChoice] = OMIT,
         thinking: typing.Optional[Thinking] = OMIT,
+        priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[AsyncHttpResponse[typing.AsyncIterator[V2ChatStreamResponse]]]:
         """
@@ -1263,6 +1288,10 @@ class AsyncRawV2Client:
 
         thinking : typing.Optional[Thinking]
 
+        priority : typing.Optional[int]
+            The priority of the request (lower means earlier handling; default 0 highest priority).
+            Higher priority requests are handled first, and dropped last when the system is under load.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -1306,6 +1335,7 @@ class AsyncRawV2Client:
                 "thinking": convert_and_respect_annotation_metadata(
                     object_=thinking, annotation=Thinking, direction="write"
                 ),
+                "priority": priority,
                 "stream": True,
             },
             headers={
@@ -1501,6 +1531,7 @@ class AsyncRawV2Client:
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatRequestToolChoice] = OMIT,
         thinking: typing.Optional[Thinking] = OMIT,
+        priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[V2ChatResponse]:
         """
@@ -1593,6 +1624,10 @@ class AsyncRawV2Client:
 
         thinking : typing.Optional[Thinking]
 
+        priority : typing.Optional[int]
+            The priority of the request (lower means earlier handling; default 0 highest priority).
+            Higher priority requests are handled first, and dropped last when the system is under load.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -1636,6 +1671,7 @@ class AsyncRawV2Client:
                 "thinking": convert_and_respect_annotation_metadata(
                     object_=thinking, annotation=Thinking, direction="write"
                 ),
+                "priority": priority,
                 "stream": False,
             },
             headers={
@@ -1803,6 +1839,7 @@ class AsyncRawV2Client:
         output_dimension: typing.Optional[int] = OMIT,
         embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
         truncate: typing.Optional[V2EmbedRequestTruncate] = OMIT,
+        priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[EmbedByTypeResponse]:
         """
@@ -1856,6 +1893,10 @@ class AsyncRawV2Client:
 
             If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
 
+        priority : typing.Optional[int]
+            The priority of the request (lower means earlier handling; default 0 highest priority).
+            Higher priority requests are handled first, and dropped last when the system is under load.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -1879,6 +1920,7 @@ class AsyncRawV2Client:
                 "output_dimension": output_dimension,
                 "embedding_types": embedding_types,
                 "truncate": truncate,
+                "priority": priority,
             },
             headers={
                 "content-type": "application/json",
@@ -2041,6 +2083,7 @@ class AsyncRawV2Client:
         documents: typing.Sequence[str],
         top_n: typing.Optional[int] = OMIT,
         max_tokens_per_doc: typing.Optional[int] = OMIT,
+        priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[V2RerankResponse]:
         """
@@ -2068,6 +2111,10 @@ class AsyncRawV2Client:
         max_tokens_per_doc : typing.Optional[int]
             Defaults to `4096`. Long documents will be automatically truncated to the specified number of tokens.
 
+        priority : typing.Optional[int]
+            The priority of the request (lower means earlier handling; default 0 highest priority).
+            Higher priority requests are handled first, and dropped last when the system is under load.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -2085,6 +2132,7 @@ class AsyncRawV2Client:
                 "documents": documents,
                 "top_n": top_n,
                 "max_tokens_per_doc": max_tokens_per_doc,
+                "priority": priority,
             },
             headers={
                 "content-type": "application/json",
