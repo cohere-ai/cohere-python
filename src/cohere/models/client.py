@@ -99,7 +99,12 @@ class ModelsClient:
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        client.models.list()
+        client.models.list(
+            page_size=1.1,
+            page_token="page_token",
+            endpoint="chat",
+            default_only=True,
+        )
         """
         _response = self._raw_client.list(
             page_size=page_size,
@@ -213,7 +218,12 @@ class AsyncModelsClient:
 
 
         async def main() -> None:
-            await client.models.list()
+            await client.models.list(
+                page_size=1.1,
+                page_token="page_token",
+                endpoint="chat",
+                default_only=True,
+            )
 
 
         asyncio.run(main())
