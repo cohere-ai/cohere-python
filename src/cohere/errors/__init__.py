@@ -2,18 +2,58 @@
 
 # isort: skip_file
 
-from .bad_request_error import BadRequestError
-from .client_closed_request_error import ClientClosedRequestError
-from .forbidden_error import ForbiddenError
-from .gateway_timeout_error import GatewayTimeoutError
-from .internal_server_error import InternalServerError
-from .invalid_token_error import InvalidTokenError
-from .not_found_error import NotFoundError
-from .not_implemented_error import NotImplementedError
-from .service_unavailable_error import ServiceUnavailableError
-from .too_many_requests_error import TooManyRequestsError
-from .unauthorized_error import UnauthorizedError
-from .unprocessable_entity_error import UnprocessableEntityError
+import typing
+from importlib import import_module
+
+if typing.TYPE_CHECKING:
+    from .bad_request_error import BadRequestError
+    from .client_closed_request_error import ClientClosedRequestError
+    from .forbidden_error import ForbiddenError
+    from .gateway_timeout_error import GatewayTimeoutError
+    from .internal_server_error import InternalServerError
+    from .invalid_token_error import InvalidTokenError
+    from .not_found_error import NotFoundError
+    from .not_implemented_error import NotImplementedError
+    from .service_unavailable_error import ServiceUnavailableError
+    from .too_many_requests_error import TooManyRequestsError
+    from .unauthorized_error import UnauthorizedError
+    from .unprocessable_entity_error import UnprocessableEntityError
+_dynamic_imports: typing.Dict[str, str] = {
+    "BadRequestError": ".bad_request_error",
+    "ClientClosedRequestError": ".client_closed_request_error",
+    "ForbiddenError": ".forbidden_error",
+    "GatewayTimeoutError": ".gateway_timeout_error",
+    "InternalServerError": ".internal_server_error",
+    "InvalidTokenError": ".invalid_token_error",
+    "NotFoundError": ".not_found_error",
+    "NotImplementedError": ".not_implemented_error",
+    "ServiceUnavailableError": ".service_unavailable_error",
+    "TooManyRequestsError": ".too_many_requests_error",
+    "UnauthorizedError": ".unauthorized_error",
+    "UnprocessableEntityError": ".unprocessable_entity_error",
+}
+
+
+def __getattr__(attr_name: str) -> typing.Any:
+    module_name = _dynamic_imports.get(attr_name)
+    if module_name is None:
+        raise AttributeError(f"No {attr_name} found in _dynamic_imports for module name -> {__name__}")
+    try:
+        module = import_module(module_name, __package__)
+        if module_name == f".{attr_name}":
+            return module
+        else:
+            return getattr(module, attr_name)
+    except ImportError as e:
+        raise ImportError(f"Failed to import {attr_name} from {module_name}: {e}") from e
+    except AttributeError as e:
+        raise AttributeError(f"Failed to get {attr_name} from {module_name}: {e}") from e
+
+
+def __dir__():
+    lazy_attrs = list(_dynamic_imports.keys())
+    return sorted(lazy_attrs)
+
 
 __all__ = [
     "BadRequestError",
