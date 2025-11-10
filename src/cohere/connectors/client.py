@@ -67,7 +67,10 @@ class ConnectorsClient:
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        client.connectors.list()
+        client.connectors.list(
+            limit=1.1,
+            offset=1.1,
+        )
         """
         _response = self._raw_client.list(limit=limit, offset=offset, request_options=request_options)
         return _response.data
@@ -321,6 +324,7 @@ class ConnectorsClient:
         )
         client.connectors.o_auth_authorize(
             id="id",
+            after_token_redirect="after_token_redirect",
         )
         """
         _response = self._raw_client.o_auth_authorize(
@@ -383,7 +387,10 @@ class AsyncConnectorsClient:
 
 
         async def main() -> None:
-            await client.connectors.list()
+            await client.connectors.list(
+                limit=1.1,
+                offset=1.1,
+            )
 
 
         asyncio.run(main())
@@ -679,6 +686,7 @@ class AsyncConnectorsClient:
         async def main() -> None:
             await client.connectors.o_auth_authorize(
                 id="id",
+                after_token_redirect="after_token_redirect",
             )
 
 

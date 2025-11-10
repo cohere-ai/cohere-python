@@ -124,12 +124,50 @@ class UncheckedBaseModel(UniversalBaseModel):
         return m
 
 
+def _validate_collection_items_compatible(collection: typing.Any, target_type: typing.Type[typing.Any]) -> bool:
+    """
+    Validate that all items in a collection are compatible with the target type.
+
+    Args:
+        collection: The collection to validate (list, set, or dict values)
+        target_type: The target type to validate against
+
+    Returns:
+        True if all items are compatible, False otherwise
+    """
+    if inspect.isclass(target_type) and issubclass(target_type, pydantic.BaseModel):
+        for item in collection:
+            try:
+                # Try to validate the item against the target type
+                if isinstance(item, dict):
+                    parse_obj_as(target_type, item)
+                else:
+                    # If it's not a dict, it might already be the right type
+                    if not isinstance(item, target_type):
+                        return False
+            except Exception:
+                return False
+    return True
+
+
 def _convert_undiscriminated_union_type(union_type: typing.Type[typing.Any], object_: typing.Any) -> typing.Any:
     inner_types = get_args(union_type)
     if typing.Any in inner_types:
         return object_
 
     for inner_type in inner_types:
+        # Handle lists of objects that need parsing
+        if get_origin(inner_type) is list and isinstance(object_, list):
+            list_inner_type = get_args(inner_type)[0]
+            try:
+                if inspect.isclass(list_inner_type) and issubclass(list_inner_type, pydantic.BaseModel):
+                    # Validate that all items in the list are compatible with the target type
+                    if _validate_collection_items_compatible(object_, list_inner_type):
+                        parsed_list = [parse_obj_as(object_=item, type_=list_inner_type) for item in object_]
+                        return parsed_list
+            except Exception:
+                pass
+
         try:
             if inspect.isclass(inner_type) and issubclass(inner_type, pydantic.BaseModel):
                 # Attempt a validated parse until one works
@@ -137,7 +175,42 @@ def _convert_undiscriminated_union_type(union_type: typing.Type[typing.Any], obj
         except Exception:
             continue
 
-    # If none of the types work, just return the first successful cast
+    # If none of the types work, try matching literal fields first, then fall back
+    # First pass: try types where all literal fields match the object's values
+    for inner_type in inner_types:
+        if inspect.isclass(inner_type) and issubclass(inner_type, pydantic.BaseModel):
+            fields = _get_model_fields(inner_type)
+            literal_fields_match = True
+
+            for field_name, field in fields.items():
+                # Check if this field has a Literal type
+                if IS_PYDANTIC_V2:
+                    field_type = field.annotation  # type: ignore # Pydantic v2
+                else:
+                    field_type = field.outer_type_  # type: ignore # Pydantic v1
+
+                if is_literal_type(field_type):  # type: ignore[arg-type]
+                    field_default = _get_field_default(field)
+                    name_or_alias = get_field_to_alias_mapping(inner_type).get(field_name, field_name)
+                    # Get the value from the object
+                    if isinstance(object_, dict):
+                        object_value = object_.get(name_or_alias)
+                    else:
+                        object_value = getattr(object_, name_or_alias, None)
+
+                    # If the literal field value doesn't match, this type is not a match
+                    if object_value is not None and field_default != object_value:
+                        literal_fields_match = False
+                        break
+
+            # If all literal fields match, try to construct this type
+            if literal_fields_match:
+                try:
+                    return construct_type(object_=object_, type_=inner_type)
+                except Exception:
+                    continue
+
+    # Second pass: if no literal matches, just return the first successful cast
     for inner_type in inner_types:
         try:
             return construct_type(object_=object_, type_=inner_type)
@@ -148,7 +221,7 @@ def _convert_undiscriminated_union_type(union_type: typing.Type[typing.Any], obj
 def _convert_union_type(type_: typing.Type[typing.Any], object_: typing.Any) -> typing.Any:
     base_type = get_origin(type_) or type_
     union_type = type_
-    if base_type == typing_extensions.Annotated:
+    if base_type == typing_extensions.Annotated:  # type: ignore[comparison-overlap]
         union_type = get_args(type_)[0]
         annotated_metadata = get_args(type_)[1:]
         for metadata in annotated_metadata:
@@ -179,11 +252,11 @@ def construct_type(*, type_: typing.Type[typing.Any], object_: typing.Any) -> ty
         return None
 
     base_type = get_origin(type_) or type_
-    is_annotated = base_type == typing_extensions.Annotated
+    is_annotated = base_type == typing_extensions.Annotated  # type: ignore[comparison-overlap]
     maybe_annotation_members = get_args(type_)
     is_annotated_union = is_annotated and is_union(get_origin(maybe_annotation_members[0]))
 
-    if base_type == typing.Any:
+    if base_type == typing.Any:  # type: ignore[comparison-overlap]
         return object_
 
     if base_type == dict:
