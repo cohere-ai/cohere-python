@@ -1,3 +1,7 @@
+# Import overrides early to ensure they're applied before types are used
+# This is necessary for backwards compatibility patches like ToolCallV2.id being optional
+from . import overrides  # noqa: F401
+
 from .v2 import (
     ContentDeltaV2ChatStreamResponse,
     ContentEndV2ChatStreamResponse,

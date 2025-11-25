@@ -1,0 +1,83 @@
+{
+  "cliVersion": "0.112.1",
+  "generatorName": "fernapi/fern-python-sdk",
+  "generatorVersion": "4.35.0",
+  "generatorConfig": {
+    "pyproject_python_version": "^3.9",
+    "inline_request_params": false,
+    "extra_dependencies": {
+      "fastavro": "^1.9.4",
+      "requests": "^2.0.0",
+      "types-requests": "^2.0.0",
+      "tokenizers": ">=0.15,<1",
+      "httpx-sse": "^0.4.0"
+    },
+    "improved_imports": true,
+    "pydantic_config": {
+      "frozen": false,
+      "union_naming": "v1",
+      "require_optional_fields": false,
+      "extra_fields": "allow",
+      "use_str_enums": true,
+      "skip_validation": true
+    },
+    "timeout_in_seconds": 300,
+    "client": {
+      "class_name": "BaseCohere",
+      "filename": "base_client.py",
+      "exported_class_name": "Client",
+      "exported_filename": "client.py"
+    },
+    "additional_init_exports": [
+      {
+        "from": "client",
+        "imports": [
+          "Client",
+          "AsyncClient"
+        ]
+      },
+      {
+        "from": "bedrock_client",
+        "imports": [
+          "BedrockClient",
+          "BedrockClientV2"
+        ]
+      },
+      {
+        "from": "sagemaker_client",
+        "imports": [
+          "SagemakerClient",
+          "SagemakerClientV2"
+        ]
+      },
+      {
+        "from": "aws_client",
+        "imports": [
+          "AwsClient"
+        ]
+      },
+      {
+        "from": "client_v2",
+        "imports": [
+          "AsyncClientV2",
+          "ClientV2"
+        ]
+      },
+      {
+        "from": "aliases",
+        "imports": [
+          "StreamedChatResponseV2",
+          "MessageStartStreamedChatResponseV2",
+          "MessageEndStreamedChatResponseV2",
+          "ContentStartStreamedChatResponseV2",
+          "ContentDeltaStreamedChatResponseV2",
+          "ContentEndStreamedChatResponseV2",
+          "ToolCallStartStreamedChatResponseV2",
+          "ToolCallDeltaStreamedChatResponseV2",
+          "ToolCallEndStreamedChatResponseV2",
+          "ChatResponse"
+        ]
+      }
+    ]
+  }
+}
