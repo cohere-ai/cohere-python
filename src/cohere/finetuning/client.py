@@ -79,7 +79,11 @@ class FinetuningClient:
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        client.finetuning.list_finetuned_models()
+        client.finetuning.list_finetuned_models(
+            page_size=1,
+            page_token="page_token",
+            order_by="order_by",
+        )
         """
         _response = self._raw_client.list_finetuned_models(
             page_size=page_size, page_token=page_token, order_by=order_by, request_options=request_options
@@ -308,6 +312,9 @@ class FinetuningClient:
         )
         client.finetuning.list_events(
             finetuned_model_id="finetuned_model_id",
+            page_size=1,
+            page_token="page_token",
+            order_by="order_by",
         )
         """
         _response = self._raw_client.list_events(
@@ -362,6 +369,8 @@ class FinetuningClient:
         )
         client.finetuning.list_training_step_metrics(
             finetuned_model_id="finetuned_model_id",
+            page_size=1,
+            page_token="page_token",
         )
         """
         _response = self._raw_client.list_training_step_metrics(
@@ -434,7 +443,11 @@ class AsyncFinetuningClient:
 
 
         async def main() -> None:
-            await client.finetuning.list_finetuned_models()
+            await client.finetuning.list_finetuned_models(
+                page_size=1,
+                page_token="page_token",
+                order_by="order_by",
+            )
 
 
         asyncio.run(main())
@@ -703,6 +716,9 @@ class AsyncFinetuningClient:
         async def main() -> None:
             await client.finetuning.list_events(
                 finetuned_model_id="finetuned_model_id",
+                page_size=1,
+                page_token="page_token",
+                order_by="order_by",
             )
 
 
@@ -765,6 +781,8 @@ class AsyncFinetuningClient:
         async def main() -> None:
             await client.finetuning.list_training_step_metrics(
                 finetuned_model_id="finetuned_model_id",
+                page_size=1,
+                page_token="page_token",
             )
 
 

@@ -5,9 +5,8 @@ from __future__ import annotations
 import typing
 
 import pydantic
-import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
-from ..core.unchecked_base_model import UncheckedBaseModel, UnionMetadata
+from ..core.unchecked_base_model import UncheckedBaseModel
 
 
 class TextSystemMessageV2ContentItem(UncheckedBaseModel):
@@ -23,6 +22,4 @@ class TextSystemMessageV2ContentItem(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-SystemMessageV2ContentItem = typing_extensions.Annotated[
-    TextSystemMessageV2ContentItem, UnionMetadata(discriminant="type")
-]
+SystemMessageV2ContentItem = TextSystemMessageV2ContentItem

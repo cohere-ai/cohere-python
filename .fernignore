@@ -11,6 +11,7 @@ src/cohere/utils.py
 src/cohere/overrides.py
 src/cohere/config.py
 src/cohere/manually_maintained
+src/cohere/manually_maintained/__init__.py
 src/cohere/bedrock_client.py
 src/cohere/aws_client.py
 src/cohere/sagemaker_client.py

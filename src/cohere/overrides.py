@@ -1,7 +1,8 @@
 import typing
+import uuid
 
 from . import EmbedByTypeResponseEmbeddings
-from .core.pydantic_utilities import _get_model_fields, Model
+from .core.pydantic_utilities import _get_model_fields, Model, IS_PYDANTIC_V2
 
 from pprint import pprint
 
@@ -33,6 +34,31 @@ def allow_access_to_aliases(self: typing.Type["Model"], name):
         f"'{type(self).__name__}' object has no attribute '{name}'")
 
 
+def make_tool_call_v2_id_optional(cls):
+    """
+    Override ToolCallV2 to make the 'id' field optional with a default UUID.
+    This ensures backward compatibility with code that doesn't provide an id.
+
+    We wrap the __init__ method to inject a default id before Pydantic validation runs.
+    """
+    # Store the original __init__ method
+    original_init = cls.__init__
+
+    def patched_init(self, /, **data):
+        """Patched __init__ that injects default id if not provided."""
+        # Inject default UUID if 'id' is not in the data
+        if 'id' not in data:
+            data['id'] = str(uuid.uuid4())
+
+        # Call the original __init__ with modified data
+        original_init(self, **data)
+
+    # Replace the __init__ method
+    cls.__init__ = patched_init
+
+    return cls
+
+
 def run_overrides():
     """
         These are overrides to allow us to make changes to generated code without touching the generated files themselves.
@@ -41,3 +67,14 @@ def run_overrides():
 
     # Override to allow access to aliases in EmbedByTypeResponseEmbeddings eg embeddings.float rather than embeddings.float_
     setattr(EmbedByTypeResponseEmbeddings, "__getattr__", allow_access_to_aliases)
+
+    # Import ToolCallV2 lazily to avoid circular dependency issues
+    from . import ToolCallV2
+
+    # Override ToolCallV2 to make id field optional with default UUID
+    make_tool_call_v2_id_optional(ToolCallV2)
+
+
+# Run overrides immediately at module import time to ensure they're applied
+# before any code tries to use the modified classes
+run_overrides()
