@@ -38,7 +38,6 @@ Repository = 'https://github.com/cohere-ai/cohere-python'
 python = "^3.9"
 fastavro = "^1.9.4"
 httpx = ">=0.21.2"
-httpx-sse = "^0.4.0"
 pydantic = ">= 1.9.2"
 pydantic-core = ">=2.18.2"
 requests = "^2.0.0"
