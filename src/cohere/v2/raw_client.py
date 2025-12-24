@@ -48,6 +48,17 @@ from .types.v2rerank_response import V2RerankResponse
 OMIT = typing.cast(typing.Any, ...)
 
 
+def _safe_json_parse(response: typing.Any) -> typing.Any:
+    """
+    Safely parse JSON from HTTP response.
+    Returns parsed JSON or response text if parsing fails.
+    """
+    try:
+        return response.json()
+    except JSONDecodeError:
+        return response.text
+
+
 class RawV2Client:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
@@ -262,7 +273,7 @@ class RawV2Client:
                                 typing.Optional[typing.Any],
                                 construct_type(
                                     type_=typing.Optional[typing.Any],  # type: ignore
-                                    object_=_response.json(),
+                                    object_=_safe_json_parse(_response),
                                 ),
                             ),
                         )
@@ -273,7 +284,7 @@ class RawV2Client:
                                 typing.Optional[typing.Any],
                                 construct_type(
                                     type_=typing.Optional[typing.Any],  # type: ignore
-                                    object_=_response.json(),
+                                    object_=_safe_json_parse(_response),
                                 ),
                             ),
                         )
@@ -284,7 +295,7 @@ class RawV2Client:
                                 typing.Optional[typing.Any],
                                 construct_type(
                                     type_=typing.Optional[typing.Any],  # type: ignore
-                                    object_=_response.json(),
+                                    object_=_safe_json_parse(_response),
                                 ),
                             ),
                         )
@@ -295,7 +306,7 @@ class RawV2Client:
                                 typing.Optional[typing.Any],
                                 construct_type(
                                     type_=typing.Optional[typing.Any],  # type: ignore
-                                    object_=_response.json(),
+                                    object_=_safe_json_parse(_response),
                                 ),
                             ),
                         )
@@ -306,7 +317,7 @@ class RawV2Client:
                                 typing.Optional[typing.Any],
                                 construct_type(
                                     type_=typing.Optional[typing.Any],  # type: ignore
-                                    object_=_response.json(),
+                                    object_=_safe_json_parse(_response),
                                 ),
                             ),
                         )
@@ -317,7 +328,7 @@ class RawV2Client:
                                 typing.Optional[typing.Any],
                                 construct_type(
                                     type_=typing.Optional[typing.Any],  # type: ignore
-                                    object_=_response.json(),
+                                    object_=_safe_json_parse(_response),
                                 ),
                             ),
                         )
@@ -328,7 +339,7 @@ class RawV2Client:
                                 typing.Optional[typing.Any],
                                 construct_type(
                                     type_=typing.Optional[typing.Any],  # type: ignore
-                                    object_=_response.json(),
+                                    object_=_safe_json_parse(_response),
                                 ),
                             ),
                         )
@@ -339,7 +350,7 @@ class RawV2Client:
                                 typing.Optional[typing.Any],
                                 construct_type(
                                     type_=typing.Optional[typing.Any],  # type: ignore
-                                    object_=_response.json(),
+                                    object_=_safe_json_parse(_response),
                                 ),
                             ),
                         )
@@ -350,7 +361,7 @@ class RawV2Client:
                                 typing.Optional[typing.Any],
                                 construct_type(
                                     type_=typing.Optional[typing.Any],  # type: ignore
-                                    object_=_response.json(),
+                                    object_=_safe_json_parse(_response),
                                 ),
                             ),
                         )
@@ -361,7 +372,7 @@ class RawV2Client:
                                 typing.Optional[typing.Any],
                                 construct_type(
                                     type_=typing.Optional[typing.Any],  # type: ignore
-                                    object_=_response.json(),
+                                    object_=_safe_json_parse(_response),
                                 ),
                             ),
                         )
@@ -372,7 +383,7 @@ class RawV2Client:
                                 typing.Optional[typing.Any],
                                 construct_type(
                                     type_=typing.Optional[typing.Any],  # type: ignore
-                                    object_=_response.json(),
+                                    object_=_safe_json_parse(_response),
                                 ),
                             ),
                         )
@@ -383,11 +394,11 @@ class RawV2Client:
                                 typing.Optional[typing.Any],
                                 construct_type(
                                     type_=typing.Optional[typing.Any],  # type: ignore
-                                    object_=_response.json(),
+                                    object_=_safe_json_parse(_response),
                                 ),
                             ),
                         )
-                    _response_json = _response.json()
+                    _response_json = _safe_json_parse(_response)
                 except JSONDecodeError:
                     raise ApiError(
                         status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
@@ -572,7 +583,7 @@ class RawV2Client:
                     V2ChatResponse,
                     construct_type(
                         type_=V2ChatResponse,  # type: ignore
-                        object_=_response.json(),
+                        object_=_safe_json_parse(_response),
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
@@ -583,7 +594,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -594,7 +605,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -605,7 +616,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -616,7 +627,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -627,7 +638,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -638,7 +649,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -649,7 +660,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -660,7 +671,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -671,7 +682,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -682,7 +693,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -693,7 +704,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -704,11 +715,11 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
-            _response_json = _response.json()
+            _response_json = _safe_json_parse(_response)
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
@@ -819,7 +830,7 @@ class RawV2Client:
                     EmbedByTypeResponse,
                     construct_type(
                         type_=EmbedByTypeResponse,  # type: ignore
-                        object_=_response.json(),
+                        object_=_safe_json_parse(_response),
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
@@ -830,7 +841,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -841,7 +852,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -852,7 +863,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -863,7 +874,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -874,7 +885,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -885,7 +896,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -896,7 +907,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -907,7 +918,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -918,7 +929,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -929,7 +940,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -940,7 +951,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -951,11 +962,11 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
-            _response_json = _response.json()
+            _response_json = _safe_json_parse(_response)
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
@@ -1030,7 +1041,7 @@ class RawV2Client:
                     V2RerankResponse,
                     construct_type(
                         type_=V2RerankResponse,  # type: ignore
-                        object_=_response.json(),
+                        object_=_safe_json_parse(_response),
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
@@ -1041,7 +1052,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1052,7 +1063,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1063,7 +1074,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1074,7 +1085,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1085,7 +1096,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1096,7 +1107,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1107,7 +1118,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1118,7 +1129,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1129,7 +1140,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1140,7 +1151,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1151,7 +1162,7 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1162,11 +1173,11 @@ class RawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
-            _response_json = _response.json()
+            _response_json = _safe_json_parse(_response)
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
@@ -1386,7 +1397,7 @@ class AsyncRawV2Client:
                                 typing.Optional[typing.Any],
                                 construct_type(
                                     type_=typing.Optional[typing.Any],  # type: ignore
-                                    object_=_response.json(),
+                                    object_=_safe_json_parse(_response),
                                 ),
                             ),
                         )
@@ -1397,7 +1408,7 @@ class AsyncRawV2Client:
                                 typing.Optional[typing.Any],
                                 construct_type(
                                     type_=typing.Optional[typing.Any],  # type: ignore
-                                    object_=_response.json(),
+                                    object_=_safe_json_parse(_response),
                                 ),
                             ),
                         )
@@ -1408,7 +1419,7 @@ class AsyncRawV2Client:
                                 typing.Optional[typing.Any],
                                 construct_type(
                                     type_=typing.Optional[typing.Any],  # type: ignore
-                                    object_=_response.json(),
+                                    object_=_safe_json_parse(_response),
                                 ),
                             ),
                         )
@@ -1419,7 +1430,7 @@ class AsyncRawV2Client:
                                 typing.Optional[typing.Any],
                                 construct_type(
                                     type_=typing.Optional[typing.Any],  # type: ignore
-                                    object_=_response.json(),
+                                    object_=_safe_json_parse(_response),
                                 ),
                             ),
                         )
@@ -1430,7 +1441,7 @@ class AsyncRawV2Client:
                                 typing.Optional[typing.Any],
                                 construct_type(
                                     type_=typing.Optional[typing.Any],  # type: ignore
-                                    object_=_response.json(),
+                                    object_=_safe_json_parse(_response),
                                 ),
                             ),
                         )
@@ -1441,7 +1452,7 @@ class AsyncRawV2Client:
                                 typing.Optional[typing.Any],
                                 construct_type(
                                     type_=typing.Optional[typing.Any],  # type: ignore
-                                    object_=_response.json(),
+                                    object_=_safe_json_parse(_response),
                                 ),
                             ),
                         )
@@ -1452,7 +1463,7 @@ class AsyncRawV2Client:
                                 typing.Optional[typing.Any],
                                 construct_type(
                                     type_=typing.Optional[typing.Any],  # type: ignore
-                                    object_=_response.json(),
+                                    object_=_safe_json_parse(_response),
                                 ),
                             ),
                         )
@@ -1463,7 +1474,7 @@ class AsyncRawV2Client:
                                 typing.Optional[typing.Any],
                                 construct_type(
                                     type_=typing.Optional[typing.Any],  # type: ignore
-                                    object_=_response.json(),
+                                    object_=_safe_json_parse(_response),
                                 ),
                             ),
                         )
@@ -1474,7 +1485,7 @@ class AsyncRawV2Client:
                                 typing.Optional[typing.Any],
                                 construct_type(
                                     type_=typing.Optional[typing.Any],  # type: ignore
-                                    object_=_response.json(),
+                                    object_=_safe_json_parse(_response),
                                 ),
                             ),
                         )
@@ -1485,7 +1496,7 @@ class AsyncRawV2Client:
                                 typing.Optional[typing.Any],
                                 construct_type(
                                     type_=typing.Optional[typing.Any],  # type: ignore
-                                    object_=_response.json(),
+                                    object_=_safe_json_parse(_response),
                                 ),
                             ),
                         )
@@ -1496,7 +1507,7 @@ class AsyncRawV2Client:
                                 typing.Optional[typing.Any],
                                 construct_type(
                                     type_=typing.Optional[typing.Any],  # type: ignore
-                                    object_=_response.json(),
+                                    object_=_safe_json_parse(_response),
                                 ),
                             ),
                         )
@@ -1507,11 +1518,11 @@ class AsyncRawV2Client:
                                 typing.Optional[typing.Any],
                                 construct_type(
                                     type_=typing.Optional[typing.Any],  # type: ignore
-                                    object_=_response.json(),
+                                    object_=_safe_json_parse(_response),
                                 ),
                             ),
                         )
-                    _response_json = _response.json()
+                    _response_json = _safe_json_parse(_response)
                 except JSONDecodeError:
                     raise ApiError(
                         status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
@@ -1696,7 +1707,7 @@ class AsyncRawV2Client:
                     V2ChatResponse,
                     construct_type(
                         type_=V2ChatResponse,  # type: ignore
-                        object_=_response.json(),
+                        object_=_safe_json_parse(_response),
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
@@ -1707,7 +1718,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1718,7 +1729,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1729,7 +1740,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1740,7 +1751,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1751,7 +1762,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1762,7 +1773,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1773,7 +1784,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1784,7 +1795,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1795,7 +1806,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1806,7 +1817,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1817,7 +1828,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1828,11 +1839,11 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
-            _response_json = _response.json()
+            _response_json = _safe_json_parse(_response)
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
@@ -1943,7 +1954,7 @@ class AsyncRawV2Client:
                     EmbedByTypeResponse,
                     construct_type(
                         type_=EmbedByTypeResponse,  # type: ignore
-                        object_=_response.json(),
+                        object_=_safe_json_parse(_response),
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
@@ -1954,7 +1965,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1965,7 +1976,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1976,7 +1987,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1987,7 +1998,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -1998,7 +2009,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -2009,7 +2020,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -2020,7 +2031,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -2031,7 +2042,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -2042,7 +2053,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -2053,7 +2064,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -2064,7 +2075,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -2075,11 +2086,11 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
-            _response_json = _response.json()
+            _response_json = _safe_json_parse(_response)
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
@@ -2154,7 +2165,7 @@ class AsyncRawV2Client:
                     V2RerankResponse,
                     construct_type(
                         type_=V2RerankResponse,  # type: ignore
-                        object_=_response.json(),
+                        object_=_safe_json_parse(_response),
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
@@ -2165,7 +2176,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -2176,7 +2187,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -2187,7 +2198,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -2198,7 +2209,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -2209,7 +2220,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -2220,7 +2231,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -2231,7 +2242,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -2242,7 +2253,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -2253,7 +2264,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -2264,7 +2275,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -2275,7 +2286,7 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
@@ -2286,11 +2297,11 @@ class AsyncRawV2Client:
                         typing.Optional[typing.Any],
                         construct_type(
                             type_=typing.Optional[typing.Any],  # type: ignore
-                            object_=_response.json(),
+                            object_=_safe_json_parse(_response),
                         ),
                     ),
                 )
-            _response_json = _response.json()
+            _response_json = _safe_json_parse(_response)
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
