@@ -219,3 +219,62 @@ class TestClient(unittest.TestCase):
                 warnings=resp.meta.warnings  # order ignored
             )
         ))
+
+    def test_image_tokens_field(self) -> None:
+        """Test that image_tokens field is properly handled in ApiMetaBilledUnits.
+
+        This is a regression test for issue #711 where the image_tokens field
+        was missing from the response model.
+        """
+        # Test that image_tokens can be set and accessed
+        billed_units = ApiMetaBilledUnits(
+            input_tokens=100,
+            image_tokens=2716
+        )
+        self.assertEqual(billed_units.image_tokens, 2716)
+        self.assertEqual(billed_units.input_tokens, 100)
+
+        # Test serialization includes image_tokens
+        dumped = billed_units.model_dump()
+        self.assertEqual(dumped["image_tokens"], 2716)
+
+    def test_merge_with_image_tokens(self) -> None:
+        """Test that image_tokens are properly merged across responses."""
+        ebt_with_images_1 = EmbeddingsByTypeEmbedResponse(
+            response_type="embeddings_by_type",
+            id="1",
+            embeddings=EmbedByTypeResponseEmbeddings(
+                float_=[[0, 1, 2]],
+            ),
+            texts=["hello"],
+            meta=ApiMeta(
+                api_version=ApiMetaApiVersion(version="1"),
+                billed_units=ApiMetaBilledUnits(
+                    input_tokens=1,
+                    image_tokens=100
+                ),
+            )
+        )
+
+        ebt_with_images_2 = EmbeddingsByTypeEmbedResponse(
+            response_type="embeddings_by_type",
+            id="2",
+            embeddings=EmbedByTypeResponseEmbeddings(
+                float_=[[3, 4, 5]],
+            ),
+            texts=["goodbye"],
+            meta=ApiMeta(
+                api_version=ApiMetaApiVersion(version="1"),
+                billed_units=ApiMetaBilledUnits(
+                    input_tokens=2,
+                    image_tokens=200
+                ),
+            )
+        )
+
+        resp = merge_embed_responses([ebt_with_images_1, ebt_with_images_2])
+
+        self.assertIsNotNone(resp.meta)
+        self.assertIsNotNone(resp.meta.billed_units)
+        self.assertEqual(resp.meta.billed_units.image_tokens, 300)
+        self.assertEqual(resp.meta.billed_units.input_tokens, 3)
