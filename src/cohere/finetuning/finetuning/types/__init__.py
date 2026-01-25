@@ -2,24 +2,70 @@
 
 # isort: skip_file
 
-from .base_model import BaseModel
-from .base_type import BaseType
-from .create_finetuned_model_response import CreateFinetunedModelResponse
-from .delete_finetuned_model_response import DeleteFinetunedModelResponse
-from .event import Event
-from .finetuned_model import FinetunedModel
-from .get_finetuned_model_response import GetFinetunedModelResponse
-from .hyperparameters import Hyperparameters
-from .list_events_response import ListEventsResponse
-from .list_finetuned_models_response import ListFinetunedModelsResponse
-from .list_training_step_metrics_response import ListTrainingStepMetricsResponse
-from .lora_target_modules import LoraTargetModules
-from .settings import Settings
-from .status import Status
-from .strategy import Strategy
-from .training_step_metrics import TrainingStepMetrics
-from .update_finetuned_model_response import UpdateFinetunedModelResponse
-from .wandb_config import WandbConfig
+import typing
+from importlib import import_module
+
+if typing.TYPE_CHECKING:
+    from .base_model import BaseModel
+    from .base_type import BaseType
+    from .create_finetuned_model_response import CreateFinetunedModelResponse
+    from .delete_finetuned_model_response import DeleteFinetunedModelResponse
+    from .event import Event
+    from .finetuned_model import FinetunedModel
+    from .get_finetuned_model_response import GetFinetunedModelResponse
+    from .hyperparameters import Hyperparameters
+    from .list_events_response import ListEventsResponse
+    from .list_finetuned_models_response import ListFinetunedModelsResponse
+    from .list_training_step_metrics_response import ListTrainingStepMetricsResponse
+    from .lora_target_modules import LoraTargetModules
+    from .settings import Settings
+    from .status import Status
+    from .strategy import Strategy
+    from .training_step_metrics import TrainingStepMetrics
+    from .update_finetuned_model_response import UpdateFinetunedModelResponse
+    from .wandb_config import WandbConfig
+_dynamic_imports: typing.Dict[str, str] = {
+    "BaseModel": ".base_model",
+    "BaseType": ".base_type",
+    "CreateFinetunedModelResponse": ".create_finetuned_model_response",
+    "DeleteFinetunedModelResponse": ".delete_finetuned_model_response",
+    "Event": ".event",
+    "FinetunedModel": ".finetuned_model",
+    "GetFinetunedModelResponse": ".get_finetuned_model_response",
+    "Hyperparameters": ".hyperparameters",
+    "ListEventsResponse": ".list_events_response",
+    "ListFinetunedModelsResponse": ".list_finetuned_models_response",
+    "ListTrainingStepMetricsResponse": ".list_training_step_metrics_response",
+    "LoraTargetModules": ".lora_target_modules",
+    "Settings": ".settings",
+    "Status": ".status",
+    "Strategy": ".strategy",
+    "TrainingStepMetrics": ".training_step_metrics",
+    "UpdateFinetunedModelResponse": ".update_finetuned_model_response",
+    "WandbConfig": ".wandb_config",
+}
+
+
+def __getattr__(attr_name: str) -> typing.Any:
+    module_name = _dynamic_imports.get(attr_name)
+    if module_name is None:
+        raise AttributeError(f"No {attr_name} found in _dynamic_imports for module name -> {__name__}")
+    try:
+        module = import_module(module_name, __package__)
+        if module_name == f".{attr_name}":
+            return module
+        else:
+            return getattr(module, attr_name)
+    except ImportError as e:
+        raise ImportError(f"Failed to import {attr_name} from {module_name}: {e}") from e
+    except AttributeError as e:
+        raise AttributeError(f"Failed to get {attr_name} from {module_name}: {e}") from e
+
+
+def __dir__():
+    lazy_attrs = list(_dynamic_imports.keys())
+    return sorted(lazy_attrs)
+
 
 __all__ = [
     "BaseModel",

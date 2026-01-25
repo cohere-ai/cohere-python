@@ -73,7 +73,11 @@ class BatchesClient:
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        client.batches.list()
+        client.batches.list(
+            page_size=1,
+            page_token="page_token",
+            order_by="order_by",
+        )
         """
         _response = self._raw_client.list(
             page_size=page_size, page_token=page_token, order_by=order_by, request_options=request_options
@@ -244,7 +248,11 @@ class AsyncBatchesClient:
 
 
         async def main() -> None:
-            await client.batches.list()
+            await client.batches.list(
+                page_size=1,
+                page_token="page_token",
+                order_by="order_by",
+            )
 
 
         asyncio.run(main())

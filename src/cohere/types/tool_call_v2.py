@@ -13,8 +13,8 @@ class ToolCallV2(UncheckedBaseModel):
     An array of tool calls to be made.
     """
 
-    id: typing.Optional[str] = None
-    type: typing.Optional[typing.Literal["function"]] = None
+    id: str
+    type: typing.Literal["function"] = "function"
     function: typing.Optional[ToolCallV2Function] = None
 
     if IS_PYDANTIC_V2:

@@ -206,7 +206,7 @@ class TestClient(unittest.TestCase):
             'Capital punishment (the death penalty) has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states.']
 
         response = co.rerank(
-            model='rerank-english-v2.0',
+            model='rerank-v3.5',
             query='What is the capital of the United States?',
             documents=docs,
             top_n=3,

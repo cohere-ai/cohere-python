@@ -9,7 +9,7 @@ from .tool_v2function import ToolV2Function
 
 
 class ToolV2(UncheckedBaseModel):
-    type: typing.Optional[typing.Literal["function"]] = None
+    type: typing.Literal["function"] = "function"
     function: typing.Optional[ToolV2Function] = pydantic.Field(default=None)
     """
     The function to be executed.
