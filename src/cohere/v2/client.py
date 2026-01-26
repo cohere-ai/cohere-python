@@ -610,7 +610,8 @@ class V2Client:
             for embedding in parser.iter_embeddings():
                 # The parser sets embedding.text correctly for multiple embedding types
                 # Adjust the global index based on text position in batch
-                if embedding.text and embedding.text in batch_texts:
+                # Use 'is not None' to handle empty strings correctly (they are falsy but valid)
+                if embedding.text is not None and embedding.text in batch_texts:
                     # Get or create the set of used indices for this embedding type
                     emb_type = embedding.embedding_type
                     if emb_type not in used_batch_indices_by_type:
