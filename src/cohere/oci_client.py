@@ -387,8 +387,7 @@ def map_request_to_oci(
 
         # Update httpx request with signed headers
         request.url = URL(url)
-        request.headers.clear()
-        request.headers.update(prepped_request.headers)
+        request.headers = httpx.Headers(prepped_request.headers)
         request.stream = ByteStream(oci_body_bytes)
         request._content = oci_body_bytes
         request.extensions["endpoint"] = endpoint
