@@ -420,11 +420,17 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         effective_batch_size = batch_size if batch_size is not None else embed_batch_size
         texts_batches = [textsarr[i : i + effective_batch_size] for i in range(0, len(textsarr), effective_batch_size)]
 
-        # Note: max_workers parameter is not used in async version since asyncio.gather
+        # Note: max_workers parameter is not applicable to async version since asyncio.gather
         # handles concurrency differently than ThreadPoolExecutor
         if max_workers is not None:
-            # Log a warning or silently ignore - asyncio manages its own concurrency
-            pass
+            import warnings
+            warnings.warn(
+                "The 'max_workers' parameter is not supported for AsyncClient. "
+                "Async clients use asyncio.gather() for concurrent execution, which "
+                "automatically manages concurrency. The parameter will be ignored.",
+                UserWarning,
+                stacklevel=2
+            )
         
         responses = typing.cast(
             typing.List[EmbedResponse],
