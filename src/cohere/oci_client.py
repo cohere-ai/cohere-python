@@ -841,7 +841,8 @@ def transform_oci_stream_wrapper(
             if line.startswith("data: "):
                 data_str = line[6:]  # Remove "data: " prefix
                 if data_str.strip() == "[DONE]":
-                    break
+                    # Return (not break) to stop the generator completely, preventing further chunk processing
+                    return
 
                 try:
                     oci_event = json.loads(data_str)
