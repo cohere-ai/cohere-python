@@ -1615,7 +1615,7 @@ client.rerank(
     ],
     query="What is the capital of the United States?",
     top_n=3,
-    model="rerank-v3.5",
+    model="rerank-v4.0-pro",
 )
 
 ```
@@ -2492,10 +2492,7 @@ If tool_choice isn't specified, then the model is free to choose whether to use 
 <dl>
 <dd>
 
-**priority:** `typing.Optional[int]` 
-
-The priority of the request (lower means earlier handling; default 0 highest priority).
-Higher priority requests are handled first, and dropped last when the system is under load.
+**priority:** `typing.Optional[int]` — Controls how early the request is handled. Lower numbers indicate higher priority (default: 0, the highest). When the system is under load, higher-priority requests are processed first and are the least likely to be dropped.
     
 </dd>
 </dl>
@@ -2793,10 +2790,7 @@ If tool_choice isn't specified, then the model is free to choose whether to use 
 <dl>
 <dd>
 
-**priority:** `typing.Optional[int]` 
-
-The priority of the request (lower means earlier handling; default 0 highest priority).
-Higher priority requests are handled first, and dropped last when the system is under load.
+**priority:** `typing.Optional[int]` — Controls how early the request is handled. Lower numbers indicate higher priority (default: 0, the highest). When the system is under load, higher-priority requests are processed first and are the least likely to be dropped.
     
 </dd>
 </dl>
@@ -2972,10 +2966,7 @@ If `NONE` is selected, when the input exceeds the maximum input token length an 
 <dl>
 <dd>
 
-**priority:** `typing.Optional[int]` 
-
-The priority of the request (lower means earlier handling; default 0 highest priority).
-Higher priority requests are handled first, and dropped last when the system is under load.
+**priority:** `typing.Optional[int]` — Controls how early the request is handled. Lower numbers indicate higher priority (default: 0, the highest). When the system is under load, higher-priority requests are processed first and are the least likely to be dropped.
     
 </dd>
 </dl>
@@ -3038,7 +3029,7 @@ client.v2.rerank(
     ],
     query="What is the capital of the United States?",
     top_n=3,
-    model="rerank-v3.5",
+    model="rerank-v4.0-pro",
 )
 
 ```
@@ -3102,10 +3093,7 @@ For optimal performance we recommend against sending more than 1,000 documents i
 <dl>
 <dd>
 
-**priority:** `typing.Optional[int]` 
-
-The priority of the request (lower means earlier handling; default 0 highest priority).
-Higher priority requests are handled first, and dropped last when the system is under load.
+**priority:** `typing.Optional[int]` — Controls how early the request is handled. Lower numbers indicate higher priority (default: 0, the highest). When the system is under load, higher-priority requests are processed first and are the least likely to be dropped.
     
 </dd>
 </dl>

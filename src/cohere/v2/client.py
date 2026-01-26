@@ -160,8 +160,7 @@ class V2Client:
         thinking : typing.Optional[Thinking]
 
         priority : typing.Optional[int]
-            The priority of the request (lower means earlier handling; default 0 highest priority).
-            Higher priority requests are handled first, and dropped last when the system is under load.
+            Controls how early the request is handled. Lower numbers indicate higher priority (default: 0, the highest). When the system is under load, higher-priority requests are processed first and are the least likely to be dropped.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -331,8 +330,7 @@ class V2Client:
         thinking : typing.Optional[Thinking]
 
         priority : typing.Optional[int]
-            The priority of the request (lower means earlier handling; default 0 highest priority).
-            Higher priority requests are handled first, and dropped last when the system is under load.
+            Controls how early the request is handled. Lower numbers indicate higher priority (default: 0, the highest). When the system is under load, higher-priority requests are processed first and are the least likely to be dropped.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -451,8 +449,7 @@ class V2Client:
             If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
 
         priority : typing.Optional[int]
-            The priority of the request (lower means earlier handling; default 0 highest priority).
-            Higher priority requests are handled first, and dropped last when the system is under load.
+            Controls how early the request is handled. Lower numbers indicate higher priority (default: 0, the highest). When the system is under load, higher-priority requests are processed first and are the least likely to be dropped.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -650,8 +647,7 @@ class V2Client:
             Defaults to `4096`. Long documents will be automatically truncated to the specified number of tokens.
 
         priority : typing.Optional[int]
-            The priority of the request (lower means earlier handling; default 0 highest priority).
-            Higher priority requests are handled first, and dropped last when the system is under load.
+            Controls how early the request is handled. Lower numbers indicate higher priority (default: 0, the highest). When the system is under load, higher-priority requests are processed first and are the least likely to be dropped.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -679,7 +675,7 @@ class V2Client:
             ],
             query="What is the capital of the United States?",
             top_n=3,
-            model="rerank-v3.5",
+            model="rerank-v4.0-pro",
         )
         """
         _response = self._raw_client.rerank(
@@ -825,8 +821,7 @@ class AsyncV2Client:
         thinking : typing.Optional[Thinking]
 
         priority : typing.Optional[int]
-            The priority of the request (lower means earlier handling; default 0 highest priority).
-            Higher priority requests are handled first, and dropped last when the system is under load.
+            Controls how early the request is handled. Lower numbers indicate higher priority (default: 0, the highest). When the system is under load, higher-priority requests are processed first and are the least likely to be dropped.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1005,8 +1000,7 @@ class AsyncV2Client:
         thinking : typing.Optional[Thinking]
 
         priority : typing.Optional[int]
-            The priority of the request (lower means earlier handling; default 0 highest priority).
-            Higher priority requests are handled first, and dropped last when the system is under load.
+            Controls how early the request is handled. Lower numbers indicate higher priority (default: 0, the highest). When the system is under load, higher-priority requests are processed first and are the least likely to be dropped.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1133,8 +1127,7 @@ class AsyncV2Client:
             If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
 
         priority : typing.Optional[int]
-            The priority of the request (lower means earlier handling; default 0 highest priority).
-            Higher priority requests are handled first, and dropped last when the system is under load.
+            Controls how early the request is handled. Lower numbers indicate higher priority (default: 0, the highest). When the system is under load, higher-priority requests are processed first and are the least likely to be dropped.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1219,8 +1212,7 @@ class AsyncV2Client:
             Defaults to `4096`. Long documents will be automatically truncated to the specified number of tokens.
 
         priority : typing.Optional[int]
-            The priority of the request (lower means earlier handling; default 0 highest priority).
-            Higher priority requests are handled first, and dropped last when the system is under load.
+            Controls how early the request is handled. Lower numbers indicate higher priority (default: 0, the highest). When the system is under load, higher-priority requests are processed first and are the least likely to be dropped.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1253,7 +1245,7 @@ class AsyncV2Client:
                 ],
                 query="What is the capital of the United States?",
                 top_n=3,
-                model="rerank-v3.5",
+                model="rerank-v4.0-pro",
             )
 
 

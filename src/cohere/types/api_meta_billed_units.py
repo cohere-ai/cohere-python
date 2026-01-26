@@ -18,6 +18,11 @@ class ApiMetaBilledUnits(UncheckedBaseModel):
     The number of billed input tokens.
     """
 
+    image_tokens: typing.Optional[float] = pydantic.Field(default=None)
+    """
+    The number of billed image tokens.
+    """
+
     output_tokens: typing.Optional[float] = pydantic.Field(default=None)
     """
     The number of billed output tokens.
