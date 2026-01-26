@@ -583,7 +583,6 @@ class V2Client:
 
         # Process texts in batches
         texts_list = list(texts)
-        total_embeddings_yielded = 0
 
         for batch_start in range(0, len(texts_list), batch_size):
             batch_end = min(batch_start + batch_size, len(texts_list))
@@ -600,15 +599,26 @@ class V2Client:
                 truncate=truncate,
                 request_options=request_options,
             )
-            
+
             # Parse embeddings from response incrementally
             parser = StreamingEmbedParser(response._response, batch_texts)
+            # Track used indices to handle duplicate texts correctly
+            used_batch_indices: set[int] = set()
+
             for embedding in parser.iter_embeddings():
                 # The parser sets embedding.text correctly for multiple embedding types
                 # Adjust the global index based on text position in batch
                 if embedding.text and embedding.text in batch_texts:
-                    text_idx_in_batch = batch_texts.index(embedding.text)
-                    embedding.index = batch_start + text_idx_in_batch
+                    # Find the next unused occurrence of this text in the batch
+                    # This handles duplicate texts correctly
+                    text_idx_in_batch = None
+                    for idx, text in enumerate(batch_texts):
+                        if text == embedding.text and idx not in used_batch_indices:
+                            text_idx_in_batch = idx
+                            used_batch_indices.add(idx)
+                            break
+                    if text_idx_in_batch is not None:
+                        embedding.index = batch_start + text_idx_in_batch
                 yield embedding
 
     def rerank(
