@@ -365,10 +365,20 @@ def map_request_to_oci(
     oci = lazy_oci()
 
     # Create OCI signer based on config type
+    # Priority order: instance/resource principal > API key auth > session-based auth
     if "signer" in oci_config:
         signer = oci_config["signer"]  # Instance/resource principal
+    elif "user" in oci_config:
+        # Config has user field - standard API key auth (prioritize this over session-based)
+        signer = oci.signer.Signer(
+            tenancy=oci_config["tenancy"],
+            user=oci_config["user"],
+            fingerprint=oci_config["fingerprint"],
+            private_key_file_location=oci_config.get("key_file"),
+            private_key_content=oci_config.get("key_content"),
+        )
     elif "security_token_file" in oci_config:
-        # Session-based authentication with security token
+        # Session-based authentication with security token (fallback if no user field)
         token_file_path = os.path.expanduser(oci_config["security_token_file"])
         with open(token_file_path, "r") as f:
             security_token = f.read().strip()
@@ -380,21 +390,12 @@ def map_request_to_oci(
             token=security_token,
             private_key=private_key,
         )
-    elif "user" not in oci_config:
+    else:
         # Config doesn't have user or security token - unsupported
         raise ValueError(
             "OCI config is missing 'user' field and no security_token_file found. "
             "Please use a profile with standard API key authentication, "
             "session-based authentication, or provide direct credentials via oci_user_id parameter."
-        )
-    else:
-        # Config has user field - standard API key auth
-        signer = oci.signer.Signer(
-            tenancy=oci_config["tenancy"],
-            user=oci_config["user"],
-            fingerprint=oci_config["fingerprint"],
-            private_key_file_location=oci_config.get("key_file"),
-            private_key_content=oci_config.get("key_content"),
         )
 
     def _event_hook(request: httpx.Request) -> None:
@@ -637,7 +638,16 @@ def transform_request_to_oci(
                     oci_msg["content"] = [{"type": "TEXT", "text": msg["content"]}]
                 elif isinstance(msg.get("content"), list):
                     # Already array format (from tool calls, etc.)
-                    oci_msg["content"] = msg["content"]
+                    # Transform type field to uppercase for OCI
+                    transformed_content = []
+                    for item in msg["content"]:
+                        if isinstance(item, dict) and "type" in item:
+                            transformed_item = item.copy()
+                            transformed_item["type"] = item["type"].upper()
+                            transformed_content.append(transformed_item)
+                        else:
+                            transformed_content.append(item)
+                    oci_msg["content"] = transformed_content
                 else:
                     oci_msg["content"] = msg.get("content", [])
 
