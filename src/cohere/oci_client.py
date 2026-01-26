@@ -1,17 +1,12 @@
 """Oracle Cloud Infrastructure (OCI) client for Cohere API."""
 
-import base64
 import email.utils
-import hashlib
-import io
 import json
 import typing
 import uuid
 
 import httpx
 import requests
-from httpx import URL, ByteStream, SyncByteStream
-
 from . import (
     EmbedResponse,
     GenerateStreamedResponse,
@@ -22,8 +17,8 @@ from . import (
 )
 from .client import Client, ClientEnvironment
 from .client_v2 import ClientV2
-from .core import construct_type
 from .manually_maintained.lazy_oci_deps import lazy_oci
+from httpx import URL, ByteStream, SyncByteStream
 
 
 class OciClient(Client):
