@@ -388,6 +388,7 @@ def map_request_to_oci(
         request._content = oci_body_bytes
         request.extensions["endpoint"] = endpoint
         request.extensions["cohere_body"] = body
+        request.extensions["is_stream"] = "stream" in endpoint or body.get("stream", False)
 
     return _event_hook
 
@@ -402,18 +403,31 @@ def map_response_from_oci() -> EventHook:
 
     def _hook(response: httpx.Response) -> None:
         endpoint = response.request.extensions["endpoint"]
-        is_stream = "stream" in endpoint
+        is_stream = response.request.extensions.get("is_stream", False)
 
         output: typing.Iterator[bytes]
 
+        # Only transform successful responses (200-299)
+        # Let error responses pass through unchanged so SDK error handling works
+        if not (200 <= response.status_code < 300):
+            return
+
+        # For streaming responses, wrap the stream with a transformer
         if is_stream:
-            # Handle streaming responses
-            output = transform_oci_stream_response(response, endpoint)
-        else:
-            # Handle non-streaming responses
-            oci_response = json.loads(response.read())
-            cohere_response = transform_oci_response_to_cohere(endpoint, oci_response)
-            output = iter([json.dumps(cohere_response).encode("utf-8")])
+            original_stream = response.stream
+            transformed_stream = transform_oci_stream_wrapper(original_stream, endpoint)
+            response.stream = Streamer(transformed_stream)
+            # Reset consumption flags
+            if hasattr(response, "_content"):
+                del response._content
+            response.is_stream_consumed = False
+            response.is_closed = False
+            return
+
+        # Handle non-streaming responses
+        oci_response = json.loads(response.read())
+        cohere_response = transform_oci_response_to_cohere(endpoint, oci_response)
+        output = iter([json.dumps(cohere_response).encode("utf-8")])
 
         response.stream = Streamer(output)
 
@@ -452,11 +466,43 @@ def get_oci_url(
         "chat_stream": "chat",
         "generate": "generateText",
         "generate_stream": "generateText",
-        "rerank": "rerank",
+        "rerank": "rerankText",  # OCI uses rerankText, not rerank
     }
 
     action = action_map.get(endpoint, endpoint)
     return f"{base}/{api_version}/actions/{action}"
+
+
+def normalize_model_for_oci(model: str) -> str:
+    """
+    Normalize model name for OCI.
+
+    OCI accepts model names in the format "cohere.model-name" or full OCIDs.
+    This function ensures proper formatting for all regions.
+
+    Args:
+        model: Model name (e.g., "command-r-08-2024") or full OCID
+
+    Returns:
+        Normalized model identifier (e.g., "cohere.command-r-08-2024" or OCID)
+
+    Examples:
+        >>> normalize_model_for_oci("command-a-03-2025")
+        "cohere.command-a-03-2025"
+        >>> normalize_model_for_oci("cohere.embed-english-v3.0")
+        "cohere.embed-english-v3.0"
+        >>> normalize_model_for_oci("ocid1.generativeaimodel.oc1...")
+        "ocid1.generativeaimodel.oc1..."
+    """
+    # If it's already an OCID, return as-is (works across all regions)
+    if model.startswith("ocid1."):
+        return model
+
+    # Add "cohere." prefix if not present
+    if not model.startswith("cohere."):
+        return f"cohere.{model}"
+
+    return model
 
 
 def transform_request_to_oci(
@@ -475,9 +521,7 @@ def transform_request_to_oci(
     Returns:
         Transformed request body in OCI format
     """
-    model = cohere_body.get("model", "")
-    if not model.startswith("cohere."):
-        model = f"cohere.{model}"
+    model = normalize_model_for_oci(cohere_body.get("model", ""))
 
     if endpoint == "embed":
         # Transform Cohere input_type to OCI format
@@ -506,21 +550,96 @@ def transform_request_to_oci(
         return oci_body
 
     elif endpoint in ["chat", "chat_stream"]:
+        # Detect V1 vs V2 API based on request body structure
+        is_v2 = "messages" in cohere_body  # V2 uses messages array
+
+        # OCI uses a nested chatRequest structure
+        chat_request = {
+            "apiFormat": "COHEREV2" if is_v2 else "COHERE",
+        }
+
+        if is_v2:
+            # V2 API: uses messages array
+            # Transform Cohere V2 messages to OCI V2 format
+            # Cohere sends: [{"role": "user", "content": "text"}]
+            # OCI expects: [{"role": "USER", "content": [{"type": "TEXT", "text": "..."}]}]
+            oci_messages = []
+            for msg in cohere_body["messages"]:
+                oci_msg = {
+                    "role": msg["role"].upper(),
+                }
+
+                # Transform content
+                if isinstance(msg.get("content"), str):
+                    # Simple string content -> wrap in array
+                    oci_msg["content"] = [{"type": "TEXT", "text": msg["content"]}]
+                elif isinstance(msg.get("content"), list):
+                    # Already array format (from tool calls, etc.)
+                    oci_msg["content"] = msg["content"]
+                else:
+                    oci_msg["content"] = msg.get("content", [])
+
+                # Add tool_calls if present
+                if "tool_calls" in msg:
+                    oci_msg["toolCalls"] = msg["tool_calls"]
+
+                oci_messages.append(oci_msg)
+
+            chat_request["messages"] = oci_messages
+
+            # V2 optional parameters (use Cohere's camelCase names for OCI)
+            if "max_tokens" in cohere_body:
+                chat_request["maxTokens"] = cohere_body["max_tokens"]
+            if "temperature" in cohere_body:
+                chat_request["temperature"] = cohere_body["temperature"]
+            if "k" in cohere_body:
+                chat_request["topK"] = cohere_body["k"]
+            if "p" in cohere_body:
+                chat_request["topP"] = cohere_body["p"]
+            if "seed" in cohere_body:
+                chat_request["seed"] = cohere_body["seed"]
+            if "frequency_penalty" in cohere_body:
+                chat_request["frequencyPenalty"] = cohere_body["frequency_penalty"]
+            if "presence_penalty" in cohere_body:
+                chat_request["presencePenalty"] = cohere_body["presence_penalty"]
+            if "stop_sequences" in cohere_body:
+                chat_request["stopSequences"] = cohere_body["stop_sequences"]
+            if "tools" in cohere_body:
+                chat_request["tools"] = cohere_body["tools"]
+            if "documents" in cohere_body:
+                chat_request["documents"] = cohere_body["documents"]
+            if "citation_options" in cohere_body:
+                chat_request["citationOptions"] = cohere_body["citation_options"]
+            if "safety_mode" in cohere_body:
+                chat_request["safetyMode"] = cohere_body["safety_mode"]
+        else:
+            # V1 API: uses single message string
+            chat_request["message"] = cohere_body["message"]
+
+            # V1 optional parameters
+            if "temperature" in cohere_body:
+                chat_request["temperature"] = cohere_body["temperature"]
+            if "max_tokens" in cohere_body:
+                chat_request["maxTokens"] = cohere_body["max_tokens"]
+            if "preamble" in cohere_body:
+                chat_request["preambleOverride"] = cohere_body["preamble"]
+            if "chat_history" in cohere_body:
+                chat_request["chatHistory"] = cohere_body["chat_history"]
+
+        # Handle streaming for both versions
+        if "stream" in endpoint or cohere_body.get("stream"):
+            chat_request["isStream"] = True
+
+        # Top level OCI request structure
         oci_body = {
-            "message": cohere_body["message"],
             "servingMode": {
                 "servingType": "ON_DEMAND",
                 "modelId": model,
             },
             "compartmentId": compartment_id,
-            "isStream": endpoint == "chat_stream" or cohere_body.get("stream", False),
+            "chatRequest": chat_request,
         }
-        if "chat_history" in cohere_body:
-            oci_body["chatHistory"] = cohere_body["chat_history"]
-        if "temperature" in cohere_body:
-            oci_body["temperature"] = cohere_body["temperature"]
-        if "max_tokens" in cohere_body:
-            oci_body["maxTokens"] = cohere_body["max_tokens"]
+
         return oci_body
 
     elif endpoint in ["generate", "generate_stream"]:
@@ -540,17 +659,24 @@ def transform_request_to_oci(
         return oci_body
 
     elif endpoint == "rerank":
+        # OCI rerank uses a flat structure (not nested like chat)
+        # and "input" instead of "query"
         oci_body = {
-            "query": cohere_body["query"],
-            "documents": cohere_body["documents"],
             "servingMode": {
                 "servingType": "ON_DEMAND",
                 "modelId": model,
             },
             "compartmentId": compartment_id,
+            "input": cohere_body["query"],  # OCI uses "input" not "query"
+            "documents": cohere_body["documents"],
         }
+
+        # Add optional rerank parameters
         if "top_n" in cohere_body:
             oci_body["topN"] = cohere_body["top_n"]
+        if "max_chunks_per_doc" in cohere_body:
+            oci_body["maxChunksPerDocument"] = cohere_body["max_chunks_per_doc"]
+
         return oci_body
 
     return cohere_body
@@ -603,14 +729,66 @@ def transform_oci_response_to_cohere(
             "meta": meta,
         }
 
-    elif endpoint == "chat":
-        return {
-            "text": oci_response.get("chatResponse", {}).get("text", ""),
-            "generation_id": str(uuid.uuid4()),
-            "chat_history": [],
-            "finish_reason": oci_response.get("finishReason", "COMPLETE"),
-            "meta": {"api_version": {"version": "1"}},
-        }
+    elif endpoint == "chat" or endpoint == "chat_stream":
+        chat_response = oci_response.get("chatResponse", {})
+
+        # Detect V2 response (has apiFormat field)
+        is_v2 = chat_response.get("apiFormat") == "COHEREV2"
+
+        if is_v2:
+            # V2 response transformation
+            # Extract usage for V2
+            usage_data = chat_response.get("usage", {})
+            usage = {
+                "tokens": {
+                    "input_tokens": usage_data.get("inputTokens", 0),
+                    "output_tokens": usage_data.get("completionTokens", 0),
+                },
+            }
+            if usage_data.get("inputTokens") or usage_data.get("completionTokens"):
+                usage["billed_units"] = {
+                    "input_tokens": usage_data.get("inputTokens", 0),
+                    "output_tokens": usage_data.get("completionTokens", 0),
+                }
+
+            return {
+                "id": chat_response.get("id", str(uuid.uuid4())),
+                "message": chat_response.get("message", {}),
+                "finish_reason": chat_response.get("finishReason", "COMPLETE").lower(),
+                "usage": usage,
+            }
+        else:
+            # V1 response transformation
+            # Build proper meta structure
+            meta = {
+                "api_version": {"version": "1"},
+            }
+
+            # Add usage info if available
+            if "usage" in chat_response and chat_response["usage"]:
+                usage = chat_response["usage"]
+                input_tokens = usage.get("inputTokens", 0)
+                output_tokens = usage.get("outputTokens", 0)
+
+                meta["billed_units"] = {
+                    "input_tokens": input_tokens,
+                    "output_tokens": output_tokens,
+                }
+                meta["tokens"] = {
+                    "input_tokens": input_tokens,
+                    "output_tokens": output_tokens,
+                }
+
+            return {
+                "text": chat_response.get("text", ""),
+                "generation_id": oci_response.get("modelId", str(uuid.uuid4())),
+                "chat_history": chat_response.get("chatHistory", []),
+                "finish_reason": chat_response.get("finishReason", "COMPLETE"),
+                "citations": chat_response.get("citations", []),
+                "documents": chat_response.get("documents", []),
+                "search_queries": chat_response.get("searchQueries", []),
+                "meta": meta,
+            }
 
     elif endpoint == "generate":
         return {
@@ -627,20 +805,55 @@ def transform_oci_response_to_cohere(
         }
 
     elif endpoint == "rerank":
-        results = oci_response.get("results", [])
+        # OCI returns flat structure with document_ranks
+        document_ranks = oci_response.get("documentRanks", [])
+
         return {
-            "id": str(uuid.uuid4()),
+            "id": oci_response.get("id", str(uuid.uuid4())),
             "results": [
                 {
                     "index": r.get("index"),
                     "relevance_score": r.get("relevanceScore"),
                 }
-                for r in results
+                for r in document_ranks
             ],
             "meta": {"api_version": {"version": "1"}},
         }
 
     return oci_response
+
+
+def transform_oci_stream_wrapper(
+    stream: typing.Iterator[bytes], endpoint: str
+) -> typing.Iterator[bytes]:
+    """
+    Wrap OCI stream and transform events to Cohere format.
+
+    Args:
+        stream: Original OCI stream iterator
+        endpoint: Cohere endpoint name
+
+    Yields:
+        Bytes of transformed streaming events
+    """
+    buffer = b""
+    for chunk in stream:
+        buffer += chunk
+        while b"\n" in buffer:
+            line_bytes, buffer = buffer.split(b"\n", 1)
+            line = line_bytes.decode("utf-8").strip()
+
+            if line.startswith("data: "):
+                data_str = line[6:]  # Remove "data: " prefix
+                if data_str.strip() == "[DONE]":
+                    break
+
+                try:
+                    oci_event = json.loads(data_str)
+                    cohere_event = transform_stream_event(endpoint, oci_event)
+                    yield json.dumps(cohere_event).encode("utf-8") + b"\n"
+                except json.JSONDecodeError:
+                    continue
 
 
 def transform_oci_stream_response(
