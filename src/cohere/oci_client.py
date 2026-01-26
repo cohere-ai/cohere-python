@@ -9,6 +9,7 @@ import typing
 import uuid
 
 import httpx
+import requests
 from httpx import URL, ByteStream, SyncByteStream
 
 from . import (
@@ -319,7 +320,17 @@ def map_request_to_oci(
     # Create OCI signer based on config type
     if "signer" in oci_config:
         signer = oci_config["signer"]  # Instance/resource principal
+    elif "user" not in oci_config:
+        # Config doesn't have user - might be session-based or security token based
+        # Raise error with helpful message
+        raise ValueError(
+            "OCI config is missing 'user' field. "
+            "Please use a profile with standard API key authentication, "
+            "or provide direct credentials via oci_user_id parameter. "
+            "Current profile may be using session or security token authentication which is not yet supported."
+        )
     else:
+        # Config has user field - standard API key auth
         signer = oci.signer.Signer(
             tenancy=oci_config["tenancy"],
             user=oci_config["user"],
@@ -355,26 +366,24 @@ def map_request_to_oci(
         headers = {
             "content-type": "application/json",
             "date": email.utils.formatdate(usegmt=True),
-            "host": URL(url).host,
-            "content-length": str(len(oci_body_bytes)),
         }
 
-        # Add SHA256 hash for POST requests
-        if request.method == "POST":
-            body_hash = hashlib.sha256(oci_body_bytes).digest()
-            headers["x-content-sha256"] = base64.b64encode(body_hash).decode()
-
-        # Sign the request using OCI signer
-        signer.do_request_sign(
+        # Create a requests.PreparedRequest for OCI signing
+        oci_request = requests.Request(
             method=request.method,
             url=url,
             headers=headers,
-            body=None,  # Body already in headers via hash
+            data=oci_body_bytes,
         )
+        prepped_request = oci_request.prepare()
 
-        # Update httpx request
+        # Sign the request using OCI signer (modifies headers in place)
+        signer.do_request_sign(prepped_request)
+
+        # Update httpx request with signed headers
         request.url = URL(url)
-        request.headers.update(headers)
+        request.headers.clear()
+        request.headers.update(prepped_request.headers)
         request.stream = ByteStream(oci_body_bytes)
         request._content = oci_body_bytes
         request.extensions["endpoint"] = endpoint
@@ -471,17 +480,30 @@ def transform_request_to_oci(
         model = f"cohere.{model}"
 
     if endpoint == "embed":
-        return {
+        # Transform Cohere input_type to OCI format
+        # Cohere uses: "search_document", "search_query", "classification", "clustering"
+        # OCI uses: "SEARCH_DOCUMENT", "SEARCH_QUERY", "CLASSIFICATION", "CLUSTERING"
+
+        oci_body = {
             "inputs": cohere_body["texts"],
             "servingMode": {
                 "servingType": "ON_DEMAND",
                 "modelId": model,
             },
             "compartmentId": compartment_id,
-            "inputType": cohere_body.get("input_type", "SEARCH_DOCUMENT").upper().replace("SEARCH_", ""),
-            "truncate": cohere_body.get("truncate", "NONE").upper(),
-            "embeddingTypes": [et.upper() for et in cohere_body.get("embedding_types", ["float"])],
         }
+
+        # Add optional fields only if provided
+        if "input_type" in cohere_body:
+            oci_body["inputType"] = cohere_body["input_type"].upper()
+
+        if "truncate" in cohere_body:
+            oci_body["truncate"] = cohere_body["truncate"].upper()
+
+        if "embedding_types" in cohere_body:
+            oci_body["embeddingTypes"] = [et.upper() for et in cohere_body["embedding_types"]]
+
+        return oci_body
 
     elif endpoint in ["chat", "chat_stream"]:
         oci_body = {
@@ -552,11 +574,33 @@ def transform_oci_response_to_cohere(
         embeddings_data = oci_response.get("embeddings", {})
         # For now, handle float embeddings (most common case)
         embeddings = embeddings_data.get("float", []) if isinstance(embeddings_data, dict) else embeddings_data
+
+        # Build proper meta structure
+        meta = {
+            "api_version": {"version": "1"},
+        }
+
+        # Add usage info if available
+        if "usage" in oci_response and oci_response["usage"]:
+            usage = oci_response["usage"]
+            # OCI usage has inputTokens, outputTokens, totalTokens
+            input_tokens = usage.get("inputTokens", 0)
+            output_tokens = usage.get("outputTokens", 0)
+
+            meta["billed_units"] = {
+                "input_tokens": input_tokens,
+                "output_tokens": output_tokens,
+            }
+            meta["tokens"] = {
+                "input_tokens": input_tokens,
+                "output_tokens": output_tokens,
+            }
+
         return {
-            "id": str(uuid.uuid4()),
+            "id": oci_response.get("id", str(uuid.uuid4())),
             "embeddings": embeddings,
             "texts": [],  # OCI doesn't return texts
-            "meta": {"api_version": {"version": "1"}},
+            "meta": meta,
         }
 
     elif endpoint == "chat":
