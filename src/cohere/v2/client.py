@@ -495,7 +495,6 @@ class V2Client:
         model: str,
         input_type: EmbedInputType,
         texts: typing.Optional[typing.Sequence[str]] = OMIT,
-        images: typing.Optional[typing.Sequence[str]] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
         output_dimension: typing.Optional[int] = OMIT,
         embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
@@ -505,10 +504,13 @@ class V2Client:
     ) -> typing.Iterator[typing.Any]:  # Returns Iterator[StreamedEmbedding]
         """
         Memory-efficient streaming version of embed that yields embeddings one at a time.
-        
+
         This method processes texts in batches and yields individual embeddings as they are
         parsed from the response, without loading all embeddings into memory at once.
         Ideal for processing large datasets where memory usage is a concern.
+
+        Note: This method only supports text embeddings. For image embeddings, use the
+        regular embed() method.
 
         Parameters
         ----------
@@ -520,9 +522,6 @@ class V2Client:
 
         texts : typing.Optional[typing.Sequence[str]]
             An array of strings for the model to embed. Will be processed in batches.
-
-        images : typing.Optional[typing.Sequence[str]]
-            An array of image data URIs for the model to embed.
 
         max_tokens : typing.Optional[int]
             The maximum number of tokens to embed per input.
@@ -556,7 +555,7 @@ class V2Client:
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        
+
         # Process embeddings one at a time without loading all into memory
         for embedding in client.v2.embed_stream(
             model="embed-v4.0",
@@ -567,40 +566,43 @@ class V2Client:
             print(f"Embedding {embedding.index}: {embedding.embedding[:5]}...")
             # Process/save embedding immediately
         """
-        if not texts:
+        # Validate inputs
+        if texts is None or texts is OMIT:
             return
-            
+        if batch_size < 1:
+            raise ValueError("batch_size must be at least 1")
+
         from ..streaming_utils import StreamingEmbedParser
-        
+
         # Process texts in batches
-        texts_list = list(texts) if texts else []
-        total_embeddings_yielded = 0
-        
+        texts_list = list(texts)
+        if not texts_list:
+            return
+
         for batch_start in range(0, len(texts_list), batch_size):
             batch_end = min(batch_start + batch_size, len(texts_list))
             batch_texts = texts_list[batch_start:batch_end]
-            
+
             # Get response for this batch
             response = self._raw_client.embed(
                 model=model,
                 input_type=input_type,
                 texts=batch_texts,
-                images=images if batch_start == 0 else None,  # Only include images in first batch
                 max_tokens=max_tokens,
                 output_dimension=output_dimension,
                 embedding_types=embedding_types,
                 truncate=truncate,
                 request_options=request_options,
             )
-            
+
             # Parse embeddings from response incrementally
             parser = StreamingEmbedParser(response._response, batch_texts)
-            for i, embedding in enumerate(parser.iter_embeddings()):
-                # Adjust index for global position
-                embedding.index = batch_start + i
-                embedding.text = texts_list[embedding.index]
+            for embedding in parser.iter_embeddings():
+                # The parser tracks text index per embedding type
+                # Adjust text reference to use batch_texts mapping
+                text_index_in_batch = batch_texts.index(embedding.text) if embedding.text in batch_texts else 0
+                embedding.index = batch_start + text_index_in_batch
                 yield embedding
-            total_embeddings_yielded += len(batch_texts)
 
     def rerank(
         self,
