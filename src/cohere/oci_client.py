@@ -23,10 +23,19 @@ from httpx import URL, ByteStream, SyncByteStream
 
 class OciClient(Client):
     """
-    Cohere client for Oracle Cloud Infrastructure (OCI) Generative AI service.
+    Cohere V1 API client for Oracle Cloud Infrastructure (OCI) Generative AI service.
+
+    Supported APIs on OCI:
+    - embed(): Full support for all embedding models
+    - chat(): Full support with Command-R models
+    - chat_stream(): Streaming chat support
+
+    Note: generate() and rerank() require fine-tuned models deployed to dedicated
+    endpoints. OCI on-demand inference does not support these APIs.
 
     Supports all authentication methods:
     - Config file (default): Uses ~/.oci/config
+    - Session-based: Uses OCI CLI session tokens
     - Direct credentials: Pass OCI credentials directly
     - Instance principal: For OCI compute instances
     - Resource principal: For OCI functions
@@ -128,9 +137,44 @@ class OciClient(Client):
 
 class OciClientV2(ClientV2):
     """
-    Cohere V2 client for Oracle Cloud Infrastructure (OCI) Generative AI service.
+    Cohere V2 API client for Oracle Cloud Infrastructure (OCI) Generative AI service.
 
-    See OciClient for usage examples and authentication methods.
+    Supported APIs on OCI:
+    - embed(): Full support for all embedding models (returns embeddings as dict)
+    - chat(): Full support with Command-A models (command-a-03-2025)
+    - chat_stream(): Streaming chat with proper V2 event format
+
+    Note: rerank() requires fine-tuned models deployed to dedicated endpoints.
+    OCI on-demand inference does not support the rerank API.
+
+    See OciClient for authentication method examples. OciClientV2 supports the same
+    authentication options (config file, session-based, direct credentials, instance
+    principal, resource principal).
+
+    Example:
+        ```python
+        import cohere
+
+        client = cohere.OciClientV2(
+            oci_region="us-chicago-1",
+            oci_compartment_id="ocid1.compartment.oc1...",
+        )
+
+        # V2 embed returns embeddings as dict with type keys
+        response = client.embed(
+            model="embed-english-v3.0",
+            texts=["Hello world"],
+            input_type="search_document",
+        )
+        print(response.embeddings.float_)  # Access float embeddings
+
+        # V2 chat with Command-A models
+        response = client.chat(
+            model="command-a-03-2025",
+            messages=[{"role": "user", "content": "Hello!"}],
+        )
+        print(response.message)
+        ```
     """
 
     def __init__(
