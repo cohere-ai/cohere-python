@@ -40,18 +40,12 @@ class TestConnectionPooling(unittest.TestCase):
     def test_cohere_client_initialization(self):
         """Test that Cohere clients can be initialized with connection pooling."""
         # Test with dummy API key - just verifies initialization works
-        try:
-            sync_client = cohere.Client(api_key="dummy-key")
-            v2_client = cohere.ClientV2(api_key="dummy-key")
-            
-            # Verify clients were created
-            self.assertIsNotNone(sync_client)
-            self.assertIsNotNone(v2_client)
-            
-        except Exception as e:
-            # Should not fail due to httpx configuration
-            if "httpx" in str(e).lower() or "limits" in str(e).lower():
-                self.fail(f"Failed to create client with connection pooling: {e}")
+        sync_client = cohere.Client(api_key="dummy-key")
+        v2_client = cohere.ClientV2(api_key="dummy-key")
+
+        # Verify clients were created
+        self.assertIsNotNone(sync_client)
+        self.assertIsNotNone(v2_client)
 
     def test_custom_httpx_client_with_pooling(self):
         """Test that custom httpx clients with connection pooling work correctly."""

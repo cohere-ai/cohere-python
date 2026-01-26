@@ -59,6 +59,14 @@ if typing.TYPE_CHECKING:
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
 
+# Default connection pool limits for httpx clients
+# These values provide a good balance between performance and resource usage
+_DEFAULT_POOL_LIMITS = httpx.Limits(
+    max_keepalive_connections=20,
+    max_connections=100,
+    keepalive_expiry=30.0,
+)
+
 
 class BaseCohere:
     """
@@ -129,20 +137,12 @@ class BaseCohere:
             else httpx.Client(
                 timeout=_defaulted_timeout,
                 follow_redirects=follow_redirects,
-                limits=httpx.Limits(
-                    max_keepalive_connections=20,
-                    max_connections=100,
-                    keepalive_expiry=30.0
-                )
+                limits=_DEFAULT_POOL_LIMITS,
             )
             if follow_redirects is not None
             else httpx.Client(
                 timeout=_defaulted_timeout,
-                limits=httpx.Limits(
-                    max_keepalive_connections=20,
-                    max_connections=100,
-                    keepalive_expiry=30.0
-                )
+                limits=_DEFAULT_POOL_LIMITS,
             ),
             timeout=_defaulted_timeout,
         )
@@ -1649,20 +1649,12 @@ class AsyncBaseCohere:
             else httpx.AsyncClient(
                 timeout=_defaulted_timeout,
                 follow_redirects=follow_redirects,
-                limits=httpx.Limits(
-                    max_keepalive_connections=20,
-                    max_connections=100,
-                    keepalive_expiry=30.0
-                )
+                limits=_DEFAULT_POOL_LIMITS,
             )
             if follow_redirects is not None
             else httpx.AsyncClient(
                 timeout=_defaulted_timeout,
-                limits=httpx.Limits(
-                    max_keepalive_connections=20,
-                    max_connections=100,
-                    keepalive_expiry=30.0
-                )
+                limits=_DEFAULT_POOL_LIMITS,
             ),
             timeout=_defaulted_timeout,
         )
