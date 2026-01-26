@@ -58,6 +58,85 @@ for event in response:
         print(event.delta.message.content.text, end="")
 ```
 
+## Oracle Cloud Infrastructure (OCI)
+
+The SDK supports Oracle Cloud Infrastructure (OCI) Generative AI service. First, install the OCI SDK:
+
+```
+pip install 'cohere[oci]'
+```
+
+Then use the `OciClient` or `OciClientV2`:
+
+```Python
+import cohere
+
+# Using OCI config file authentication (default: ~/.oci/config)
+co = cohere.OciClient(
+    oci_region="us-chicago-1",
+    oci_compartment_id="ocid1.compartment.oc1...",
+)
+
+response = co.embed(
+    model="embed-english-v3.0",
+    texts=["Hello world"],
+    input_type="search_document",
+)
+
+print(response.embeddings)
+```
+
+### OCI Authentication Methods
+
+**1. Config File (Default)**
+```Python
+co = cohere.OciClient(
+    oci_region="us-chicago-1",
+    oci_compartment_id="ocid1.compartment.oc1...",
+    # Uses ~/.oci/config with DEFAULT profile
+)
+```
+
+**2. Custom Profile**
+```Python
+co = cohere.OciClient(
+    oci_profile="MY_PROFILE",
+    oci_region="us-chicago-1",
+    oci_compartment_id="ocid1.compartment.oc1...",
+)
+```
+
+**3. Direct Credentials**
+```Python
+co = cohere.OciClient(
+    oci_user_id="ocid1.user.oc1...",
+    oci_fingerprint="xx:xx:xx:...",
+    oci_tenancy_id="ocid1.tenancy.oc1...",
+    oci_private_key_path="~/.oci/key.pem",
+    oci_region="us-chicago-1",
+    oci_compartment_id="ocid1.compartment.oc1...",
+)
+```
+
+**4. Instance Principal (for OCI Compute instances)**
+```Python
+co = cohere.OciClient(
+    auth_type="instance_principal",
+    oci_region="us-chicago-1",
+    oci_compartment_id="ocid1.compartment.oc1...",
+)
+```
+
+### Supported OCI APIs
+
+The OCI client supports all Cohere APIs:
+- Embed (with multiple embedding types)
+- Chat (with streaming via `chat_stream`)
+- Generate (with streaming via `generate_stream`)
+- Rerank
+
+See the [OCI client documentation](https://docs.cohere.com/docs/cohere-works-everywhere) for more details.
+
 ## Contributing
 
 While we value open-source contributions to this SDK, the code is generated programmatically. Additions made directly would have to be moved over to our generation code, otherwise they would be overwritten upon the next generated release. Feel free to open a PR as a proof of concept, but know that we will not be able to merge it as-is. We suggest opening an issue first to discuss with us!
