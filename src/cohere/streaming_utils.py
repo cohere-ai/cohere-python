@@ -80,22 +80,13 @@ class StreamingEmbedParser:
     
     def _parse_with_ijson(self, parser) -> Iterator[StreamedEmbedding]:
         """Parse embeddings using ijson incremental parser."""
-        current_path: List[str] = []
         current_embedding = []
         # Track text index separately per embedding type
         # When multiple types requested, each text gets multiple embeddings
         type_text_indices: dict = {}
-        embedding_type = "float"
         response_type = None
-        in_embeddings = False
 
         for prefix, event, value in parser:
-            # Track current path
-            if event == 'map_key':
-                if current_path and current_path[-1] == 'embeddings':
-                    # This is an embedding type key (float_, int8, etc.)
-                    embedding_type = value.rstrip('_')
-
             # Detect response type
             if prefix == 'response_type':
                 response_type = value
@@ -170,10 +161,11 @@ class StreamingEmbedParser:
     def _iter_embeddings_fallback_from_dict(self, data: dict) -> Iterator[StreamedEmbedding]:
         """Parse embeddings from a dictionary (used by fallback methods)."""
         response_type = data.get('response_type', '')
+        # Use batch_texts from constructor as fallback if API doesn't return texts
+        texts = data.get('texts') or self.batch_texts
 
         if response_type == 'embeddings_floats':
             embeddings = data.get('embeddings', [])
-            texts = data.get('texts', [])
             for i, embedding in enumerate(embeddings):
                 yield StreamedEmbedding(
                     index=self.embeddings_yielded + i,
@@ -184,7 +176,6 @@ class StreamingEmbedParser:
 
         elif response_type == 'embeddings_by_type':
             embeddings_obj = data.get('embeddings', {})
-            texts = data.get('texts', [])
 
             # Iterate through each embedding type
             for emb_type, embeddings_list in embeddings_obj.items():
@@ -198,18 +189,3 @@ class StreamingEmbedParser:
                             text=texts[i] if i < len(texts) else None
                         )
                         self.embeddings_yielded += 1
-                        
-                        
-def stream_embed_response(response: httpx.Response, texts: List[str]) -> Iterator[StreamedEmbedding]:
-    """
-    Convenience function to stream embeddings from a response.
-    
-    Args:
-        response: The httpx response containing embeddings
-        texts: The original texts that were embedded
-        
-    Yields:
-        StreamedEmbedding objects
-    """
-    parser = StreamingEmbedParser(response, texts)
-    yield from parser.iter_embeddings()
