@@ -1309,7 +1309,7 @@ class BaseCohere:
             ],
             query="What is the capital of the United States?",
             top_n=3,
-            model="rerank-v3.5",
+            model="rerank-v4.0-pro",
         )
         """
         _response = self._raw_client.rerank(
@@ -2859,7 +2859,7 @@ class AsyncBaseCohere:
                 ],
                 query="What is the capital of the United States?",
                 top_n=3,
-                model="rerank-v3.5",
+                model="rerank-v4.0-pro",
             )
 
 
