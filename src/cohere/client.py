@@ -203,6 +203,10 @@ class Client(BaseCohere, CacheMixin):
                 request_options=request_options,
             )
 
+        # Validate batch_size
+        if batch_size is not None and batch_size < 1:
+            raise ValueError("batch_size must be at least 1")
+
         textsarr: typing.Sequence[str]  = texts if texts is not OMIT and texts is not None else []
         effective_batch_size = batch_size if batch_size is not None else embed_batch_size
         texts_batches = [textsarr[i : i + effective_batch_size] for i in range(0, len(textsarr), effective_batch_size)]
@@ -407,6 +411,10 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
                 truncate=truncate,
                 request_options=request_options,
             )
+
+        # Validate batch_size
+        if batch_size is not None and batch_size < 1:
+            raise ValueError("batch_size must be at least 1")
 
         textsarr: typing.Sequence[str]  = texts if texts is not OMIT and texts is not None else []
         effective_batch_size = batch_size if batch_size is not None else embed_batch_size

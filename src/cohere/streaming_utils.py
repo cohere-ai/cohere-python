@@ -50,21 +50,31 @@ class StreamingEmbedParser:
         Yields:
             StreamedEmbedding objects as they are parsed from the response
         """
-        if not IJSON_AVAILABLE:
-            # Fallback to regular parsing if ijson not available
+        # Try to get response content as bytes for ijson
+        response_content: Optional[bytes] = None
+        try:
+            content = self.response.content
+            if isinstance(content, bytes):
+                response_content = content
+        except Exception:
+            pass
+
+        if not IJSON_AVAILABLE or response_content is None:
+            # Fallback to regular parsing if ijson not available or no bytes content
             yield from self._iter_embeddings_fallback()
             return
 
-        # Buffer response content first to allow fallback if ijson fails
-        # This prevents partial parsing issues where ijson yields some embeddings then fails
-        response_content = self.response.content
-
         try:
             # Use ijson for memory-efficient parsing
+            # Collect all embeddings first to avoid partial yields before failure
             parser = ijson.parse(io.BytesIO(response_content))
-            yield from self._parse_with_ijson(parser)
+            embeddings = list(self._parse_with_ijson(parser))
+            # Only yield after successful complete parsing
+            yield from embeddings
         except Exception:
             # If ijson parsing fails, fallback to regular parsing using buffered content
+            # Reset embeddings_yielded since we collected but didn't yield
+            self.embeddings_yielded = 0
             data = json.loads(response_content)
             yield from self._iter_embeddings_fallback_from_dict(data)
     

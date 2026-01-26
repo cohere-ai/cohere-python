@@ -603,12 +603,13 @@ class V2Client:
             
             # Parse embeddings from response incrementally
             parser = StreamingEmbedParser(response._response, batch_texts)
-            for i, embedding in enumerate(parser.iter_embeddings()):
-                # Adjust index for global position
-                embedding.index = batch_start + i
-                embedding.text = texts_list[embedding.index]
+            for embedding in parser.iter_embeddings():
+                # The parser sets embedding.text correctly for multiple embedding types
+                # Adjust the global index based on text position in batch
+                if embedding.text and embedding.text in batch_texts:
+                    text_idx_in_batch = batch_texts.index(embedding.text)
+                    embedding.index = batch_start + text_idx_in_batch
                 yield embedding
-            total_embeddings_yielded += len(batch_texts)
 
     def rerank(
         self,
