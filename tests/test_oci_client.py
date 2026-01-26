@@ -28,10 +28,12 @@ class TestOciClient(unittest.TestCase):
             self.skipTest("OCI_COMPARTMENT_ID not set")
 
         region = os.getenv("OCI_REGION", "us-chicago-1")
+        profile = os.getenv("OCI_PROFILE", "DEFAULT")
 
         self.client = cohere.OciClient(
             oci_region=region,
             oci_compartment_id=compartment_id,
+            oci_profile=profile,
         )
 
     def test_embed(self):
@@ -171,10 +173,12 @@ class TestOciClientV2(unittest.TestCase):
             self.skipTest("OCI_COMPARTMENT_ID not set")
 
         region = os.getenv("OCI_REGION", "us-chicago-1")
+        profile = os.getenv("OCI_PROFILE", "DEFAULT")
 
         self.client = cohere.OciClientV2(
             oci_region=region,
             oci_compartment_id=compartment_id,
+            oci_profile=profile,
         )
 
     def test_embed_v2(self):
@@ -317,10 +321,12 @@ class TestOciClientModels(unittest.TestCase):
             self.skipTest("OCI_COMPARTMENT_ID not set")
 
         region = os.getenv("OCI_REGION", "us-chicago-1")
+        profile = os.getenv("OCI_PROFILE", "DEFAULT")
 
         self.client = cohere.OciClient(
             oci_region=region,
             oci_compartment_id=compartment_id,
+            oci_profile=profile,
         )
 
     def test_embed_english_v3(self):
