@@ -139,13 +139,29 @@ co = cohere.OciClient(
 
 ### Supported OCI APIs
 
-The OCI client supports all Cohere APIs:
-- Embed (with multiple embedding types)
-- Chat (with streaming via `chat_stream`)
-- Generate (with streaming via `generate_stream`)
-- Rerank
+The OCI client supports the following Cohere APIs:
+- **Embed**: Full support for all embedding models (embed-english-v3.0, embed-light-v3.0, embed-multilingual-v3.0)
+- **Chat**: Full support with both V1 (`OciClient`) and V2 (`OciClientV2`) APIs
+  - Streaming available via `chat_stream()`
+  - Supports Command-R and Command-A model families
 
-See the [OCI client documentation](https://docs.cohere.com/docs/cohere-works-everywhere) for more details.
+### OCI Model Availability and Limitations
+
+**Available on OCI On-Demand Inference:**
+- ✅ **Embed models**: embed-english-v3.0, embed-light-v3.0, embed-multilingual-v3.0
+- ✅ **Chat models**: command-r-08-2024, command-r-plus, command-a-03-2025
+
+**Not Available on OCI On-Demand Inference:**
+- ❌ **Generate API**: OCI TEXT_GENERATION models are base models that require fine-tuning before deployment
+- ❌ **Rerank API**: OCI TEXT_RERANK models are base models that require fine-tuning before deployment
+- ❌ **Multiple Embedding Types**: OCI on-demand models only support single embedding type per request (cannot request both `float` and `int8` simultaneously)
+
+**Note**: To use Generate or Rerank models on OCI, you need to:
+1. Fine-tune the base model using OCI's fine-tuning service
+2. Deploy the fine-tuned model to a dedicated endpoint
+3. Update your code to use the deployed model endpoint
+
+For the latest model availability, see the [OCI Generative AI documentation](https://docs.oracle.com/en-us/iaas/Content/generative-ai/home.htm).
 
 ## Contributing
 
