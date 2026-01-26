@@ -602,21 +602,30 @@ class V2Client:
 
             # Parse embeddings from response incrementally
             parser = StreamingEmbedParser(response._response, batch_texts)
-            # Track used indices to handle duplicate texts correctly
-            used_batch_indices: set[int] = set()
+            # Track used indices per embedding type to handle:
+            # 1. Duplicate texts within a batch
+            # 2. Multiple embedding types (float, int8, etc.) for the same texts
+            used_batch_indices_by_type: dict[str, set[int]] = {}
 
             for embedding in parser.iter_embeddings():
                 # The parser sets embedding.text correctly for multiple embedding types
                 # Adjust the global index based on text position in batch
                 if embedding.text and embedding.text in batch_texts:
+                    # Get or create the set of used indices for this embedding type
+                    emb_type = embedding.embedding_type
+                    if emb_type not in used_batch_indices_by_type:
+                        used_batch_indices_by_type[emb_type] = set()
+                    used_indices = used_batch_indices_by_type[emb_type]
+
                     # Find the next unused occurrence of this text in the batch
                     # This handles duplicate texts correctly
                     text_idx_in_batch = None
                     for idx, text in enumerate(batch_texts):
-                        if text == embedding.text and idx not in used_batch_indices:
+                        if text == embedding.text and idx not in used_indices:
                             text_idx_in_batch = idx
-                            used_batch_indices.add(idx)
+                            used_indices.add(idx)
                             break
+
                     if text_idx_in_batch is not None:
                         embedding.index = batch_start + text_idx_in_batch
                 yield embedding
