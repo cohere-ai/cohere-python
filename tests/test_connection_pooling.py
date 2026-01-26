@@ -10,12 +10,6 @@ import cohere
 class TestConnectionPooling(unittest.TestCase):
     """Test suite for HTTP connection pooling functionality."""
 
-    @classmethod
-    def setUpClass(cls):
-        """Set up class-level fixtures."""
-        # Check if API key is available for integration tests
-        cls.api_key_available = bool(os.environ.get("CO_API_KEY"))
-
     def test_httpx_client_creation_with_limits(self):
         """Test that httpx clients can be created with our connection pooling limits."""
         # Test creating httpx client with limits (our implementation)
