@@ -315,14 +315,24 @@ def map_request_to_oci(
     # Create OCI signer based on config type
     if "signer" in oci_config:
         signer = oci_config["signer"]  # Instance/resource principal
+    elif "security_token_file" in oci_config:
+        # Session-based authentication with security token
+        with open(oci_config["security_token_file"], "r") as f:
+            security_token = f.read().strip()
+
+        # Load private key using OCI's utility function
+        private_key = oci.signer.load_private_key_from_file(oci_config["key_file"])
+
+        signer = oci.auth.signers.SecurityTokenSigner(
+            token=security_token,
+            private_key=private_key,
+        )
     elif "user" not in oci_config:
-        # Config doesn't have user - might be session-based or security token based
-        # Raise error with helpful message
+        # Config doesn't have user or security token - unsupported
         raise ValueError(
-            "OCI config is missing 'user' field. "
+            "OCI config is missing 'user' field and no security_token_file found. "
             "Please use a profile with standard API key authentication, "
-            "or provide direct credentials via oci_user_id parameter. "
-            "Current profile may be using session or security token authentication which is not yet supported."
+            "session-based authentication, or provide direct credentials via oci_user_id parameter."
         )
     else:
         # Config has user field - standard API key auth
