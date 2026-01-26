@@ -1193,19 +1193,26 @@ class BaseCohere:
             print(f"Embedding {embedding.index}: {embedding.embedding[:5]}...")
             # Process/save embedding immediately
         """
-        if not texts:
+        # Validate inputs
+        if texts is None or texts is OMIT:
             return
-            
+        if batch_size < 1:
+            raise ValueError("batch_size must be at least 1")
+
         from .streaming_utils import StreamingEmbedParser
-        
+
         # Process texts in batches
-        texts_list = list(texts) if texts else []
-        total_embeddings_yielded = 0
-        
+        texts_list = list(texts)
+        if not texts_list:
+            return
+
+        # Track text index separately from embedding index (for multiple embedding types)
+        global_text_index = 0
+
         for batch_start in range(0, len(texts_list), batch_size):
             batch_end = min(batch_start + batch_size, len(texts_list))
             batch_texts = texts_list[batch_start:batch_end]
-            
+
             # Get response for this batch
             response = self._raw_client.embed(
                 texts=batch_texts,
@@ -1215,15 +1222,15 @@ class BaseCohere:
                 truncate=truncate,
                 request_options=request_options,
             )
-            
+
             # Parse embeddings from response incrementally
             parser = StreamingEmbedParser(response._response, batch_texts)
-            for i, embedding in enumerate(parser.iter_embeddings()):
-                # Adjust index for global position
-                embedding.index = batch_start + i
-                embedding.text = texts_list[embedding.index]
+            for embedding in parser.iter_embeddings():
+                # The parser tracks text index per embedding type
+                # Adjust text reference to use batch_texts mapping
+                text_index_in_batch = batch_texts.index(embedding.text) if embedding.text in batch_texts else 0
+                embedding.index = batch_start + text_index_in_batch
                 yield embedding
-            total_embeddings_yielded += len(batch_texts)
 
     def rerank(
         self,
