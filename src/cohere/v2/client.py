@@ -66,6 +66,7 @@ class V2Client:
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatStreamRequestToolChoice] = OMIT,
         thinking: typing.Optional[Thinking] = OMIT,
+        priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[V2ChatStreamResponse]:
         """
@@ -76,7 +77,7 @@ class V2Client:
         Parameters
         ----------
         model : str
-            The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
+            The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models).
 
         messages : ChatMessages
 
@@ -158,6 +159,9 @@ class V2Client:
 
         thinking : typing.Optional[Thinking]
 
+        priority : typing.Optional[int]
+            Controls how early the request is handled. Lower numbers indicate higher priority (default: 0, the highest). When the system is under load, higher-priority requests are processed first and are the least likely to be dropped.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -175,10 +179,10 @@ class V2Client:
             token="YOUR_TOKEN",
         )
         response = client.v2.chat_stream(
-            model="command-r",
+            model="command-a-03-2025",
             messages=[
                 UserChatMessageV2(
-                    content="Hello!",
+                    content="Tell me about LLMs",
                 )
             ],
         )
@@ -205,6 +209,7 @@ class V2Client:
             logprobs=logprobs,
             tool_choice=tool_choice,
             thinking=thinking,
+            priority=priority,
             request_options=request_options,
         ) as r:
             yield from r.data
@@ -231,6 +236,7 @@ class V2Client:
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatRequestToolChoice] = OMIT,
         thinking: typing.Optional[Thinking] = OMIT,
+        priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> V2ChatResponse:
         """
@@ -241,7 +247,7 @@ class V2Client:
         Parameters
         ----------
         model : str
-            The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
+            The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models).
 
         messages : ChatMessages
 
@@ -322,6 +328,9 @@ class V2Client:
             **Note**: This parameter is only compatible with models [Command-r7b](https://docs.cohere.com/v2/docs/command-r7b) and newer.
 
         thinking : typing.Optional[Thinking]
+
+        priority : typing.Optional[int]
+            Controls how early the request is handled. Lower numbers indicate higher priority (default: 0, the highest). When the system is under load, higher-priority requests are processed first and are the least likely to be dropped.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -368,6 +377,7 @@ class V2Client:
             logprobs=logprobs,
             tool_choice=tool_choice,
             thinking=thinking,
+            priority=priority,
             request_options=request_options,
         )
         return _response.data
@@ -384,6 +394,7 @@ class V2Client:
         output_dimension: typing.Optional[int] = OMIT,
         embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
         truncate: typing.Optional[V2EmbedRequestTruncate] = OMIT,
+        priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> EmbedByTypeResponse:
         """
@@ -406,7 +417,7 @@ class V2Client:
         images : typing.Optional[typing.Sequence[str]]
             An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
 
-            The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
+            The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg`, `image/png`, `image/webp`, or `image/gif` format and has a maximum size of 5MB.
 
             Image embeddings are supported with Embed v3.0 and newer models.
 
@@ -436,6 +447,9 @@ class V2Client:
             Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
 
             If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
+
+        priority : typing.Optional[int]
+            Controls how early the request is handled. Lower numbers indicate higher priority (default: 0, the highest). When the system is under load, higher-priority requests are processed first and are the least likely to be dropped.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -470,6 +484,7 @@ class V2Client:
             output_dimension=output_dimension,
             embedding_types=embedding_types,
             truncate=truncate,
+            priority=priority,
             request_options=request_options,
         )
         return _response.data
@@ -482,6 +497,7 @@ class V2Client:
         documents: typing.Sequence[str],
         top_n: typing.Optional[int] = OMIT,
         max_tokens_per_doc: typing.Optional[int] = OMIT,
+        priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> V2RerankResponse:
         """
@@ -509,6 +525,9 @@ class V2Client:
         max_tokens_per_doc : typing.Optional[int]
             Defaults to `4096`. Long documents will be automatically truncated to the specified number of tokens.
 
+        priority : typing.Optional[int]
+            Controls how early the request is handled. Lower numbers indicate higher priority (default: 0, the highest). When the system is under load, higher-priority requests are processed first and are the least likely to be dropped.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -535,7 +554,7 @@ class V2Client:
             ],
             query="What is the capital of the United States?",
             top_n=3,
-            model="rerank-v3.5",
+            model="rerank-v4.0-pro",
         )
         """
         _response = self._raw_client.rerank(
@@ -544,6 +563,7 @@ class V2Client:
             documents=documents,
             top_n=top_n,
             max_tokens_per_doc=max_tokens_per_doc,
+            priority=priority,
             request_options=request_options,
         )
         return _response.data
@@ -586,6 +606,7 @@ class AsyncV2Client:
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatStreamRequestToolChoice] = OMIT,
         thinking: typing.Optional[Thinking] = OMIT,
+        priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[V2ChatStreamResponse]:
         """
@@ -596,7 +617,7 @@ class AsyncV2Client:
         Parameters
         ----------
         model : str
-            The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
+            The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models).
 
         messages : ChatMessages
 
@@ -678,6 +699,9 @@ class AsyncV2Client:
 
         thinking : typing.Optional[Thinking]
 
+        priority : typing.Optional[int]
+            Controls how early the request is handled. Lower numbers indicate higher priority (default: 0, the highest). When the system is under load, higher-priority requests are processed first and are the least likely to be dropped.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -700,10 +724,10 @@ class AsyncV2Client:
 
         async def main() -> None:
             response = await client.v2.chat_stream(
-                model="command-r",
+                model="command-a-03-2025",
                 messages=[
                     UserChatMessageV2(
-                        content="Hello!",
+                        content="Tell me about LLMs",
                     )
                 ],
             )
@@ -733,6 +757,7 @@ class AsyncV2Client:
             logprobs=logprobs,
             tool_choice=tool_choice,
             thinking=thinking,
+            priority=priority,
             request_options=request_options,
         ) as r:
             async for _chunk in r.data:
@@ -760,6 +785,7 @@ class AsyncV2Client:
         logprobs: typing.Optional[bool] = OMIT,
         tool_choice: typing.Optional[V2ChatRequestToolChoice] = OMIT,
         thinking: typing.Optional[Thinking] = OMIT,
+        priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> V2ChatResponse:
         """
@@ -770,7 +796,7 @@ class AsyncV2Client:
         Parameters
         ----------
         model : str
-            The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/v2/docs/chat-fine-tuning) model.
+            The name of a compatible [Cohere model](https://docs.cohere.com/v2/docs/models).
 
         messages : ChatMessages
 
@@ -851,6 +877,9 @@ class AsyncV2Client:
             **Note**: This parameter is only compatible with models [Command-r7b](https://docs.cohere.com/v2/docs/command-r7b) and newer.
 
         thinking : typing.Optional[Thinking]
+
+        priority : typing.Optional[int]
+            Controls how early the request is handled. Lower numbers indicate higher priority (default: 0, the highest). When the system is under load, higher-priority requests are processed first and are the least likely to be dropped.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -905,6 +934,7 @@ class AsyncV2Client:
             logprobs=logprobs,
             tool_choice=tool_choice,
             thinking=thinking,
+            priority=priority,
             request_options=request_options,
         )
         return _response.data
@@ -921,6 +951,7 @@ class AsyncV2Client:
         output_dimension: typing.Optional[int] = OMIT,
         embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
         truncate: typing.Optional[V2EmbedRequestTruncate] = OMIT,
+        priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> EmbedByTypeResponse:
         """
@@ -943,7 +974,7 @@ class AsyncV2Client:
         images : typing.Optional[typing.Sequence[str]]
             An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
 
-            The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg` or `image/png` format and has a maximum size of 5MB.
+            The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg`, `image/png`, `image/webp`, or `image/gif` format and has a maximum size of 5MB.
 
             Image embeddings are supported with Embed v3.0 and newer models.
 
@@ -973,6 +1004,9 @@ class AsyncV2Client:
             Passing `START` will discard the start of the input. `END` will discard the end of the input. In both cases, input is discarded until the remaining input is exactly the maximum input token length for the model.
 
             If `NONE` is selected, when the input exceeds the maximum input token length an error will be returned.
+
+        priority : typing.Optional[int]
+            Controls how early the request is handled. Lower numbers indicate higher priority (default: 0, the highest). When the system is under load, higher-priority requests are processed first and are the least likely to be dropped.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1015,6 +1049,7 @@ class AsyncV2Client:
             output_dimension=output_dimension,
             embedding_types=embedding_types,
             truncate=truncate,
+            priority=priority,
             request_options=request_options,
         )
         return _response.data
@@ -1027,6 +1062,7 @@ class AsyncV2Client:
         documents: typing.Sequence[str],
         top_n: typing.Optional[int] = OMIT,
         max_tokens_per_doc: typing.Optional[int] = OMIT,
+        priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> V2RerankResponse:
         """
@@ -1053,6 +1089,9 @@ class AsyncV2Client:
 
         max_tokens_per_doc : typing.Optional[int]
             Defaults to `4096`. Long documents will be automatically truncated to the specified number of tokens.
+
+        priority : typing.Optional[int]
+            Controls how early the request is handled. Lower numbers indicate higher priority (default: 0, the highest). When the system is under load, higher-priority requests are processed first and are the least likely to be dropped.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1085,7 +1124,7 @@ class AsyncV2Client:
                 ],
                 query="What is the capital of the United States?",
                 top_n=3,
-                model="rerank-v3.5",
+                model="rerank-v4.0-pro",
             )
 
 
@@ -1097,6 +1136,7 @@ class AsyncV2Client:
             documents=documents,
             top_n=top_n,
             max_tokens_per_doc=max_tokens_per_doc,
+            priority=priority,
             request_options=request_options,
         )
         return _response.data

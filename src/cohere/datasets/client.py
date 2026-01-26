@@ -77,13 +77,26 @@ class DatasetsClient:
 
         Examples
         --------
+        import datetime
+
         from cohere import Client
 
         client = Client(
             client_name="YOUR_CLIENT_NAME",
             token="YOUR_TOKEN",
         )
-        client.datasets.list()
+        client.datasets.list(
+            dataset_type="datasetType",
+            before=datetime.datetime.fromisoformat(
+                "2024-01-15 09:30:00+00:00",
+            ),
+            after=datetime.datetime.fromisoformat(
+                "2024-01-15 09:30:00+00:00",
+            ),
+            limit=1.1,
+            offset=1.1,
+            validation_status="unknown",
+        )
         """
         _response = self._raw_client.list(
             dataset_type=dataset_type,
@@ -120,7 +133,7 @@ class DatasetsClient:
             The name of the uploaded dataset.
 
         type : DatasetType
-            The dataset type, which is used to validate the data. Valid types are `embed-input`, `reranker-finetune-input`, `single-label-classification-finetune-input`, `chat-finetune-input`, and `multi-label-classification-finetune-input`.
+            The dataset type, which is used to validate the data. The only valid type is `embed-input` used in conjunction with the Embed Jobs API.
 
         data : core.File
             See core.File for more documentation
@@ -165,6 +178,10 @@ class DatasetsClient:
         client.datasets.create(
             name="name",
             type="embed-input",
+            keep_original_file=True,
+            skip_malformed_input=True,
+            text_separator="text_separator",
+            csv_delimiter="csv_delimiter",
         )
         """
         _response = self._raw_client.create(
@@ -334,6 +351,7 @@ class AsyncDatasetsClient:
         Examples
         --------
         import asyncio
+        import datetime
 
         from cohere import AsyncClient
 
@@ -344,7 +362,18 @@ class AsyncDatasetsClient:
 
 
         async def main() -> None:
-            await client.datasets.list()
+            await client.datasets.list(
+                dataset_type="datasetType",
+                before=datetime.datetime.fromisoformat(
+                    "2024-01-15 09:30:00+00:00",
+                ),
+                after=datetime.datetime.fromisoformat(
+                    "2024-01-15 09:30:00+00:00",
+                ),
+                limit=1.1,
+                offset=1.1,
+                validation_status="unknown",
+            )
 
 
         asyncio.run(main())
@@ -384,7 +413,7 @@ class AsyncDatasetsClient:
             The name of the uploaded dataset.
 
         type : DatasetType
-            The dataset type, which is used to validate the data. Valid types are `embed-input`, `reranker-finetune-input`, `single-label-classification-finetune-input`, `chat-finetune-input`, and `multi-label-classification-finetune-input`.
+            The dataset type, which is used to validate the data. The only valid type is `embed-input` used in conjunction with the Embed Jobs API.
 
         data : core.File
             See core.File for more documentation
@@ -434,6 +463,10 @@ class AsyncDatasetsClient:
             await client.datasets.create(
                 name="name",
                 type="embed-input",
+                keep_original_file=True,
+                skip_malformed_input=True,
+                text_separator="text_separator",
+                csv_delimiter="csv_delimiter",
             )
 
 

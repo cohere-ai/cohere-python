@@ -13,6 +13,9 @@ from . import EmbedResponse, EmbeddingsFloatsEmbedResponse, EmbeddingsByTypeEmbe
 from .datasets import DatasetsCreateResponse, DatasetsGetResponse
 from .overrides import get_fields
 
+# Note: utils.py does NOT call run_overrides() itself - that's done in client.py
+# which imports utils.py. This ensures overrides are applied when client is used.
+
 
 def get_terminal_states():
     return get_success_states() | get_failed_states()
