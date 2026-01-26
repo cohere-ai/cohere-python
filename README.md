@@ -106,7 +106,17 @@ co = cohere.OciClient(
 )
 ```
 
-**3. Direct Credentials**
+**3. Session-based Authentication (Security Token)**
+```Python
+# Works with OCI CLI session tokens
+co = cohere.OciClient(
+    oci_profile="MY_SESSION_PROFILE",  # Profile with security_token_file
+    oci_region="us-chicago-1",
+    oci_compartment_id="ocid1.compartment.oc1...",
+)
+```
+
+**4. Direct Credentials**
 ```Python
 co = cohere.OciClient(
     oci_user_id="ocid1.user.oc1...",
@@ -118,7 +128,7 @@ co = cohere.OciClient(
 )
 ```
 
-**4. Instance Principal (for OCI Compute instances)**
+**5. Instance Principal (for OCI Compute instances)**
 ```Python
 co = cohere.OciClient(
     auth_type="instance_principal",
