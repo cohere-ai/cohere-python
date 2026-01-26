@@ -2,6 +2,7 @@
 
 import email.utils
 import json
+import os
 import typing
 import uuid
 
@@ -368,7 +369,8 @@ def map_request_to_oci(
         signer = oci_config["signer"]  # Instance/resource principal
     elif "security_token_file" in oci_config:
         # Session-based authentication with security token
-        with open(oci_config["security_token_file"], "r") as f:
+        token_file_path = os.path.expanduser(oci_config["security_token_file"])
+        with open(token_file_path, "r") as f:
             security_token = f.read().strip()
 
         # Load private key using OCI's utility function
@@ -800,9 +802,8 @@ def transform_oci_response_to_cohere(
     elif endpoint == "chat" or endpoint == "chat_stream":
         chat_response = oci_response.get("chatResponse", {})
 
-        # Detect V2 response (has apiFormat field)
-        is_v2 = chat_response.get("apiFormat") == "COHEREV2"
-
+        # Use the is_v2 parameter passed in (determined from client type)
+        # OCI response also includes apiFormat field for verification if needed
         if is_v2:
             # V2 response transformation
             # Extract usage for V2
