@@ -62,7 +62,10 @@ class TestOciClient(unittest.TestCase):
         self.assertIsNotNone(response.embeddings)
         self.assertEqual(len(response.embeddings), 1)
 
-    @unittest.skip("Multiple embedding types not yet implemented for OCI")
+    @unittest.skip(
+        "OCI on-demand models don't support multiple embedding types in a single call. "
+        "The embedding_types parameter in OCI accepts a single value, not a list."
+    )
     def test_embed_multiple_types(self):
         """Test embedding with multiple embedding types."""
         response = self.client.embed(
@@ -114,7 +117,10 @@ class TestOciClient(unittest.TestCase):
         text_events = [e for e in events if hasattr(e, "text") and e.text]
         self.assertTrue(len(text_events) > 0)
 
-    @unittest.skip("OCI TEXT_GENERATION models are finetune base models - not callable via on-demand inference")
+    @unittest.skip(
+        "OCI TEXT_GENERATION models are finetune base models, not available via on-demand inference. "
+        "Only CHAT models (command-r, command-a) support on-demand inference on OCI."
+    )
     def test_generate(self):
         """Test text generation with OCI."""
         response = self.client.generate(
@@ -128,7 +134,10 @@ class TestOciClient(unittest.TestCase):
         self.assertTrue(len(response.generations) > 0)
         self.assertIsNotNone(response.generations[0].text)
 
-    @unittest.skip("OCI TEXT_GENERATION models are finetune base models - not callable via on-demand inference")
+    @unittest.skip(
+        "OCI TEXT_GENERATION models are finetune base models, not available via on-demand inference. "
+        "Only CHAT models (command-r, command-a) support on-demand inference on OCI."
+    )
     def test_generate_stream(self):
         """Test streaming text generation with OCI."""
         events = []
@@ -141,7 +150,10 @@ class TestOciClient(unittest.TestCase):
 
         self.assertTrue(len(events) > 0)
 
-    @unittest.skip("OCI TEXT_RERANK models are base models - not callable via on-demand inference")
+    @unittest.skip(
+        "OCI TEXT_RERANK models are base models, not available via on-demand inference. "
+        "These models require fine-tuning and deployment before use on OCI."
+    )
     def test_rerank(self):
         """Test reranking with OCI."""
         query = "What is the capital of France?"
@@ -185,17 +197,34 @@ class TestOciClientV2(unittest.TestCase):
             oci_profile=profile,
         )
 
-    @unittest.skip("Embed API is identical in V1 and V2 - use V1 client for embed")
     def test_embed_v2(self):
-        """Test embedding with v2 client (same as V1 for embed)."""
+        """Test embedding with v2 client."""
         response = self.client.embed(
             model="embed-english-v3.0",
-            texts=["Hello from v2"],
+            texts=["Hello from v2", "Second text"],
             input_type="search_document",
         )
 
         self.assertIsNotNone(response)
         self.assertIsNotNone(response.embeddings)
+        # V2 returns embeddings as a dict with "float" key
+        self.assertIsNotNone(response.embeddings.float_)
+        self.assertEqual(len(response.embeddings.float_), 2)
+        # Verify embedding dimensions (1024 for embed-english-v3.0)
+        self.assertEqual(len(response.embeddings.float_[0]), 1024)
+
+    def test_embed_with_model_prefix_v2(self):
+        """Test embedding with 'cohere.' model prefix on v2 client."""
+        response = self.client.embed(
+            model="cohere.embed-english-v3.0",
+            texts=["Test with prefix"],
+            input_type="search_document",
+        )
+
+        self.assertIsNotNone(response)
+        self.assertIsNotNone(response.embeddings)
+        self.assertIsNotNone(response.embeddings.float_)
+        self.assertEqual(len(response.embeddings.float_), 1)
 
     def test_chat_v2(self):
         """Test chat with v2 client."""
@@ -207,7 +236,41 @@ class TestOciClientV2(unittest.TestCase):
         self.assertIsNotNone(response)
         self.assertIsNotNone(response.message)
 
-    @unittest.skip("OCI TEXT_RERANK models are base models - not callable via on-demand inference")
+    def test_chat_stream_v2(self):
+        """Test streaming chat with v2 client."""
+        events = []
+        for event in self.client.chat_stream(
+            model="command-a-03-2025",
+            messages=[{"role": "user", "content": "Count from 1 to 3"}],
+        ):
+            events.append(event)
+
+        self.assertTrue(len(events) > 0)
+        # Verify we received content-delta events with text
+        content_delta_events = [e for e in events if hasattr(e, "type") and e.type == "content-delta"]
+        self.assertTrue(len(content_delta_events) > 0)
+
+        # Verify we can extract text from events
+        full_text = ""
+        for event in events:
+            if (
+                hasattr(event, "delta")
+                and event.delta
+                and hasattr(event.delta, "message")
+                and event.delta.message
+                and hasattr(event.delta.message, "content")
+                and event.delta.message.content
+                and hasattr(event.delta.message.content, "text")
+            ):
+                full_text += event.delta.message.content.text
+
+        # Should have received some text
+        self.assertTrue(len(full_text) > 0)
+
+    @unittest.skip(
+        "OCI TEXT_RERANK models are base models, not available via on-demand inference. "
+        "These models require fine-tuning and deployment before use on OCI."
+    )
     def test_rerank_v2(self):
         """Test reranking with v2 client."""
         response = self.client.rerank(
@@ -378,7 +441,10 @@ class TestOciClientModels(unittest.TestCase):
         )
         self.assertIsNotNone(response.text)
 
-    @unittest.skip("OCI TEXT_RERANK models are base models - not callable via on-demand inference")
+    @unittest.skip(
+        "OCI TEXT_RERANK models are base models, not available via on-demand inference. "
+        "These models require fine-tuning and deployment before use on OCI."
+    )
     def test_rerank_v3(self):
         """Test rerank-english-v3.0 model."""
         response = self.client.rerank(

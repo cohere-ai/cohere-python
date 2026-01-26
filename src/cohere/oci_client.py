@@ -119,6 +119,7 @@ class OciClient(Client):
                     oci_config=oci_config,
                     oci_region=oci_region,
                     oci_compartment_id=oci_compartment_id,
+                    is_v2_client=False,
                 ),
                 timeout=timeout,
             ),
@@ -183,6 +184,7 @@ class OciClientV2(ClientV2):
                     oci_config=oci_config,
                     oci_region=oci_region,
                     oci_compartment_id=oci_compartment_id,
+                    is_v2_client=True,
                 ),
                 timeout=timeout,
             ),
@@ -270,6 +272,7 @@ def get_event_hooks(
     oci_config: typing.Dict[str, typing.Any],
     oci_region: str,
     oci_compartment_id: str,
+    is_v2_client: bool = False,
 ) -> typing.Dict[str, typing.List[EventHook]]:
     """
     Create httpx event hooks for OCI request/response transformation.
@@ -278,6 +281,7 @@ def get_event_hooks(
         oci_config: OCI configuration dictionary
         oci_region: OCI region (e.g., "us-chicago-1")
         oci_compartment_id: OCI compartment OCID
+        is_v2_client: Whether this is for OciClientV2 (True) or OciClient (False)
 
     Returns:
         Dictionary of event hooks for httpx
@@ -288,6 +292,7 @@ def get_event_hooks(
                 oci_config=oci_config,
                 oci_region=oci_region,
                 oci_compartment_id=oci_compartment_id,
+                is_v2_client=is_v2_client,
             ),
         ],
         "response": [map_response_from_oci()],
@@ -298,6 +303,7 @@ def map_request_to_oci(
     oci_config: typing.Dict[str, typing.Any],
     oci_region: str,
     oci_compartment_id: str,
+    is_v2_client: bool = False,
 ) -> EventHook:
     """
     Create event hook that transforms Cohere requests to OCI format and signs them.
@@ -306,6 +312,7 @@ def map_request_to_oci(
         oci_config: OCI configuration dictionary
         oci_region: OCI region
         oci_compartment_id: OCI compartment OCID
+        is_v2_client: Whether this is for OciClientV2 (True) or OciClient (False)
 
     Returns:
         Event hook function for httpx
@@ -393,6 +400,10 @@ def map_request_to_oci(
         request.extensions["endpoint"] = endpoint
         request.extensions["cohere_body"] = body
         request.extensions["is_stream"] = "stream" in endpoint or body.get("stream", False)
+        # Store V2 detection for streaming event transformation
+        # For chat, detect V2 by presence of "messages" field (V2) vs "message" field (V1)
+        # For other endpoints (embed, rerank), use the client type
+        request.extensions["is_v2"] = is_v2_client or ("messages" in body)
 
     return _event_hook
 
@@ -408,6 +419,7 @@ def map_response_from_oci() -> EventHook:
     def _hook(response: httpx.Response) -> None:
         endpoint = response.request.extensions["endpoint"]
         is_stream = response.request.extensions.get("is_stream", False)
+        is_v2 = response.request.extensions.get("is_v2", False)
 
         output: typing.Iterator[bytes]
 
@@ -419,7 +431,7 @@ def map_response_from_oci() -> EventHook:
         # For streaming responses, wrap the stream with a transformer
         if is_stream:
             original_stream = response.stream
-            transformed_stream = transform_oci_stream_wrapper(original_stream, endpoint)
+            transformed_stream = transform_oci_stream_wrapper(original_stream, endpoint, is_v2)
             response.stream = Streamer(transformed_stream)
             # Reset consumption flags
             if hasattr(response, "_content"):
@@ -430,7 +442,7 @@ def map_response_from_oci() -> EventHook:
 
         # Handle non-streaming responses
         oci_response = json.loads(response.read())
-        cohere_response = transform_oci_response_to_cohere(endpoint, oci_response)
+        cohere_response = transform_oci_response_to_cohere(endpoint, oci_response, is_v2)
         output = iter([json.dumps(cohere_response).encode("utf-8")])
 
         response.stream = Streamer(output)
@@ -687,7 +699,7 @@ def transform_request_to_oci(
 
 
 def transform_oci_response_to_cohere(
-    endpoint: str, oci_response: typing.Dict[str, typing.Any]
+    endpoint: str, oci_response: typing.Dict[str, typing.Any], is_v2: bool = False
 ) -> typing.Dict[str, typing.Any]:
     """
     Transform OCI response to Cohere format.
@@ -695,6 +707,7 @@ def transform_oci_response_to_cohere(
     Args:
         endpoint: Cohere endpoint name
         oci_response: OCI response body
+        is_v2: Whether this is a V2 API request
 
     Returns:
         Transformed response in Cohere format
@@ -702,8 +715,15 @@ def transform_oci_response_to_cohere(
     if endpoint == "embed":
         # OCI returns embeddings in "embeddings" field, may have multiple types
         embeddings_data = oci_response.get("embeddings", {})
-        # For now, handle float embeddings (most common case)
-        embeddings = embeddings_data.get("float", []) if isinstance(embeddings_data, dict) else embeddings_data
+
+        # V2 expects embeddings as a dict with type keys (float, int8, etc.)
+        # V1 expects embeddings as a direct list
+        if is_v2:
+            # Keep the dict structure for V2
+            embeddings = embeddings_data if isinstance(embeddings_data, dict) else {"float": embeddings_data}
+        else:
+            # Extract just the float embeddings for V1
+            embeddings = embeddings_data.get("float", []) if isinstance(embeddings_data, dict) else embeddings_data
 
         # Build proper meta structure
         meta = {
@@ -828,7 +848,7 @@ def transform_oci_response_to_cohere(
 
 
 def transform_oci_stream_wrapper(
-    stream: typing.Iterator[bytes], endpoint: str
+    stream: typing.Iterator[bytes], endpoint: str, is_v2: bool = False
 ) -> typing.Iterator[bytes]:
     """
     Wrap OCI stream and transform events to Cohere format.
@@ -836,6 +856,7 @@ def transform_oci_stream_wrapper(
     Args:
         stream: Original OCI stream iterator
         endpoint: Cohere endpoint name
+        is_v2: Whether this is a V2 API request
 
     Yields:
         Bytes of transformed streaming events
@@ -855,8 +876,12 @@ def transform_oci_stream_wrapper(
 
                 try:
                     oci_event = json.loads(data_str)
-                    cohere_event = transform_stream_event(endpoint, oci_event)
-                    yield json.dumps(cohere_event).encode("utf-8") + b"\n"
+                    cohere_event = transform_stream_event(endpoint, oci_event, is_v2)
+                    # V2 expects SSE format with "data: " prefix and double newline, V1 expects plain JSON
+                    if is_v2:
+                        yield b"data: " + json.dumps(cohere_event).encode("utf-8") + b"\n\n"
+                    else:
+                        yield json.dumps(cohere_event).encode("utf-8") + b"\n"
                 except json.JSONDecodeError:
                     continue
 
@@ -891,7 +916,7 @@ def transform_oci_stream_response(
 
 
 def transform_stream_event(
-    endpoint: str, oci_event: typing.Dict[str, typing.Any]
+    endpoint: str, oci_event: typing.Dict[str, typing.Any], is_v2: bool = False
 ) -> typing.Dict[str, typing.Any]:
     """
     Transform individual OCI stream event to Cohere format.
@@ -899,18 +924,54 @@ def transform_stream_event(
     Args:
         endpoint: Cohere endpoint name
         oci_event: OCI stream event
+        is_v2: Whether this is a V2 API request
 
     Returns:
         Transformed event in Cohere format
     """
     if endpoint in ["chat_stream", "chat"]:
-        return {
-            "event_type": "text-generation",
-            "text": oci_event.get("text", ""),
-            "is_finished": oci_event.get("isFinished", False),
-        }
+        if is_v2:
+            # V2 API format: OCI returns full message structure in each event
+            # Extract text from nested structure: message.content[0].text
+            text = ""
+            if "message" in oci_event and "content" in oci_event["message"]:
+                content_list = oci_event["message"]["content"]
+                if content_list and isinstance(content_list, list) and len(content_list) > 0:
+                    first_content = content_list[0]
+                    if "text" in first_content:
+                        text = first_content["text"]
+
+            is_finished = "finishReason" in oci_event
+
+            if is_finished:
+                # Final event - use content-end type
+                return {
+                    "type": "content-end",
+                    "index": 0,
+                }
+            else:
+                # Content delta event
+                return {
+                    "type": "content-delta",
+                    "index": 0,
+                    "delta": {
+                        "message": {
+                            "content": {
+                                "text": text,
+                            }
+                        }
+                    },
+                }
+        else:
+            # V1 API format
+            return {
+                "event_type": "text-generation",
+                "text": oci_event.get("text", ""),
+                "is_finished": oci_event.get("isFinished", False),
+            }
 
     elif endpoint in ["generate_stream", "generate"]:
+        # Generate only supports V1
         return {
             "event_type": "text-generation",
             "text": oci_event.get("text", ""),
