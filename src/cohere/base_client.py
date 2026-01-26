@@ -1207,7 +1207,6 @@ class BaseCohere:
 
         # Process texts in batches
         texts_list = list(texts)
-        total_embeddings_yielded = 0
 
         for batch_start in range(0, len(texts_list), batch_size):
             batch_end = min(batch_start + batch_size, len(texts_list))
