@@ -684,6 +684,16 @@ def transform_request_to_oci(
                 chat_request["citationOptions"] = cohere_body["citation_options"]
             if "safety_mode" in cohere_body:
                 chat_request["safetyMode"] = cohere_body["safety_mode"]
+            # Thinking parameter for Command A Reasoning models
+            if "thinking" in cohere_body:
+                thinking = cohere_body["thinking"]
+                oci_thinking: typing.Dict[str, typing.Any] = {}
+                if "type" in thinking:
+                    oci_thinking["type"] = thinking["type"].upper()
+                if "token_budget" in thinking and thinking["token_budget"] is not None:
+                    oci_thinking["token_budget"] = thinking["token_budget"]
+                if oci_thinking:
+                    chat_request["thinking"] = oci_thinking
         else:
             # V1 API: uses single message string
             chat_request["message"] = cohere_body["message"]
@@ -830,9 +840,23 @@ def transform_oci_response_to_cohere(
                     "output_tokens": usage_data.get("completionTokens", 0),
                 }
 
+            # Transform message content types from OCI (uppercase) to Cohere (lowercase)
+            message = chat_response.get("message", {})
+            if "content" in message and isinstance(message["content"], list):
+                transformed_content = []
+                for item in message["content"]:
+                    if isinstance(item, dict):
+                        transformed_item = item.copy()
+                        if "type" in transformed_item:
+                            transformed_item["type"] = transformed_item["type"].lower()
+                        transformed_content.append(transformed_item)
+                    else:
+                        transformed_content.append(item)
+                message = {**message, "content": transformed_content}
+
             return {
                 "id": chat_response.get("id", str(uuid.uuid4())),
-                "message": chat_response.get("message", {}),
+                "message": message,
                 "finish_reason": chat_response.get("finishReason", "COMPLETE").lower(),
                 "usage": usage,
             }
@@ -987,14 +1011,22 @@ def transform_stream_event(
     if endpoint in ["chat_stream", "chat"]:
         if is_v2:
             # V2 API format: OCI returns full message structure in each event
-            # Extract text from nested structure: message.content[0].text
-            text = ""
+            # Extract content from nested structure: message.content[0]
+            content_type = "text"
+            content_value = ""
+
             if "message" in oci_event and "content" in oci_event["message"]:
                 content_list = oci_event["message"]["content"]
                 if content_list and isinstance(content_list, list) and len(content_list) > 0:
                     first_content = content_list[0]
-                    if "text" in first_content:
-                        text = first_content["text"]
+                    # Detect content type (TEXT or THINKING)
+                    oci_type = first_content.get("type", "TEXT").upper()
+                    if oci_type == "THINKING":
+                        content_type = "thinking"
+                        content_value = first_content.get("thinking", "")
+                    else:
+                        content_type = "text"
+                        content_value = first_content.get("text", "")
 
             is_finished = "finishReason" in oci_event
 
@@ -1005,15 +1037,19 @@ def transform_stream_event(
                     "index": 0,
                 }
             else:
-                # Content delta event
+                # Content delta event - include type for thinking vs text
+                delta_content: typing.Dict[str, typing.Any] = {}
+                if content_type == "thinking":
+                    delta_content["thinking"] = content_value
+                else:
+                    delta_content["text"] = content_value
+
                 return {
                     "type": "content-delta",
                     "index": 0,
                     "delta": {
                         "message": {
-                            "content": {
-                                "text": text,
-                            }
+                            "content": delta_content,
                         }
                     },
                 }
