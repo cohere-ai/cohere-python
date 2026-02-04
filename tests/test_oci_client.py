@@ -236,6 +236,46 @@ class TestOciClientV2(unittest.TestCase):
         self.assertIsNotNone(response)
         self.assertIsNotNone(response.message)
 
+    @unittest.skip(
+        "Command A Reasoning model (command-a-reasoning-08-2025) may not be available in all regions. "
+        "Enable this test when the reasoning model is available in your OCI region."
+    )
+    def test_chat_v2_with_thinking(self):
+        """Test chat with thinking parameter for Command A Reasoning model."""
+        from cohere.types import Thinking
+
+        response = self.client.chat(
+            model="command-a-reasoning-08-2025",
+            messages=[{"role": "user", "content": "What is 15 * 27? Think step by step."}],
+            thinking=Thinking(type="enabled", token_budget=5000),
+        )
+
+        self.assertIsNotNone(response)
+        self.assertIsNotNone(response.message)
+        # The response should contain content (may include thinking content)
+        self.assertIsNotNone(response.message.content)
+
+    @unittest.skip(
+        "Command A Reasoning model (command-a-reasoning-08-2025) may not be available in all regions. "
+        "Enable this test when the reasoning model is available in your OCI region."
+    )
+    def test_chat_stream_v2_with_thinking(self):
+        """Test streaming chat with thinking parameter for Command A Reasoning model."""
+        from cohere.types import Thinking
+
+        events = []
+        for event in self.client.chat_stream(
+            model="command-a-reasoning-08-2025",
+            messages=[{"role": "user", "content": "What is 15 * 27? Think step by step."}],
+            thinking=Thinking(type="enabled", token_budget=5000),
+        ):
+            events.append(event)
+
+        self.assertTrue(len(events) > 0)
+        # Verify we received content-delta events
+        content_delta_events = [e for e in events if hasattr(e, "type") and e.type == "content-delta"]
+        self.assertTrue(len(content_delta_events) > 0)
+
     def test_chat_stream_v2(self):
         """Test streaming chat with v2 client."""
         events = []
@@ -453,6 +493,109 @@ class TestOciClientModels(unittest.TestCase):
             documents=["Artificial Intelligence", "Biology"],
         )
         self.assertIsNotNone(response.results)
+
+
+class TestOciClientTransformations(unittest.TestCase):
+    """Unit tests for OCI request/response transformations (no OCI credentials required)."""
+
+    def test_thinking_parameter_transformation(self):
+        """Test that thinking parameter is correctly transformed to OCI format."""
+        from cohere.oci_client import transform_request_to_oci
+
+        cohere_body = {
+            "model": "command-a-reasoning-08-2025",
+            "messages": [{"role": "user", "content": "What is 2+2?"}],
+            "thinking": {
+                "type": "enabled",
+                "token_budget": 10000,
+            },
+        }
+
+        result = transform_request_to_oci("chat", cohere_body, "compartment-123")
+
+        # Verify thinking parameter is transformed
+        chat_request = result["chatRequest"]
+        self.assertIn("thinking", chat_request)
+        self.assertEqual(chat_request["thinking"]["type"], "ENABLED")
+        self.assertEqual(chat_request["thinking"]["token_budget"], 10000)
+
+    def test_thinking_parameter_disabled(self):
+        """Test that disabled thinking is correctly transformed."""
+        from cohere.oci_client import transform_request_to_oci
+
+        cohere_body = {
+            "model": "command-a-reasoning-08-2025",
+            "messages": [{"role": "user", "content": "Hello"}],
+            "thinking": {
+                "type": "disabled",
+            },
+        }
+
+        result = transform_request_to_oci("chat", cohere_body, "compartment-123")
+
+        chat_request = result["chatRequest"]
+        self.assertIn("thinking", chat_request)
+        self.assertEqual(chat_request["thinking"]["type"], "DISABLED")
+        self.assertNotIn("token_budget", chat_request["thinking"])
+
+    def test_thinking_response_transformation(self):
+        """Test that thinking content in response is correctly transformed."""
+        from cohere.oci_client import transform_oci_response_to_cohere
+
+        oci_response = {
+            "chatResponse": {
+                "id": "test-id",
+                "message": {
+                    "role": "ASSISTANT",
+                    "content": [
+                        {"type": "THINKING", "thinking": "Let me think about this..."},
+                        {"type": "TEXT", "text": "The answer is 4."},
+                    ],
+                },
+                "finishReason": "COMPLETE",
+                "usage": {"inputTokens": 10, "completionTokens": 20},
+            }
+        }
+
+        result = transform_oci_response_to_cohere("chat", oci_response, is_v2=True)
+
+        # Verify content types are lowercased
+        self.assertEqual(result["message"]["content"][0]["type"], "thinking")
+        self.assertEqual(result["message"]["content"][1]["type"], "text")
+
+    def test_stream_event_thinking_transformation(self):
+        """Test that thinking content in stream events is correctly transformed."""
+        from cohere.oci_client import transform_stream_event
+
+        # OCI thinking event
+        oci_event = {
+            "message": {
+                "content": [{"type": "THINKING", "thinking": "Reasoning step..."}]
+            }
+        }
+
+        result = transform_stream_event("chat", oci_event, is_v2=True)
+
+        self.assertEqual(result["type"], "content-delta")
+        self.assertIn("thinking", result["delta"]["message"]["content"])
+        self.assertEqual(result["delta"]["message"]["content"]["thinking"], "Reasoning step...")
+
+    def test_stream_event_text_transformation(self):
+        """Test that text content in stream events is correctly transformed."""
+        from cohere.oci_client import transform_stream_event
+
+        # OCI text event
+        oci_event = {
+            "message": {
+                "content": [{"type": "TEXT", "text": "The answer is..."}]
+            }
+        }
+
+        result = transform_stream_event("chat", oci_event, is_v2=True)
+
+        self.assertEqual(result["type"], "content-delta")
+        self.assertIn("text", result["delta"]["message"]["content"])
+        self.assertEqual(result["delta"]["message"]["content"]["text"], "The answer is...")
 
 
 if __name__ == "__main__":
