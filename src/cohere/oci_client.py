@@ -8,14 +8,6 @@ import uuid
 
 import httpx
 import requests
-from . import (
-    EmbedResponse,
-    GenerateStreamedResponse,
-    Generation,
-    NonStreamedChatResponse,
-    RerankResponse,
-    StreamedChatResponse,
-)
 from .client import Client, ClientEnvironment
 from .client_v2 import ClientV2
 from .manually_maintained.lazy_oci_deps import lazy_oci
@@ -239,18 +231,6 @@ class OciClientV2(ClientV2):
 EventHook = typing.Callable[..., typing.Any]
 
 
-# Response type mappings
-response_mapping: typing.Dict[str, typing.Any] = {
-    "chat": NonStreamedChatResponse,
-    "embed": EmbedResponse,
-    "generate": Generation,
-    "rerank": RerankResponse,
-}
-
-stream_response_mapping: typing.Dict[str, typing.Any] = {
-    "chat": StreamedChatResponse,
-    "generate": GenerateStreamedResponse,
-}
 
 
 class Streamer(SyncByteStream):
@@ -685,7 +665,7 @@ def transform_request_to_oci(
             if "safety_mode" in cohere_body:
                 chat_request["safetyMode"] = cohere_body["safety_mode"]
             # Thinking parameter for Command A Reasoning models
-            if "thinking" in cohere_body:
+            if "thinking" in cohere_body and cohere_body["thinking"] is not None:
                 thinking = cohere_body["thinking"]
                 oci_thinking: typing.Dict[str, typing.Any] = {}
                 if "type" in thinking:
@@ -840,8 +820,14 @@ def transform_oci_response_to_cohere(
                     "output_tokens": usage_data.get("completionTokens", 0),
                 }
 
-            # Transform message content types from OCI (uppercase) to Cohere (lowercase)
+            # Transform message from OCI format to Cohere format
             message = chat_response.get("message", {})
+
+            # Lowercase the role (OCI returns "ASSISTANT", Cohere expects "assistant")
+            if "role" in message:
+                message = {**message, "role": message["role"].lower()}
+
+            # Transform content types from OCI (uppercase) to Cohere (lowercase)
             if "content" in message and isinstance(message["content"], list):
                 transformed_content = []
                 for item in message["content"]:
@@ -857,7 +843,7 @@ def transform_oci_response_to_cohere(
             return {
                 "id": chat_response.get("id", str(uuid.uuid4())),
                 "message": message,
-                "finish_reason": chat_response.get("finishReason", "COMPLETE").lower(),
+                "finish_reason": chat_response.get("finishReason", "COMPLETE"),  # V2 keeps uppercase
                 "usage": usage,
             }
         else:
@@ -963,35 +949,6 @@ def transform_oci_stream_wrapper(
                         yield json.dumps(cohere_event).encode("utf-8") + b"\n"
                 except json.JSONDecodeError:
                     continue
-
-
-def transform_oci_stream_response(
-    response: httpx.Response, endpoint: str
-) -> typing.Iterator[bytes]:
-    """
-    Transform OCI streaming responses to Cohere streaming format.
-
-    OCI uses Server-Sent Events (SSE) format.
-
-    Args:
-        response: httpx Response object
-        endpoint: Cohere endpoint name
-
-    Yields:
-        Bytes of transformed streaming events
-    """
-    for line in response.iter_lines():
-        if line.startswith("data: "):
-            data_str = line[6:]  # Remove "data: " prefix
-            if data_str.strip() == "[DONE]":
-                break
-
-            try:
-                oci_event = json.loads(data_str)
-                cohere_event = transform_stream_event(endpoint, oci_event)
-                yield json.dumps(cohere_event).encode("utf-8") + b"\n"
-            except json.JSONDecodeError:
-                continue
 
 
 def transform_stream_event(
