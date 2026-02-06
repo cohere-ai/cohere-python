@@ -597,6 +597,65 @@ class TestOciClientTransformations(unittest.TestCase):
         self.assertIn("text", result["delta"]["message"]["content"])
         self.assertEqual(result["delta"]["message"]["content"]["text"], "The answer is...")
 
+    def test_thinking_parameter_none(self):
+        """Test that thinking=None does not crash (issue: null guard)."""
+        from cohere.oci_client import transform_request_to_oci
+
+        cohere_body = {
+            "model": "command-a-03-2025",
+            "messages": [{"role": "user", "content": "Hello"}],
+            "thinking": None,  # Explicitly set to None
+        }
+
+        # Should not crash with TypeError
+        result = transform_request_to_oci("chat", cohere_body, "compartment-123")
+
+        chat_request = result["chatRequest"]
+        # thinking should not be in request when None
+        self.assertNotIn("thinking", chat_request)
+
+    def test_v2_response_role_lowercased(self):
+        """Test that V2 response message role is lowercased."""
+        from cohere.oci_client import transform_oci_response_to_cohere
+
+        oci_response = {
+            "chatResponse": {
+                "id": "test-id",
+                "message": {
+                    "role": "ASSISTANT",
+                    "content": [{"type": "TEXT", "text": "Hello"}],
+                },
+                "finishReason": "COMPLETE",
+                "usage": {"inputTokens": 10, "completionTokens": 20},
+            }
+        }
+
+        result = transform_oci_response_to_cohere("chat", oci_response, is_v2=True)
+
+        # Role should be lowercased
+        self.assertEqual(result["message"]["role"], "assistant")
+
+    def test_v2_response_finish_reason_uppercase(self):
+        """Test that V2 response finish_reason stays uppercase."""
+        from cohere.oci_client import transform_oci_response_to_cohere
+
+        oci_response = {
+            "chatResponse": {
+                "id": "test-id",
+                "message": {
+                    "role": "ASSISTANT",
+                    "content": [{"type": "TEXT", "text": "Hello"}],
+                },
+                "finishReason": "MAX_TOKENS",
+                "usage": {"inputTokens": 10, "completionTokens": 20},
+            }
+        }
+
+        result = transform_oci_response_to_cohere("chat", oci_response, is_v2=True)
+
+        # V2 finish_reason should stay uppercase
+        self.assertEqual(result["finish_reason"], "MAX_TOKENS")
+
 
 if __name__ == "__main__":
     unittest.main()
