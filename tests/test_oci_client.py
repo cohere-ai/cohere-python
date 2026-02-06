@@ -513,11 +513,11 @@ class TestOciClientTransformations(unittest.TestCase):
 
         result = transform_request_to_oci("chat", cohere_body, "compartment-123")
 
-        # Verify thinking parameter is transformed
+        # Verify thinking parameter is transformed with camelCase for OCI API
         chat_request = result["chatRequest"]
         self.assertIn("thinking", chat_request)
         self.assertEqual(chat_request["thinking"]["type"], "ENABLED")
-        self.assertEqual(chat_request["thinking"]["token_budget"], 10000)
+        self.assertEqual(chat_request["thinking"]["tokenBudget"], 10000)  # camelCase for OCI
 
     def test_thinking_parameter_disabled(self):
         """Test that disabled thinking is correctly transformed."""
@@ -655,6 +655,37 @@ class TestOciClientTransformations(unittest.TestCase):
 
         # V2 finish_reason should stay uppercase
         self.assertEqual(result["finish_reason"], "MAX_TOKENS")
+
+    def test_v2_response_tool_calls_conversion(self):
+        """Test that V2 response converts toolCalls to tool_calls."""
+        from cohere.oci_client import transform_oci_response_to_cohere
+
+        oci_response = {
+            "chatResponse": {
+                "id": "test-id",
+                "message": {
+                    "role": "ASSISTANT",
+                    "content": [{"type": "TEXT", "text": "I'll help with that."}],
+                    "toolCalls": [
+                        {
+                            "id": "call_123",
+                            "type": "function",
+                            "function": {"name": "get_weather", "arguments": '{"city": "London"}'},
+                        }
+                    ],
+                },
+                "finishReason": "TOOL_CALL",
+                "usage": {"inputTokens": 10, "completionTokens": 20},
+            }
+        }
+
+        result = transform_oci_response_to_cohere("chat", oci_response, is_v2=True)
+
+        # toolCalls should be converted to tool_calls
+        self.assertIn("tool_calls", result["message"])
+        self.assertNotIn("toolCalls", result["message"])
+        self.assertEqual(len(result["message"]["tool_calls"]), 1)
+        self.assertEqual(result["message"]["tool_calls"][0]["id"], "call_123")
 
 
 if __name__ == "__main__":
