@@ -671,7 +671,7 @@ def transform_request_to_oci(
                 if "type" in thinking:
                     oci_thinking["type"] = thinking["type"].upper()
                 if "token_budget" in thinking and thinking["token_budget"] is not None:
-                    oci_thinking["token_budget"] = thinking["token_budget"]
+                    oci_thinking["tokenBudget"] = thinking["token_budget"]
                 if oci_thinking:
                     chat_request["thinking"] = oci_thinking
         else:
@@ -839,6 +839,12 @@ def transform_oci_response_to_cohere(
                     else:
                         transformed_content.append(item)
                 message = {**message, "content": transformed_content}
+
+            # Convert toolCalls to tool_calls (OCI uses camelCase, Cohere SDK expects snake_case)
+            if "toolCalls" in message:
+                tool_calls = message["toolCalls"]
+                message = {k: v for k, v in message.items() if k != "toolCalls"}
+                message["tool_calls"] = tool_calls
 
             return {
                 "id": chat_response.get("id", str(uuid.uuid4())),
