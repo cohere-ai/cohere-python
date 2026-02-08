@@ -2,6 +2,8 @@
 
 # nopycln: file
 import datetime as dt
+import sys
+import warnings
 from collections import defaultdict
 from typing import Any, Callable, ClassVar, Dict, List, Mapping, Optional, Set, Tuple, Type, TypeVar, Union, cast
 
@@ -10,14 +12,40 @@ import pydantic
 IS_PYDANTIC_V2 = pydantic.VERSION.startswith("2.")
 
 if IS_PYDANTIC_V2:
-    from pydantic.v1.datetime_parse import parse_date as parse_date
-    from pydantic.v1.datetime_parse import parse_datetime as parse_datetime
-    from pydantic.v1.fields import ModelField as ModelField
-    from pydantic.v1.json import ENCODERS_BY_TYPE as encoders_by_type  # type: ignore[attr-defined]
-    from pydantic.v1.typing import get_args as get_args
-    from pydantic.v1.typing import get_origin as get_origin
-    from pydantic.v1.typing import is_literal_type as is_literal_type
-    from pydantic.v1.typing import is_union as is_union
+    # Suppress pydantic.v1 compatibility warnings on Python 3.14+
+    if sys.version_info >= (3, 14):
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", message="Core Pydantic V1 functionality")
+            from pydantic.v1.fields import ModelField as ModelField
+            from pydantic.v1.json import ENCODERS_BY_TYPE as encoders_by_type  # type: ignore[attr-defined]
+            from pydantic.v1.typing import get_args as get_args
+            from pydantic.v1.typing import get_origin as get_origin
+            from pydantic.v1.typing import is_literal_type as is_literal_type
+            from pydantic.v1.typing import is_union as is_union
+    else:
+        from pydantic.v1.fields import ModelField as ModelField
+        from pydantic.v1.json import ENCODERS_BY_TYPE as encoders_by_type  # type: ignore[attr-defined]
+        from pydantic.v1.typing import get_args as get_args
+        from pydantic.v1.typing import get_origin as get_origin
+        from pydantic.v1.typing import is_literal_type as is_literal_type
+        from pydantic.v1.typing import is_union as is_union
+
+    # Use TypeAdapter for datetime parsing (Python 3.14 compatible)
+    _datetime_adapter = pydantic.TypeAdapter(dt.datetime)  # type: ignore[attr-defined]
+    _date_adapter = pydantic.TypeAdapter(dt.date)  # type: ignore[attr-defined]
+
+    def parse_datetime(v: Any) -> dt.datetime:
+        """Parse datetime using Pydantic v2 TypeAdapter (Python 3.14 compatible)."""
+        if isinstance(v, dt.datetime):
+            return v
+        return _datetime_adapter.validate_python(v)
+
+    def parse_date(v: Any) -> dt.date:
+        """Parse date using Pydantic v2 TypeAdapter (Python 3.14 compatible)."""
+        if isinstance(v, dt.date):
+            return v
+        return _date_adapter.validate_python(v)
+
 else:
     from pydantic.datetime_parse import parse_date as parse_date  # type: ignore[no-redef]
     from pydantic.datetime_parse import parse_datetime as parse_datetime  # type: ignore[no-redef]
