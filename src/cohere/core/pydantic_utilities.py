@@ -42,7 +42,7 @@ if IS_PYDANTIC_V2:
 
     def parse_date(v: Any) -> dt.date:
         """Parse date using Pydantic v2 TypeAdapter (Python 3.14 compatible)."""
-        if isinstance(v, dt.date):
+        if isinstance(v, dt.date) and not isinstance(v, dt.datetime):
             return v
         return _date_adapter.validate_python(v)
 
