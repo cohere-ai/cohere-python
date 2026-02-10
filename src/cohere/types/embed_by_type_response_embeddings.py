@@ -15,12 +15,10 @@ class EmbedByTypeResponseEmbeddings(UncheckedBaseModel):
     """
 
     float_: typing_extensions.Annotated[
-        typing.Optional[typing.List[typing.List[float]]], FieldMetadata(alias="float")
-    ] = pydantic.Field(default=None)
-    """
-    An array of float embeddings.
-    """
-
+        typing.Optional[typing.List[typing.List[float]]],
+        FieldMetadata(alias="float"),
+        pydantic.Field(alias="float", description="An array of float embeddings."),
+    ] = None
     int8: typing.Optional[typing.List[typing.List[int]]] = pydantic.Field(default=None)
     """
     An array of signed int8 embeddings. Each value is between -128 and 127.

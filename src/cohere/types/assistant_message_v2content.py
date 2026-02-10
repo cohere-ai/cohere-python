@@ -2,6 +2,6 @@
 
 import typing
 
-from .assistant_message_v2content_item import AssistantMessageV2ContentItem
+from .assistant_message_v2content_one_item import AssistantMessageV2ContentOneItem
 
-AssistantMessageV2Content = typing.Union[str, typing.List[AssistantMessageV2ContentItem]]
+AssistantMessageV2Content = typing.Union[str, typing.List[AssistantMessageV2ContentOneItem]]

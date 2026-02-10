@@ -41,13 +41,11 @@ class Dataset(UncheckedBaseModel):
     Errors found during validation
     """
 
-    schema_: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="schema")] = pydantic.Field(
-        default=None
-    )
-    """
-    the avro schema of the dataset
-    """
-
+    schema_: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="schema"),
+        pydantic.Field(alias="schema", description="the avro schema of the dataset"),
+    ] = None
     required_fields: typing.Optional[typing.List[str]] = None
     preserve_fields: typing.Optional[typing.List[str]] = None
     dataset_parts: typing.Optional[typing.List[DatasetPart]] = pydantic.Field(default=None)

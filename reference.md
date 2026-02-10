@@ -1,5 +1,7 @@
 # Reference
-<details><summary><code>client.<a href="src/cohere/base_client.py">chat_stream</a>(...)</code></summary>
+<details><summary><code>client.<a href="src/cohere/base_client.py">chat_stream</a>(...) -&gt; typing.AsyncIterator[
+    AsyncHttpResponse[typing.AsyncIterator[StreamedChatResponse]]
+]</code></summary>
 <dl>
 <dd>
 
@@ -453,7 +455,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">chat</a>(...)</code></summary>
+<details><summary><code>client.<a href="src/cohere/base_client.py">chat</a>(...) -&gt; AsyncHttpResponse[NonStreamedChatResponse]</code></summary>
 <dl>
 <dd>
 
@@ -928,7 +930,9 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">generate_stream</a>(...)</code></summary>
+<details><summary><code>client.<a href="src/cohere/base_client.py">generate_stream</a>(...) -&gt; typing.AsyncIterator[
+    AsyncHttpResponse[typing.AsyncIterator[GenerateStreamedResponse]]
+]</code></summary>
 <dl>
 <dd>
 
@@ -1176,7 +1180,7 @@ WARNING: `ALL` is deprecated, and will be removed in a future release.
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">generate</a>(...)</code></summary>
+<details><summary><code>client.<a href="src/cohere/base_client.py">generate</a>(...) -&gt; AsyncHttpResponse[Generation]</code></summary>
 <dl>
 <dd>
 
@@ -1422,7 +1426,7 @@ WARNING: `ALL` is deprecated, and will be removed in a future release.
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">embed</a>(...)</code></summary>
+<details><summary><code>client.<a href="src/cohere/base_client.py">embed</a>(...) -&gt; AsyncHttpResponse[EmbedResponse]</code></summary>
 <dl>
 <dd>
 
@@ -1562,7 +1566,7 @@ If `NONE` is selected, when the input exceeds the maximum input token length an 
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">rerank</a>(...)</code></summary>
+<details><summary><code>client.<a href="src/cohere/base_client.py">rerank</a>(...) -&gt; AsyncHttpResponse[RerankResponse]</code></summary>
 <dl>
 <dd>
 
@@ -1710,7 +1714,7 @@ We recommend a maximum of 1,000 documents for optimal endpoint performance.
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">classify</a>(...)</code></summary>
+<details><summary><code>client.<a href="src/cohere/base_client.py">classify</a>(...) -&gt; AsyncHttpResponse[ClassifyResponse]</code></summary>
 <dl>
 <dd>
 
@@ -1868,7 +1872,7 @@ If `NONE` is selected, when the input exceeds the maximum input token length an 
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">summarize</a>(...)</code></summary>
+<details><summary><code>client.<a href="src/cohere/base_client.py">summarize</a>(...) -&gt; AsyncHttpResponse[SummarizeResponse]</code></summary>
 <dl>
 <dd>
 
@@ -1990,7 +1994,7 @@ client.summarize(
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">tokenize</a>(...)</code></summary>
+<details><summary><code>client.<a href="src/cohere/base_client.py">tokenize</a>(...) -&gt; AsyncHttpResponse[TokenizeResponse]</code></summary>
 <dl>
 <dd>
 
@@ -2070,7 +2074,7 @@ client.tokenize(
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">detokenize</a>(...)</code></summary>
+<details><summary><code>client.<a href="src/cohere/base_client.py">detokenize</a>(...) -&gt; AsyncHttpResponse[DetokenizeResponse]</code></summary>
 <dl>
 <dd>
 
@@ -2150,7 +2154,7 @@ client.detokenize(
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">check_api_key</a>()</code></summary>
+<details><summary><code>client.<a href="src/cohere/base_client.py">check_api_key</a>() -&gt; AsyncHttpResponse[CheckApiKeyResponse]</code></summary>
 <dl>
 <dd>
 
@@ -2212,7 +2216,9 @@ client.check_api_key()
 </details>
 
 ## V2
-<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">chat_stream</a>(...)</code></summary>
+<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">chat_stream</a>(...) -&gt; typing.AsyncIterator[
+    AsyncHttpResponse[typing.AsyncIterator[V2ChatStreamResponse]]
+]</code></summary>
 <dl>
 <dd>
 
@@ -2512,7 +2518,7 @@ If tool_choice isn't specified, then the model is free to choose whether to use 
 </dl>
 </details>
 
-<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">chat</a>(...)</code></summary>
+<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">chat</a>(...) -&gt; AsyncHttpResponse[V2ChatResponse]</code></summary>
 <dl>
 <dd>
 
@@ -2810,7 +2816,7 @@ If tool_choice isn't specified, then the model is free to choose whether to use 
 </dl>
 </details>
 
-<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">embed</a>(...)</code></summary>
+<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">embed</a>(...) -&gt; AsyncHttpResponse[EmbedByTypeResponse]</code></summary>
 <dl>
 <dd>
 
@@ -2986,7 +2992,7 @@ If `NONE` is selected, when the input exceeds the maximum input token length an 
 </dl>
 </details>
 
-<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">rerank</a>(...)</code></summary>
+<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">rerank</a>(...) -&gt; AsyncHttpResponse[V2RerankResponse]</code></summary>
 <dl>
 <dd>
 
@@ -3114,7 +3120,7 @@ For optimal performance we recommend against sending more than 1,000 documents i
 </details>
 
 ## Batches
-<details><summary><code>client.batches.<a href="src/cohere/batches/client.py">list</a>(...)</code></summary>
+<details><summary><code>client.batches.<a href="src/cohere/batches/client.py">list</a>(...) -&gt; AsyncHttpResponse[ListBatchesResponse]</code></summary>
 <dl>
 <dd>
 
@@ -3214,7 +3220,7 @@ Use `created_at` for creation time or `updated_at` for last updated time.
 </dl>
 </details>
 
-<details><summary><code>client.batches.<a href="src/cohere/batches/client.py">create</a>(...)</code></summary>
+<details><summary><code>client.batches.<a href="src/cohere/batches/client.py">create</a>(...) -&gt; AsyncHttpResponse[CreateBatchResponse]</code></summary>
 <dl>
 <dd>
 
@@ -3290,7 +3296,7 @@ client.batches.create(
 </dl>
 </details>
 
-<details><summary><code>client.batches.<a href="src/cohere/batches/client.py">retrieve</a>(...)</code></summary>
+<details><summary><code>client.batches.<a href="src/cohere/batches/client.py">retrieve</a>(...) -&gt; AsyncHttpResponse[GetBatchResponse]</code></summary>
 <dl>
 <dd>
 
@@ -3361,7 +3367,7 @@ client.batches.retrieve(
 </dl>
 </details>
 
-<details><summary><code>client.batches.<a href="src/cohere/batches/client.py">cancel</a>(...)</code></summary>
+<details><summary><code>client.batches.<a href="src/cohere/batches/client.py">cancel</a>(...) -&gt; AsyncHttpResponse[CancelBatchResponse]</code></summary>
 <dl>
 <dd>
 
@@ -3433,7 +3439,7 @@ client.batches.cancel(
 </details>
 
 ## EmbedJobs
-<details><summary><code>client.embed_jobs.<a href="src/cohere/embed_jobs/client.py">list</a>()</code></summary>
+<details><summary><code>client.embed_jobs.<a href="src/cohere/embed_jobs/client.py">list</a>() -&gt; AsyncHttpResponse[ListEmbedJobResponse]</code></summary>
 <dl>
 <dd>
 
@@ -3494,7 +3500,7 @@ client.embed_jobs.list()
 </dl>
 </details>
 
-<details><summary><code>client.embed_jobs.<a href="src/cohere/embed_jobs/client.py">create</a>(...)</code></summary>
+<details><summary><code>client.embed_jobs.<a href="src/cohere/embed_jobs/client.py">create</a>(...) -&gt; AsyncHttpResponse[CreateEmbedJobResponse]</code></summary>
 <dl>
 <dd>
 
@@ -3628,7 +3634,7 @@ Passing `START` will discard the start of the input. `END` will discard the end 
 </dl>
 </details>
 
-<details><summary><code>client.embed_jobs.<a href="src/cohere/embed_jobs/client.py">get</a>(...)</code></summary>
+<details><summary><code>client.embed_jobs.<a href="src/cohere/embed_jobs/client.py">get</a>(...) -&gt; AsyncHttpResponse[EmbedJob]</code></summary>
 <dl>
 <dd>
 
@@ -3699,7 +3705,7 @@ client.embed_jobs.get(
 </dl>
 </details>
 
-<details><summary><code>client.embed_jobs.<a href="src/cohere/embed_jobs/client.py">cancel</a>(...)</code></summary>
+<details><summary><code>client.embed_jobs.<a href="src/cohere/embed_jobs/client.py">cancel</a>(...) -&gt; AsyncHttpResponse[None]</code></summary>
 <dl>
 <dd>
 
@@ -3771,7 +3777,7 @@ client.embed_jobs.cancel(
 </details>
 
 ## Datasets
-<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">list</a>(...)</code></summary>
+<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">list</a>(...) -&gt; AsyncHttpResponse[DatasetsListResponse]</code></summary>
 <dl>
 <dd>
 
@@ -3893,7 +3899,7 @@ client.datasets.list(
 </dl>
 </details>
 
-<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">create</a>(...)</code></summary>
+<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">create</a>(...) -&gt; AsyncHttpResponse[DatasetsCreateResponse]</code></summary>
 <dl>
 <dd>
 
@@ -4045,7 +4051,7 @@ typing.Optional[core.File]` — See core.File for more documentation
 </dl>
 </details>
 
-<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">get_usage</a>()</code></summary>
+<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">get_usage</a>() -&gt; AsyncHttpResponse[DatasetsGetUsageResponse]</code></summary>
 <dl>
 <dd>
 
@@ -4106,7 +4112,7 @@ client.datasets.get_usage()
 </dl>
 </details>
 
-<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">get</a>(...)</code></summary>
+<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">get</a>(...) -&gt; AsyncHttpResponse[DatasetsGetResponse]</code></summary>
 <dl>
 <dd>
 
@@ -4177,7 +4183,7 @@ client.datasets.get(
 </dl>
 </details>
 
-<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">delete</a>(...)</code></summary>
+<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">delete</a>(...) -&gt; AsyncHttpResponse[typing.Dict[str, typing.Any]]</code></summary>
 <dl>
 <dd>
 
@@ -4249,7 +4255,7 @@ client.datasets.delete(
 </details>
 
 ## Connectors
-<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">list</a>(...)</code></summary>
+<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">list</a>(...) -&gt; AsyncHttpResponse[ListConnectorsResponse]</code></summary>
 <dl>
 <dd>
 
@@ -4329,7 +4335,7 @@ client.connectors.list(
 </dl>
 </details>
 
-<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">create</a>(...)</code></summary>
+<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">create</a>(...) -&gt; AsyncHttpResponse[CreateConnectorResponse]</code></summary>
 <dl>
 <dd>
 
@@ -4457,7 +4463,7 @@ client.connectors.create(
 </dl>
 </details>
 
-<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">get</a>(...)</code></summary>
+<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">get</a>(...) -&gt; AsyncHttpResponse[GetConnectorResponse]</code></summary>
 <dl>
 <dd>
 
@@ -4528,7 +4534,7 @@ client.connectors.get(
 </dl>
 </details>
 
-<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">delete</a>(...)</code></summary>
+<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">delete</a>(...) -&gt; AsyncHttpResponse[DeleteConnectorResponse]</code></summary>
 <dl>
 <dd>
 
@@ -4599,7 +4605,7 @@ client.connectors.delete(
 </dl>
 </details>
 
-<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">update</a>(...)</code></summary>
+<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">update</a>(...) -&gt; AsyncHttpResponse[UpdateConnectorResponse]</code></summary>
 <dl>
 <dd>
 
@@ -4726,7 +4732,7 @@ client.connectors.update(
 </dl>
 </details>
 
-<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">o_auth_authorize</a>(...)</code></summary>
+<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">o_auth_authorize</a>(...) -&gt; AsyncHttpResponse[OAuthAuthorizeResponse]</code></summary>
 <dl>
 <dd>
 
@@ -4807,7 +4813,7 @@ client.connectors.o_auth_authorize(
 </details>
 
 ## Models
-<details><summary><code>client.models.<a href="src/cohere/models/client.py">get</a>(...)</code></summary>
+<details><summary><code>client.models.<a href="src/cohere/models/client.py">get</a>(...) -&gt; AsyncHttpResponse[GetModelResponse]</code></summary>
 <dl>
 <dd>
 
@@ -4878,7 +4884,7 @@ client.models.get(
 </dl>
 </details>
 
-<details><summary><code>client.models.<a href="src/cohere/models/client.py">list</a>(...)</code></summary>
+<details><summary><code>client.models.<a href="src/cohere/models/client.py">list</a>(...) -&gt; AsyncHttpResponse[ListModelsResponse]</code></summary>
 <dl>
 <dd>
 
@@ -4980,7 +4986,7 @@ Defaults to `20`, min value of `1`, max value of `1000`.
 </details>
 
 ## /finetuning
-<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">list_finetuned_models</a>(...)</code></summary>
+<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">list_finetuned_models</a>(...) -&gt; AsyncHttpResponse[ListFinetunedModelsResponse]</code></summary>
 <dl>
 <dd>
 
@@ -5079,7 +5085,7 @@ Supported sorting fields:
 </dl>
 </details>
 
-<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">create_finetuned_model</a>(...)</code></summary>
+<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">create_finetuned_model</a>(...) -&gt; AsyncHttpResponse[CreateFinetunedModelResponse]</code></summary>
 <dl>
 <dd>
 
@@ -5159,7 +5165,7 @@ client.finetuning.create_finetuned_model(
 </dl>
 </details>
 
-<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">get_finetuned_model</a>(...)</code></summary>
+<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">get_finetuned_model</a>(...) -&gt; AsyncHttpResponse[GetFinetunedModelResponse]</code></summary>
 <dl>
 <dd>
 
@@ -5230,7 +5236,7 @@ client.finetuning.get_finetuned_model(
 </dl>
 </details>
 
-<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">delete_finetuned_model</a>(...)</code></summary>
+<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">delete_finetuned_model</a>(...) -&gt; AsyncHttpResponse[DeleteFinetunedModelResponse]</code></summary>
 <dl>
 <dd>
 
@@ -5302,7 +5308,7 @@ client.finetuning.delete_finetuned_model(
 </dl>
 </details>
 
-<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">update_finetuned_model</a>(...)</code></summary>
+<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">update_finetuned_model</a>(...) -&gt; AsyncHttpResponse[UpdateFinetunedModelResponse]</code></summary>
 <dl>
 <dd>
 
@@ -5405,7 +5411,7 @@ client.finetuning.update_finetuned_model(
 </dl>
 </details>
 
-<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">list_events</a>(...)</code></summary>
+<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">list_events</a>(...) -&gt; AsyncHttpResponse[ListEventsResponse]</code></summary>
 <dl>
 <dd>
 
@@ -5515,7 +5521,7 @@ Supported sorting fields:
 </dl>
 </details>
 
-<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">list_training_step_metrics</a>(...)</code></summary>
+<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">list_training_step_metrics</a>(...) -&gt; AsyncHttpResponse[ListTrainingStepMetricsResponse]</code></summary>
 <dl>
 <dd>
 

@@ -22,7 +22,7 @@ class ToolV2Function(UncheckedBaseModel):
     The description of the function.
     """
 
-    parameters: typing.Dict[str, typing.Optional[typing.Any]] = pydantic.Field()
+    parameters: typing.Dict[str, typing.Any] = pydantic.Field()
     """
     The parameters of the function as a JSON schema.
     """

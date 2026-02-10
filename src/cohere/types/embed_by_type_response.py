@@ -7,10 +7,12 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2
 from ..core.unchecked_base_model import UncheckedBaseModel
 from .api_meta import ApiMeta
 from .embed_by_type_response_embeddings import EmbedByTypeResponseEmbeddings
+from .embed_by_type_response_response_type import EmbedByTypeResponseResponseType
 from .image import Image
 
 
 class EmbedByTypeResponse(UncheckedBaseModel):
+    response_type: typing.Optional[EmbedByTypeResponseResponseType] = None
     id: str
     embeddings: EmbedByTypeResponseEmbeddings = pydantic.Field()
     """

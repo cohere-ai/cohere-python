@@ -29,7 +29,7 @@ class ChatConnector(UncheckedBaseModel):
     When `true`, the request will continue if this connector returned an error.
     """
 
-    options: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = pydantic.Field(default=None)
+    options: typing.Optional[typing.Dict[str, typing.Any]] = pydantic.Field(default=None)
     """
     Provides the connector with different settings at request time. The key/value pairs of this object are specific to each connector.
     

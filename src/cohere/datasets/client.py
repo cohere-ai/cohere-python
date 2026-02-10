@@ -259,7 +259,7 @@ class DatasetsClient:
 
     def delete(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> typing.Dict[str, typing.Optional[typing.Any]]:
+    ) -> typing.Dict[str, typing.Any]:
         """
         Delete a dataset by ID. Datasets are automatically deleted after 30 days, but they can also be deleted manually.
 
@@ -272,7 +272,7 @@ class DatasetsClient:
 
         Returns
         -------
-        typing.Dict[str, typing.Optional[typing.Any]]
+        typing.Dict[str, typing.Any]
             A successful response.
 
         Examples
@@ -563,7 +563,7 @@ class AsyncDatasetsClient:
 
     async def delete(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> typing.Dict[str, typing.Optional[typing.Any]]:
+    ) -> typing.Dict[str, typing.Any]:
         """
         Delete a dataset by ID. Datasets are automatically deleted after 30 days, but they can also be deleted manually.
 
@@ -576,7 +576,7 @@ class AsyncDatasetsClient:
 
         Returns
         -------
-        typing.Dict[str, typing.Optional[typing.Any]]
+        typing.Dict[str, typing.Any]
             A successful response.
 
         Examples

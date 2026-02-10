@@ -11,7 +11,7 @@ class BaseClientWrapper:
         self,
         *,
         client_name: typing.Optional[str] = None,
-        token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
+        token: typing.Union[str, typing.Callable[[], str]],
         headers: typing.Optional[typing.Dict[str, str]] = None,
         base_url: str,
         timeout: typing.Optional[float] = None,
@@ -23,22 +23,24 @@ class BaseClientWrapper:
         self._timeout = timeout
 
     def get_headers(self) -> typing.Dict[str, str]:
+        import platform
+
         headers: typing.Dict[str, str] = {
-            "User-Agent": "cohere/5.20.4",
+            "User-Agent": "cohere/5.20.5",
             "X-Fern-Language": "Python",
+            "X-Fern-Runtime": f"python/{platform.python_version()}",
+            "X-Fern-Platform": f"{platform.system().lower()}/{platform.release()}",
             "X-Fern-SDK-Name": "cohere",
-            "X-Fern-SDK-Version": "5.20.4",
+            "X-Fern-SDK-Version": "5.20.5",
             **(self.get_custom_headers() or {}),
         }
         if self._client_name is not None:
             headers["X-Client-Name"] = self._client_name
-        token = self._get_token()
-        if token is not None:
-            headers["Authorization"] = f"Bearer {token}"
+        headers["Authorization"] = f"Bearer {self._get_token()}"
         return headers
 
-    def _get_token(self) -> typing.Optional[str]:
-        if isinstance(self._token, str) or self._token is None:
+    def _get_token(self) -> str:
+        if isinstance(self._token, str):
             return self._token
         else:
             return self._token()
@@ -58,7 +60,7 @@ class SyncClientWrapper(BaseClientWrapper):
         self,
         *,
         client_name: typing.Optional[str] = None,
-        token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
+        token: typing.Union[str, typing.Callable[[], str]],
         headers: typing.Optional[typing.Dict[str, str]] = None,
         base_url: str,
         timeout: typing.Optional[float] = None,
@@ -78,16 +80,26 @@ class AsyncClientWrapper(BaseClientWrapper):
         self,
         *,
         client_name: typing.Optional[str] = None,
-        token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
+        token: typing.Union[str, typing.Callable[[], str]],
         headers: typing.Optional[typing.Dict[str, str]] = None,
         base_url: str,
         timeout: typing.Optional[float] = None,
+        async_token: typing.Optional[typing.Callable[[], typing.Awaitable[str]]] = None,
         httpx_client: httpx.AsyncClient,
     ):
         super().__init__(client_name=client_name, token=token, headers=headers, base_url=base_url, timeout=timeout)
+        self._async_token = async_token
         self.httpx_client = AsyncHttpClient(
             httpx_client=httpx_client,
             base_headers=self.get_headers,
             base_timeout=self.get_timeout,
             base_url=self.get_base_url,
+            async_base_headers=self.async_get_headers,
         )
+
+    async def async_get_headers(self) -> typing.Dict[str, str]:
+        headers = self.get_headers()
+        if self._async_token is not None:
+            token = await self._async_token()
+            headers["Authorization"] = f"Bearer {token}"
+        return headers

@@ -6,6 +6,7 @@ import os
 import typing
 
 import httpx
+from .core.api_error import ApiError
 from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from .core.request_options import RequestOptions
 from .environment import ClientEnvironment
@@ -116,6 +117,8 @@ class BaseCohere:
         _defaulted_timeout = (
             timeout if timeout is not None else 300 if httpx_client is None else httpx_client.timeout.read
         )
+        if token is None:
+            raise ApiError(body="The client must be instantiated be either passing in token or setting CO_API_KEY")
         self._client_wrapper = SyncClientWrapper(
             base_url=_get_base_url(base_url=base_url, environment=environment),
             client_name=client_name,
@@ -192,7 +195,7 @@ class BaseCohere:
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
         accepts : typing.Optional[typing.Literal["text/event-stream"]]
-            Pass text/event-stream to receive the streamed response as server-sent events. The default is `\n` delimited events.
+            Pass text/event-stream to receive the streamed response as server-sent events. The default is `\\n` delimited events.
 
         model : typing.Optional[str]
             The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
@@ -492,7 +495,7 @@ class BaseCohere:
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
         accepts : typing.Optional[typing.Literal["text/event-stream"]]
-            Pass text/event-stream to receive the streamed response as server-sent events. The default is `\n` delimited events.
+            Pass text/event-stream to receive the streamed response as server-sent events. The default is `\\n` delimited events.
 
         model : typing.Optional[str]
             The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
@@ -1619,6 +1622,8 @@ class AsyncBaseCohere:
         _defaulted_timeout = (
             timeout if timeout is not None else 300 if httpx_client is None else httpx_client.timeout.read
         )
+        if token is None:
+            raise ApiError(body="The client must be instantiated be either passing in token or setting CO_API_KEY")
         self._client_wrapper = AsyncClientWrapper(
             base_url=_get_base_url(base_url=base_url, environment=environment),
             client_name=client_name,
@@ -1695,7 +1700,7 @@ class AsyncBaseCohere:
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
         accepts : typing.Optional[typing.Literal["text/event-stream"]]
-            Pass text/event-stream to receive the streamed response as server-sent events. The default is `\n` delimited events.
+            Pass text/event-stream to receive the streamed response as server-sent events. The default is `\\n` delimited events.
 
         model : typing.Optional[str]
             The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
@@ -2004,7 +2009,7 @@ class AsyncBaseCohere:
             Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
 
         accepts : typing.Optional[typing.Literal["text/event-stream"]]
-            Pass text/event-stream to receive the streamed response as server-sent events. The default is `\n` delimited events.
+            Pass text/event-stream to receive the streamed response as server-sent events. The default is `\\n` delimited events.
 
         model : typing.Optional[str]
             The name of a compatible [Cohere model](https://docs.cohere.com/docs/models) or the ID of a [fine-tuned](https://docs.cohere.com/docs/chat-fine-tuning) model.
