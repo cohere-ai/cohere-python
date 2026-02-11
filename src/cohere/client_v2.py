@@ -1,10 +1,11 @@
-from .client import Client, AsyncClient
-from .v2.client import V2Client, AsyncV2Client
-import typing
-from .environment import ClientEnvironment
 import os
-import httpx
+import typing
 from concurrent.futures import ThreadPoolExecutor
+
+import httpx
+from .client import AsyncClient, Client
+from .environment import ClientEnvironment
+from .v2.client import AsyncRawV2Client, AsyncV2Client, RawV2Client, V2Client
 
 
 class _CombinedRawClient:
@@ -57,7 +58,7 @@ class ClientV2(V2Client, Client):  # type: ignore
             self,
             client_wrapper=self._client_wrapper
         )
-        self._raw_client = _CombinedRawClient(v1_raw, self._raw_client)
+        self._raw_client = typing.cast(RawV2Client, _CombinedRawClient(v1_raw, self._raw_client))
 
 
 class AsyncClientV2(AsyncV2Client, AsyncClient):  # type: ignore
@@ -90,4 +91,4 @@ class AsyncClientV2(AsyncV2Client, AsyncClient):  # type: ignore
             self,
             client_wrapper=self._client_wrapper
         )
-        self._raw_client = _CombinedRawClient(v1_raw, self._raw_client)
+        self._raw_client = typing.cast(AsyncRawV2Client, _CombinedRawClient(v1_raw, self._raw_client))
