@@ -239,6 +239,7 @@ def map_request_to_bedrock(
         )
         request.url = URL(url)
         request.headers["host"] = request.url.host
+        headers["host"] = request.url.host
 
         if endpoint == "rerank":
             body["api_version"] = get_api_version(version=api_version)
