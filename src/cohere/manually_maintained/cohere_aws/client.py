@@ -37,8 +37,12 @@ class Client:
         elif self.mode == Mode.BEDROCK:
             self._client = lazy_boto3().client("bedrock-runtime", region_name=aws_region)
             self._service_client = lazy_boto3().client("bedrock", region_name=aws_region)
+            self._sess = None
+            self._endpoint_name = None
 
-
+    def _require_sagemaker(self) -> None:
+        if self.mode != Mode.SAGEMAKER:
+            raise CohereError("This method is only supported in SageMaker mode.")
 
     def _does_endpoint_exist(self, endpoint_name: str) -> bool:
         try:
@@ -56,6 +60,7 @@ class Client:
         Raises:
             CohereError: Connection to the endpoint failed.
         """
+        self._require_sagemaker()
         if not self._does_endpoint_exist(endpoint_name):
             raise CohereError(f"Endpoint {endpoint_name} does not exist.")
         self._endpoint_name = endpoint_name
@@ -143,6 +148,7 @@ class Client:
                 will be used to get the role. This should work when one uses the client inside SageMaker. If this errors
                 out, the default role "ServiceRoleSagemaker" will be used, which generally works outside of SageMaker.
         """
+        self._require_sagemaker()
         # First, check if endpoint already exists
         if self._does_endpoint_exist(endpoint_name):
             if recreate:
@@ -815,6 +821,7 @@ class Client:
             This should work when one uses the client inside SageMaker. If this errors out,
             the default role "ServiceRoleSagemaker" will be used, which generally works outside SageMaker.
         """
+        self._require_sagemaker()
         if name == "model":
             raise ValueError("name cannot be 'model'")
 
@@ -958,6 +965,7 @@ class Client:
         additional_command: Optional[str] = "",
         variant: Optional[str] = None
     ) -> Summary:
+        self._require_sagemaker()
 
         if self._endpoint_name is None:
             raise CohereError("No endpoint connected. "
@@ -999,6 +1007,7 @@ class Client:
 
 
     def delete_endpoint(self) -> None:
+        self._require_sagemaker()
         if self._endpoint_name is None:
             raise CohereError("No endpoint connected.")
         try:
