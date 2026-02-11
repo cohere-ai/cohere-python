@@ -36,6 +36,12 @@ class TestClientV2(unittest.TestCase):
         self.assertTrue("content-delta" in events)
         self.assertTrue("content-end" in events)
         self.assertTrue("message-end" in events)
+    
+    def test_legacy_methods_available(self) -> None:
+        self.assertTrue(hasattr(co, "generate"))
+        self.assertTrue(callable(getattr(co, "generate")))
+        self.assertTrue(hasattr(co, "generate_stream"))
+        self.assertTrue(callable(getattr(co, "generate_stream")))
 
     @unittest.skip("Skip v2 test for now")
     def test_chat_documents(self) -> None:
