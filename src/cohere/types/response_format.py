@@ -48,7 +48,7 @@ class JsonObjectResponseFormat(UncheckedBaseModel):
 
     type: typing.Literal["json_object"] = "json_object"
     schema_: typing_extensions.Annotated[
-        typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]], FieldMetadata(alias="schema")
+        typing.Optional[typing.Dict[str, typing.Any]], FieldMetadata(alias="schema"), pydantic.Field(alias="schema")
     ] = None
 
     if IS_PYDANTIC_V2:

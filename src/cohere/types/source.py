@@ -17,7 +17,7 @@ class ToolSource(UncheckedBaseModel):
 
     type: typing.Literal["tool"] = "tool"
     id: typing.Optional[str] = None
-    tool_output: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = None
+    tool_output: typing.Optional[typing.Dict[str, typing.Any]] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
@@ -35,7 +35,7 @@ class DocumentSource(UncheckedBaseModel):
 
     type: typing.Literal["document"] = "document"
     id: typing.Optional[str] = None
-    document: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = None
+    document: typing.Optional[typing.Dict[str, typing.Any]] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
