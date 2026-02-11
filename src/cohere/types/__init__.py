@@ -18,10 +18,10 @@ if typing.TYPE_CHECKING:
         ThinkingAssistantMessageResponseContentItem,
     )
     from .assistant_message_v2content import AssistantMessageV2Content
-    from .assistant_message_v2content_item import (
-        AssistantMessageV2ContentItem,
-        TextAssistantMessageV2ContentItem,
-        ThinkingAssistantMessageV2ContentItem,
+    from .assistant_message_v2content_one_item import (
+        AssistantMessageV2ContentOneItem,
+        TextAssistantMessageV2ContentOneItem,
+        ThinkingAssistantMessageV2ContentOneItem,
     )
     from .auth_token_type import AuthTokenType
     from .chat_citation import ChatCitation
@@ -133,6 +133,7 @@ if typing.TYPE_CHECKING:
     from .document_content import DocumentContent
     from .embed_by_type_response import EmbedByTypeResponse
     from .embed_by_type_response_embeddings import EmbedByTypeResponseEmbeddings
+    from .embed_by_type_response_response_type import EmbedByTypeResponseResponseType
     from .embed_content import EmbedContent, ImageUrlEmbedContent, TextEmbedContent
     from .embed_floats_response import EmbedFloatsResponse
     from .embed_image import EmbedImage
@@ -212,7 +213,7 @@ if typing.TYPE_CHECKING:
     from .summarize_response import SummarizeResponse
     from .system_message_v2 import SystemMessageV2
     from .system_message_v2content import SystemMessageV2Content
-    from .system_message_v2content_item import SystemMessageV2ContentItem, TextSystemMessageV2ContentItem
+    from .system_message_v2content_one_item import SystemMessageV2ContentOneItem, TextSystemMessageV2ContentOneItem
     from .thinking import Thinking
     from .thinking_type import ThinkingType
     from .tokenize_response import TokenizeResponse
@@ -244,7 +245,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "AssistantMessageResponse": ".assistant_message_response",
     "AssistantMessageResponseContentItem": ".assistant_message_response_content_item",
     "AssistantMessageV2Content": ".assistant_message_v2content",
-    "AssistantMessageV2ContentItem": ".assistant_message_v2content_item",
+    "AssistantMessageV2ContentOneItem": ".assistant_message_v2content_one_item",
     "AuthTokenType": ".auth_token_type",
     "ChatCitation": ".chat_citation",
     "ChatCitationGenerationEvent": ".chat_citation_generation_event",
@@ -350,6 +351,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "DocumentToolContent": ".tool_content",
     "EmbedByTypeResponse": ".embed_by_type_response",
     "EmbedByTypeResponseEmbeddings": ".embed_by_type_response_embeddings",
+    "EmbedByTypeResponseResponseType": ".embed_by_type_response_response_type",
     "EmbedContent": ".embed_content",
     "EmbedFloatsResponse": ".embed_floats_response",
     "EmbedImage": ".embed_image",
@@ -427,20 +429,20 @@ _dynamic_imports: typing.Dict[str, str] = {
     "SystemMessage": ".message",
     "SystemMessageV2": ".system_message_v2",
     "SystemMessageV2Content": ".system_message_v2content",
-    "SystemMessageV2ContentItem": ".system_message_v2content_item",
+    "SystemMessageV2ContentOneItem": ".system_message_v2content_one_item",
     "TextAssistantMessageResponseContentItem": ".assistant_message_response_content_item",
-    "TextAssistantMessageV2ContentItem": ".assistant_message_v2content_item",
+    "TextAssistantMessageV2ContentOneItem": ".assistant_message_v2content_one_item",
     "TextContent": ".content",
     "TextEmbedContent": ".embed_content",
     "TextGenerationGenerateStreamedResponse": ".generate_streamed_response",
     "TextGenerationStreamedChatResponse": ".streamed_chat_response",
     "TextResponseFormat": ".response_format",
     "TextResponseFormatV2": ".response_format_v2",
-    "TextSystemMessageV2ContentItem": ".system_message_v2content_item",
+    "TextSystemMessageV2ContentOneItem": ".system_message_v2content_one_item",
     "TextToolContent": ".tool_content",
     "Thinking": ".thinking",
     "ThinkingAssistantMessageResponseContentItem": ".assistant_message_response_content_item",
-    "ThinkingAssistantMessageV2ContentItem": ".assistant_message_v2content_item",
+    "ThinkingAssistantMessageV2ContentOneItem": ".assistant_message_v2content_one_item",
     "ThinkingType": ".thinking_type",
     "TokenizeResponse": ".tokenize_response",
     "Tool": ".tool",
@@ -502,7 +504,7 @@ __all__ = [
     "AssistantMessageResponse",
     "AssistantMessageResponseContentItem",
     "AssistantMessageV2Content",
-    "AssistantMessageV2ContentItem",
+    "AssistantMessageV2ContentOneItem",
     "AuthTokenType",
     "ChatCitation",
     "ChatCitationGenerationEvent",
@@ -608,6 +610,7 @@ __all__ = [
     "DocumentToolContent",
     "EmbedByTypeResponse",
     "EmbedByTypeResponseEmbeddings",
+    "EmbedByTypeResponseResponseType",
     "EmbedContent",
     "EmbedFloatsResponse",
     "EmbedImage",
@@ -685,20 +688,20 @@ __all__ = [
     "SystemMessage",
     "SystemMessageV2",
     "SystemMessageV2Content",
-    "SystemMessageV2ContentItem",
+    "SystemMessageV2ContentOneItem",
     "TextAssistantMessageResponseContentItem",
-    "TextAssistantMessageV2ContentItem",
+    "TextAssistantMessageV2ContentOneItem",
     "TextContent",
     "TextEmbedContent",
     "TextGenerationGenerateStreamedResponse",
     "TextGenerationStreamedChatResponse",
     "TextResponseFormat",
     "TextResponseFormatV2",
-    "TextSystemMessageV2ContentItem",
+    "TextSystemMessageV2ContentOneItem",
     "TextToolContent",
     "Thinking",
     "ThinkingAssistantMessageResponseContentItem",
-    "ThinkingAssistantMessageV2ContentItem",
+    "ThinkingAssistantMessageV2ContentOneItem",
     "ThinkingType",
     "TokenizeResponse",
     "Tool",

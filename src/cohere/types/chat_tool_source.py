@@ -13,7 +13,7 @@ class ChatToolSource(UncheckedBaseModel):
     The unique identifier of the document
     """
 
-    tool_output: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = None
+    tool_output: typing.Optional[typing.Dict[str, typing.Any]] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2

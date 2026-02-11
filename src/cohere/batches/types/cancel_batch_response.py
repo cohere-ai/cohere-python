@@ -2,4 +2,4 @@
 
 import typing
 
-CancelBatchResponse = typing.Dict[str, typing.Optional[typing.Any]]
+CancelBatchResponse = typing.Dict[str, typing.Any]
