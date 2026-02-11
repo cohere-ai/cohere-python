@@ -2,6 +2,6 @@
 
 import typing
 
-from .system_message_v2content_item import SystemMessageV2ContentItem
+from .system_message_v2content_one_item import SystemMessageV2ContentOneItem
 
-SystemMessageV2Content = typing.Union[str, typing.List[SystemMessageV2ContentItem]]
+SystemMessageV2Content = typing.Union[str, typing.List[SystemMessageV2ContentOneItem]]

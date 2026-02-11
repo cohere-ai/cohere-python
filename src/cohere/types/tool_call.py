@@ -17,7 +17,7 @@ class ToolCall(UncheckedBaseModel):
     Name of the tool to call.
     """
 
-    parameters: typing.Dict[str, typing.Optional[typing.Any]] = pydantic.Field()
+    parameters: typing.Dict[str, typing.Any] = pydantic.Field()
     """
     The name and value of the parameters to use when invoking a tool.
     """

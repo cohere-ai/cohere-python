@@ -10,7 +10,7 @@ from .tool_call import ToolCall
 
 class ToolResult(UncheckedBaseModel):
     call: ToolCall
-    outputs: typing.List[typing.Dict[str, typing.Optional[typing.Any]]]
+    outputs: typing.List[typing.Dict[str, typing.Any]]
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
