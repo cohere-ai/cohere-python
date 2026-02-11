@@ -165,6 +165,7 @@ class TestCohereAwsBedrockClient(unittest.TestCase):
     - Fix 2: Client can be initialized with mode=BEDROCK without importing sagemaker
     - Fix 3: embed() accepts output_dimension and embedding_types
     """
+    client: typing.Any = None
 
     @classmethod
     def setUpClass(cls) -> None:
