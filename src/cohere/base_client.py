@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import typing
 
+import aiohttp
 import httpx
 from .core.api_error import ApiError
 from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
@@ -1617,23 +1618,25 @@ class AsyncBaseCohere:
         headers: typing.Optional[typing.Dict[str, str]] = None,
         timeout: typing.Optional[float] = None,
         follow_redirects: typing.Optional[bool] = True,
-        httpx_client: typing.Optional[httpx.AsyncClient] = None,
+        aiohttp_session: typing.Optional[aiohttp.ClientSession] = None,
+        httpx_client: typing.Optional[httpx.AsyncClient] = None,  # Deprecated, kept for compatibility
     ):
-        _defaulted_timeout = (
-            timeout if timeout is not None else 300 if httpx_client is None else httpx_client.timeout.read
-        )
+        _defaulted_timeout = timeout if timeout is not None else 300
         if token is None:
             raise ApiError(body="The client must be instantiated be either passing in token or setting CO_API_KEY")
+        
+        # Create aiohttp session if not provided
+        if aiohttp_session is None:
+            timeout_config = aiohttp.ClientTimeout(total=_defaulted_timeout)
+            connector = aiohttp.TCPConnector(force_close=not follow_redirects) if follow_redirects is not None else aiohttp.TCPConnector()
+            aiohttp_session = aiohttp.ClientSession(timeout=timeout_config, connector=connector)
+        
         self._client_wrapper = AsyncClientWrapper(
             base_url=_get_base_url(base_url=base_url, environment=environment),
             client_name=client_name,
             token=token,
             headers=headers,
-            httpx_client=httpx_client
-            if httpx_client is not None
-            else httpx.AsyncClient(timeout=_defaulted_timeout, follow_redirects=follow_redirects)
-            if follow_redirects is not None
-            else httpx.AsyncClient(timeout=_defaulted_timeout),
+            aiohttp_session=aiohttp_session,
             timeout=_defaulted_timeout,
         )
         self._raw_client = AsyncRawBaseCohere(client_wrapper=self._client_wrapper)

@@ -39,6 +39,7 @@ Repository = 'https://github.com/cohere-ai/cohere-python'
 
 [tool.poetry.dependencies]
 python = "^3.9"
+aiohttp = "^3.9.0"
 fastavro = "^1.9.4"
 httpx = ">=0.21.2"
 pydantic = ">= 1.9.2"

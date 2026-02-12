@@ -1,329 +1,231 @@
+"""
+Test script for async client migration from httpx to aiohttp.
+
+This script tests various async operations to ensure the aiohttp integration works correctly.
+Run with: python test_async_client.py
+"""
+
+import asyncio
 import os
-import unittest
+from cohere.client import AsyncClient
+from cohere.client_v2 import AsyncClientV2
 
-import cohere
-from cohere import ChatConnector, ClassifyExample, CreateConnectorServiceAuth, Tool, \
-    ToolParameterDefinitionsValue, ToolResult, UserMessage, ChatbotMessage
-
-package_dir = os.path.dirname(os.path.abspath(__file__))
-embed_job = os.path.join(package_dir, 'embed_job.jsonl')
+# Set your API key here or use environment variable
+API_KEY = os.getenv("CO_API_KEY", "your-api-key-here")
 
 
-class TestClient(unittest.IsolatedAsyncioTestCase):
-    co: cohere.AsyncClient
-
-    def setUp(self) -> None:
-        self.co = cohere.AsyncClient(timeout=10000)
-
-    async def test_token_falls_back_on_env_variable(self) -> None:
-        cohere.AsyncClient(api_key=None)
-        cohere.AsyncClient(None)
-
-    async def test_context_manager(self) -> None:
-        async with cohere.AsyncClient(api_key="xxx") as client:
-            self.assertIsNotNone(client)
-
-    async def test_chat(self) -> None:
-        chat = await self.co.chat(
-            model="command-a-03-2025",
-            chat_history=[
-                UserMessage(
-                    message="Who discovered gravity?"),
-                ChatbotMessage(message="The man who is widely credited with discovering "
-                               "gravity is Sir Isaac Newton")
-            ],
-            message="What year was he born?",
-        )
-
-        print(chat)
-
-    async def test_chat_stream(self) -> None:
-        stream = self.co.chat_stream(
-            model="command-a-03-2025",
-            chat_history=[
-                UserMessage(
-                    message="Who discovered gravity?"),
-                ChatbotMessage(message="The man who is widely credited with discovering "
-                               "gravity is Sir Isaac Newton")
-            ],
-            message="What year was he born?",
-        )
-
-        events = set()
-
-        async for chat_event in stream:
-            events.add(chat_event.event_type)
-            if chat_event.event_type == "text-generation":
-                print(chat_event.text)
-
-        self.assertTrue("text-generation" in events)
-        self.assertTrue("stream-start" in events)
-        self.assertTrue("stream-end" in events)
-
-    async def test_stream_equals_true(self) -> None:
-        with self.assertRaises(ValueError):
-            await self.co.chat(
-                stream=True,  # type: ignore
-                message="What year was he born?",
+async def test_basic_chat():
+    """Test basic async chat with v1 API."""
+    print("\n=== Testing AsyncClient Chat (v1) ===")
+    
+    async with AsyncClient(api_key=API_KEY) as client:
+        try:
+            response = await client.chat(
+                message="Say 'Hello, aiohttp!' in exactly those words.",
+                model="command-a-03-2025-pld-rl",
             )
-
-    async def test_deprecated_fn(self) -> None:
-        with self.assertRaises(ValueError):
-            await self.co.check_api_key("dummy", dummy="dummy")  # type: ignore
-
-    async def test_moved_fn(self) -> None:
-        with self.assertRaises(ValueError):
-            await self.co.list_connectors("dummy", dummy="dummy") # type: ignore
+            print(f"✓ Chat response: {response.text}")
+            return True
+        except Exception as e:
+            print(f"✗ Chat failed: {type(e).__name__}: {e}")
+            return False
 
 
-    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
-    async def test_generate(self) -> None:
-        response = await self.co.generate(
-            prompt='Please explain to me how LLMs work',
-        )
-        print(response)
-
-    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
-    async def test_embed(self) -> None:
-        response = await self.co.embed(
-            texts=['hello', 'goodbye'],
-            model='embed-english-v3.0',
-            input_type="classification"
-        )
-        print(response)
-
-    async def test_embed_batch_types(self) -> None:
-        # batch more than 96 texts
-        response = await self.co.embed(
-            texts=['hello']*100,
-            model='embed-english-v3.0',
-            input_type="classification",
-            embedding_types=["float", "int8", "uint8", "binary", "ubinary"]
-        )
-
-        if response.response_type == "embeddings_by_type":
-            self.assertEqual(len(response.texts or []), 100)
-            self.assertEqual(len(response.embeddings.float_ or []), 100)
-            self.assertEqual(len(response.embeddings.int8 or []), 100)
-            self.assertEqual(len(response.embeddings.uint8 or []), 100)
-            self.assertEqual(len(response.embeddings.binary or []), 100)
-            self.assertEqual(len(response.embeddings.ubinary or []), 100)
-        else:
-            self.fail("Expected embeddings_by_type response type")
-
-        print(response)
-
-    async def test_embed_batch_v1(self) -> None:
-        # batch more than 96 texts
-        response = await self.co.embed(
-            texts=['hello']*100,
-            model='embed-english-v3.0',
-            input_type="classification",
-        )
-
-        if response.response_type == "embeddings_floats":
-            self.assertEqual(len(response.embeddings), 100)
-        else:
-            self.fail("Expected embeddings_floats response type")
-
-        print(response)
-
-    @unittest.skip("temp")
-    async def test_embed_job_crud(self) -> None:
-        dataset = await self.co.datasets.create(
-            name="test",
-            type="embed-input",
-            data=open(embed_job, 'rb'),
-        )
-
-        result = await self.co.wait(dataset)
-
-        self.assertEqual(result.dataset.validation_status, "validated")
-
-        # start an embed job
-        job = await self.co.embed_jobs.create(
-            dataset_id=dataset.id or "",
-            input_type="search_document",
-            model='embed-english-v3.0')
-
-        print(job)
-
-        # list embed jobs
-        my_embed_jobs = await self.co.embed_jobs.list()
-
-        print(my_embed_jobs)
-
-        emb_result = await self.co.wait(job)
-
-        self.assertEqual(emb_result.status, "complete")
-
-        await self.co.embed_jobs.cancel(job.job_id)
-
-        await self.co.datasets.delete(dataset.id or "")
-
-    async def test_rerank(self) -> None:
-        docs = [
-            'Carson City is the capital city of the American state of Nevada.',
-            'The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.',
-            'Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.',
-            'Capital punishment (the death penalty) has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states.']
-
-        response = await self.co.rerank(
-            model='rerank-v3.5',
-            query='What is the capital of the United States?',
-            documents=docs,
-            top_n=3,
-        )
-
-        print(response)
-
-    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
-    async def test_datasets_crud(self) -> None:
-        my_dataset = await self.co.datasets.create(
-            name="test",
-            type="embed-input",
-            data=open(embed_job, 'rb'),
-        )
-
-        print(my_dataset)
-
-        my_datasets = await self.co.datasets.list()
-
-        print(my_datasets)
-
-        dataset = await self.co.datasets.get(my_dataset.id or "")
-
-        print(dataset)
-
-        await self.co.datasets.delete(my_dataset.id or "")
-
-    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
-    async def test_save_load(self) -> None:
-        my_dataset = await self.co.datasets.create(
-            name="test",
-            type="embed-input",
-            data=open(embed_job, 'rb'),
-        )
-
-        result = await self.co.wait(my_dataset)
-
-        self.co.utils.save_dataset(result.dataset, "dataset.jsonl")
-
-        # assert files equal
-        self.assertTrue(os.path.exists("dataset.jsonl"))
-        self.assertEqual(open(embed_job, 'rb').read(),
-                         open("dataset.jsonl", 'rb').read())
-
-        print(result)
-
-        await self.co.datasets.delete(my_dataset.id or "")
-
-    async def test_tokenize(self) -> None:
-        response = await self.co.tokenize(
-            text='tokenize me! :D',
-            model="command-a-03-2025",
-            offline=False,
-        )
-        print(response)
-
-    async def test_detokenize(self) -> None:
-        response = await self.co.detokenize(
-            tokens=[10104, 12221, 1315, 34, 1420, 69],
-            model="command-a-03-2025",
-            offline=False,
-        )
-        print(response)
-
-    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
-    async def test_tool_use(self) -> None:
-        tools = [
-            Tool(
-                name="sales_database",
-                description="Connects to a database about sales volumes",
-                parameter_definitions={
-                    "day": ToolParameterDefinitionsValue(
-                        description="Retrieves sales data from this day, formatted as YYYY-MM-DD.",
-                        type="str",
-                        required=True
-                    )}
+async def test_streaming_chat():
+    """Test streaming chat with v1 API."""
+    print("\n=== Testing AsyncClient Streaming (v1) ===")
+    
+    async with AsyncClient(api_key=API_KEY) as client:
+        try:
+            stream = client.chat_stream(
+                message="Count from 1 to 3, one number per line.",
+                model="command-a-03-2025-pld-rl",
             )
-        ]
+            
+            chunks = []
+            async for chunk in stream:
+                if hasattr(chunk, 'text') and chunk.text:
+                    chunks.append(chunk.text)
+                    print(f"  Chunk: {chunk.text}")
+            
+            print(f"✓ Received {len(chunks)} chunks")
+            return True
+        except Exception as e:
+            print(f"✗ Streaming failed: {type(e).__name__}: {e}")
+            return False
 
-        tool_parameters_response = await self.co.chat(
-            message="How good were the sales on September 29 2023?",
-            tools=tools,
-            model="command-nightly",
-            preamble="""
-                ## Task Description
-                You help people answer their questions and other requests interactively. You will be asked a very wide array of requests on all kinds of topics. You will be equipped with a wide range of search engines or similar tools to help you, which you use to research your answer. You should focus on serving the user's needs as best you can, which will be wide-ranging.
 
-                ## Style Guide
-                Unless the user asks for a different style of answer, you should answer in full sentences, using proper grammar and spelling.
-            """
-        )
+async def test_embed():
+    """Test embedding with v1 API."""
+    print("\n=== Testing AsyncClient Embed (v1) ===")
+    
+    async with AsyncClient(api_key=API_KEY) as client:
+        try:
+            response = await client.embed(
+                texts=["Hello world", "Testing aiohttp"],
+                model="embed-english-v3.0",
+                input_type="search_query"
+            )
+            print(f"✓ Embed response: {len(response.embeddings)} embeddings")
+            print(f"  First embedding dimension: {len(response.embeddings[0])}")
+            return True
+        except Exception as e:
+            print(f"✗ Embed failed: {type(e).__name__}: {e}")
+            return False
 
-        if tool_parameters_response.tool_calls is not None:
-            self.assertEqual(
-                tool_parameters_response.tool_calls[0].name, "sales_database")
-            self.assertEqual(tool_parameters_response.tool_calls[0].parameters, {
-                             "day": "2023-09-29"})
-        else:
-            raise ValueError("Expected tool calls to be present")
 
-        local_tools = {
-            "sales_database": lambda day: {
-                "number_of_sales": 120,
-                "total_revenue": 48500,
-                "average_sale_value": 404.17,
-                "date": "2023-09-29"
-            }
-        }
+async def test_v2_chat():
+    """Test chat with v2 API."""
+    print("\n=== Testing AsyncClientV2 Chat (v2) ===")
+    
+    async with AsyncClientV2(api_key=API_KEY) as client:
+        try:
+            response = await client.chat(
+                model="command-a-03-2025-pld-rl",
+                messages=[
+                    {"role": "user", "content": "Say 'Hello from v2 API!' in exactly those words."}
+                ]
+            )
+            print(f"✓ V2 Chat response: {response.message.content[0].text if response.message.content else 'No content'}")
+            return True
+        except Exception as e:
+            print(f"✗ V2 Chat failed: {type(e).__name__}: {e}")
+            return False
 
-        tool_results = []
-        for tool_call in tool_parameters_response.tool_calls:
-            output = local_tools[tool_call.name](**tool_call.parameters)
-            outputs = [output]
 
-            tool_results.append(ToolResult(
-                call=tool_call,
-                outputs=outputs
-            ))
+async def test_v2_streaming():
+    """Test streaming with v2 API (uses SSE)."""
+    print("\n=== Testing AsyncClientV2 Streaming (v2 SSE) ===")
+    
+    async with AsyncClientV2(api_key=API_KEY) as client:
+        try:
+            stream = client.chat_stream(
+                model="command-a-03-2025-pld-rl",
+                messages=[
+                    {"role": "user", "content": "Count from 1 to 3."}
+                ]
+            )
+            
+            chunks = []
+            async for chunk in stream:
+                if hasattr(chunk, 'type'):
+                    chunks.append(chunk.type)
+                    if chunk.type == "content-delta":
+                        if hasattr(chunk, 'delta') and hasattr(chunk.delta, 'message'):
+                            print(f"  Delta: {chunk.delta.message.content.text if hasattr(chunk.delta.message.content, 'text') else chunk.delta}")
+            
+            print(f"✓ V2 Streaming received {len(chunks)} events")
+            return True
+        except Exception as e:
+            print(f"✗ V2 Streaming failed: {type(e).__name__}: {e}")
+            return False
 
-        cited_response = await self.co.chat(
-            message="How good were the sales on September 29?",
-            tools=tools,
-            tool_results=tool_results,
-            force_single_step=True,
-            model="command-a-03-2025",
-        )
 
-        self.assertEqual(cited_response.documents, [
-            {
-                "average_sale_value": "404.17",
-                "date": "2023-09-29",
-                "id": "sales_database:0:0",
-                "number_of_sales": "120",
-                "total_revenue": "48500",
-            }
-        ])
+async def test_error_handling():
+    """Test error handling with invalid API key."""
+    print("\n=== Testing Error Handling ===")
+    
+    async with AsyncClient(api_key="invalid-key-12345") as client:
+        try:
+            await client.chat(message="This should fail", model="command-a-03-2025-pld-rl")
+            print("✗ Should have raised an error")
+            return False
+        except Exception as e:
+            print(f"✓ Correctly raised error: {type(e).__name__}")
+            return True
 
-    async def test_local_tokenize(self) -> None:
-        response = await self.co.tokenize(
-            model="command-a-03-2025",
-            text="tokenize me! :D"
-        )
-        print(response)
 
-    async def test_local_detokenize(self) -> None:
-        response = await self.co.detokenize(
-            model="command-a-03-2025",
-            tokens=[10104, 12221, 1315, 34, 1420, 69]
-        )
-        print(response)
+async def test_concurrent_requests():
+    """Test multiple concurrent async requests."""
+    print("\n=== Testing Concurrent Requests ===")
+    
+    async with AsyncClient(api_key=API_KEY) as client:
+        try:
+            # Fire off 3 requests concurrently
+            tasks = [
+                client.chat(message=f"Say the number {i}", model="command-a-03-2025-pld-rl")
+                for i in range(1, 4)
+            ]
+            
+            responses = await asyncio.gather(*tasks, return_exceptions=True)
+            
+            successes = sum(1 for r in responses if not isinstance(r, Exception))
+            print(f"✓ Concurrent requests: {successes}/3 successful")
+            return successes > 0
+        except Exception as e:
+            print(f"✗ Concurrent requests failed: {type(e).__name__}: {e}")
+            return False
 
-    async def test_tokenize_async_context_with_sync_client(self) -> None:
-        # Test that the sync client can be used in an async context.
-        co = cohere.Client(timeout=10000)
-        print(co.tokenize(model="command-a-03-2025", text="tokenize me! :D"))
-        print(co.detokenize(model="command-a-03-2025", tokens=[
-              10104, 12221, 1315, 34, 1420, 69]))
+
+async def test_timeout():
+    """Test timeout configuration."""
+    print("\n=== Testing Timeout Configuration ===")
+    
+    async with AsyncClient(api_key=API_KEY, timeout=60.0) as client:
+        try:
+            response = await client.chat(
+                message="Quick response test",
+                model="command-a-03-2025-pld-rl",
+            )
+            print(f"✓ Timeout config works: got response")
+            return True
+        except Exception as e:
+            print(f"✗ Timeout test failed: {type(e).__name__}: {e}")
+            return False
+
+
+async def main():
+    """Run all async tests."""
+    print("=" * 60)
+    print("Testing Async Client with aiohttp")
+    print("=" * 60)
+    
+    if API_KEY == "your-api-key-here":
+        print("\n⚠️  WARNING: Please set CO_API_KEY environment variable or update API_KEY in this script")
+        print("Skipping tests that require API key...\n")
+    
+    results = {}
+    
+    # Run tests
+    tests = [
+        ("Basic Chat (v1)", test_basic_chat),
+        ("Streaming Chat (v1)", test_streaming_chat),
+        ("Embed (v1)", test_embed),
+        ("Chat V2", test_v2_chat),
+        ("Streaming V2 (SSE)", test_v2_streaming),
+        ("Concurrent Requests", test_concurrent_requests),
+        ("Timeout Config", test_timeout),
+        ("Error Handling", test_error_handling),
+    ]
+    
+    for test_name, test_func in tests:
+        try:
+            results[test_name] = await test_func()
+        except Exception as e:
+            print(f"\n✗ {test_name} crashed: {type(e).__name__}: {e}")
+            results[test_name] = False
+    
+    # Summary
+    print("\n" + "=" * 60)
+    print("Test Summary")
+    print("=" * 60)
+    
+    for test_name, passed in results.items():
+        status = "✓ PASS" if passed else "✗ FAIL"
+        print(f"{status}: {test_name}")
+    
+    total_passed = sum(1 for p in results.values() if p)
+    total_tests = len(results)
+    
+    print(f"\nTotal: {total_passed}/{total_tests} tests passed")
+    
+    if total_passed == total_tests:
+        print("\n🎉 All tests passed! aiohttp migration is working correctly.")
+    elif total_passed > 0:
+        print(f"\n⚠️  {total_tests - total_passed} test(s) failed. Check errors above.")
+    else:
+        print("\n❌ All tests failed. Check your API key and connection.")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

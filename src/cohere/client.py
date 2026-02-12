@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from tokenizers import Tokenizer  # type: ignore
 import logging
 
+import aiohttp
 import httpx
 
 from cohere.types.detokenize_response import DetokenizeResponse
@@ -331,7 +332,8 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
         client_name: typing.Optional[str] = None,
         timeout: typing.Optional[float] = None,
-        httpx_client: typing.Optional[httpx.AsyncClient] = None,
+        aiohttp_session: typing.Optional["aiohttp.ClientSession"] = None,
+        httpx_client: typing.Optional[httpx.AsyncClient] = None,  # Deprecated
         thread_pool_executor: ThreadPoolExecutor = ThreadPoolExecutor(64),
         log_warning_experimental_features: bool = True,
     ):
@@ -349,6 +351,7 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
             client_name=client_name,
             token=api_key,
             timeout=timeout,
+            aiohttp_session=aiohttp_session,
             httpx_client=httpx_client,
         )
 
@@ -365,7 +368,7 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         return self
 
     async def __aexit__(self, exc_type, exc_value, traceback):
-        await self._client_wrapper.httpx_client.httpx_client.aclose()
+        await self._client_wrapper.httpx_client.aiohttp_session.close()
 
     wait = async_wait
 

@@ -8,8 +8,10 @@ import typing
 from contextlib import asynccontextmanager, contextmanager
 from random import random
 
+import aiohttp
 import httpx
-from .file import File, convert_file_dict_to_httpx_tuples
+from multidict import CIMultiDictProxy
+from .file import File, convert_file_dict_to_httpx_tuples, build_aiohttp_form_data
 from .force_multipart import FORCE_MULTIPART
 from .jsonable_encoder import jsonable_encoder
 from .query_encoder import encode_query
@@ -22,7 +24,7 @@ MAX_RETRY_DELAY_SECONDS = 60.0
 JITTER_FACTOR = 0.2  # 20% random jitter
 
 
-def _parse_retry_after(response_headers: httpx.Headers) -> typing.Optional[float]:
+def _parse_retry_after(response_headers: typing.Union[httpx.Headers, CIMultiDictProxy]) -> typing.Optional[float]:
     """
     This function parses the `Retry-After` header in a HTTP response and returns the number of seconds to wait.
 
@@ -75,7 +77,7 @@ def _add_symmetric_jitter(delay: float) -> float:
     return delay * jitter_multiplier
 
 
-def _parse_x_ratelimit_reset(response_headers: httpx.Headers) -> typing.Optional[float]:
+def _parse_x_ratelimit_reset(response_headers: typing.Union[httpx.Headers, CIMultiDictProxy]) -> typing.Optional[float]:
     """
     Parse the X-RateLimit-Reset header (Unix timestamp in seconds).
     Returns seconds to wait, or None if header is missing/invalid.
@@ -95,7 +97,7 @@ def _parse_x_ratelimit_reset(response_headers: httpx.Headers) -> typing.Optional
     return None
 
 
-def _retry_timeout(response: httpx.Response, retries: int) -> float:
+def _retry_timeout(response: typing.Union[httpx.Response, aiohttp.ClientResponse], retries: int) -> float:
     """
     Determine the amount of time to wait before retrying a request.
     This function begins by trying to parse a retry-after header from the response, and then proceeds to use exponential backoff
@@ -117,9 +119,18 @@ def _retry_timeout(response: httpx.Response, retries: int) -> float:
     return _add_symmetric_jitter(backoff)
 
 
-def _should_retry(response: httpx.Response) -> bool:
+def _should_retry(response: typing.Union[httpx.Response, aiohttp.ClientResponse]) -> bool:
     retryable_400s = [429, 408, 409]
-    return response.status_code >= 500 or response.status_code in retryable_400s
+    status = response.status_code if isinstance(response, httpx.Response) else response.status
+    return status >= 500 or status in retryable_400s
+
+
+def get_response_status(response: typing.Union[httpx.Response, aiohttp.ClientResponse]) -> int:
+    """Get status code from either httpx or aiohttp response."""
+    if isinstance(response, httpx.Response):
+        return response.status_code
+    else:
+        return response.status
 
 
 def _build_url(base_url: str, path: typing.Optional[str]) -> str:
@@ -444,7 +455,7 @@ class AsyncHttpClient:
     def __init__(
         self,
         *,
-        httpx_client: httpx.AsyncClient,
+        aiohttp_session: aiohttp.ClientSession,
         base_timeout: typing.Callable[[], typing.Optional[float]],
         base_headers: typing.Callable[[], typing.Dict[str, str]],
         base_url: typing.Optional[typing.Callable[[], str]] = None,
@@ -454,7 +465,7 @@ class AsyncHttpClient:
         self.base_timeout = base_timeout
         self.base_headers = base_headers
         self.async_base_headers = async_base_headers
-        self.httpx_client = httpx_client
+        self.aiohttp_session = aiohttp_session
 
     async def _get_headers(self) -> typing.Dict[str, str]:
         if self.async_base_headers is not None:
@@ -491,32 +502,22 @@ class AsyncHttpClient:
         retries: int = 0,
         omit: typing.Optional[typing.Any] = None,
         force_multipart: typing.Optional[bool] = None,
-    ) -> httpx.Response:
+    ) -> aiohttp.ClientResponse:
         base_url = self.get_base_url(base_url)
-        timeout = (
+        timeout_seconds = (
             request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else self.base_timeout()
         )
-
-        request_files: typing.Optional[RequestFiles] = (
-            convert_file_dict_to_httpx_tuples(remove_omit_from_dict(remove_none_from_dict(files), omit))
-            if (files is not None and files is not omit and isinstance(files, dict))
-            else None
-        )
-
-        if (request_files is None or len(request_files) == 0) and force_multipart:
-            request_files = FORCE_MULTIPART
+        
+        timeout = aiohttp.ClientTimeout(total=timeout_seconds) if timeout_seconds is not None else None
 
         json_body, data_body = get_request_body(json=json, data=data, request_options=request_options, omit=omit)
-
-        data_body = _maybe_filter_none_from_multipart_data(data_body, request_files, force_multipart)
 
         # Get headers (supports async token providers)
         _headers = await self._get_headers()
 
-        # Compute encoded params separately to avoid passing empty list to httpx
-        # (httpx strips existing query params from URL when params=[] is passed)
+        # Compute encoded params
         _encoded_params = encode_query(
             jsonable_encoder(
                 remove_none_from_dict(
@@ -534,31 +535,71 @@ class AsyncHttpClient:
                 )
             )
         )
+        
+        # Build final headers
+        final_headers = jsonable_encoder(
+            remove_none_from_dict(
+                {
+                    **_headers,
+                    **(headers if headers is not None else {}),
+                    **(request_options.get("additional_headers", {}) or {} if request_options is not None else {}),
+                }
+            )
+        )
+        
+        # Handle file uploads and multipart data for aiohttp
+        request_data = data_body
+        if files is not None and files is not omit and isinstance(files, dict):
+            # Convert files to aiohttp FormData
+            form_data = build_aiohttp_form_data(
+                remove_omit_from_dict(remove_none_from_dict(files), omit),
+                data_body
+            )
+            request_data = form_data
+            json_body = None  # Can't use json with multipart
+        elif content is not None:
+            request_data = content
+            json_body = None
 
-        # Add the input to each of these and do None-safety checks
-        response = await self.httpx_client.request(
+        # Make request with aiohttp
+        response = await self.aiohttp_session.request(
             method=method,
             url=_build_url(base_url, path),
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **_headers,
-                        **(headers if headers is not None else {}),
-                        **(request_options.get("additional_headers", {}) or {} if request_options is not None else {}),
-                    }
-                )
-            ),
+            headers=final_headers,
             params=_encoded_params if _encoded_params else None,
             json=json_body,
-            data=data_body,
-            content=content,
-            files=request_files,
+            data=request_data,
             timeout=timeout,
         )
+        
+        # Read response body and parse JSON for aiohttp compatibility
+        body_bytes = await response.read()
+        
+        # Add status_code property for backward compatibility
+        if not hasattr(response, 'status_code'):
+            response.status_code = response.status
+        
+        # Add synchronous json() method for backward compatibility
+        # aiohttp's json() is async, but raw clients expect sync access
+        if hasattr(response, 'content_type') and 'json' in response.content_type:
+            try:
+                import json
+                response._json_data = json.loads(body_bytes.decode('utf-8'))
+                
+                def sync_json():
+                    return response._json_data
+                
+                response.json = sync_json
+            except:
+                pass
+        
+        # Add text property for backward compatibility
+        response.text = body_bytes.decode('utf-8', errors='replace')
 
         max_retries: int = request_options.get("max_retries", 2) if request_options is not None else 2
         if _should_retry(response=response):
             if retries < max_retries:
+                response.release()
                 await asyncio.sleep(_retry_timeout(response=response, retries=retries))
                 return await self.request(
                     path=path,
@@ -566,12 +607,14 @@ class AsyncHttpClient:
                     base_url=base_url,
                     params=params,
                     json=json,
+                    data=data,
                     content=content,
                     files=files,
                     headers=headers,
                     request_options=request_options,
                     retries=retries + 1,
                     omit=omit,
+                    force_multipart=force_multipart,
                 )
         return response
 
@@ -597,32 +640,22 @@ class AsyncHttpClient:
         retries: int = 0,
         omit: typing.Optional[typing.Any] = None,
         force_multipart: typing.Optional[bool] = None,
-    ) -> typing.AsyncIterator[httpx.Response]:
+    ) -> typing.AsyncIterator[aiohttp.ClientResponse]:
         base_url = self.get_base_url(base_url)
-        timeout = (
+        timeout_seconds = (
             request_options.get("timeout_in_seconds")
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else self.base_timeout()
         )
-
-        request_files: typing.Optional[RequestFiles] = (
-            convert_file_dict_to_httpx_tuples(remove_omit_from_dict(remove_none_from_dict(files), omit))
-            if (files is not None and files is not omit and isinstance(files, dict))
-            else None
-        )
-
-        if (request_files is None or len(request_files) == 0) and force_multipart:
-            request_files = FORCE_MULTIPART
+        
+        timeout = aiohttp.ClientTimeout(total=timeout_seconds) if timeout_seconds is not None else None
 
         json_body, data_body = get_request_body(json=json, data=data, request_options=request_options, omit=omit)
-
-        data_body = _maybe_filter_none_from_multipart_data(data_body, request_files, force_multipart)
 
         # Get headers (supports async token providers)
         _headers = await self._get_headers()
 
-        # Compute encoded params separately to avoid passing empty list to httpx
-        # (httpx strips existing query params from URL when params=[] is passed)
+        # Compute encoded params
         _encoded_params = encode_query(
             jsonable_encoder(
                 remove_none_from_dict(
@@ -640,24 +673,57 @@ class AsyncHttpClient:
                 )
             )
         )
+        
+        # Build final headers
+        final_headers = jsonable_encoder(
+            remove_none_from_dict(
+                {
+                    **_headers,
+                    **(headers if headers is not None else {}),
+                    **(request_options.get("additional_headers", {}) if request_options is not None else {}),
+                }
+            )
+        )
+        
+        # Handle file uploads and multipart data for aiohttp
+        request_data = data_body
+        if files is not None and files is not omit and isinstance(files, dict):
+            # Convert files to aiohttp FormData
+            form_data = build_aiohttp_form_data(
+                remove_omit_from_dict(remove_none_from_dict(files), omit),
+                data_body
+            )
+            request_data = form_data
+            json_body = None  # Can't use json with multipart
+        elif content is not None:
+            request_data = content
+            json_body = None
 
-        async with self.httpx_client.stream(
+        async with self.aiohttp_session.request(
             method=method,
             url=_build_url(base_url, path),
-            headers=jsonable_encoder(
-                remove_none_from_dict(
-                    {
-                        **_headers,
-                        **(headers if headers is not None else {}),
-                        **(request_options.get("additional_headers", {}) if request_options is not None else {}),
-                    }
-                )
-            ),
+            headers=final_headers,
             params=_encoded_params if _encoded_params else None,
             json=json_body,
-            data=data_body,
-            content=content,
-            files=request_files,
+            data=request_data,
             timeout=timeout,
-        ) as stream:
-            yield stream
+        ) as response:
+            # Add status_code property for backward compatibility
+            if not hasattr(response, 'status_code'):
+                response.status_code = response.status
+            
+            # Add aiter_lines() method for backward compatibility with httpx
+            if not hasattr(response, 'aiter_lines'):
+                async def aiter_lines_compat():
+                    buffer = b""
+                    async for chunk in response.content.iter_any():
+                        buffer += chunk
+                        while b"\n" in buffer:
+                            line, buffer = buffer.split(b"\n", 1)
+                            yield line.decode('utf-8', errors='replace').rstrip('\r')
+                    if buffer:
+                        yield buffer.decode('utf-8', errors='replace').rstrip('\r')
+                
+                response.aiter_lines = aiter_lines_compat
+            
+            yield response
