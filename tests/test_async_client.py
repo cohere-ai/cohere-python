@@ -6,14 +6,21 @@ Run with: python test_async_client.py
 """
 
 import asyncio
+import json
 import os
+from contextlib import asynccontextmanager
+from unittest.mock import AsyncMock, MagicMock, patch
+import pytest
 from cohere.client import AsyncClient
 from cohere.client_v2 import AsyncClientV2
+from cohere.errors import BadRequestError, UnauthorizedError, TooManyRequestsError, InternalServerError
+from cohere.core.api_error import ApiError
 
 # Set your API key here or use environment variable
 API_KEY = os.getenv("CO_API_KEY", "your-api-key-here")
 
 
+@pytest.mark.asyncio
 async def test_basic_chat():
     """Test basic async chat with v1 API."""
     print("\n=== Testing AsyncClient Chat (v1) ===")
@@ -31,6 +38,7 @@ async def test_basic_chat():
             return False
 
 
+@pytest.mark.asyncio
 async def test_streaming_chat():
     """Test streaming chat with v1 API."""
     print("\n=== Testing AsyncClient Streaming (v1) ===")
@@ -55,6 +63,7 @@ async def test_streaming_chat():
             return False
 
 
+@pytest.mark.asyncio
 async def test_embed():
     """Test embedding with v1 API."""
     print("\n=== Testing AsyncClient Embed (v1) ===")
@@ -74,6 +83,7 @@ async def test_embed():
             return False
 
 
+@pytest.mark.asyncio
 async def test_v2_chat():
     """Test chat with v2 API."""
     print("\n=== Testing AsyncClientV2 Chat (v2) ===")
@@ -93,6 +103,7 @@ async def test_v2_chat():
             return False
 
 
+@pytest.mark.asyncio
 async def test_v2_streaming():
     """Test streaming with v2 API (uses SSE)."""
     print("\n=== Testing AsyncClientV2 Streaming (v2 SSE) ===")
@@ -121,6 +132,7 @@ async def test_v2_streaming():
             return False
 
 
+@pytest.mark.asyncio
 async def test_error_handling():
     """Test error handling with invalid API key."""
     print("\n=== Testing Error Handling ===")
@@ -135,6 +147,7 @@ async def test_error_handling():
             return True
 
 
+@pytest.mark.asyncio
 async def test_concurrent_requests():
     """Test multiple concurrent async requests."""
     print("\n=== Testing Concurrent Requests ===")
@@ -157,6 +170,7 @@ async def test_concurrent_requests():
             return False
 
 
+@pytest.mark.asyncio
 async def test_timeout():
     """Test timeout configuration."""
     print("\n=== Testing Timeout Configuration ===")
@@ -225,6 +239,301 @@ async def main():
         print(f"\n⚠️  {total_tests - total_passed} test(s) failed. Check errors above.")
     else:
         print("\n❌ All tests failed. Check your API key and connection.")
+
+
+# Unit tests for aiohttp error handling fixes
+# These tests verify that error responses properly await .read(), .json(), and .text()
+
+@pytest.mark.asyncio
+async def test_chat_stream_error_response_400():
+    """Test that chat_stream properly handles 400 error with JSON body using await response.json()."""
+    
+    # Create a mock aiohttp ClientResponse
+    mock_response = AsyncMock()
+    mock_response.status = 400
+    mock_response.status_code = 400
+    mock_response.headers = {"content-type": "application/json"}
+    
+    # Mock the async methods that were fixed
+    error_body = {"message": "Invalid request", "error": "bad_request"}
+    mock_response.read = AsyncMock(return_value=json.dumps(error_body).encode())
+    mock_response.json = AsyncMock(return_value=error_body)
+    mock_response.text = AsyncMock(return_value=json.dumps(error_body))
+    
+    # Mock aiter_lines to return nothing (error path doesn't use it)
+    async def mock_aiter_lines():
+        return
+        yield  # Make it a generator
+    mock_response.aiter_lines = mock_aiter_lines
+    
+    # Patch at the aiohttp session level
+    with patch('aiohttp.ClientSession') as mock_session_class:
+        mock_session = AsyncMock()
+        mock_session_class.return_value = mock_session
+        
+        # Mock the request context manager
+        @asynccontextmanager
+        async def mock_stream_context(*args, **kwargs):
+            yield mock_response
+        
+        mock_session.request = mock_stream_context
+        
+        client = AsyncClient(api_key="test-key")
+        
+        try:
+            stream = client.chat_stream(
+                message="test",
+                model="command"
+            )
+            async for _ in stream:
+                pass
+            pytest.fail("Should have raised BadRequestError")
+        except BadRequestError as e:
+            # Verify the error was properly constructed with awaited json()
+            # Verify async methods were called
+            mock_response.read.assert_called_once()
+            assert mock_response.json.call_count >= 1  # Called at least once for error body
+
+
+@pytest.mark.asyncio
+async def test_v2_chat_stream_error_response_401():
+    """Test that v2 chat_stream properly handles 401 error using await response.json()."""
+    
+    mock_response = AsyncMock()
+    mock_response.status = 401
+    mock_response.status_code = 401
+    mock_response.headers = {"content-type": "application/json"}
+    
+    error_body = {"message": "Unauthorized", "error": "invalid_token"}
+    mock_response.read = AsyncMock(return_value=json.dumps(error_body).encode())
+    mock_response.json = AsyncMock(return_value=error_body)
+    mock_response.text = AsyncMock(return_value=json.dumps(error_body))
+    
+    # Mock SSE iteration
+    from cohere.core.http_sse._api import EventSource
+    original_aiter_sse = EventSource.aiter_sse
+    
+    async def mock_aiter_sse(self):
+        # Don't iterate, go straight to error handling
+        return
+        yield  # Make it a generator
+    
+    with patch.object(EventSource, 'aiter_sse', mock_aiter_sse):
+        with patch('aiohttp.ClientSession') as mock_session_class:
+            mock_session = AsyncMock()
+            mock_session_class.return_value = mock_session
+            
+            @asynccontextmanager
+            async def mock_stream_context(*args, **kwargs):
+                yield mock_response
+            
+            mock_session.request = mock_stream_context
+            
+            client = AsyncClientV2(api_key="test-key")
+            
+            try:
+                stream = client.chat_stream(
+                    model="command",
+                    messages=[{"role": "user", "content": "test"}]
+                )
+                async for _ in stream:
+                    pass
+                pytest.fail("Should have raised UnauthorizedError")
+            except UnauthorizedError as e:
+                # Verify async methods were awaited
+                mock_response.read.assert_called_once()
+                assert mock_response.json.call_count >= 1
+
+
+@pytest.mark.asyncio
+async def test_generate_stream_error_response_429():
+    """Test that generate streaming properly handles 429 error using await response.json()."""
+    
+    mock_response = AsyncMock()
+    mock_response.status = 429
+    mock_response.status_code = 429
+    mock_response.headers = {"content-type": "application/json"}
+    
+    error_body = {"message": "Rate limit exceeded", "error": "too_many_requests"}
+    mock_response.read = AsyncMock(return_value=json.dumps(error_body).encode())
+    mock_response.json = AsyncMock(return_value=error_body)
+    mock_response.text = AsyncMock(return_value=json.dumps(error_body))
+    
+    async def mock_aiter_lines():
+        return
+        yield
+    mock_response.aiter_lines = mock_aiter_lines
+    
+    with patch('aiohttp.ClientSession') as mock_session_class:
+        mock_session = AsyncMock()
+        mock_session_class.return_value = mock_session
+        
+        @asynccontextmanager
+        async def mock_stream_context(*args, **kwargs):
+            yield mock_response
+        
+        mock_session.request = mock_stream_context
+        
+        client = AsyncClient(api_key="test-key")
+        
+        try:
+            stream = client.generate_stream(
+                prompt="test",
+                model="command"
+            )
+            async for _ in stream:
+                pass
+            pytest.fail("Should have raised TooManyRequestsError")
+        except TooManyRequestsError as e:
+            # Verify async methods were awaited
+            mock_response.read.assert_called_once()
+            assert mock_response.json.call_count >= 1
+
+
+@pytest.mark.asyncio
+async def test_chat_stream_error_response_500():
+    """Test that chat_stream properly handles 500 error using await response.json()."""
+    
+    mock_response = AsyncMock()
+    mock_response.status = 500
+    mock_response.status_code = 500
+    mock_response.headers = {"content-type": "application/json"}
+    
+    error_body = {"message": "Internal server error", "error": "server_error"}
+    mock_response.read = AsyncMock(return_value=json.dumps(error_body).encode())
+    mock_response.json = AsyncMock(return_value=error_body)
+    mock_response.text = AsyncMock(return_value=json.dumps(error_body))
+    
+    async def mock_aiter_lines():
+        return
+        yield
+    mock_response.aiter_lines = mock_aiter_lines
+    
+    with patch('aiohttp.ClientSession') as mock_session_class:
+        mock_session = AsyncMock()
+        mock_session_class.return_value = mock_session
+        
+        @asynccontextmanager
+        async def mock_stream_context(*args, **kwargs):
+            yield mock_response
+        
+        mock_session.request = mock_stream_context
+        
+        client = AsyncClient(api_key="test-key")
+        
+        try:
+            stream = client.chat_stream(
+                message="test",
+                model="command"
+            )
+            async for _ in stream:
+                pass
+            pytest.fail("Should have raised InternalServerError")
+        except InternalServerError as e:
+            # Verify async methods were awaited
+            mock_response.read.assert_called_once()
+            assert mock_response.json.call_count >= 1
+
+
+@pytest.mark.asyncio
+async def test_chat_stream_error_invalid_json_uses_text():
+    """Test that chat_stream uses await response.text() when JSON parsing fails."""
+    
+    mock_response = AsyncMock()
+    mock_response.status = 400
+    mock_response.status_code = 400
+    mock_response.headers = {"content-type": "text/plain"}
+    
+    # Simulate invalid JSON - json() will raise JSONDecodeError
+    mock_response.read = AsyncMock(return_value=b"Invalid response body")
+    mock_response.json = AsyncMock(side_effect=json.JSONDecodeError("Invalid JSON", "", 0))
+    mock_response.text = AsyncMock(return_value="Invalid response body")
+    
+    async def mock_aiter_lines():
+        return
+        yield
+    mock_response.aiter_lines = mock_aiter_lines
+    
+    with patch('aiohttp.ClientSession') as mock_session_class:
+        mock_session = AsyncMock()
+        mock_session_class.return_value = mock_session
+        
+        @asynccontextmanager
+        async def mock_stream_context(*args, **kwargs):
+            yield mock_response
+        
+        mock_session.request = mock_stream_context
+        
+        client = AsyncClient(api_key="test-key")
+        
+        try:
+            stream = client.chat_stream(
+                message="test",
+                model="command"
+            )
+            async for _ in stream:
+                pass
+            pytest.fail("Should have raised ApiError")
+        except ApiError as e:
+            # Verify text() was awaited in the JSONDecodeError path
+            mock_response.read.assert_called_once()
+            mock_response.text.assert_called()
+            assert "Invalid response body" in str(e) or (hasattr(e, 'body') and "Invalid" in str(e.body))
+
+
+@pytest.mark.asyncio 
+async def test_multiple_error_codes_use_await_json():
+    """Test that various HTTP error codes all properly await response.json()."""
+    from cohere.errors import (
+        ForbiddenError, NotFoundError, UnprocessableEntityError,
+        InvalidTokenError, ServiceUnavailableError
+    )
+    
+    error_codes_and_exceptions = [
+        (403, ForbiddenError, "Forbidden"),
+        (404, NotFoundError, "Not found"),
+        (422, UnprocessableEntityError, "Unprocessable entity"),
+        (498, InvalidTokenError, "Invalid token"),
+        (503, ServiceUnavailableError, "Service unavailable"),
+    ]
+    
+    for status_code, expected_exception, error_msg in error_codes_and_exceptions:
+        mock_response = AsyncMock()
+        mock_response.status = status_code
+        mock_response.status_code = status_code
+        mock_response.headers = {"content-type": "application/json"}
+        
+        error_body = {"message": error_msg, "error": "test_error"}
+        mock_response.read = AsyncMock(return_value=json.dumps(error_body).encode())
+        mock_response.json = AsyncMock(return_value=error_body)
+        mock_response.text = AsyncMock(return_value=json.dumps(error_body))
+        
+        async def mock_aiter_lines():
+            return
+            yield
+        mock_response.aiter_lines = mock_aiter_lines
+        
+        with patch('aiohttp.ClientSession') as mock_session_class:
+            mock_session = AsyncMock()
+            mock_session_class.return_value = mock_session
+            
+            @asynccontextmanager
+            async def mock_stream_context(*args, **kwargs):
+                yield mock_response
+            
+            mock_session.request = mock_stream_context
+            
+            client = AsyncClient(api_key="test-key")
+            
+            try:
+                stream = client.chat_stream(message="test", model="command")
+                async for _ in stream:
+                    pass
+                pytest.fail(f"Should have raised {expected_exception.__name__} for {status_code}")
+            except expected_exception:
+                # Verify async methods were properly awaited
+                mock_response.read.assert_called_once()
+                assert mock_response.json.call_count >= 1
 
 
 if __name__ == "__main__":

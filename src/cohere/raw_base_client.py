@@ -3307,7 +3307,7 @@ class AsyncRawBaseCohere:
                             return
 
                         return AsyncHttpResponse(response=_response, data=_iter())
-                    await _response.aread()
+                    await _response.read()
                     if _response.status_code == 400:
                         raise BadRequestError(
                             headers=dict(_response.headers),
@@ -3315,7 +3315,7 @@ class AsyncRawBaseCohere:
                                 typing.Any,
                                 construct_type(
                                     type_=typing.Any,  # type: ignore
-                                    object_=_response.json(),
+                                    object_=await _response.json(),
                                 ),
                             ),
                         )
@@ -3326,7 +3326,7 @@ class AsyncRawBaseCohere:
                                 typing.Any,
                                 construct_type(
                                     type_=typing.Any,  # type: ignore
-                                    object_=_response.json(),
+                                    object_=await _response.json(),
                                 ),
                             ),
                         )
@@ -3337,7 +3337,7 @@ class AsyncRawBaseCohere:
                                 typing.Any,
                                 construct_type(
                                     type_=typing.Any,  # type: ignore
-                                    object_=_response.json(),
+                                    object_=await _response.json(),
                                 ),
                             ),
                         )
@@ -3348,7 +3348,7 @@ class AsyncRawBaseCohere:
                                 typing.Any,
                                 construct_type(
                                     type_=typing.Any,  # type: ignore
-                                    object_=_response.json(),
+                                    object_=await _response.json(),
                                 ),
                             ),
                         )
@@ -3359,7 +3359,7 @@ class AsyncRawBaseCohere:
                                 typing.Any,
                                 construct_type(
                                     type_=typing.Any,  # type: ignore
-                                    object_=_response.json(),
+                                    object_=await _response.json(),
                                 ),
                             ),
                         )
@@ -3370,7 +3370,7 @@ class AsyncRawBaseCohere:
                                 typing.Any,
                                 construct_type(
                                     type_=typing.Any,  # type: ignore
-                                    object_=_response.json(),
+                                    object_=await _response.json(),
                                 ),
                             ),
                         )
@@ -3381,7 +3381,7 @@ class AsyncRawBaseCohere:
                                 typing.Any,
                                 construct_type(
                                     type_=typing.Any,  # type: ignore
-                                    object_=_response.json(),
+                                    object_=await _response.json(),
                                 ),
                             ),
                         )
@@ -3392,7 +3392,7 @@ class AsyncRawBaseCohere:
                                 typing.Any,
                                 construct_type(
                                     type_=typing.Any,  # type: ignore
-                                    object_=_response.json(),
+                                    object_=await _response.json(),
                                 ),
                             ),
                         )
@@ -3403,7 +3403,7 @@ class AsyncRawBaseCohere:
                                 typing.Any,
                                 construct_type(
                                     type_=typing.Any,  # type: ignore
-                                    object_=_response.json(),
+                                    object_=await _response.json(),
                                 ),
                             ),
                         )
@@ -3414,7 +3414,7 @@ class AsyncRawBaseCohere:
                                 typing.Any,
                                 construct_type(
                                     type_=typing.Any,  # type: ignore
-                                    object_=_response.json(),
+                                    object_=await _response.json(),
                                 ),
                             ),
                         )
@@ -3425,7 +3425,7 @@ class AsyncRawBaseCohere:
                                 typing.Any,
                                 construct_type(
                                     type_=typing.Any,  # type: ignore
-                                    object_=_response.json(),
+                                    object_=await _response.json(),
                                 ),
                             ),
                         )
@@ -3436,14 +3436,14 @@ class AsyncRawBaseCohere:
                                 typing.Any,
                                 construct_type(
                                     type_=typing.Any,  # type: ignore
-                                    object_=_response.json(),
+                                    object_=await _response.json(),
                                 ),
                             ),
                         )
-                    _response_json = _response.json()
+                    _response_json = await _response.json()
                 except JSONDecodeError:
                     raise ApiError(
-                        status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
+                        status_code=_response.status_code, headers=dict(_response.headers), body=await _response.text()
                     )
                 raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
@@ -4062,7 +4062,7 @@ class AsyncRawBaseCohere:
                             return
 
                         return AsyncHttpResponse(response=_response, data=_iter())
-                    await _response.aread()
+                    await _response.read()
                     if _response.status_code == 400:
                         raise BadRequestError(
                             headers=dict(_response.headers),
@@ -4070,7 +4070,7 @@ class AsyncRawBaseCohere:
                                 typing.Any,
                                 construct_type(
                                     type_=typing.Any,  # type: ignore
-                                    object_=_response.json(),
+                                    object_=await _response.json(),
                                 ),
                             ),
                         )
@@ -4081,7 +4081,7 @@ class AsyncRawBaseCohere:
                                 typing.Any,
                                 construct_type(
                                     type_=typing.Any,  # type: ignore
-                                    object_=_response.json(),
+                                    object_=await _response.json(),
                                 ),
                             ),
                         )
@@ -4092,7 +4092,7 @@ class AsyncRawBaseCohere:
                                 typing.Any,
                                 construct_type(
                                     type_=typing.Any,  # type: ignore
-                                    object_=_response.json(),
+                                    object_=await _response.json(),
                                 ),
                             ),
                         )
@@ -4103,7 +4103,7 @@ class AsyncRawBaseCohere:
                                 typing.Any,
                                 construct_type(
                                     type_=typing.Any,  # type: ignore
-                                    object_=_response.json(),
+                                    object_=await _response.json(),
                                 ),
                             ),
                         )
@@ -4114,7 +4114,7 @@ class AsyncRawBaseCohere:
                                 typing.Any,
                                 construct_type(
                                     type_=typing.Any,  # type: ignore
-                                    object_=_response.json(),
+                                    object_=await _response.json(),
                                 ),
                             ),
                         )
@@ -4125,7 +4125,7 @@ class AsyncRawBaseCohere:
                                 typing.Any,
                                 construct_type(
                                     type_=typing.Any,  # type: ignore
-                                    object_=_response.json(),
+                                    object_=await _response.json(),
                                 ),
                             ),
                         )
@@ -4136,7 +4136,7 @@ class AsyncRawBaseCohere:
                                 typing.Any,
                                 construct_type(
                                     type_=typing.Any,  # type: ignore
-                                    object_=_response.json(),
+                                    object_=await _response.json(),
                                 ),
                             ),
                         )
@@ -4147,7 +4147,7 @@ class AsyncRawBaseCohere:
                                 typing.Any,
                                 construct_type(
                                     type_=typing.Any,  # type: ignore
-                                    object_=_response.json(),
+                                    object_=await _response.json(),
                                 ),
                             ),
                         )
@@ -4158,7 +4158,7 @@ class AsyncRawBaseCohere:
                                 typing.Any,
                                 construct_type(
                                     type_=typing.Any,  # type: ignore
-                                    object_=_response.json(),
+                                    object_=await _response.json(),
                                 ),
                             ),
                         )
@@ -4169,7 +4169,7 @@ class AsyncRawBaseCohere:
                                 typing.Any,
                                 construct_type(
                                     type_=typing.Any,  # type: ignore
-                                    object_=_response.json(),
+                                    object_=await _response.json(),
                                 ),
                             ),
                         )
@@ -4180,7 +4180,7 @@ class AsyncRawBaseCohere:
                                 typing.Any,
                                 construct_type(
                                     type_=typing.Any,  # type: ignore
-                                    object_=_response.json(),
+                                    object_=await _response.json(),
                                 ),
                             ),
                         )
@@ -4191,14 +4191,14 @@ class AsyncRawBaseCohere:
                                 typing.Any,
                                 construct_type(
                                     type_=typing.Any,  # type: ignore
-                                    object_=_response.json(),
+                                    object_=await _response.json(),
                                 ),
                             ),
                         )
-                    _response_json = _response.json()
+                    _response_json = await _response.json()
                 except JSONDecodeError:
                     raise ApiError(
-                        status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
+                        status_code=_response.status_code, headers=dict(_response.headers), body=await _response.text()
                     )
                 raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
