@@ -206,3 +206,47 @@ class TestEmbedV4Params(unittest.TestCase):
 
             self.assertNotIn("output_dimension", captured_body)
             self.assertNotIn("embedding_types", captured_body)
+
+    def test_embed_with_embedding_types_returns_dict(self) -> None:
+        """When embedding_types is specified, the API returns embeddings as a dict.
+        The client should return that dict rather than wrapping it in Embeddings."""
+        mock_boto3 = MagicMock()
+        mock_botocore = MagicMock()
+
+        by_type_embeddings = {"float": [[0.1, 0.2]], "int8": [[1, 2]]}
+
+        def fake_invoke_model(**kwargs):  # type: ignore
+            mock_body = MagicMock()
+            mock_body.read.return_value = json.dumps({
+                "embeddings": by_type_embeddings,
+                "response_type": "embeddings_by_type",
+            }).encode()
+            return {"body": mock_body}
+
+        mock_bedrock_client = MagicMock()
+        mock_bedrock_client.invoke_model.side_effect = fake_invoke_model
+
+        def fake_boto3_client(service_name, **kwargs):  # type: ignore
+            if service_name == "bedrock-runtime":
+                return mock_bedrock_client
+            return MagicMock()
+
+        mock_boto3.client.side_effect = fake_boto3_client
+
+        with patch("cohere.manually_maintained.cohere_aws.client.lazy_boto3", return_value=mock_boto3), \
+             patch("cohere.manually_maintained.cohere_aws.client.lazy_botocore", return_value=mock_botocore), \
+             patch("cohere.manually_maintained.cohere_aws.client.lazy_sagemaker", return_value=MagicMock()), \
+             patch.dict(os.environ, {"AWS_DEFAULT_REGION": "us-east-1"}):
+
+            from cohere.manually_maintained.cohere_aws.client import Client
+
+            client = Client(aws_region="us-east-1", mode=Mode.BEDROCK)
+            result = client.embed(
+                texts=["hello world"],
+                input_type="search_document",
+                model_id="cohere.embed-english-v3",
+                embedding_types=["float", "int8"],
+            )
+
+            self.assertIsInstance(result, dict)
+            self.assertEqual(result, by_type_embeddings)

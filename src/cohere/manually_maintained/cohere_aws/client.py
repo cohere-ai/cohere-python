@@ -564,7 +564,7 @@ class Client:
         model_id: Optional[str] = None,
         output_dimension: Optional[int] = None,
         embedding_types: Optional[List[str]] = None,
-    ) -> Embeddings:
+    ) -> Union[Embeddings, Dict[str, List]]:
         json_params = {
             'texts': texts,
             'truncate': truncate,
@@ -607,7 +607,10 @@ class Client:
             # ValidationError, e.g. when variant is bad
             raise CohereError(str(e))
 
-        return Embeddings(response['embeddings'])
+        embeddings = response['embeddings']
+        if isinstance(embeddings, dict):
+            return embeddings
+        return Embeddings(embeddings)
 
     def _bedrock_embed(self, json_params: Dict[str, Any], model_id: str):
         if not model_id:
@@ -628,7 +631,10 @@ class Client:
             # ValidationError, e.g. when variant is bad
             raise CohereError(str(e))
 
-        return Embeddings(response['embeddings'])
+        embeddings = response['embeddings']
+        if isinstance(embeddings, dict):
+            return embeddings
+        return Embeddings(embeddings)
 
 
     def rerank(self,
