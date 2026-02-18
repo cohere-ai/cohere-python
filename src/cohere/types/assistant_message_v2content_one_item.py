@@ -10,7 +10,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2
 from ..core.unchecked_base_model import UncheckedBaseModel, UnionMetadata
 
 
-class TextAssistantMessageV2ContentItem(UncheckedBaseModel):
+class TextAssistantMessageV2ContentOneItem(UncheckedBaseModel):
     type: typing.Literal["text"] = "text"
     text: str
 
@@ -23,7 +23,7 @@ class TextAssistantMessageV2ContentItem(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-class ThinkingAssistantMessageV2ContentItem(UncheckedBaseModel):
+class ThinkingAssistantMessageV2ContentOneItem(UncheckedBaseModel):
     type: typing.Literal["thinking"] = "thinking"
     thinking: str
 
@@ -36,7 +36,7 @@ class ThinkingAssistantMessageV2ContentItem(UncheckedBaseModel):
             extra = pydantic.Extra.allow
 
 
-AssistantMessageV2ContentItem = typing_extensions.Annotated[
-    typing.Union[TextAssistantMessageV2ContentItem, ThinkingAssistantMessageV2ContentItem],
+AssistantMessageV2ContentOneItem = typing_extensions.Annotated[
+    typing.Union[TextAssistantMessageV2ContentOneItem, ThinkingAssistantMessageV2ContentOneItem],
     UnionMetadata(discriminant="type"),
 ]
