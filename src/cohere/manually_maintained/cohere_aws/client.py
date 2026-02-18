@@ -20,19 +20,29 @@ class Client:
     def __init__(
            self,
             aws_region: typing.Optional[str] = None,
+            mode: Mode = Mode.SAGEMAKER,
         ):
         """
         By default we assume region configured in AWS CLI (`aws configure get region`). You can change the region with
         `aws configure set region us-west-2` or override it with `region_name` parameter.
         """
-        self._client = lazy_boto3().client("sagemaker-runtime", region_name=aws_region)
-        self._service_client = lazy_boto3().client("sagemaker", region_name=aws_region)
+        self.mode = mode
         if os.environ.get('AWS_DEFAULT_REGION') is None:
             os.environ['AWS_DEFAULT_REGION'] = aws_region
-        self._sess = lazy_sagemaker().Session(sagemaker_client=self._service_client)
-        self.mode = Mode.SAGEMAKER
 
+        if self.mode == Mode.SAGEMAKER:
+            self._client = lazy_boto3().client("sagemaker-runtime", region_name=aws_region)
+            self._service_client = lazy_boto3().client("sagemaker", region_name=aws_region)
+            self._sess = lazy_sagemaker().Session(sagemaker_client=self._service_client)
+        elif self.mode == Mode.BEDROCK:
+            self._client = lazy_boto3().client("bedrock-runtime", region_name=aws_region)
+            self._service_client = lazy_boto3().client("bedrock", region_name=aws_region)
+            self._sess = None
+            self._endpoint_name = None
 
+    def _require_sagemaker(self) -> None:
+        if self.mode != Mode.SAGEMAKER:
+            raise CohereError("This method is only supported in SageMaker mode.")
 
     def _does_endpoint_exist(self, endpoint_name: str) -> bool:
         try:
@@ -50,6 +60,7 @@ class Client:
         Raises:
             CohereError: Connection to the endpoint failed.
         """
+        self._require_sagemaker()
         if not self._does_endpoint_exist(endpoint_name):
             raise CohereError(f"Endpoint {endpoint_name} does not exist.")
         self._endpoint_name = endpoint_name
@@ -137,6 +148,7 @@ class Client:
                 will be used to get the role. This should work when one uses the client inside SageMaker. If this errors
                 out, the default role "ServiceRoleSagemaker" will be used, which generally works outside of SageMaker.
         """
+        self._require_sagemaker()
         # First, check if endpoint already exists
         if self._does_endpoint_exist(endpoint_name):
             if recreate:
@@ -550,11 +562,15 @@ class Client:
         variant: Optional[str] = None,
         input_type: Optional[str] = None,
         model_id: Optional[str] = None,
-    ) -> Embeddings:
+        output_dimension: Optional[int] = None,
+        embedding_types: Optional[List[str]] = None,
+    ) -> Union[Embeddings, Dict[str, List]]:
         json_params = {
             'texts': texts,
             'truncate': truncate,
-            "input_type": input_type
+            "input_type": input_type,
+            "output_dimension": output_dimension,
+            "embedding_types": embedding_types,
         }
         for key, value in list(json_params.items()):
             if value is None:
@@ -591,7 +607,10 @@ class Client:
             # ValidationError, e.g. when variant is bad
             raise CohereError(str(e))
 
-        return Embeddings(response['embeddings'])
+        embeddings = response['embeddings']
+        if isinstance(embeddings, dict):
+            return embeddings
+        return Embeddings(embeddings)
 
     def _bedrock_embed(self, json_params: Dict[str, Any], model_id: str):
         if not model_id:
@@ -612,7 +631,10 @@ class Client:
             # ValidationError, e.g. when variant is bad
             raise CohereError(str(e))
 
-        return Embeddings(response['embeddings'])
+        embeddings = response['embeddings']
+        if isinstance(embeddings, dict):
+            return embeddings
+        return Embeddings(embeddings)
 
 
     def rerank(self,
@@ -805,6 +827,7 @@ class Client:
             This should work when one uses the client inside SageMaker. If this errors out,
             the default role "ServiceRoleSagemaker" will be used, which generally works outside SageMaker.
         """
+        self._require_sagemaker()
         if name == "model":
             raise ValueError("name cannot be 'model'")
 
@@ -948,6 +971,7 @@ class Client:
         additional_command: Optional[str] = "",
         variant: Optional[str] = None
     ) -> Summary:
+        self._require_sagemaker()
 
         if self._endpoint_name is None:
             raise CohereError("No endpoint connected. "
@@ -989,6 +1013,7 @@ class Client:
 
 
     def delete_endpoint(self) -> None:
+        self._require_sagemaker()
         if self._endpoint_name is None:
             raise CohereError("No endpoint connected.")
         try:

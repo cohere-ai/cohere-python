@@ -10,6 +10,17 @@ aws_session_token = os.getenv("AWS_SESSION_TOKEN")
 aws_region = os.getenv("AWS_REGION")
 endpoint_type = os.getenv("ENDPOINT_TYPE")
 
+
+def _setup_boto3_env():
+    """Bridge custom test env vars to standard boto3 credential env vars."""
+    if aws_access_key:
+        os.environ["AWS_ACCESS_KEY_ID"] = aws_access_key
+    if aws_secret_key:
+        os.environ["AWS_SECRET_ACCESS_KEY"] = aws_secret_key
+    if aws_session_token:
+        os.environ["AWS_SESSION_TOKEN"] = aws_session_token
+
+
 @unittest.skipIf(None == os.getenv("TEST_AWS"), "tests skipped because TEST_AWS is not set")
 class TestClient(unittest.TestCase):
     platform: str = "bedrock"
@@ -109,3 +120,105 @@ class TestClient(unittest.TestCase):
                 self.assertIsNotNone(event.response.text)
 
         self.assertSetEqual(response_types, {"text-generation", "stream-end"})
+
+
+@unittest.skipIf(None == os.getenv("TEST_AWS"), "tests skipped because TEST_AWS is not set")
+class TestBedrockClientV2(unittest.TestCase):
+    """Integration tests for BedrockClientV2 (httpx-based).
+
+    Fix 1 validation: If these pass, SigV4 signing uses the correct host header,
+    since the request would fail with a signature mismatch otherwise.
+    """
+
+    client: cohere.ClientV2 = cohere.BedrockClientV2(
+        aws_access_key=aws_access_key,
+        aws_secret_key=aws_secret_key,
+        aws_session_token=aws_session_token,
+        aws_region=aws_region,
+    )
+
+    def test_embed(self) -> None:
+        response = self.client.embed(
+            model="cohere.embed-multilingual-v3",
+            texts=["I love Cohere!"],
+            input_type="search_document",
+            embedding_types=["float"],
+        )
+        self.assertIsNotNone(response)
+
+    def test_embed_with_output_dimension(self) -> None:
+        response = self.client.embed(
+            model="cohere.embed-english-v3",
+            texts=["I love Cohere!"],
+            input_type="search_document",
+            embedding_types=["float"],
+            output_dimension=256,
+        )
+        self.assertIsNotNone(response)
+
+
+@unittest.skipIf(None == os.getenv("TEST_AWS"), "tests skipped because TEST_AWS is not set")
+class TestCohereAwsBedrockClient(unittest.TestCase):
+    """Integration tests for cohere_aws.Client in Bedrock mode (boto3-based).
+
+    Validates:
+    - Fix 2: Client can be initialized with mode=BEDROCK without importing sagemaker
+    - Fix 3: embed() accepts output_dimension and embedding_types
+    """
+    client: typing.Any = None
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        _setup_boto3_env()
+        from cohere.manually_maintained.cohere_aws.client import Client
+        from cohere.manually_maintained.cohere_aws.mode import Mode
+        cls.client = Client(aws_region=aws_region, mode=Mode.BEDROCK)
+
+    def test_client_is_bedrock_mode(self) -> None:
+        from cohere.manually_maintained.cohere_aws.mode import Mode
+        self.assertEqual(self.client.mode, Mode.BEDROCK)
+
+    def test_embed(self) -> None:
+        response = self.client.embed(
+            texts=["I love Cohere!"],
+            input_type="search_document",
+            model_id="cohere.embed-multilingual-v3",
+        )
+        self.assertIsNotNone(response)
+        self.assertIsNotNone(response.embeddings)
+        self.assertGreater(len(response.embeddings), 0)
+
+    def test_embed_with_embedding_types(self) -> None:
+        response = self.client.embed(
+            texts=["I love Cohere!"],
+            input_type="search_document",
+            model_id="cohere.embed-multilingual-v3",
+            embedding_types=["float"],
+        )
+        self.assertIsNotNone(response)
+        # When embedding_types is passed, the response is a raw dict
+        self.assertIsInstance(response, dict)
+        self.assertIn("float", response)
+
+    def test_embed_with_output_dimension(self) -> None:
+        response = self.client.embed(
+            texts=["I love Cohere!"],
+            input_type="search_document",
+            model_id="cohere.embed-english-v3",
+            output_dimension=256,
+            embedding_types=["float"],
+        )
+        self.assertIsNotNone(response)
+        # When embedding_types is passed, the response is a raw dict
+        self.assertIsInstance(response, dict)
+        self.assertIn("float", response)
+
+    def test_embed_without_new_params(self) -> None:
+        """Backwards compat: embed() still works without the new v4 params."""
+        response = self.client.embed(
+            texts=["I love Cohere!"],
+            input_type="search_document",
+            model_id="cohere.embed-multilingual-v3",
+        )
+        self.assertIsNotNone(response)
+        self.assertIsNotNone(response.embeddings)
