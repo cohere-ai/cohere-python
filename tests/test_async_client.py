@@ -10,9 +10,12 @@ import json
 import os
 from contextlib import asynccontextmanager
 from unittest.mock import AsyncMock, MagicMock, patch
+import aiohttp
 import pytest
+from cohere.base_client import AsyncBaseCohere
 from cohere.client import AsyncClient
 from cohere.client_v2 import AsyncClientV2
+from cohere.core.http_client import AsyncHttpClient
 from cohere.errors import BadRequestError, UnauthorizedError, TooManyRequestsError, InternalServerError
 from cohere.core.api_error import ApiError
 
@@ -534,6 +537,77 @@ async def test_multiple_error_codes_use_await_json():
                 # Verify async methods were properly awaited
                 mock_response.read.assert_called_once()
                 assert mock_response.json.call_count >= 1
+
+
+# ---- Regression tests for aio-libs/aiohttp#1142: force_close / allow_redirects fix ----
+
+
+@pytest.mark.asyncio
+async def test_connector_never_force_closes_connections():
+    """
+    Regression: TCPConnector must NOT receive force_close=True regardless of the
+    follow_redirects setting. The previous implementation on AsyncBaseCohere used
+    `force_close=not follow_redirects`, which disabled keep-alive connection pooling
+    and caused TIME_WAIT port exhaustion when making thousands of concurrent requests.
+    Redirect behaviour is now handled per-request via allow_redirects instead.
+    """
+    for follow_redirects_val in (True, False):
+        with patch("aiohttp.TCPConnector") as mock_connector_cls, patch("aiohttp.ClientSession"):
+            mock_connector_cls.return_value = MagicMock()
+            # AsyncBaseCohere is where follow_redirects is consumed and the connector is built
+            AsyncBaseCohere(token="test-key", follow_redirects=follow_redirects_val)
+
+            call_kwargs = mock_connector_cls.call_args.kwargs if mock_connector_cls.call_args else {}
+            assert call_kwargs.get("force_close", False) is not True, (
+                f"force_close must not be True when follow_redirects={follow_redirects_val!r}; "
+                "this kills TCP keep-alive and exhausts ephemeral ports under high concurrency"
+            )
+
+
+@pytest.mark.asyncio
+async def test_allow_redirects_forwarded_per_request():
+    """
+    follow_redirects on the client is forwarded as allow_redirects= on each
+    aiohttp session.request() call. This is the correct per-request mechanism;
+    the connector-level force_close must NOT be used for this purpose.
+    """
+    mock_response = AsyncMock()
+    mock_response.status = 200
+    mock_response.status_code = 200
+    mock_response.headers = {}
+    mock_response.read = AsyncMock(return_value=b"{}")
+    mock_response.content_type = "application/json"
+    mock_response.text = "{}"
+
+    for follow_redirects_val in (True, False):
+        captured_request_kwargs: dict = {}
+
+        async def capture_request(*args, **kwargs):
+            captured_request_kwargs.update(kwargs)
+            return mock_response
+
+        mock_session = MagicMock()
+        mock_session.request = capture_request
+
+        http_client = AsyncHttpClient(
+            aiohttp_session=mock_session,
+            base_timeout=lambda: 30.0,
+            base_headers=lambda: {"Authorization": "Bearer test"},
+            base_url=lambda: "https://api.cohere.com",
+            follow_redirects=follow_redirects_val,
+        )
+        try:
+            await http_client.request(method="GET", path="/v1/chat")
+        except Exception:
+            pass  # response parsing may fail; we only care about the kwargs forwarded
+
+        assert "allow_redirects" in captured_request_kwargs, (
+            "allow_redirects must be passed to session.request() — "
+            "redirect handling belongs at the request level, not the connector level"
+        )
+        assert captured_request_kwargs["allow_redirects"] == follow_redirects_val, (
+            f"allow_redirects should equal follow_redirects={follow_redirects_val!r}"
+        )
 
 
 if __name__ == "__main__":
