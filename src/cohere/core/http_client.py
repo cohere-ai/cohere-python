@@ -460,12 +460,14 @@ class AsyncHttpClient:
         base_headers: typing.Callable[[], typing.Dict[str, str]],
         base_url: typing.Optional[typing.Callable[[], str]] = None,
         async_base_headers: typing.Optional[typing.Callable[[], typing.Awaitable[typing.Dict[str, str]]]] = None,
+        follow_redirects: bool = True,
     ):
         self.base_url = base_url
         self.base_timeout = base_timeout
         self.base_headers = base_headers
         self.async_base_headers = async_base_headers
         self.aiohttp_session = aiohttp_session
+        self.follow_redirects = follow_redirects
 
     async def _get_headers(self) -> typing.Dict[str, str]:
         if self.async_base_headers is not None:
@@ -570,6 +572,7 @@ class AsyncHttpClient:
             json=json_body,
             data=request_data,
             timeout=timeout,
+            allow_redirects=self.follow_redirects,
         )
         
         # Read response body and parse JSON for aiohttp compatibility
@@ -707,6 +710,7 @@ class AsyncHttpClient:
             json=json_body,
             data=request_data,
             timeout=timeout,
+            allow_redirects=self.follow_redirects,
         ) as response:
             # Add status_code property for backward compatibility
             if not hasattr(response, 'status_code'):

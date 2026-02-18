@@ -1593,7 +1593,8 @@ class AsyncBaseCohere:
         The timeout to be used, in seconds, for requests. By default the timeout is 300 seconds, unless a custom httpx client is used, in which case this default is not enforced.
 
     follow_redirects : typing.Optional[bool]
-        Whether the default httpx client follows redirects or not, this is irrelevant if a custom httpx client is passed in.
+        Whether the async client follows HTTP redirects. Defaults to True. Passed as allow_redirects
+        on each request; does NOT affect TCP connection reuse (connections are always pooled).
 
     httpx_client : typing.Optional[httpx.AsyncClient]
         The httpx client to use for making requests, a preconfigured client is used by default, however this is useful should you want to pass in any custom httpx configuration.
@@ -1625,12 +1626,17 @@ class AsyncBaseCohere:
         if token is None:
             raise ApiError(body="The client must be instantiated be either passing in token or setting CO_API_KEY")
         
-        # Create aiohttp session if not provided
+        # Create aiohttp session if not provided.
+        # NOTE: force_close is intentionally NOT derived from follow_redirects.
+        # force_close controls TCP connection reuse (keep-alive pooling); setting it True
+        # causes every request to open and close a fresh TCP socket, exhausting the ephemeral
+        # port range (TIME_WAIT) when making thousands of concurrent calls.
+        # Redirect behaviour is handled per-request via allow_redirects instead.
         if aiohttp_session is None:
             timeout_config = aiohttp.ClientTimeout(total=_defaulted_timeout)
-            connector = aiohttp.TCPConnector(force_close=not follow_redirects) if follow_redirects is not None else aiohttp.TCPConnector()
+            connector = aiohttp.TCPConnector()
             aiohttp_session = aiohttp.ClientSession(timeout=timeout_config, connector=connector)
-        
+
         self._client_wrapper = AsyncClientWrapper(
             base_url=_get_base_url(base_url=base_url, environment=environment),
             client_name=client_name,
@@ -1638,6 +1644,7 @@ class AsyncBaseCohere:
             headers=headers,
             aiohttp_session=aiohttp_session,
             timeout=_defaulted_timeout,
+            follow_redirects=follow_redirects if follow_redirects is not None else True,
         )
         self._raw_client = AsyncRawBaseCohere(client_wrapper=self._client_wrapper)
         self._v2: typing.Optional[AsyncV2Client] = None

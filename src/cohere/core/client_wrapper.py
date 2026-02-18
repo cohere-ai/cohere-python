@@ -87,6 +87,7 @@ class AsyncClientWrapper(BaseClientWrapper):
         timeout: typing.Optional[float] = None,
         async_token: typing.Optional[typing.Callable[[], typing.Awaitable[str]]] = None,
         aiohttp_session: aiohttp.ClientSession,
+        follow_redirects: bool = True,
     ):
         super().__init__(client_name=client_name, token=token, headers=headers, base_url=base_url, timeout=timeout)
         self._async_token = async_token
@@ -96,6 +97,7 @@ class AsyncClientWrapper(BaseClientWrapper):
             base_timeout=self.get_timeout,
             base_url=self.get_base_url,
             async_base_headers=self.async_get_headers,
+            follow_redirects=follow_redirects,
         )
 
     async def async_get_headers(self) -> typing.Dict[str, str]:
