@@ -24,10 +24,10 @@ class BaseClientWrapper:
 
     def get_headers(self) -> typing.Dict[str, str]:
         headers: typing.Dict[str, str] = {
-            "User-Agent": "cohere/5.20.4",
+            "User-Agent": "cohere/5.20.6",
             "X-Fern-Language": "Python",
             "X-Fern-SDK-Name": "cohere",
-            "X-Fern-SDK-Version": "5.20.4",
+            "X-Fern-SDK-Version": "5.20.6",
             **(self.get_custom_headers() or {}),
         }
         if self._client_name is not None:
