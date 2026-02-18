@@ -197,6 +197,9 @@ def parse_sse_obj(sse: "ServerSentEvent", type_: Type[T]) -> T:
         # Not a discriminated union - parse the data field as JSON
         data_value = sse_event.get("data")
         if isinstance(data_value, str) and data_value:
+            # Skip [DONE] marker - it's an expected end-of-stream signal, not data
+            if data_value.strip() == "[DONE]":
+                return None  # type: ignore
             try:
                 parsed_data = json.loads(data_value)
                 return parse_obj_as(type_, parsed_data)

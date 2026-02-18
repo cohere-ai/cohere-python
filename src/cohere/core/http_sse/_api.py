@@ -2,8 +2,9 @@
 
 import re
 from contextlib import asynccontextmanager, contextmanager
-from typing import Any, AsyncGenerator, AsyncIterator, Iterator, cast
+from typing import Any, AsyncGenerator, AsyncIterator, Iterator, Union, cast
 
+import aiohttp
 import httpx
 from ._decoders import SSEDecoder
 from ._exceptions import SSEError
@@ -11,7 +12,7 @@ from ._models import ServerSentEvent
 
 
 class EventSource:
-    def __init__(self, response: httpx.Response) -> None:
+    def __init__(self, response: Union[httpx.Response, aiohttp.ClientResponse]) -> None:
         self._response = response
 
     def _check_content_type(self) -> None:
@@ -42,7 +43,7 @@ class EventSource:
         return "utf-8"
 
     @property
-    def response(self) -> httpx.Response:
+    def response(self) -> Union[httpx.Response, aiohttp.ClientResponse]:
         return self._response
 
     def iter_sse(self) -> Iterator[ServerSentEvent]:
@@ -76,15 +77,40 @@ class EventSource:
     async def aiter_sse(self) -> AsyncGenerator[ServerSentEvent, None]:
         self._check_content_type()
         decoder = SSEDecoder()
-        lines = cast(AsyncGenerator[str, None], self._response.aiter_lines())
-        try:
-            async for line in lines:
-                line = line.rstrip("\n")
+        charset = self._get_charset()
+        
+        if isinstance(self._response, httpx.Response):
+            # Use httpx's aiter_lines
+            lines = cast(AsyncGenerator[str, None], self._response.aiter_lines())
+            try:
+                async for line in lines:
+                    line = line.rstrip("\n")
+                    sse = decoder.decode(line)
+                    if sse is not None:
+                        yield sse
+            finally:
+                await lines.aclose()
+        else:
+            # Use aiohttp's content reading
+            buffer = ""
+            async for chunk in self._response.content.iter_any():
+                text_chunk = chunk.decode(charset, errors="replace")
+                buffer += text_chunk
+                
+                # Process complete lines
+                while "\n" in buffer:
+                    line, buffer = buffer.split("\n", 1)
+                    line = line.rstrip("\r")
+                    sse = decoder.decode(line)
+                    if sse is not None:
+                        yield sse
+            
+            # Process any remaining data in buffer
+            if buffer.strip():
+                line = buffer.rstrip("\r")
                 sse = decoder.decode(line)
                 if sse is not None:
                     yield sse
-        finally:
-            await lines.aclose()
 
 
 @contextmanager
@@ -99,7 +125,7 @@ def connect_sse(client: httpx.Client, method: str, url: str, **kwargs: Any) -> I
 
 @asynccontextmanager
 async def aconnect_sse(
-    client: httpx.AsyncClient,
+    client: Union[httpx.AsyncClient, aiohttp.ClientSession],
     method: str,
     url: str,
     **kwargs: Any,
@@ -108,5 +134,10 @@ async def aconnect_sse(
     headers["Accept"] = "text/event-stream"
     headers["Cache-Control"] = "no-store"
 
-    async with client.stream(method, url, headers=headers, **kwargs) as response:
-        yield EventSource(response)
+    if isinstance(client, httpx.AsyncClient):
+        async with client.stream(method, url, headers=headers, **kwargs) as response:
+            yield EventSource(response)
+    else:
+        # aiohttp.ClientSession
+        async with client.request(method, url, headers=headers, **kwargs) as response:
+            yield EventSource(response)
