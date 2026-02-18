@@ -196,7 +196,9 @@ class TestCohereAwsBedrockClient(unittest.TestCase):
             embedding_types=["float"],
         )
         self.assertIsNotNone(response)
-        self.assertIsNotNone(response.embeddings)
+        # When embedding_types is passed, the response is a raw dict
+        self.assertIsInstance(response, dict)
+        self.assertIn("float", response)
 
     def test_embed_with_output_dimension(self) -> None:
         response = self.client.embed(
@@ -207,7 +209,9 @@ class TestCohereAwsBedrockClient(unittest.TestCase):
             embedding_types=["float"],
         )
         self.assertIsNotNone(response)
-        self.assertIsNotNone(response.embeddings)
+        # When embedding_types is passed, the response is a raw dict
+        self.assertIsInstance(response, dict)
+        self.assertIn("float", response)
 
     def test_embed_without_new_params(self) -> None:
         """Backwards compat: embed() still works without the new v4 params."""
