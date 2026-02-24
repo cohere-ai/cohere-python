@@ -274,7 +274,13 @@ def _load_oci_config(
         return {"signer": signer, "auth_type": "resource_principal"}
 
     elif kwargs.get("user_id"):
-        # Direct credentials provided
+        # Direct credentials provided - validate required fields
+        required_fields = ["fingerprint", "tenancy_id"]
+        missing = [f for f in required_fields if not kwargs.get(f)]
+        if missing:
+            raise ValueError(
+                f"When providing oci_user_id, you must also provide: {', '.join('oci_' + f for f in missing)}"
+            )
         config = {
             "user": kwargs["user_id"],
             "fingerprint": kwargs["fingerprint"],
@@ -942,7 +948,11 @@ def transform_oci_stream_wrapper(
             if line.startswith("data: "):
                 data_str = line[6:]  # Remove "data: " prefix
                 if data_str.strip() == "[DONE]":
-                    # Return (not break) to stop the generator completely, preventing further chunk processing
+                    # Emit message-end event for V2 before stopping
+                    if is_v2:
+                        message_end_event = {"type": "message-end"}
+                        yield b"data: " + json.dumps(message_end_event).encode("utf-8") + b"\n\n"
+                    # Return to stop the generator completely
                     return
 
                 try:
