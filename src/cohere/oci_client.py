@@ -876,7 +876,7 @@ def transform_oci_response_to_cohere(
 
             return {
                 "text": chat_response.get("text", ""),
-                "generation_id": oci_response.get("modelId", str(uuid.uuid4())),
+                "generation_id": str(uuid.uuid4()),  # OCI doesn't provide generation ID, generate one
                 "chat_history": chat_response.get("chatHistory", []),
                 "finish_reason": chat_response.get("finishReason", "COMPLETE"),
                 "citations": chat_response.get("citations", []),
