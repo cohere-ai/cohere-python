@@ -1018,12 +1018,12 @@ class Client:
             raise CohereError("No endpoint connected.")
         try:
             self._service_client.delete_endpoint(EndpointName=self._endpoint_name)
-        except:
+        except Exception:
             print("Endpoint not found, skipping deletion.")
 
         try:
             self._service_client.delete_endpoint_config(EndpointConfigName=self._endpoint_name)
-        except:
+        except Exception:
             print("Endpoint config not found, skipping deletion.")
 
     def close(self) -> None:

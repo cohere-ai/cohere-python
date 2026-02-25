@@ -231,7 +231,7 @@ def _convert_union_type(type_: typing.Type[typing.Any], object_: typing.Any) -> 
                     for inner_type in get_args(union_type):
                         try:
                             objects_discriminant = getattr(object_, metadata.discriminant)
-                        except:
+                        except Exception:
                             objects_discriminant = object_[metadata.discriminant]
                         if inner_type.__fields__[metadata.discriminant].default == objects_discriminant:
                             return construct_type(object_=object_, type_=inner_type)
@@ -365,7 +365,7 @@ def _get_model_fields(
 def _get_field_default(field: PydanticField) -> typing.Any:
     try:
         value = field.get_default()  # type: ignore # Pydantic < v1.10.15
-    except:
+    except Exception:
         value = field.default
     if IS_PYDANTIC_V2:
         from pydantic_core import PydanticUndefined
