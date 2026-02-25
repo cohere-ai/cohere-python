@@ -1128,6 +1128,131 @@ class BaseCohere:
         )
         return _response.data
 
+    def embed_stream(
+        self,
+        *,
+        texts: typing.Optional[typing.Sequence[str]] = OMIT,
+        model: typing.Optional[str] = OMIT,
+        input_type: typing.Optional[EmbedInputType] = OMIT,
+        embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
+        truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
+        batch_size: int = 10,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> typing.Iterator[typing.Any]:  # Returns Iterator[StreamedEmbedding]
+        """
+        Memory-efficient streaming version of embed that yields embeddings one at a time.
+        
+        This method processes texts in batches and yields individual embeddings as they are
+        parsed from the response, without loading all embeddings into memory at once.
+        Ideal for processing large datasets where memory usage is a concern.
+
+        Parameters
+        ----------
+        texts : typing.Optional[typing.Sequence[str]]
+            An array of strings for the model to embed. Will be processed in batches.
+
+        model : typing.Optional[str]
+            ID of one of the available [Embedding models](https://docs.cohere.com/docs/cohere-embed).
+
+        input_type : typing.Optional[EmbedInputType]
+            Specifies the type of input passed to the model.
+
+        embedding_types : typing.Optional[typing.Sequence[EmbeddingType]]
+            Specifies the types of embeddings you want to get back.
+
+        truncate : typing.Optional[EmbedRequestTruncate]
+            One of `NONE|START|END` to specify how the API will handle inputs longer than the maximum token length.
+
+        batch_size : int
+            Number of texts to process in each batch. Default is 10.
+            Lower values use less memory but may be slower overall.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Yields
+        ------
+        StreamedEmbedding
+            Individual embeddings as they are parsed from the response.
+
+        Examples
+        --------
+        from cohere import Client
+
+        client = Client(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        
+        # Process embeddings one at a time without loading all into memory
+        for embedding in client.embed_stream(
+            texts=["hello", "goodbye", "how are you"],
+            model="embed-v4.0",
+            batch_size=2
+        ):
+            print(f"Embedding {embedding.index}: {embedding.embedding[:5]}...")
+            # Process/save embedding immediately
+        """
+        # Validate batch_size
+        if batch_size < 1:
+            raise ValueError("batch_size must be at least 1")
+
+        # Handle OMIT sentinel and empty texts
+        if texts is None or texts is OMIT:
+            return
+        if not texts:
+            return
+
+        from .streaming_utils import StreamingEmbedParser
+
+        # Process texts in batches
+        texts_list = list(texts)
+
+        for batch_start in range(0, len(texts_list), batch_size):
+            batch_end = min(batch_start + batch_size, len(texts_list))
+            batch_texts = texts_list[batch_start:batch_end]
+
+            # Get response for this batch
+            response = self._raw_client.embed(
+                texts=batch_texts,
+                model=model,
+                input_type=input_type,
+                embedding_types=embedding_types,
+                truncate=truncate,
+                request_options=request_options,
+            )
+
+            # Parse embeddings from response incrementally
+            parser = StreamingEmbedParser(response._response, batch_texts)
+            # Track used indices per embedding type to handle:
+            # 1. Duplicate texts within a batch
+            # 2. Multiple embedding types (float, int8, etc.) for the same texts
+            used_batch_indices_by_type: dict[str, set[int]] = {}
+
+            for embedding in parser.iter_embeddings():
+                # The parser sets embedding.text correctly for multiple embedding types
+                # Adjust the global index based on text position in batch
+                # Use 'is not None' to handle empty strings correctly (they are falsy but valid)
+                if embedding.text is not None and embedding.text in batch_texts:
+                    # Get or create the set of used indices for this embedding type
+                    emb_type = embedding.embedding_type
+                    if emb_type not in used_batch_indices_by_type:
+                        used_batch_indices_by_type[emb_type] = set()
+                    used_indices = used_batch_indices_by_type[emb_type]
+
+                    # Find the next unused occurrence of this text in the batch
+                    # This handles duplicate texts correctly
+                    text_idx_in_batch = None
+                    for idx, text in enumerate(batch_texts):
+                        if text == embedding.text and idx not in used_indices:
+                            text_idx_in_batch = idx
+                            used_indices.add(idx)
+                            break
+
+                    if text_idx_in_batch is not None:
+                        embedding.index = batch_start + text_idx_in_batch
+                yield embedding
+
     def rerank(
         self,
         *,
