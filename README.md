@@ -6,6 +6,41 @@
 ![license badge](https://img.shields.io/github/license/cohere-ai/cohere-python)
 [![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-SDK%20generated%20by%20Fern-brightgreen)](https://github.com/fern-api/fern)
 
+---
+
+## ⚠️ Custom Modifications (Internal Fork)
+
+**This is a modified version of the Cohere Python SDK with the following changes:**
+
+### Async Client Migration (httpx → aiohttp)
+- **Date:** February 2026
+- **Reason:** Resolves `httpx.ConnectError: All connection attempts failed` issues
+- **Scope:** Async clients only (`AsyncClient`, `AsyncClientV2`) - sync clients unchanged
+
+### Modified Files:
+- `src/cohere/core/http_client.py` - AsyncHttpClient migrated to aiohttp
+- `src/cohere/core/client_wrapper.py` - AsyncClientWrapper updated
+- `src/cohere/base_client.py` - AsyncBaseCohere initialization
+- `src/cohere/core/http_response.py` - AsyncHttpResponse compatibility
+- `src/cohere/core/http_sse/_api.py` - SSE streaming with aiohttp
+- `src/cohere/core/http_sse/_exceptions.py` - Exception compatibility
+- `src/cohere/core/file.py` - FormData support for aiohttp
+- `pyproject.toml` - Added aiohttp dependency
+
+### Testing:
+- All async operations verified working (see `test_async_client.py`)
+- 8/8 test suite passing: chat, streaming, SSE, embed, concurrent requests, error handling
+
+### Important Notes:
+- **Fern-generated code modified:** Changes will be overwritten if Fern regenerates
+- **Version pinned:** Stay on 5.20.5 base until migration is upstreamed
+- **Backward compatible:** Sync clients (`Client`, `ClientV2`) continue using httpx
+- **Production ready:** All async functionality tested and working
+
+**To use:** Install with `uv sync` in this directory
+
+---
+
 The Cohere Python SDK allows access to Cohere models across many different platforms: the cohere platform, AWS (Bedrock, Sagemaker), Azure, GCP and Oracle OCI. For a full list of support and snippets, please take a look at the [SDK support docs page](https://docs.cohere.com/docs/cohere-works-everywhere).
 
 ## Documentation

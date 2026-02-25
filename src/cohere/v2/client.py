@@ -761,7 +761,9 @@ class AsyncV2Client:
             request_options=request_options,
         ) as r:
             async for _chunk in r.data:
-                yield _chunk
+                # Skip None chunks (e.g., from [DONE] markers in SSE streams)
+                if _chunk is not None:
+                    yield _chunk
 
     async def chat(
         self,

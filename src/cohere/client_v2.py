@@ -2,6 +2,7 @@ import os
 import typing
 from concurrent.futures import ThreadPoolExecutor
 
+import aiohttp
 import httpx
 from .client import AsyncClient, Client
 from .environment import ClientEnvironment
@@ -71,7 +72,8 @@ class AsyncClientV2(AsyncV2Client, AsyncClient):  # type: ignore
         environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
         client_name: typing.Optional[str] = None,
         timeout: typing.Optional[float] = None,
-        httpx_client: typing.Optional[httpx.AsyncClient] = None,
+        aiohttp_session: typing.Optional["aiohttp.ClientSession"] = None,
+        httpx_client: typing.Optional[httpx.AsyncClient] = None,  # Deprecated
         thread_pool_executor: ThreadPoolExecutor = ThreadPoolExecutor(64),
         log_warning_experimental_features: bool = True,
     ):
@@ -82,6 +84,7 @@ class AsyncClientV2(AsyncV2Client, AsyncClient):  # type: ignore
             environment=environment,
             client_name=client_name,
             timeout=timeout,
+            aiohttp_session=aiohttp_session,
             httpx_client=httpx_client,
             thread_pool_executor=thread_pool_executor,
             log_warning_experimental_features=log_warning_experimental_features,
