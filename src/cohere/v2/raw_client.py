@@ -232,7 +232,7 @@ class RawV2Client:
                         def _iter():
                             _event_source = EventSource(_response)
                             for _sse in _event_source.iter_sse():
-                                if _sse.data == None:
+                                if _sse.data == "[DONE]":
                                     return
                                 try:
                                     yield typing.cast(
@@ -1356,7 +1356,7 @@ class AsyncRawV2Client:
                         async def _iter():
                             _event_source = EventSource(_response)
                             async for _sse in _event_source.aiter_sse():
-                                if _sse.data == None:
+                                if _sse.data == "[DONE]":
                                     return
                                 try:
                                     yield typing.cast(
