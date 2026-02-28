@@ -38,6 +38,11 @@ class ApiMetaBilledUnits(UncheckedBaseModel):
     The number of billed classifications units.
     """
 
+    image_tokens: typing.Optional[float] = pydantic.Field(default=None)
+    """
+    The number of billed image tokens.
+    """
+
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
     else:
