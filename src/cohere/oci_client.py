@@ -418,7 +418,12 @@ def get_oci_url(
         "rerank": "rerankText",
     }
 
-    action = action_map.get(endpoint, endpoint)
+    action = action_map.get(endpoint)
+    if action is None:
+        raise ValueError(
+            f"Endpoint '{endpoint}' is not supported by OCI Generative AI. "
+            f"Supported endpoints: {list(action_map.keys())}"
+        )
     return f"{base}/{api_version}/actions/{action}"
 
 

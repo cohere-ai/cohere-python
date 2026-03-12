@@ -516,6 +516,27 @@ class TestOciClientTransformations(unittest.TestCase):
         self.assertEqual(result["message"]["tool_calls"][0]["id"], "call_123")
 
 
+    def test_get_oci_url_known_endpoints(self):
+        """Test URL generation for known endpoints."""
+        from cohere.oci_client import get_oci_url
+
+        url = get_oci_url("us-chicago-1", "embed")
+        self.assertIn("/actions/embedText", url)
+
+        url = get_oci_url("us-chicago-1", "chat")
+        self.assertIn("/actions/chat", url)
+
+        url = get_oci_url("us-chicago-1", "chat_stream", stream=True)
+        self.assertIn("/actions/chat", url)
+
+    def test_get_oci_url_unknown_endpoint_raises(self):
+        """Test that unknown endpoints raise ValueError instead of producing bad URLs."""
+        from cohere.oci_client import get_oci_url
+
+        with self.assertRaises(ValueError) as ctx:
+            get_oci_url("us-chicago-1", "unknown_endpoint")
+        self.assertIn("not supported", str(ctx.exception))
+
     def test_load_oci_config_missing_private_key_raises(self):
         """Test that direct credentials without private key raises clear error."""
         from unittest.mock import patch, MagicMock
