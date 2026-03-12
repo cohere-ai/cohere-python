@@ -384,6 +384,7 @@ def map_request_to_oci(
                 "OCI config profile is missing 'key_file'. "
                 "Session-based auth requires a key_file entry in your OCI config profile."
             )
+        key_file = os.path.expanduser(key_file)
         private_key = oci.signer.load_private_key_from_file(key_file)
 
         signer = oci.auth.signers.SecurityTokenSigner(
@@ -411,7 +412,6 @@ def map_request_to_oci(
         url = get_oci_url(
             region=oci_region,
             endpoint=endpoint,
-            stream="stream" in endpoint or body.get("stream", False),
         )
 
         # Transform request body to OCI format
@@ -517,7 +517,6 @@ def map_response_from_oci() -> EventHook:
 def get_oci_url(
     region: str,
     endpoint: str,
-    stream: bool = False,
 ) -> str:
     """
     Map Cohere endpoints to OCI Generative AI endpoints.
@@ -525,8 +524,6 @@ def get_oci_url(
     Args:
         region: OCI region (e.g., "us-chicago-1")
         endpoint: Cohere endpoint name
-        stream: Whether this is a streaming request
-
     Returns:
         Full OCI Generative AI endpoint URL
     """
@@ -972,6 +969,21 @@ def transform_oci_stream_wrapper(
 
     generation_id = str(uuid.uuid4())
     emitted_start = False
+    v1_text_parts: typing.List[str] = []
+    v1_finish_reason = "COMPLETE"
+    v1_response: typing.Dict[str, typing.Any] = {
+        "text": "",
+        "generation_id": generation_id,
+        "response_id": None,
+        "citations": [],
+        "documents": [],
+        "is_search_required": None,
+        "search_queries": [],
+        "search_results": [],
+        "chat_history": [],
+        "meta": {"api_version": {"version": "1"}},
+    }
+    v2_message_end_delta: typing.Dict[str, typing.Any] = {}
     buffer = b""
     for chunk in stream:
         buffer += chunk
@@ -982,10 +994,25 @@ def transform_oci_stream_wrapper(
             if line.startswith("data: "):
                 data_str = line[6:]  # Remove "data: " prefix
                 if data_str.strip() == "[DONE]":
-                    # Emit message-end event for V2 before stopping
                     if is_v2:
-                        message_end_event = {"type": "message-end"}
+                        message_end_event: typing.Dict[str, typing.Any] = {
+                            "type": "message-end",
+                            "id": generation_id,
+                        }
+                        if v2_message_end_delta:
+                            message_end_event["delta"] = v2_message_end_delta
                         yield b"data: " + json.dumps(message_end_event).encode("utf-8") + b"\n\n"
+                    elif endpoint in ["chat_stream", "chat"]:
+                        stream_end_event = {
+                            "event_type": "stream-end",
+                            "finish_reason": v1_finish_reason,
+                            "response": {
+                                **v1_response,
+                                "text": "".join(v1_text_parts),
+                                "finish_reason": v1_finish_reason,
+                            },
+                        }
+                        yield json.dumps(stream_end_event).encode("utf-8") + b"\n"
                     # Return to stop the generator completely
                     return
 
@@ -1023,10 +1050,61 @@ def transform_oci_stream_wrapper(
                         yield b"data: " + json.dumps(content_start).encode("utf-8") + b"\n\n"
                         emitted_start = True
 
-                    cohere_event = transform_stream_event(endpoint, oci_event, is_v2)
                     if is_v2:
-                        yield b"data: " + json.dumps(cohere_event).encode("utf-8") + b"\n\n"
+                        if endpoint in ["chat_stream", "chat"] and "finishReason" in oci_event:
+                            content_event = transform_stream_event(
+                                endpoint,
+                                {k: v for k, v in oci_event.items() if k != "finishReason"},
+                                is_v2,
+                            )
+                            content_payload = (
+                                content_event.get("delta", {})
+                                .get("message", {})
+                                .get("content", {})
+                            )
+                            if content_payload.get("text") or content_payload.get("thinking"):
+                                yield b"data: " + json.dumps(content_event).encode("utf-8") + b"\n\n"
+
+                            usage_data = oci_event.get("usage", {})
+                            usage: typing.Dict[str, typing.Any] = {
+                                "tokens": {
+                                    "input_tokens": usage_data.get("inputTokens", 0),
+                                    "output_tokens": usage_data.get("completionTokens", 0),
+                                }
+                            }
+                            if usage_data.get("inputTokens") or usage_data.get("completionTokens"):
+                                usage["billed_units"] = {
+                                    "input_tokens": usage_data.get("inputTokens", 0),
+                                    "output_tokens": usage_data.get("completionTokens", 0),
+                                }
+                            v2_message_end_delta = {
+                                "finish_reason": oci_event.get("finishReason"),
+                                "usage": usage,
+                            }
+
+                            content_end_event = {"type": "content-end", "index": 0}
+                            yield b"data: " + json.dumps(content_end_event).encode("utf-8") + b"\n\n"
+                        else:
+                            cohere_event = transform_stream_event(endpoint, oci_event, is_v2)
+                            yield b"data: " + json.dumps(cohere_event).encode("utf-8") + b"\n\n"
                     else:
+                        if endpoint in ["chat_stream", "chat"]:
+                            text = oci_event.get("text", "")
+                            if text:
+                                v1_text_parts.append(text)
+                            if "finishReason" in oci_event:
+                                v1_finish_reason = oci_event.get("finishReason", v1_finish_reason)
+                            if "chatHistory" in oci_event:
+                                v1_response["chat_history"] = oci_event.get("chatHistory", [])
+                            if "citations" in oci_event:
+                                v1_response["citations"] = oci_event.get("citations", [])
+                            if "documents" in oci_event:
+                                v1_response["documents"] = oci_event.get("documents", [])
+                            if "searchQueries" in oci_event:
+                                v1_response["search_queries"] = oci_event.get("searchQueries", [])
+                            if "searchResults" in oci_event:
+                                v1_response["search_results"] = oci_event.get("searchResults", [])
+                        cohere_event = transform_stream_event(endpoint, oci_event, is_v2)
                         yield json.dumps(cohere_event).encode("utf-8") + b"\n"
                 except Exception as e:
                     raise RuntimeError(

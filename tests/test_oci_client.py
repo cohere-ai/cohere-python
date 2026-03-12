@@ -15,6 +15,7 @@ import os
 import unittest
 
 import cohere
+from cohere.errors import NotFoundError
 
 
 @unittest.skipIf(os.getenv("TEST_OCI") is None, "TEST_OCI not set")
@@ -467,11 +468,14 @@ class TestOciClientModels(unittest.TestCase):
 
     def test_embed_light_v3(self):
         """Test embed-english-light-v3.0 model."""
-        response = self.client.embed(
-            model="embed-english-light-v3.0",
-            texts=["Test"],
-            input_type="search_document",
-        )
+        try:
+            response = self.client.embed(
+                model="embed-english-light-v3.0",
+                texts=["Test"],
+                input_type="search_document",
+            )
+        except NotFoundError:
+            self.skipTest("embed-english-light-v3.0 is not available in this OCI region/profile")
         self.assertIsNotNone(response.embeddings)
         self.assertEqual(len(response.embeddings[0]), 384)
 
@@ -709,7 +713,7 @@ class TestOciClientTransformations(unittest.TestCase):
         url = get_oci_url("us-chicago-1", "chat")
         self.assertIn("/actions/chat", url)
 
-        url = get_oci_url("us-chicago-1", "chat_stream", stream=True)
+        url = get_oci_url("us-chicago-1", "chat_stream")
         self.assertIn("/actions/chat", url)
 
     def test_get_oci_url_unknown_endpoint_raises(self):
@@ -744,7 +748,7 @@ class TestOciClientTransformations(unittest.TestCase):
 
         chunks = [
             b'data: {"message": {"content": [{"type": "TEXT", "text": "Hello"}]}}\n',
-            b'data: {"message": {"content": [{"type": "TEXT", "text": " world"}]}, "finishReason": "COMPLETE"}\n',
+            b'data: {"message": {"content": [{"type": "TEXT", "text": " world"}]}, "finishReason": "COMPLETE", "usage": {"inputTokens": 3, "completionTokens": 2}}\n',
             b"data: [DONE]\n",
         ]
 
@@ -758,13 +762,19 @@ class TestOciClientTransformations(unittest.TestCase):
         self.assertEqual(event_types[0], "message-start")
         self.assertEqual(event_types[1], "content-start")
         self.assertEqual(event_types[2], "content-delta")
-        self.assertEqual(event_types[3], "content-end")
-        self.assertEqual(event_types[4], "message-end")
+        self.assertEqual(event_types[3], "content-delta")
+        self.assertEqual(event_types[4], "content-end")
+        self.assertEqual(event_types[5], "message-end")
 
         self.assertIn("id", events[0])
         self.assertEqual(events[0]["delta"]["message"]["role"], "assistant")
         self.assertEqual(events[1]["index"], 0)
         self.assertEqual(events[1]["delta"]["message"]["content"]["type"], "text")
+        self.assertEqual(events[2]["delta"]["message"]["content"]["text"], "Hello")
+        self.assertEqual(events[3]["delta"]["message"]["content"]["text"], " world")
+        self.assertEqual(events[5]["delta"]["finish_reason"], "COMPLETE")
+        self.assertEqual(events[5]["delta"]["usage"]["tokens"]["input_tokens"], 3)
+        self.assertEqual(events[5]["delta"]["usage"]["tokens"]["output_tokens"], 2)
 
     def test_stream_wrapper_skips_malformed_json_with_warning(self):
         """Test that malformed JSON in SSE streams is skipped with a warning."""
@@ -778,6 +788,60 @@ class TestOciClientTransformations(unittest.TestCase):
 
         events = list(transform_oci_stream_wrapper(iter(chunks), "chat", is_v2=True))
         self.assertEqual(len(events), 4)
+
+    def test_v1_stream_wrapper_emits_stream_end(self):
+        """Test that V1 chat streams end with a stream-end event containing the response payload."""
+        import json
+        from cohere.oci_client import transform_oci_stream_wrapper
+
+        chunks = [
+            b'data: {"text": "Hello", "isFinished": false}\n',
+            b'data: {"text": " world", "isFinished": true, "finishReason": "COMPLETE"}\n',
+            b"data: [DONE]\n",
+        ]
+
+        events = [
+            json.loads(raw.decode("utf-8"))
+            for raw in transform_oci_stream_wrapper(iter(chunks), "chat_stream", is_v2=False)
+        ]
+
+        self.assertEqual(events[0]["event_type"], "text-generation")
+        self.assertEqual(events[1]["event_type"], "text-generation")
+        self.assertEqual(events[2]["event_type"], "stream-end")
+        self.assertEqual(events[2]["finish_reason"], "COMPLETE")
+        self.assertEqual(events[2]["response"]["text"], "Hello world")
+
+    def test_session_auth_expands_key_file_path(self):
+        """Test that session-based auth expands key_file paths before loading them."""
+        from unittest.mock import MagicMock, patch
+        from cohere.oci_client import map_request_to_oci
+
+        mock_private_key = object()
+        mock_security_token_signer = MagicMock()
+        mock_oci = MagicMock()
+        mock_oci.signer.load_private_key_from_file.return_value = mock_private_key
+        mock_oci.auth.signers.SecurityTokenSigner.return_value = mock_security_token_signer
+
+        oci_config = {
+            "security_token_file": "~/.oci/sessions/TEST/token",
+            "key_file": "~/.oci/sessions/TEST/oci_api_key.pem",
+        }
+
+        with patch("cohere.oci_client.lazy_oci", return_value=mock_oci), patch(
+            "builtins.open", create=True
+        ) as mock_open:
+            mock_open.return_value.__enter__.return_value.read.return_value = "token"
+            with patch("os.path.expanduser", side_effect=lambda p: p.replace("~", "/Users/test")):
+                with patch("cohere.oci_client.transform_request_to_oci", return_value={"compartmentId": "c"}):
+                    hook = map_request_to_oci(oci_config, "us-chicago-1", "compartment-123", is_v2_client=False)
+                    request = MagicMock()
+                    request.url.path = "/v1/chat"
+                    request.read.return_value = b'{"message":"hi"}'
+                    request.method = "POST"
+                    request.extensions = {}
+                    hook(request)
+
+        mock_oci.signer.load_private_key_from_file.assert_called_with("/Users/test/.oci/sessions/TEST/oci_api_key.pem")
 
     def test_stream_wrapper_raises_on_transform_error(self):
         """Test that stream transformation errors are re-raised with OCI-specific context."""
