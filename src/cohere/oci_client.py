@@ -272,12 +272,27 @@ def map_request_to_oci(
         )
     elif "security_token_file" in oci_config:
         # Session-based authentication with security token (fallback if no user field)
+        # Note: Session tokens expire (typically ~1 hour). If expired, re-run:
+        #   oci session authenticate --profile <profile>
         token_file_path = os.path.expanduser(oci_config["security_token_file"])
-        with open(token_file_path, "r") as f:
-            security_token = f.read().strip()
+        try:
+            with open(token_file_path, "r") as f:
+                security_token = f.read().strip()
+        except FileNotFoundError:
+            raise ValueError(
+                f"OCI session token file not found: {token_file_path}. "
+                "Your session may have expired. Re-authenticate with: "
+                "oci session authenticate"
+            )
 
         # Load private key using OCI's utility function
-        private_key = oci.signer.load_private_key_from_file(oci_config["key_file"])
+        key_file = oci_config.get("key_file")
+        if not key_file:
+            raise ValueError(
+                "OCI config profile is missing 'key_file'. "
+                "Session-based auth requires a key_file entry in your OCI config profile."
+            )
+        private_key = oci.signer.load_private_key_from_file(key_file)
 
         signer = oci.auth.signers.SecurityTokenSigner(
             token=security_token,
@@ -362,7 +377,9 @@ def map_response_from_oci() -> EventHook:
     """
 
     def _hook(response: httpx.Response) -> None:
-        endpoint = response.request.extensions["endpoint"]
+        endpoint = response.request.extensions.get("endpoint")
+        if endpoint is None:
+            return  # Request hook didn't run; pass response through unchanged
         is_stream = response.request.extensions.get("is_stream", False)
 
         output: typing.Iterator[bytes]
