@@ -3,7 +3,7 @@
 from typing import Any
 
 OCI_INSTALLATION_MESSAGE = """
-The OCI SDK is required to use OciClient or OciClientV2.
+The OCI SDK is required to use OciClientV2.
 
 Install it with:
     pip install oci
