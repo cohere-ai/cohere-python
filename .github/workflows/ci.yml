@@ -76,12 +76,19 @@ jobs:
           poetry add ../../../cohere-python
 
           echo "Current cohere installation: $(poetry show cohere)"
+
+          # Patch deprecated model references in langchain-cohere tests
+          # command-r-plus resolves to command-r-plus-04-2024, deprecated 2025-09-15
+          # ChatCohere() with no model arg also resolves to a deprecated default
+          sed -i 's/DEFAULT_MODEL = "command-r-plus"/DEFAULT_MODEL = "command-a-03-2025"/' tests/integration_tests/test_langgraph_agents.py
+          sed -i 's/model = ChatCohere()/model = ChatCohere(model="command-a-03-2025")/' tests/integration_tests/test_langgraph_agents.py
+
           make test
           make integration_test
           echo "tests passed"
 
-          # reset poetry changes
-          git checkout -- poetry.lock pyproject.toml
+          # reset all changes (poetry files + patched test)
+          git checkout -- .
 
           set -eu
 
