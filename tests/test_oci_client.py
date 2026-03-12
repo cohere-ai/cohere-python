@@ -385,7 +385,7 @@ class TestOciClientTransformations(unittest.TestCase):
             }
         }
 
-        result = transform_oci_response_to_cohere("chat", oci_response, is_v2=True)
+        result = transform_oci_response_to_cohere("chat", oci_response)
 
         # Verify content types are lowercased
         self.assertEqual(result["message"]["content"][0]["type"], "thinking")
@@ -402,7 +402,7 @@ class TestOciClientTransformations(unittest.TestCase):
             }
         }
 
-        result = transform_stream_event("chat", oci_event, is_v2=True)
+        result = transform_stream_event("chat", oci_event)
 
         self.assertEqual(result["type"], "content-delta")
         self.assertIn("thinking", result["delta"]["message"]["content"])
@@ -419,7 +419,7 @@ class TestOciClientTransformations(unittest.TestCase):
             }
         }
 
-        result = transform_stream_event("chat", oci_event, is_v2=True)
+        result = transform_stream_event("chat", oci_event)
 
         self.assertEqual(result["type"], "content-delta")
         self.assertIn("text", result["delta"]["message"]["content"])
@@ -458,7 +458,7 @@ class TestOciClientTransformations(unittest.TestCase):
             }
         }
 
-        result = transform_oci_response_to_cohere("chat", oci_response, is_v2=True)
+        result = transform_oci_response_to_cohere("chat", oci_response)
 
         # Role should be lowercased
         self.assertEqual(result["message"]["role"], "assistant")
@@ -479,7 +479,7 @@ class TestOciClientTransformations(unittest.TestCase):
             }
         }
 
-        result = transform_oci_response_to_cohere("chat", oci_response, is_v2=True)
+        result = transform_oci_response_to_cohere("chat", oci_response)
 
         # V2 finish_reason should stay uppercase
         self.assertEqual(result["finish_reason"], "MAX_TOKENS")
@@ -507,7 +507,7 @@ class TestOciClientTransformations(unittest.TestCase):
             }
         }
 
-        result = transform_oci_response_to_cohere("chat", oci_response, is_v2=True)
+        result = transform_oci_response_to_cohere("chat", oci_response)
 
         # toolCalls should be converted to tool_calls
         self.assertIn("tool_calls", result["message"])
