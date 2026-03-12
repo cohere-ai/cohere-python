@@ -392,7 +392,7 @@ def map_response_from_oci() -> EventHook:
         # For streaming responses, wrap the stream with a transformer
         if is_stream:
             original_stream = response.stream
-            transformed_stream = transform_oci_stream_wrapper(original_stream, endpoint)
+            transformed_stream = transform_oci_stream_wrapper(typing.cast(SyncByteStream, original_stream), endpoint)
             response.stream = Streamer(transformed_stream)
             # Reset consumption flags
             if hasattr(response, "_content"):
@@ -765,7 +765,7 @@ def transform_oci_response_to_cohere(
 
 
 def transform_oci_stream_wrapper(
-    stream: typing.Iterator[bytes], endpoint: str
+    stream: SyncByteStream, endpoint: str
 ) -> typing.Iterator[bytes]:
     """
     Wrap OCI stream and transform events to Cohere V2 format.
