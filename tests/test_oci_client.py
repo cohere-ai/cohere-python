@@ -25,6 +25,13 @@ def get_test_oci_model(env_var: str, default: str) -> str:
     return default
 
 
+def get_test_oci_setting(env_var: str, default: str) -> str:
+    value = os.getenv(env_var)
+    if value:
+        return value
+    return default
+
+
 @unittest.skipIf(os.getenv("TEST_OCI") is None, "TEST_OCI not set")
 class TestOciClient(unittest.TestCase):
     """Test OciClient (v1 API) with OCI Generative AI."""
@@ -412,12 +419,15 @@ class TestOciClientModels(unittest.TestCase):
 
     def setUp(self):
         """Set up OCI client for each test."""
-        compartment_id = os.getenv("OCI_COMPARTMENT_ID")
+        compartment_id = get_test_oci_setting(
+            "OCI_MODEL_TEST_COMPARTMENT_ID",
+            os.getenv("OCI_COMPARTMENT_ID", ""),
+        )
         if not compartment_id:
             self.skipTest("OCI_COMPARTMENT_ID not set")
 
-        region = os.getenv("OCI_REGION", "us-chicago-1")
-        profile = os.getenv("OCI_PROFILE", "DEFAULT")
+        region = get_test_oci_setting("OCI_MODEL_TEST_REGION", os.getenv("OCI_REGION", "us-chicago-1"))
+        profile = get_test_oci_setting("OCI_MODEL_TEST_PROFILE", os.getenv("OCI_PROFILE", "API_KEY_AUTH"))
 
         self.client = cohere.OciClient(
             oci_region=region,
@@ -437,14 +447,11 @@ class TestOciClientModels(unittest.TestCase):
 
     def test_embed_light_v3(self):
         """Test embed-english-light-v3.0 model."""
-        try:
-            response = self.client.embed(
-                model="embed-english-light-v3.0",
-                texts=["Test"],
-                input_type="search_document",
-            )
-        except NotFoundError:
-            self.skipTest("embed-english-light-v3.0 is not available in this OCI region/profile")
+        response = self.client.embed(
+            model="embed-english-light-v3.0",
+            texts=["Test"],
+            input_type="search_document",
+        )
         self.assertIsNotNone(response.embeddings)
         self.assertEqual(len(response.embeddings[0]), 384)
 
