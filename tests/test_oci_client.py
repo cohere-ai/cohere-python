@@ -18,167 +18,6 @@ import cohere
 
 
 @unittest.skipIf(os.getenv("TEST_OCI") is None, "TEST_OCI not set")
-class TestOciClient(unittest.TestCase):
-    """Test OciClient (v1 API) with OCI Generative AI."""
-
-    def setUp(self):
-        """Set up OCI client for each test."""
-        compartment_id = os.getenv("OCI_COMPARTMENT_ID")
-        if not compartment_id:
-            self.skipTest("OCI_COMPARTMENT_ID not set")
-
-        region = os.getenv("OCI_REGION", "us-chicago-1")
-        profile = os.getenv("OCI_PROFILE", "DEFAULT")
-
-        self.client = cohere.OciClient(
-            oci_region=region,
-            oci_compartment_id=compartment_id,
-            oci_profile=profile,
-        )
-
-    def test_embed(self):
-        """Test embedding generation with OCI."""
-        response = self.client.embed(
-            model="embed-english-v3.0",
-            texts=["Hello world", "Cohere on OCI"],
-            input_type="search_document",
-        )
-
-        self.assertIsNotNone(response)
-        self.assertIsNotNone(response.embeddings)
-        self.assertEqual(len(response.embeddings), 2)
-        # Verify embedding dimensions (1024 for embed-english-v3.0)
-        self.assertEqual(len(response.embeddings[0]), 1024)
-
-    def test_embed_with_model_prefix(self):
-        """Test embedding with 'cohere.' model prefix."""
-        response = self.client.embed(
-            model="cohere.embed-english-v3.0",
-            texts=["Test with prefix"],
-            input_type="search_document",
-        )
-
-        self.assertIsNotNone(response)
-        self.assertIsNotNone(response.embeddings)
-        self.assertEqual(len(response.embeddings), 1)
-
-    @unittest.skip(
-        "OCI on-demand models don't support multiple embedding types in a single call. "
-        "The embedding_types parameter in OCI accepts a single value, not a list."
-    )
-    def test_embed_multiple_types(self):
-        """Test embedding with multiple embedding types."""
-        response = self.client.embed(
-            model="embed-english-v3.0",
-            texts=["Multi-type test"],
-            input_type="search_document",
-            embedding_types=["float", "int8"],
-        )
-
-        self.assertIsNotNone(response)
-        self.assertIsNotNone(response.embeddings)
-
-    def test_chat(self):
-        """Test chat with OCI."""
-        response = self.client.chat(
-            model="command-r-08-2024",
-            message="What is 2+2? Answer with just the number.",
-        )
-
-        self.assertIsNotNone(response)
-        self.assertIsNotNone(response.text)
-        self.assertIn("4", response.text)
-
-    def test_chat_with_history(self):
-        """Test chat with conversation history."""
-        response = self.client.chat(
-            model="command-r-08-2024",
-            message="What was my previous question?",
-            chat_history=[
-                {"role": "USER", "message": "What is the capital of France?"},
-                {"role": "CHATBOT", "message": "The capital of France is Paris."},
-            ],
-        )
-
-        self.assertIsNotNone(response)
-        self.assertIsNotNone(response.text)
-
-    def test_chat_stream(self):
-        """Test streaming chat with OCI."""
-        events = []
-        for event in self.client.chat_stream(
-            model="command-r-08-2024",
-            message="Count from 1 to 3.",
-        ):
-            events.append(event)
-
-        self.assertTrue(len(events) > 0)
-        # Verify we received text generation events
-        text_events = [e for e in events if hasattr(e, "text") and e.text]
-        self.assertTrue(len(text_events) > 0)
-
-    @unittest.skip(
-        "OCI TEXT_GENERATION models are finetune base models, not available via on-demand inference. "
-        "Only CHAT models (command-r, command-a) support on-demand inference on OCI."
-    )
-    def test_generate(self):
-        """Test text generation with OCI."""
-        response = self.client.generate(
-            model="command-r-08-2024",
-            prompt="Write a haiku about clouds.",
-            max_tokens=100,
-        )
-
-        self.assertIsNotNone(response)
-        self.assertIsNotNone(response.generations)
-        self.assertTrue(len(response.generations) > 0)
-        self.assertIsNotNone(response.generations[0].text)
-
-    @unittest.skip(
-        "OCI TEXT_GENERATION models are finetune base models, not available via on-demand inference. "
-        "Only CHAT models (command-r, command-a) support on-demand inference on OCI."
-    )
-    def test_generate_stream(self):
-        """Test streaming text generation with OCI."""
-        events = []
-        for event in self.client.generate_stream(
-            model="command-r-08-2024",
-            prompt="Say hello",
-            max_tokens=20,
-        ):
-            events.append(event)
-
-        self.assertTrue(len(events) > 0)
-
-    @unittest.skip(
-        "OCI TEXT_RERANK models are base models, not available via on-demand inference. "
-        "These models require fine-tuning and deployment before use on OCI."
-    )
-    def test_rerank(self):
-        """Test reranking with OCI."""
-        query = "What is the capital of France?"
-        documents = [
-            "Paris is the capital of France.",
-            "London is the capital of England.",
-            "Berlin is the capital of Germany.",
-        ]
-
-        response = self.client.rerank(
-            model="rerank-english-v3.1",
-            query=query,
-            documents=documents,
-            top_n=2,
-        )
-
-        self.assertIsNotNone(response)
-        self.assertIsNotNone(response.results)
-        self.assertEqual(len(response.results), 2)
-        # First result should be the Paris document
-        self.assertEqual(response.results[0].index, 0)
-        self.assertGreater(response.results[0].relevance_score, 0.5)
-
-
-@unittest.skipIf(os.getenv("TEST_OCI") is None, "TEST_OCI not set")
 class TestOciClientV2(unittest.TestCase):
     """Test OciClientV2 (v2 API) with OCI Generative AI."""
 
@@ -336,7 +175,7 @@ class TestOciClientAuthentication(unittest.TestCase):
 
         # Use API_KEY_AUTH profile (DEFAULT may be session-based)
         profile = os.getenv("OCI_PROFILE", "API_KEY_AUTH")
-        client = cohere.OciClient(
+        client = cohere.OciClientV2(
             oci_region="us-chicago-1",
             oci_compartment_id=compartment_id,
             oci_profile=profile,
@@ -351,6 +190,7 @@ class TestOciClientAuthentication(unittest.TestCase):
 
         self.assertIsNotNone(response)
         self.assertIsNotNone(response.embeddings)
+        self.assertIsNotNone(response.embeddings.float_)
 
     def test_custom_profile_auth(self):
         """Test authentication using custom OCI profile."""
@@ -360,7 +200,7 @@ class TestOciClientAuthentication(unittest.TestCase):
         if not compartment_id:
             self.skipTest("OCI_COMPARTMENT_ID not set")
 
-        client = cohere.OciClient(
+        client = cohere.OciClientV2(
             oci_profile=profile,
             oci_region="us-chicago-1",
             oci_compartment_id=compartment_id,
@@ -382,25 +222,10 @@ class TestOciClientErrors(unittest.TestCase):
     def test_missing_compartment_id(self):
         """Test error when compartment ID is missing."""
         with self.assertRaises(TypeError):
-            cohere.OciClient(
+            cohere.OciClientV2(
                 oci_region="us-chicago-1",
                 # Missing oci_compartment_id
             )
-
-    @unittest.skip("Region is available in config file for current test environment")
-    def test_missing_region(self):
-        """Test error when region is missing and not in config."""
-        # This test assumes no region in config file
-        # If config has region, this will pass, so we just check it doesn't crash
-        try:
-            client = cohere.OciClient(
-                oci_compartment_id="ocid1.compartment.oc1...",
-            )
-            # If this succeeds, region was in config
-            self.assertIsNotNone(client)
-        except ValueError as e:
-            # Expected if no region in config
-            self.assertIn("region", str(e).lower())
 
     def test_invalid_model(self):
         """Test error handling with invalid model."""
@@ -409,7 +234,7 @@ class TestOciClientErrors(unittest.TestCase):
             self.skipTest("OCI_COMPARTMENT_ID not set")
 
         profile = os.getenv("OCI_PROFILE", "API_KEY_AUTH")
-        client = cohere.OciClient(
+        client = cohere.OciClientV2(
             oci_region="us-chicago-1",
             oci_compartment_id=compartment_id,
             oci_profile=profile,
@@ -437,7 +262,7 @@ class TestOciClientModels(unittest.TestCase):
         region = os.getenv("OCI_REGION", "us-chicago-1")
         profile = os.getenv("OCI_PROFILE", "DEFAULT")
 
-        self.client = cohere.OciClient(
+        self.client = cohere.OciClientV2(
             oci_region=region,
             oci_compartment_id=compartment_id,
             oci_profile=profile,
@@ -451,7 +276,8 @@ class TestOciClientModels(unittest.TestCase):
             input_type="search_document",
         )
         self.assertIsNotNone(response.embeddings)
-        self.assertEqual(len(response.embeddings[0]), 1024)
+        self.assertIsNotNone(response.embeddings.float_)
+        self.assertEqual(len(response.embeddings.float_[0]), 1024)
 
     def test_embed_light_v3(self):
         """Test embed-english-light-v3.0 model."""
@@ -461,7 +287,8 @@ class TestOciClientModels(unittest.TestCase):
             input_type="search_document",
         )
         self.assertIsNotNone(response.embeddings)
-        self.assertEqual(len(response.embeddings[0]), 384)
+        self.assertIsNotNone(response.embeddings.float_)
+        self.assertEqual(len(response.embeddings.float_[0]), 384)
 
     def test_embed_multilingual_v3(self):
         """Test embed-multilingual-v3.0 model."""
@@ -471,15 +298,16 @@ class TestOciClientModels(unittest.TestCase):
             input_type="search_document",
         )
         self.assertIsNotNone(response.embeddings)
-        self.assertEqual(len(response.embeddings[0]), 1024)
+        self.assertIsNotNone(response.embeddings.float_)
+        self.assertEqual(len(response.embeddings.float_[0]), 1024)
 
-    def test_command_r_plus(self):
-        """Test command-r-plus model for chat."""
+    def test_command_a(self):
+        """Test command-a model for chat."""
         response = self.client.chat(
-            model="command-r-08-2024",
-            message="Hello",
+            model="command-a-03-2025",
+            messages=[{"role": "user", "content": "Hello"}],
         )
-        self.assertIsNotNone(response.text)
+        self.assertIsNotNone(response.message)
 
     @unittest.skip(
         "OCI TEXT_RERANK models are base models, not available via on-demand inference. "
