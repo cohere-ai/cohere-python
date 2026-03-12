@@ -18,6 +18,13 @@ import cohere
 from cohere.errors import NotFoundError
 
 
+def get_test_oci_model(env_var: str, default: str) -> str:
+    value = os.getenv(env_var)
+    if value:
+        return value
+    return default
+
+
 @unittest.skipIf(os.getenv("TEST_OCI") is None, "TEST_OCI not set")
 class TestOciClient(unittest.TestCase):
     """Test OciClient (v1 API) with OCI Generative AI."""
@@ -197,11 +204,13 @@ class TestOciClientV2(unittest.TestCase):
             oci_compartment_id=compartment_id,
             oci_profile=profile,
         )
+        self.chat_model = get_test_oci_model("OCI_V2_CHAT_MODEL", "command-a-03-2025")
+        self.embed_model = get_test_oci_model("OCI_V2_EMBED_MODEL", "embed-english-v3.0")
 
     def test_embed_v2(self):
         """Test embedding with v2 client."""
         response = self.client.embed(
-            model="embed-english-v3.0",
+            model=self.embed_model,
             texts=["Hello from v2", "Second text"],
             input_type="search_document",
         )
@@ -217,7 +226,7 @@ class TestOciClientV2(unittest.TestCase):
     def test_embed_with_model_prefix_v2(self):
         """Test embedding with 'cohere.' model prefix on v2 client."""
         response = self.client.embed(
-            model="cohere.embed-english-v3.0",
+            model=f"cohere.{self.embed_model}",
             texts=["Test with prefix"],
             input_type="search_document",
         )
@@ -230,58 +239,18 @@ class TestOciClientV2(unittest.TestCase):
     def test_chat_v2(self):
         """Test chat with v2 client."""
         response = self.client.chat(
-            model="command-a-03-2025",
+            model=self.chat_model,
             messages=[{"role": "user", "content": "Say hello"}],
         )
 
         self.assertIsNotNone(response)
         self.assertIsNotNone(response.message)
 
-    @unittest.skip(
-        "Command A Reasoning model (command-a-reasoning-08-2025) may not be available in all regions. "
-        "Enable this test when the reasoning model is available in your OCI region."
-    )
-    def test_chat_v2_with_thinking(self):
-        """Test chat with thinking parameter for Command A Reasoning model."""
-        from cohere.types import Thinking
-
-        response = self.client.chat(
-            model="command-a-reasoning-08-2025",
-            messages=[{"role": "user", "content": "What is 15 * 27? Think step by step."}],
-            thinking=Thinking(type="enabled", token_budget=5000),
-        )
-
-        self.assertIsNotNone(response)
-        self.assertIsNotNone(response.message)
-        # The response should contain content (may include thinking content)
-        self.assertIsNotNone(response.message.content)
-
-    @unittest.skip(
-        "Command A Reasoning model (command-a-reasoning-08-2025) may not be available in all regions. "
-        "Enable this test when the reasoning model is available in your OCI region."
-    )
-    def test_chat_stream_v2_with_thinking(self):
-        """Test streaming chat with thinking parameter for Command A Reasoning model."""
-        from cohere.types import Thinking
-
-        events = []
-        for event in self.client.chat_stream(
-            model="command-a-reasoning-08-2025",
-            messages=[{"role": "user", "content": "What is 15 * 27? Think step by step."}],
-            thinking=Thinking(type="enabled", token_budget=5000),
-        ):
-            events.append(event)
-
-        self.assertTrue(len(events) > 0)
-        # Verify we received content-delta events
-        content_delta_events = [e for e in events if hasattr(e, "type") and e.type == "content-delta"]
-        self.assertTrue(len(content_delta_events) > 0)
-
     def test_chat_stream_v2(self):
         """Test streaming chat with v2 client."""
         events = []
         for event in self.client.chat_stream(
-            model="command-a-03-2025",
+            model=self.chat_model,
             messages=[{"role": "user", "content": "Count from 1 to 3"}],
         ):
             events.append(event)
@@ -775,6 +744,44 @@ class TestOciClientTransformations(unittest.TestCase):
         self.assertEqual(events[5]["delta"]["finish_reason"], "COMPLETE")
         self.assertEqual(events[5]["delta"]["usage"]["tokens"]["input_tokens"], 3)
         self.assertEqual(events[5]["delta"]["usage"]["tokens"]["output_tokens"], 2)
+
+    def test_stream_wrapper_emits_reasoning_content_transition(self):
+        """Test that V2 reasoning streams emit content block transitions from thinking to text."""
+        import json
+        from cohere.oci_client import transform_oci_stream_wrapper
+
+        chunks = [
+            b'data: {"message": {"content": [{"type": "THINKING", "thinking": "step 1"}]}}\n',
+            b'data: {"message": {"content": [{"type": "TEXT", "text": "final answer"}]}, "finishReason": "COMPLETE"}\n',
+            b"data: [DONE]\n",
+        ]
+
+        events = [
+            json.loads(line[6:].decode("utf-8"))
+            for line in transform_oci_stream_wrapper(iter(chunks), "chat_stream", is_v2=True)
+            if line.startswith(b"data: ")
+        ]
+
+        self.assertEqual(
+            [event["type"] for event in events],
+            [
+                "message-start",
+                "content-start",
+                "content-delta",
+                "content-end",
+                "content-start",
+                "content-delta",
+                "content-end",
+                "message-end",
+            ],
+        )
+        self.assertEqual(events[1]["delta"]["message"]["content"]["type"], "thinking")
+        self.assertEqual(events[2]["index"], 0)
+        self.assertEqual(events[2]["delta"]["message"]["content"]["thinking"], "step 1")
+        self.assertEqual(events[4]["index"], 1)
+        self.assertEqual(events[4]["delta"]["message"]["content"]["type"], "text")
+        self.assertEqual(events[5]["index"], 1)
+        self.assertEqual(events[5]["delta"]["message"]["content"]["text"], "final answer")
 
     def test_stream_wrapper_skips_malformed_json_with_warning(self):
         """Test that malformed JSON in SSE streams is skipped with a warning."""

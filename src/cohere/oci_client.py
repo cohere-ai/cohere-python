@@ -984,6 +984,8 @@ def transform_oci_stream_wrapper(
         "meta": {"api_version": {"version": "1"}},
     }
     v2_message_end_delta: typing.Dict[str, typing.Any] = {}
+    v2_content_index = 0
+    v2_current_content_type: typing.Optional[str] = None
     buffer = b""
     for chunk in stream:
         buffer += chunk
@@ -1027,13 +1029,7 @@ def transform_oci_stream_wrapper(
 
                 try:
                     if is_v2 and not emitted_start:
-                        content_type = "text"
-                        if "message" in oci_event and "content" in oci_event["message"]:
-                            content_list = oci_event["message"]["content"]
-                            if content_list and isinstance(content_list, list) and len(content_list) > 0:
-                                oci_type = content_list[0].get("type", "TEXT").upper()
-                                if oci_type == "THINKING":
-                                    content_type = "thinking"
+                        content_type = _get_v2_stream_content_type(oci_event)
 
                         message_start = {
                             "type": "message-start",
@@ -1044,19 +1040,39 @@ def transform_oci_stream_wrapper(
 
                         content_start = {
                             "type": "content-start",
-                            "index": 0,
+                            "index": v2_content_index,
                             "delta": {"message": {"content": {"type": content_type}}},
                         }
                         yield b"data: " + json.dumps(content_start).encode("utf-8") + b"\n\n"
+                        v2_current_content_type = content_type
                         emitted_start = True
 
                     if is_v2:
+                        content_type = _get_v2_stream_content_type(oci_event)
+                        if (
+                            endpoint in ["chat_stream", "chat"]
+                            and emitted_start
+                            and v2_current_content_type is not None
+                            and content_type != v2_current_content_type
+                        ):
+                            content_end_event = {"type": "content-end", "index": v2_content_index}
+                            yield b"data: " + json.dumps(content_end_event).encode("utf-8") + b"\n\n"
+                            v2_content_index += 1
+                            content_start_event = {
+                                "type": "content-start",
+                                "index": v2_content_index,
+                                "delta": {"message": {"content": {"type": content_type}}},
+                            }
+                            yield b"data: " + json.dumps(content_start_event).encode("utf-8") + b"\n\n"
+                            v2_current_content_type = content_type
+
                         if endpoint in ["chat_stream", "chat"] and "finishReason" in oci_event:
                             content_event = transform_stream_event(
                                 endpoint,
                                 {k: v for k, v in oci_event.items() if k != "finishReason"},
                                 is_v2,
                             )
+                            content_event["index"] = v2_content_index
                             content_payload = (
                                 content_event.get("delta", {})
                                 .get("message", {})
@@ -1082,10 +1098,12 @@ def transform_oci_stream_wrapper(
                                 "usage": usage,
                             }
 
-                            content_end_event = {"type": "content-end", "index": 0}
+                            content_end_event = {"type": "content-end", "index": v2_content_index}
                             yield b"data: " + json.dumps(content_end_event).encode("utf-8") + b"\n\n"
                         else:
                             cohere_event = transform_stream_event(endpoint, oci_event, is_v2)
+                            if endpoint in ["chat_stream", "chat"] and cohere_event.get("type") == "content-delta":
+                                cohere_event["index"] = v2_content_index
                             yield b"data: " + json.dumps(cohere_event).encode("utf-8") + b"\n\n"
                     else:
                         if endpoint in ["chat_stream", "chat"]:
@@ -1177,7 +1195,7 @@ def transform_stream_event(
                 "event_type": "text-generation",
                 "text": oci_event.get("text", ""),
                 "is_finished": oci_event.get("isFinished", False),
-            }
+                }
 
     elif endpoint in ["generate_stream", "generate"]:
         # Generate only supports V1
@@ -1188,3 +1206,14 @@ def transform_stream_event(
         }
 
     return oci_event
+
+
+def _get_v2_stream_content_type(oci_event: typing.Dict[str, typing.Any]) -> str:
+    content_type = "text"
+    if "message" in oci_event and "content" in oci_event["message"]:
+        content_list = oci_event["message"]["content"]
+        if content_list and isinstance(content_list, list) and len(content_list) > 0:
+            oci_type = content_list[0].get("type", "TEXT").upper()
+            if oci_type == "THINKING":
+                content_type = "thinking"
+    return content_type
