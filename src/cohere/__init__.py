@@ -280,6 +280,7 @@ if typing.TYPE_CHECKING:
     )
     from .bedrock_client import BedrockClient, BedrockClientV2
     from .client import AsyncClient, Client
+    from ._default_clients import DefaultAioHttpClient, DefaultAsyncHttpxClient
     from .client_v2 import AsyncClientV2, ClientV2
     from .datasets import DatasetsCreateResponse, DatasetsGetResponse, DatasetsGetUsageResponse, DatasetsListResponse
     from .embed_jobs import CreateEmbedJobRequestTruncate
@@ -440,6 +441,8 @@ _dynamic_imports: typing.Dict[str, str] = {
     "CreateEmbedJobResponse": ".types",
     "Dataset": ".types",
     "DatasetPart": ".types",
+    "DefaultAioHttpClient": "._default_clients",
+    "DefaultAsyncHttpxClient": "._default_clients",
     "DatasetType": ".types",
     "DatasetValidationStatus": ".types",
     "DatasetsCreateResponse": ".datasets",
@@ -779,6 +782,8 @@ __all__ = [
     "DatasetsGetResponse",
     "DatasetsGetUsageResponse",
     "DatasetsListResponse",
+    "DefaultAioHttpClient",
+    "DefaultAsyncHttpxClient",
     "DebugStreamedChatResponse",
     "DebugV2ChatStreamResponse",
     "DeleteConnectorResponse",
