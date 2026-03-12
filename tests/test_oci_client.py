@@ -516,6 +516,60 @@ class TestOciClientTransformations(unittest.TestCase):
         self.assertEqual(result["message"]["tool_calls"][0]["id"], "call_123")
 
 
+    def test_normalize_model_for_oci(self):
+        """Test model name normalization for OCI."""
+        from cohere.oci_client import normalize_model_for_oci
+
+        # Plain model name gets cohere. prefix
+        self.assertEqual(normalize_model_for_oci("command-a-03-2025"), "cohere.command-a-03-2025")
+        # Already prefixed passes through
+        self.assertEqual(normalize_model_for_oci("cohere.embed-english-v3.0"), "cohere.embed-english-v3.0")
+        # OCID passes through
+        self.assertEqual(
+            normalize_model_for_oci("ocid1.generativeaimodel.oc1.us-chicago-1.abc"),
+            "ocid1.generativeaimodel.oc1.us-chicago-1.abc",
+        )
+
+    def test_transform_embed_request(self):
+        """Test embed request transformation to OCI format."""
+        from cohere.oci_client import transform_request_to_oci
+
+        body = {
+            "model": "embed-english-v3.0",
+            "texts": ["hello", "world"],
+            "input_type": "search_document",
+            "truncate": "end",
+            "embedding_types": ["float", "int8"],
+        }
+        result = transform_request_to_oci("embed", body, "compartment-123")
+
+        self.assertEqual(result["inputs"], ["hello", "world"])
+        self.assertEqual(result["inputType"], "SEARCH_DOCUMENT")
+        self.assertEqual(result["truncate"], "END")
+        self.assertEqual(result["embeddingTypes"], ["FLOAT", "INT8"])
+        self.assertEqual(result["compartmentId"], "compartment-123")
+        self.assertEqual(result["servingMode"]["modelId"], "cohere.embed-english-v3.0")
+
+    def test_transform_chat_request_optional_params(self):
+        """Test chat request transformation includes optional params."""
+        from cohere.oci_client import transform_request_to_oci
+
+        body = {
+            "model": "command-a-03-2025",
+            "messages": [{"role": "user", "content": "Hi"}],
+            "max_tokens": 100,
+            "temperature": 0.7,
+            "stop_sequences": ["END"],
+            "frequency_penalty": 0.5,
+        }
+        result = transform_request_to_oci("chat", body, "compartment-123")
+
+        chat_req = result["chatRequest"]
+        self.assertEqual(chat_req["maxTokens"], 100)
+        self.assertEqual(chat_req["temperature"], 0.7)
+        self.assertEqual(chat_req["stopSequences"], ["END"])
+        self.assertEqual(chat_req["frequencyPenalty"], 0.5)
+
     def test_get_oci_url_known_endpoints(self):
         """Test URL generation for known endpoints."""
         from cohere.oci_client import get_oci_url
