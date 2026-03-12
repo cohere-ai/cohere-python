@@ -295,7 +295,10 @@ def map_request_to_oci(
         # Extract Cohere API details
         path_parts = request.url.path.split("/")
         endpoint = path_parts[-1]
-        body = json.loads(request.read())
+        try:
+            body = json.loads(request.read())
+        except json.JSONDecodeError as e:
+            raise RuntimeError(f"OCI client: failed to parse request body as JSON: {e}") from e
 
         # Build OCI URL
         url = get_oci_url(
@@ -305,11 +308,14 @@ def map_request_to_oci(
         )
 
         # Transform request body to OCI format
-        oci_body = transform_request_to_oci(
-            endpoint=endpoint,
-            cohere_body=body,
-            compartment_id=oci_compartment_id,
-        )
+        try:
+            oci_body = transform_request_to_oci(
+                endpoint=endpoint,
+                cohere_body=body,
+                compartment_id=oci_compartment_id,
+            )
+        except (KeyError, ValueError) as e:
+            raise RuntimeError(f"OCI client: failed to transform request for endpoint '{endpoint}': {e}") from e
 
         # Prepare request for signing
         oci_body_bytes = json.dumps(oci_body).encode("utf-8")
@@ -330,7 +336,10 @@ def map_request_to_oci(
         prepped_request = oci_request.prepare()
 
         # Sign the request using OCI signer (modifies headers in place)
-        signer.do_request_sign(prepped_request)
+        try:
+            signer.do_request_sign(prepped_request)
+        except Exception as e:
+            raise RuntimeError(f"OCI client: request signing failed for endpoint '{endpoint}': {e}") from e
 
         # Update httpx request with signed headers
         request.url = URL(url)
