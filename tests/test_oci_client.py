@@ -516,6 +516,24 @@ class TestOciClientTransformations(unittest.TestCase):
         self.assertEqual(result["message"]["tool_calls"][0]["id"], "call_123")
 
 
+    def test_load_oci_config_missing_private_key_raises(self):
+        """Test that direct credentials without private key raises clear error."""
+        from unittest.mock import patch, MagicMock
+        from cohere.oci_client import _load_oci_config
+
+        with patch("cohere.oci_client.lazy_oci", return_value=MagicMock()):
+            with self.assertRaises(ValueError) as ctx:
+                _load_oci_config(
+                    auth_type="api_key",
+                    config_path=None,
+                    profile=None,
+                    user_id="ocid1.user.oc1...",
+                    fingerprint="xx:xx:xx",
+                    tenancy_id="ocid1.tenancy.oc1...",
+                    # No private_key_path or private_key_content
+                )
+            self.assertIn("oci_private_key_path", str(ctx.exception))
+
     def test_stream_wrapper_skips_malformed_json_with_warning(self):
         """Test that malformed JSON in SSE stream is skipped (not silently swallowed)."""
         import json

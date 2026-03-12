@@ -188,6 +188,11 @@ def _load_oci_config(
             raise ValueError(
                 f"When providing oci_user_id, you must also provide: {', '.join('oci_' + f for f in missing)}"
             )
+        if not kwargs.get("private_key_path") and not kwargs.get("private_key_content"):
+            raise ValueError(
+                "When providing oci_user_id, you must also provide either "
+                "oci_private_key_path or oci_private_key_content"
+            )
         config = {
             "user": kwargs["user_id"],
             "fingerprint": kwargs["fingerprint"],
