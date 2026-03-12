@@ -230,9 +230,6 @@ class OciClientV2(ClientV2):
 
 EventHook = typing.Callable[..., typing.Any]
 
-
-
-
 class Streamer(SyncByteStream):
     """Wraps an iterator of bytes for streaming responses."""
 
@@ -280,6 +277,11 @@ def _load_oci_config(
         if missing:
             raise ValueError(
                 f"When providing oci_user_id, you must also provide: {', '.join('oci_' + f for f in missing)}"
+            )
+        if not kwargs.get("private_key_path") and not kwargs.get("private_key_content"):
+            raise ValueError(
+                "When providing oci_user_id, you must also provide either "
+                "oci_private_key_path or oci_private_key_content"
             )
         config = {
             "user": kwargs["user_id"],
@@ -366,11 +368,23 @@ def map_request_to_oci(
     elif "security_token_file" in oci_config:
         # Session-based authentication with security token (fallback if no user field)
         token_file_path = os.path.expanduser(oci_config["security_token_file"])
-        with open(token_file_path, "r") as f:
-            security_token = f.read().strip()
+        try:
+            with open(token_file_path, "r") as f:
+                security_token = f.read().strip()
+        except FileNotFoundError as e:
+            raise ValueError(
+                f"OCI session token file not found: {token_file_path}. "
+                "Your session may have expired. Re-authenticate with: oci session authenticate"
+            ) from e
 
         # Load private key using OCI's utility function
-        private_key = oci.signer.load_private_key_from_file(oci_config["key_file"])
+        key_file = oci_config.get("key_file")
+        if not key_file:
+            raise ValueError(
+                "OCI config profile is missing 'key_file'. "
+                "Session-based auth requires a key_file entry in your OCI config profile."
+            )
+        private_key = oci.signer.load_private_key_from_file(key_file)
 
         signer = oci.auth.signers.SecurityTokenSigner(
             token=security_token,
@@ -388,7 +402,10 @@ def map_request_to_oci(
         # Extract Cohere API details
         path_parts = request.url.path.split("/")
         endpoint = path_parts[-1]
-        body = json.loads(request.read())
+        try:
+            body = json.loads(request.read())
+        except json.JSONDecodeError as e:
+            raise RuntimeError(f"OCI client: failed to parse request body as JSON: {e}") from e
 
         # Build OCI URL
         url = get_oci_url(
@@ -398,11 +415,14 @@ def map_request_to_oci(
         )
 
         # Transform request body to OCI format
-        oci_body = transform_request_to_oci(
-            endpoint=endpoint,
-            cohere_body=body,
-            compartment_id=oci_compartment_id,
-        )
+        try:
+            oci_body = transform_request_to_oci(
+                endpoint=endpoint,
+                cohere_body=body,
+                compartment_id=oci_compartment_id,
+            )
+        except (KeyError, ValueError) as e:
+            raise RuntimeError(f"OCI client: failed to transform request for endpoint '{endpoint}': {e}") from e
 
         # Prepare request for signing
         oci_body_bytes = json.dumps(oci_body).encode("utf-8")
@@ -423,7 +443,10 @@ def map_request_to_oci(
         prepped_request = oci_request.prepare()
 
         # Sign the request using OCI signer (modifies headers in place)
-        signer.do_request_sign(prepped_request)
+        try:
+            signer.do_request_sign(prepped_request)
+        except Exception as e:
+            raise RuntimeError(f"OCI client: request signing failed for endpoint '{endpoint}': {e}") from e
 
         # Update httpx request with signed headers
         request.url = URL(url)
@@ -450,7 +473,9 @@ def map_response_from_oci() -> EventHook:
     """
 
     def _hook(response: httpx.Response) -> None:
-        endpoint = response.request.extensions["endpoint"]
+        endpoint = response.request.extensions.get("endpoint")
+        if endpoint is None:
+            return
         is_stream = response.request.extensions.get("is_stream", False)
         is_v2 = response.request.extensions.get("is_v2", False)
 
@@ -464,7 +489,7 @@ def map_response_from_oci() -> EventHook:
         # For streaming responses, wrap the stream with a transformer
         if is_stream:
             original_stream = response.stream
-            transformed_stream = transform_oci_stream_wrapper(original_stream, endpoint, is_v2)
+            transformed_stream = transform_oci_stream_wrapper(typing.cast(SyncByteStream, original_stream), endpoint, is_v2)
             response.stream = Streamer(transformed_stream)
             # Reset consumption flags
             if hasattr(response, "_content"):
@@ -518,7 +543,12 @@ def get_oci_url(
         "rerank": "rerankText",  # OCI uses rerankText, not rerank
     }
 
-    action = action_map.get(endpoint, endpoint)
+    action = action_map.get(endpoint)
+    if action is None:
+        raise ValueError(
+            f"Endpoint '{endpoint}' is not supported by OCI Generative AI. "
+            f"Supported endpoints: {list(action_map.keys())}"
+        )
     return f"{base}/{api_version}/actions/{action}"
 
 
@@ -925,7 +955,7 @@ def transform_oci_response_to_cohere(
 
 
 def transform_oci_stream_wrapper(
-    stream: typing.Iterator[bytes], endpoint: str, is_v2: bool = False
+    stream: SyncByteStream, endpoint: str, is_v2: bool = False
 ) -> typing.Iterator[bytes]:
     """
     Wrap OCI stream and transform events to Cohere format.
@@ -938,6 +968,10 @@ def transform_oci_stream_wrapper(
     Yields:
         Bytes of transformed streaming events
     """
+    import logging
+
+    generation_id = str(uuid.uuid4())
+    emitted_start = False
     buffer = b""
     for chunk in stream:
         buffer += chunk
@@ -957,14 +991,47 @@ def transform_oci_stream_wrapper(
 
                 try:
                     oci_event = json.loads(data_str)
+                except json.JSONDecodeError:
+                    logging.warning(
+                        "OCI stream: failed to parse SSE event as JSON (endpoint=%s, data=%r)",
+                        endpoint, data_str[:200],
+                    )
+                    continue
+
+                try:
+                    if is_v2 and not emitted_start:
+                        content_type = "text"
+                        if "message" in oci_event and "content" in oci_event["message"]:
+                            content_list = oci_event["message"]["content"]
+                            if content_list and isinstance(content_list, list) and len(content_list) > 0:
+                                oci_type = content_list[0].get("type", "TEXT").upper()
+                                if oci_type == "THINKING":
+                                    content_type = "thinking"
+
+                        message_start = {
+                            "type": "message-start",
+                            "id": generation_id,
+                            "delta": {"message": {"role": "assistant"}},
+                        }
+                        yield b"data: " + json.dumps(message_start).encode("utf-8") + b"\n\n"
+
+                        content_start = {
+                            "type": "content-start",
+                            "index": 0,
+                            "delta": {"message": {"content": {"type": content_type}}},
+                        }
+                        yield b"data: " + json.dumps(content_start).encode("utf-8") + b"\n\n"
+                        emitted_start = True
+
                     cohere_event = transform_stream_event(endpoint, oci_event, is_v2)
-                    # V2 expects SSE format with "data: " prefix and double newline, V1 expects plain JSON
                     if is_v2:
                         yield b"data: " + json.dumps(cohere_event).encode("utf-8") + b"\n\n"
                     else:
                         yield json.dumps(cohere_event).encode("utf-8") + b"\n"
-                except json.JSONDecodeError:
-                    continue
+                except Exception as e:
+                    raise RuntimeError(
+                        f"OCI stream event transformation failed for endpoint '{endpoint}': {e}"
+                    ) from e
 
 
 def transform_stream_event(

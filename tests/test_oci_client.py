@@ -294,6 +294,18 @@ class TestOciClientV2(unittest.TestCase):
         full_text = ""
         for event in events:
             if (
+                hasattr(event, "type")
+                and event.type == "content-delta"
+                and hasattr(event, "delta")
+                and event.delta
+                and hasattr(event.delta, "message")
+                and event.delta.message
+                and hasattr(event.delta.message, "content")
+                and event.delta.message.content
+                and getattr(event.delta.message.content, "text", None)
+            ):
+                full_text += event.delta.message.content.text
+            elif (
                 hasattr(event, "delta")
                 and event.delta
                 and hasattr(event.delta, "message")
@@ -302,7 +314,7 @@ class TestOciClientV2(unittest.TestCase):
                 and event.delta.message.content
                 and hasattr(event.delta.message.content, "text")
             ):
-                full_text += event.delta.message.content.text
+                self.assertIsNone(event.delta.message.content.text)
 
         # Should have received some text
         self.assertTrue(len(full_text) > 0)
@@ -686,6 +698,98 @@ class TestOciClientTransformations(unittest.TestCase):
         self.assertNotIn("toolCalls", result["message"])
         self.assertEqual(len(result["message"]["tool_calls"]), 1)
         self.assertEqual(result["message"]["tool_calls"][0]["id"], "call_123")
+
+    def test_get_oci_url_known_endpoints(self):
+        """Test URL generation for known endpoints."""
+        from cohere.oci_client import get_oci_url
+
+        url = get_oci_url("us-chicago-1", "embed")
+        self.assertIn("/actions/embedText", url)
+
+        url = get_oci_url("us-chicago-1", "chat")
+        self.assertIn("/actions/chat", url)
+
+        url = get_oci_url("us-chicago-1", "chat_stream", stream=True)
+        self.assertIn("/actions/chat", url)
+
+    def test_get_oci_url_unknown_endpoint_raises(self):
+        """Test that unknown endpoints raise ValueError instead of producing bad URLs."""
+        from cohere.oci_client import get_oci_url
+
+        with self.assertRaises(ValueError) as ctx:
+            get_oci_url("us-chicago-1", "unknown_endpoint")
+        self.assertIn("not supported", str(ctx.exception))
+
+    def test_load_oci_config_missing_private_key_raises(self):
+        """Test that direct credentials without private key raises clear error."""
+        from unittest.mock import MagicMock, patch
+        from cohere.oci_client import _load_oci_config
+
+        with patch("cohere.oci_client.lazy_oci", return_value=MagicMock()):
+            with self.assertRaises(ValueError) as ctx:
+                _load_oci_config(
+                    auth_type="api_key",
+                    config_path=None,
+                    profile=None,
+                    user_id="ocid1.user.oc1...",
+                    fingerprint="xx:xx:xx",
+                    tenancy_id="ocid1.tenancy.oc1...",
+                )
+            self.assertIn("oci_private_key_path", str(ctx.exception))
+
+    def test_stream_wrapper_emits_full_event_lifecycle(self):
+        """Test that V2 streams emit message-start, content-start, content-delta, content-end, and message-end."""
+        import json
+        from cohere.oci_client import transform_oci_stream_wrapper
+
+        chunks = [
+            b'data: {"message": {"content": [{"type": "TEXT", "text": "Hello"}]}}\n',
+            b'data: {"message": {"content": [{"type": "TEXT", "text": " world"}]}, "finishReason": "COMPLETE"}\n',
+            b"data: [DONE]\n",
+        ]
+
+        events = []
+        for raw in transform_oci_stream_wrapper(iter(chunks), "chat", is_v2=True):
+            line = raw.decode("utf-8").strip()
+            if line.startswith("data: "):
+                events.append(json.loads(line[6:]))
+
+        event_types = [event["type"] for event in events]
+        self.assertEqual(event_types[0], "message-start")
+        self.assertEqual(event_types[1], "content-start")
+        self.assertEqual(event_types[2], "content-delta")
+        self.assertEqual(event_types[3], "content-end")
+        self.assertEqual(event_types[4], "message-end")
+
+        self.assertIn("id", events[0])
+        self.assertEqual(events[0]["delta"]["message"]["role"], "assistant")
+        self.assertEqual(events[1]["index"], 0)
+        self.assertEqual(events[1]["delta"]["message"]["content"]["type"], "text")
+
+    def test_stream_wrapper_skips_malformed_json_with_warning(self):
+        """Test that malformed JSON in SSE streams is skipped with a warning."""
+        from cohere.oci_client import transform_oci_stream_wrapper
+
+        chunks = [
+            b"data: not-valid-json\n",
+            b'data: {"message": {"content": [{"type": "TEXT", "text": "hello"}]}}\n',
+            b"data: [DONE]\n",
+        ]
+
+        events = list(transform_oci_stream_wrapper(iter(chunks), "chat", is_v2=True))
+        self.assertEqual(len(events), 4)
+
+    def test_stream_wrapper_raises_on_transform_error(self):
+        """Test that stream transformation errors are re-raised with OCI-specific context."""
+        from cohere.oci_client import transform_oci_stream_wrapper
+
+        chunks = [
+            b'data: {"message": null}\n',
+        ]
+
+        with self.assertRaises(RuntimeError) as ctx:
+            list(transform_oci_stream_wrapper(iter(chunks), "chat", is_v2=True))
+        self.assertIn("OCI stream event transformation failed", str(ctx.exception))
 
 
 if __name__ == "__main__":
