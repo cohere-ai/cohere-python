@@ -555,6 +555,38 @@ class TestOciClientTransformations(unittest.TestCase):
                 )
             self.assertIn("oci_private_key_path", str(ctx.exception))
 
+    def test_stream_wrapper_emits_full_event_lifecycle(self):
+        """Test that stream emits message-start, content-start, content-delta, content-end, message-end."""
+        import json
+        from cohere.oci_client import transform_oci_stream_wrapper
+
+        chunks = [
+            b'data: {"message": {"content": [{"type": "TEXT", "text": "Hello"}]}}\n',
+            b'data: {"message": {"content": [{"type": "TEXT", "text": " world"}]}, "finishReason": "COMPLETE"}\n',
+            b'data: [DONE]\n',
+        ]
+
+        events = []
+        for raw in transform_oci_stream_wrapper(iter(chunks), "chat"):
+            line = raw.decode("utf-8").strip()
+            if line.startswith("data: "):
+                events.append(json.loads(line[6:]))
+
+        event_types = [e["type"] for e in events]
+        self.assertEqual(event_types[0], "message-start")
+        self.assertEqual(event_types[1], "content-start")
+        self.assertEqual(event_types[2], "content-delta")
+        self.assertEqual(event_types[3], "content-end")
+        self.assertEqual(event_types[4], "message-end")
+
+        # Verify message-start has id and role
+        self.assertIn("id", events[0])
+        self.assertEqual(events[0]["delta"]["message"]["role"], "assistant")
+
+        # Verify content-start has index and type
+        self.assertEqual(events[1]["index"], 0)
+        self.assertEqual(events[1]["delta"]["message"]["content"]["type"], "text")
+
     def test_stream_wrapper_skips_malformed_json_with_warning(self):
         """Test that malformed JSON in SSE stream is skipped (not silently swallowed)."""
         import json
@@ -566,8 +598,8 @@ class TestOciClientTransformations(unittest.TestCase):
             b'data: [DONE]\n',
         ]
         events = list(transform_oci_stream_wrapper(iter(chunks), "chat"))
-        # Should get content-delta + message-end (malformed line skipped)
-        self.assertEqual(len(events), 2)
+        # Should get message-start + content-start + content-delta + message-end (malformed line skipped)
+        self.assertEqual(len(events), 4)
 
     def test_stream_wrapper_raises_on_transform_error(self):
         """Test that transform errors in stream produce OCI-specific error, not opaque httpx error."""

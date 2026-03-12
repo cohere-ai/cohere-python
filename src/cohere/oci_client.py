@@ -770,6 +770,9 @@ def transform_oci_stream_wrapper(
     """
     Wrap OCI stream and transform events to Cohere V2 format.
 
+    Emits the full V2 streaming lifecycle:
+    message-start -> content-start -> content-delta* -> content-end -> message-end
+
     Args:
         stream: Original OCI stream iterator
         endpoint: Cohere endpoint name
@@ -777,6 +780,10 @@ def transform_oci_stream_wrapper(
     Yields:
         Bytes of transformed streaming events
     """
+    import logging
+
+    generation_id = str(uuid.uuid4())
+    emitted_start = False
     buffer = b""
     for chunk in stream:
         buffer += chunk
@@ -795,7 +802,6 @@ def transform_oci_stream_wrapper(
                 try:
                     oci_event = json.loads(data_str)
                 except json.JSONDecodeError:
-                    import logging
                     logging.warning(
                         "OCI stream: failed to parse SSE event as JSON (endpoint=%s, data=%r)",
                         endpoint, data_str[:200],
@@ -803,6 +809,32 @@ def transform_oci_stream_wrapper(
                     continue
 
                 try:
+                    # Emit message-start and content-start before first content delta
+                    if not emitted_start:
+                        # Detect content type from first event
+                        content_type = "text"
+                        if "message" in oci_event and "content" in oci_event["message"]:
+                            content_list = oci_event["message"]["content"]
+                            if content_list and isinstance(content_list, list) and len(content_list) > 0:
+                                oci_type = content_list[0].get("type", "TEXT").upper()
+                                if oci_type == "THINKING":
+                                    content_type = "thinking"
+
+                        message_start = {
+                            "type": "message-start",
+                            "id": generation_id,
+                            "delta": {"message": {"role": "assistant"}},
+                        }
+                        yield b"data: " + json.dumps(message_start).encode("utf-8") + b"\n\n"
+
+                        content_start = {
+                            "type": "content-start",
+                            "index": 0,
+                            "delta": {"message": {"content": {"type": content_type}}},
+                        }
+                        yield b"data: " + json.dumps(content_start).encode("utf-8") + b"\n\n"
+                        emitted_start = True
+
                     cohere_event = transform_stream_event(endpoint, oci_event)
                     yield b"data: " + json.dumps(cohere_event).encode("utf-8") + b"\n\n"
                 except Exception as e:
