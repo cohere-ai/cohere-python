@@ -44,6 +44,10 @@ jobs:
           CO_API_KEY: ${{ secrets.COHERE_API_KEY }}
 
   test-langchain-cohere:
+    # Skipped: langchain-cohere integration tests use deprecated models and hit
+    # the live API without temperature=0, causing non-deterministic failures.
+    # See https://github.com/cohere-ai/cohere-python/pull/738 for investigation.
+    if: false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
