@@ -24,7 +24,7 @@ def lazy_oci() -> Any:
         ImportError: If the OCI SDK is not installed
     """
     try:
-        import oci
+        import oci  # type: ignore
         return oci
     except ImportError:
         raise ImportError(OCI_INSTALLATION_MESSAGE)
