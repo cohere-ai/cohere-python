@@ -516,5 +516,34 @@ class TestOciClientTransformations(unittest.TestCase):
         self.assertEqual(result["message"]["tool_calls"][0]["id"], "call_123")
 
 
+    def test_stream_wrapper_skips_malformed_json_with_warning(self):
+        """Test that malformed JSON in SSE stream is skipped (not silently swallowed)."""
+        import json
+        from cohere.oci_client import transform_oci_stream_wrapper
+
+        chunks = [
+            b'data: not-valid-json\n',
+            b'data: {"message": {"content": [{"type": "TEXT", "text": "hello"}]}}\n',
+            b'data: [DONE]\n',
+        ]
+        events = list(transform_oci_stream_wrapper(iter(chunks), "chat"))
+        # Should get content-delta + message-end (malformed line skipped)
+        self.assertEqual(len(events), 2)
+
+    def test_stream_wrapper_raises_on_transform_error(self):
+        """Test that transform errors in stream produce OCI-specific error, not opaque httpx error."""
+        import json
+        from cohere.oci_client import transform_oci_stream_wrapper
+
+        # Event with structure that will cause transform_stream_event to fail
+        # (message is None, causing TypeError on "content" in None)
+        chunks = [
+            b'data: {"message": null}\n',
+        ]
+        with self.assertRaises(RuntimeError) as ctx:
+            list(transform_oci_stream_wrapper(iter(chunks), "chat"))
+        self.assertIn("OCI stream event transformation failed", str(ctx.exception))
+
+
 if __name__ == "__main__":
     unittest.main()

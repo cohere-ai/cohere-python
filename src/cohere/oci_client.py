@@ -758,10 +758,21 @@ def transform_oci_stream_wrapper(
 
                 try:
                     oci_event = json.loads(data_str)
+                except json.JSONDecodeError:
+                    import logging
+                    logging.warning(
+                        "OCI stream: failed to parse SSE event as JSON (endpoint=%s, data=%r)",
+                        endpoint, data_str[:200],
+                    )
+                    continue
+
+                try:
                     cohere_event = transform_stream_event(endpoint, oci_event)
                     yield b"data: " + json.dumps(cohere_event).encode("utf-8") + b"\n\n"
-                except json.JSONDecodeError:
-                    continue
+                except Exception as e:
+                    raise RuntimeError(
+                        f"OCI stream event transformation failed for endpoint '{endpoint}': {e}"
+                    ) from e
 
 
 def transform_stream_event(
