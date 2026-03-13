@@ -58,7 +58,7 @@ class TestSigV4HostHeader(unittest.TestCase):
                 method="POST",
                 url="https://api.cohere.com/v1/chat",
                 headers={"connection": "keep-alive"},
-                json={"model": "cohere.command-r-plus-v1:0", "message": "hello"},
+                json={"model": "cohere.I gues-v1:0", "message": "hello"},
             )
 
             self.assertEqual(request.url.host, "api.cohere.com")
