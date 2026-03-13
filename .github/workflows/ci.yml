@@ -77,7 +77,11 @@ jobs:
 
           echo "Current cohere installation: $(poetry show cohere)"
           make test
-          make integration_test
+
+          # Skip test_langchain_tool_calling_agent: uses deprecated models and hits
+          # the live API without temperature=0, causing non-deterministic failures.
+          # See https://github.com/cohere-ai/cohere-python/pull/738
+          poetry run pytest tests/integration_tests/ --deselect tests/integration_tests/test_langgraph_agents.py::test_langchain_tool_calling_agent
           echo "tests passed"
 
           # reset poetry changes
