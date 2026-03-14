@@ -12,9 +12,25 @@ Run with:
 """
 
 import os
+import sys
+import tempfile
+import types
 import unittest
+from unittest.mock import MagicMock, mock_open, patch
 
 import cohere
+
+if "tokenizers" not in sys.modules:
+    tokenizers_stub = types.ModuleType("tokenizers")
+    tokenizers_stub.Tokenizer = object
+    sys.modules["tokenizers"] = tokenizers_stub
+
+if "fastavro" not in sys.modules:
+    fastavro_stub = types.ModuleType("fastavro")
+    fastavro_stub.parse_schema = lambda schema: schema
+    fastavro_stub.reader = lambda *args, **kwargs: iter(())
+    fastavro_stub.writer = lambda *args, **kwargs: None
+    sys.modules["fastavro"] = fastavro_stub
 
 
 @unittest.skipIf(os.getenv("TEST_OCI") is None, "TEST_OCI not set")
@@ -301,6 +317,7 @@ class TestOciClientV2(unittest.TestCase):
                 and hasattr(event.delta.message, "content")
                 and event.delta.message.content
                 and hasattr(event.delta.message.content, "text")
+                and event.delta.message.content.text is not None
             ):
                 full_text += event.delta.message.content.text
 
@@ -576,9 +593,9 @@ class TestOciClientTransformations(unittest.TestCase):
 
         result = transform_stream_event("chat", oci_event, is_v2=True)
 
-        self.assertEqual(result["type"], "content-delta")
-        self.assertIn("thinking", result["delta"]["message"]["content"])
-        self.assertEqual(result["delta"]["message"]["content"]["thinking"], "Reasoning step...")
+        self.assertEqual(result[0]["type"], "content-delta")
+        self.assertIn("thinking", result[0]["delta"]["message"]["content"])
+        self.assertEqual(result[0]["delta"]["message"]["content"]["thinking"], "Reasoning step...")
 
     def test_stream_event_text_transformation(self):
         """Test that text content in stream events is correctly transformed."""
@@ -593,9 +610,9 @@ class TestOciClientTransformations(unittest.TestCase):
 
         result = transform_stream_event("chat", oci_event, is_v2=True)
 
-        self.assertEqual(result["type"], "content-delta")
-        self.assertIn("text", result["delta"]["message"]["content"])
-        self.assertEqual(result["delta"]["message"]["content"]["text"], "The answer is...")
+        self.assertEqual(result[0]["type"], "content-delta")
+        self.assertIn("text", result[0]["delta"]["message"]["content"])
+        self.assertEqual(result[0]["delta"]["message"]["content"]["text"], "The answer is...")
 
     def test_thinking_parameter_none(self):
         """Test that thinking=None does not crash (issue: null guard)."""
@@ -687,6 +704,367 @@ class TestOciClientTransformations(unittest.TestCase):
         self.assertEqual(len(result["message"]["tool_calls"]), 1)
         self.assertEqual(result["message"]["tool_calls"][0]["id"], "call_123")
 
+    def test_normalize_model_for_oci(self):
+        """Test model name normalization for OCI."""
+        from cohere.oci_client import normalize_model_for_oci
 
+        # Plain model name gets cohere. prefix
+        self.assertEqual(normalize_model_for_oci("command-a-03-2025"), "cohere.command-a-03-2025")
+        # Already prefixed passes through
+        self.assertEqual(normalize_model_for_oci("cohere.embed-english-v3.0"), "cohere.embed-english-v3.0")
+        # OCID passes through
+        self.assertEqual(
+            normalize_model_for_oci("ocid1.generativeaimodel.oc1.us-chicago-1.abc"),
+            "ocid1.generativeaimodel.oc1.us-chicago-1.abc",
+        )
+
+    def test_transform_embed_request(self):
+        """Test embed request transformation to OCI format."""
+        from cohere.oci_client import transform_request_to_oci
+
+        body = {
+            "model": "embed-english-v3.0",
+            "texts": ["hello", "world"],
+            "input_type": "search_document",
+            "truncate": "end",
+            "embedding_types": ["float", "int8"],
+        }
+        result = transform_request_to_oci("embed", body, "compartment-123")
+
+        self.assertEqual(result["inputs"], ["hello", "world"])
+        self.assertEqual(result["inputType"], "SEARCH_DOCUMENT")
+        self.assertEqual(result["truncate"], "END")
+        self.assertEqual(result["embeddingTypes"], ["FLOAT", "INT8"])
+        self.assertEqual(result["compartmentId"], "compartment-123")
+        self.assertEqual(result["servingMode"]["modelId"], "cohere.embed-english-v3.0")
+
+    def test_transform_embed_request_with_v2_optional_params(self):
+        """Test embed request forwards V2-specific optional params."""
+        from cohere.oci_client import transform_request_to_oci
+
+        body = {
+            "model": "embed-english-v3.0",
+            "inputs": [{"content": [{"type": "text", "text": "hello"}]}],
+            "input_type": "classification",
+            "max_tokens": 256,
+            "output_dimension": 512,
+            "priority": 42,
+        }
+        result = transform_request_to_oci("embed", body, "compartment-123")
+
+        self.assertEqual(result["inputs"], body["inputs"])
+        self.assertEqual(result["maxTokens"], 256)
+        self.assertEqual(result["outputDimension"], 512)
+        self.assertEqual(result["priority"], 42)
+
+    def test_transform_embed_request_rejects_images(self):
+        """Test embed request fails clearly for unsupported top-level images."""
+        from cohere.oci_client import transform_request_to_oci
+
+        with self.assertRaises(ValueError) as ctx:
+            transform_request_to_oci(
+                "embed",
+                {
+                    "model": "embed-english-v3.0",
+                    "images": ["data:image/png;base64,abc"],
+                    "input_type": "classification",
+                },
+                "compartment-123",
+            )
+
+        self.assertIn("top-level 'images' parameter", str(ctx.exception))
+
+    def test_transform_chat_request_optional_params(self):
+        """Test chat request transformation includes optional params."""
+        from cohere.oci_client import transform_request_to_oci
+
+        body = {
+            "model": "command-a-03-2025",
+            "messages": [{"role": "user", "content": "Hi"}],
+            "max_tokens": 100,
+            "temperature": 0.7,
+            "stop_sequences": ["END"],
+            "frequency_penalty": 0.5,
+            "strict_tools": True,
+            "response_format": {"type": "json_object"},
+            "logprobs": True,
+            "tool_choice": "REQUIRED",
+            "priority": 7,
+        }
+        result = transform_request_to_oci("chat", body, "compartment-123")
+
+        chat_req = result["chatRequest"]
+        self.assertEqual(chat_req["maxTokens"], 100)
+        self.assertEqual(chat_req["temperature"], 0.7)
+        self.assertEqual(chat_req["stopSequences"], ["END"])
+        self.assertEqual(chat_req["frequencyPenalty"], 0.5)
+        self.assertTrue(chat_req["strictTools"])
+        self.assertEqual(chat_req["responseFormat"], {"type": "json_object"})
+        self.assertTrue(chat_req["logprobs"])
+        self.assertEqual(chat_req["toolChoice"], "REQUIRED")
+        self.assertEqual(chat_req["priority"], 7)
+
+    def test_transform_chat_request_tool_message_fields(self):
+        """Test tool message fields are converted to OCI names."""
+        from cohere.oci_client import transform_request_to_oci
+
+        body = {
+            "model": "command-a-03-2025",
+            "messages": [
+                {
+                    "role": "assistant",
+                    "content": [{"type": "text", "text": "Use tool"}],
+                    "tool_calls": [{"id": "call_1"}],
+                    "tool_plan": "Plan",
+                },
+                {
+                    "role": "tool",
+                    "tool_call_id": "call_1",
+                    "content": [{"type": "text", "text": "Result"}],
+                },
+            ],
+        }
+
+        result = transform_request_to_oci("chat", body, "compartment-123")
+        assistant_message, tool_message = result["chatRequest"]["messages"]
+        self.assertEqual(assistant_message["toolCalls"], [{"id": "call_1"}])
+        self.assertEqual(assistant_message["toolPlan"], "Plan")
+        self.assertEqual(tool_message["toolCallId"], "call_1")
+
+    def test_get_oci_url_known_endpoints(self):
+        """Test URL generation for known endpoints."""
+        from cohere.oci_client import get_oci_url
+
+        url = get_oci_url("us-chicago-1", "embed")
+        self.assertIn("/actions/embedText", url)
+
+        url = get_oci_url("us-chicago-1", "chat")
+        self.assertIn("/actions/chat", url)
+
+        url = get_oci_url("us-chicago-1", "chat_stream")
+        self.assertIn("/actions/chat", url)
+
+    def test_get_oci_url_unknown_endpoint_raises(self):
+        """Test that unknown endpoints raise ValueError instead of producing bad URLs."""
+        from cohere.oci_client import get_oci_url
+
+        with self.assertRaises(ValueError) as ctx:
+            get_oci_url("us-chicago-1", "unknown_endpoint")
+        self.assertIn("not supported", str(ctx.exception))
+
+    def test_load_oci_config_missing_private_key_raises(self):
+        """Test that direct credentials without private key raises clear error."""
+        from cohere.oci_client import _load_oci_config
+
+        with patch("cohere.oci_client.lazy_oci", return_value=MagicMock()):
+            with self.assertRaises(ValueError) as ctx:
+                _load_oci_config(
+                    auth_type="api_key",
+                    config_path=None,
+                    profile=None,
+                    user_id="ocid1.user.oc1...",
+                    fingerprint="xx:xx:xx",
+                    tenancy_id="ocid1.tenancy.oc1...",
+                    # No private_key_path or private_key_content
+                )
+            self.assertIn("oci_private_key_path", str(ctx.exception))
+
+    def test_load_oci_config_ignores_inherited_session_auth(self):
+        """Test that named API-key profiles do not inherit DEFAULT session auth fields."""
+        from cohere.oci_client import _load_oci_config
+
+        config_text = """
+[DEFAULT]
+security_token_file=/tmp/default-token
+
+[API_KEY_AUTH]
+user=ocid1.user.oc1..test
+fingerprint=aa:bb
+key_file=/tmp/test.pem
+tenancy=ocid1.tenancy.oc1..test
+region=us-chicago-1
+""".strip()
+
+        with tempfile.NamedTemporaryFile("w", delete=False) as config_file:
+            config_file.write(config_text)
+            config_path = config_file.name
+
+        try:
+            mock_oci = MagicMock()
+            mock_oci.config.from_file.return_value = {
+                "user": "ocid1.user.oc1..test",
+                "fingerprint": "aa:bb",
+                "key_file": "/tmp/test.pem",
+                "tenancy": "ocid1.tenancy.oc1..test",
+                "region": "us-chicago-1",
+                "security_token_file": "/tmp/default-token",
+            }
+
+            with patch("cohere.oci_client.lazy_oci", return_value=mock_oci):
+                config = _load_oci_config(
+                    auth_type="api_key",
+                    config_path=config_path,
+                    profile="API_KEY_AUTH",
+                )
+        finally:
+            os.unlink(config_path)
+
+        self.assertNotIn("security_token_file", config)
+
+    def test_session_auth_prefers_security_token_signer(self):
+        """Test session-based auth uses SecurityTokenSigner before API key signer."""
+        from cohere.oci_client import map_request_to_oci
+
+        mock_oci = MagicMock()
+        mock_security_signer = MagicMock()
+        mock_oci.signer.load_private_key_from_file.return_value = "private-key"
+        mock_oci.auth.signers.SecurityTokenSigner.return_value = mock_security_signer
+
+        with patch("cohere.oci_client.lazy_oci", return_value=mock_oci), patch(
+            "builtins.open", mock_open(read_data="session-token")
+        ):
+            hook = map_request_to_oci(
+                oci_config={
+                    "user": "ocid1.user.oc1..example",
+                    "fingerprint": "xx:xx",
+                    "tenancy": "ocid1.tenancy.oc1..example",
+                    "security_token_file": "~/.oci/token",
+                    "key_file": "~/.oci/key.pem",
+                },
+                oci_region="us-chicago-1",
+                oci_compartment_id="ocid1.compartment.oc1..example",
+            )
+
+            request = MagicMock()
+            request.url.path = "/v2/embed"
+            request.read.return_value = b'{"model":"embed-english-v3.0","texts":["hello"]}'
+            request.method = "POST"
+            request.extensions = {}
+
+            hook(request)
+
+        mock_oci.auth.signers.SecurityTokenSigner.assert_called_once_with(
+            token="session-token",
+            private_key="private-key",
+        )
+        mock_oci.signer.Signer.assert_not_called()
+
+    def test_embed_response_lowercases_embedding_keys(self):
+        """Test embed response uses lowercase keys expected by the SDK model."""
+        from cohere.oci_client import transform_oci_response_to_cohere
+
+        result = transform_oci_response_to_cohere(
+            "embed",
+            {"id": "embed-id", "embeddings": {"FLOAT": [[0.1, 0.2]], "INT8": [[1, 2]]}},
+        )
+
+        self.assertIn("float", result["embeddings"])
+        self.assertIn("int8", result["embeddings"])
+        self.assertNotIn("FLOAT", result["embeddings"])
+
+    def test_normalize_model_for_oci_rejects_empty_model(self):
+        """Test model normalization fails clearly for empty model names."""
+        from cohere.oci_client import normalize_model_for_oci
+
+        with self.assertRaises(ValueError) as ctx:
+            normalize_model_for_oci("")
+        self.assertIn("non-empty model", str(ctx.exception))
+
+    def test_transform_rerank_request_uses_v2_max_tokens_per_doc(self):
+        """Test rerank request forwards the V2 max_tokens_per_doc parameter."""
+        from cohere.oci_client import transform_request_to_oci
+
+        result = transform_request_to_oci(
+            "rerank",
+            {
+                "model": "rerank-english-v3.1",
+                "query": "query",
+                "documents": ["a", "b"],
+                "top_n": 2,
+                "max_tokens_per_doc": 512,
+                "priority": 3,
+            },
+            "compartment-123",
+        )
+
+        self.assertEqual(result["topN"], 2)
+        self.assertEqual(result["maxTokensPerDocument"], 512)
+        self.assertEqual(result["priority"], 3)
+
+    def test_stream_wrapper_emits_full_event_lifecycle(self):
+        """Test that stream emits message-start, content-start, content-delta, content-end, message-end."""
+        import json
+        from cohere.oci_client import transform_oci_stream_wrapper
+
+        chunks = [
+            b'data: {"message": {"content": [{"type": "TEXT", "text": "Hello"}]}}\n',
+            b'data: {"message": {"content": [{"type": "TEXT", "text": " world"}]}, "finishReason": "COMPLETE"}\n',
+            b'data: [DONE]\n',
+        ]
+
+        events = []
+        for raw in transform_oci_stream_wrapper(iter(chunks), "chat"):
+            line = raw.decode("utf-8").strip()
+            if line.startswith("data: "):
+                events.append(json.loads(line[6:]))
+
+        event_types = [e["type"] for e in events]
+        self.assertEqual(event_types[0], "message-start")
+        self.assertEqual(event_types[1], "content-start")
+        self.assertEqual(event_types[2], "content-delta")
+        self.assertEqual(event_types[3], "content-delta")
+        self.assertEqual(event_types[4], "content-end")
+        self.assertEqual(event_types[5], "message-end")
+
+        # Verify message-start has id and role
+        self.assertIn("id", events[0])
+        self.assertEqual(events[0]["delta"]["message"]["role"], "assistant")
+
+        # Verify content-start has index and type
+        self.assertEqual(events[1]["index"], 0)
+        self.assertEqual(events[1]["delta"]["message"]["content"]["type"], "text")
+        self.assertEqual(events[5]["delta"]["finish_reason"], "COMPLETE")
+
+    def test_stream_wrapper_skips_malformed_json_with_warning(self):
+        """Test that malformed JSON in SSE stream is skipped (not silently swallowed)."""
+        from cohere.oci_client import transform_oci_stream_wrapper
+
+        chunks = [
+            b'data: not-valid-json\n',
+            b'data: {"message": {"content": [{"type": "TEXT", "text": "hello"}]}}\n',
+            b'data: [DONE]\n',
+        ]
+        events = list(transform_oci_stream_wrapper(iter(chunks), "chat"))
+        # Should get message-start + content-start + content-delta + content-end + message-end.
+        self.assertEqual(len(events), 5)
+
+    def test_stream_wrapper_raises_on_transform_error(self):
+        """Test that transform errors in stream produce OCI-specific error, not opaque httpx error."""
+        from cohere.oci_client import transform_oci_stream_wrapper
+
+        # Event with structure that will cause transform_stream_event to fail
+        # (message is None, causing TypeError on "content" in None)
+        chunks = [
+            b'data: {"message": null}\n',
+        ]
+        with self.assertRaises(RuntimeError) as ctx:
+            list(transform_oci_stream_wrapper(iter(chunks), "chat"))
+        self.assertIn("OCI stream event transformation failed", str(ctx.exception))
+
+    def test_stream_event_finish_reason_keeps_final_text(self):
+        """Test finish events keep final text before content-end."""
+        from cohere.oci_client import transform_stream_event
+
+        events = transform_stream_event(
+            "chat",
+            {
+                "message": {"content": [{"type": "TEXT", "text": " world"}]},
+                "finishReason": "COMPLETE",
+            },
+        )
+
+        self.assertEqual(events[0]["type"], "content-delta")
+        self.assertEqual(events[0]["delta"]["message"]["content"]["text"], " world")
+        self.assertEqual(events[1]["type"], "content-end")
 if __name__ == "__main__":
     unittest.main()
