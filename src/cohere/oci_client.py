@@ -566,7 +566,12 @@ def get_oci_url(
         "rerank": "rerankText",  # OCI uses rerankText, not rerank
     }
 
-    action = action_map.get(endpoint, endpoint)
+    action = action_map.get(endpoint)
+    if action is None:
+        raise ValueError(
+            f"Endpoint '{endpoint}' is not supported by OCI Generative AI. "
+            f"Supported endpoints: {list(action_map.keys())}"
+        )
     return f"{base}/{api_version}/actions/{action}"
 
 
@@ -1089,11 +1094,14 @@ def transform_oci_stream_wrapper(
         except json.JSONDecodeError:
             return
 
-        if is_v2:
-            for event_bytes in _transform_v2_event(oci_event):
-                yield event_bytes
-        else:
-            yield _transform_v1_event(oci_event)
+        try:
+            if is_v2:
+                for event_bytes in _transform_v2_event(oci_event):
+                    yield event_bytes
+            else:
+                yield _transform_v1_event(oci_event)
+        except Exception as exc:
+            raise RuntimeError(f"OCI stream event transformation failed for endpoint '{endpoint}': {exc}") from exc
 
     for chunk in stream:
         buffer += chunk
@@ -1128,6 +1136,9 @@ def transform_stream_event(
             content_type = "text"
             content_value = ""
             message = oci_event.get("message")
+
+            if "message" in oci_event and not isinstance(message, dict):
+                raise TypeError("OCI V2 stream event message must be an object")
 
             if isinstance(message, dict) and "content" in message:
                 content_list = message["content"]

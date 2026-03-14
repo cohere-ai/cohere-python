@@ -956,6 +956,7 @@ region=us-chicago-1
         result = transform_oci_response_to_cohere(
             "embed",
             {"id": "embed-id", "embeddings": {"FLOAT": [[0.1, 0.2]], "INT8": [[1, 2]]}},
+            is_v2=True,
         )
 
         self.assertIn("float", result["embeddings"])
@@ -1003,7 +1004,7 @@ region=us-chicago-1
         ]
 
         events = []
-        for raw in transform_oci_stream_wrapper(iter(chunks), "chat"):
+        for raw in transform_oci_stream_wrapper(iter(chunks), "chat", is_v2=True):
             line = raw.decode("utf-8").strip()
             if line.startswith("data: "):
                 events.append(json.loads(line[6:]))
@@ -1034,7 +1035,7 @@ region=us-chicago-1
             b'data: {"message": {"content": [{"type": "TEXT", "text": "hello"}]}}\n',
             b'data: [DONE]\n',
         ]
-        events = list(transform_oci_stream_wrapper(iter(chunks), "chat"))
+        events = list(transform_oci_stream_wrapper(iter(chunks), "chat", is_v2=True))
         # Should get message-start + content-start + content-delta + content-end + message-end.
         self.assertEqual(len(events), 5)
 
@@ -1048,7 +1049,7 @@ region=us-chicago-1
             b'data: {"message": null}\n',
         ]
         with self.assertRaises(RuntimeError) as ctx:
-            list(transform_oci_stream_wrapper(iter(chunks), "chat"))
+            list(transform_oci_stream_wrapper(iter(chunks), "chat", is_v2=True))
         self.assertIn("OCI stream event transformation failed", str(ctx.exception))
 
     def test_stream_event_finish_reason_keeps_final_text(self):
@@ -1061,6 +1062,7 @@ region=us-chicago-1
                 "message": {"content": [{"type": "TEXT", "text": " world"}]},
                 "finishReason": "COMPLETE",
             },
+            is_v2=True,
         )
 
         self.assertEqual(events[0]["type"], "content-delta")
