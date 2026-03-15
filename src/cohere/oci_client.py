@@ -12,7 +12,8 @@ import requests
 from .client import Client, ClientEnvironment
 from .client_v2 import ClientV2
 from .manually_maintained.lazy_oci_deps import lazy_oci
-from httpx import URL, ByteStream, SyncByteStream
+from .manually_maintained.streaming import Streamer
+from httpx import URL, ByteStream
 
 
 class OciClient(Client):
@@ -230,20 +231,6 @@ class OciClientV2(ClientV2):
 
 
 EventHook = typing.Callable[..., typing.Any]
-
-
-
-
-class Streamer(SyncByteStream):
-    """Wraps an iterator of bytes for streaming responses."""
-
-    lines: typing.Iterator[bytes]
-
-    def __init__(self, lines: typing.Iterator[bytes]):
-        self.lines = lines
-
-    def __iter__(self) -> typing.Iterator[bytes]:
-        return self.lines
 
 
 def _load_oci_config(
@@ -1006,6 +993,7 @@ def transform_oci_stream_wrapper(
     final_finish_reason = "COMPLETE"
     final_usage: typing.Optional[typing.Dict[str, typing.Any]] = None
     full_v1_text = ""
+    final_v1_finish_reason = "COMPLETE"
     buffer = b""
 
     def _emit_v2_event(event: typing.Dict[str, typing.Any]) -> bytes:
@@ -1053,10 +1041,12 @@ def transform_oci_stream_wrapper(
             yield _emit_v2_event(cohere_event)
 
     def _transform_v1_event(oci_event: typing.Dict[str, typing.Any]) -> bytes:
-        nonlocal full_v1_text
+        nonlocal full_v1_text, final_v1_finish_reason
         event = typing.cast(typing.Dict[str, typing.Any], transform_stream_event(endpoint, oci_event, is_v2=False))
         if event.get("event_type") == "text-generation" and event.get("text"):
             full_v1_text += typing.cast(str, event["text"])
+        if "finishReason" in oci_event:
+            final_v1_finish_reason = oci_event.get("finishReason", final_v1_finish_reason)
         return _emit_v1_event(event)
 
     def _process_line(line: str) -> typing.Iterator[bytes]:
@@ -1083,7 +1073,7 @@ def transform_oci_stream_wrapper(
                         "response": {
                             "text": full_v1_text,
                             "generation_id": generation_id,
-                            "finish_reason": final_finish_reason,
+                            "finish_reason": final_v1_finish_reason,
                         },
                     }
                 )

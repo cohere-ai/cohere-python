@@ -1039,6 +1039,26 @@ region=us-chicago-1
         # Should get message-start + content-start + content-delta + content-end + message-end.
         self.assertEqual(len(events), 5)
 
+    def test_v1_stream_wrapper_preserves_finish_reason_in_stream_end(self):
+        """Test that V1 stream-end uses the OCI finish reason from the final event."""
+        import json
+        from cohere.oci_client import transform_oci_stream_wrapper
+
+        chunks = [
+            b'data: {"text": "Hello", "isFinished": false}\n',
+            b'data: {"text": " world", "isFinished": true, "finishReason": "MAX_TOKENS"}\n',
+            b"data: [DONE]\n",
+        ]
+
+        events = [
+            json.loads(raw.decode("utf-8"))
+            for raw in transform_oci_stream_wrapper(iter(chunks), "chat_stream", is_v2=False)
+        ]
+
+        self.assertEqual(events[2]["event_type"], "stream-end")
+        self.assertEqual(events[2]["response"]["text"], "Hello world")
+        self.assertEqual(events[2]["response"]["finish_reason"], "MAX_TOKENS")
+
     def test_stream_wrapper_raises_on_transform_error(self):
         """Test that transform errors in stream produce OCI-specific error, not opaque httpx error."""
         from cohere.oci_client import transform_oci_stream_wrapper
