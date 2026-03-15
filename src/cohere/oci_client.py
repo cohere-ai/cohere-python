@@ -305,12 +305,30 @@ def _remove_inherited_session_auth(
     if profile_name == "DEFAULT" or "security_token_file" not in oci_config:
         return
 
+    config_file = os.path.expanduser(config_path or "~/.oci/config")
     parser = configparser.ConfigParser(interpolation=None)
-    if not parser.read(os.path.expanduser(config_path or "~/.oci/config")):
+    if not parser.read(config_file):
         return
 
-    explicit_profile = parser._sections.get(profile_name, {})
-    if "security_token_file" not in explicit_profile:
+    if not parser.has_section(profile_name):
+        oci_config.pop("security_token_file", None)
+        return
+
+    explicit_security_token = False
+    current_section: typing.Optional[str] = None
+    with open(config_file, encoding="utf-8") as handle:
+        for raw_line in handle:
+            line = raw_line.strip()
+            if not line or line.startswith(("#", ";")):
+                continue
+            if line.startswith("[") and line.endswith("]"):
+                current_section = line[1:-1].strip()
+                continue
+            if current_section == profile_name and line.split("=", 1)[0].strip() == "security_token_file":
+                explicit_security_token = True
+                break
+
+    if not explicit_security_token:
         oci_config.pop("security_token_file", None)
 
 
@@ -469,7 +487,6 @@ def map_request_to_oci(
         request.stream = ByteStream(oci_body_bytes)
         request._content = oci_body_bytes
         request.extensions["endpoint"] = endpoint
-        request.extensions["cohere_body"] = body
         request.extensions["is_stream"] = "stream" in endpoint or body.get("stream", False)
         # Store V2 detection for streaming event transformation
         # For chat, detect V2 by presence of "messages" field (V2) vs "message" field (V1)
@@ -853,20 +870,11 @@ def transform_oci_response_to_cohere(
         }
 
         # Add usage info if available
-        if "usage" in oci_response and oci_response["usage"]:
-            usage = oci_response["usage"]
-            # OCI usage has inputTokens, outputTokens, totalTokens
-            input_tokens = usage.get("inputTokens", 0)
-            output_tokens = usage.get("outputTokens", 0)
-
-            meta["billed_units"] = {
-                "input_tokens": input_tokens,
-                "output_tokens": output_tokens,
-            }
-            meta["tokens"] = {
-                "input_tokens": input_tokens,
-                "output_tokens": output_tokens,
-            }
+        usage = _usage_from_oci(oci_response.get("usage"))
+        if "tokens" in usage:
+            meta["tokens"] = usage["tokens"]
+        if "billed_units" in usage:
+            meta["billed_units"] = usage["billed_units"]
 
         return {
             "id": oci_response.get("id", str(uuid.uuid4())),
@@ -916,19 +924,11 @@ def transform_oci_response_to_cohere(
             "api_version": {"version": "1"},
         }
 
-        if "usage" in chat_response and chat_response["usage"]:
-            usage = chat_response["usage"]
-            input_tokens = usage.get("inputTokens", 0)
-            output_tokens = usage.get("outputTokens", 0)
-
-            meta["billed_units"] = {
-                "input_tokens": input_tokens,
-                "output_tokens": output_tokens,
-            }
-            meta["tokens"] = {
-                "input_tokens": input_tokens,
-                "output_tokens": output_tokens,
-            }
+        usage = _usage_from_oci(chat_response.get("usage"))
+        if "tokens" in usage:
+            meta["tokens"] = usage["tokens"]
+        if "billed_units" in usage:
+            meta["billed_units"] = usage["billed_units"]
 
         return {
             "text": chat_response.get("text", ""),
@@ -1056,16 +1056,17 @@ def transform_oci_stream_wrapper(
         data_str = line[6:]
         if data_str.strip() == "[DONE]":
             if is_v2:
-                if emitted_start and not emitted_content_end:
-                    yield _emit_v2_event({"type": "content-end", "index": 0})
-                message_end_event: typing.Dict[str, typing.Any] = {
-                    "type": "message-end",
-                    "id": generation_id,
-                    "delta": {"finish_reason": final_finish_reason},
-                }
-                if final_usage:
-                    message_end_event["delta"]["usage"] = final_usage
-                yield _emit_v2_event(message_end_event)
+                if emitted_start:
+                    if not emitted_content_end:
+                        yield _emit_v2_event({"type": "content-end", "index": 0})
+                    message_end_event: typing.Dict[str, typing.Any] = {
+                        "type": "message-end",
+                        "id": generation_id,
+                        "delta": {"finish_reason": final_finish_reason},
+                    }
+                    if final_usage:
+                        message_end_event["delta"]["usage"] = final_usage
+                    yield _emit_v2_event(message_end_event)
             else:
                 yield _emit_v1_event(
                     {

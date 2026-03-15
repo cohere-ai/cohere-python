@@ -966,13 +966,18 @@ region=us-chicago-1
 
         result = transform_oci_response_to_cohere(
             "embed",
-            {"id": "embed-id", "embeddings": {"FLOAT": [[0.1, 0.2]], "INT8": [[1, 2]]}},
+            {
+                "id": "embed-id",
+                "embeddings": {"FLOAT": [[0.1, 0.2]], "INT8": [[1, 2]]},
+                "usage": {"inputTokens": 3, "completionTokens": 7},
+            },
             is_v2=True,
         )
 
         self.assertIn("float", result["embeddings"])
         self.assertIn("int8", result["embeddings"])
         self.assertNotIn("FLOAT", result["embeddings"])
+        self.assertEqual(result["meta"]["tokens"]["output_tokens"], 7)
 
     def test_normalize_model_for_oci_rejects_empty_model(self):
         """Test model normalization fails clearly for empty model names."""
@@ -1049,6 +1054,14 @@ region=us-chicago-1
         events = list(transform_oci_stream_wrapper(iter(chunks), "chat", is_v2=True))
         # Should get message-start + content-start + content-delta + content-end + message-end.
         self.assertEqual(len(events), 5)
+
+    def test_stream_wrapper_skips_message_end_for_empty_v2_stream(self):
+        """Test empty V2 streams do not emit message-end without a preceding message-start."""
+        from cohere.oci_client import transform_oci_stream_wrapper
+
+        events = list(transform_oci_stream_wrapper(iter([b"data: [DONE]\n"]), "chat", is_v2=True))
+
+        self.assertEqual(events, [])
 
     def test_v1_stream_wrapper_preserves_finish_reason_in_stream_end(self):
         """Test that V1 stream-end uses the OCI finish reason from the final event."""
