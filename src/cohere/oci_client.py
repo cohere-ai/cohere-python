@@ -337,18 +337,16 @@ def _usage_from_oci(usage_data: typing.Optional[typing.Dict[str, typing.Any]]) -
     input_tokens = usage_data.get("inputTokens", 0)
     output_tokens = usage_data.get("completionTokens", usage_data.get("outputTokens", 0))
 
-    usage: typing.Dict[str, typing.Any] = {
+    return {
         "tokens": {
+            "input_tokens": input_tokens,
+            "output_tokens": output_tokens,
+        },
+        "billed_units": {
             "input_tokens": input_tokens,
             "output_tokens": output_tokens,
         }
     }
-    if input_tokens or output_tokens:
-        usage["billed_units"] = {
-            "input_tokens": input_tokens,
-            "output_tokens": output_tokens,
-        }
-    return usage
 
 
 def get_event_hooks(
