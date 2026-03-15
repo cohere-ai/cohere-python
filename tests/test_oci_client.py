@@ -19,6 +19,7 @@ import unittest
 from unittest.mock import MagicMock, mock_open, patch
 
 import cohere
+from cohere.errors import NotFoundError
 
 if "tokenizers" not in sys.modules:
     tokenizers_stub = types.ModuleType("tokenizers")
@@ -472,11 +473,16 @@ class TestOciClientModels(unittest.TestCase):
 
     def test_embed_light_v3(self):
         """Test embed-english-light-v3.0 model."""
-        response = self.client.embed(
-            model="embed-english-light-v3.0",
-            texts=["Test"],
-            input_type="search_document",
-        )
+        try:
+            response = self.client.embed(
+                model="embed-english-light-v3.0",
+                texts=["Test"],
+                input_type="search_document",
+            )
+        except NotFoundError as exc:
+            if "embed-english-light-v3.0" in str(exc):
+                self.skipTest("embed-english-light-v3.0 is not available in the current OCI region/profile")
+            raise
         self.assertIsNotNone(response.embeddings)
         self.assertEqual(len(response.embeddings[0]), 384)
 
