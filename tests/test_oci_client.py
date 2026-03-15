@@ -33,6 +33,11 @@ if "fastavro" not in sys.modules:
     fastavro_stub.writer = lambda *args, **kwargs: None
     sys.modules["fastavro"] = fastavro_stub
 
+if "httpx_sse" not in sys.modules:
+    httpx_sse_stub = types.ModuleType("httpx_sse")
+    httpx_sse_stub.connect_sse = lambda *args, **kwargs: None
+    sys.modules["httpx_sse"] = httpx_sse_stub
+
 
 @unittest.skipIf(os.getenv("TEST_OCI") is None, "TEST_OCI not set")
 class TestOciClient(unittest.TestCase):
