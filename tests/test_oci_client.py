@@ -815,6 +815,46 @@ class TestOciClientTransformations(unittest.TestCase):
         self.assertEqual(chat_req["toolChoice"], "REQUIRED")
         self.assertEqual(chat_req["priority"], 7)
 
+    def test_transform_v1_chat_request_optional_params(self):
+        """Test V1 chat request forwards the supported optional params."""
+        from cohere.oci_client import transform_request_to_oci
+
+        body = {
+            "model": "command-r-08-2024",
+            "message": "Hi",
+            "max_tokens": 100,
+            "temperature": 0.7,
+            "k": 10,
+            "p": 0.8,
+            "seed": 123,
+            "stop_sequences": ["END"],
+            "frequency_penalty": 0.5,
+            "presence_penalty": 0.2,
+            "documents": [{"title": "Doc", "text": "Body"}],
+            "tools": [{"name": "lookup"}],
+            "tool_results": [{"call": {"name": "lookup"}}],
+            "response_format": {"type": "json_object"},
+            "safety_mode": "NONE",
+            "priority": 4,
+        }
+        result = transform_request_to_oci("chat", body, "compartment-123")
+
+        chat_req = result["chatRequest"]
+        self.assertEqual(chat_req["maxTokens"], 100)
+        self.assertEqual(chat_req["temperature"], 0.7)
+        self.assertEqual(chat_req["topK"], 10)
+        self.assertEqual(chat_req["topP"], 0.8)
+        self.assertEqual(chat_req["seed"], 123)
+        self.assertEqual(chat_req["stopSequences"], ["END"])
+        self.assertEqual(chat_req["frequencyPenalty"], 0.5)
+        self.assertEqual(chat_req["presencePenalty"], 0.2)
+        self.assertEqual(chat_req["documents"], [{"title": "Doc", "text": "Body"}])
+        self.assertEqual(chat_req["tools"], [{"name": "lookup"}])
+        self.assertEqual(chat_req["toolResults"], [{"call": {"name": "lookup"}}])
+        self.assertEqual(chat_req["responseFormat"], {"type": "json_object"})
+        self.assertEqual(chat_req["safetyMode"], "NONE")
+        self.assertEqual(chat_req["priority"], 4)
+
     def test_transform_chat_request_tool_message_fields(self):
         """Test tool message fields are converted to OCI names."""
         from cohere.oci_client import transform_request_to_oci
@@ -1042,6 +1082,34 @@ region=us-chicago-1
         self.assertEqual(events[1]["delta"]["message"]["content"]["type"], "text")
         self.assertEqual(events[5]["delta"]["finish_reason"], "COMPLETE")
 
+    def test_stream_wrapper_emits_new_content_block_on_thinking_transition(self):
+        """Test V2 streams emit a new content block when transitioning from thinking to text."""
+        import json
+        from cohere.oci_client import transform_oci_stream_wrapper
+
+        chunks = [
+            b'data: {"message": {"content": [{"type": "THINKING", "thinking": "Reasoning..."}]}}\n',
+            b'data: {"message": {"content": [{"type": "TEXT", "text": "Answer"}]}, "finishReason": "COMPLETE"}\n',
+            b"data: [DONE]\n",
+        ]
+
+        events = []
+        for raw in transform_oci_stream_wrapper(iter(chunks), "chat", is_v2=True):
+            line = raw.decode("utf-8").strip()
+            if line.startswith("data: "):
+                events.append(json.loads(line[6:]))
+
+        self.assertEqual(events[1]["type"], "content-start")
+        self.assertEqual(events[1]["delta"]["message"]["content"]["type"], "thinking")
+        self.assertEqual(events[2]["type"], "content-delta")
+        self.assertEqual(events[2]["index"], 0)
+        self.assertEqual(events[3], {"type": "content-end", "index": 0})
+        self.assertEqual(events[4]["type"], "content-start")
+        self.assertEqual(events[4]["index"], 1)
+        self.assertEqual(events[4]["delta"]["message"]["content"]["type"], "text")
+        self.assertEqual(events[5]["type"], "content-delta")
+        self.assertEqual(events[5]["index"], 1)
+
     def test_stream_wrapper_skips_malformed_json_with_warning(self):
         """Test that malformed JSON in SSE stream is skipped (not silently swallowed)."""
         from cohere.oci_client import transform_oci_stream_wrapper
@@ -1080,6 +1148,7 @@ region=us-chicago-1
         ]
 
         self.assertEqual(events[2]["event_type"], "stream-end")
+        self.assertEqual(events[2]["finish_reason"], "MAX_TOKENS")
         self.assertEqual(events[2]["response"]["text"], "Hello world")
         self.assertEqual(events[2]["response"]["finish_reason"], "MAX_TOKENS")
 

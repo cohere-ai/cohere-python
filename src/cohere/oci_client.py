@@ -771,10 +771,34 @@ def transform_request_to_oci(
                 chat_request["temperature"] = cohere_body["temperature"]
             if "max_tokens" in cohere_body:
                 chat_request["maxTokens"] = cohere_body["max_tokens"]
+            if "k" in cohere_body:
+                chat_request["topK"] = cohere_body["k"]
+            if "p" in cohere_body:
+                chat_request["topP"] = cohere_body["p"]
+            if "seed" in cohere_body:
+                chat_request["seed"] = cohere_body["seed"]
+            if "stop_sequences" in cohere_body:
+                chat_request["stopSequences"] = cohere_body["stop_sequences"]
+            if "frequency_penalty" in cohere_body:
+                chat_request["frequencyPenalty"] = cohere_body["frequency_penalty"]
+            if "presence_penalty" in cohere_body:
+                chat_request["presencePenalty"] = cohere_body["presence_penalty"]
             if "preamble" in cohere_body:
                 chat_request["preambleOverride"] = cohere_body["preamble"]
             if "chat_history" in cohere_body:
                 chat_request["chatHistory"] = cohere_body["chat_history"]
+            if "documents" in cohere_body:
+                chat_request["documents"] = cohere_body["documents"]
+            if "tools" in cohere_body:
+                chat_request["tools"] = cohere_body["tools"]
+            if "tool_results" in cohere_body:
+                chat_request["toolResults"] = cohere_body["tool_results"]
+            if "response_format" in cohere_body:
+                chat_request["responseFormat"] = cohere_body["response_format"]
+            if "safety_mode" in cohere_body:
+                chat_request["safetyMode"] = cohere_body["safety_mode"]
+            if "priority" in cohere_body:
+                chat_request["priority"] = cohere_body["priority"]
 
         # Handle streaming for both versions
         if "stream" in endpoint or cohere_body.get("stream"):
@@ -988,6 +1012,8 @@ def transform_oci_stream_wrapper(
     generation_id = str(uuid.uuid4())
     emitted_start = False
     emitted_content_end = False
+    current_content_type: typing.Optional[str] = None
+    current_content_index = 0
     final_finish_reason = "COMPLETE"
     final_usage: typing.Optional[typing.Dict[str, typing.Any]] = None
     full_v1_text = ""
@@ -1000,18 +1026,23 @@ def transform_oci_stream_wrapper(
     def _emit_v1_event(event: typing.Dict[str, typing.Any]) -> bytes:
         return json.dumps(event).encode("utf-8") + b"\n"
 
+    def _current_v2_content_type(oci_event: typing.Dict[str, typing.Any]) -> str:
+        message = oci_event.get("message")
+        if isinstance(message, dict):
+            content_list = message.get("content")
+            if content_list and isinstance(content_list, list) and len(content_list) > 0:
+                oci_type = content_list[0].get("type", "TEXT").upper()
+                if oci_type == "THINKING":
+                    return "thinking"
+        return "text"
+
     def _transform_v2_event(oci_event: typing.Dict[str, typing.Any]) -> typing.Iterator[bytes]:
-        nonlocal emitted_start, emitted_content_end, final_finish_reason, final_usage
+        nonlocal emitted_start, emitted_content_end, current_content_type, current_content_index
+        nonlocal final_finish_reason, final_usage
+
+        event_content_type = _current_v2_content_type(oci_event)
 
         if not emitted_start:
-            content_type = "text"
-            message = oci_event.get("message")
-            if isinstance(message, dict):
-                content_list = message.get("content")
-                if content_list and isinstance(content_list, list) and len(content_list) > 0:
-                    oci_type = content_list[0].get("type", "TEXT").upper()
-                    if oci_type == "THINKING":
-                        content_type = "thinking"
 
             yield _emit_v2_event(
                 {
@@ -1023,15 +1054,30 @@ def transform_oci_stream_wrapper(
             yield _emit_v2_event(
                 {
                     "type": "content-start",
-                    "index": 0,
-                    "delta": {"message": {"content": {"type": content_type}}},
+                    "index": current_content_index,
+                    "delta": {"message": {"content": {"type": event_content_type}}},
                 }
             )
             emitted_start = True
+            current_content_type = event_content_type
+        elif current_content_type != event_content_type:
+            yield _emit_v2_event({"type": "content-end", "index": current_content_index})
+            current_content_index += 1
+            yield _emit_v2_event(
+                {
+                    "type": "content-start",
+                    "index": current_content_index,
+                    "delta": {"message": {"content": {"type": event_content_type}}},
+                }
+            )
+            current_content_type = event_content_type
+            emitted_content_end = False
 
         for cohere_event in typing.cast(
             typing.List[typing.Dict[str, typing.Any]], transform_stream_event(endpoint, oci_event, is_v2=True)
         ):
+            if "index" in cohere_event:
+                cohere_event = {**cohere_event, "index": current_content_index}
             if cohere_event["type"] == "content-end":
                 emitted_content_end = True
                 final_finish_reason = oci_event.get("finishReason", final_finish_reason)
@@ -1069,6 +1115,7 @@ def transform_oci_stream_wrapper(
                 yield _emit_v1_event(
                     {
                         "event_type": "stream-end",
+                        "finish_reason": final_v1_finish_reason,
                         "response": {
                             "text": full_v1_text,
                             "generation_id": generation_id,
