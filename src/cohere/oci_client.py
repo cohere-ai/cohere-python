@@ -1102,7 +1102,7 @@ def transform_oci_stream_wrapper(
             if is_v2:
                 if emitted_start:
                     if not emitted_content_end:
-                        yield _emit_v2_event({"type": "content-end", "index": 0})
+                        yield _emit_v2_event({"type": "content-end", "index": current_content_index})
                     message_end_event: typing.Dict[str, typing.Any] = {
                         "type": "message-end",
                         "id": generation_id,

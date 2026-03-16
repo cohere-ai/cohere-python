@@ -952,6 +952,26 @@ region=us-chicago-1
 
         self.assertEqual(events, [])
 
+    def test_stream_wrapper_done_uses_current_content_index_after_transition(self):
+        """Test fallback content-end uses the latest content index after type transitions."""
+        import json
+        from cohere.oci_client import transform_oci_stream_wrapper
+
+        chunks = [
+            b'data: {"message": {"content": [{"type": "THINKING", "thinking": "Reasoning..."}]}}\n',
+            b'data: {"message": {"content": [{"type": "TEXT", "text": "Answer"}]}}\n',
+            b"data: [DONE]\n",
+        ]
+
+        events = []
+        for raw in transform_oci_stream_wrapper(iter(chunks), "chat", is_v2=True):
+            line = raw.decode("utf-8").strip()
+            if line.startswith("data: "):
+                events.append(json.loads(line[6:]))
+
+        self.assertEqual(events[-2], {"type": "content-end", "index": 1})
+        self.assertEqual(events[-1]["type"], "message-end")
+
     def test_v1_stream_wrapper_preserves_finish_reason_in_stream_end(self):
         """Test that V1 stream-end uses the OCI finish reason from the final event."""
         import json
