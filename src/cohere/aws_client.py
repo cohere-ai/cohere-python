@@ -4,7 +4,7 @@ import re
 import typing
 
 import httpx
-from httpx import URL, SyncByteStream, ByteStream
+from httpx import URL, ByteStream
 
 from . import GenerateStreamedResponse, Generation, \
     NonStreamedChatResponse, EmbedResponse, StreamedChatResponse, RerankResponse, ApiMeta, ApiMetaTokens, \
@@ -12,6 +12,7 @@ from . import GenerateStreamedResponse, Generation, \
 from .client import Client, ClientEnvironment
 from .core import construct_type
 from .manually_maintained.lazy_aws_deps import lazy_boto3, lazy_botocore
+from .manually_maintained.streaming import Streamer
 from .client_v2 import ClientV2
 
 class AwsClient(Client):
@@ -110,16 +111,6 @@ StreamEnd = typing.TypedDict('StreamEnd',
                               #     "inputTokenCount": int, "outputTokenCount": int, "invocationLatency": int,
                               #     "firstByteLatency": int}
                               })
-
-
-class Streamer(SyncByteStream):
-    lines: typing.Iterator[bytes]
-
-    def __init__(self, lines: typing.Iterator[bytes]):
-        self.lines = lines
-
-    def __iter__(self) -> typing.Iterator[bytes]:
-        return self.lines
 
 
 response_mapping: typing.Dict[str, typing.Any] = {
