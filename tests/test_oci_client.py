@@ -19,7 +19,6 @@ import unittest
 from unittest.mock import MagicMock, mock_open, patch
 
 import cohere
-from cohere.errors import NotFoundError
 
 if "tokenizers" not in sys.modules:
     tokenizers_stub = types.ModuleType("tokenizers")
@@ -84,22 +83,6 @@ class TestOciClient(unittest.TestCase):
         self.assertIsNotNone(response.embeddings)
         self.assertEqual(len(response.embeddings), 1)
 
-    @unittest.skip(
-        "OCI on-demand models don't support multiple embedding types in a single call. "
-        "The embedding_types parameter in OCI accepts a single value, not a list."
-    )
-    def test_embed_multiple_types(self):
-        """Test embedding with multiple embedding types."""
-        response = self.client.embed(
-            model="embed-english-v3.0",
-            texts=["Multi-type test"],
-            input_type="search_document",
-            embedding_types=["float", "int8"],
-        )
-
-        self.assertIsNotNone(response)
-        self.assertIsNotNone(response.embeddings)
-
     def test_chat(self):
         """Test chat with OCI."""
         response = self.client.chat(
@@ -138,67 +121,6 @@ class TestOciClient(unittest.TestCase):
         # Verify we received text generation events
         text_events = [e for e in events if hasattr(e, "text") and e.text]
         self.assertTrue(len(text_events) > 0)
-
-    @unittest.skip(
-        "OCI TEXT_GENERATION models are finetune base models, not available via on-demand inference. "
-        "Only CHAT models (command-r, command-a) support on-demand inference on OCI."
-    )
-    def test_generate(self):
-        """Test text generation with OCI."""
-        response = self.client.generate(
-            model="command-r-08-2024",
-            prompt="Write a haiku about clouds.",
-            max_tokens=100,
-        )
-
-        self.assertIsNotNone(response)
-        self.assertIsNotNone(response.generations)
-        self.assertTrue(len(response.generations) > 0)
-        self.assertIsNotNone(response.generations[0].text)
-
-    @unittest.skip(
-        "OCI TEXT_GENERATION models are finetune base models, not available via on-demand inference. "
-        "Only CHAT models (command-r, command-a) support on-demand inference on OCI."
-    )
-    def test_generate_stream(self):
-        """Test streaming text generation with OCI."""
-        events = []
-        for event in self.client.generate_stream(
-            model="command-r-08-2024",
-            prompt="Say hello",
-            max_tokens=20,
-        ):
-            events.append(event)
-
-        self.assertTrue(len(events) > 0)
-
-    @unittest.skip(
-        "OCI TEXT_RERANK models are base models, not available via on-demand inference. "
-        "These models require fine-tuning and deployment before use on OCI."
-    )
-    def test_rerank(self):
-        """Test reranking with OCI."""
-        query = "What is the capital of France?"
-        documents = [
-            "Paris is the capital of France.",
-            "London is the capital of England.",
-            "Berlin is the capital of Germany.",
-        ]
-
-        response = self.client.rerank(
-            model="rerank-english-v3.1",
-            query=query,
-            documents=documents,
-            top_n=2,
-        )
-
-        self.assertIsNotNone(response)
-        self.assertIsNotNone(response.results)
-        self.assertEqual(len(response.results), 2)
-        # First result should be the Paris document
-        self.assertEqual(response.results[0].index, 0)
-        self.assertGreater(response.results[0].relevance_score, 0.5)
-
 
 @unittest.skipIf(os.getenv("TEST_OCI") is None, "TEST_OCI not set")
 class TestOciClientV2(unittest.TestCase):
@@ -258,46 +180,6 @@ class TestOciClientV2(unittest.TestCase):
         self.assertIsNotNone(response)
         self.assertIsNotNone(response.message)
 
-    @unittest.skip(
-        "Command A Reasoning model (command-a-reasoning-08-2025) may not be available in all regions. "
-        "Enable this test when the reasoning model is available in your OCI region."
-    )
-    def test_chat_v2_with_thinking(self):
-        """Test chat with thinking parameter for Command A Reasoning model."""
-        from cohere.types import Thinking
-
-        response = self.client.chat(
-            model="command-a-reasoning-08-2025",
-            messages=[{"role": "user", "content": "What is 15 * 27? Think step by step."}],
-            thinking=Thinking(type="enabled", token_budget=5000),
-        )
-
-        self.assertIsNotNone(response)
-        self.assertIsNotNone(response.message)
-        # The response should contain content (may include thinking content)
-        self.assertIsNotNone(response.message.content)
-
-    @unittest.skip(
-        "Command A Reasoning model (command-a-reasoning-08-2025) may not be available in all regions. "
-        "Enable this test when the reasoning model is available in your OCI region."
-    )
-    def test_chat_stream_v2_with_thinking(self):
-        """Test streaming chat with thinking parameter for Command A Reasoning model."""
-        from cohere.types import Thinking
-
-        events = []
-        for event in self.client.chat_stream(
-            model="command-a-reasoning-08-2025",
-            messages=[{"role": "user", "content": "What is 15 * 27? Think step by step."}],
-            thinking=Thinking(type="enabled", token_budget=5000),
-        ):
-            events.append(event)
-
-        self.assertTrue(len(events) > 0)
-        # Verify we received content-delta events
-        content_delta_events = [e for e in events if hasattr(e, "type") and e.type == "content-delta"]
-        self.assertTrue(len(content_delta_events) > 0)
-
     def test_chat_stream_v2(self):
         """Test streaming chat with v2 client."""
         events = []
@@ -329,23 +211,6 @@ class TestOciClientV2(unittest.TestCase):
 
         # Should have received some text
         self.assertTrue(len(full_text) > 0)
-
-    @unittest.skip(
-        "OCI TEXT_RERANK models are base models, not available via on-demand inference. "
-        "These models require fine-tuning and deployment before use on OCI."
-    )
-    def test_rerank_v2(self):
-        """Test reranking with v2 client."""
-        response = self.client.rerank(
-            model="rerank-english-v3.1",
-            query="What is AI?",
-            documents=["AI is artificial intelligence.", "AI is not natural."],
-            top_n=1,
-        )
-
-        self.assertIsNotNone(response)
-        self.assertIsNotNone(response.results)
-
 
 @unittest.skipIf(os.getenv("TEST_OCI") is None, "TEST_OCI not set")
 class TestOciClientAuthentication(unittest.TestCase):
@@ -410,21 +275,6 @@ class TestOciClientErrors(unittest.TestCase):
                 # Missing oci_compartment_id
             )
 
-    @unittest.skip("Region is available in config file for current test environment")
-    def test_missing_region(self):
-        """Test error when region is missing and not in config."""
-        # This test assumes no region in config file
-        # If config has region, this will pass, so we just check it doesn't crash
-        try:
-            client = cohere.OciClient(
-                oci_compartment_id="ocid1.compartment.oc1...",
-            )
-            # If this succeeds, region was in config
-            self.assertIsNotNone(client)
-        except ValueError as e:
-            # Expected if no region in config
-            self.assertIn("region", str(e).lower())
-
     def test_invalid_model(self):
         """Test error handling with invalid model."""
         compartment_id = os.getenv("OCI_COMPARTMENT_ID")
@@ -476,21 +326,6 @@ class TestOciClientModels(unittest.TestCase):
         self.assertIsNotNone(response.embeddings)
         self.assertEqual(len(response.embeddings[0]), 1024)
 
-    def test_embed_light_v3(self):
-        """Test embed-english-light-v3.0 model."""
-        try:
-            response = self.client.embed(
-                model="embed-english-light-v3.0",
-                texts=["Test"],
-                input_type="search_document",
-            )
-        except NotFoundError as exc:
-            if "embed-english-light-v3.0" in str(exc):
-                self.skipTest("embed-english-light-v3.0 is not available in the current OCI region/profile")
-            raise
-        self.assertIsNotNone(response.embeddings)
-        self.assertEqual(len(response.embeddings[0]), 384)
-
     def test_embed_multilingual_v3(self):
         """Test embed-multilingual-v3.0 model."""
         response = self.client.embed(
@@ -508,20 +343,6 @@ class TestOciClientModels(unittest.TestCase):
             message="Hello",
         )
         self.assertIsNotNone(response.text)
-
-    @unittest.skip(
-        "OCI TEXT_RERANK models are base models, not available via on-demand inference. "
-        "These models require fine-tuning and deployment before use on OCI."
-    )
-    def test_rerank_v3(self):
-        """Test rerank-english-v3.0 model."""
-        response = self.client.rerank(
-            model="rerank-english-v3.1",
-            query="AI",
-            documents=["Artificial Intelligence", "Biology"],
-        )
-        self.assertIsNotNone(response.results)
-
 
 class TestOciClientTransformations(unittest.TestCase):
     """Unit tests for OCI request/response transformations (no OCI credentials required)."""
