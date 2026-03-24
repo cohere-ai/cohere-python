@@ -12,7 +12,7 @@ from cohere.types.tokenize_response import TokenizeResponse
 
 from . import EmbedResponse, EmbedInputType, EmbeddingType, EmbedRequestTruncate
 from .base_client import BaseCohere, AsyncBaseCohere, OMIT
-from .config import embed_batch_size
+from .config import embed_batch_size, embed_stream_batch_size
 from .core import RequestOptions
 from .environment import ClientEnvironment
 from .manually_maintained.cache import CacheMixin
@@ -222,6 +222,61 @@ class Client(BaseCohere, CacheMixin):
         ]
 
         return merge_embed_responses(responses)
+
+    def embed_stream(
+        self,
+        *,
+        texts: typing.Sequence[str],
+        model: typing.Optional[str] = OMIT,
+        input_type: typing.Optional[EmbedInputType] = OMIT,
+        embedding_types: typing.Optional[typing.Sequence[EmbeddingType]] = OMIT,
+        truncate: typing.Optional[EmbedRequestTruncate] = OMIT,
+        batch_size: int = embed_stream_batch_size,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> typing.Iterator[typing.Any]:
+        """
+        Memory-efficient embed that yields embeddings one batch at a time.
+
+        Processes texts in batches and yields individual StreamedEmbedding objects
+        as they come back, so you can write to a vector store incrementally without
+        holding all embeddings in memory.
+
+        Args:
+            texts: Texts to embed.
+            model: Embedding model ID.
+            input_type: Input type (search_document, search_query, etc.).
+            embedding_types: Types of embeddings to return (float, int8, etc.).
+            truncate: How to handle inputs longer than the max token length.
+            batch_size: Texts per API call. Defaults to 96 (API max).
+            request_options: Request-specific configuration.
+
+        Yields:
+            StreamedEmbedding with index, embedding, embedding_type, and text.
+        """
+        from .manually_maintained.streaming_embed import extract_embeddings_from_response
+
+        if not texts:
+            return
+        if batch_size < 1:
+            raise ValueError("batch_size must be at least 1")
+
+        texts_list = list(texts)
+
+        for batch_start in range(0, len(texts_list), batch_size):
+            batch_texts = texts_list[batch_start : batch_start + batch_size]
+
+            response = BaseCohere.embed(
+                self,
+                texts=batch_texts,
+                model=model,
+                input_type=input_type,
+                embedding_types=embedding_types,
+                truncate=truncate,
+                request_options=request_options,
+            )
+
+            response_data = response.dict() if hasattr(response, "dict") else response.__dict__
+            yield from extract_embeddings_from_response(response_data, batch_texts, batch_start)
 
     """
     The following methods have been moved or deprecated in cohere==5.0.0. Please update your usage.
