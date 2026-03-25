@@ -42,7 +42,6 @@ jobs:
         run: poetry run pytest .
         env:
           CO_API_KEY: ${{ secrets.COHERE_API_KEY }}
-
   publish:
     needs: [compile, test]
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
