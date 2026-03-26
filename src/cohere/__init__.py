@@ -256,7 +256,7 @@ if typing.TYPE_CHECKING:
         UnauthorizedError,
         UnprocessableEntityError,
     )
-    from . import batches, connectors, datasets, embed_jobs, finetuning, models, v2
+    from . import audio, batches, connectors, datasets, embed_jobs, finetuning, models, v2
     from .aliases import (
         ChatResponse,
         ContentDeltaStreamedChatResponseV2,
@@ -613,6 +613,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "V2RerankResponse": ".v2",
     "V2RerankResponseResultsItem": ".v2",
     "__version__": ".version",
+    "audio": ".audio",
     "batches": ".batches",
     "connectors": ".connectors",
     "datasets": ".datasets",
@@ -946,6 +947,7 @@ __all__ = [
     "V2RerankResponse",
     "V2RerankResponseResultsItem",
     "__version__",
+    "audio",
     "batches",
     "connectors",
     "datasets",
