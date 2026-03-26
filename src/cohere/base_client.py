@@ -8,6 +8,7 @@ import typing
 import httpx
 from .core.api_error import ApiError
 from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
+from .core.logging import LogConfig, Logger
 from .core.request_options import RequestOptions
 from .environment import ClientEnvironment
 from .raw_base_client import AsyncRawBaseCohere, RawBaseCohere
@@ -49,6 +50,7 @@ from .types.tool import Tool
 from .types.tool_result import ToolResult
 
 if typing.TYPE_CHECKING:
+    from .audio.client import AsyncAudioClient, AudioClient
     from .batches.client import AsyncBatchesClient, BatchesClient
     from .connectors.client import AsyncConnectorsClient, ConnectorsClient
     from .datasets.client import AsyncDatasetsClient, DatasetsClient
@@ -92,6 +94,9 @@ class BaseCohere:
     httpx_client : typing.Optional[httpx.Client]
         The httpx client to use for making requests, a preconfigured client is used by default, however this is useful should you want to pass in any custom httpx configuration.
 
+    logging : typing.Optional[typing.Union[LogConfig, Logger]]
+        Configure logging for the SDK. Accepts a LogConfig dict with 'level' (debug/info/warn/error), 'logger' (custom logger implementation), and 'silent' (boolean, defaults to True) fields. You can also pass a pre-configured Logger instance.
+
     Examples
     --------
     from cohere import Client
@@ -113,6 +118,7 @@ class BaseCohere:
         timeout: typing.Optional[float] = None,
         follow_redirects: typing.Optional[bool] = True,
         httpx_client: typing.Optional[httpx.Client] = None,
+        logging: typing.Optional[typing.Union[LogConfig, Logger]] = None,
     ):
         _defaulted_timeout = (
             timeout if timeout is not None else 300 if httpx_client is None else httpx_client.timeout.read
@@ -130,6 +136,7 @@ class BaseCohere:
             if follow_redirects is not None
             else httpx.Client(timeout=_defaulted_timeout),
             timeout=_defaulted_timeout,
+            logging=logging,
         )
         self._raw_client = RawBaseCohere(client_wrapper=self._client_wrapper)
         self._v2: typing.Optional[V2Client] = None
@@ -139,6 +146,7 @@ class BaseCohere:
         self._connectors: typing.Optional[ConnectorsClient] = None
         self._models: typing.Optional[ModelsClient] = None
         self._finetuning: typing.Optional[FinetuningClient] = None
+        self._audio: typing.Optional[AudioClient] = None
 
     @property
     def with_raw_response(self) -> RawBaseCohere:
@@ -1564,6 +1572,14 @@ class BaseCohere:
             self._finetuning = FinetuningClient(client_wrapper=self._client_wrapper)
         return self._finetuning
 
+    @property
+    def audio(self):
+        if self._audio is None:
+            from .audio.client import AudioClient  # noqa: E402
+
+            self._audio = AudioClient(client_wrapper=self._client_wrapper)
+        return self._audio
+
 
 class AsyncBaseCohere:
     """
@@ -1597,6 +1613,9 @@ class AsyncBaseCohere:
     httpx_client : typing.Optional[httpx.AsyncClient]
         The httpx client to use for making requests, a preconfigured client is used by default, however this is useful should you want to pass in any custom httpx configuration.
 
+    logging : typing.Optional[typing.Union[LogConfig, Logger]]
+        Configure logging for the SDK. Accepts a LogConfig dict with 'level' (debug/info/warn/error), 'logger' (custom logger implementation), and 'silent' (boolean, defaults to True) fields. You can also pass a pre-configured Logger instance.
+
     Examples
     --------
     from cohere import AsyncClient
@@ -1618,6 +1637,7 @@ class AsyncBaseCohere:
         timeout: typing.Optional[float] = None,
         follow_redirects: typing.Optional[bool] = True,
         httpx_client: typing.Optional[httpx.AsyncClient] = None,
+        logging: typing.Optional[typing.Union[LogConfig, Logger]] = None,
     ):
         _defaulted_timeout = (
             timeout if timeout is not None else 300 if httpx_client is None else httpx_client.timeout.read
@@ -1635,6 +1655,7 @@ class AsyncBaseCohere:
             if follow_redirects is not None
             else httpx.AsyncClient(timeout=_defaulted_timeout),
             timeout=_defaulted_timeout,
+            logging=logging,
         )
         self._raw_client = AsyncRawBaseCohere(client_wrapper=self._client_wrapper)
         self._v2: typing.Optional[AsyncV2Client] = None
@@ -1644,6 +1665,7 @@ class AsyncBaseCohere:
         self._connectors: typing.Optional[AsyncConnectorsClient] = None
         self._models: typing.Optional[AsyncModelsClient] = None
         self._finetuning: typing.Optional[AsyncFinetuningClient] = None
+        self._audio: typing.Optional[AsyncAudioClient] = None
 
     @property
     def with_raw_response(self) -> AsyncRawBaseCohere:
@@ -3158,6 +3180,14 @@ class AsyncBaseCohere:
 
             self._finetuning = AsyncFinetuningClient(client_wrapper=self._client_wrapper)
         return self._finetuning
+
+    @property
+    def audio(self):
+        if self._audio is None:
+            from .audio.client import AsyncAudioClient  # noqa: E402
+
+            self._audio = AsyncAudioClient(client_wrapper=self._client_wrapper)
+        return self._audio
 
 
 def _get_base_url(*, base_url: typing.Optional[str] = None, environment: ClientEnvironment) -> str:

@@ -1,7 +1,5 @@
 # Reference
-<details><summary><code>client.<a href="src/cohere/base_client.py">chat_stream</a>(...) -&gt; typing.AsyncIterator[
-    AsyncHttpResponse[typing.AsyncIterator[StreamedChatResponse]]
-]</code></summary>
+<details><summary><code>client.<a href="src/cohere/client.py">chat_stream</a>(...) -> typing.Iterator[bytes]</code></summary>
 <dl>
 <dd>
 
@@ -31,17 +29,17 @@ To learn how to use the Chat API and RAG follow our [Text Generation guides](htt
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
-response = client.chat_stream(
+
+client.chat_stream(
     model="command-a-03-2025",
     message="hello!",
 )
-for chunk in response.data:
-    yield chunk
 
 ```
 </dd>
@@ -69,7 +67,23 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dl>
 <dd>
 
-**accepts:** `typing.Optional[typing.Literal["text/event-stream"]]` — Pass text/event-stream to receive the streamed response as server-sent events. The default is `\n` delimited events.
+**stream:** `typing.Literal` 
+
+Defaults to `false`.
+
+When `true`, the response will be a JSON stream of events. The final event will contain the complete response, and will have an `event_type` of `"stream-end"`.
+
+Streaming is beneficial for user interfaces that render the contents of the response piece by piece, as it gets generated.
+
+Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**accepts:** `typing.Optional[typing.Literal]` — Pass text/event-stream to receive the streamed response as server-sent events. The default is `\n` delimited events.
     
 </dd>
 </dl>
@@ -103,7 +117,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dl>
 <dd>
 
-**chat_history:** `typing.Optional[typing.Sequence[Message]]` 
+**chat_history:** `typing.Optional[typing.List[Message]]` 
 
 A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
 
@@ -155,7 +169,7 @@ Compatible Deployments:
 <dl>
 <dd>
 
-**connectors:** `typing.Optional[typing.Sequence[ChatConnector]]` 
+**connectors:** `typing.Optional[typing.List[ChatConnector]]` 
 
 Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/v1/docs/creating-and-deploying-a-connector) one.
 
@@ -183,7 +197,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dl>
 <dd>
 
-**documents:** `typing.Optional[typing.Sequence[ChatDocument]]` 
+**documents:** `typing.Optional[typing.List[ChatDocument]]` 
 
 A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
 
@@ -309,7 +323,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dl>
 <dd>
 
-**stop_sequences:** `typing.Optional[typing.Sequence[str]]` 
+**stop_sequences:** `typing.Optional[typing.List[str]]` 
 
 A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
 
@@ -362,7 +376,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dl>
 <dd>
 
-**tools:** `typing.Optional[typing.Sequence[Tool]]` 
+**tools:** `typing.Optional[typing.List[Tool]]` 
 
 A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
@@ -376,7 +390,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dl>
 <dd>
 
-**tool_results:** `typing.Optional[typing.Sequence[ToolResult]]` 
+**tool_results:** `typing.Optional[typing.List[ToolResult]]` 
 
 A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
 Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
@@ -455,7 +469,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">chat</a>(...) -&gt; AsyncHttpResponse[NonStreamedChatResponse]</code></summary>
+<details><summary><code>client.<a href="src/cohere/client.py">chat</a>(...) -> NonStreamedChatResponse</code></summary>
 <dl>
 <dd>
 
@@ -483,39 +497,17 @@ To learn how to use the Chat API and RAG follow our [Text Generation guides](htt
 <dd>
 
 ```python
-from cohere import Client, Tool, ToolParameterDefinitionsValue
+from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
-client.chat(
+
+client.chat_stream(
     model="command-a-03-2025",
-    message="Can you provide a sales summary for 29th September 2023, and also give me some details about the products in the 'Electronics' category, for example their prices and stock levels?",
-    tools=[
-        Tool(
-            name="query_daily_sales_report",
-            description="Connects to a database to retrieve overall sales volumes and sales information for a given day.",
-            parameter_definitions={
-                "day": ToolParameterDefinitionsValue(
-                    description="Retrieves sales data for this day, formatted as YYYY-MM-DD.",
-                    type="str",
-                    required=True,
-                )
-            },
-        ),
-        Tool(
-            name="query_product_catalog",
-            description="Connects to a a product catalog with information about all the products being sold, including categories, prices, and stock levels.",
-            parameter_definitions={
-                "category": ToolParameterDefinitionsValue(
-                    description="Retrieves product information data for all products in this category.",
-                    type="str",
-                    required=True,
-                )
-            },
-        ),
-    ],
+    message="Tell me about LLMs",
 )
 
 ```
@@ -544,7 +536,23 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dl>
 <dd>
 
-**accepts:** `typing.Optional[typing.Literal["text/event-stream"]]` — Pass text/event-stream to receive the streamed response as server-sent events. The default is `\n` delimited events.
+**stream:** `typing.Literal` 
+
+Defaults to `false`.
+
+When `true`, the response will be a JSON stream of events. The final event will contain the complete response, and will have an `event_type` of `"stream-end"`.
+
+Streaming is beneficial for user interfaces that render the contents of the response piece by piece, as it gets generated.
+
+Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private Deployments
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**accepts:** `typing.Optional[typing.Literal]` — Pass text/event-stream to receive the streamed response as server-sent events. The default is `\n` delimited events.
     
 </dd>
 </dl>
@@ -578,7 +586,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dl>
 <dd>
 
-**chat_history:** `typing.Optional[typing.Sequence[Message]]` 
+**chat_history:** `typing.Optional[typing.List[Message]]` 
 
 A list of previous messages between the user and the model, giving the model conversational context for responding to the user's `message`.
 
@@ -630,7 +638,7 @@ Compatible Deployments:
 <dl>
 <dd>
 
-**connectors:** `typing.Optional[typing.Sequence[ChatConnector]]` 
+**connectors:** `typing.Optional[typing.List[ChatConnector]]` 
 
 Accepts `{"id": "web-search"}`, and/or the `"id"` for a custom [connector](https://docs.cohere.com/docs/connectors), if you've [created](https://docs.cohere.com/v1/docs/creating-and-deploying-a-connector) one.
 
@@ -658,7 +666,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dl>
 <dd>
 
-**documents:** `typing.Optional[typing.Sequence[ChatDocument]]` 
+**documents:** `typing.Optional[typing.List[ChatDocument]]` 
 
 A list of relevant documents that the model can cite to generate a more accurate reply. Each document is a string-string dictionary.
 
@@ -784,7 +792,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dl>
 <dd>
 
-**stop_sequences:** `typing.Optional[typing.Sequence[str]]` 
+**stop_sequences:** `typing.Optional[typing.List[str]]` 
 
 A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
 
@@ -837,7 +845,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dl>
 <dd>
 
-**tools:** `typing.Optional[typing.Sequence[Tool]]` 
+**tools:** `typing.Optional[typing.List[Tool]]` 
 
 A list of available tools (functions) that the model may suggest invoking before producing a text response.
 
@@ -851,7 +859,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 <dl>
 <dd>
 
-**tool_results:** `typing.Optional[typing.Sequence[ToolResult]]` 
+**tool_results:** `typing.Optional[typing.List[ToolResult]]` 
 
 A list of results from invoking tools recommended by the model in the previous chat turn. Results are used to produce a text response and will be referenced in citations. When using `tool_results`, `tools` must be passed as well.
 Each tool_result contains information about how it was invoked, as well as a list of outputs in the form of dictionaries.
@@ -930,9 +938,7 @@ Compatible Deployments: Cohere Platform, Azure, AWS Sagemaker/Bedrock, Private D
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">generate_stream</a>(...) -&gt; typing.AsyncIterator[
-    AsyncHttpResponse[typing.AsyncIterator[GenerateStreamedResponse]]
-]</code></summary>
+<details><summary><code>client.<a href="src/cohere/client.py">generate_stream</a>(...) -> typing.Iterator[bytes]</code></summary>
 <dl>
 <dd>
 
@@ -963,16 +969,16 @@ Generates realistic text conditioned on a given input.
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
-response = client.generate_stream(
+
+client.generate_stream(
     prompt="Please explain to me how LLMs work",
 )
-for chunk in response.data:
-    yield chunk
 
 ```
 </dd>
@@ -992,6 +998,22 @@ for chunk in response.data:
 
 The input text that serves as the starting point for generating the response.
 Note: The prompt will be pre-processed and modified before reaching the model.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**stream:** `typing.Literal` 
+
+When `true`, the response will be a JSON stream of events. Streaming is beneficial for user interfaces that render the contents of the response piece by piece, as it gets generated.
+
+The final event will contain the complete response, and will contain an `is_finished` field set to `true`. The event will also contain a `finish_reason`, which can be one of the following:
+- `COMPLETE` - the model sent back a finished reply
+- `MAX_TOKENS` - the reply was cut off because the model reached the maximum number of tokens for its context length
+- `ERROR` - something went wrong when generating the reply
+- `ERROR_TOXIC` - the model generated a reply that was deemed toxic
     
 </dd>
 </dl>
@@ -1082,7 +1104,7 @@ When a preset is specified, the `prompt` parameter becomes optional, and any inc
 <dl>
 <dd>
 
-**end_sequences:** `typing.Optional[typing.Sequence[str]]` — The generated text will be cut at the beginning of the earliest occurrence of an end sequence. The sequence will be excluded from the text.
+**end_sequences:** `typing.Optional[typing.List[str]]` — The generated text will be cut at the beginning of the earliest occurrence of an end sequence. The sequence will be excluded from the text.
     
 </dd>
 </dl>
@@ -1090,7 +1112,7 @@ When a preset is specified, the `prompt` parameter becomes optional, and any inc
 <dl>
 <dd>
 
-**stop_sequences:** `typing.Optional[typing.Sequence[str]]` — The generated text will be cut at the end of the earliest occurrence of a stop sequence. The sequence will be included the text.
+**stop_sequences:** `typing.Optional[typing.List[str]]` — The generated text will be cut at the end of the earliest occurrence of a stop sequence. The sequence will be included the text.
     
 </dd>
 </dl>
@@ -1180,7 +1202,7 @@ WARNING: `ALL` is deprecated, and will be removed in a future release.
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">generate</a>(...) -&gt; AsyncHttpResponse[Generation]</code></summary>
+<details><summary><code>client.<a href="src/cohere/client.py">generate</a>(...) -> Generation</code></summary>
 <dl>
 <dd>
 
@@ -1211,12 +1233,14 @@ Generates realistic text conditioned on a given input.
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
-client.generate(
+
+client.generate_stream(
     prompt="Please explain to me how LLMs work",
 )
 
@@ -1238,6 +1262,22 @@ client.generate(
 
 The input text that serves as the starting point for generating the response.
 Note: The prompt will be pre-processed and modified before reaching the model.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**stream:** `typing.Literal` 
+
+When `true`, the response will be a JSON stream of events. Streaming is beneficial for user interfaces that render the contents of the response piece by piece, as it gets generated.
+
+The final event will contain the complete response, and will contain an `is_finished` field set to `true`. The event will also contain a `finish_reason`, which can be one of the following:
+- `COMPLETE` - the model sent back a finished reply
+- `MAX_TOKENS` - the reply was cut off because the model reached the maximum number of tokens for its context length
+- `ERROR` - something went wrong when generating the reply
+- `ERROR_TOXIC` - the model generated a reply that was deemed toxic
     
 </dd>
 </dl>
@@ -1328,7 +1368,7 @@ When a preset is specified, the `prompt` parameter becomes optional, and any inc
 <dl>
 <dd>
 
-**end_sequences:** `typing.Optional[typing.Sequence[str]]` — The generated text will be cut at the beginning of the earliest occurrence of an end sequence. The sequence will be excluded from the text.
+**end_sequences:** `typing.Optional[typing.List[str]]` — The generated text will be cut at the beginning of the earliest occurrence of an end sequence. The sequence will be excluded from the text.
     
 </dd>
 </dl>
@@ -1336,7 +1376,7 @@ When a preset is specified, the `prompt` parameter becomes optional, and any inc
 <dl>
 <dd>
 
-**stop_sequences:** `typing.Optional[typing.Sequence[str]]` — The generated text will be cut at the end of the earliest occurrence of a stop sequence. The sequence will be included the text.
+**stop_sequences:** `typing.Optional[typing.List[str]]` — The generated text will be cut at the end of the earliest occurrence of a stop sequence. The sequence will be included the text.
     
 </dd>
 </dl>
@@ -1426,7 +1466,7 @@ WARNING: `ALL` is deprecated, and will be removed in a future release.
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">embed</a>(...) -&gt; AsyncHttpResponse[EmbedResponse]</code></summary>
+<details><summary><code>client.<a href="src/cohere/client.py">embed</a>(...) -> EmbedResponse</code></summary>
 <dl>
 <dd>
 
@@ -1458,18 +1498,20 @@ If you want to learn more how to use the embedding model, have a look at the [Se
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.embed(
-    model="embed-v4.0",
-    input_type="image",
-    embedding_types=["float"],
-    images=[
-        "data:image/jpeg;base64,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"
+    texts=[
+        "hello",
+        "goodbye"
     ],
+    model="embed-v4.0",
+    input_type="classification",
 )
 
 ```
@@ -1486,7 +1528,7 @@ client.embed(
 <dl>
 <dd>
 
-**texts:** `typing.Optional[typing.Sequence[str]]` — An array of strings for the model to embed. Maximum number of texts per call is `96`.
+**texts:** `typing.Optional[typing.List[str]]` — An array of strings for the model to embed. Maximum number of texts per call is `96`.
     
 </dd>
 </dl>
@@ -1494,7 +1536,7 @@ client.embed(
 <dl>
 <dd>
 
-**images:** `typing.Optional[typing.Sequence[str]]` 
+**images:** `typing.Optional[typing.List[str]]` 
 
 An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
 
@@ -1524,7 +1566,7 @@ Images are only supported with Embed v3.0 and newer models.
 <dl>
 <dd>
 
-**embedding_types:** `typing.Optional[typing.Sequence[EmbeddingType]]` 
+**embedding_types:** `typing.Optional[typing.List[EmbeddingType]]` 
 
 Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
@@ -1566,7 +1608,7 @@ If `NONE` is selected, when the input exceeds the maximum input token length an 
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">rerank</a>(...) -&gt; AsyncHttpResponse[RerankResponse]</code></summary>
+<details><summary><code>client.<a href="src/cohere/client.py">rerank</a>(...) -> RerankResponse</code></summary>
 <dl>
 <dd>
 
@@ -1594,11 +1636,13 @@ This endpoint takes in a query and a list of texts and produces an ordered array
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.rerank(
     documents=[
         {
@@ -1615,7 +1659,7 @@ client.rerank(
         },
         {
             "text": "Capital punishment has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states."
-        },
+        }
     ],
     query="What is the capital of the United States?",
     top_n=3,
@@ -1644,7 +1688,7 @@ client.rerank(
 <dl>
 <dd>
 
-**documents:** `typing.Sequence[RerankRequestDocumentsItem]` 
+**documents:** `typing.List[RerankRequestDocumentsItem]` 
 
 A list of document objects or strings to rerank.
 If a document is provided the text fields is required and all other fields will be preserved in the response.
@@ -1675,7 +1719,7 @@ We recommend a maximum of 1,000 documents for optimal endpoint performance.
 <dl>
 <dd>
 
-**rank_fields:** `typing.Optional[typing.Sequence[str]]` — If a JSON object is provided, you can specify which keys you would like to have considered for reranking. The model will rerank based on order of the fields passed in (i.e. rank_fields=['title','author','text'] will rerank using the values in title, author, text  sequentially. If the length of title, author, and text exceeds the context length of the model, the chunking will not re-consider earlier fields). If not provided, the model will use the default text field for ranking.
+**rank_fields:** `typing.Optional[typing.List[str]]` — If a JSON object is provided, you can specify which keys you would like to have considered for reranking. The model will rerank based on order of the fields passed in (i.e. rank_fields=['title','author','text'] will rerank using the values in title, author, text  sequentially. If the length of title, author, and text exceeds the context length of the model, the chunking will not re-consider earlier fields). If not provided, the model will use the default text field for ranking.
     
 </dd>
 </dl>
@@ -1714,7 +1758,7 @@ We recommend a maximum of 1,000 documents for optimal endpoint performance.
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">classify</a>(...) -&gt; AsyncHttpResponse[ClassifyResponse]</code></summary>
+<details><summary><code>client.<a href="src/cohere/client.py">classify</a>(...) -> ClassifyResponse</code></summary>
 <dl>
 <dd>
 
@@ -1742,20 +1786,22 @@ Note: [Fine-tuned models](https://docs.cohere.com/docs/classify-fine-tuning) tra
 <dd>
 
 ```python
-from cohere import ClassifyExample, Client
+from cohere import Client, ClassifyExample
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.classify(
     examples=[
         ClassifyExample(
-            text="Dermatologists don't like her!",
+            text="Dermatologists don\'t like her!",
             label="Spam",
         ),
         ClassifyExample(
-            text="'Hello, open to this?'",
+            text="\'Hello, open to this?\'",
             label="Spam",
         ),
         ClassifyExample(
@@ -1783,15 +1829,18 @@ client.classify(
             label="Not spam",
         ),
         ClassifyExample(
-            text="'Re: Follow up from today's meeting'",
+            text="\'Re: Follow up from today\'s meeting\'",
             label="Not spam",
         ),
         ClassifyExample(
             text="Pre-read for tomorrow",
             label="Not spam",
-        ),
+        )
     ],
-    inputs=["Confirm your email address", "hey i need u to send some $"],
+    inputs=[
+        "Confirm your email address",
+        "hey i need u to send some $"
+    ],
     model="YOUR-FINE-TUNED-MODEL-ID",
 )
 
@@ -1809,7 +1858,7 @@ client.classify(
 <dl>
 <dd>
 
-**inputs:** `typing.Sequence[str]` 
+**inputs:** `typing.List[str]` 
 
 A list of up to 96 texts to be classified. Each one must be a non-empty string.
 There is, however, no consistent, universal limit to the length a particular input can be. We perform classification on the first `x` tokens of each input, and `x` varies depending on which underlying model is powering classification. The maximum token length for each model is listed in the "max tokens" column [here](https://docs.cohere.com/docs/models).
@@ -1821,7 +1870,7 @@ Note: by default the `truncate` parameter is set to `END`, so tokens exceeding t
 <dl>
 <dd>
 
-**examples:** `typing.Optional[typing.Sequence[ClassifyExample]]` 
+**examples:** `typing.Optional[typing.List[ClassifyExample]]` 
 
 An array of examples to provide context to the model. Each example is a text string and its associated label/class. Each unique label requires at least 2 examples associated with it; the maximum number of examples is 2500, and each example has a maximum length of 512 tokens. The values should be structured as `{text: "...",label: "..."}`.
 Note: [Fine-tuned Models](https://docs.cohere.com/docs/classify-fine-tuning) trained on classification examples don't require the `examples` parameter to be passed in explicitly.
@@ -1872,7 +1921,7 @@ If `NONE` is selected, when the input exceeds the maximum input token length an 
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">summarize</a>(...) -&gt; AsyncHttpResponse[SummarizeResponse]</code></summary>
+<details><summary><code>client.<a href="src/cohere/client.py">summarize</a>(...) -> SummarizeResponse</code></summary>
 <dl>
 <dd>
 
@@ -1903,13 +1952,15 @@ Generates a summary in English for a given text.
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.summarize(
-    text='Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.\n\nThe meaning of the name "ice cream" varies from one country to another. In some countries, such as the United States, "ice cream" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled "frozen dairy dessert" instead. In other countries, such as Italy and Argentina, one word is used fo\r all variants. Analogues made from dairy alternatives, such as goat\'s or sheep\'s milk, or milk substitutes (e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are lactose intolerant, allergic to dairy protein or vegan.',
+    text="Ice cream is a sweetened frozen food typically eaten as a snack or dessert. It may be made from milk or cream and is flavoured with a sweetener, either sugar or an alternative, and a spice, such as cocoa or vanilla, or with fruit such as strawberries or peaches. It can also be made by whisking a flavored cream base and liquid nitrogen together. Food coloring is sometimes added, in addition to stabilizers. The mixture is cooled below the freezing point of water and stirred to incorporate air spaces and to prevent detectable ice crystals from forming. The result is a smooth, semi-solid foam that is solid at very low temperatures (below 2 °C or 35 °F). It becomes more malleable as its temperature increases.\n\nThe meaning of the name \"ice cream\" varies from one country to another. In some countries, such as the United States, \"ice cream\" applies only to a specific variety, and most governments regulate the commercial use of the various terms according to the relative quantities of the main ingredients, notably the amount of cream. Products that do not meet the criteria to be called ice cream are sometimes labelled \"frozen dairy dessert\" instead. In other countries, such as Italy and Argentina, one word is used fo\r all variants. Analogues made from dairy alternatives, such as goat\'s or sheep\'s milk, or milk substitutes (e.g., soy, cashew, coconut, almond milk or tofu), are available for those who are lactose intolerant, allergic to dairy protein or vegan.",
 )
 
 ```
@@ -1994,7 +2045,7 @@ client.summarize(
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">tokenize</a>(...) -&gt; AsyncHttpResponse[TokenizeResponse]</code></summary>
+<details><summary><code>client.<a href="src/cohere/client.py">tokenize</a>(...) -> TokenizeResponse</code></summary>
 <dl>
 <dd>
 
@@ -2022,11 +2073,13 @@ This endpoint splits input text into smaller units called tokens using byte-pair
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.tokenize(
     text="tokenize me! :D",
     model="command",
@@ -2074,7 +2127,7 @@ client.tokenize(
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">detokenize</a>(...) -&gt; AsyncHttpResponse[DetokenizeResponse]</code></summary>
+<details><summary><code>client.<a href="src/cohere/client.py">detokenize</a>(...) -> DetokenizeResponse</code></summary>
 <dl>
 <dd>
 
@@ -2102,13 +2155,22 @@ This endpoint takes tokens using byte-pair encoding and returns their text repre
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.detokenize(
-    tokens=[10002, 2261, 2012, 8, 2792, 43],
+    tokens=[
+        10002,
+        2261,
+        2012,
+        8,
+        2792,
+        43
+    ],
     model="command",
 )
 
@@ -2126,7 +2188,7 @@ client.detokenize(
 <dl>
 <dd>
 
-**tokens:** `typing.Sequence[int]` — The list of tokens to be detokenized.
+**tokens:** `typing.List[int]` — The list of tokens to be detokenized.
     
 </dd>
 </dl>
@@ -2154,7 +2216,7 @@ client.detokenize(
 </dl>
 </details>
 
-<details><summary><code>client.<a href="src/cohere/base_client.py">check_api_key</a>() -&gt; AsyncHttpResponse[CheckApiKeyResponse]</code></summary>
+<details><summary><code>client.<a href="src/cohere/client.py">check_api_key</a>() -> CheckApiKeyResponse</code></summary>
 <dl>
 <dd>
 
@@ -2182,11 +2244,13 @@ Checks that the api key in the Authorization header is valid and active
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.check_api_key()
 
 ```
@@ -2216,9 +2280,7 @@ client.check_api_key()
 </details>
 
 ## V2
-<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">chat_stream</a>(...) -&gt; typing.AsyncIterator[
-    AsyncHttpResponse[typing.AsyncIterator[V2ChatStreamResponse]]
-]</code></summary>
+<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">chat_stream</a>(...) -> typing.Iterator[bytes]</code></summary>
 <dl>
 <dd>
 
@@ -2247,38 +2309,23 @@ Follow the [Migration Guide](https://docs.cohere.com/v2/docs/migrating-v1-to-v2)
 <dd>
 
 ```python
-from cohere import (
-    Client,
-    ImageUrl,
-    ImageUrlContent,
-    TextContent,
-    UserChatMessageV2,
-)
+from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
-response = client.v2.chat_stream(
-    model="command-a-vision-07-2025",
+
+client.v2.chat_stream(
+    model="command-a-03-2025",
     messages=[
-        UserChatMessageV2(
-            content=[
-                TextContent(
-                    text="Describe this image",
-                ),
-                ImageUrlContent(
-                    image_url=ImageUrl(
-                        url="https://cohere.com/favicon-32x32.png",
-                        detail="auto",
-                    ),
-                ),
-            ],
-        )
+        {
+            "role": "user",
+            "content": "Tell me about LLMs"
+        }
     ],
 )
-for chunk in response.data:
-    yield chunk
 
 ```
 </dd>
@@ -2290,6 +2337,20 @@ for chunk in response.data:
 
 <dl>
 <dd>
+
+<dl>
+<dd>
+
+**stream:** `typing.Literal` 
+
+Defaults to `false`.
+
+When `true`, the response will be a SSE stream of events.
+
+Streaming is beneficial for user interfaces that render the contents of the response piece by piece, as it gets generated.
+    
+</dd>
+</dl>
 
 <dl>
 <dd>
@@ -2310,7 +2371,7 @@ for chunk in response.data:
 <dl>
 <dd>
 
-**tools:** `typing.Optional[typing.Sequence[ToolV2]]` 
+**tools:** `typing.Optional[typing.List[ToolV2]]` 
 
 A list of tools (functions) available to the model. The model response may contain 'tool_calls' to the specified tools.
 
@@ -2334,7 +2395,7 @@ When set to `true`, tool calls in the Assistant message will be forced to follow
 <dl>
 <dd>
 
-**documents:** `typing.Optional[typing.Sequence[V2ChatStreamRequestDocumentsItem]]` — A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
+**documents:** `typing.Optional[typing.List[V2ChatStreamRequestDocumentsItem]]` — A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
     
 </dd>
 </dl>
@@ -2389,7 +2450,7 @@ The maximum number of output tokens the model will generate in the response. If 
 <dl>
 <dd>
 
-**stop_sequences:** `typing.Optional[typing.Sequence[str]]` — A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
+**stop_sequences:** `typing.Optional[typing.List[str]]` — A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
     
 </dd>
 </dl>
@@ -2518,7 +2579,7 @@ If tool_choice isn't specified, then the model is free to choose whether to use 
 </dl>
 </details>
 
-<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">chat</a>(...) -&gt; AsyncHttpResponse[V2ChatResponse]</code></summary>
+<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">chat</a>(...) -> V2ChatResponse</code></summary>
 <dl>
 <dd>
 
@@ -2547,34 +2608,21 @@ Follow the [Migration Guide](https://docs.cohere.com/v2/docs/migrating-v1-to-v2)
 <dd>
 
 ```python
-from cohere import (
-    Client,
-    ImageUrl,
-    ImageUrlContent,
-    TextContent,
-    UserChatMessageV2,
-)
+from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
-client.v2.chat(
-    model="command-a-vision-07-2025",
+
+client.v2.chat_stream(
+    model="command-a-03-2025",
     messages=[
-        UserChatMessageV2(
-            content=[
-                TextContent(
-                    text="Describe this image",
-                ),
-                ImageUrlContent(
-                    image_url=ImageUrl(
-                        url="https://cohere.com/favicon-32x32.png",
-                        detail="auto",
-                    ),
-                ),
-            ],
-        )
+        {
+            "role": "user",
+            "content": "Tell me about LLMs"
+        }
     ],
 )
 
@@ -2588,6 +2636,20 @@ client.v2.chat(
 
 <dl>
 <dd>
+
+<dl>
+<dd>
+
+**stream:** `typing.Literal` 
+
+Defaults to `false`.
+
+When `true`, the response will be a SSE stream of events.
+
+Streaming is beneficial for user interfaces that render the contents of the response piece by piece, as it gets generated.
+    
+</dd>
+</dl>
 
 <dl>
 <dd>
@@ -2608,7 +2670,7 @@ client.v2.chat(
 <dl>
 <dd>
 
-**tools:** `typing.Optional[typing.Sequence[ToolV2]]` 
+**tools:** `typing.Optional[typing.List[ToolV2]]` 
 
 A list of tools (functions) available to the model. The model response may contain 'tool_calls' to the specified tools.
 
@@ -2632,7 +2694,7 @@ When set to `true`, tool calls in the Assistant message will be forced to follow
 <dl>
 <dd>
 
-**documents:** `typing.Optional[typing.Sequence[V2ChatRequestDocumentsItem]]` — A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
+**documents:** `typing.Optional[typing.List[V2ChatRequestDocumentsItem]]` — A list of relevant documents that the model can cite to generate a more accurate reply. Each document is either a string or document object with content and metadata.
     
 </dd>
 </dl>
@@ -2687,7 +2749,7 @@ The maximum number of output tokens the model will generate in the response. If 
 <dl>
 <dd>
 
-**stop_sequences:** `typing.Optional[typing.Sequence[str]]` — A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
+**stop_sequences:** `typing.Optional[typing.List[str]]` — A list of up to 5 strings that the model will use to stop generation. If the model generates a string that matches any of the strings in the list, it will stop generating tokens and return the generated text up to that point not including the stop sequence.
     
 </dd>
 </dl>
@@ -2816,7 +2878,7 @@ If tool_choice isn't specified, then the model is free to choose whether to use 
 </dl>
 </details>
 
-<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">embed</a>(...) -&gt; AsyncHttpResponse[EmbedByTypeResponse]</code></summary>
+<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">embed</a>(...) -> EmbedByTypeResponse</code></summary>
 <dl>
 <dd>
 
@@ -2848,17 +2910,22 @@ If you want to learn more how to use the embedding model, have a look at the [Se
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.v2.embed(
+    texts=[
+        "hello",
+        "goodbye"
+    ],
     model="embed-v4.0",
-    input_type="image",
-    embedding_types=["float"],
-    images=[
-        "data:image/jpeg;base64,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"
+    input_type="classification",
+    embedding_types=[
+        "float"
     ],
 )
 
@@ -2892,7 +2959,7 @@ client.v2.embed(
 <dl>
 <dd>
 
-**texts:** `typing.Optional[typing.Sequence[str]]` — An array of strings for the model to embed. Maximum number of texts per call is `96`.
+**texts:** `typing.Optional[typing.List[str]]` — An array of strings for the model to embed. Maximum number of texts per call is `96`.
     
 </dd>
 </dl>
@@ -2900,7 +2967,7 @@ client.v2.embed(
 <dl>
 <dd>
 
-**images:** `typing.Optional[typing.Sequence[str]]` 
+**images:** `typing.Optional[typing.List[str]]` 
 
 An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
 
@@ -2914,7 +2981,7 @@ Image embeddings are supported with Embed v3.0 and newer models.
 <dl>
 <dd>
 
-**inputs:** `typing.Optional[typing.Sequence[EmbedInput]]` — An array of inputs for the model to embed. Maximum number of inputs per call is `96`. An input can contain a mix of text and image components.
+**inputs:** `typing.Optional[typing.List[EmbedInput]]` — An array of inputs for the model to embed. Maximum number of inputs per call is `96`. An input can contain a mix of text and image components.
     
 </dd>
 </dl>
@@ -2941,7 +3008,7 @@ Possible values are `256`, `512`, `1024`, and `1536`. The default is `1536`.
 <dl>
 <dd>
 
-**embedding_types:** `typing.Optional[typing.Sequence[EmbeddingType]]` 
+**embedding_types:** `typing.Optional[typing.List[EmbeddingType]]` 
 
 Specifies the types of embeddings you want to get back. Can be one or more of the following types.
 
@@ -2992,7 +3059,7 @@ If `NONE` is selected, when the input exceeds the maximum input token length an 
 </dl>
 </details>
 
-<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">rerank</a>(...) -&gt; AsyncHttpResponse[V2RerankResponse]</code></summary>
+<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">rerank</a>(...) -> V2RerankResponse</code></summary>
 <dl>
 <dd>
 
@@ -3020,18 +3087,20 @@ This endpoint takes in a query and a list of texts and produces an ordered array
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.v2.rerank(
     documents=[
         "Carson City is the capital city of the American state of Nevada.",
         "The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.",
         "Capitalization or capitalisation in English grammar is the use of a capital letter at the start of a word. English usage varies from capitalization in other languages.",
         "Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.",
-        "Capital punishment has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states.",
+        "Capital punishment has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states."
     ],
     query="What is the capital of the United States?",
     top_n=3,
@@ -3068,7 +3137,7 @@ client.v2.rerank(
 <dl>
 <dd>
 
-**documents:** `typing.Sequence[str]` 
+**documents:** `typing.List[str]` 
 
 A list of texts that will be compared to the `query`.
 For optimal performance we recommend against sending more than 1,000 documents in a single request.
@@ -3120,7 +3189,7 @@ For optimal performance we recommend against sending more than 1,000 documents i
 </details>
 
 ## Batches
-<details><summary><code>client.batches.<a href="src/cohere/batches/client.py">list</a>(...) -&gt; AsyncHttpResponse[ListBatchesResponse]</code></summary>
+<details><summary><code>client.batches.<a href="src/cohere/batches/client.py">list</a>(...) -> ListBatchesResponse</code></summary>
 <dl>
 <dd>
 
@@ -3148,11 +3217,13 @@ List the batches for the current user
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.batches.list(
     page_size=1,
     page_token="page_token",
@@ -3220,7 +3291,7 @@ Use `created_at` for creation time or `updated_at` for last updated time.
 </dl>
 </details>
 
-<details><summary><code>client.batches.<a href="src/cohere/batches/client.py">create</a>(...) -&gt; AsyncHttpResponse[CreateBatchResponse]</code></summary>
+<details><summary><code>client.batches.<a href="src/cohere/batches/client.py">create</a>(...) -> CreateBatchResponse</code></summary>
 <dl>
 <dd>
 
@@ -3248,12 +3319,14 @@ Creates and executes a batch from an uploaded dataset of requests
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 from cohere.batches import Batch
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.batches.create(
     request=Batch(
         name="name",
@@ -3296,7 +3369,7 @@ client.batches.create(
 </dl>
 </details>
 
-<details><summary><code>client.batches.<a href="src/cohere/batches/client.py">retrieve</a>(...) -&gt; AsyncHttpResponse[GetBatchResponse]</code></summary>
+<details><summary><code>client.batches.<a href="src/cohere/batches/client.py">retrieve</a>(...) -> GetBatchResponse</code></summary>
 <dl>
 <dd>
 
@@ -3324,11 +3397,13 @@ Retrieves a batch
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.batches.retrieve(
     id="id",
 )
@@ -3367,7 +3442,7 @@ client.batches.retrieve(
 </dl>
 </details>
 
-<details><summary><code>client.batches.<a href="src/cohere/batches/client.py">cancel</a>(...) -&gt; AsyncHttpResponse[CancelBatchResponse]</code></summary>
+<details><summary><code>client.batches.<a href="src/cohere/batches/client.py">cancel</a>(...) -> CancelBatchResponse</code></summary>
 <dl>
 <dd>
 
@@ -3395,11 +3470,13 @@ Cancels an in-progress batch
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.batches.cancel(
     id="id",
 )
@@ -3439,7 +3516,7 @@ client.batches.cancel(
 </details>
 
 ## EmbedJobs
-<details><summary><code>client.embed_jobs.<a href="src/cohere/embed_jobs/client.py">list</a>() -&gt; AsyncHttpResponse[ListEmbedJobResponse]</code></summary>
+<details><summary><code>client.embed_jobs.<a href="src/cohere/embed_jobs/client.py">list</a>() -> ListEmbedJobResponse</code></summary>
 <dl>
 <dd>
 
@@ -3467,11 +3544,13 @@ The list embed job endpoint allows users to view all embed jobs history for that
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.embed_jobs.list()
 
 ```
@@ -3500,7 +3579,7 @@ client.embed_jobs.list()
 </dl>
 </details>
 
-<details><summary><code>client.embed_jobs.<a href="src/cohere/embed_jobs/client.py">create</a>(...) -&gt; AsyncHttpResponse[CreateEmbedJobResponse]</code></summary>
+<details><summary><code>client.embed_jobs.<a href="src/cohere/embed_jobs/client.py">create</a>(...) -> CreateEmbedJobResponse</code></summary>
 <dl>
 <dd>
 
@@ -3528,11 +3607,13 @@ This API launches an async Embed job for a [Dataset](https://docs.cohere.com/doc
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.embed_jobs.create(
     model="model",
     dataset_id="dataset_id",
@@ -3594,7 +3675,7 @@ Available models and corresponding embedding dimensions:
 <dl>
 <dd>
 
-**embedding_types:** `typing.Optional[typing.Sequence[EmbeddingType]]` 
+**embedding_types:** `typing.Optional[typing.List[EmbeddingType]]` 
 
 Specifies the types of embeddings you want to get back. Not required and default is None, which returns the Embed Floats response type. Can be one or more of the following types.
 
@@ -3634,7 +3715,7 @@ Passing `START` will discard the start of the input. `END` will discard the end 
 </dl>
 </details>
 
-<details><summary><code>client.embed_jobs.<a href="src/cohere/embed_jobs/client.py">get</a>(...) -&gt; AsyncHttpResponse[EmbedJob]</code></summary>
+<details><summary><code>client.embed_jobs.<a href="src/cohere/embed_jobs/client.py">get</a>(...) -> EmbedJob</code></summary>
 <dl>
 <dd>
 
@@ -3662,11 +3743,13 @@ This API retrieves the details about an embed job started by the same user.
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.embed_jobs.get(
     id="id",
 )
@@ -3705,7 +3788,7 @@ client.embed_jobs.get(
 </dl>
 </details>
 
-<details><summary><code>client.embed_jobs.<a href="src/cohere/embed_jobs/client.py">cancel</a>(...) -&gt; AsyncHttpResponse[None]</code></summary>
+<details><summary><code>client.embed_jobs.<a href="src/cohere/embed_jobs/client.py">cancel</a>(...)</code></summary>
 <dl>
 <dd>
 
@@ -3733,11 +3816,13 @@ This API allows users to cancel an active embed job. Once invoked, the embedding
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.embed_jobs.cancel(
     id="id",
 )
@@ -3777,7 +3862,7 @@ client.embed_jobs.cancel(
 </details>
 
 ## Datasets
-<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">list</a>(...) -&gt; AsyncHttpResponse[DatasetsListResponse]</code></summary>
+<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">list</a>(...) -> DatasetsListResponse</code></summary>
 <dl>
 <dd>
 
@@ -3804,22 +3889,19 @@ List datasets that have been created.
 <dd>
 
 ```python
+from cohere import Client
+from cohere.environment import ClientEnvironment
 import datetime
 
-from cohere import Client
-
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.datasets.list(
     dataset_type="datasetType",
-    before=datetime.datetime.fromisoformat(
-        "2024-01-15 09:30:00+00:00",
-    ),
-    after=datetime.datetime.fromisoformat(
-        "2024-01-15 09:30:00+00:00",
-    ),
+    before=datetime.datetime.fromisoformat("2024-01-15T09:30:00+00:00"),
+    after=datetime.datetime.fromisoformat("2024-01-15T09:30:00+00:00"),
     limit=1.1,
     offset=1.1,
     validation_status="unknown",
@@ -3847,7 +3929,7 @@ client.datasets.list(
 <dl>
 <dd>
 
-**before:** `typing.Optional[dt.datetime]` — optional filter before a date
+**before:** `typing.Optional[datetime.datetime]` — optional filter before a date
     
 </dd>
 </dl>
@@ -3855,7 +3937,7 @@ client.datasets.list(
 <dl>
 <dd>
 
-**after:** `typing.Optional[dt.datetime]` — optional filter after a date
+**after:** `typing.Optional[datetime.datetime]` — optional filter after a date
     
 </dd>
 </dl>
@@ -3899,7 +3981,7 @@ client.datasets.list(
 </dl>
 </details>
 
-<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">create</a>(...) -&gt; AsyncHttpResponse[DatasetsCreateResponse]</code></summary>
+<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">create</a>(...) -> DatasetsCreateResponse</code></summary>
 <dl>
 <dd>
 
@@ -3927,11 +4009,13 @@ Create a dataset by uploading a file. See ['Dataset Creation'](https://docs.cohe
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.datasets.create(
     name="name",
     type="embed-input",
@@ -3939,6 +4023,8 @@ client.datasets.create(
     skip_malformed_input=True,
     text_separator="text_separator",
     csv_delimiter="csv_delimiter",
+    data="example_data",
+    eval_data="example_eval_data",
 )
 
 ```
@@ -3971,9 +4057,7 @@ client.datasets.create(
 <dl>
 <dd>
 
-**data:** `from __future__ import annotations
-
-core.File` — See core.File for more documentation
+**data:** `core.File` — The file to upload
     
 </dd>
 </dl>
@@ -4029,9 +4113,7 @@ core.File` — See core.File for more documentation
 <dl>
 <dd>
 
-**eval_data:** `from __future__ import annotations
-
-typing.Optional[core.File]` — See core.File for more documentation
+**eval_data:** `typing.Optional[core.File]` — An optional evaluation file to upload
     
 </dd>
 </dl>
@@ -4051,7 +4133,7 @@ typing.Optional[core.File]` — See core.File for more documentation
 </dl>
 </details>
 
-<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">get_usage</a>() -&gt; AsyncHttpResponse[DatasetsGetUsageResponse]</code></summary>
+<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">get_usage</a>() -> DatasetsGetUsageResponse</code></summary>
 <dl>
 <dd>
 
@@ -4079,11 +4161,13 @@ View the dataset storage usage for your Organization. Each Organization can have
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.datasets.get_usage()
 
 ```
@@ -4112,7 +4196,7 @@ client.datasets.get_usage()
 </dl>
 </details>
 
-<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">get</a>(...) -&gt; AsyncHttpResponse[DatasetsGetResponse]</code></summary>
+<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">get</a>(...) -> DatasetsGetResponse</code></summary>
 <dl>
 <dd>
 
@@ -4140,11 +4224,13 @@ Retrieve a dataset by ID. See ['Datasets'](https://docs.cohere.com/docs/datasets
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.datasets.get(
     id="id",
 )
@@ -4183,7 +4269,7 @@ client.datasets.get(
 </dl>
 </details>
 
-<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">delete</a>(...) -&gt; AsyncHttpResponse[typing.Dict[str, typing.Any]]</code></summary>
+<details><summary><code>client.datasets.<a href="src/cohere/datasets/client.py">delete</a>(...) -> typing.Dict[str, typing.Any]</code></summary>
 <dl>
 <dd>
 
@@ -4211,11 +4297,13 @@ Delete a dataset by ID. Datasets are automatically deleted after 30 days, but th
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.datasets.delete(
     id="id",
 )
@@ -4255,7 +4343,7 @@ client.datasets.delete(
 </details>
 
 ## Connectors
-<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">list</a>(...) -&gt; AsyncHttpResponse[ListConnectorsResponse]</code></summary>
+<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">list</a>(...) -> ListConnectorsResponse</code></summary>
 <dl>
 <dd>
 
@@ -4283,11 +4371,13 @@ Returns a list of connectors ordered by descending creation date (newer first). 
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.connectors.list(
     limit=1.1,
     offset=1.1,
@@ -4335,7 +4425,7 @@ client.connectors.list(
 </dl>
 </details>
 
-<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">create</a>(...) -&gt; AsyncHttpResponse[CreateConnectorResponse]</code></summary>
+<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">create</a>(...) -> CreateConnectorResponse</code></summary>
 <dl>
 <dd>
 
@@ -4363,11 +4453,13 @@ Creates a new connector. The connector is tested during registration and will ca
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.connectors.create(
     name="name",
     url="url",
@@ -4411,7 +4503,7 @@ client.connectors.create(
 <dl>
 <dd>
 
-**excludes:** `typing.Optional[typing.Sequence[str]]` — A list of fields to exclude from the prompt (fields remain in the document).
+**excludes:** `typing.Optional[typing.List[str]]` — A list of fields to exclude from the prompt (fields remain in the document).
     
 </dd>
 </dl>
@@ -4463,7 +4555,7 @@ client.connectors.create(
 </dl>
 </details>
 
-<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">get</a>(...) -&gt; AsyncHttpResponse[GetConnectorResponse]</code></summary>
+<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">get</a>(...) -> GetConnectorResponse</code></summary>
 <dl>
 <dd>
 
@@ -4491,11 +4583,13 @@ Retrieve a connector by ID. See ['Connectors'](https://docs.cohere.com/docs/conn
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.connectors.get(
     id="id",
 )
@@ -4534,7 +4628,7 @@ client.connectors.get(
 </dl>
 </details>
 
-<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">delete</a>(...) -&gt; AsyncHttpResponse[DeleteConnectorResponse]</code></summary>
+<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">delete</a>(...) -> DeleteConnectorResponse</code></summary>
 <dl>
 <dd>
 
@@ -4562,11 +4656,13 @@ Delete a connector by ID. See ['Connectors'](https://docs.cohere.com/docs/connec
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.connectors.delete(
     id="id",
 )
@@ -4605,7 +4701,7 @@ client.connectors.delete(
 </dl>
 </details>
 
-<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">update</a>(...) -&gt; AsyncHttpResponse[UpdateConnectorResponse]</code></summary>
+<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">update</a>(...) -> UpdateConnectorResponse</code></summary>
 <dl>
 <dd>
 
@@ -4633,11 +4729,13 @@ Update a connector by ID. Omitted fields will not be updated. See ['Managing you
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.connectors.update(
     id="id",
 )
@@ -4680,7 +4778,7 @@ client.connectors.update(
 <dl>
 <dd>
 
-**excludes:** `typing.Optional[typing.Sequence[str]]` — A list of fields to exclude from the prompt (fields remain in the document).
+**excludes:** `typing.Optional[typing.List[str]]` — A list of fields to exclude from the prompt (fields remain in the document).
     
 </dd>
 </dl>
@@ -4732,7 +4830,7 @@ client.connectors.update(
 </dl>
 </details>
 
-<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">o_auth_authorize</a>(...) -&gt; AsyncHttpResponse[OAuthAuthorizeResponse]</code></summary>
+<details><summary><code>client.connectors.<a href="src/cohere/connectors/client.py">o_auth_authorize</a>(...) -> OAuthAuthorizeResponse</code></summary>
 <dl>
 <dd>
 
@@ -4760,11 +4858,13 @@ Authorize the connector with the given ID for the connector oauth app.  See ['Co
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.connectors.o_auth_authorize(
     id="id",
     after_token_redirect="after_token_redirect",
@@ -4813,7 +4913,7 @@ client.connectors.o_auth_authorize(
 </details>
 
 ## Models
-<details><summary><code>client.models.<a href="src/cohere/models/client.py">get</a>(...) -&gt; AsyncHttpResponse[GetModelResponse]</code></summary>
+<details><summary><code>client.models.<a href="src/cohere/models/client.py">get</a>(...) -> GetModelResponse</code></summary>
 <dl>
 <dd>
 
@@ -4841,11 +4941,13 @@ Returns the details of a model, provided its name.
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.models.get(
     model="command-a-03-2025",
 )
@@ -4884,7 +4986,7 @@ client.models.get(
 </dl>
 </details>
 
-<details><summary><code>client.models.<a href="src/cohere/models/client.py">list</a>(...) -&gt; AsyncHttpResponse[ListModelsResponse]</code></summary>
+<details><summary><code>client.models.<a href="src/cohere/models/client.py">list</a>(...) -> ListModelsResponse</code></summary>
 <dl>
 <dd>
 
@@ -4912,11 +5014,13 @@ Returns a list of models available for use.
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.models.list(
     page_size=1.1,
     page_token="page_token",
@@ -4986,7 +5090,7 @@ Defaults to `20`, min value of `1`, max value of `1000`.
 </details>
 
 ## /finetuning
-<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">list_finetuned_models</a>(...) -&gt; AsyncHttpResponse[ListFinetunedModelsResponse]</code></summary>
+<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">list_finetuned_models</a>(...) -> ListFinetunedModelsResponse</code></summary>
 <dl>
 <dd>
 
@@ -5014,11 +5118,13 @@ Returns a list of fine-tuned models that the user has access to.
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.finetuning.list_finetuned_models(
     page_size=1,
     page_token="page_token",
@@ -5085,7 +5191,7 @@ Supported sorting fields:
 </dl>
 </details>
 
-<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">create_finetuned_model</a>(...) -&gt; AsyncHttpResponse[CreateFinetunedModelResponse]</code></summary>
+<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">create_finetuned_model</a>(...) -> CreateFinetunedModelResponse</code></summary>
 <dl>
 <dd>
 
@@ -5113,12 +5219,14 @@ Creates a new fine-tuned model. The model will be trained on the dataset specifi
 
 ```python
 from cohere import Client
-from cohere.finetuning.finetuning import BaseModel, FinetunedModel, Settings
+from cohere.environment import ClientEnvironment
+from cohere.finetuning.finetuning import FinetunedModel, Settings, BaseModel
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.finetuning.create_finetuned_model(
     request=FinetunedModel(
         name="name",
@@ -5165,7 +5273,7 @@ client.finetuning.create_finetuned_model(
 </dl>
 </details>
 
-<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">get_finetuned_model</a>(...) -&gt; AsyncHttpResponse[GetFinetunedModelResponse]</code></summary>
+<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">get_finetuned_model</a>(...) -> GetFinetunedModelResponse</code></summary>
 <dl>
 <dd>
 
@@ -5193,11 +5301,13 @@ Retrieve a fine-tuned model by its ID.
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.finetuning.get_finetuned_model(
     id="id",
 )
@@ -5236,7 +5346,7 @@ client.finetuning.get_finetuned_model(
 </dl>
 </details>
 
-<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">delete_finetuned_model</a>(...) -&gt; AsyncHttpResponse[DeleteFinetunedModelResponse]</code></summary>
+<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">delete_finetuned_model</a>(...) -> DeleteFinetunedModelResponse</code></summary>
 <dl>
 <dd>
 
@@ -5265,11 +5375,13 @@ This operation is irreversible.
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.finetuning.delete_finetuned_model(
     id="id",
 )
@@ -5308,7 +5420,7 @@ client.finetuning.delete_finetuned_model(
 </dl>
 </details>
 
-<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">update_finetuned_model</a>(...) -&gt; AsyncHttpResponse[UpdateFinetunedModelResponse]</code></summary>
+<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">update_finetuned_model</a>(...) -> UpdateFinetunedModelResponse</code></summary>
 <dl>
 <dd>
 
@@ -5336,12 +5448,14 @@ Updates the fine-tuned model with the given ID. The model will be updated with t
 
 ```python
 from cohere import Client
-from cohere.finetuning.finetuning import BaseModel, Settings
+from cohere.environment import ClientEnvironment
+from cohere.finetuning.finetuning import Settings, BaseModel
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.finetuning.update_finetuned_model(
     id="id",
     name="name",
@@ -5411,7 +5525,7 @@ client.finetuning.update_finetuned_model(
 </dl>
 </details>
 
-<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">list_events</a>(...) -&gt; AsyncHttpResponse[ListEventsResponse]</code></summary>
+<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">list_events</a>(...) -> ListEventsResponse</code></summary>
 <dl>
 <dd>
 
@@ -5441,11 +5555,13 @@ The list can be paginated using `page_size` and `page_token` parameters.
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.finetuning.list_events(
     finetuned_model_id="finetuned_model_id",
     page_size=1,
@@ -5521,7 +5637,7 @@ Supported sorting fields:
 </dl>
 </details>
 
-<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">list_training_step_metrics</a>(...) -&gt; AsyncHttpResponse[ListTrainingStepMetricsResponse]</code></summary>
+<details><summary><code>client.finetuning.<a href="src/cohere/finetuning/client.py">list_training_step_metrics</a>(...) -> ListTrainingStepMetricsResponse</code></summary>
 <dl>
 <dd>
 
@@ -5551,11 +5667,13 @@ The list can be paginated using `page_size` and `page_token` parameters.
 
 ```python
 from cohere import Client
+from cohere.environment import ClientEnvironment
 
 client = Client(
-    client_name="YOUR_CLIENT_NAME",
-    token="YOUR_TOKEN",
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
 )
+
 client.finetuning.list_training_step_metrics(
     finetuned_model_id="finetuned_model_id",
     page_size=1,
@@ -5596,6 +5714,106 @@ Maximum number of results to be returned by the server. If 0, defaults to
 <dd>
 
 **page_token:** `typing.Optional[str]` — Request a specific page of the list results.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Audio Transcriptions
+<details><summary><code>client.audio.transcriptions.<a href="src/cohere/audio/transcriptions/client.py">create</a>(...) -> AudioTranscriptionsCreateResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Transcribe an audio file.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cohere import Client
+from cohere.environment import ClientEnvironment
+
+client = Client(
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
+)
+
+client.audio.transcriptions.create(
+    file="example_file",
+    model="model",
+    language="language",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**model:** `str` — ID of the model to use.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**language:** `str` — The language of the input audio, supplied in [ISO-639-1](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes) format.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**file:** `core.File` — The audio file object to transcribe. Supported file extensions are flac, mp3, mpeg, mpga, ogg, and wav.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**temperature:** `typing.Optional[float]` — The sampling temperature, between 0 and 1. Higher values like 0.8 make the output more random, while lower values like 0.2 make it more focused and deterministic.
     
 </dd>
 </dl>
