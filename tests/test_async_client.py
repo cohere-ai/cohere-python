@@ -1,9 +1,16 @@
 import os
 import unittest
 
+import httpx
+
 import cohere
-from cohere import ChatConnector, ClassifyExample, CreateConnectorServiceAuth, Tool, \
-    ToolParameterDefinitionsValue, ToolResult, UserMessage, ChatbotMessage
+from cohere import (
+    ChatbotMessage,
+    Tool,
+    ToolParameterDefinitionsValue,
+    ToolResult,
+    UserMessage,
+)
 
 package_dir = os.path.dirname(os.path.abspath(__file__))
 embed_job = os.path.join(package_dir, 'embed_job.jsonl')
@@ -22,6 +29,23 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
     async def test_context_manager(self) -> None:
         async with cohere.AsyncClient(api_key="xxx") as client:
             self.assertIsNotNone(client)
+
+    async def test_custom_httpx_async_client_is_used_verbatim(self) -> None:
+        """A plain httpx.AsyncClient must be passed through, not replaced by HttpxAiohttpClient."""
+        custom = httpx.AsyncClient(timeout=30.0)
+        try:
+            client = cohere.AsyncClient(api_key="xxx", httpx_client=custom)
+            self.assertIs(client._client_wrapper.httpx_client.httpx_client, custom)
+        finally:
+            await custom.aclose()
+
+    async def test_async_client_v2_custom_httpx_async_client(self) -> None:
+        custom = httpx.AsyncClient(timeout=30.0)
+        try:
+            client = cohere.AsyncClientV2(api_key="xxx", httpx_client=custom)
+            self.assertIs(client._client_wrapper.httpx_client.httpx_client, custom)
+        finally:
+            await custom.aclose()
 
     async def test_chat(self) -> None:
         chat = await self.co.chat(
