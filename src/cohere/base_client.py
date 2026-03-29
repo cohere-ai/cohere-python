@@ -48,6 +48,7 @@ from .types.summarize_response import SummarizeResponse
 from .types.tokenize_response import TokenizeResponse
 from .types.tool import Tool
 from .types.tool_result import ToolResult
+from httpx_aiohttp import HttpxAiohttpClient
 
 if typing.TYPE_CHECKING:
     from .audio.client import AsyncAudioClient, AudioClient
@@ -1611,7 +1612,7 @@ class AsyncBaseCohere:
         Whether the default httpx client follows redirects or not, this is irrelevant if a custom httpx client is passed in.
 
     httpx_client : typing.Optional[httpx.AsyncClient]
-        The httpx client to use for making requests, a preconfigured client is used by default, however this is useful should you want to pass in any custom httpx configuration.
+        The httpx-compatible async client to use for making requests. By default an aiohttp-backed client (httpx_aiohttp.HttpxAiohttpClient) is used for better concurrency under high parallelism; pass a custom httpx.AsyncClient if you need a different transport or configuration.
 
     logging : typing.Optional[typing.Union[LogConfig, Logger]]
         Configure logging for the SDK. Accepts a LogConfig dict with 'level' (debug/info/warn/error), 'logger' (custom logger implementation), and 'silent' (boolean, defaults to True) fields. You can also pass a pre-configured Logger instance.
@@ -1651,9 +1652,9 @@ class AsyncBaseCohere:
             headers=headers,
             httpx_client=httpx_client
             if httpx_client is not None
-            else httpx.AsyncClient(timeout=_defaulted_timeout, follow_redirects=follow_redirects)
+            else HttpxAiohttpClient(timeout=_defaulted_timeout, follow_redirects=follow_redirects)
             if follow_redirects is not None
-            else httpx.AsyncClient(timeout=_defaulted_timeout),
+            else HttpxAiohttpClient(timeout=_defaulted_timeout),
             timeout=_defaulted_timeout,
             logging=logging,
         )
