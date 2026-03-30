@@ -25,7 +25,6 @@ from .finetuning.types.list_events_response import ListEventsResponse
 from .finetuning.types.list_finetuned_models_response import ListFinetunedModelsResponse
 from .finetuning.types.list_training_step_metrics_response import ListTrainingStepMetricsResponse
 from .finetuning.types.settings import Settings
-from .finetuning.types.status import Status
 from .finetuning.types.update_finetuned_model_response import UpdateFinetunedModelResponse
 from pydantic import ValidationError
 
@@ -501,13 +500,7 @@ class RawFinetuningClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def update_finetuned_model(
-        self,
-        id: str,
-        *,
-        name: str,
-        settings: Settings,
-        status: typing.Optional[Status] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        self, id: str, *, name: str, settings: Settings, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[UpdateFinetunedModelResponse]:
         """
         Updates the fine-tuned model with the given ID. The model will be updated with the new settings and name provided in the request body.
@@ -522,9 +515,6 @@ class RawFinetuningClient:
 
         settings : Settings
             FinetunedModel settings such as dataset, hyperparameters...
-
-        status : typing.Optional[Status]
-            Current stage in the life-cycle of the fine-tuned model.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -542,7 +532,6 @@ class RawFinetuningClient:
                 "settings": convert_and_respect_annotation_metadata(
                     object_=settings, annotation=Settings, direction="write"
                 ),
-                "status": status,
             },
             headers={
                 "content-type": "application/json",
@@ -1368,13 +1357,7 @@ class AsyncRawFinetuningClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def update_finetuned_model(
-        self,
-        id: str,
-        *,
-        name: str,
-        settings: Settings,
-        status: typing.Optional[Status] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        self, id: str, *, name: str, settings: Settings, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[UpdateFinetunedModelResponse]:
         """
         Updates the fine-tuned model with the given ID. The model will be updated with the new settings and name provided in the request body.
@@ -1389,9 +1372,6 @@ class AsyncRawFinetuningClient:
 
         settings : Settings
             FinetunedModel settings such as dataset, hyperparameters...
-
-        status : typing.Optional[Status]
-            Current stage in the life-cycle of the fine-tuned model.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1409,7 +1389,6 @@ class AsyncRawFinetuningClient:
                 "settings": convert_and_respect_annotation_metadata(
                     object_=settings, annotation=Settings, direction="write"
                 ),
-                "status": status,
             },
             headers={
                 "content-type": "application/json",
