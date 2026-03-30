@@ -5505,14 +5505,6 @@ client.finetuning.update_finetuned_model(
 <dl>
 <dd>
 
-**status:** `typing.Optional[Status]` — Current stage in the life-cycle of the fine-tuned model.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>
