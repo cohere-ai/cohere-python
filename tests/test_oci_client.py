@@ -348,6 +348,77 @@ class TestOciClientModels(unittest.TestCase):
         )
         self.assertIsNotNone(response.message)
 
+    def test_embed_english_light_v3(self):
+        """Test embed-english-light-v3.0 returns 384-dim vectors."""
+        response = self.client.embed(
+            model="embed-english-light-v3.0",
+            texts=["Hello world"],
+            input_type="search_document",
+        )
+        self.assertIsNotNone(response.embeddings.float_)
+        self.assertEqual(len(response.embeddings.float_[0]), 384)
+
+    def test_embed_multilingual_light_v3(self):
+        """Test embed-multilingual-light-v3.0 returns 384-dim vectors."""
+        response = self.client.embed(
+            model="embed-multilingual-light-v3.0",
+            texts=["Bonjour le monde"],
+            input_type="search_document",
+        )
+        self.assertIsNotNone(response.embeddings.float_)
+        self.assertEqual(len(response.embeddings.float_[0]), 384)
+
+    def test_embed_search_query_input_type(self):
+        """Test embed with search_query input_type (distinct from search_document)."""
+        response = self.client.embed(
+            model="embed-english-v3.0",
+            texts=["What is the capital of France?"],
+            input_type="search_query",
+        )
+        self.assertIsNotNone(response.embeddings.float_)
+        self.assertEqual(len(response.embeddings.float_[0]), 1024)
+
+    def test_command_r_plus_chat(self):
+        """Test command-r-plus-08-2024 via V1 client."""
+        v1_client = cohere.OciClient(
+            oci_region=os.getenv("OCI_REGION", "us-chicago-1"),
+            oci_compartment_id=os.getenv("OCI_COMPARTMENT_ID"),
+            oci_profile=os.getenv("OCI_PROFILE", "DEFAULT"),
+        )
+        response = v1_client.chat(
+            model="command-r-plus-08-2024",
+            message="What is 2+2? Answer with just the number.",
+        )
+        self.assertIsNotNone(response.text)
+        self.assertIn("4", response.text)
+
+    def test_v2_multi_turn_chat(self):
+        """Test V2 chat with conversation history (multi-turn)."""
+        response = self.client.chat(
+            model="command-a-03-2025",
+            messages=[
+                {"role": "user", "content": "My name is Alice."},
+                {"role": "assistant", "content": "Nice to meet you, Alice!"},
+                {"role": "user", "content": "What is my name?"},
+            ],
+        )
+        self.assertIsNotNone(response.message)
+        content = response.message.content[0].text
+        self.assertIn("Alice", content)
+
+    def test_v2_system_message(self):
+        """Test V2 chat with a system message."""
+        response = self.client.chat(
+            model="command-a-03-2025",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant. Always respond in exactly 3 words."},
+                {"role": "user", "content": "Say hello."},
+            ],
+        )
+        self.assertIsNotNone(response.message)
+        self.assertIsNotNone(response.message.content[0].text)
+
+
 class TestOciClientTransformations(unittest.TestCase):
     """Unit tests for OCI request/response transformations (no OCI credentials required)."""
 
