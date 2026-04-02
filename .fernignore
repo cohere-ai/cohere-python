@@ -15,6 +15,7 @@ src/cohere/manually_maintained/__init__.py
 src/cohere/bedrock_client.py
 src/cohere/aws_client.py
 src/cohere/sagemaker_client.py
+src/cohere/oci_client.py
 src/cohere/client_v2.py
 mypy.ini
 src/cohere/aliases.py
