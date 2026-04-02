@@ -953,21 +953,21 @@ def transform_oci_stream_wrapper(
     def _emit_v1_event(event: typing.Dict[str, typing.Any]) -> bytes:
         return json.dumps(event).encode("utf-8") + b"\n"
 
-    def _current_content_type(oci_event: typing.Dict[str, typing.Any]) -> str:
+    def _current_content_type(oci_event: typing.Dict[str, typing.Any]) -> typing.Optional[str]:
         message = oci_event.get("message")
         if isinstance(message, dict):
             content_list = message.get("content")
             if content_list and isinstance(content_list, list) and len(content_list) > 0:
                 oci_type = content_list[0].get("type", "TEXT").upper()
-                if oci_type == "THINKING":
-                    return "thinking"
-        return "text"
+                return "thinking" if oci_type == "THINKING" else "text"
+        return None  # finish-only or non-content event — don't trigger a type transition
 
     def _transform_v2_event(oci_event: typing.Dict[str, typing.Any]) -> typing.Iterator[bytes]:
         nonlocal emitted_start, emitted_content_end, current_content_type, current_content_index
         nonlocal final_finish_reason, final_usage
 
         event_content_type = _current_content_type(oci_event)
+        open_type = event_content_type or "text"
 
         if not emitted_start:
             yield _emit_v2_event(
@@ -981,12 +981,12 @@ def transform_oci_stream_wrapper(
                 {
                     "type": "content-start",
                     "index": current_content_index,
-                    "delta": {"message": {"content": {"type": event_content_type}}},
+                    "delta": {"message": {"content": {"type": open_type}}},
                 }
             )
             emitted_start = True
-            current_content_type = event_content_type
-        elif current_content_type != event_content_type:
+            current_content_type = open_type
+        elif event_content_type is not None and current_content_type != event_content_type:
             yield _emit_v2_event({"type": "content-end", "index": current_content_index})
             current_content_index += 1
             yield _emit_v2_event(

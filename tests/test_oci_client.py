@@ -954,6 +954,32 @@ region=us-chicago-1
         self.assertEqual(events[5]["type"], "content-delta")
         self.assertEqual(events[5]["index"], 1)
 
+    def test_stream_wrapper_no_spurious_block_on_finish_only_event(self):
+        """Finish-only event after thinking block must not open a spurious empty text block."""
+        import json
+        from cohere.oci_client import transform_oci_stream_wrapper
+
+        chunks = [
+            b'data: {"message": {"content": [{"type": "THINKING", "thinking": "Reasoning..."}]}}\n',
+            b'data: {"finishReason": "COMPLETE"}\n',
+            b"data: [DONE]\n",
+        ]
+
+        events = []
+        for raw in transform_oci_stream_wrapper(iter(chunks), "chat", is_v2=True):
+            line = raw.decode("utf-8").strip()
+            if line.startswith("data: "):
+                events.append(json.loads(line[6:]))
+
+        types = [e["type"] for e in events]
+        # Must not contain two content-start events
+        self.assertEqual(types.count("content-start"), 1)
+        # The single content block must be thinking
+        cs = next(e for e in events if e["type"] == "content-start")
+        self.assertEqual(cs["delta"]["message"]["content"]["type"], "thinking")
+        # Must end cleanly
+        self.assertEqual(events[-1]["type"], "message-end")
+
     def test_stream_wrapper_skips_malformed_json_with_warning(self):
         """Test that malformed JSON in SSE stream is skipped."""
         from cohere.oci_client import transform_oci_stream_wrapper
