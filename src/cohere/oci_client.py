@@ -399,24 +399,46 @@ def map_request_to_oci(
     if "signer" in oci_config:
         signer = oci_config["signer"]  # Instance/resource principal
     elif "security_token_file" in oci_config:
-        # Session-based authentication with security token (fallback if no user field)
-        token_file_path = os.path.expanduser(oci_config["security_token_file"])
-        with open(token_file_path, "r") as f:
-            security_token = f.read().strip()
-
-        # Load private key using OCI's utility function
+        # Session-based authentication with security token.
+        # The token file is re-read on every request so that OCI CLI token refreshes
+        # (e.g. `oci session refresh`) are picked up without restarting the client.
         key_file = oci_config.get("key_file")
         if not key_file:
             raise ValueError(
                 "OCI config profile is missing 'key_file'. "
                 "Session-based auth requires a key_file entry in your OCI config profile."
             )
+        token_file_path = os.path.expanduser(oci_config["security_token_file"])
         private_key = oci.signer.load_private_key_from_file(os.path.expanduser(key_file))
 
-        signer = oci.auth.signers.SecurityTokenSigner(
-            token=security_token,
-            private_key=private_key,
-        )
+        class _RefreshingSecurityTokenSigner:
+            """Wraps SecurityTokenSigner and re-reads the token file before each signing call."""
+
+            def __init__(self) -> None:
+                self._token_file = token_file_path
+                self._private_key = private_key
+                self._refresh()
+
+            def _refresh(self) -> None:
+                with open(self._token_file, "r") as _f:
+                    _token = _f.read().strip()
+                self._signer = oci.auth.signers.SecurityTokenSigner(
+                    token=_token,
+                    private_key=self._private_key,
+                )
+
+            # Delegate all attribute access to the inner signer, refreshing first.
+            def __call__(self, *args: typing.Any, **kwargs: typing.Any) -> typing.Any:
+                self._refresh()
+                return self._signer(*args, **kwargs)
+
+            def __getattr__(self, name: str) -> typing.Any:
+                if name.startswith("_"):
+                    raise AttributeError(name)
+                self._refresh()
+                return getattr(self._signer, name)
+
+        signer = _RefreshingSecurityTokenSigner()
     elif "user" in oci_config:
         signer = oci.signer.Signer(
             tenancy=oci_config["tenancy"],
@@ -814,7 +836,10 @@ def transform_request_to_oci(
 
         return oci_body
 
-    return cohere_body
+    raise ValueError(
+        f"Endpoint '{endpoint}' is not supported by OCI Generative AI on-demand inference. "
+        "Supported endpoints: ['embed', 'chat']"
+    )
 
 
 def transform_oci_response_to_cohere(

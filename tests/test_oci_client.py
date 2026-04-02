@@ -737,6 +737,15 @@ class TestOciClientTransformations(unittest.TestCase):
             )
         self.assertIn("OciClient ", str(ctx.exception))
 
+    def test_unsupported_endpoint_raises(self):
+        """Test that transform_request_to_oci raises for unsupported endpoints."""
+        from cohere.oci_client import transform_request_to_oci
+
+        with self.assertRaises(ValueError) as ctx:
+            transform_request_to_oci("rerank", {"model": "rerank-v3.5"}, "compartment-123")
+        self.assertIn("rerank", str(ctx.exception))
+        self.assertIn("not supported", str(ctx.exception))
+
     def test_v1_chat_request_optional_params(self):
         """Test V1 chat request forwards supported optional params."""
         from cohere.oci_client import transform_request_to_oci
@@ -930,10 +939,13 @@ region=us-chicago-1
 
             hook(request)
 
-        mock_oci.auth.signers.SecurityTokenSigner.assert_called_once_with(
+        # SecurityTokenSigner is called at least once (init) and again per request
+        # (token file is re-read on each signing call to pick up refreshed tokens).
+        mock_oci.auth.signers.SecurityTokenSigner.assert_called_with(
             token="session-token",
             private_key="private-key",
         )
+        self.assertGreaterEqual(mock_oci.auth.signers.SecurityTokenSigner.call_count, 1)
         mock_oci.signer.Signer.assert_not_called()
 
     def test_embed_response_lowercases_embedding_keys(self):
