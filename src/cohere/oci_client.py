@@ -703,7 +703,7 @@ def transform_request_to_oci(
                             transformed_content.append(item)
                     oci_msg["content"] = transformed_content
                 else:
-                    oci_msg["content"] = msg.get("content", [])
+                    oci_msg["content"] = msg.get("content") or []
 
                 if "tool_calls" in msg:
                     oci_msg["toolCalls"] = msg["tool_calls"]
