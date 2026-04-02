@@ -948,6 +948,62 @@ region=us-chicago-1
         self.assertGreaterEqual(mock_oci.auth.signers.SecurityTokenSigner.call_count, 1)
         mock_oci.signer.Signer.assert_not_called()
 
+    def test_session_token_refreshed_on_subsequent_requests(self):
+        """Verify the refreshing signer picks up a new token written to the token file."""
+        import tempfile
+        import os
+        from cohere.oci_client import map_request_to_oci
+
+        mock_oci = MagicMock()
+        mock_oci.signer.load_private_key_from_file.return_value = "private-key"
+
+        # Write initial token to a real temp file so we can overwrite it later.
+        with tempfile.NamedTemporaryFile("w", suffix=".token", delete=False) as tf:
+            tf.write("token-v1")
+            token_path = tf.name
+
+        try:
+            with patch("cohere.oci_client.lazy_oci", return_value=mock_oci):
+                hook = map_request_to_oci(
+                    oci_config={
+                        "security_token_file": token_path,
+                        "key_file": "/irrelevant.pem",
+                    },
+                    oci_region="us-chicago-1",
+                    oci_compartment_id="ocid1.compartment.oc1..example",
+                )
+
+                def _make_request():
+                    req = MagicMock()
+                    req.url.path = "/v2/embed"
+                    req.read.return_value = b'{"model":"embed-english-v3.0","texts":["hi"]}'
+                    req.method = "POST"
+                    req.extensions = {}
+                    return req
+
+                # First request uses token-v1
+                hook(_make_request())
+                calls_after_first = mock_oci.auth.signers.SecurityTokenSigner.call_count
+
+                # Simulate token refresh by overwriting the file
+                with open(token_path, "w") as _f:
+                    _f.write("token-v2")
+
+                # Second request — should re-read and use token-v2
+                hook(_make_request())
+                self.assertGreater(
+                    mock_oci.auth.signers.SecurityTokenSigner.call_count,
+                    calls_after_first,
+                    "SecurityTokenSigner should be re-instantiated after token file update",
+                )
+                # Verify the latest call used the refreshed token
+                all_calls = mock_oci.auth.signers.SecurityTokenSigner.call_args_list
+                last_call = all_calls[-1]
+                last_token = last_call.kwargs.get("token") or (last_call.args[0] if last_call.args else None)
+                self.assertEqual(last_token, "token-v2", "Last signing call must use the refreshed token")
+        finally:
+            os.unlink(token_path)
+
     def test_embed_response_lowercases_embedding_keys(self):
         """Test embed response uses lowercase keys expected by the SDK model."""
         from cohere.oci_client import transform_oci_response_to_cohere
