@@ -715,7 +715,7 @@ class TestOciClientTransformations(unittest.TestCase):
 
         events = [
             json.loads(raw.decode("utf-8"))
-            for raw in transform_oci_stream_wrapper(iter(chunks), "chat_stream", is_v2=False)
+            for raw in transform_oci_stream_wrapper(iter(chunks), "chat", is_v2=False)
         ]
 
         self.assertEqual(events[2]["event_type"], "stream-end")
@@ -759,8 +759,6 @@ class TestOciClientTransformations(unittest.TestCase):
         url = get_oci_url("us-chicago-1", "chat")
         self.assertIn("/actions/chat", url)
 
-        url = get_oci_url("us-chicago-1", "chat_stream")
-        self.assertIn("/actions/chat", url)
 
     def test_get_oci_url_unknown_endpoint_raises(self):
         """Test that unknown endpoints raise ValueError instead of producing bad URLs."""

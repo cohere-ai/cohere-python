@@ -480,7 +480,7 @@ def map_request_to_oci(
         request.stream = ByteStream(oci_body_bytes)
         request._content = oci_body_bytes
         request.extensions["endpoint"] = endpoint
-        request.extensions["is_stream"] = "stream" in endpoint or body.get("stream", False)
+        request.extensions["is_stream"] = body.get("stream", False)
         request.extensions["is_v2"] = is_v2_client
 
     return _event_hook
@@ -554,7 +554,6 @@ def get_oci_url(
     action_map = {
         "embed": "embedText",
         "chat": "chat",
-        "chat_stream": "chat",
     }
 
     action = action_map.get(endpoint)
@@ -658,7 +657,7 @@ def transform_request_to_oci(
 
         return oci_body
 
-    elif endpoint in ["chat", "chat_stream"]:
+    elif endpoint == "chat":
         # Validate that the request body matches the client type
         has_messages = "messages" in cohere_body
         has_message = "message" in cohere_body
@@ -800,7 +799,7 @@ def transform_request_to_oci(
                 chat_request["priority"] = cohere_body["priority"]
 
         # Handle streaming for both versions
-        if "stream" in endpoint or cohere_body.get("stream"):
+        if cohere_body.get("stream"):
             chat_request["isStream"] = True
 
         # Top level OCI request structure
@@ -861,7 +860,7 @@ def transform_oci_response_to_cohere(
             "meta": meta,
         }
 
-    elif endpoint == "chat" or endpoint == "chat_stream":
+    elif endpoint == "chat":
         chat_response = oci_response.get("chatResponse", {})
 
         if is_v2:
@@ -1096,7 +1095,7 @@ def transform_stream_event(
     Returns:
         V2: List of transformed events. V1: Single transformed event dict.
     """
-    if endpoint in ["chat_stream", "chat"]:
+    if endpoint == "chat":
         if is_v2:
             content_type = "text"
             content_value = ""
