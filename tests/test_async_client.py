@@ -79,7 +79,9 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
     @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
     async def test_generate(self) -> None:
         response = await self.co.generate(
+            model="command-a-03-2025",
             prompt='Please explain to me how LLMs work',
+            max_tokens=10
         )
         print(response)
 
