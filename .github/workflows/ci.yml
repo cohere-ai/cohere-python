@@ -39,9 +39,15 @@ jobs:
       - name: Install aws deps
         run: poetry run pip install boto3 sagemaker botocore
       - name: Test
-        run: poetry run pytest .
+        run: poetry run pytest -rP -n auto .
         env:
           CO_API_KEY: ${{ secrets.COHERE_API_KEY }}
+      - name: Install aiohttp extra
+        run: poetry install --extras aiohttp
+
+      - name: Test (aiohttp)
+        run: poetry run pytest -rP -n auto -m aiohttp .
+
   publish:
     needs: [compile, test]
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
