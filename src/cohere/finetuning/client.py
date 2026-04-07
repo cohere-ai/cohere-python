@@ -12,7 +12,6 @@ from .finetuning.types.list_events_response import ListEventsResponse
 from .finetuning.types.list_finetuned_models_response import ListFinetunedModelsResponse
 from .finetuning.types.list_training_step_metrics_response import ListTrainingStepMetricsResponse
 from .finetuning.types.settings import Settings
-from .finetuning.types.status import Status
 from .finetuning.types.update_finetuned_model_response import UpdateFinetunedModelResponse
 from .raw_client import AsyncRawFinetuningClient, RawFinetuningClient
 
@@ -202,13 +201,7 @@ class FinetuningClient:
         return _response.data
 
     def update_finetuned_model(
-        self,
-        id: str,
-        *,
-        name: str,
-        settings: Settings,
-        status: typing.Optional[Status] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        self, id: str, *, name: str, settings: Settings, request_options: typing.Optional[RequestOptions] = None
     ) -> UpdateFinetunedModelResponse:
         """
         Updates the fine-tuned model with the given ID. The model will be updated with the new settings and name provided in the request body.
@@ -223,9 +216,6 @@ class FinetuningClient:
 
         settings : Settings
             FinetunedModel settings such as dataset, hyperparameters...
-
-        status : typing.Optional[Status]
-            Current stage in the life-cycle of the fine-tuned model.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -256,7 +246,7 @@ class FinetuningClient:
         )
         """
         _response = self._raw_client.update_finetuned_model(
-            id, name=name, settings=settings, status=status, request_options=request_options
+            id, name=name, settings=settings, request_options=request_options
         )
         return _response.data
 
@@ -593,13 +583,7 @@ class AsyncFinetuningClient:
         return _response.data
 
     async def update_finetuned_model(
-        self,
-        id: str,
-        *,
-        name: str,
-        settings: Settings,
-        status: typing.Optional[Status] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        self, id: str, *, name: str, settings: Settings, request_options: typing.Optional[RequestOptions] = None
     ) -> UpdateFinetunedModelResponse:
         """
         Updates the fine-tuned model with the given ID. The model will be updated with the new settings and name provided in the request body.
@@ -614,9 +598,6 @@ class AsyncFinetuningClient:
 
         settings : Settings
             FinetunedModel settings such as dataset, hyperparameters...
-
-        status : typing.Optional[Status]
-            Current stage in the life-cycle of the fine-tuned model.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -655,7 +636,7 @@ class AsyncFinetuningClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.update_finetuned_model(
-            id, name=name, settings=settings, status=status, request_options=request_options
+            id, name=name, settings=settings, request_options=request_options
         )
         return _response.data
 

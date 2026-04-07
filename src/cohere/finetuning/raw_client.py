@@ -7,6 +7,7 @@ from ..core.api_error import ApiError
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.http_response import AsyncHttpResponse, HttpResponse
 from ..core.jsonable_encoder import jsonable_encoder
+from ..core.parse_error import ParsingError
 from ..core.request_options import RequestOptions
 from ..core.serialization import convert_and_respect_annotation_metadata
 from ..core.unchecked_base_model import construct_type
@@ -24,8 +25,8 @@ from .finetuning.types.list_events_response import ListEventsResponse
 from .finetuning.types.list_finetuned_models_response import ListFinetunedModelsResponse
 from .finetuning.types.list_training_step_metrics_response import ListTrainingStepMetricsResponse
 from .finetuning.types.settings import Settings
-from .finetuning.types.status import Status
 from .finetuning.types.update_finetuned_model_response import UpdateFinetunedModelResponse
+from pydantic import ValidationError
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -160,6 +161,10 @@ class RawFinetuningClient:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def create_finetuned_model(
@@ -269,6 +274,10 @@ class RawFinetuningClient:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def get_finetuned_model(
@@ -374,6 +383,10 @@ class RawFinetuningClient:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def delete_finetuned_model(
@@ -480,16 +493,14 @@ class RawFinetuningClient:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def update_finetuned_model(
-        self,
-        id: str,
-        *,
-        name: str,
-        settings: Settings,
-        status: typing.Optional[Status] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        self, id: str, *, name: str, settings: Settings, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[UpdateFinetunedModelResponse]:
         """
         Updates the fine-tuned model with the given ID. The model will be updated with the new settings and name provided in the request body.
@@ -504,9 +515,6 @@ class RawFinetuningClient:
 
         settings : Settings
             FinetunedModel settings such as dataset, hyperparameters...
-
-        status : typing.Optional[Status]
-            Current stage in the life-cycle of the fine-tuned model.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -524,7 +532,6 @@ class RawFinetuningClient:
                 "settings": convert_and_respect_annotation_metadata(
                     object_=settings, annotation=Settings, direction="write"
                 ),
-                "status": status,
             },
             headers={
                 "content-type": "application/json",
@@ -611,6 +618,10 @@ class RawFinetuningClient:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def list_events(
@@ -744,6 +755,10 @@ class RawFinetuningClient:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def list_training_step_metrics(
@@ -867,6 +882,10 @@ class RawFinetuningClient:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
 
@@ -999,6 +1018,10 @@ class AsyncRawFinetuningClient:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def create_finetuned_model(
@@ -1108,6 +1131,10 @@ class AsyncRawFinetuningClient:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def get_finetuned_model(
@@ -1213,6 +1240,10 @@ class AsyncRawFinetuningClient:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def delete_finetuned_model(
@@ -1319,16 +1350,14 @@ class AsyncRawFinetuningClient:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def update_finetuned_model(
-        self,
-        id: str,
-        *,
-        name: str,
-        settings: Settings,
-        status: typing.Optional[Status] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        self, id: str, *, name: str, settings: Settings, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[UpdateFinetunedModelResponse]:
         """
         Updates the fine-tuned model with the given ID. The model will be updated with the new settings and name provided in the request body.
@@ -1343,9 +1372,6 @@ class AsyncRawFinetuningClient:
 
         settings : Settings
             FinetunedModel settings such as dataset, hyperparameters...
-
-        status : typing.Optional[Status]
-            Current stage in the life-cycle of the fine-tuned model.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1363,7 +1389,6 @@ class AsyncRawFinetuningClient:
                 "settings": convert_and_respect_annotation_metadata(
                     object_=settings, annotation=Settings, direction="write"
                 ),
-                "status": status,
             },
             headers={
                 "content-type": "application/json",
@@ -1450,6 +1475,10 @@ class AsyncRawFinetuningClient:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def list_events(
@@ -1583,6 +1612,10 @@ class AsyncRawFinetuningClient:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def list_training_step_metrics(
@@ -1706,4 +1739,8 @@ class AsyncRawFinetuningClient:
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
