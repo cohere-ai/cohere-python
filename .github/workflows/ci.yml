@@ -46,7 +46,7 @@ jobs:
         run: poetry install --extras aiohttp
 
       - name: Test (aiohttp)
-        run: poetry run pytest -rP -n auto -m aiohttp .
+        run: poetry run pytest -rP -n auto -m aiohttp . || [ $? -eq 5 ]
         env:
           CO_API_KEY: ${{ secrets.COHERE_API_KEY }}
 
