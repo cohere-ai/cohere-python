@@ -24,17 +24,19 @@ def _setup_boto3_env():
 @unittest.skipIf(None == os.getenv("TEST_AWS"), "tests skipped because TEST_AWS is not set")
 class TestClient(unittest.TestCase):
     platform: str = "bedrock"
-    client: cohere.AwsClient = cohere.BedrockClient(
-        aws_access_key=aws_access_key,
-        aws_secret_key=aws_secret_key,
-        aws_session_token=aws_session_token,
-        aws_region=aws_region,
-    )
     models: typing.Dict[str, str] = {
         "chat_model": "cohere.command-r-plus-v1:0",
         "embed_model": "cohere.embed-multilingual-v3",
         "generate_model": "cohere.command-text-v14",
     }
+
+    def setUp(self) -> None:
+        self.client = cohere.BedrockClient(
+            aws_access_key=aws_access_key,
+            aws_secret_key=aws_secret_key,
+            aws_session_token=aws_session_token,
+            aws_region=aws_region,
+        )
 
     def test_rerank(self) -> None:
         if self.platform != "sagemaker":
@@ -130,12 +132,13 @@ class TestBedrockClientV2(unittest.TestCase):
     since the request would fail with a signature mismatch otherwise.
     """
 
-    client: cohere.ClientV2 = cohere.BedrockClientV2(
-        aws_access_key=aws_access_key,
-        aws_secret_key=aws_secret_key,
-        aws_session_token=aws_session_token,
-        aws_region=aws_region,
-    )
+    def setUp(self) -> None:
+        self.client = cohere.BedrockClientV2(
+            aws_access_key=aws_access_key,
+            aws_secret_key=aws_secret_key,
+            aws_session_token=aws_session_token,
+            aws_region=aws_region,
+        )
 
     def test_embed(self) -> None:
         response = self.client.embed(

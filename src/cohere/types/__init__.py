@@ -167,6 +167,7 @@ if typing.TYPE_CHECKING:
     from .generation import Generation
     from .get_connector_response import GetConnectorResponse
     from .get_model_response import GetModelResponse
+    from .get_model_response_sampling_defaults import GetModelResponseSamplingDefaults
     from .image import Image
     from .image_content import ImageContent
     from .image_url import ImageUrl
@@ -382,6 +383,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "Generation": ".generation",
     "GetConnectorResponse": ".get_connector_response",
     "GetModelResponse": ".get_model_response",
+    "GetModelResponseSamplingDefaults": ".get_model_response_sampling_defaults",
     "Image": ".image",
     "ImageContent": ".image_content",
     "ImageUrl": ".image_url",
@@ -641,6 +643,7 @@ __all__ = [
     "Generation",
     "GetConnectorResponse",
     "GetModelResponse",
+    "GetModelResponseSamplingDefaults",
     "Image",
     "ImageContent",
     "ImageUrl",

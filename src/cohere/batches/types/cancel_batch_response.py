@@ -3,3 +3,6 @@
 import typing
 
 CancelBatchResponse = typing.Dict[str, typing.Any]
+"""
+Response to a request to cancel a batch.
+"""
