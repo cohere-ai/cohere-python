@@ -72,13 +72,6 @@ class TestClient(unittest.TestCase):
         with self.assertRaises(ValueError):
             co.list_connectors("dummy", dummy="dummy")  # type: ignore
 
-    @unittest.skipIf(os.getenv("CO_API_URL") is not None, "Doesn't work in staging.")
-    def test_generate(self) -> None:
-        response = co.generate(
-            prompt='Please explain to me how LLMs work',
-        )
-        print(response)
-
     def test_embed(self) -> None:
         response = co.embed(
             texts=['hello', 'goodbye'],
