@@ -47,6 +47,8 @@ jobs:
 
       - name: Test (aiohttp)
         run: poetry run pytest -rP -n auto -m aiohttp .
+        env:
+          CO_API_KEY: ${{ secrets.COHERE_API_KEY }}
 
   publish:
     needs: [compile, test]
