@@ -3,3 +3,9 @@
 import typing
 
 ChatDocument = typing.Dict[str, str]
+"""
+Relevant information that could be used by the model to generate a more accurate reply.
+The contents of each document are generally short (under 300 words), and are passed in the form of a
+dictionary of strings. Some suggested keys are "text", "author", "date". Both the key name and the value will be
+passed to the model.
+"""

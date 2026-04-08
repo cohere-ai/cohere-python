@@ -2309,7 +2309,7 @@ Follow the [Migration Guide](https://docs.cohere.com/v2/docs/migrating-v1-to-v2)
 <dd>
 
 ```python
-from cohere import Client
+from cohere import Client, ChatMessageV2_User
 from cohere.environment import ClientEnvironment
 
 client = Client(
@@ -2320,10 +2320,9 @@ client = Client(
 client.v2.chat_stream(
     model="command-a-03-2025",
     messages=[
-        {
-            "role": "user",
-            "content": "Tell me about LLMs"
-        }
+        ChatMessageV2_User(
+            content="Tell me about LLMs",
+        )
     ],
 )
 
@@ -2608,7 +2607,7 @@ Follow the [Migration Guide](https://docs.cohere.com/v2/docs/migrating-v1-to-v2)
 <dd>
 
 ```python
-from cohere import Client
+from cohere import Client, ChatMessageV2_User
 from cohere.environment import ClientEnvironment
 
 client = Client(
@@ -2619,10 +2618,9 @@ client = Client(
 client.v2.chat_stream(
     model="command-a-03-2025",
     messages=[
-        {
-            "role": "user",
-            "content": "Tell me about LLMs"
-        }
+        ChatMessageV2_User(
+            content="Tell me about LLMs",
+        )
     ],
 )
 

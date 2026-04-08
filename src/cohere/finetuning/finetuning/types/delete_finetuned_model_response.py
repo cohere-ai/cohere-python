@@ -3,3 +3,6 @@
 import typing
 
 DeleteFinetunedModelResponse = typing.Dict[str, typing.Any]
+"""
+Response to request to delete a fine-tuned model.
+"""
