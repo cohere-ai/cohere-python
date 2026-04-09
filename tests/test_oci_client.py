@@ -100,6 +100,7 @@ class TestOciClient(unittest.TestCase):
         self.assertIsNotNone(response.embeddings)
         self.assertEqual(len(response.embeddings), 2)
         self.assertEqual(len(response.embeddings[0]), 1024)
+        self.assertEqual(response.response_type, "embeddings_floats")
 
     def test_chat(self):
         """Test V1 chat with Command R."""
@@ -159,6 +160,7 @@ class TestOciClientV2(unittest.TestCase):
         self.assertEqual(len(response.embeddings.float_), 2)
         # Verify embedding dimensions (1024 for embed-english-v3.0)
         self.assertEqual(len(response.embeddings.float_[0]), 1024)
+        self.assertEqual(response.response_type, "embeddings_by_type")
 
     def test_embed_with_model_prefix_v2(self):
         """Test embedding with 'cohere.' model prefix on v2 client."""
@@ -1022,6 +1024,38 @@ region=us-chicago-1
         self.assertIn("int8", result["embeddings"])
         self.assertNotIn("FLOAT", result["embeddings"])
         self.assertEqual(result["meta"]["tokens"]["output_tokens"], 7)
+
+    def test_embed_response_includes_response_type_v1(self):
+        """Test V1 embed response includes response_type=embeddings_floats for SDK union."""
+        from cohere.oci_client import transform_oci_response_to_cohere
+
+        result = transform_oci_response_to_cohere(
+            "embed",
+            {
+                "id": "embed-id",
+                "embeddings": [[0.1, 0.2]],
+                "usage": {"inputTokens": 3, "completionTokens": 0},
+            },
+            is_v2=False,
+        )
+
+        self.assertEqual(result["response_type"], "embeddings_floats")
+
+    def test_embed_response_includes_response_type_v2(self):
+        """Test V2 embed response includes response_type=embeddings_by_type for SDK union."""
+        from cohere.oci_client import transform_oci_response_to_cohere
+
+        result = transform_oci_response_to_cohere(
+            "embed",
+            {
+                "id": "embed-id",
+                "embeddings": {"FLOAT": [[0.1, 0.2]]},
+                "usage": {"inputTokens": 3, "completionTokens": 0},
+            },
+            is_v2=True,
+        )
+
+        self.assertEqual(result["response_type"], "embeddings_by_type")
 
     def test_normalize_model_for_oci_rejects_empty_model(self):
         """Test model normalization fails clearly for empty model names."""
