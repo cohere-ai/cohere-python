@@ -878,7 +878,10 @@ def transform_oci_response_to_cohere(
         if "billed_units" in usage:
             meta["billed_units"] = usage["billed_units"]
 
+        response_type = "embeddings_by_type" if is_v2 else "embeddings_floats"
+
         return {
+            "response_type": response_type,
             "id": oci_response.get("id", str(uuid.uuid4())),
             "embeddings": embeddings,
             "texts": [],
