@@ -52,6 +52,7 @@ oci = { version = "^2.165.0", optional = true }
 
 [tool.poetry.extras]
 oci = ["oci"]
+aiohttp=["aiohttp", "httpx-aiohttp"]
 
 [tool.poetry.group.dev.dependencies]
 mypy = "==1.13.0"
@@ -99,6 +100,3 @@ section-order = ["future", "standard-library", "third-party", "first-party"]
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.extras]
-aiohttp=["aiohttp", "httpx-aiohttp"]

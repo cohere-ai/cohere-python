@@ -530,7 +530,7 @@ def map_response_from_oci() -> EventHook:
 
         # For streaming responses, wrap the stream with a transformer
         if is_stream:
-            original_stream = response.stream
+            original_stream = typing.cast(typing.Iterator[bytes], response.stream)
             transformed_stream = transform_oci_stream_wrapper(original_stream, endpoint, is_v2)
             response.stream = Streamer(transformed_stream)
             # Reset consumption flags
@@ -640,7 +640,7 @@ def transform_request_to_oci(
     Returns:
         Transformed request body in OCI format
     """
-    model = normalize_model_for_oci(cohere_body.get("model"))
+    model = normalize_model_for_oci(cohere_body.get("model", ""))
 
     if endpoint == "embed":
         if "texts" in cohere_body:

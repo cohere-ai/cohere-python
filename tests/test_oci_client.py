@@ -55,19 +55,19 @@ import cohere
 
 if "tokenizers" not in sys.modules:
     tokenizers_stub = types.ModuleType("tokenizers")
-    tokenizers_stub.Tokenizer = object
+    tokenizers_stub.Tokenizer = object  # type: ignore[attr-defined]
     sys.modules["tokenizers"] = tokenizers_stub
 
 if "fastavro" not in sys.modules:
     fastavro_stub = types.ModuleType("fastavro")
-    fastavro_stub.parse_schema = lambda schema: schema
-    fastavro_stub.reader = lambda *args, **kwargs: iter(())
-    fastavro_stub.writer = lambda *args, **kwargs: None
+    fastavro_stub.parse_schema = lambda schema: schema  # type: ignore[attr-defined]
+    fastavro_stub.reader = lambda *args, **kwargs: iter(())  # type: ignore[attr-defined]
+    fastavro_stub.writer = lambda *args, **kwargs: None  # type: ignore[attr-defined]
     sys.modules["fastavro"] = fastavro_stub
 
 if "httpx_sse" not in sys.modules:
     httpx_sse_stub = types.ModuleType("httpx_sse")
-    httpx_sse_stub.connect_sse = lambda *args, **kwargs: None
+    httpx_sse_stub.connect_sse = lambda *args, **kwargs: None  # type: ignore[attr-defined]
     sys.modules["httpx_sse"] = httpx_sse_stub
 
 
