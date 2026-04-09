@@ -11,8 +11,8 @@ import httpx
 import requests
 from .client import Client, ClientEnvironment
 from .client_v2 import ClientV2
+from .aws_client import Streamer
 from .manually_maintained.lazy_oci_deps import lazy_oci
-from .manually_maintained.streaming import Streamer
 from httpx import URL, ByteStream
 
 
@@ -1038,16 +1038,22 @@ def transform_oci_stream_wrapper(
                 final_usage = _usage_from_oci(oci_event.get("usage"))
             yield _emit_v2_event(cohere_event)
 
-    def _transform_v1_event(oci_event: typing.Dict[str, typing.Any]) -> bytes:
-        nonlocal full_v1_text, final_v1_finish_reason
+    def _transform_v1_event(oci_event: typing.Dict[str, typing.Any]) -> typing.Iterator[bytes]:
+        nonlocal emitted_start, full_v1_text, final_v1_finish_reason
+        if not emitted_start:
+            yield _emit_v1_event({
+                "event_type": "stream-start",
+                "generation_id": generation_id,
+                "is_finished": False,
+            })
+            emitted_start = True
         event = transform_stream_event(endpoint, oci_event, is_v2=False)
         if isinstance(event, dict):
             if event.get("event_type") == "text-generation" and event.get("text"):
                 full_v1_text += typing.cast(str, event["text"])
             if "finishReason" in oci_event:
                 final_v1_finish_reason = oci_event.get("finishReason", final_v1_finish_reason)
-            return _emit_v1_event(event)
-        return b""
+            yield _emit_v1_event(event)
 
     def _process_line(line: str) -> typing.Iterator[bytes]:
         if not line.startswith("data: "):
@@ -1091,7 +1097,8 @@ def transform_oci_stream_wrapper(
                 for event_bytes in _transform_v2_event(oci_event):
                     yield event_bytes
             else:
-                yield _transform_v1_event(oci_event)
+                for event_bytes in _transform_v1_event(oci_event):
+                    yield event_bytes
         except Exception as exc:
             raise RuntimeError(f"OCI stream event transformation failed for endpoint '{endpoint}': {exc}") from exc
 

@@ -800,9 +800,13 @@ class TestOciClientTransformations(unittest.TestCase):
             for raw in transform_oci_stream_wrapper(iter(chunks), "chat", is_v2=False)
         ]
 
-        self.assertEqual(events[2]["event_type"], "stream-end")
-        self.assertEqual(events[2]["finish_reason"], "MAX_TOKENS")
-        self.assertEqual(events[2]["response"]["text"], "Hello world")
+        # First event should be stream-start with generation_id
+        self.assertEqual(events[0]["event_type"], "stream-start")
+        self.assertIn("generation_id", events[0])
+
+        self.assertEqual(events[3]["event_type"], "stream-end")
+        self.assertEqual(events[3]["finish_reason"], "MAX_TOKENS")
+        self.assertEqual(events[3]["response"]["text"], "Hello world")
 
     def test_transform_chat_request_tool_message_fields(self):
         """Test tool message fields are converted to OCI names."""
