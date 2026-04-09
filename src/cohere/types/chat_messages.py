@@ -5,3 +5,8 @@ import typing
 from .chat_message_v2 import ChatMessageV2
 
 ChatMessages = typing.List[ChatMessageV2]
+"""
+A list of chat messages in chronological order, representing a conversation between the user and the model.
+
+Messages can be from `User`, `Assistant`, `Tool` and `System` roles. Learn more about messages and roles in [the Chat API guide](https://docs.cohere.com/v2/docs/chat-api).
+"""

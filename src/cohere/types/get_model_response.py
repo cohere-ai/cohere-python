@@ -6,6 +6,7 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
 from ..core.unchecked_base_model import UncheckedBaseModel
 from .compatible_endpoint import CompatibleEndpoint
+from .get_model_response_sampling_defaults import GetModelResponseSamplingDefaults
 
 
 class GetModelResponse(UncheckedBaseModel):
@@ -51,6 +52,11 @@ class GetModelResponse(UncheckedBaseModel):
     features: typing.Optional[typing.List[str]] = pydantic.Field(default=None)
     """
     The features that the model supports.
+    """
+
+    sampling_defaults: typing.Optional[GetModelResponseSamplingDefaults] = pydantic.Field(default=None)
+    """
+    Default sampling parameters for this model when omitted from API requests.
     """
 
     if IS_PYDANTIC_V2:

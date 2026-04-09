@@ -153,6 +153,7 @@ if typing.TYPE_CHECKING:
         Generation,
         GetConnectorResponse,
         GetModelResponse,
+        GetModelResponseSamplingDefaults,
         Image,
         ImageContent,
         ImageUrl,
@@ -257,6 +258,7 @@ if typing.TYPE_CHECKING:
         UnprocessableEntityError,
     )
     from . import audio, batches, connectors, datasets, embed_jobs, finetuning, models, v2
+    from ._default_clients import DefaultAioHttpClient, DefaultAsyncHttpxClient
     from .aliases import (
         ChatResponse,
         ContentDeltaStreamedChatResponseV2,
@@ -448,6 +450,8 @@ _dynamic_imports: typing.Dict[str, str] = {
     "DatasetsListResponse": ".datasets",
     "DebugStreamedChatResponse": ".types",
     "DebugV2ChatStreamResponse": ".v2",
+    "DefaultAioHttpClient": "._default_clients",
+    "DefaultAsyncHttpxClient": "._default_clients",
     "DeleteConnectorResponse": ".types",
     "DetokenizeResponse": ".types",
     "Document": ".types",
@@ -490,6 +494,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "GetBatchResponse": ".batches",
     "GetConnectorResponse": ".types",
     "GetModelResponse": ".types",
+    "GetModelResponseSamplingDefaults": ".types",
     "Image": ".types",
     "ImageContent": ".types",
     "ImageUrl": ".types",
@@ -784,6 +789,8 @@ __all__ = [
     "DatasetsListResponse",
     "DebugStreamedChatResponse",
     "DebugV2ChatStreamResponse",
+    "DefaultAioHttpClient",
+    "DefaultAsyncHttpxClient",
     "DeleteConnectorResponse",
     "DetokenizeResponse",
     "Document",
@@ -826,6 +833,7 @@ __all__ = [
     "GetBatchResponse",
     "GetConnectorResponse",
     "GetModelResponse",
+    "GetModelResponseSamplingDefaults",
     "Image",
     "ImageContent",
     "ImageUrl",
