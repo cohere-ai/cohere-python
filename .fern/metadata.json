@@ -4,11 +4,20 @@
   "generatorVersion": "5.3.3",
   "generatorConfig": {
     "inline_request_params": false,
+    "extras": {
+      "oci": [
+        "oci"
+      ]
+    },
     "extra_dependencies": {
       "fastavro": "^1.9.4",
       "requests": "^2.0.0",
       "types-requests": "^2.0.0",
-      "tokenizers": ">=0.15,<1"
+      "tokenizers": ">=0.15,<1",
+      "oci": {
+        "version": "^2.165.0",
+        "optional": true
+      }
     },
     "improved_imports": true,
     "pydantic_config": {
@@ -55,6 +64,13 @@
         ]
       },
       {
+        "from": "oci_client",
+        "imports": [
+          "OciClient",
+          "OciClientV2"
+        ]
+      },
+      {
         "from": "client_v2",
         "imports": [
           "AsyncClientV2",
@@ -78,6 +94,6 @@
       }
     ]
   },
-  "originGitCommit": "f6bbd671944a203a435dd01ebe619dcb4e493503",
-  "sdkVersion": "6.0.0"
+  "originGitCommit": "8dfb5e03f14a05967c4cdeeb44429eb4c1dca198",
+  "sdkVersion": "6.1.0"
 }
