@@ -286,6 +286,7 @@ if typing.TYPE_CHECKING:
     from .datasets import DatasetsCreateResponse, DatasetsGetResponse, DatasetsGetUsageResponse, DatasetsListResponse
     from .embed_jobs import CreateEmbedJobRequestTruncate
     from .environment import ClientEnvironment
+    from .oci_client import OciClient, OciClientV2
     from .sagemaker_client import SagemakerClient, SagemakerClientV2
     from .v2 import (
         CitationEndV2ChatStreamResponse,
