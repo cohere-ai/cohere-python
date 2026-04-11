@@ -509,6 +509,30 @@ class TestOciClientModels(unittest.TestCase):
         self.assertIsNotNone(response.embeddings.float_)
         self.assertEqual(len(response.embeddings.float_[0]), 1024)
 
+    def test_embed_with_embedding_types(self):
+        """Test embed with explicit embedding_types parameter."""
+        response = self.client.embed(
+            model="embed-english-v3.0",
+            texts=["Hello world"],
+            input_type="search_document",
+            embedding_types=["float"],
+        )
+        self.assertIsNotNone(response.embeddings.float_)
+        self.assertEqual(len(response.embeddings.float_[0]), 1024)
+
+    def test_embed_with_truncate(self):
+        """Test embed with truncate parameter."""
+        long_text = "hello " * 1000
+        for mode in ["NONE", "START", "END"]:
+            response = self.client.embed(
+                model="embed-english-v3.0",
+                texts=[long_text],
+                input_type="search_document",
+                truncate=mode,
+            )
+            self.assertIsNotNone(response.embeddings.float_)
+            self.assertEqual(len(response.embeddings.float_[0]), 1024)
+
     def test_command_r_plus_chat(self):
         """Test command-r-plus-08-2024 via V1 client."""
         v1_client = cohere.OciClient(
@@ -772,7 +796,7 @@ class TestOciClientTransformations(unittest.TestCase):
         self.assertEqual(result["inputs"], ["hello", "world"])
         self.assertEqual(result["inputType"], "SEARCH_DOCUMENT")
         self.assertEqual(result["truncate"], "END")
-        self.assertEqual(result["embeddingTypes"], ["FLOAT", "INT8"])
+        self.assertEqual(result["embeddingTypes"], ["float", "int8"])
         self.assertEqual(result["compartmentId"], "compartment-123")
         self.assertEqual(result["servingMode"]["modelId"], "cohere.embed-english-v3.0")
 

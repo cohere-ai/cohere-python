@@ -669,7 +669,8 @@ def transform_request_to_oci(
             oci_body["truncate"] = cohere_body["truncate"].upper()
 
         if "embedding_types" in cohere_body:
-            oci_body["embeddingTypes"] = [et.upper() for et in cohere_body["embedding_types"]]
+            # OCI expects lowercase embedding types (float, int8, binary, etc.)
+            oci_body["embeddingTypes"] = [et.lower() for et in cohere_body["embedding_types"]]
         if "max_tokens" in cohere_body:
             oci_body["maxTokens"] = cohere_body["max_tokens"]
         if "output_dimension" in cohere_body:
@@ -875,7 +876,8 @@ def transform_oci_response_to_cohere(
         Transformed response in Cohere format
     """
     if endpoint == "embed":
-        embeddings_data = oci_response.get("embeddings", {})
+        # OCI returns "embeddings" by default, or "embeddingsByType" when embeddingTypes is specified
+        embeddings_data = oci_response.get("embeddingsByType") or oci_response.get("embeddings", {})
 
         if isinstance(embeddings_data, dict):
             normalized_embeddings = {str(key).lower(): value for key, value in embeddings_data.items()}
