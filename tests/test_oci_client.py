@@ -185,6 +185,36 @@ class TestOciClientV2(unittest.TestCase):
         self.assertIsNotNone(response)
         self.assertIsNotNone(response.message)
 
+    def test_chat_tool_use_v2(self):
+        """Test tool use with v2 client on OCI on-demand inference."""
+        response = self.client.chat(
+            model="command-a-03-2025",
+            messages=[{"role": "user", "content": "What's the weather in Toronto?"}],
+            max_tokens=200,
+            tools=[{
+                "type": "function",
+                "function": {
+                    "name": "get_weather",
+                    "description": "Get current weather for a location",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "location": {"type": "string", "description": "City name"}
+                        },
+                        "required": ["location"],
+                    },
+                },
+            }],
+        )
+
+        self.assertIsNotNone(response)
+        self.assertIsNotNone(response.message)
+        self.assertEqual(response.finish_reason, "TOOL_CALL")
+        self.assertTrue(len(response.message.tool_calls) > 0)
+        tool_call = response.message.tool_calls[0]
+        self.assertEqual(tool_call.function.name, "get_weather")
+        self.assertIn("Toronto", tool_call.function.arguments)
+
     def test_chat_stream_v2(self):
         """Test streaming chat with v2 client."""
         events = []
