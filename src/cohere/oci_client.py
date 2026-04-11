@@ -756,7 +756,13 @@ def transform_request_to_oci(
             if "stop_sequences" in cohere_body:
                 chat_request["stopSequences"] = cohere_body["stop_sequences"]
             if "tools" in cohere_body:
-                chat_request["tools"] = cohere_body["tools"]
+                oci_tools = []
+                for tool in cohere_body["tools"]:
+                    oci_tool = {**tool}
+                    if "type" in oci_tool:
+                        oci_tool["type"] = oci_tool["type"].upper()
+                    oci_tools.append(oci_tool)
+                chat_request["tools"] = oci_tools
             if "strict_tools" in cohere_body:
                 chat_request["strictTools"] = cohere_body["strict_tools"]
             if "documents" in cohere_body:
