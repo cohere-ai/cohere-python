@@ -113,7 +113,7 @@ class TestOciClient(unittest.TestCase):
         self.assertIn("4", response.text)
 
     def test_chat_stream(self):
-        """Test V1 streaming chat."""
+        """Test V1 streaming chat terminates and produces correct events."""
         events = []
         for event in self.client.chat_stream(
             model="command-r-08-2024",
@@ -124,6 +124,11 @@ class TestOciClient(unittest.TestCase):
         self.assertTrue(len(events) > 0)
         text_events = [e for e in events if hasattr(e, "text") and e.text]
         self.assertTrue(len(text_events) > 0)
+
+        # Verify stream terminates with correct event lifecycle
+        event_types = [getattr(e, "event_type", None) for e in events]
+        self.assertEqual(event_types[0], "stream-start")
+        self.assertEqual(event_types[-1], "stream-end")
 
 
 @unittest.skipIf(os.getenv("TEST_OCI") is None, "TEST_OCI not set")
@@ -186,7 +191,7 @@ class TestOciClientV2(unittest.TestCase):
         self.assertIsNotNone(response.message)
 
     def test_chat_stream_v2(self):
-        """Test streaming chat with v2 client."""
+        """Test V2 streaming chat terminates and produces correct event lifecycle."""
         events = []
         for event in self.client.chat_stream(
             model="command-a-03-2025",
@@ -195,11 +200,16 @@ class TestOciClientV2(unittest.TestCase):
             events.append(event)
 
         self.assertTrue(len(events) > 0)
-        # Verify we received content-delta events with text
-        content_delta_events = [e for e in events if hasattr(e, "type") and e.type == "content-delta"]
-        self.assertTrue(len(content_delta_events) > 0)
 
-        # Verify we can extract text from events
+        # Verify full event lifecycle: message-start → content-start → content-delta(s) → content-end → message-end
+        event_types = [e.type for e in events]
+        self.assertEqual(event_types[0], "message-start")
+        self.assertIn("content-start", event_types)
+        self.assertIn("content-delta", event_types)
+        self.assertIn("content-end", event_types)
+        self.assertEqual(event_types[-1], "message-end")
+
+        # Verify we can extract text from content-delta events
         full_text = ""
         for event in events:
             if (
@@ -214,7 +224,6 @@ class TestOciClientV2(unittest.TestCase):
             ):
                 full_text += event.delta.message.content.text
 
-        # Should have received some text
         self.assertTrue(len(full_text) > 0)
 
 @unittest.skipIf(os.getenv("TEST_OCI") is None, "TEST_OCI not set")
