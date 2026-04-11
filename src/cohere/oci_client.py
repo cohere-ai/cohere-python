@@ -778,7 +778,7 @@ def transform_request_to_oci(
                 chat_request["citationOptions"] = cohere_body["citation_options"]
             if "response_format" in cohere_body:
                 chat_request["responseFormat"] = cohere_body["response_format"]
-            if "safety_mode" in cohere_body:
+            if "safety_mode" in cohere_body and cohere_body["safety_mode"] is not None:
                 chat_request["safetyMode"] = cohere_body["safety_mode"].upper()
             if "logprobs" in cohere_body:
                 chat_request["logprobs"] = cohere_body["logprobs"]
@@ -834,7 +834,7 @@ def transform_request_to_oci(
                 chat_request["toolResults"] = cohere_body["tool_results"]
             if "response_format" in cohere_body:
                 chat_request["responseFormat"] = cohere_body["response_format"]
-            if "safety_mode" in cohere_body:
+            if "safety_mode" in cohere_body and cohere_body["safety_mode"] is not None:
                 chat_request["safetyMode"] = cohere_body["safety_mode"].upper()
             if "priority" in cohere_body:
                 chat_request["priority"] = cohere_body["priority"]
