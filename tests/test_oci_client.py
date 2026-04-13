@@ -190,6 +190,37 @@ class TestOciClientV2(unittest.TestCase):
         self.assertIsNotNone(response)
         self.assertIsNotNone(response.message)
 
+    def test_chat_vision_v2(self):
+        """Test vision with inline image on Command A Vision."""
+        import base64, struct, zlib
+
+        # Create a minimal 1x1 red PNG
+        raw = b'\x00\xff\x00\x00'
+        compressed = zlib.compress(raw)
+        def chunk(ctype, data):
+            c = ctype + data
+            return struct.pack('>I', len(data)) + c + struct.pack('>I', zlib.crc32(c) & 0xffffffff)
+        ihdr = struct.pack('>IIBBBBB', 1, 1, 8, 2, 0, 0, 0)
+        png = b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', ihdr) + chunk(b'IDAT', compressed) + chunk(b'IEND', b'')
+        img_b64 = base64.b64encode(png).decode()
+
+        response = self.client.chat(
+            model="command-a-vision",
+            messages=[{
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "What color is this image? Reply with one word."},
+                    {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{img_b64}"}},
+                ],
+            }],
+        )
+
+        self.assertIsNotNone(response)
+        self.assertIsNotNone(response.message)
+        self.assertTrue(len(response.message.content) > 0)
+        # The 1x1 red pixel should be identified as red
+        self.assertIn("red", response.message.content[0].text.lower())
+
     def test_chat_tool_use_v2(self):
         """Test tool use with v2 client on OCI on-demand inference."""
         response = self.client.chat(

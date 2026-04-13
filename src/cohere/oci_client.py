@@ -721,6 +721,9 @@ def transform_request_to_oci(
                         if isinstance(item, dict) and "type" in item:
                             transformed_item = item.copy()
                             transformed_item["type"] = item["type"].upper()
+                            # OCI expects camelCase: image_url → imageUrl
+                            if "image_url" in transformed_item:
+                                transformed_item["imageUrl"] = transformed_item.pop("image_url")
                             transformed_content.append(transformed_item)
                         else:
                             transformed_content.append(item)
