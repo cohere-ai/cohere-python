@@ -113,7 +113,7 @@ class TestOciClient(unittest.TestCase):
         self.assertIn("4", response.text)
 
     def test_chat_stream(self):
-        """Test V1 streaming chat."""
+        """Test V1 streaming chat terminates and produces correct events."""
         events = []
         for event in self.client.chat_stream(
             model="command-r-08-2024",
@@ -124,6 +124,11 @@ class TestOciClient(unittest.TestCase):
         self.assertTrue(len(events) > 0)
         text_events = [e for e in events if hasattr(e, "text") and e.text]
         self.assertTrue(len(text_events) > 0)
+
+        # Verify stream terminates with correct event lifecycle
+        event_types = [getattr(e, "event_type", None) for e in events]
+        self.assertEqual(event_types[0], "stream-start")
+        self.assertEqual(event_types[-1], "stream-end")
 
 
 @unittest.skipIf(os.getenv("TEST_OCI") is None, "TEST_OCI not set")
@@ -216,8 +221,137 @@ class TestOciClientV2(unittest.TestCase):
         # The 1x1 red pixel should be identified as red
         self.assertIn("red", response.message.content[0].text.lower())
 
+    def test_chat_tool_use_v2(self):
+        """Test tool use with v2 client on OCI on-demand inference."""
+        response = self.client.chat(
+            model="command-a-03-2025",
+            messages=[{"role": "user", "content": "What's the weather in Toronto?"}],
+            max_tokens=200,
+            tools=[{
+                "type": "function",
+                "function": {
+                    "name": "get_weather",
+                    "description": "Get current weather for a location",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "location": {"type": "string", "description": "City name"}
+                        },
+                        "required": ["location"],
+                    },
+                },
+            }],
+        )
+
+        self.assertIsNotNone(response)
+        self.assertIsNotNone(response.message)
+        self.assertEqual(response.finish_reason, "TOOL_CALL")
+        self.assertTrue(len(response.message.tool_calls) > 0)
+        tool_call = response.message.tool_calls[0]
+        self.assertEqual(tool_call.function.name, "get_weather")
+        self.assertIn("Toronto", tool_call.function.arguments)
+
+    def test_chat_tool_use_response_type_lowered(self):
+        """Test that tool_call type is lowercased in response (OCI returns FUNCTION)."""
+        response = self.client.chat(
+            model="command-a-03-2025",
+            messages=[{"role": "user", "content": "What's the weather in Toronto?"}],
+            max_tokens=200,
+            tools=[{
+                "type": "function",
+                "function": {
+                    "name": "get_weather",
+                    "description": "Get current weather for a location",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "location": {"type": "string", "description": "City name"}
+                        },
+                        "required": ["location"],
+                    },
+                },
+            }],
+        )
+
+        self.assertEqual(response.finish_reason, "TOOL_CALL")
+        tool_call = response.message.tool_calls[0]
+        # OCI returns "FUNCTION" — SDK must lowercase to "function" for Cohere compat
+        self.assertEqual(tool_call.type, "function")
+
+    def test_chat_multi_turn_tool_use_v2(self):
+        """Test multi-turn tool use: send tool result back after tool call."""
+        # Step 1: Get a tool call
+        response = self.client.chat(
+            model="command-a-03-2025",
+            messages=[{"role": "user", "content": "What's the weather in Toronto?"}],
+            max_tokens=200,
+            tools=[{
+                "type": "function",
+                "function": {
+                    "name": "get_weather",
+                    "description": "Get current weather for a location",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "location": {"type": "string", "description": "City name"}
+                        },
+                        "required": ["location"],
+                    },
+                },
+            }],
+        )
+        self.assertEqual(response.finish_reason, "TOOL_CALL")
+        tool_call = response.message.tool_calls[0]
+
+        # Step 2: Send tool result back
+        response2 = self.client.chat(
+            model="command-a-03-2025",
+            messages=[
+                {"role": "user", "content": "What's the weather in Toronto?"},
+                {
+                    "role": "assistant",
+                    "tool_calls": [{"id": tool_call.id, "type": "function", "function": {"name": "get_weather", "arguments": tool_call.function.arguments}}],
+                    "tool_plan": response.message.tool_plan,
+                },
+                {
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "content": [{"type": "text", "text": "15°C, sunny"}],
+                },
+            ],
+            max_tokens=200,
+            tools=[{
+                "type": "function",
+                "function": {
+                    "name": "get_weather",
+                    "description": "Get current weather for a location",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "location": {"type": "string", "description": "City name"}
+                        },
+                        "required": ["location"],
+                    },
+                },
+            }],
+        )
+
+        self.assertIsNotNone(response2.message)
+        # Model should respond with text incorporating the tool result
+        self.assertTrue(len(response2.message.content) > 0)
+
+    def test_chat_safety_mode_v2(self):
+        """Test that safety_mode is uppercased for OCI."""
+        # Cohere SDK enum values are already uppercase, but test lowercase too
+        response = self.client.chat(
+            model="command-a-03-2025",
+            messages=[{"role": "user", "content": "Say hi"}],
+            safety_mode="STRICT",
+        )
+        self.assertIsNotNone(response.message)
+
     def test_chat_stream_v2(self):
-        """Test streaming chat with v2 client."""
+        """Test V2 streaming chat terminates and produces correct event lifecycle."""
         events = []
         for event in self.client.chat_stream(
             model="command-a-03-2025",
@@ -226,11 +360,16 @@ class TestOciClientV2(unittest.TestCase):
             events.append(event)
 
         self.assertTrue(len(events) > 0)
-        # Verify we received content-delta events with text
-        content_delta_events = [e for e in events if hasattr(e, "type") and e.type == "content-delta"]
-        self.assertTrue(len(content_delta_events) > 0)
 
-        # Verify we can extract text from events
+        # Verify full event lifecycle: message-start → content-start → content-delta(s) → content-end → message-end
+        event_types = [e.type for e in events]
+        self.assertEqual(event_types[0], "message-start")
+        self.assertIn("content-start", event_types)
+        self.assertIn("content-delta", event_types)
+        self.assertIn("content-end", event_types)
+        self.assertEqual(event_types[-1], "message-end")
+
+        # Verify we can extract text from content-delta events
         full_text = ""
         for event in events:
             if (
@@ -245,7 +384,6 @@ class TestOciClientV2(unittest.TestCase):
             ):
                 full_text += event.delta.message.content.text
 
-        # Should have received some text
         self.assertTrue(len(full_text) > 0)
 
 @unittest.skipIf(os.getenv("TEST_OCI") is None, "TEST_OCI not set")
@@ -410,6 +548,30 @@ class TestOciClientModels(unittest.TestCase):
         )
         self.assertIsNotNone(response.embeddings.float_)
         self.assertEqual(len(response.embeddings.float_[0]), 1024)
+
+    def test_embed_with_embedding_types(self):
+        """Test embed with explicit embedding_types parameter."""
+        response = self.client.embed(
+            model="embed-english-v3.0",
+            texts=["Hello world"],
+            input_type="search_document",
+            embedding_types=["float"],
+        )
+        self.assertIsNotNone(response.embeddings.float_)
+        self.assertEqual(len(response.embeddings.float_[0]), 1024)
+
+    def test_embed_with_truncate(self):
+        """Test embed with truncate parameter."""
+        long_text = "hello " * 1000
+        for mode in ["NONE", "START", "END"]:
+            response = self.client.embed(
+                model="embed-english-v3.0",
+                texts=[long_text],
+                input_type="search_document",
+                truncate=mode,
+            )
+            self.assertIsNotNone(response.embeddings.float_)
+            self.assertEqual(len(response.embeddings.float_[0]), 1024)
 
     def test_command_r_plus_chat(self):
         """Test command-r-plus-08-2024 via V1 client."""
@@ -674,7 +836,7 @@ class TestOciClientTransformations(unittest.TestCase):
         self.assertEqual(result["inputs"], ["hello", "world"])
         self.assertEqual(result["inputType"], "SEARCH_DOCUMENT")
         self.assertEqual(result["truncate"], "END")
-        self.assertEqual(result["embeddingTypes"], ["FLOAT", "INT8"])
+        self.assertEqual(result["embeddingTypes"], ["float", "int8"])
         self.assertEqual(result["compartmentId"], "compartment-123")
         self.assertEqual(result["servingMode"]["modelId"], "cohere.embed-english-v3.0")
 

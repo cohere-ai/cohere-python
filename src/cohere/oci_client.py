@@ -669,7 +669,8 @@ def transform_request_to_oci(
             oci_body["truncate"] = cohere_body["truncate"].upper()
 
         if "embedding_types" in cohere_body:
-            oci_body["embeddingTypes"] = [et.upper() for et in cohere_body["embedding_types"]]
+            # OCI expects lowercase embedding types (float, int8, binary, etc.)
+            oci_body["embeddingTypes"] = [et.lower() for et in cohere_body["embedding_types"]]
         if "max_tokens" in cohere_body:
             oci_body["maxTokens"] = cohere_body["max_tokens"]
         if "output_dimension" in cohere_body:
@@ -731,7 +732,13 @@ def transform_request_to_oci(
                     oci_msg["content"] = msg.get("content") or []
 
                 if "tool_calls" in msg:
-                    oci_msg["toolCalls"] = msg["tool_calls"]
+                    oci_tool_calls = []
+                    for tc in msg["tool_calls"]:
+                        oci_tc = {**tc}
+                        if "type" in oci_tc:
+                            oci_tc["type"] = oci_tc["type"].upper()
+                        oci_tool_calls.append(oci_tc)
+                    oci_msg["toolCalls"] = oci_tool_calls
                 if "tool_call_id" in msg:
                     oci_msg["toolCallId"] = msg["tool_call_id"]
                 if "tool_plan" in msg:
@@ -759,7 +766,13 @@ def transform_request_to_oci(
             if "stop_sequences" in cohere_body:
                 chat_request["stopSequences"] = cohere_body["stop_sequences"]
             if "tools" in cohere_body:
-                chat_request["tools"] = cohere_body["tools"]
+                oci_tools = []
+                for tool in cohere_body["tools"]:
+                    oci_tool = {**tool}
+                    if "type" in oci_tool:
+                        oci_tool["type"] = oci_tool["type"].upper()
+                    oci_tools.append(oci_tool)
+                chat_request["tools"] = oci_tools
             if "strict_tools" in cohere_body:
                 chat_request["strictTools"] = cohere_body["strict_tools"]
             if "documents" in cohere_body:
@@ -768,8 +781,8 @@ def transform_request_to_oci(
                 chat_request["citationOptions"] = cohere_body["citation_options"]
             if "response_format" in cohere_body:
                 chat_request["responseFormat"] = cohere_body["response_format"]
-            if "safety_mode" in cohere_body:
-                chat_request["safetyMode"] = cohere_body["safety_mode"]
+            if "safety_mode" in cohere_body and cohere_body["safety_mode"] is not None:
+                chat_request["safetyMode"] = cohere_body["safety_mode"].upper()
             if "logprobs" in cohere_body:
                 chat_request["logprobs"] = cohere_body["logprobs"]
             if "tool_choice" in cohere_body:
@@ -813,13 +826,19 @@ def transform_request_to_oci(
             if "documents" in cohere_body:
                 chat_request["documents"] = cohere_body["documents"]
             if "tools" in cohere_body:
-                chat_request["tools"] = cohere_body["tools"]
+                oci_tools = []
+                for tool in cohere_body["tools"]:
+                    oci_tool = {**tool}
+                    if "type" in oci_tool:
+                        oci_tool["type"] = oci_tool["type"].upper()
+                    oci_tools.append(oci_tool)
+                chat_request["tools"] = oci_tools
             if "tool_results" in cohere_body:
                 chat_request["toolResults"] = cohere_body["tool_results"]
             if "response_format" in cohere_body:
                 chat_request["responseFormat"] = cohere_body["response_format"]
-            if "safety_mode" in cohere_body:
-                chat_request["safetyMode"] = cohere_body["safety_mode"]
+            if "safety_mode" in cohere_body and cohere_body["safety_mode"] is not None:
+                chat_request["safetyMode"] = cohere_body["safety_mode"].upper()
             if "priority" in cohere_body:
                 chat_request["priority"] = cohere_body["priority"]
 
@@ -860,7 +879,8 @@ def transform_oci_response_to_cohere(
         Transformed response in Cohere format
     """
     if endpoint == "embed":
-        embeddings_data = oci_response.get("embeddings", {})
+        # OCI returns "embeddings" by default, or "embeddingsByType" when embeddingTypes is specified
+        embeddings_data = oci_response.get("embeddingsByType") or oci_response.get("embeddings", {})
 
         if isinstance(embeddings_data, dict):
             normalized_embeddings = {str(key).lower(): value for key, value in embeddings_data.items()}
@@ -914,7 +934,12 @@ def transform_oci_response_to_cohere(
                 message = {**message, "content": transformed_content}
 
             if "toolCalls" in message:
-                tool_calls = message["toolCalls"]
+                tool_calls = []
+                for tc in message["toolCalls"]:
+                    lowered_tc = {**tc}
+                    if "type" in lowered_tc:
+                        lowered_tc["type"] = lowered_tc["type"].lower()
+                    tool_calls.append(lowered_tc)
                 message = {k: v for k, v in message.items() if k != "toolCalls"}
                 message["tool_calls"] = tool_calls
             if "toolPlan" in message:
@@ -1058,36 +1083,45 @@ def transform_oci_stream_wrapper(
                 final_v1_finish_reason = oci_event.get("finishReason", final_v1_finish_reason)
             yield _emit_v1_event(event)
 
+    stream_finished = False
+
+    def _emit_closing_events() -> typing.Iterator[bytes]:
+        """Emit the final closing events for the stream."""
+        if is_v2:
+            if emitted_start:
+                if not emitted_content_end:
+                    yield _emit_v2_event({"type": "content-end", "index": current_content_index})
+                message_end_event: typing.Dict[str, typing.Any] = {
+                    "type": "message-end",
+                    "id": generation_id,
+                    "delta": {"finish_reason": final_finish_reason},
+                }
+                if final_usage:
+                    message_end_event["delta"]["usage"] = final_usage
+                yield _emit_v2_event(message_end_event)
+        else:
+            yield _emit_v1_event(
+                {
+                    "event_type": "stream-end",
+                    "finish_reason": final_v1_finish_reason,
+                    "response": {
+                        "text": full_v1_text,
+                        "generation_id": generation_id,
+                        "finish_reason": final_v1_finish_reason,
+                    },
+                }
+            )
+
     def _process_line(line: str) -> typing.Iterator[bytes]:
+        nonlocal stream_finished
         if not line.startswith("data: "):
             return
 
         data_str = line[6:]
         if data_str.strip() == "[DONE]":
-            if is_v2:
-                if emitted_start:
-                    if not emitted_content_end:
-                        yield _emit_v2_event({"type": "content-end", "index": current_content_index})
-                    message_end_event: typing.Dict[str, typing.Any] = {
-                        "type": "message-end",
-                        "id": generation_id,
-                        "delta": {"finish_reason": final_finish_reason},
-                    }
-                    if final_usage:
-                        message_end_event["delta"]["usage"] = final_usage
-                    yield _emit_v2_event(message_end_event)
-            else:
-                yield _emit_v1_event(
-                    {
-                        "event_type": "stream-end",
-                        "finish_reason": final_v1_finish_reason,
-                        "response": {
-                            "text": full_v1_text,
-                            "generation_id": generation_id,
-                            "finish_reason": final_v1_finish_reason,
-                        },
-                    }
-                )
+            for event_bytes in _emit_closing_events():
+                yield event_bytes
+            stream_finished = True
             return
 
         try:
@@ -1105,6 +1139,12 @@ def transform_oci_stream_wrapper(
         except Exception as exc:
             raise RuntimeError(f"OCI stream event transformation failed for endpoint '{endpoint}': {exc}") from exc
 
+        # OCI may not send [DONE] — treat finishReason as stream termination
+        if "finishReason" in oci_event:
+            for event_bytes in _emit_closing_events():
+                yield event_bytes
+            stream_finished = True
+
     for chunk in stream:
         buffer += chunk
         while b"\n" in buffer:
@@ -1112,8 +1152,10 @@ def transform_oci_stream_wrapper(
             line = line_bytes.decode("utf-8").strip()
             for event_bytes in _process_line(line):
                 yield event_bytes
+            if stream_finished:
+                return
 
-    if buffer.strip():
+    if buffer.strip() and not stream_finished:
         line = buffer.decode("utf-8").strip()
         for event_bytes in _process_line(line):
             yield event_bytes
