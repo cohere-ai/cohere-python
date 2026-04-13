@@ -1055,36 +1055,45 @@ def transform_oci_stream_wrapper(
                 final_v1_finish_reason = oci_event.get("finishReason", final_v1_finish_reason)
             yield _emit_v1_event(event)
 
+    stream_finished = False
+
+    def _emit_closing_events() -> typing.Iterator[bytes]:
+        """Emit the final closing events for the stream."""
+        if is_v2:
+            if emitted_start:
+                if not emitted_content_end:
+                    yield _emit_v2_event({"type": "content-end", "index": current_content_index})
+                message_end_event: typing.Dict[str, typing.Any] = {
+                    "type": "message-end",
+                    "id": generation_id,
+                    "delta": {"finish_reason": final_finish_reason},
+                }
+                if final_usage:
+                    message_end_event["delta"]["usage"] = final_usage
+                yield _emit_v2_event(message_end_event)
+        else:
+            yield _emit_v1_event(
+                {
+                    "event_type": "stream-end",
+                    "finish_reason": final_v1_finish_reason,
+                    "response": {
+                        "text": full_v1_text,
+                        "generation_id": generation_id,
+                        "finish_reason": final_v1_finish_reason,
+                    },
+                }
+            )
+
     def _process_line(line: str) -> typing.Iterator[bytes]:
+        nonlocal stream_finished
         if not line.startswith("data: "):
             return
 
         data_str = line[6:]
         if data_str.strip() == "[DONE]":
-            if is_v2:
-                if emitted_start:
-                    if not emitted_content_end:
-                        yield _emit_v2_event({"type": "content-end", "index": current_content_index})
-                    message_end_event: typing.Dict[str, typing.Any] = {
-                        "type": "message-end",
-                        "id": generation_id,
-                        "delta": {"finish_reason": final_finish_reason},
-                    }
-                    if final_usage:
-                        message_end_event["delta"]["usage"] = final_usage
-                    yield _emit_v2_event(message_end_event)
-            else:
-                yield _emit_v1_event(
-                    {
-                        "event_type": "stream-end",
-                        "finish_reason": final_v1_finish_reason,
-                        "response": {
-                            "text": full_v1_text,
-                            "generation_id": generation_id,
-                            "finish_reason": final_v1_finish_reason,
-                        },
-                    }
-                )
+            for event_bytes in _emit_closing_events():
+                yield event_bytes
+            stream_finished = True
             return
 
         try:
@@ -1102,6 +1111,12 @@ def transform_oci_stream_wrapper(
         except Exception as exc:
             raise RuntimeError(f"OCI stream event transformation failed for endpoint '{endpoint}': {exc}") from exc
 
+        # OCI may not send [DONE] — treat finishReason as stream termination
+        if "finishReason" in oci_event:
+            for event_bytes in _emit_closing_events():
+                yield event_bytes
+            stream_finished = True
+
     for chunk in stream:
         buffer += chunk
         while b"\n" in buffer:
@@ -1109,8 +1124,10 @@ def transform_oci_stream_wrapper(
             line = line_bytes.decode("utf-8").strip()
             for event_bytes in _process_line(line):
                 yield event_bytes
+            if stream_finished:
+                return
 
-    if buffer.strip():
+    if buffer.strip() and not stream_finished:
         line = buffer.decode("utf-8").strip()
         for event_bytes in _process_line(line):
             yield event_bytes
