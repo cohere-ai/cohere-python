@@ -669,7 +669,8 @@ def transform_request_to_oci(
             oci_body["truncate"] = cohere_body["truncate"].upper()
 
         if "embedding_types" in cohere_body:
-            oci_body["embeddingTypes"] = [et.upper() for et in cohere_body["embedding_types"]]
+            # OCI expects lowercase embedding types (float, int8, binary, etc.)
+            oci_body["embeddingTypes"] = [et.lower() for et in cohere_body["embedding_types"]]
         if "max_tokens" in cohere_body:
             oci_body["maxTokens"] = cohere_body["max_tokens"]
         if "output_dimension" in cohere_body:
@@ -728,7 +729,13 @@ def transform_request_to_oci(
                     oci_msg["content"] = msg.get("content") or []
 
                 if "tool_calls" in msg:
-                    oci_msg["toolCalls"] = msg["tool_calls"]
+                    oci_tool_calls = []
+                    for tc in msg["tool_calls"]:
+                        oci_tc = {**tc}
+                        if "type" in oci_tc:
+                            oci_tc["type"] = oci_tc["type"].upper()
+                        oci_tool_calls.append(oci_tc)
+                    oci_msg["toolCalls"] = oci_tool_calls
                 if "tool_call_id" in msg:
                     oci_msg["toolCallId"] = msg["tool_call_id"]
                 if "tool_plan" in msg:
@@ -756,7 +763,13 @@ def transform_request_to_oci(
             if "stop_sequences" in cohere_body:
                 chat_request["stopSequences"] = cohere_body["stop_sequences"]
             if "tools" in cohere_body:
-                chat_request["tools"] = cohere_body["tools"]
+                oci_tools = []
+                for tool in cohere_body["tools"]:
+                    oci_tool = {**tool}
+                    if "type" in oci_tool:
+                        oci_tool["type"] = oci_tool["type"].upper()
+                    oci_tools.append(oci_tool)
+                chat_request["tools"] = oci_tools
             if "strict_tools" in cohere_body:
                 chat_request["strictTools"] = cohere_body["strict_tools"]
             if "documents" in cohere_body:
@@ -765,8 +778,8 @@ def transform_request_to_oci(
                 chat_request["citationOptions"] = cohere_body["citation_options"]
             if "response_format" in cohere_body:
                 chat_request["responseFormat"] = cohere_body["response_format"]
-            if "safety_mode" in cohere_body:
-                chat_request["safetyMode"] = cohere_body["safety_mode"]
+            if "safety_mode" in cohere_body and cohere_body["safety_mode"] is not None:
+                chat_request["safetyMode"] = cohere_body["safety_mode"].upper()
             if "logprobs" in cohere_body:
                 chat_request["logprobs"] = cohere_body["logprobs"]
             if "tool_choice" in cohere_body:
@@ -810,13 +823,19 @@ def transform_request_to_oci(
             if "documents" in cohere_body:
                 chat_request["documents"] = cohere_body["documents"]
             if "tools" in cohere_body:
-                chat_request["tools"] = cohere_body["tools"]
+                oci_tools = []
+                for tool in cohere_body["tools"]:
+                    oci_tool = {**tool}
+                    if "type" in oci_tool:
+                        oci_tool["type"] = oci_tool["type"].upper()
+                    oci_tools.append(oci_tool)
+                chat_request["tools"] = oci_tools
             if "tool_results" in cohere_body:
                 chat_request["toolResults"] = cohere_body["tool_results"]
             if "response_format" in cohere_body:
                 chat_request["responseFormat"] = cohere_body["response_format"]
-            if "safety_mode" in cohere_body:
-                chat_request["safetyMode"] = cohere_body["safety_mode"]
+            if "safety_mode" in cohere_body and cohere_body["safety_mode"] is not None:
+                chat_request["safetyMode"] = cohere_body["safety_mode"].upper()
             if "priority" in cohere_body:
                 chat_request["priority"] = cohere_body["priority"]
 
@@ -857,7 +876,8 @@ def transform_oci_response_to_cohere(
         Transformed response in Cohere format
     """
     if endpoint == "embed":
-        embeddings_data = oci_response.get("embeddings", {})
+        # OCI returns "embeddings" by default, or "embeddingsByType" when embeddingTypes is specified
+        embeddings_data = oci_response.get("embeddingsByType") or oci_response.get("embeddings", {})
 
         if isinstance(embeddings_data, dict):
             normalized_embeddings = {str(key).lower(): value for key, value in embeddings_data.items()}
@@ -911,7 +931,12 @@ def transform_oci_response_to_cohere(
                 message = {**message, "content": transformed_content}
 
             if "toolCalls" in message:
-                tool_calls = message["toolCalls"]
+                tool_calls = []
+                for tc in message["toolCalls"]:
+                    lowered_tc = {**tc}
+                    if "type" in lowered_tc:
+                        lowered_tc["type"] = lowered_tc["type"].lower()
+                    tool_calls.append(lowered_tc)
                 message = {k: v for k, v in message.items() if k != "toolCalls"}
                 message["tool_calls"] = tool_calls
             if "toolPlan" in message:

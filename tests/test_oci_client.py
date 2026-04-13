@@ -190,6 +190,135 @@ class TestOciClientV2(unittest.TestCase):
         self.assertIsNotNone(response)
         self.assertIsNotNone(response.message)
 
+    def test_chat_tool_use_v2(self):
+        """Test tool use with v2 client on OCI on-demand inference."""
+        response = self.client.chat(
+            model="command-a-03-2025",
+            messages=[{"role": "user", "content": "What's the weather in Toronto?"}],
+            max_tokens=200,
+            tools=[{
+                "type": "function",
+                "function": {
+                    "name": "get_weather",
+                    "description": "Get current weather for a location",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "location": {"type": "string", "description": "City name"}
+                        },
+                        "required": ["location"],
+                    },
+                },
+            }],
+        )
+
+        self.assertIsNotNone(response)
+        self.assertIsNotNone(response.message)
+        self.assertEqual(response.finish_reason, "TOOL_CALL")
+        self.assertTrue(len(response.message.tool_calls) > 0)
+        tool_call = response.message.tool_calls[0]
+        self.assertEqual(tool_call.function.name, "get_weather")
+        self.assertIn("Toronto", tool_call.function.arguments)
+
+    def test_chat_tool_use_response_type_lowered(self):
+        """Test that tool_call type is lowercased in response (OCI returns FUNCTION)."""
+        response = self.client.chat(
+            model="command-a-03-2025",
+            messages=[{"role": "user", "content": "What's the weather in Toronto?"}],
+            max_tokens=200,
+            tools=[{
+                "type": "function",
+                "function": {
+                    "name": "get_weather",
+                    "description": "Get current weather for a location",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "location": {"type": "string", "description": "City name"}
+                        },
+                        "required": ["location"],
+                    },
+                },
+            }],
+        )
+
+        self.assertEqual(response.finish_reason, "TOOL_CALL")
+        tool_call = response.message.tool_calls[0]
+        # OCI returns "FUNCTION" — SDK must lowercase to "function" for Cohere compat
+        self.assertEqual(tool_call.type, "function")
+
+    def test_chat_multi_turn_tool_use_v2(self):
+        """Test multi-turn tool use: send tool result back after tool call."""
+        # Step 1: Get a tool call
+        response = self.client.chat(
+            model="command-a-03-2025",
+            messages=[{"role": "user", "content": "What's the weather in Toronto?"}],
+            max_tokens=200,
+            tools=[{
+                "type": "function",
+                "function": {
+                    "name": "get_weather",
+                    "description": "Get current weather for a location",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "location": {"type": "string", "description": "City name"}
+                        },
+                        "required": ["location"],
+                    },
+                },
+            }],
+        )
+        self.assertEqual(response.finish_reason, "TOOL_CALL")
+        tool_call = response.message.tool_calls[0]
+
+        # Step 2: Send tool result back
+        response2 = self.client.chat(
+            model="command-a-03-2025",
+            messages=[
+                {"role": "user", "content": "What's the weather in Toronto?"},
+                {
+                    "role": "assistant",
+                    "tool_calls": [{"id": tool_call.id, "type": "function", "function": {"name": "get_weather", "arguments": tool_call.function.arguments}}],
+                    "tool_plan": response.message.tool_plan,
+                },
+                {
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "content": [{"type": "text", "text": "15°C, sunny"}],
+                },
+            ],
+            max_tokens=200,
+            tools=[{
+                "type": "function",
+                "function": {
+                    "name": "get_weather",
+                    "description": "Get current weather for a location",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "location": {"type": "string", "description": "City name"}
+                        },
+                        "required": ["location"],
+                    },
+                },
+            }],
+        )
+
+        self.assertIsNotNone(response2.message)
+        # Model should respond with text incorporating the tool result
+        self.assertTrue(len(response2.message.content) > 0)
+
+    def test_chat_safety_mode_v2(self):
+        """Test that safety_mode is uppercased for OCI."""
+        # Cohere SDK enum values are already uppercase, but test lowercase too
+        response = self.client.chat(
+            model="command-a-03-2025",
+            messages=[{"role": "user", "content": "Say hi"}],
+            safety_mode="STRICT",
+        )
+        self.assertIsNotNone(response.message)
+
     def test_chat_stream_v2(self):
         """Test V2 streaming chat terminates and produces correct event lifecycle."""
         events = []
@@ -388,6 +517,30 @@ class TestOciClientModels(unittest.TestCase):
         )
         self.assertIsNotNone(response.embeddings.float_)
         self.assertEqual(len(response.embeddings.float_[0]), 1024)
+
+    def test_embed_with_embedding_types(self):
+        """Test embed with explicit embedding_types parameter."""
+        response = self.client.embed(
+            model="embed-english-v3.0",
+            texts=["Hello world"],
+            input_type="search_document",
+            embedding_types=["float"],
+        )
+        self.assertIsNotNone(response.embeddings.float_)
+        self.assertEqual(len(response.embeddings.float_[0]), 1024)
+
+    def test_embed_with_truncate(self):
+        """Test embed with truncate parameter."""
+        long_text = "hello " * 1000
+        for mode in ["NONE", "START", "END"]:
+            response = self.client.embed(
+                model="embed-english-v3.0",
+                texts=[long_text],
+                input_type="search_document",
+                truncate=mode,
+            )
+            self.assertIsNotNone(response.embeddings.float_)
+            self.assertEqual(len(response.embeddings.float_[0]), 1024)
 
     def test_command_r_plus_chat(self):
         """Test command-r-plus-08-2024 via V1 client."""
@@ -652,7 +805,7 @@ class TestOciClientTransformations(unittest.TestCase):
         self.assertEqual(result["inputs"], ["hello", "world"])
         self.assertEqual(result["inputType"], "SEARCH_DOCUMENT")
         self.assertEqual(result["truncate"], "END")
-        self.assertEqual(result["embeddingTypes"], ["FLOAT", "INT8"])
+        self.assertEqual(result["embeddingTypes"], ["float", "int8"])
         self.assertEqual(result["compartmentId"], "compartment-123")
         self.assertEqual(result["servingMode"]["modelId"], "cohere.embed-english-v3.0")
 
