@@ -99,4 +99,7 @@ def _get_tokenizer_config_size(tokenizer_url: str) -> float:
         if size:
             break
 
-    return round(int(typing.cast(int, size)) / 1024 / 1024, 2)
+    if size is None:
+        raise ValueError("Content-Length unavailable (server may use chunked transfer encoding)")
+
+    return round(int(size) / 1024 / 1024, 2)
