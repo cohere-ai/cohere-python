@@ -5,6 +5,9 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
 from ..core.unchecked_base_model import UncheckedBaseModel
+from .chat_data_metrics import ChatDataMetrics
+from .classify_data_metrics import ClassifyDataMetrics
+from .reranker_data_metrics import RerankerDataMetrics
 
 
 class FinetuneDatasetMetrics(UncheckedBaseModel):
@@ -37,6 +40,10 @@ class FinetuneDatasetMetrics(UncheckedBaseModel):
     """
     The size in bytes of all eval examples.
     """
+
+    reranker_data_metrics: typing.Optional[RerankerDataMetrics] = None
+    chat_data_metrics: typing.Optional[ChatDataMetrics] = None
+    classify_data_metrics: typing.Optional[ClassifyDataMetrics] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2

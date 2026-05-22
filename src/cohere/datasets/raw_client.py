@@ -9,7 +9,7 @@ from ..core.api_error import ApiError
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.datetime_utils import serialize_datetime
 from ..core.http_response import AsyncHttpResponse, HttpResponse
-from ..core.jsonable_encoder import jsonable_encoder
+from ..core.jsonable_encoder import encode_path_param
 from ..core.parse_error import ParsingError
 from ..core.request_options import RequestOptions
 from ..core.unchecked_base_model import construct_type
@@ -669,7 +669,7 @@ class RawDatasetsClient:
             A successful response.
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"v1/datasets/{jsonable_encoder(id)}",
+            f"v1/datasets/{encode_path_param(id)}",
             method="GET",
             request_options=request_options,
         )
@@ -843,7 +843,7 @@ class RawDatasetsClient:
             A successful response.
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"v1/datasets/{jsonable_encoder(id)}",
+            f"v1/datasets/{encode_path_param(id)}",
             method="DELETE",
             request_options=request_options,
         )
@@ -1631,7 +1631,7 @@ class AsyncRawDatasetsClient:
             A successful response.
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"v1/datasets/{jsonable_encoder(id)}",
+            f"v1/datasets/{encode_path_param(id)}",
             method="GET",
             request_options=request_options,
         )
@@ -1805,7 +1805,7 @@ class AsyncRawDatasetsClient:
             A successful response.
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"v1/datasets/{jsonable_encoder(id)}",
+            f"v1/datasets/{encode_path_param(id)}",
             method="DELETE",
             request_options=request_options,
         )
