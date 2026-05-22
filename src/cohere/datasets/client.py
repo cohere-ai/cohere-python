@@ -180,6 +180,8 @@ class DatasetsClient:
             type="embed-input",
             keep_original_file=True,
             skip_malformed_input=True,
+            keep_fields=["keep_fields"],
+            optional_fields=["optional_fields"],
             text_separator="text_separator",
             csv_delimiter="csv_delimiter",
         )
@@ -465,6 +467,8 @@ class AsyncDatasetsClient:
                 type="embed-input",
                 keep_original_file=True,
                 skip_malformed_input=True,
+                keep_fields=["keep_fields"],
+                optional_fields=["optional_fields"],
                 text_separator="text_separator",
                 csv_delimiter="csv_delimiter",
             )

@@ -37,8 +37,8 @@ client = Client(
 )
 
 client.chat_stream(
-    model="command-a-03-2025",
     message="hello!",
+    model="command-a-03-2025",
 )
 
 ```
@@ -506,8 +506,8 @@ client = Client(
 )
 
 client.chat_stream(
-    model="command-a-03-2025",
     message="Tell me about LLMs",
+    model="command-a-03-2025",
 )
 
 ```
@@ -1644,6 +1644,8 @@ client = Client(
 )
 
 client.rerank(
+    model="rerank-v4.0-pro",
+    query="What is the capital of the United States?",
     documents=[
         {
             "text": "Carson City is the capital city of the American state of Nevada."
@@ -1661,9 +1663,7 @@ client.rerank(
             "text": "Capital punishment has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states."
         }
     ],
-    query="What is the capital of the United States?",
     top_n=3,
-    model="rerank-v4.0-pro",
 )
 
 ```
@@ -1795,6 +1795,10 @@ client = Client(
 )
 
 client.classify(
+    inputs=[
+        "Confirm your email address",
+        "hey i need u to send some $"
+    ],
     examples=[
         ClassifyExample(
             text="Dermatologists don\'t like her!",
@@ -1836,10 +1840,6 @@ client.classify(
             text="Pre-read for tomorrow",
             label="Not spam",
         )
-    ],
-    inputs=[
-        "Confirm your email address",
-        "hey i need u to send some $"
     ],
     model="YOUR-FINE-TUNED-MODEL-ID",
 )
@@ -2309,7 +2309,7 @@ Follow the [Migration Guide](https://docs.cohere.com/v2/docs/migrating-v1-to-v2)
 <dd>
 
 ```python
-from cohere import Client, ChatMessageV2_User
+from cohere import Client, UserChatMessageV2
 from cohere.environment import ClientEnvironment
 
 client = Client(
@@ -2318,9 +2318,9 @@ client = Client(
 )
 
 client.v2.chat_stream(
-    model="command-a-03-2025",
+    model="command-a-plus-05-2026",
     messages=[
-        ChatMessageV2_User(
+        UserChatMessageV2(
             content="Tell me about LLMs",
         )
     ],
@@ -2607,7 +2607,7 @@ Follow the [Migration Guide](https://docs.cohere.com/v2/docs/migrating-v1-to-v2)
 <dd>
 
 ```python
-from cohere import Client, ChatMessageV2_User
+from cohere import Client, UserChatMessageV2
 from cohere.environment import ClientEnvironment
 
 client = Client(
@@ -2616,9 +2616,9 @@ client = Client(
 )
 
 client.v2.chat_stream(
-    model="command-a-03-2025",
+    model="command-a-plus-05-2026",
     messages=[
-        ChatMessageV2_User(
+        UserChatMessageV2(
             content="Tell me about LLMs",
         )
     ],
@@ -3093,6 +3093,8 @@ client = Client(
 )
 
 client.v2.rerank(
+    model="rerank-v4.0-pro",
+    query="What is the capital of the United States?",
     documents=[
         "Carson City is the capital city of the American state of Nevada.",
         "The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.",
@@ -3100,9 +3102,7 @@ client.v2.rerank(
         "Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.",
         "Capital punishment has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states."
     ],
-    query="What is the capital of the United States?",
     top_n=3,
-    model="rerank-v4.0-pro",
 )
 
 ```
@@ -4019,6 +4019,12 @@ client.datasets.create(
     type="embed-input",
     keep_original_file=True,
     skip_malformed_input=True,
+    keep_fields=[
+        "keep_fields"
+    ],
+    optional_fields=[
+        "optional_fields"
+    ],
     text_separator="text_separator",
     csv_delimiter="csv_delimiter",
     data="example_data",

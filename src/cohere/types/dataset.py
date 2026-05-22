@@ -11,6 +11,8 @@ from ..core.unchecked_base_model import UncheckedBaseModel
 from .dataset_part import DatasetPart
 from .dataset_type import DatasetType
 from .dataset_validation_status import DatasetValidationStatus
+from .metrics import Metrics
+from .parse_info import ParseInfo
 
 
 class Dataset(UncheckedBaseModel):
@@ -57,6 +59,9 @@ class Dataset(UncheckedBaseModel):
     """
     warnings found during validation
     """
+
+    parse_info: typing.Optional[ParseInfo] = None
+    metrics: typing.Optional[Metrics] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2

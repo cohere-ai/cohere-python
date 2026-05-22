@@ -179,7 +179,7 @@ class V2Client:
             token="YOUR_TOKEN",
         )
         response = client.v2.chat_stream(
-            model="command-a-03-2025",
+            model="command-a-plus-05-2026",
             messages=[
                 UserChatMessageV2(
                     content="Tell me about LLMs",
@@ -349,7 +349,7 @@ class V2Client:
             token="YOUR_TOKEN",
         )
         client.v2.chat(
-            model="command-a-03-2025",
+            model="command-a-plus-05-2026",
             messages=[
                 UserChatMessageV2(
                     content="Tell me about LLMs",
@@ -724,7 +724,7 @@ class AsyncV2Client:
 
         async def main() -> None:
             response = await client.v2.chat_stream(
-                model="command-a-03-2025",
+                model="command-a-plus-05-2026",
                 messages=[
                     UserChatMessageV2(
                         content="Tell me about LLMs",
@@ -903,7 +903,7 @@ class AsyncV2Client:
 
         async def main() -> None:
             await client.v2.chat(
-                model="command-a-03-2025",
+                model="command-a-plus-05-2026",
                 messages=[
                     UserChatMessageV2(
                         content="Tell me about LLMs",
