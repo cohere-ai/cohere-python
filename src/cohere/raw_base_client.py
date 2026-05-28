@@ -1627,11 +1627,15 @@ class RawBaseCohere:
             An array of strings for the model to embed. Maximum number of texts per call is `96`.
 
         images : typing.Optional[typing.Sequence[str]]
-            An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
+            An array of image data URIs for the model to embed.
 
-            The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg`, `image/png`, `image/webp`, or `image/gif` format and has a maximum size of 5MB.
+            The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg`, `image/png`, `image/webp`, or `image/gif` format.
 
-            Images are only supported with Embed v3.0 and newer models.
+            Image embeddings are supported with Embed v3.0 and newer models.
+
+            For **Embed v3.x** models, the maximum number of images per call is `1`, and each image has a maximum size of `5MB`.
+
+            For **Embed v4.0 and newer** models, there is no limit on the number of images per call. The combined size of all images in the request must be at most `20MB`.
 
         model : typing.Optional[str]
             ID of one of the available [Embedding models](https://docs.cohere.com/docs/cohere-embed).
@@ -4590,11 +4594,15 @@ class AsyncRawBaseCohere:
             An array of strings for the model to embed. Maximum number of texts per call is `96`.
 
         images : typing.Optional[typing.Sequence[str]]
-            An array of image data URIs for the model to embed. Maximum number of images per call is `1`.
+            An array of image data URIs for the model to embed.
 
-            The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg`, `image/png`, `image/webp`, or `image/gif` format and has a maximum size of 5MB.
+            The image must be a valid [data URI](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). The image must be in either `image/jpeg`, `image/png`, `image/webp`, or `image/gif` format.
 
-            Images are only supported with Embed v3.0 and newer models.
+            Image embeddings are supported with Embed v3.0 and newer models.
+
+            For **Embed v3.x** models, the maximum number of images per call is `1`, and each image has a maximum size of `5MB`.
+
+            For **Embed v4.0 and newer** models, there is no limit on the number of images per call. The combined size of all images in the request must be at most `20MB`.
 
         model : typing.Optional[str]
             ID of one of the available [Embedding models](https://docs.cohere.com/docs/cohere-embed).
