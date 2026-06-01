@@ -2,7 +2,7 @@ import unittest
 
 from cohere import EmbeddingsByTypeEmbedResponse, EmbedByTypeResponseEmbeddings, ApiMeta, ApiMetaBilledUnits, \
     ApiMetaApiVersion, EmbeddingsFloatsEmbedResponse
-from cohere.utils import merge_embed_responses
+from cohere.utils import merge_embed_responses, sum_fields_if_not_none
 
 ebt_1 = EmbeddingsByTypeEmbedResponse(
     response_type="embeddings_by_type",
@@ -198,6 +198,12 @@ class TestClient(unittest.TestCase):
             embeddings=EmbedByTypeResponseEmbeddings(float_=None))
         result = merge_embed_responses([resp1, resp2])
         self.assertEqual(result.embeddings.float_, [[1.0, 2.0]])  # type: ignore
+
+    def test_sum_fields_if_not_none_with_none_entries(self) -> None:
+        # billed_units list may contain None when ApiMeta.billed_units is unset;
+        # sum_fields_if_not_none must skip None objects without raising AttributeError
+        result = sum_fields_if_not_none([None, ApiMetaBilledUnits(input_tokens=5), None], "input_tokens")
+        self.assertEqual(result, 5)
 
     def test_merge_partial_embeddings_floats(self) -> None:
         resp = merge_embed_responses([
