@@ -360,7 +360,8 @@ def construct_type(
         if not isinstance(object_, typing.Mapping):
             return object_
 
-        key_type, items_type = get_args(type_)
+        args = get_args(type_)
+        key_type, items_type = args if args else (typing.Any, typing.Any)
         key_type = _maybe_resolve_forward_ref(key_type, host)
         items_type = _maybe_resolve_forward_ref(items_type, host)
         d = {
