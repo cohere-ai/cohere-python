@@ -228,7 +228,7 @@ def merge_embed_responses(responses: typing.List[EmbedResponse]) -> EmbedRespons
             field: [
                 embedding
                 for embedding_by_type in embeddings_by_type
-                for embedding in getattr(embedding_by_type, field)
+                for embedding in (getattr(embedding_by_type, field) or [])
             ]
             for field in fields
         }
