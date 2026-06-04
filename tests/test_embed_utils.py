@@ -189,6 +189,12 @@ class TestClient(unittest.TestCase):
             )
         ))
 
+    def test_merge_embed_responses_empty_list_raises_value_error(self) -> None:
+        # An empty texts list (e.g. Client.embed(texts=[])) yields no responses;
+        # merge_embed_responses must raise a clear ValueError instead of IndexError.
+        with self.assertRaises(ValueError):
+            merge_embed_responses([])
+
     def test_merge_partial_embeddings_floats(self) -> None:
         resp = merge_embed_responses([
             ebt_partial_1,
