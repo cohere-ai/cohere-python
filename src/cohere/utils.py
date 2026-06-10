@@ -163,7 +163,7 @@ async def async_wait(
 
 
 def sum_fields_if_not_none(obj: typing.Any, field: str) -> Optional[int]:
-    non_none = [getattr(obj, field) for obj in obj if getattr(obj, field) is not None]
+    non_none = [getattr(obj, field) for obj in obj if obj is not None and getattr(obj, field) is not None]
     return sum(non_none) if non_none else None
 
 
@@ -231,7 +231,7 @@ def merge_embed_responses(responses: typing.List[EmbedResponse]) -> EmbedRespons
             field: [
                 embedding
                 for embedding_by_type in embeddings_by_type
-                for embedding in getattr(embedding_by_type, field)
+                for embedding in (getattr(embedding_by_type, field) or [])
             ]
             for field in fields
         }
