@@ -188,6 +188,9 @@ def merge_meta_field(metas: typing.List[ApiMeta]) -> ApiMeta:
 
 
 def merge_embed_responses(responses: typing.List[EmbedResponse]) -> EmbedResponse:
+    if not responses:
+        raise ValueError("Cannot merge embed responses: no texts were provided to embed")
+
     meta = merge_meta_field([response.meta for response in responses if response.meta])
     response_id = ", ".join(response.id for response in responses)
     texts = [
