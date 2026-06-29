@@ -139,6 +139,7 @@ class Client(BaseCohere, CacheMixin):
         environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
         client_name: typing.Optional[str] = None,
         timeout: typing.Optional[float] = None,
+        max_retries: typing.Optional[int] = None,
         httpx_client: typing.Optional[httpx.Client] = None,
         thread_pool_executor: ThreadPoolExecutor = ThreadPoolExecutor(64),
         log_warning_experimental_features: bool = True,
@@ -157,6 +158,7 @@ class Client(BaseCohere, CacheMixin):
             client_name=client_name,
             token=api_key,
             timeout=timeout,
+            max_retries=max_retries,
             httpx_client=httpx_client,
         )
 
@@ -386,6 +388,7 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
         client_name: typing.Optional[str] = None,
         timeout: typing.Optional[float] = None,
+        max_retries: typing.Optional[int] = None,
         httpx_client: typing.Optional[httpx.AsyncClient] = None,
         thread_pool_executor: ThreadPoolExecutor = ThreadPoolExecutor(64),
         log_warning_experimental_features: bool = True,
@@ -404,6 +407,7 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
             client_name=client_name,
             token=api_key,
             timeout=timeout,
+            max_retries=max_retries,
             httpx_client=httpx_client,
         )
 
