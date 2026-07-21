@@ -19,6 +19,10 @@ class EmbedByTypeResponseEmbeddings(UncheckedBaseModel):
         FieldMetadata(alias="float"),
         pydantic.Field(alias="float", description="An array of float embeddings."),
     ] = None
+    """
+    An array of float embeddings.
+    """
+
     int8: typing.Optional[typing.List[typing.List[int]]] = pydantic.Field(default=None)
     """
     An array of signed int8 embeddings. Each value is between -128 and 127.

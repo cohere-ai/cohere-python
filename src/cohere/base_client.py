@@ -8,6 +8,7 @@ import typing
 import httpx
 from .core.api_error import ApiError
 from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
+from .core.http_client import get_keepalive_socket_options
 from .core.logging import LogConfig, Logger
 from .core.request_options import RequestOptions
 from .environment import ClientEnvironment
@@ -91,6 +92,12 @@ class BaseCohere:
     max_retries : typing.Optional[int]
         The default maximum number of retries for failed requests. Defaults to 2. Per-request `max_retries` in `request_options` takes precedence over this value.
 
+    stream_reconnection_enabled : typing.Optional[bool]
+        Whether to automatically reconnect on stream disconnection for resumable streaming endpoints. Defaults to True. Per-request `stream_reconnection_enabled` in `request_options` takes precedence over this value.
+
+    max_stream_reconnection_attempts : typing.Optional[int]
+        The maximum number of reconnection attempts for resumable streaming endpoints. Defaults to no limit. Per-request `max_stream_reconnection_attempts` in `request_options` takes precedence over this value.
+
     follow_redirects : typing.Optional[bool]
         Whether the default httpx client follows redirects or not, this is irrelevant if a custom httpx client is passed in.
 
@@ -120,13 +127,13 @@ class BaseCohere:
         headers: typing.Optional[typing.Dict[str, str]] = None,
         timeout: typing.Optional[float] = None,
         max_retries: typing.Optional[int] = None,
+        stream_reconnection_enabled: typing.Optional[bool] = None,
+        max_stream_reconnection_attempts: typing.Optional[int] = None,
         follow_redirects: typing.Optional[bool] = True,
         httpx_client: typing.Optional[httpx.Client] = None,
         logging: typing.Optional[typing.Union[LogConfig, Logger]] = None,
     ):
-        _defaulted_timeout = (
-            timeout if timeout is not None else 300 if httpx_client is None else httpx_client.timeout.read
-        )
+        _defaulted_timeout = timeout if timeout is not None else 300 if httpx_client is None else None
         _defaulted_max_retries = max_retries if max_retries is not None else 2
         if token is None:
             raise ApiError(body="The client must be instantiated be either passing in token or setting CO_API_KEY")
@@ -137,11 +144,20 @@ class BaseCohere:
             headers=headers,
             httpx_client=httpx_client
             if httpx_client is not None
-            else httpx.Client(timeout=_defaulted_timeout, follow_redirects=follow_redirects)
+            else httpx.Client(
+                timeout=_defaulted_timeout,
+                follow_redirects=follow_redirects,
+                transport=httpx.HTTPTransport(socket_options=get_keepalive_socket_options(idle=60, intvl=30, cnt=5)),
+            )
             if follow_redirects is not None
-            else httpx.Client(timeout=_defaulted_timeout),
+            else httpx.Client(
+                timeout=_defaulted_timeout,
+                transport=httpx.HTTPTransport(socket_options=get_keepalive_socket_options(idle=60, intvl=30, cnt=5)),
+            ),
             timeout=_defaulted_timeout,
             max_retries=_defaulted_max_retries,
+            stream_reconnection_enabled=stream_reconnection_enabled,
+            max_stream_reconnection_attempts=max_stream_reconnection_attempts,
             logging=logging,
         )
         self._raw_client = RawBaseCohere(client_wrapper=self._client_wrapper)
@@ -1594,7 +1610,10 @@ class BaseCohere:
 def _make_default_async_client(
     timeout: typing.Optional[float],
     follow_redirects: typing.Optional[bool],
+    transport: typing.Optional[httpx.AsyncBaseTransport] = None,
 ) -> httpx.AsyncClient:
+    if transport is None:
+        transport = httpx.AsyncHTTPTransport(socket_options=get_keepalive_socket_options(idle=60, intvl=30, cnt=5))
     try:
         import httpx_aiohttp  # type: ignore[import-not-found]
     except ImportError:
@@ -1605,8 +1624,8 @@ def _make_default_async_client(
         return httpx_aiohttp.HttpxAiohttpClient(timeout=timeout)
 
     if follow_redirects is not None:
-        return httpx.AsyncClient(timeout=timeout, follow_redirects=follow_redirects)
-    return httpx.AsyncClient(timeout=timeout)
+        return httpx.AsyncClient(timeout=timeout, follow_redirects=follow_redirects, transport=transport)
+    return httpx.AsyncClient(timeout=timeout, transport=transport)
 
 
 class AsyncBaseCohere:
@@ -1641,6 +1660,12 @@ class AsyncBaseCohere:
     max_retries : typing.Optional[int]
         The default maximum number of retries for failed requests. Defaults to 2. Per-request `max_retries` in `request_options` takes precedence over this value.
 
+    stream_reconnection_enabled : typing.Optional[bool]
+        Whether to automatically reconnect on stream disconnection for resumable streaming endpoints. Defaults to True. Per-request `stream_reconnection_enabled` in `request_options` takes precedence over this value.
+
+    max_stream_reconnection_attempts : typing.Optional[int]
+        The maximum number of reconnection attempts for resumable streaming endpoints. Defaults to no limit. Per-request `max_stream_reconnection_attempts` in `request_options` takes precedence over this value.
+
     follow_redirects : typing.Optional[bool]
         Whether the default httpx client follows redirects or not, this is irrelevant if a custom httpx client is passed in.
 
@@ -1671,13 +1696,13 @@ class AsyncBaseCohere:
         async_token: typing.Optional[typing.Callable[[], typing.Awaitable[str]]] = None,
         timeout: typing.Optional[float] = None,
         max_retries: typing.Optional[int] = None,
+        stream_reconnection_enabled: typing.Optional[bool] = None,
+        max_stream_reconnection_attempts: typing.Optional[int] = None,
         follow_redirects: typing.Optional[bool] = True,
         httpx_client: typing.Optional[httpx.AsyncClient] = None,
         logging: typing.Optional[typing.Union[LogConfig, Logger]] = None,
     ):
-        _defaulted_timeout = (
-            timeout if timeout is not None else 300 if httpx_client is None else httpx_client.timeout.read
-        )
+        _defaulted_timeout = timeout if timeout is not None else 300 if httpx_client is None else None
         _defaulted_max_retries = max_retries if max_retries is not None else 2
         if token is None:
             raise ApiError(body="The client must be instantiated be either passing in token or setting CO_API_KEY")
@@ -1692,6 +1717,8 @@ class AsyncBaseCohere:
             else _make_default_async_client(timeout=_defaulted_timeout, follow_redirects=follow_redirects),
             timeout=_defaulted_timeout,
             max_retries=_defaulted_max_retries,
+            stream_reconnection_enabled=stream_reconnection_enabled,
+            max_stream_reconnection_attempts=max_stream_reconnection_attempts,
             logging=logging,
         )
         self._raw_client = AsyncRawBaseCohere(client_wrapper=self._client_wrapper)
