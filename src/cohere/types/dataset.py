@@ -48,6 +48,10 @@ class Dataset(UncheckedBaseModel):
         FieldMetadata(alias="schema"),
         pydantic.Field(alias="schema", description="the avro schema of the dataset"),
     ] = None
+    """
+    the avro schema of the dataset
+    """
+
     required_fields: typing.Optional[typing.List[str]] = None
     preserve_fields: typing.Optional[typing.List[str]] = None
     dataset_parts: typing.Optional[typing.List[DatasetPart]] = pydantic.Field(default=None)
