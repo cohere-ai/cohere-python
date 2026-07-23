@@ -4,7 +4,7 @@ dynamic = ["version"]
 
 [tool.poetry]
 name = "cohere"
-version = "7.0.7"
+version = "7.0.8"
 description = ""
 readme = "README.md"
 authors = []
@@ -41,7 +41,7 @@ python = "^3.10"
 aiohttp = { version = ">=3.14.1,<4", optional = true, python = ">=3.10"}
 fastavro = "^1.9.4"
 httpx = ">=0.25.0"
-httpx-aiohttp = { version = "0.1.8", optional = true, python = ">=3.10"}
+httpx-aiohttp = { version = "^0.1.8", optional = true, python = ">=3.10"}
 oci = { version = "^2.165.0", optional = true}
 pydantic = ">= 1.9.2"
 pydantic-core = ">=2.18.2,<3.0.0"
