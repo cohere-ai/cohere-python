@@ -174,6 +174,7 @@ def merge_meta_field(metas: typing.List[ApiMeta]) -> ApiMeta:
     output_tokens = sum_fields_if_not_none(billed_units, "output_tokens")
     search_units = sum_fields_if_not_none(billed_units, "search_units")
     classifications = sum_fields_if_not_none(billed_units, "classifications")
+    image_tokens = sum_fields_if_not_none(billed_units, "image_tokens")
     warnings = {warning for meta in metas if meta.warnings for warning in meta.warnings}
     return ApiMeta(
         api_version=api_version,
@@ -181,7 +182,8 @@ def merge_meta_field(metas: typing.List[ApiMeta]) -> ApiMeta:
             input_tokens=input_tokens,
             output_tokens=output_tokens,
             search_units=search_units,
-            classifications=classifications
+            classifications=classifications,
+            image_tokens=image_tokens
         ),
         warnings=list(warnings)
     )
