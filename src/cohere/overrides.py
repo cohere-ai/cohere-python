@@ -59,11 +59,46 @@ def make_tool_call_v2_id_optional(cls):
     return cls
 
 
+def omit_authorization_header_when_api_key_is_empty() -> None:
+    """
+    Do not send an `Authorization` header when the client is created with an empty API key.
+
+    This allows pointing the client at a proxy or a self-hosted deployment that performs its own
+    authentication, e.g. `cohere.Client(api_key="")`.
+    """
+    from .core.client_wrapper import AsyncClientWrapper, BaseClientWrapper
+
+    if getattr(BaseClientWrapper, "_omits_empty_authorization", False):
+        return
+
+    get_headers = BaseClientWrapper.get_headers
+    async_get_headers = AsyncClientWrapper.async_get_headers
+
+    def patched_get_headers(self: BaseClientWrapper) -> typing.Dict[str, str]:
+        headers = get_headers(self)
+        if not self._get_token():
+            headers.pop("Authorization", None)
+        return headers
+
+    async def patched_async_get_headers(self: AsyncClientWrapper) -> typing.Dict[str, str]:
+        headers = await async_get_headers(self)
+        if headers.get("Authorization") == "Bearer ":
+            headers.pop("Authorization", None)
+        return headers
+
+    BaseClientWrapper.get_headers = patched_get_headers  # type: ignore[method-assign]
+    AsyncClientWrapper.async_get_headers = patched_async_get_headers  # type: ignore[method-assign]
+    BaseClientWrapper._omits_empty_authorization = True  # type: ignore[attr-defined]
+
+
 def run_overrides():
     """
         These are overrides to allow us to make changes to generated code without touching the generated files themselves.
         Should be used judiciously!
     """
+
+    # Override to skip the Authorization header entirely when an empty api_key is passed
+    omit_authorization_header_when_api_key_is_empty()
 
     # Override to allow access to aliases in EmbedByTypeResponseEmbeddings eg embeddings.float rather than embeddings.float_
     setattr(EmbedByTypeResponseEmbeddings, "__getattr__", allow_access_to_aliases)
