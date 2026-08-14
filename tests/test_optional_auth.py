@@ -29,3 +29,21 @@ class TestOptionalAuth(unittest.TestCase):
 
     def test_callable_api_key_returning_empty_string_omits_authorization_header(self) -> None:
         self.assertNotIn("Authorization", _headers(cohere.Client(api_key=lambda: "")))
+
+    def test_callable_api_key_is_invoked_once_per_request(self) -> None:
+        calls = 0
+
+        def api_key() -> str:
+            nonlocal calls
+            calls += 1
+            return "n/a"
+
+        self.assertEqual(_headers(cohere.Client(api_key=api_key))["Authorization"], "Bearer n/a")
+        self.assertEqual(calls, 1)
+
+    def test_callable_api_key_is_not_re_read_after_the_header_is_built(self) -> None:
+        # A supplier whose value changes between calls must not be able to strip an Authorization
+        # header that was built from a valid token.
+        values = iter(["real-token", ""])
+        client = cohere.Client(api_key=lambda: next(values))
+        self.assertEqual(_headers(client)["Authorization"], "Bearer real-token")

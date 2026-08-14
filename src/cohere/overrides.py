@@ -76,7 +76,10 @@ def omit_authorization_header_when_api_key_is_empty() -> None:
 
     def patched_get_headers(self: BaseClientWrapper) -> typing.Dict[str, str]:
         headers = get_headers(self)
-        if not self._get_token():
+        # Inspect the header that get_headers() already built rather than calling _get_token()
+        # again: for the callable `api_key` form that would invoke the supplier twice per request,
+        # and a supplier whose value changes between the two calls would produce the wrong header.
+        if headers.get("Authorization") == "Bearer ":
             headers.pop("Authorization", None)
         return headers
 
