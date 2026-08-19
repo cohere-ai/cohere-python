@@ -35,12 +35,12 @@ class BaseClientWrapper:
         import platform
 
         headers: typing.Dict[str, str] = {
-            "User-Agent": "cohere/7.0.8",
+            "User-Agent": "cohere/7.0.9",
             "X-Fern-Language": "Python",
             "X-Fern-Runtime": f"python/{platform.python_version()}",
             "X-Fern-Platform": f"{platform.system().lower()}/{platform.release()}",
             "X-Fern-SDK-Name": "cohere",
-            "X-Fern-SDK-Version": "7.0.8",
+            "X-Fern-SDK-Version": "7.0.9",
             **(self.get_custom_headers() or {}),
         }
         if self._client_name is not None:
