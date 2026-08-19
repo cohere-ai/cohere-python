@@ -266,7 +266,8 @@ def save_jsonl(dataset: Dataset, filepath: str):
 
 
 def save_csv(dataset: Dataset, filepath: str):
-    with open(filepath, "w") as outfile:
+    # csv writes its own \r\n, so the stream must not translate newlines again.
+    with open(filepath, "w", newline="") as outfile:
         for i, data in enumerate(dataset_generator(dataset)):
             if i == 0:
                 writer = csv.DictWriter(outfile, fieldnames=list(data.keys()))
