@@ -18,7 +18,13 @@ generations:
     cli_version: unknown
     generator_versions:
       fernapi/fern-python-sdk: 5.22.1
-current_generation: 39a1903ea9ab8a6a146cd2865cc9c41e5dd5b15a
+  - commit_sha: 9badd1e4f4204be56f9a132655d88d08cf2b2fb6
+    tree_hash: 9188b55259a8c6e7d2a815ab6c8dc3642175506a
+    timestamp: 2026-08-26T21:05:37.478Z
+    cli_version: unknown
+    generator_versions:
+      fernapi/fern-python-sdk: 5.22.1
+current_generation: 9badd1e4f4204be56f9a132655d88d08cf2b2fb6
 patches:
   - id: patch-c81e8a75
     content_hash: sha256:2bc67df2e5b682e22056376b1ff46d4728c48908d0b19f1c87ed230376e3dc40
@@ -572,6 +578,311 @@ patches:
                     base_url=base_url,
                     timeout=timeout,
                     max_retries=max_retries,
+                    logging=logging,
+                )
+                self._async_token = async_token
+                self.httpx_client = AsyncHttpClient(
+                    httpx_client=httpx_client,
+                    base_headers=self.get_headers,
+                    base_timeout=self.get_timeout,
+                    base_url=self.get_base_url,
+                    base_max_retries=self.get_max_retries(),
+                    async_base_headers=self.async_get_headers,
+                    logging_config=self._logging,
+                )
+
+            async def async_get_headers(self) -> typing.Dict[str, str]:
+                headers = self.get_headers()
+                if self._async_token is not None:
+                    token = await self._async_token()
+                    headers["Authorization"] = f"Bearer {token}"
+                return headers
+    status: unresolved
+  - id: patch-bc495daa
+    content_hash: sha256:b1bf3d35a15a53b01e43fdc7ce213509624684623d7c11efac2987c455431d98
+    original_commit: bc495daab7817a2e1389d71257c056dd75bbb0df
+    original_message: Omit Authorization header when api_key is empty (#795)
+    original_author: Fern Support <126544928+fern-support@users.noreply.github.com>
+    base_generation: 050f9c019d3412e3673f3c4f447abece1525b385
+    files:
+      - pyproject.toml
+      - src/cohere/core/client_wrapper.py
+    patch_content: |
+      diff --git a/pyproject.toml b/pyproject.toml
+      index f6b9084..596c3df 100644
+      --- a/pyproject.toml
+      +++ b/pyproject.toml
+      @@ -4,7 +4,7 @@ dynamic = ["version"]
+       
+       [tool.poetry]
+       name = "cohere"
+      -version = "7.0.8"
+      +version = "7.0.9"
+       description = ""
+       readme = "README.md"
+       authors = []
+      diff --git a/src/cohere/core/client_wrapper.py b/src/cohere/core/client_wrapper.py
+      index 10de6f4..ac495af 100644
+      --- a/src/cohere/core/client_wrapper.py
+      +++ b/src/cohere/core/client_wrapper.py
+      @@ -35,12 +35,12 @@ class BaseClientWrapper:
+               import platform
+       
+               headers: typing.Dict[str, str] = {
+      -            "User-Agent": "cohere/7.0.8",
+      +            "User-Agent": "cohere/7.0.9",
+                   "X-Fern-Language": "Python",
+                   "X-Fern-Runtime": f"python/{platform.python_version()}",
+                   "X-Fern-Platform": f"{platform.system().lower()}/{platform.release()}",
+                   "X-Fern-SDK-Name": "cohere",
+      -            "X-Fern-SDK-Version": "7.0.8",
+      +            "X-Fern-SDK-Version": "7.0.9",
+                   **(self.get_custom_headers() or {}),
+               }
+               if self._client_name is not None:
+    theirs_snapshot:
+      pyproject.toml: |
+        [project]
+        name = "cohere"
+        dynamic = ["version"]
+
+        [tool.poetry]
+        name = "cohere"
+        version = "7.0.9"
+        description = ""
+        readme = "README.md"
+        authors = []
+        keywords = []
+        license = "MIT"
+        classifiers = [
+            "Intended Audience :: Developers",
+            "Programming Language :: Python",
+            "Programming Language :: Python :: 3",
+            "Programming Language :: Python :: 3.10",
+            "Programming Language :: Python :: 3.11",
+            "Programming Language :: Python :: 3.12",
+            "Programming Language :: Python :: 3.13",
+            "Programming Language :: Python :: 3.14",
+            "Programming Language :: Python :: 3.15",
+            "Operating System :: OS Independent",
+            "Operating System :: POSIX",
+            "Operating System :: MacOS",
+            "Operating System :: POSIX :: Linux",
+            "Operating System :: Microsoft :: Windows",
+            "Topic :: Software Development :: Libraries :: Python Modules",
+            "Typing :: Typed",
+            "License :: OSI Approved :: MIT License"
+        ]
+        packages = [
+            { include = "cohere", from = "src"}
+        ]
+
+        [tool.poetry.urls]
+        Repository = 'https://github.com/cohere-ai/cohere-python'
+
+        [tool.poetry.dependencies]
+        python = "^3.10"
+        aiohttp = { version = ">=3.14.1,<4", optional = true, python = ">=3.10"}
+        fastavro = "^1.9.4"
+        httpx = ">=0.25.0"
+        httpx-aiohttp = { version = "^0.1.8", optional = true, python = ">=3.10"}
+        oci = { version = "^2.165.0", optional = true}
+        pydantic = ">= 1.9.2"
+        pydantic-core = ">=2.18.2,<3.0.0"
+        requests = "^2.0.0"
+        tokenizers = ">=0.15,<1"
+        types-requests = "^2.0.0"
+        typing_extensions = ">= 4.0.0"
+
+        [tool.poetry.group.dev.dependencies]
+        mypy = "==1.13.0"
+        pytest = "^9.0.3"
+        pytest-asyncio = "^1.0.0"
+        pytest-xdist = "^3.6.1"
+        python-dateutil = "^2.9.0"
+        types-python-dateutil = "^2.9.0.20240316"
+        urllib3 = ">=2.6.3,<3.0.0"
+        ruff = "==0.11.5"
+
+        [tool.pytest.ini_options]
+        testpaths = [ "tests" ]
+        asyncio_mode = "auto"
+        norecursedirs = [ "src" ]
+        markers = [
+            "aiohttp: tests that require httpx_aiohttp to be installed",
+        ]
+
+        [tool.mypy]
+        plugins = ["pydantic.mypy"]
+
+        [tool.ruff]
+        line-length = 120
+
+        [tool.ruff.lint]
+        select = [
+            "E",  # pycodestyle errors
+            "F",  # pyflakes
+            "I",  # isort
+        ]
+        ignore = [
+            "E402",  # Module level import not at top of file
+            "E501",  # Line too long
+            "E711",  # Comparison to `None` should be `cond is not None`
+            "E712",  # Avoid equality comparisons to `True`; use `if ...:` checks
+            "E721",  # Use `is` and `is not` for type comparisons, or `isinstance()` for insinstance checks
+            "E722",  # Do not use bare `except`
+            "E731",  # Do not assign a `lambda` expression, use a `def`
+            "F821",  # Undefined name
+            "F841"   # Local variable ... is assigned to but never used
+        ]
+
+        [tool.ruff.lint.isort]
+        section-order = ["future", "standard-library", "third-party", "first-party"]
+
+        [build-system]
+        requires = ["poetry-core"]
+        build-backend = "poetry.core.masonry.api"
+
+        [tool.poetry.extras]
+        oci=["oci"]
+        aiohttp=["aiohttp", "httpx-aiohttp"]
+      src/cohere/core/client_wrapper.py: |
+        # This file was auto-generated by Fern from our API Definition.
+
+        import typing
+
+        import httpx
+        from .http_client import AsyncHttpClient, HttpClient
+        from .logging import LogConfig, Logger
+
+
+        class BaseClientWrapper:
+            def __init__(
+                self,
+                *,
+                client_name: typing.Optional[str] = None,
+                token: typing.Union[str, typing.Callable[[], str]],
+                headers: typing.Optional[typing.Dict[str, str]] = None,
+                base_url: str,
+                timeout: typing.Optional[float] = None,
+                max_retries: int = 2,
+                stream_reconnection_enabled: typing.Optional[bool] = None,
+                max_stream_reconnection_attempts: typing.Optional[int] = None,
+                logging: typing.Optional[typing.Union[LogConfig, Logger]] = None,
+            ):
+                self._client_name = client_name
+                self._token = token
+                self._headers = headers
+                self._base_url = base_url
+                self._timeout = timeout
+                self._max_retries = max_retries
+                self._stream_reconnection_enabled = stream_reconnection_enabled
+                self._max_stream_reconnection_attempts = max_stream_reconnection_attempts
+                self._logging = logging
+
+            def get_headers(self) -> typing.Dict[str, str]:
+                import platform
+
+                headers: typing.Dict[str, str] = {
+                    "User-Agent": "cohere/7.0.9",
+                    "X-Fern-Language": "Python",
+                    "X-Fern-Runtime": f"python/{platform.python_version()}",
+                    "X-Fern-Platform": f"{platform.system().lower()}/{platform.release()}",
+                    "X-Fern-SDK-Name": "cohere",
+                    "X-Fern-SDK-Version": "7.0.9",
+                    **(self.get_custom_headers() or {}),
+                }
+                if self._client_name is not None:
+                    headers["X-Client-Name"] = self._client_name
+                headers["Authorization"] = f"Bearer {self._get_token()}"
+                return headers
+
+            def _get_token(self) -> str:
+                if isinstance(self._token, str):
+                    return self._token
+                else:
+                    return self._token()
+
+            def get_custom_headers(self) -> typing.Optional[typing.Dict[str, str]]:
+                return self._headers
+
+            def get_base_url(self) -> str:
+                return self._base_url
+
+            def get_timeout(self) -> typing.Optional[float]:
+                return self._timeout
+
+            def get_max_retries(self) -> int:
+                return self._max_retries
+
+            def get_stream_reconnection_enabled(self) -> bool:
+                return self._stream_reconnection_enabled if self._stream_reconnection_enabled is not None else True
+
+            def get_max_stream_reconnection_attempts(self) -> typing.Optional[int]:
+                return self._max_stream_reconnection_attempts
+
+
+        class SyncClientWrapper(BaseClientWrapper):
+            def __init__(
+                self,
+                *,
+                client_name: typing.Optional[str] = None,
+                token: typing.Union[str, typing.Callable[[], str]],
+                headers: typing.Optional[typing.Dict[str, str]] = None,
+                base_url: str,
+                timeout: typing.Optional[float] = None,
+                max_retries: int = 2,
+                stream_reconnection_enabled: typing.Optional[bool] = None,
+                max_stream_reconnection_attempts: typing.Optional[int] = None,
+                logging: typing.Optional[typing.Union[LogConfig, Logger]] = None,
+                httpx_client: httpx.Client,
+            ):
+                super().__init__(
+                    client_name=client_name,
+                    token=token,
+                    headers=headers,
+                    base_url=base_url,
+                    timeout=timeout,
+                    max_retries=max_retries,
+                    stream_reconnection_enabled=stream_reconnection_enabled,
+                    max_stream_reconnection_attempts=max_stream_reconnection_attempts,
+                    logging=logging,
+                )
+                self.httpx_client = HttpClient(
+                    httpx_client=httpx_client,
+                    base_headers=self.get_headers,
+                    base_timeout=self.get_timeout,
+                    base_url=self.get_base_url,
+                    base_max_retries=self.get_max_retries(),
+                    logging_config=self._logging,
+                )
+
+
+        class AsyncClientWrapper(BaseClientWrapper):
+            def __init__(
+                self,
+                *,
+                client_name: typing.Optional[str] = None,
+                token: typing.Union[str, typing.Callable[[], str]],
+                headers: typing.Optional[typing.Dict[str, str]] = None,
+                base_url: str,
+                timeout: typing.Optional[float] = None,
+                max_retries: int = 2,
+                stream_reconnection_enabled: typing.Optional[bool] = None,
+                max_stream_reconnection_attempts: typing.Optional[int] = None,
+                logging: typing.Optional[typing.Union[LogConfig, Logger]] = None,
+                async_token: typing.Optional[typing.Callable[[], typing.Awaitable[str]]] = None,
+                httpx_client: httpx.AsyncClient,
+            ):
+                super().__init__(
+                    client_name=client_name,
+                    token=token,
+                    headers=headers,
+                    base_url=base_url,
+                    timeout=timeout,
+                    max_retries=max_retries,
+                    stream_reconnection_enabled=stream_reconnection_enabled,
+                    max_stream_reconnection_attempts=max_stream_reconnection_attempts,
                     logging=logging,
                 )
                 self._async_token = async_token

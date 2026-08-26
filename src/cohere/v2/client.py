@@ -10,6 +10,9 @@ from ..types.embed_by_type_response import EmbedByTypeResponse
 from ..types.embed_input import EmbedInput
 from ..types.embed_input_type import EmbedInputType
 from ..types.embedding_type import EmbeddingType
+from ..types.parse_document import ParseDocument
+from ..types.parse_output_format import ParseOutputFormat
+from ..types.parse_response import ParseResponse
 from ..types.response_format_v2 import ResponseFormatV2
 from ..types.thinking import Thinking
 from ..types.tool_v2 import ToolV2
@@ -379,6 +382,62 @@ class V2Client:
             thinking=thinking,
             priority=priority,
             request_options=request_options,
+        )
+        return _response.data
+
+    def parse(
+        self,
+        *,
+        model: str,
+        document: ParseDocument,
+        output_format: typing.Optional[ParseOutputFormat] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ParseResponse:
+        """
+        Parse a document image into structured output. Use `output_format` to select
+        blocks or markdown (default).
+
+        Currently supports `document.type = image_url` only (data URI or remote http(s)
+        image URL). PDF / file URL inputs are not yet supported.
+
+        Image limits: 20 MB file size; 50 megapixels or 200 MB decoded (whichever is
+        exceeded first).
+
+        Parameters
+        ----------
+        model : str
+            The name of a compatible Cohere parse model.
+
+        document : ParseDocument
+
+        output_format : typing.Optional[ParseOutputFormat]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ParseResponse
+            OK
+
+        Examples
+        --------
+        from cohere import Client, ParseDocument
+
+        client = Client(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+        client.v2.parse(
+            model="parse-v5.0",
+            document=ParseDocument(
+                image_url="https://cohere.com/favicon-32x32.png",
+            ),
+            output_format="markdown",
+        )
+        """
+        _response = self._raw_client.parse(
+            model=model, document=document, output_format=output_format, request_options=request_options
         )
         return _response.data
 
@@ -940,6 +999,70 @@ class AsyncV2Client:
             thinking=thinking,
             priority=priority,
             request_options=request_options,
+        )
+        return _response.data
+
+    async def parse(
+        self,
+        *,
+        model: str,
+        document: ParseDocument,
+        output_format: typing.Optional[ParseOutputFormat] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ParseResponse:
+        """
+        Parse a document image into structured output. Use `output_format` to select
+        blocks or markdown (default).
+
+        Currently supports `document.type = image_url` only (data URI or remote http(s)
+        image URL). PDF / file URL inputs are not yet supported.
+
+        Image limits: 20 MB file size; 50 megapixels or 200 MB decoded (whichever is
+        exceeded first).
+
+        Parameters
+        ----------
+        model : str
+            The name of a compatible Cohere parse model.
+
+        document : ParseDocument
+
+        output_format : typing.Optional[ParseOutputFormat]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ParseResponse
+            OK
+
+        Examples
+        --------
+        import asyncio
+
+        from cohere import AsyncClient, ParseDocument
+
+        client = AsyncClient(
+            client_name="YOUR_CLIENT_NAME",
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.v2.parse(
+                model="parse-v5.0",
+                document=ParseDocument(
+                    image_url="https://cohere.com/favicon-32x32.png",
+                ),
+                output_format="markdown",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.parse(
+            model=model, document=document, output_format=output_format, request_options=request_options
         )
         return _response.data
 
