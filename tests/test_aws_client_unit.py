@@ -13,7 +13,10 @@ import os
 import unittest
 from unittest.mock import MagicMock, patch
 
-import httpx
+try:
+    import httpx2 as httpx
+except ImportError:
+    import httpx
 
 from cohere.manually_maintained.cohere_aws.mode import Mode
 
