@@ -16,7 +16,7 @@ from typing import (
 )
 
 import anyio
-import httpx
+import httpx2
 from ._decoders import SSEDecoder
 from ._exceptions import SSEError
 from ._models import ServerSentEvent
@@ -31,12 +31,12 @@ MAX_RECONNECT_DELAY_MS: int = 30_000
 
 # A reconnect callback re-issues the original request (with a ``Last-Event-ID``
 # header set to the supplied event id) and returns a *context manager* yielding
-# a fresh streaming ``httpx.Response``. Sync clients supply a sync context
+# a fresh streaming ``httpx2.Response``. Sync clients supply a sync context
 # manager; async clients supply an async one.
 class EventSource:
     def __init__(
         self,
-        response: httpx.Response,
+        response: httpx2.Response,
         *,
         resumable: bool = False,
         stream_reconnection_enabled: bool = True,
@@ -52,7 +52,7 @@ class EventSource:
         self._reconnect = reconnect
 
     @staticmethod
-    def _is_event_stream(response: httpx.Response) -> bool:
+    def _is_event_stream(response: httpx2.Response) -> bool:
         content_type = response.headers.get("content-type", "").partition(";")[0]
         return "text/event-stream" in content_type
 
@@ -63,17 +63,17 @@ class EventSource:
                 f"Expected response header Content-Type to contain 'text/event-stream', got {content_type!r}"
             )
 
-    def _is_reconnect_response_usable(self, response: httpx.Response) -> bool:
+    def _is_reconnect_response_usable(self, response: httpx2.Response) -> bool:
         """Whether a reconnected response can be resumed as an SSE stream.
 
-        ``httpx.stream`` does not raise on non-success status, so a resume that
+        ``httpx2.stream`` does not raise on non-success status, so a resume that
         returns an error page (e.g. ``200 text/html`` or a ``500`` body) would
         otherwise be parsed as SSE and yield garbage/zero events. Such a
         response is treated as a failed attempt (back off and retry) instead.
         """
         return response.status_code < 400 and self._is_event_stream(response)
 
-    def _get_charset(self, response: Optional[httpx.Response] = None) -> str:
+    def _get_charset(self, response: Optional[httpx2.Response] = None) -> str:
         """Extract charset from Content-Type header, fallback to UTF-8."""
         resolved = response if response is not None else self._response
         content_type = resolved.headers.get("content-type", "")
@@ -95,7 +95,7 @@ class EventSource:
         return "utf-8"
 
     @property
-    def response(self) -> httpx.Response:
+    def response(self) -> httpx2.Response:
         return self._response
 
     @staticmethod
@@ -110,7 +110,7 @@ class EventSource:
             return buf[:-1].replace("\r", "\n") + "\r"
         return buf.replace("\r", "\n")
 
-    def _new_text_decoder(self, response: Optional[httpx.Response] = None) -> "codecs.IncrementalDecoder":
+    def _new_text_decoder(self, response: Optional[httpx2.Response] = None) -> "codecs.IncrementalDecoder":
         return codecs.getincrementaldecoder(self._get_charset(response))(errors="replace")
 
     def _reconnect_applicable(self) -> bool:
@@ -181,7 +181,7 @@ class EventSource:
 
     def _decode_response(
         self,
-        response: httpx.Response,
+        response: httpx2.Response,
         decoder: SSEDecoder,
         text_decoder: "codecs.IncrementalDecoder",
     ) -> Iterator[ServerSentEvent]:
@@ -205,7 +205,7 @@ class EventSource:
 
     async def _adecode_response(
         self,
-        response: httpx.Response,
+        response: httpx2.Response,
         decoder: SSEDecoder,
         text_decoder: "codecs.IncrementalDecoder",
     ) -> AsyncGenerator[ServerSentEvent, None]:
@@ -270,10 +270,10 @@ class EventSource:
         # ``None`` means there is no live stream to read this iteration (e.g. a
         # failed reconnect); the loop then re-evaluates the reconnect decision
         # without re-reading an exhausted response.
-        response: Optional[httpx.Response] = self._response
+        response: Optional[httpx2.Response] = self._response
         # Context manager for a response we opened ourselves and must close.
         # The initial response is owned by the caller, so it starts as None.
-        owned_cm: Optional[ContextManager[httpx.Response]] = None
+        owned_cm: Optional[ContextManager[httpx2.Response]] = None
         try:
             while True:
                 if response is not None:
@@ -287,9 +287,9 @@ class EventSource:
                             # A protocol violation (e.g. an oversized line) is a
                             # genuine error, not a dropped connection; propagate it.
                             # Listed first because ``SSEError`` subclasses
-                            # ``httpx.TransportError``.
+                            # ``httpx2.TransportError``.
                             raise
-                        except httpx.TransportError:
+                        except httpx2.TransportError:
                             # A transport error mid-stream (e.g. the server dropped
                             # the connection: ``ReadError``/``RemoteProtocolError``)
                             # is a premature end. Only swallow it when reconnection
@@ -326,7 +326,7 @@ class EventSource:
 
                 assert self._reconnect is not None  # guaranteed by _should_reconnect
                 try:
-                    cm: ContextManager[httpx.Response] = self._reconnect(last_dispatched_id or "")
+                    cm: ContextManager[httpx2.Response] = self._reconnect(last_dispatched_id or "")
                     new_response = cm.__enter__()
                 except Exception:
                     # A failed reconnect consumes an attempt; back off and retry.
@@ -358,8 +358,8 @@ class EventSource:
         last_retry: Optional[int] = None
         reconnect_attempts = 0
 
-        response: Optional[httpx.Response] = self._response
-        owned_cm: Optional[AsyncContextManager[httpx.Response]] = None
+        response: Optional[httpx2.Response] = self._response
+        owned_cm: Optional[AsyncContextManager[httpx2.Response]] = None
         try:
             while True:
                 if response is not None:
@@ -373,9 +373,9 @@ class EventSource:
                             # A protocol violation (e.g. an oversized line) is a
                             # genuine error, not a dropped connection; propagate it.
                             # Listed first because ``SSEError`` subclasses
-                            # ``httpx.TransportError``.
+                            # ``httpx2.TransportError``.
                             raise
-                        except httpx.TransportError:
+                        except httpx2.TransportError:
                             # A transport error mid-stream (e.g. the server dropped
                             # the connection: ``ReadError``/``RemoteProtocolError``)
                             # is a premature end. Only swallow it when reconnection
@@ -408,7 +408,7 @@ class EventSource:
 
                 assert self._reconnect is not None  # guaranteed by _should_reconnect
                 try:
-                    cm: AsyncContextManager[httpx.Response] = self._reconnect(last_dispatched_id or "")
+                    cm: AsyncContextManager[httpx2.Response] = self._reconnect(last_dispatched_id or "")
                     new_response = await cm.__aenter__()
                 except Exception:
                     response = None
@@ -431,7 +431,7 @@ class EventSource:
 
 
 @contextmanager
-def connect_sse(client: httpx.Client, method: str, url: str, **kwargs: Any) -> Iterator[EventSource]:
+def connect_sse(client: httpx2.Client, method: str, url: str, **kwargs: Any) -> Iterator[EventSource]:
     headers = kwargs.pop("headers", {})
     headers["Accept"] = "text/event-stream"
     headers["Cache-Control"] = "no-store"
@@ -442,7 +442,7 @@ def connect_sse(client: httpx.Client, method: str, url: str, **kwargs: Any) -> I
 
 @asynccontextmanager
 async def aconnect_sse(
-    client: httpx.AsyncClient,
+    client: httpx2.AsyncClient,
     method: str,
     url: str,
     **kwargs: Any,
