@@ -17,6 +17,15 @@ from typing import (
 
 import anyio
 import httpx2
+
+# The optional aiohttp extra's async client raises httpx (0.x) transport errors.
+try:
+    import httpx as _httpx_aiohttp
+
+    _AIOHTTP_TRANSPORT_ERRORS: tuple = (_httpx_aiohttp.TransportError,)
+except ImportError:
+    _AIOHTTP_TRANSPORT_ERRORS = ()
+
 from ._decoders import SSEDecoder
 from ._exceptions import SSEError
 from ._models import ServerSentEvent
@@ -375,7 +384,7 @@ class EventSource:
                             # Listed first because ``SSEError`` subclasses
                             # ``httpx2.TransportError``.
                             raise
-                        except httpx2.TransportError:
+                        except (httpx2.TransportError, *_AIOHTTP_TRANSPORT_ERRORS):
                             # A transport error mid-stream (e.g. the server dropped
                             # the connection: ``ReadError``/``RemoteProtocolError``)
                             # is a premature end. Only swallow it when reconnection

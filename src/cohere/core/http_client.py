@@ -10,6 +10,16 @@ from contextlib import asynccontextmanager, contextmanager
 from random import random
 
 import httpx2
+
+# The optional aiohttp extra builds its async client on httpx 0.x (httpx-aiohttp),
+# so that path raises httpx exceptions rather than httpx2 ones. Catch both.
+try:
+    import httpx as _httpx_aiohttp
+
+    _AIOHTTP_CONNECT_ERRORS: tuple = (_httpx_aiohttp.ConnectError, _httpx_aiohttp.RemoteProtocolError)
+except ImportError:
+    _AIOHTTP_CONNECT_ERRORS = ()
+
 from .file import File, convert_file_dict_to_httpx_tuples
 from .force_multipart import FORCE_MULTIPART
 from .jsonable_encoder import jsonable_encoder
@@ -724,7 +734,7 @@ class AsyncHttpClient:
                 files=request_files,
                 timeout=timeout,
             )
-        except (httpx2.ConnectError, httpx2.RemoteProtocolError):
+        except (httpx2.ConnectError, httpx2.RemoteProtocolError, *_AIOHTTP_CONNECT_ERRORS):
             if retries < max_retries:
                 await asyncio.sleep(_retry_timeout_from_retries(retries=retries))
                 return await self.request(
