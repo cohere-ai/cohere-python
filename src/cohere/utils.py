@@ -224,8 +224,12 @@ def merge_embed_responses(responses: typing.List[EmbedResponse]) -> EmbedRespons
             for response in embeddings_type
         ]
 
-        # only get set keys from the pydantic model (i.e. exclude fields that are set to 'None')
-        fields = [x for x in get_fields(embeddings_type[0].embeddings) if getattr(embeddings_type[0].embeddings, x) is not None]
+        # only get keys that are set on at least one response (i.e. exclude fields that are 'None' everywhere)
+        fields = [
+            x
+            for x in get_fields(embeddings_type[0].embeddings)
+            if any(getattr(embedding_by_type, x) is not None for embedding_by_type in embeddings_by_type)
+        ]
 
         merged_dicts = {
             field: [
