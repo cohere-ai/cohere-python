@@ -2,7 +2,7 @@
 
 Every tool call in the TrueAgenticLoop produces a DualToolResult that pairs
 the action (mu) with a verification query (delta) satisfying mu(delta(q)) = q.
-This is the structural core of O_2 promotion.
+This is the structural core of O₂ promotion.
 
 Cohere's embed-english-v3.0 provides a natural advantage: tool outputs can be
 embedded and verified against expected semantic signatures via cosine similarity,
@@ -107,7 +107,7 @@ class ToolContract:
     def cohere_embed_contract(cls) -> "ToolContract":
         """Return a contract using Cohere embed for semantic verification.
 
-        This contract type is the key O_2 promotion mechanism: every tool
+        This contract type is the key O₂ promotion mechanism: every tool
         output gets embedded, and the embedding is checked against a
         stored "expected embedding" via cosine similarity. When the
         similarity exceeds a threshold (default 0.92), the Frobenius

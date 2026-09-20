@@ -2,10 +2,10 @@
 
 Wraps the Cohere Python SDK client in a topologically protected loop.
 Each winding executes the four phases in order, gating the UPDATE phase
-on Frobenius verification. This is the structural mechanism for O_2
+on Frobenius verification. This is the structural mechanism for O₂
 promotion: the loop enforces mu(delta(q)) = q at every step.
 
-Structural type of this loop (target O_2):
+Structural type of this loop (target O₂):
     D = D_omega (imscriptive context is the trajectory history)
     T = T_odot (self-referential topology — the loop reads its own state)
     R = R_= (bidirectional agent-environment coupling)
@@ -196,7 +196,7 @@ class TrueAgenticLoop:
         Returns:
             Tuple of (tool_name, tool_input_dict).
         """
-        return ("done", {"conclusion": "Structural promotion O_0 -> O_2 complete."})
+        return ("done", {"conclusion": "Structural promotion O₀ -> O₂ complete."})
 
     def _update(self, dual: DualToolResult, context: str) -> str:
         """UPDATE phase: integrate verified observation into context.
@@ -248,7 +248,7 @@ class TrueAgenticLoop:
 
     @property
     def is_promoted(self) -> bool:
-        """True iff the loop has achieved O_2 structural promotion.
+        """True iff the loop has achieved O₂ structural promotion.
 
         Promotion requires:
             1. Gate 1 open: frobenius_ratio >= 0.7
@@ -256,7 +256,7 @@ class TrueAgenticLoop:
             3. At least one done() cycle recorded
 
         Returns:
-            bool indicating O_2 status.
+            bool indicating O₂ status.
         """
         gate = self.criticality
         return (

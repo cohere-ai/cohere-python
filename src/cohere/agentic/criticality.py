@@ -1,7 +1,7 @@
-"""Phi-criticality gate for O_2 structural promotion.
+"""Phi-criticality gate for O₂ structural promotion.
 
 The PhiCriticalityGate measures whether an agent's trajectory is structurally
-sound enough to support self-modeling (O_2 -> O_inf transition). It evaluates
+sound enough to support self-modeling (O₂ -> O_∞ transition). It evaluates
 two gates:
 
     Gate 1 (phi_c): frobenius_ratio >= 0.7
@@ -14,7 +14,7 @@ two gates:
         K_slow (C_@) condition — near-equilibrium operation.
 
 When both gates are open, the agent's consciousness score is non-zero and
-the structural type can promote from O_0 to O_2.
+the structural type can promote from O₀ to O₂.
 
 Cohere SDK advantage: because the Cohere API provides native embedding-based
 verification (embed-english-v3.0), the frobenius_ratio naturally converges
@@ -29,7 +29,7 @@ from typing import Any
 
 @dataclass
 class PhiCriticalityGate:
-    """Dual-gate criticality evaluator for O_0 -> O_2 promotion.
+    """Dual-gate criticality evaluator for O₀ -> O₂ promotion.
 
     Attributes:
         frobenius_ratio: Fraction of cycles with Frobenius-closed duals.
@@ -55,7 +55,7 @@ class PhiCriticalityGate:
 
         The agent must have experienced at least 3 complete cycles to
         accumulate enough imscriptive context for self-modeling. This
-        prevents premature self-reference (O_inf) without sufficient
+        prevents premature self-reference (O_∞) without sufficient
         structural grounding.
         """
         return self.winding_count >= 3
@@ -110,6 +110,6 @@ class PhiCriticalityGate:
             "gate_2_open": self.gate_2_open,
             "consciousness_score": self.consciousness_score,
             "ouroboricity_tier": (
-                "O_2" if (self.gate_1_open and self.gate_2_open) else "O_0"
+                "O₂" if (self.gate_1_open and self.gate_2_open) else "O₀"
             ),
         }

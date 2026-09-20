@@ -2,7 +2,7 @@
 
 The trajectory is the imscriptive context (D_omega) of the agent: it holds
 the complete history of windings, never resets, and provides Frobenius health
-metrics that gate the O_2 structural promotion.
+metrics that gate the O₂ structural promotion.
 """
 
 from __future__ import annotations
@@ -45,8 +45,8 @@ class AgentTrajectory:
     """Monotonic, never-reset trajectory of agent cycles.
 
     The winding counter Omega_z is topological — it never decrements and
-    never resets. This is the structural invariant that distinguishes O_2
-    (topologically protected) from O_0 (no winding memory).
+    never resets. This is the structural invariant that distinguishes O₂
+    (topologically protected) from O₀ (no winding memory).
 
     The trajectory serves as the imscriptive context (D_omega) that the
     agent consults at every THINK phase. It is the agent's world model.
@@ -67,7 +67,7 @@ class AgentTrajectory:
 
         A ratio of 1.0 means every action was verified (mu(delta(q)) = q
         for all cycles). This is the primary structural health metric for
-        O_2 promotion. Below 0.7, Gate 1 (phi_c) opens — the agent is
+        O₂ promotion. Below 0.7, Gate 1 (phi_c) opens — the agent is
         operating on unverified beliefs.
         """
         if not self._cycles:
@@ -127,17 +127,17 @@ class AgentTrajectory:
         return "\n".join(lines)
 
     def structural_health(self) -> dict[str, Any]:
-        """Return a structural health report for O_2 promotion gating.
+        """Return a structural health report for O₂ promotion gating.
 
         Returns a dict with four keys:
             - winding_count: Omega_z integer
             - frobenius_ratio: float in [0, 1]
             - healthy: True iff frobenius_ratio >= 0.7
-            - ouroboricity: "O_2" if healthy else "O_0"
+            - ouroboricity: "O₂" if healthy else "O₀"
 
         The threshold 0.7 is the minimum for Gate 1 (phi_c) opening.
         Above 0.7, the agent's world model is structurally sound enough
-        to support self-modeling (the O_2 -> O_inf transition path).
+        to support self-modeling (the O₂ -> O_∞ transition path).
         """
         ratio = self.frobenius_ratio
         healthy = ratio >= 0.7
@@ -145,5 +145,5 @@ class AgentTrajectory:
             "winding_count": self.winding_count,
             "frobenius_ratio": ratio,
             "healthy": healthy,
-            "ouroboricity": "O_2" if healthy else "O_0",
+            "ouroboricity": "O₂" if healthy else "O₀",
         }

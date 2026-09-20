@@ -142,8 +142,8 @@ co = cohere.OciClient(
 The OCI client supports the following Cohere APIs:
 - **Embed**: Full support for all embedding models
 - **Chat**: Full support with both V1 (`OciClient`) and V2 (`OciClientV2`) APIs
-  - Streaming available via `chat_stream()`
-  - Supports Command-R and Command-A model families
+  Streaming available via `chat_stream()`
+  Supports Command-R and Command-A model families
 
 ### OCI Model Availability and Limitations
 
