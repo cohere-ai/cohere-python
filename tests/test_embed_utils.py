@@ -241,3 +241,30 @@ class TestClient(unittest.TestCase):
                 warnings=resp.meta.warnings  # order ignored
             )
         ))
+
+    def test_merge_embeddings_by_type_includes_types_absent_from_first_response(self) -> None:
+        # Regression test for #796: the set of embedding types to merge must be the union across all
+        # responses, not just the types present on the first one. Here the first batch only has float
+        # embeddings while the second batch also has int8 and ubinary.
+        resp1 = EmbeddingsByTypeEmbedResponse(
+            response_type="embeddings_by_type", id="1",
+            embeddings=EmbedByTypeResponseEmbeddings(float_=[[0.1, 0.2], [0.3, 0.4]]))
+        resp2 = EmbeddingsByTypeEmbedResponse(
+            response_type="embeddings_by_type", id="2",
+            embeddings=EmbedByTypeResponseEmbeddings(
+                float_=[[0.5, 0.6]], int8=[[5, 6]], ubinary=[[7], [8]]))
+        resp3 = EmbeddingsByTypeEmbedResponse(
+            response_type="embeddings_by_type", id="3",
+            embeddings=EmbedByTypeResponseEmbeddings(int8=[[9, 10]]))
+
+        result = merge_embed_responses([resp1, resp2, resp3])
+
+        self.assertEqual(result.embeddings, EmbedByTypeResponseEmbeddings(  # type: ignore
+            float_=[[0.1, 0.2], [0.3, 0.4], [0.5, 0.6]],
+            int8=[[5, 6], [9, 10]],
+            ubinary=[[7], [8]],
+        ))
+        # types absent from every response stay unset
+        self.assertIsNone(result.embeddings.uint8)  # type: ignore
+        self.assertIsNone(result.embeddings.binary)  # type: ignore
+        self.assertIsNone(result.embeddings.base64)  # type: ignore
