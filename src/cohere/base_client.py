@@ -2010,7 +2010,7 @@ class AsyncBaseCohere:
 
 
         async def main() -> None:
-            response = await client.chat_stream(
+            response = client.chat_stream(
                 model="command-a-03-2025",
                 message="hello!",
             )
@@ -2484,7 +2484,7 @@ class AsyncBaseCohere:
 
 
         async def main() -> None:
-            response = await client.generate_stream(
+            response = client.generate_stream(
                 prompt="Please explain to me how LLMs work",
             )
             async for chunk in response:
