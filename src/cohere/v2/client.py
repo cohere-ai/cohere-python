@@ -786,7 +786,7 @@ class AsyncV2Client:
 
 
         async def main() -> None:
-            response = await client.v2.chat_stream(
+            response = client.v2.chat_stream(
                 model="command-a-plus-05-2026",
                 messages=[
                     UserChatMessageV2(
