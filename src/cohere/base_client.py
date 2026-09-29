@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import typing
 
-import httpx
+import httpx2
 from .core.api_error import ApiError
 from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from .core.http_client import get_keepalive_socket_options
@@ -87,7 +87,7 @@ class BaseCohere:
         Additional headers to send with every request.
 
     timeout : typing.Optional[float]
-        The timeout to be used, in seconds, for requests. By default the timeout is 300 seconds, unless a custom httpx client is used, in which case this default is not enforced.
+        The timeout to be used, in seconds, for requests. By default the timeout is 300 seconds, unless a custom httpx2 client is used, in which case this default is not enforced.
 
     max_retries : typing.Optional[int]
         The default maximum number of retries for failed requests. Defaults to 2. Per-request `max_retries` in `request_options` takes precedence over this value.
@@ -99,10 +99,10 @@ class BaseCohere:
         The maximum number of reconnection attempts for resumable streaming endpoints. Defaults to no limit. Per-request `max_stream_reconnection_attempts` in `request_options` takes precedence over this value.
 
     follow_redirects : typing.Optional[bool]
-        Whether the default httpx client follows redirects or not, this is irrelevant if a custom httpx client is passed in.
+        Whether the default httpx2 client follows redirects or not, this is irrelevant if a custom httpx2 client is passed in.
 
-    httpx_client : typing.Optional[httpx.Client]
-        The httpx client to use for making requests, a preconfigured client is used by default, however this is useful should you want to pass in any custom httpx configuration.
+    httpx_client : typing.Optional[httpx2.Client]
+        The httpx2 client to use for making requests, a preconfigured client is used by default, however this is useful should you want to pass in any custom httpx2 configuration.
 
     logging : typing.Optional[typing.Union[LogConfig, Logger]]
         Configure logging for the SDK. Accepts a LogConfig dict with 'level' (debug/info/warn/error), 'logger' (custom logger implementation), and 'silent' (boolean, defaults to True) fields. You can also pass a pre-configured Logger instance.
@@ -130,7 +130,7 @@ class BaseCohere:
         stream_reconnection_enabled: typing.Optional[bool] = None,
         max_stream_reconnection_attempts: typing.Optional[int] = None,
         follow_redirects: typing.Optional[bool] = True,
-        httpx_client: typing.Optional[httpx.Client] = None,
+        httpx_client: typing.Optional[httpx2.Client] = None,
         logging: typing.Optional[typing.Union[LogConfig, Logger]] = None,
     ):
         _defaulted_timeout = timeout if timeout is not None else 300 if httpx_client is None else None
@@ -144,15 +144,15 @@ class BaseCohere:
             headers=headers,
             httpx_client=httpx_client
             if httpx_client is not None
-            else httpx.Client(
+            else httpx2.Client(
                 timeout=_defaulted_timeout,
                 follow_redirects=follow_redirects,
-                transport=httpx.HTTPTransport(socket_options=get_keepalive_socket_options(idle=60, intvl=30, cnt=5)),
+                transport=httpx2.HTTPTransport(socket_options=get_keepalive_socket_options(idle=60, intvl=30, cnt=5)),
             )
             if follow_redirects is not None
-            else httpx.Client(
+            else httpx2.Client(
                 timeout=_defaulted_timeout,
-                transport=httpx.HTTPTransport(socket_options=get_keepalive_socket_options(idle=60, intvl=30, cnt=5)),
+                transport=httpx2.HTTPTransport(socket_options=get_keepalive_socket_options(idle=60, intvl=30, cnt=5)),
             ),
             timeout=_defaulted_timeout,
             max_retries=_defaulted_max_retries,
@@ -1610,10 +1610,10 @@ class BaseCohere:
 def _make_default_async_client(
     timeout: typing.Optional[float],
     follow_redirects: typing.Optional[bool],
-    transport: typing.Optional[httpx.AsyncBaseTransport] = None,
-) -> httpx.AsyncClient:
+    transport: typing.Optional[httpx2.AsyncBaseTransport] = None,
+) -> httpx2.AsyncClient:
     if transport is None:
-        transport = httpx.AsyncHTTPTransport(socket_options=get_keepalive_socket_options(idle=60, intvl=30, cnt=5))
+        transport = httpx2.AsyncHTTPTransport(socket_options=get_keepalive_socket_options(idle=60, intvl=30, cnt=5))
     try:
         import httpx_aiohttp  # type: ignore[import-not-found]
     except ImportError:
@@ -1624,8 +1624,8 @@ def _make_default_async_client(
         return httpx_aiohttp.HttpxAiohttpClient(timeout=timeout)
 
     if follow_redirects is not None:
-        return httpx.AsyncClient(timeout=timeout, follow_redirects=follow_redirects, transport=transport)
-    return httpx.AsyncClient(timeout=timeout, transport=transport)
+        return httpx2.AsyncClient(timeout=timeout, follow_redirects=follow_redirects, transport=transport)
+    return httpx2.AsyncClient(timeout=timeout, transport=transport)
 
 
 class AsyncBaseCohere:
@@ -1655,7 +1655,7 @@ class AsyncBaseCohere:
         An async callable that returns a bearer token. Use this when token acquisition involves async I/O (e.g., refreshing tokens via an async HTTP client). When provided, this is used instead of the synchronous token for async requests.
 
     timeout : typing.Optional[float]
-        The timeout to be used, in seconds, for requests. By default the timeout is 300 seconds, unless a custom httpx client is used, in which case this default is not enforced.
+        The timeout to be used, in seconds, for requests. By default the timeout is 300 seconds, unless a custom httpx2 client is used, in which case this default is not enforced.
 
     max_retries : typing.Optional[int]
         The default maximum number of retries for failed requests. Defaults to 2. Per-request `max_retries` in `request_options` takes precedence over this value.
@@ -1667,10 +1667,10 @@ class AsyncBaseCohere:
         The maximum number of reconnection attempts for resumable streaming endpoints. Defaults to no limit. Per-request `max_stream_reconnection_attempts` in `request_options` takes precedence over this value.
 
     follow_redirects : typing.Optional[bool]
-        Whether the default httpx client follows redirects or not, this is irrelevant if a custom httpx client is passed in.
+        Whether the default httpx2 client follows redirects or not, this is irrelevant if a custom httpx2 client is passed in.
 
-    httpx_client : typing.Optional[httpx.AsyncClient]
-        The httpx client to use for making requests, a preconfigured client is used by default, however this is useful should you want to pass in any custom httpx configuration.
+    httpx_client : typing.Optional[httpx2.AsyncClient]
+        The httpx2 client to use for making requests, a preconfigured client is used by default, however this is useful should you want to pass in any custom httpx2 configuration.
 
     logging : typing.Optional[typing.Union[LogConfig, Logger]]
         Configure logging for the SDK. Accepts a LogConfig dict with 'level' (debug/info/warn/error), 'logger' (custom logger implementation), and 'silent' (boolean, defaults to True) fields. You can also pass a pre-configured Logger instance.
@@ -1699,7 +1699,7 @@ class AsyncBaseCohere:
         stream_reconnection_enabled: typing.Optional[bool] = None,
         max_stream_reconnection_attempts: typing.Optional[int] = None,
         follow_redirects: typing.Optional[bool] = True,
-        httpx_client: typing.Optional[httpx.AsyncClient] = None,
+        httpx_client: typing.Optional[httpx2.AsyncClient] = None,
         logging: typing.Optional[typing.Union[LogConfig, Logger]] = None,
     ):
         _defaulted_timeout = timeout if timeout is not None else 300 if httpx_client is None else None

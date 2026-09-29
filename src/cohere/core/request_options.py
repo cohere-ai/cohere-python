@@ -26,7 +26,7 @@ class RequestOptions(typing.TypedDict, total=False):
 
         - additional_body_parameters: typing.Dict[str, typing.Any]. A dictionary containing additional parameters to spread into the request's body parameters dict
 
-        - chunk_size: int. The size, in bytes, to process each chunk of data being streamed back within the response. This equates to leveraging `chunk_size` within `requests` or `httpx`, and is only leveraged for file downloads.
+        - chunk_size: int. The size, in bytes, to process each chunk of data being streamed back within the response. This equates to leveraging `chunk_size` within `requests` or `httpx2`, and is only leveraged for file downloads.
     """
 
     timeout: NotRequired[float]
