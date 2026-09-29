@@ -99,4 +99,6 @@ def _get_tokenizer_config_size(tokenizer_url: str) -> float:
         if size:
             break
 
+    if size is None:
+        raise ValueError("No content-length header found (server may use chunked transfer encoding)")
     return round(int(typing.cast(int, size)) / 1024 / 1024, 2)
