@@ -6,6 +6,7 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
 from ..core.unchecked_base_model import UncheckedBaseModel
 from .api_meta import ApiMeta
+from .chat_finish_reason import ChatFinishReason
 from .parse_page import ParsePage
 
 
@@ -25,6 +26,12 @@ class ParseResponse(UncheckedBaseModel):
     """
 
     meta: typing.Optional[ApiMeta] = None
+    finish_reason: typing.Optional[ChatFinishReason] = pydantic.Field(default=None)
+    """
+    The reason parsing finished. For Parse, this is only ever `COMPLETE` or
+    `MAX_TOKENS`; `MAX_TOKENS` indicates the output was truncated because it
+    exceeded the maximum output token limit.
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2
