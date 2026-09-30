@@ -9,7 +9,7 @@ import requests
 from fastavro import parse_schema, reader, writer
 
 from . import EmbedResponse, EmbeddingsFloatsEmbedResponse, EmbeddingsByTypeEmbedResponse, ApiMeta, \
-    EmbedByTypeResponseEmbeddings, ApiMetaBilledUnits, EmbedJob, CreateEmbedJobResponse, Dataset
+    EmbedByTypeResponseEmbeddings, ApiMetaBilledUnits, ApiMetaTokens, EmbedJob, CreateEmbedJobResponse, Dataset
 from .datasets import DatasetsCreateResponse, DatasetsGetResponse
 from .overrides import get_fields
 
@@ -170,19 +170,37 @@ def sum_fields_if_not_none(obj: typing.Any, field: str) -> Optional[int]:
 def merge_meta_field(metas: typing.List[ApiMeta]) -> ApiMeta:
     api_version = metas[0].api_version if metas else None
     billed_units = [meta.billed_units for meta in metas]
+    images = sum_fields_if_not_none(billed_units, "images")
     input_tokens = sum_fields_if_not_none(billed_units, "input_tokens")
+    image_tokens = sum_fields_if_not_none(billed_units, "image_tokens")
     output_tokens = sum_fields_if_not_none(billed_units, "output_tokens")
     search_units = sum_fields_if_not_none(billed_units, "search_units")
     classifications = sum_fields_if_not_none(billed_units, "classifications")
+
+    token_counts = [meta.tokens for meta in metas]
+    token_input = sum_fields_if_not_none(token_counts, "input_tokens")
+    token_output = sum_fields_if_not_none(token_counts, "output_tokens")
+    # Leave tokens unset rather than building an all-None ApiMetaTokens, so a
+    # merged response is indistinguishable from an unbatched one.
+    tokens = ApiMetaTokens(
+        input_tokens=token_input,
+        output_tokens=token_output,
+    ) if token_input is not None or token_output is not None else None
+
+    cached_tokens = sum_fields_if_not_none(metas, "cached_tokens")
     warnings = {warning for meta in metas if meta.warnings for warning in meta.warnings}
     return ApiMeta(
         api_version=api_version,
         billed_units=ApiMetaBilledUnits(
+            images=images,
             input_tokens=input_tokens,
+            image_tokens=image_tokens,
             output_tokens=output_tokens,
             search_units=search_units,
             classifications=classifications
         ),
+        tokens=tokens,
+        cached_tokens=cached_tokens,
         warnings=list(warnings)
     )
 
