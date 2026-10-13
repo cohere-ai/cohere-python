@@ -128,6 +128,22 @@ class TestModeConditionalInit(unittest.TestCase):
         sig = inspect.signature(Client.__init__)
         self.assertEqual(sig.parameters["mode"].default, Mode.SAGEMAKER)
 
+    def test_missing_region_does_not_write_none_to_environment(self) -> None:
+        """No aws_region + unset AWS_DEFAULT_REGION should not crash before boto3 resolves defaults."""
+        mock_boto3 = MagicMock()
+        mock_sagemaker = MagicMock()
+
+        with patch("cohere.manually_maintained.cohere_aws.client.lazy_boto3", return_value=mock_boto3), \
+             patch("cohere.manually_maintained.cohere_aws.client.lazy_sagemaker", return_value=mock_sagemaker), \
+             patch.dict(os.environ, {}, clear=True):
+
+            from cohere.manually_maintained.cohere_aws.client import Client
+
+            Client()
+
+            self.assertNotIn("AWS_DEFAULT_REGION", os.environ)
+            self.assertEqual(mock_boto3.client.call_args_list[0].kwargs["region_name"], None)
+
 
 class TestEmbedV4Params(unittest.TestCase):
     """Fix 3: embed() should accept output_dimension and embedding_types,
