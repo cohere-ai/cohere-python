@@ -123,7 +123,7 @@ class BaseCohere:
         base_url: typing.Optional[str] = None,
         environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
         client_name: typing.Optional[str] = None,
-        token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"),
+        token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
         timeout: typing.Optional[float] = None,
         max_retries: typing.Optional[int] = None,
@@ -135,6 +135,7 @@ class BaseCohere:
     ):
         _defaulted_timeout = timeout if timeout is not None else 300 if httpx_client is None else None
         _defaulted_max_retries = max_retries if max_retries is not None else 2
+        token = token if token is not None else os.getenv("CO_API_KEY")
         if token is None:
             raise ApiError(body="The client must be instantiated be either passing in token or setting CO_API_KEY")
         self._client_wrapper = SyncClientWrapper(
@@ -1147,8 +1148,8 @@ class BaseCohere:
         )
         client.embed(
             texts=["hello", "goodbye"],
-            model="embed-v4.0",
-            input_type="classification",
+            model="embed-v5.0-fast",
+            input_type="search_document",
         )
         """
         _response = self._raw_client.embed(
@@ -1691,7 +1692,7 @@ class AsyncBaseCohere:
         base_url: typing.Optional[str] = None,
         environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
         client_name: typing.Optional[str] = None,
-        token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"),
+        token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
         async_token: typing.Optional[typing.Callable[[], typing.Awaitable[str]]] = None,
         timeout: typing.Optional[float] = None,
@@ -1704,6 +1705,7 @@ class AsyncBaseCohere:
     ):
         _defaulted_timeout = timeout if timeout is not None else 300 if httpx_client is None else None
         _defaulted_max_retries = max_retries if max_retries is not None else 2
+        token = token if token is not None else os.getenv("CO_API_KEY")
         if token is None:
             raise ApiError(body="The client must be instantiated be either passing in token or setting CO_API_KEY")
         self._client_wrapper = AsyncClientWrapper(
@@ -2747,8 +2749,8 @@ class AsyncBaseCohere:
         async def main() -> None:
             await client.embed(
                 texts=["hello", "goodbye"],
-                model="embed-v4.0",
-                input_type="classification",
+                model="embed-v5.0-fast",
+                input_type="search_document",
             )
 
 

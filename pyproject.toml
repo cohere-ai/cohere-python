@@ -1,10 +1,12 @@
 [project]
 name = "cohere"
 dynamic = ["version"]
+license = "MIT"
+license-files = ["LICENSE"]
 
 [tool.poetry]
 name = "cohere"
-version = "7.2.0"
+version = "7.3.0"
 description = ""
 readme = "README.md"
 authors = []
@@ -26,8 +28,7 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Operating System :: Microsoft :: Windows",
     "Topic :: Software Development :: Libraries :: Python Modules",
-    "Typing :: Typed",
-    "License :: OSI Approved :: MIT License"
+    "Typing :: Typed"
 ]
 packages = [
     { include = "cohere", from = "src"}

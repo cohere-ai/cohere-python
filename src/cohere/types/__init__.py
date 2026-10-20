@@ -203,6 +203,9 @@ if typing.TYPE_CHECKING:
     from .parse_text_block import ParseTextBlock
     from .parse_text_content_block import ParseTextContentBlock
     from .rerank_document import RerankDocument
+    from .rerank_relevant_span_response import RerankRelevantSpanResponse
+    from .rerank_relevant_spans import RerankRelevantSpans
+    from .rerank_relevant_spans_mode import RerankRelevantSpansMode
     from .rerank_request_documents_item import RerankRequestDocumentsItem
     from .rerank_response import RerankResponse
     from .rerank_response_results_item import RerankResponseResultsItem
@@ -444,6 +447,9 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ParseTextBlock": ".parse_text_block",
     "ParseTextContentBlock": ".parse_text_content_block",
     "RerankDocument": ".rerank_document",
+    "RerankRelevantSpanResponse": ".rerank_relevant_span_response",
+    "RerankRelevantSpans": ".rerank_relevant_spans",
+    "RerankRelevantSpansMode": ".rerank_relevant_spans_mode",
     "RerankRequestDocumentsItem": ".rerank_request_documents_item",
     "RerankResponse": ".rerank_response",
     "RerankResponseResultsItem": ".rerank_response_results_item",
@@ -727,6 +733,9 @@ __all__ = [
     "ParseTextBlock",
     "ParseTextContentBlock",
     "RerankDocument",
+    "RerankRelevantSpanResponse",
+    "RerankRelevantSpans",
+    "RerankRelevantSpansMode",
     "RerankRequestDocumentsItem",
     "RerankResponse",
     "RerankResponseResultsItem",
