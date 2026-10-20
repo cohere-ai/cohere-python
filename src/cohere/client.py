@@ -27,6 +27,42 @@ run_overrides()
 Never = typing.NoReturn
 
 
+def _mount_environment_proxies(
+    httpx_client: typing.Union[httpx.Client, httpx.AsyncClient],
+    transport_factory: typing.Callable[[str, typing.List[typing.Tuple[int, int, int]]], typing.Any],
+) -> None:
+    """Honour ``HTTP_PROXY`` / ``HTTPS_PROXY`` / ``NO_PROXY`` on the default client.
+
+    The generated default client passes a keepalive ``HTTPTransport``; httpx only
+    mounts environment proxies itself when ``transport is None``
+    (``allow_env_proxies = trust_env and transport is None``), so the explicit
+    keepalive transport otherwise drops proxy environment variables. Reuse
+    httpx's own ``get_environment_proxies()`` (which parses
+    ``HTTP_PROXY``/``HTTPS_PROXY``/``NO_PROXY``) and mount per-scheme proxy
+    transports while retaining the keepalive socket options. Entries whose value
+    is ``None`` are ``NO_PROXY`` bypass patterns and fall back to the default
+    transport.
+    """
+    from httpx._utils import get_environment_proxies
+
+    env_proxies = get_environment_proxies()
+    if not env_proxies:
+        return
+
+    from .core.http_client import get_keepalive_socket_options
+
+    keepalive = get_keepalive_socket_options(idle=60, intvl=30, cnt=5)
+    from httpx._utils import URLPattern
+    for pattern, proxy_url in env_proxies.items():
+        url_pattern = URLPattern(pattern)
+        if proxy_url is None:
+            httpx_client._mounts[url_pattern] = None
+        else:
+            httpx_client._mounts[url_pattern] = transport_factory(proxy_url, keepalive)
+    # Mirror httpx's own ordering so narrower bypass patterns are checked first.
+    httpx_client._mounts = dict(sorted(httpx_client._mounts.items()))
+
+
 def validate_args(obj: typing.Any, method_name: str, check_fn: typing.Callable[[typing.Any], typing.Any]) -> None:
     method = getattr(obj, method_name)
 
@@ -161,6 +197,12 @@ class Client(BaseCohere, CacheMixin):
             max_retries=max_retries,
             httpx_client=httpx_client,
         )
+
+        if httpx_client is None:
+            _mount_environment_proxies(
+                self._client_wrapper.httpx_client.httpx_client,
+                lambda url, opts: httpx.HTTPTransport(proxy=url, socket_options=opts),
+            )
 
         validate_args(self, "chat", throw_if_stream_is_true)
         if log_warning_experimental_features:
@@ -410,6 +452,12 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
             max_retries=max_retries,
             httpx_client=httpx_client,
         )
+
+        if httpx_client is None:
+            _mount_environment_proxies(
+                self._client_wrapper.httpx_client.httpx_client,
+                lambda url, opts: httpx.AsyncHTTPTransport(proxy=url, socket_options=opts),
+            )
 
         validate_args(self, "chat", throw_if_stream_is_true)
         if log_warning_experimental_features:
