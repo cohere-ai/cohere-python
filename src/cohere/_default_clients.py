@@ -2,7 +2,7 @@
 
 import typing
 
-import httpx
+import httpx2
 
 SDK_DEFAULT_TIMEOUT = 60
 
@@ -10,7 +10,7 @@ try:
     import httpx_aiohttp  # type: ignore[import-not-found]
 except ImportError:
 
-    class DefaultAioHttpClient(httpx.AsyncClient):  # type: ignore
+    class DefaultAioHttpClient(httpx2.AsyncClient):  # type: ignore
         def __init__(self, **kwargs: typing.Any) -> None:
             raise RuntimeError("To use the aiohttp client, install the aiohttp extra: pip install cohere[aiohttp]")
 
@@ -23,7 +23,7 @@ else:
             super().__init__(**kwargs)
 
 
-class DefaultAsyncHttpxClient(httpx.AsyncClient):
+class DefaultAsyncHttpxClient(httpx2.AsyncClient):
     def __init__(self, **kwargs: typing.Any) -> None:
         kwargs.setdefault("timeout", SDK_DEFAULT_TIMEOUT)
         kwargs.setdefault("follow_redirects", True)

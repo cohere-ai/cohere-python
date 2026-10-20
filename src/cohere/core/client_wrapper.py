@@ -2,7 +2,7 @@
 
 import typing
 
-import httpx
+import httpx2
 from .http_client import AsyncHttpClient, HttpClient
 from .logging import LogConfig, Logger
 
@@ -86,7 +86,7 @@ class SyncClientWrapper(BaseClientWrapper):
         stream_reconnection_enabled: typing.Optional[bool] = None,
         max_stream_reconnection_attempts: typing.Optional[int] = None,
         logging: typing.Optional[typing.Union[LogConfig, Logger]] = None,
-        httpx_client: httpx.Client,
+        httpx_client: httpx2.Client,
     ):
         super().__init__(
             client_name=client_name,
@@ -123,7 +123,7 @@ class AsyncClientWrapper(BaseClientWrapper):
         max_stream_reconnection_attempts: typing.Optional[int] = None,
         logging: typing.Optional[typing.Union[LogConfig, Logger]] = None,
         async_token: typing.Optional[typing.Callable[[], typing.Awaitable[str]]] = None,
-        httpx_client: httpx.AsyncClient,
+        httpx_client: httpx2.AsyncClient,
     ):
         super().__init__(
             client_name=client_name,

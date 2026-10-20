@@ -2,7 +2,7 @@ import os
 import typing
 from concurrent.futures import ThreadPoolExecutor
 
-import httpx
+import httpx2
 from .client import AsyncClient, Client
 from .environment import ClientEnvironment
 from .v2.client import AsyncRawV2Client, AsyncV2Client, RawV2Client, V2Client
@@ -39,7 +39,7 @@ class ClientV2(V2Client, Client):  # type: ignore
         client_name: typing.Optional[str] = None,
         timeout: typing.Optional[float] = None,
         max_retries: typing.Optional[int] = None,
-        httpx_client: typing.Optional[httpx.Client] = None,
+        httpx_client: typing.Optional[httpx2.Client] = None,
         thread_pool_executor: ThreadPoolExecutor = ThreadPoolExecutor(64),
         log_warning_experimental_features: bool = True,
     ):
@@ -74,7 +74,7 @@ class AsyncClientV2(AsyncV2Client, AsyncClient):  # type: ignore
         client_name: typing.Optional[str] = None,
         timeout: typing.Optional[float] = None,
         max_retries: typing.Optional[int] = None,
-        httpx_client: typing.Optional[httpx.AsyncClient] = None,
+        httpx_client: typing.Optional[httpx2.AsyncClient] = None,
         thread_pool_executor: ThreadPoolExecutor = ThreadPoolExecutor(64),
         log_warning_experimental_features: bool = True,
     ):

@@ -126,7 +126,7 @@ class TestClient(unittest.TestCase):
 
 @unittest.skipIf(None == os.getenv("TEST_AWS"), "tests skipped because TEST_AWS is not set")
 class TestBedrockClientV2(unittest.TestCase):
-    """Integration tests for BedrockClientV2 (httpx-based).
+    """Integration tests for BedrockClientV2 (httpx2-based).
 
     Fix 1 validation: If these pass, SigV4 signing uses the correct host header,
     since the request would fail with a signature mismatch otherwise.

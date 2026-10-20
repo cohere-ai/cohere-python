@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from tokenizers import Tokenizer  # type: ignore
 import logging
 
-import httpx
+import httpx2
 
 from cohere.types.detokenize_response import DetokenizeResponse
 from cohere.types.tokenize_response import TokenizeResponse
@@ -140,7 +140,7 @@ class Client(BaseCohere, CacheMixin):
         client_name: typing.Optional[str] = None,
         timeout: typing.Optional[float] = None,
         max_retries: typing.Optional[int] = None,
-        httpx_client: typing.Optional[httpx.Client] = None,
+        httpx_client: typing.Optional[httpx2.Client] = None,
         thread_pool_executor: ThreadPoolExecutor = ThreadPoolExecutor(64),
         log_warning_experimental_features: bool = True,
     ):
@@ -389,7 +389,7 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         client_name: typing.Optional[str] = None,
         timeout: typing.Optional[float] = None,
         max_retries: typing.Optional[int] = None,
-        httpx_client: typing.Optional[httpx.AsyncClient] = None,
+        httpx_client: typing.Optional[httpx2.AsyncClient] = None,
         thread_pool_executor: ThreadPoolExecutor = ThreadPoolExecutor(64),
         log_warning_experimental_features: bool = True,
     ):

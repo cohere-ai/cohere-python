@@ -9,7 +9,17 @@ import typing
 from contextlib import asynccontextmanager, contextmanager
 from random import random
 
-import httpx
+import httpx2
+
+# The optional aiohttp extra builds its async client on httpx 0.x (httpx-aiohttp),
+# so that path raises httpx exceptions rather than httpx2 ones. Catch both.
+try:
+    import httpx as _httpx_aiohttp
+
+    _AIOHTTP_CONNECT_ERRORS: tuple = (_httpx_aiohttp.ConnectError, _httpx_aiohttp.RemoteProtocolError)
+except ImportError:
+    _AIOHTTP_CONNECT_ERRORS = ()
+
 from .file import File, convert_file_dict_to_httpx_tuples
 from .force_multipart import FORCE_MULTIPART
 from .jsonable_encoder import jsonable_encoder
@@ -17,7 +27,7 @@ from .logging import LogConfig, Logger, create_logger
 from .query_encoder import encode_query
 from .remove_none_from_dict import remove_none_from_dict as remove_none_from_dict
 from .request_options import RequestOptions
-from httpx._types import RequestFiles
+from httpx2._types import RequestFiles
 
 INITIAL_RETRY_DELAY_SECONDS = 1.0
 MAX_RETRY_DELAY_SECONDS = 60.0
@@ -42,8 +52,8 @@ def get_keepalive_socket_options(
       Windows, but ``TCP_KEEPALIVE`` on macOS.
     - ``TCP_KEEPINTVL`` / ``TCP_KEEPCNT`` exist on Linux/macOS/modern Windows.
 
-    Passing these tuples to ``httpx.HTTPTransport(socket_options=...)`` /
-    ``httpx.AsyncHTTPTransport(socket_options=...)`` applies them to every
+    Passing these tuples to ``httpx2.HTTPTransport(socket_options=...)`` /
+    ``httpx2.AsyncHTTPTransport(socket_options=...)`` applies them to every
     connection the transport opens.
     """
     opts: typing.List[typing.Tuple[int, int, int]] = [(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)]
@@ -57,7 +67,7 @@ def get_keepalive_socket_options(
     return opts
 
 
-def _parse_retry_after(response_headers: httpx.Headers) -> typing.Optional[float]:
+def _parse_retry_after(response_headers: httpx2.Headers) -> typing.Optional[float]:
     """
     This function parses the `Retry-After` header in a HTTP response and returns the number of seconds to wait.
 
@@ -110,7 +120,7 @@ def _add_symmetric_jitter(delay: float) -> float:
     return delay * jitter_multiplier
 
 
-def _parse_x_ratelimit_reset(response_headers: httpx.Headers) -> typing.Optional[float]:
+def _parse_x_ratelimit_reset(response_headers: httpx2.Headers) -> typing.Optional[float]:
     """
     Parse the X-RateLimit-Reset header (Unix timestamp in seconds).
     Returns seconds to wait, or None if header is missing/invalid.
@@ -130,7 +140,7 @@ def _parse_x_ratelimit_reset(response_headers: httpx.Headers) -> typing.Optional
     return None
 
 
-def _retry_timeout(response: httpx.Response, retries: int) -> float:
+def _retry_timeout(response: httpx2.Response, retries: int) -> float:
     """
     Determine the amount of time to wait before retrying a request.
     This function begins by trying to parse a retry-after header from the response, and then proceeds to use exponential backoff
@@ -158,7 +168,7 @@ def _retry_timeout_from_retries(retries: int) -> float:
     return _add_symmetric_jitter(backoff)
 
 
-def _should_retry(response: httpx.Response) -> bool:
+def _should_retry(response: httpx2.Response) -> bool:
     return response.status_code >= 500 or response.status_code in [429, 408, 409]
 
 
@@ -219,7 +229,7 @@ def _maybe_filter_none_from_multipart_data(
 ) -> typing.Optional[typing.Any]:
     """
     Filter None values from data body for multipart/form requests.
-    This prevents httpx from converting None to empty strings in multipart encoding.
+    This prevents httpx2 from converting None to empty strings in multipart encoding.
     Only applies when files are present or force_multipart is True.
     """
     if data is not None and isinstance(data, typing.Mapping) and (request_files or force_multipart):
@@ -331,7 +341,7 @@ class HttpClient:
     def __init__(
         self,
         *,
-        httpx_client: httpx.Client,
+        httpx_client: httpx2.Client,
         base_timeout: typing.Callable[[], typing.Optional[float]],
         base_headers: typing.Callable[[], typing.Dict[str, str]],
         base_url: typing.Optional[typing.Callable[[], str]] = None,
@@ -376,7 +386,7 @@ class HttpClient:
         omit: typing.Optional[typing.Any] = None,
         optional_body: bool = False,
         force_multipart: typing.Optional[bool] = None,
-    ) -> httpx.Response:
+    ) -> httpx2.Response:
         base_url = self.get_base_url(base_url)
         _timeout = (
             request_options.get("timeout")
@@ -385,7 +395,7 @@ class HttpClient:
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else self.base_timeout()
         )
-        timeout = _timeout if _timeout is not None else httpx.USE_CLIENT_DEFAULT
+        timeout = _timeout if _timeout is not None else httpx2.USE_CLIENT_DEFAULT
 
         json_body, data_body = get_request_body(
             json=json, data=data, request_options=request_options, omit=omit, optional_body=optional_body
@@ -402,8 +412,8 @@ class HttpClient:
 
         data_body = _maybe_filter_none_from_multipart_data(data_body, request_files, force_multipart)
 
-        # Compute encoded params separately to avoid passing empty list to httpx
-        # (httpx strips existing query params from URL when params=[] is passed)
+        # Compute encoded params separately to avoid passing empty list to httpx2
+        # (httpx2 strips existing query params from URL when params=[] is passed)
         _encoded_params = encode_query(
             jsonable_encoder(
                 remove_none_from_dict(
@@ -463,7 +473,7 @@ class HttpClient:
                 files=request_files,
                 timeout=timeout,
             )
-        except (httpx.ConnectError, httpx.RemoteProtocolError):
+        except (httpx2.ConnectError, httpx2.RemoteProtocolError):
             if retries < max_retries:
                 time.sleep(_retry_timeout_from_retries(retries=retries))
                 return self.request(
@@ -545,7 +555,7 @@ class HttpClient:
         omit: typing.Optional[typing.Any] = None,
         optional_body: bool = False,
         force_multipart: typing.Optional[bool] = None,
-    ) -> typing.Iterator[httpx.Response]:
+    ) -> typing.Iterator[httpx2.Response]:
         base_url = self.get_base_url(base_url)
         _timeout = (
             request_options.get("timeout")
@@ -554,7 +564,7 @@ class HttpClient:
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else self.base_timeout()
         )
-        timeout = _timeout if _timeout is not None else httpx.USE_CLIENT_DEFAULT
+        timeout = _timeout if _timeout is not None else httpx2.USE_CLIENT_DEFAULT
 
         request_files: typing.Optional[RequestFiles] = (
             convert_file_dict_to_httpx_tuples(remove_omit_from_dict(remove_none_from_dict(files), omit))
@@ -571,8 +581,8 @@ class HttpClient:
 
         data_body = _maybe_filter_none_from_multipart_data(data_body, request_files, force_multipart)
 
-        # Compute encoded params separately to avoid passing empty list to httpx
-        # (httpx strips existing query params from URL when params=[] is passed)
+        # Compute encoded params separately to avoid passing empty list to httpx2
+        # (httpx2 strips existing query params from URL when params=[] is passed)
         _encoded_params = encode_query(
             jsonable_encoder(
                 remove_none_from_dict(
@@ -631,7 +641,7 @@ class AsyncHttpClient:
     def __init__(
         self,
         *,
-        httpx_client: httpx.AsyncClient,
+        httpx_client: httpx2.AsyncClient,
         base_timeout: typing.Callable[[], typing.Optional[float]],
         base_headers: typing.Callable[[], typing.Dict[str, str]],
         base_url: typing.Optional[typing.Callable[[], str]] = None,
@@ -683,7 +693,7 @@ class AsyncHttpClient:
         omit: typing.Optional[typing.Any] = None,
         optional_body: bool = False,
         force_multipart: typing.Optional[bool] = None,
-    ) -> httpx.Response:
+    ) -> httpx2.Response:
         base_url = self.get_base_url(base_url)
         _timeout = (
             request_options.get("timeout")
@@ -692,7 +702,7 @@ class AsyncHttpClient:
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else self.base_timeout()
         )
-        timeout = _timeout if _timeout is not None else httpx.USE_CLIENT_DEFAULT
+        timeout = _timeout if _timeout is not None else httpx2.USE_CLIENT_DEFAULT
 
         request_files: typing.Optional[RequestFiles] = (
             convert_file_dict_to_httpx_tuples(remove_omit_from_dict(remove_none_from_dict(files), omit))
@@ -712,8 +722,8 @@ class AsyncHttpClient:
         # Get headers (supports async token providers)
         _headers = await self._get_headers()
 
-        # Compute encoded params separately to avoid passing empty list to httpx
-        # (httpx strips existing query params from URL when params=[] is passed)
+        # Compute encoded params separately to avoid passing empty list to httpx2
+        # (httpx2 strips existing query params from URL when params=[] is passed)
         _encoded_params = encode_query(
             jsonable_encoder(
                 remove_none_from_dict(
@@ -773,7 +783,7 @@ class AsyncHttpClient:
                 files=request_files,
                 timeout=timeout,
             )
-        except (httpx.ConnectError, httpx.RemoteProtocolError):
+        except (httpx2.ConnectError, httpx2.RemoteProtocolError, *_AIOHTTP_CONNECT_ERRORS):
             if retries < max_retries:
                 await asyncio.sleep(_retry_timeout_from_retries(retries=retries))
                 return await self.request(
@@ -855,7 +865,7 @@ class AsyncHttpClient:
         omit: typing.Optional[typing.Any] = None,
         optional_body: bool = False,
         force_multipart: typing.Optional[bool] = None,
-    ) -> typing.AsyncIterator[httpx.Response]:
+    ) -> typing.AsyncIterator[httpx2.Response]:
         base_url = self.get_base_url(base_url)
         _timeout = (
             request_options.get("timeout")
@@ -864,7 +874,7 @@ class AsyncHttpClient:
             if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else self.base_timeout()
         )
-        timeout = _timeout if _timeout is not None else httpx.USE_CLIENT_DEFAULT
+        timeout = _timeout if _timeout is not None else httpx2.USE_CLIENT_DEFAULT
 
         request_files: typing.Optional[RequestFiles] = (
             convert_file_dict_to_httpx_tuples(remove_omit_from_dict(remove_none_from_dict(files), omit))
@@ -884,8 +894,8 @@ class AsyncHttpClient:
         # Get headers (supports async token providers)
         _headers = await self._get_headers()
 
-        # Compute encoded params separately to avoid passing empty list to httpx
-        # (httpx strips existing query params from URL when params=[] is passed)
+        # Compute encoded params separately to avoid passing empty list to httpx2
+        # (httpx2 strips existing query params from URL when params=[] is passed)
         _encoded_params = encode_query(
             jsonable_encoder(
                 remove_none_from_dict(

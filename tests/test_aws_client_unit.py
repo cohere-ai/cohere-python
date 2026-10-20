@@ -13,7 +13,10 @@ import os
 import unittest
 from unittest.mock import MagicMock, patch
 
-import httpx
+try:
+    import httpx2 as httpx2
+except ImportError:
+    import httpx2
 
 from cohere.manually_maintained.cohere_aws.mode import Mode
 
@@ -54,7 +57,7 @@ class TestSigV4HostHeader(unittest.TestCase):
 
             hook = map_request_to_bedrock(service="bedrock", aws_region="us-east-1")
 
-            request = httpx.Request(
+            request = httpx2.Request(
                 method="POST",
                 url="https://api.cohere.com/v1/chat",
                 headers={"connection": "keep-alive"},

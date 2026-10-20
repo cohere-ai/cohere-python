@@ -3,8 +3,8 @@ import json
 import re
 import typing
 
-import httpx
-from httpx import URL, SyncByteStream, ByteStream
+import httpx2
+from httpx2 import URL, SyncByteStream, ByteStream
 
 from . import GenerateStreamedResponse, Generation, \
     NonStreamedChatResponse, EmbedResponse, StreamedChatResponse, RerankResponse, ApiMeta, ApiMetaTokens, \
@@ -32,7 +32,7 @@ class AwsClient(Client):
             client_name="n/a",
             timeout=timeout,
             api_key="n/a",
-            httpx_client=httpx.Client(
+            httpx_client=httpx2.Client(
                 event_hooks=get_event_hooks(
                     service=service,
                     aws_access_key=aws_access_key,
@@ -63,7 +63,7 @@ class AwsClientV2(ClientV2):
             client_name="n/a",
             timeout=timeout,
             api_key="n/a",
-            httpx_client=httpx.Client(
+            httpx_client=httpx2.Client(
                 event_hooks=get_event_hooks(
                     service=service,
                     aws_access_key=aws_access_key,
@@ -135,7 +135,7 @@ stream_response_mapping: typing.Dict[str, typing.Any] = {
 }
 
 
-def stream_generator(response: httpx.Response, endpoint: str) -> typing.Iterator[bytes]:
+def stream_generator(response: httpx2.Response, endpoint: str) -> typing.Iterator[bytes]:
     regex = r"{[^\}]*}"
 
     for _text in response.iter_lines():
@@ -152,7 +152,7 @@ def stream_generator(response: httpx.Response, endpoint: str) -> typing.Iterator
                     yield (json.dumps(parsed.dict()) + "\n").encode("utf-8")  # type: ignore
 
 
-def map_token_counts(response: httpx.Response) -> ApiMeta:
+def map_token_counts(response: httpx2.Response) -> ApiMeta:
     input_tokens = int(response.headers.get("X-Amzn-Bedrock-Input-Token-Count", -1))
     output_tokens = int(response.headers.get("X-Amzn-Bedrock-Output-Token-Count", -1))
     return ApiMeta(
@@ -163,14 +163,14 @@ def map_token_counts(response: httpx.Response) -> ApiMeta:
 
 def map_response_from_bedrock():
     def _hook(
-            response: httpx.Response,
+            response: httpx2.Response,
     ) -> None:
         stream = response.headers["content-type"] == "application/vnd.amazon.eventstream"
         endpoint = response.request.extensions["endpoint"]
         output: typing.Iterator[bytes]
 
         if stream:
-            output = stream_generator(httpx.Response(
+            output = stream_generator(httpx2.Response(
                 stream=response.stream,
                 status_code=response.status_code,
             ), endpoint)
@@ -221,7 +221,7 @@ def map_request_to_bedrock(
     credentials = session.get_credentials()
     signer = lazy_botocore().auth.SigV4Auth(credentials, service, aws_region)
 
-    def _event_hook(request: httpx.Request) -> None:
+    def _event_hook(request: httpx2.Request) -> None:
         headers = request.headers.copy()
         del headers["connection"]
 
@@ -263,7 +263,7 @@ def map_request_to_bedrock(
         )
         signer.add_auth(aws_request)
 
-        request.headers = httpx.Headers(aws_request.prepare().headers)
+        request.headers = httpx2.Headers(aws_request.prepare().headers)
         request.extensions["endpoint"] = endpoint
 
     return _event_hook

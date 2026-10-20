@@ -7,13 +7,13 @@ import os
 import typing
 import uuid
 
-import httpx
+import httpx2
 import requests
 from .client import Client, ClientEnvironment
 from .client_v2 import ClientV2
 from .aws_client import Streamer
 from .manually_maintained.lazy_oci_deps import lazy_oci
-from httpx import URL, ByteStream
+from httpx2 import URL, ByteStream
 
 
 class OciClient(Client):
@@ -90,7 +90,7 @@ class OciClient(Client):
             client_name="n/a",
             timeout=timeout,
             api_key="n/a",
-            httpx_client=httpx.Client(
+            httpx_client=httpx2.Client(
                 event_hooks=get_event_hooks(
                     oci_config=oci_config,
                     oci_region=oci_region,
@@ -204,7 +204,7 @@ class OciClientV2(ClientV2):
             if oci_region is None:
                 raise ValueError("oci_region must be provided either directly or in OCI config file")
 
-        # Create httpx client with OCI event hooks
+        # Create httpx2 client with OCI event hooks
         ClientV2.__init__(
             self,
             base_url="https://api.cohere.com",  # Unused, OCI URL set in hooks
@@ -212,7 +212,7 @@ class OciClientV2(ClientV2):
             client_name="n/a",
             timeout=timeout,
             api_key="n/a",
-            httpx_client=httpx.Client(
+            httpx_client=httpx2.Client(
                 event_hooks=get_event_hooks(
                     oci_config=oci_config,
                     oci_region=oci_region,
@@ -350,7 +350,7 @@ def get_event_hooks(
     is_v2_client: bool = False,
 ) -> typing.Dict[str, typing.List[EventHook]]:
     """
-    Create httpx event hooks for OCI request/response transformation.
+    Create httpx2 event hooks for OCI request/response transformation.
 
     Args:
         oci_config: OCI configuration dictionary
@@ -359,7 +359,7 @@ def get_event_hooks(
         is_v2_client: Whether this is for OciClientV2 (True) or OciClient (False)
 
     Returns:
-        Dictionary of event hooks for httpx
+        Dictionary of event hooks for httpx2
     """
     return {
         "request": [
@@ -390,7 +390,7 @@ def map_request_to_oci(
         is_v2_client: Whether this is for OciClientV2 (True) or OciClient (False)
 
     Returns:
-        Event hook function for httpx
+        Event hook function for httpx2
     """
     oci = lazy_oci()
 
@@ -455,7 +455,7 @@ def map_request_to_oci(
             "session-based authentication, or provide direct credentials via oci_user_id parameter."
         )
 
-    def _event_hook(request: httpx.Request) -> None:
+    def _event_hook(request: httpx2.Request) -> None:
         # Extract Cohere API details
         path_parts = request.url.path.split("/")
         endpoint = path_parts[-1]
@@ -496,9 +496,9 @@ def map_request_to_oci(
         # Sign the request using OCI signer (modifies headers in place)
         signer.do_request_sign(prepped_request)
 
-        # Update httpx request with signed headers
+        # Update httpx2 request with signed headers
         request.url = URL(url)
-        request.headers = httpx.Headers(prepped_request.headers)
+        request.headers = httpx2.Headers(prepped_request.headers)
         request.stream = ByteStream(oci_body_bytes)
         request._content = oci_body_bytes
         request.extensions["endpoint"] = endpoint
@@ -513,10 +513,10 @@ def map_response_from_oci() -> EventHook:
     Create event hook that transforms OCI responses to Cohere format.
 
     Returns:
-        Event hook function for httpx
+        Event hook function for httpx2
     """
 
-    def _hook(response: httpx.Response) -> None:
+    def _hook(response: httpx2.Response) -> None:
         endpoint = response.request.extensions["endpoint"]
         is_stream = response.request.extensions.get("is_stream", False)
         is_v2 = response.request.extensions.get("is_v2", False)

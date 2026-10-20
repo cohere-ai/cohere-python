@@ -2,8 +2,8 @@
 
 from typing import IO, Dict, List, Mapping, Optional, Tuple, Union, cast
 
-# File typing inspired by the flexibility of types within the httpx library
-# https://github.com/encode/httpx/blob/master/httpx/_types.py
+# File typing inspired by the flexibility of types within the httpx2 library
+# https://github.com/encode/httpx2/blob/master/httpx2/_types.py
 FileContent = Union[IO[bytes], bytes, str]
 File = Union[
     # file (or bytes)
@@ -30,7 +30,7 @@ def convert_file_dict_to_httpx_tuples(
     name of the file and the second is the file object. Typically HTTPX wants
     a dict, but to be able to send lists of files, you have to use the list
     approach (which also works for non-lists)
-    https://github.com/encode/httpx/pull/1032
+    https://github.com/encode/httpx2/pull/1032
     """
 
     httpx_tuples = []
