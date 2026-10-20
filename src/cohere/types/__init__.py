@@ -183,7 +183,25 @@ if typing.TYPE_CHECKING:
     from .metrics import Metrics
     from .non_streamed_chat_response import NonStreamedChatResponse
     from .o_auth_authorize_response import OAuthAuthorizeResponse
+    from .parse_block import ImageParseBlock, ParseBlock, TableParseBlock, TextParseBlock
+    from .parse_blocks_page_variant import ParseBlocksPageVariant
+    from .parse_bounding_box import ParseBoundingBox
+    from .parse_bounding_box_normalized import ParseBoundingBoxNormalized
+    from .parse_document import ParseDocument
+    from .parse_image_block import ParseImageBlock
+    from .parse_image_category import ParseImageCategory
+    from .parse_image_content_block import ParseImageContentBlock
     from .parse_info import ParseInfo
+    from .parse_markdown_page import ParseMarkdownPage
+    from .parse_markdown_page_variant import ParseMarkdownPageVariant
+    from .parse_output_format import ParseOutputFormat
+    from .parse_page import BlocksParsePage, MarkdownParsePage, ParsePage
+    from .parse_response import ParseResponse
+    from .parse_table_block import ParseTableBlock
+    from .parse_table_content_block import ParseTableContentBlock
+    from .parse_table_content_type import ParseTableContentType
+    from .parse_text_block import ParseTextBlock
+    from .parse_text_content_block import ParseTextContentBlock
     from .rerank_document import RerankDocument
     from .rerank_request_documents_item import RerankRequestDocumentsItem
     from .rerank_response import RerankResponse
@@ -248,6 +266,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "AssistantMessageV2Content": ".assistant_message_v2content",
     "AssistantMessageV2ContentOneItem": ".assistant_message_v2content_one_item",
     "AuthTokenType": ".auth_token_type",
+    "BlocksParsePage": ".parse_page",
     "ChatCitation": ".chat_citation",
     "ChatCitationGenerationEvent": ".chat_citation_generation_event",
     "ChatCitationType": ".chat_citation_type",
@@ -386,6 +405,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "GetModelResponseSamplingDefaults": ".get_model_response_sampling_defaults",
     "Image": ".image",
     "ImageContent": ".image_content",
+    "ImageParseBlock": ".parse_block",
     "ImageUrl": ".image_url",
     "ImageUrlContent": ".content",
     "ImageUrlDetail": ".image_url_detail",
@@ -399,11 +419,30 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ListEmbedJobResponse": ".list_embed_job_response",
     "ListModelsResponse": ".list_models_response",
     "LogprobItem": ".logprob_item",
+    "MarkdownParsePage": ".parse_page",
     "Message": ".message",
     "Metrics": ".metrics",
     "NonStreamedChatResponse": ".non_streamed_chat_response",
     "OAuthAuthorizeResponse": ".o_auth_authorize_response",
+    "ParseBlock": ".parse_block",
+    "ParseBlocksPageVariant": ".parse_blocks_page_variant",
+    "ParseBoundingBox": ".parse_bounding_box",
+    "ParseBoundingBoxNormalized": ".parse_bounding_box_normalized",
+    "ParseDocument": ".parse_document",
+    "ParseImageBlock": ".parse_image_block",
+    "ParseImageCategory": ".parse_image_category",
+    "ParseImageContentBlock": ".parse_image_content_block",
     "ParseInfo": ".parse_info",
+    "ParseMarkdownPage": ".parse_markdown_page",
+    "ParseMarkdownPageVariant": ".parse_markdown_page_variant",
+    "ParseOutputFormat": ".parse_output_format",
+    "ParsePage": ".parse_page",
+    "ParseResponse": ".parse_response",
+    "ParseTableBlock": ".parse_table_block",
+    "ParseTableContentBlock": ".parse_table_content_block",
+    "ParseTableContentType": ".parse_table_content_type",
+    "ParseTextBlock": ".parse_text_block",
+    "ParseTextContentBlock": ".parse_text_content_block",
     "RerankDocument": ".rerank_document",
     "RerankRequestDocumentsItem": ".rerank_request_documents_item",
     "RerankResponse": ".rerank_response",
@@ -432,12 +471,14 @@ _dynamic_imports: typing.Dict[str, str] = {
     "SystemMessageV2": ".system_message_v2",
     "SystemMessageV2Content": ".system_message_v2content",
     "SystemMessageV2ContentOneItem": ".system_message_v2content_one_item",
+    "TableParseBlock": ".parse_block",
     "TextAssistantMessageResponseContentItem": ".assistant_message_response_content_item",
     "TextAssistantMessageV2ContentOneItem": ".assistant_message_v2content_one_item",
     "TextContent": ".content",
     "TextEmbedContent": ".embed_content",
     "TextGenerationGenerateStreamedResponse": ".generate_streamed_response",
     "TextGenerationStreamedChatResponse": ".streamed_chat_response",
+    "TextParseBlock": ".parse_block",
     "TextResponseFormat": ".response_format",
     "TextResponseFormatV2": ".response_format_v2",
     "TextSystemMessageV2ContentOneItem": ".system_message_v2content_one_item",
@@ -508,6 +549,7 @@ __all__ = [
     "AssistantMessageV2Content",
     "AssistantMessageV2ContentOneItem",
     "AuthTokenType",
+    "BlocksParsePage",
     "ChatCitation",
     "ChatCitationGenerationEvent",
     "ChatCitationType",
@@ -646,6 +688,7 @@ __all__ = [
     "GetModelResponseSamplingDefaults",
     "Image",
     "ImageContent",
+    "ImageParseBlock",
     "ImageUrl",
     "ImageUrlContent",
     "ImageUrlDetail",
@@ -659,11 +702,30 @@ __all__ = [
     "ListEmbedJobResponse",
     "ListModelsResponse",
     "LogprobItem",
+    "MarkdownParsePage",
     "Message",
     "Metrics",
     "NonStreamedChatResponse",
     "OAuthAuthorizeResponse",
+    "ParseBlock",
+    "ParseBlocksPageVariant",
+    "ParseBoundingBox",
+    "ParseBoundingBoxNormalized",
+    "ParseDocument",
+    "ParseImageBlock",
+    "ParseImageCategory",
+    "ParseImageContentBlock",
     "ParseInfo",
+    "ParseMarkdownPage",
+    "ParseMarkdownPageVariant",
+    "ParseOutputFormat",
+    "ParsePage",
+    "ParseResponse",
+    "ParseTableBlock",
+    "ParseTableContentBlock",
+    "ParseTableContentType",
+    "ParseTextBlock",
+    "ParseTextContentBlock",
     "RerankDocument",
     "RerankRequestDocumentsItem",
     "RerankResponse",
@@ -692,12 +754,14 @@ __all__ = [
     "SystemMessageV2",
     "SystemMessageV2Content",
     "SystemMessageV2ContentOneItem",
+    "TableParseBlock",
     "TextAssistantMessageResponseContentItem",
     "TextAssistantMessageV2ContentOneItem",
     "TextContent",
     "TextEmbedContent",
     "TextGenerationGenerateStreamedResponse",
     "TextGenerationStreamedChatResponse",
+    "TextParseBlock",
     "TextResponseFormat",
     "TextResponseFormatV2",
     "TextSystemMessageV2ContentOneItem",

@@ -2880,6 +2880,107 @@ If tool_choice isn't specified, then the model is free to choose whether to use 
 </dl>
 </details>
 
+<details><summary><code>client.v2.<a href="src/cohere/v2/client.py">parse</a>(...) -> ParseResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Parse a document image into structured output. Use `output_format` to select
+blocks or markdown (default).
+
+Currently supports `document.type = image_url` only (data URI or remote http(s)
+image URL). PDF / file URL inputs are not yet supported.
+
+Image limits: 20 MB file size; 50 megapixels or 200 MB decoded (whichever is
+exceeded first).
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cohere import Client, ParseDocument
+from cohere.environment import ClientEnvironment
+
+client = Client(
+    token="<token>",
+    environment=ClientEnvironment.PRODUCTION,
+)
+
+client.v2.parse(
+    model="parse-v5.0",
+    document=ParseDocument(
+        type="image_url",
+        image_url="https://cohere.com/favicon-32x32.png",
+    ),
+    output_format="markdown",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**model:** `str` — The name of a compatible Cohere parse model.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**document:** `ParseDocument` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**output_format:** `typing.Optional[ParseOutputFormat]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.v2.<a href="src/cohere/v2/client.py">embed</a>(...) -> EmbedByTypeResponse</code></summary>
 <dl>
 <dd>
