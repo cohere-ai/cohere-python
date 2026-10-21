@@ -35,6 +35,7 @@ from ..types.embedding_type import EmbeddingType
 from ..types.parse_document import ParseDocument
 from ..types.parse_output_format import ParseOutputFormat
 from ..types.parse_response import ParseResponse
+from ..types.rerank_relevant_spans import RerankRelevantSpans
 from ..types.response_format_v2 import ResponseFormatV2
 from ..types.thinking import Thinking
 from ..types.tool_v2 import ToolV2
@@ -985,7 +986,7 @@ class RawV2Client:
 
         output_dimension : typing.Optional[int]
             The number of dimensions of the output embedding. This is only available for `embed-v4` and newer models.
-            Possible values are `256`, `512`, `1024`, and `1536`. The default is `1536`.
+            For supported dimensions, please refer to the [Embed models](https://docs.cohere.com/docs/cohere-embed) page.
 
         embedding_types : typing.Optional[typing.Sequence[EmbeddingType]]
             Specifies the types of embeddings you want to get back. Can be one or more of the following types.
@@ -1197,6 +1198,7 @@ class RawV2Client:
         documents: typing.Sequence[str],
         top_n: typing.Optional[int] = OMIT,
         max_tokens_per_doc: typing.Optional[int] = OMIT,
+        relevant_spans: typing.Optional[RerankRelevantSpans] = OMIT,
         priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[V2RerankResponse]:
@@ -1206,7 +1208,7 @@ class RawV2Client:
         Parameters
         ----------
         model : str
-            The identifier of the model to use, eg `rerank-v3.5`.
+            The identifier of the model to use, eg `rerank-v5.0-pro`.
 
         query : str
             The search query
@@ -1224,6 +1226,8 @@ class RawV2Client:
 
         max_tokens_per_doc : typing.Optional[int]
             Defaults to `4096`. Long documents will be automatically truncated to the specified number of tokens.
+
+        relevant_spans : typing.Optional[RerankRelevantSpans]
 
         priority : typing.Optional[int]
             Controls how early the request is handled. Lower numbers indicate higher priority (default: 0, the highest). When the system is under load, higher-priority requests are processed first and are the least likely to be dropped.
@@ -1245,6 +1249,9 @@ class RawV2Client:
                 "documents": documents,
                 "top_n": top_n,
                 "max_tokens_per_doc": max_tokens_per_doc,
+                "relevant_spans": convert_and_respect_annotation_metadata(
+                    object_=relevant_spans, annotation=RerankRelevantSpans, direction="write"
+                ),
                 "priority": priority,
             },
             headers={
@@ -2336,7 +2343,7 @@ class AsyncRawV2Client:
 
         output_dimension : typing.Optional[int]
             The number of dimensions of the output embedding. This is only available for `embed-v4` and newer models.
-            Possible values are `256`, `512`, `1024`, and `1536`. The default is `1536`.
+            For supported dimensions, please refer to the [Embed models](https://docs.cohere.com/docs/cohere-embed) page.
 
         embedding_types : typing.Optional[typing.Sequence[EmbeddingType]]
             Specifies the types of embeddings you want to get back. Can be one or more of the following types.
@@ -2548,6 +2555,7 @@ class AsyncRawV2Client:
         documents: typing.Sequence[str],
         top_n: typing.Optional[int] = OMIT,
         max_tokens_per_doc: typing.Optional[int] = OMIT,
+        relevant_spans: typing.Optional[RerankRelevantSpans] = OMIT,
         priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[V2RerankResponse]:
@@ -2557,7 +2565,7 @@ class AsyncRawV2Client:
         Parameters
         ----------
         model : str
-            The identifier of the model to use, eg `rerank-v3.5`.
+            The identifier of the model to use, eg `rerank-v5.0-pro`.
 
         query : str
             The search query
@@ -2575,6 +2583,8 @@ class AsyncRawV2Client:
 
         max_tokens_per_doc : typing.Optional[int]
             Defaults to `4096`. Long documents will be automatically truncated to the specified number of tokens.
+
+        relevant_spans : typing.Optional[RerankRelevantSpans]
 
         priority : typing.Optional[int]
             Controls how early the request is handled. Lower numbers indicate higher priority (default: 0, the highest). When the system is under load, higher-priority requests are processed first and are the least likely to be dropped.
@@ -2596,6 +2606,9 @@ class AsyncRawV2Client:
                 "documents": documents,
                 "top_n": top_n,
                 "max_tokens_per_doc": max_tokens_per_doc,
+                "relevant_spans": convert_and_respect_annotation_metadata(
+                    object_=relevant_spans, annotation=RerankRelevantSpans, direction="write"
+                ),
                 "priority": priority,
             },
             headers={

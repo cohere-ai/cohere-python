@@ -25,6 +25,9 @@
         "optional": true
       }
     },
+    "extra_dev_dependencies": {
+      "pydantic": ">=2.0.0,<2.14.0"
+    },
     "improved_imports": true,
     "pydantic_config": {
       "frozen": false,
@@ -100,10 +103,10 @@
       }
     ]
   },
-  "originGitCommit": "2bfdfa67e2f98426451cf784a8f798e6c9272b9b",
+  "originGitCommit": "c39b7388c89804b40d40b481f5338b5a39c93a32",
   "originGitCommitIsDirty": false,
   "invokedBy": "ci",
-  "requestedVersion": "7.2.0",
+  "requestedVersion": "7.3.0",
   "ciProvider": "github",
-  "sdkVersion": "7.2.0"
+  "sdkVersion": "7.3.0"
 }

@@ -1510,8 +1510,8 @@ client.embed(
         "hello",
         "goodbye"
     ],
-    model="embed-v4.0",
-    input_type="classification",
+    model="embed-v5.0-fast",
+    input_type="search_document",
 )
 
 ```
@@ -3025,8 +3025,8 @@ client.v2.embed(
         "hello",
         "goodbye"
     ],
-    model="embed-v4.0",
-    input_type="classification",
+    model="embed-v5.0-fast",
+    input_type="search_document",
     embedding_types=[
         "float"
     ],
@@ -3107,7 +3107,7 @@ For **Embed v4.0 and newer** models, there is no limit on the number of images p
 **output_dimension:** `typing.Optional[int]` 
 
 The number of dimensions of the output embedding. This is only available for `embed-v4` and newer models.
-Possible values are `256`, `512`, `1024`, and `1536`. The default is `1536`.
+For supported dimensions, please refer to the [Embed models](https://docs.cohere.com/docs/cohere-embed) page.
     
 </dd>
 </dl>
@@ -3193,7 +3193,7 @@ This endpoint takes in a query and a list of texts and produces an ordered array
 <dd>
 
 ```python
-from cohere import Client
+from cohere import Client, RerankRelevantSpans
 from cohere.environment import ClientEnvironment
 
 client = Client(
@@ -3202,16 +3202,21 @@ client = Client(
 )
 
 client.v2.rerank(
-    model="rerank-v4.0-pro",
+    model="rerank-v5.0-pro",
     query="What is the capital of the United States?",
     documents=[
         "Carson City is the capital city of the American state of Nevada.",
         "The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.",
         "Capitalization or capitalisation in English grammar is the use of a capital letter at the start of a word. English usage varies from capitalization in other languages.",
         "Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.",
-        "Capital punishment has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states."
+        "Capital gains are profits from the sale of an asset such as stocks or real estate. In the United States, long-term capital gains are taxed at lower rates than ordinary income."
     ],
     top_n=3,
+    relevant_spans=RerankRelevantSpans(
+        mode="enabled",
+        threshold=0.1,
+        max_spans=3,
+    ),
 )
 
 ```
@@ -3228,7 +3233,7 @@ client.v2.rerank(
 <dl>
 <dd>
 
-**model:** `str` — The identifier of the model to use, eg `rerank-v3.5`.
+**model:** `str` — The identifier of the model to use, eg `rerank-v5.0-pro`.
     
 </dd>
 </dl>
@@ -3268,6 +3273,14 @@ For optimal performance we recommend against sending more than 1,000 documents i
 <dd>
 
 **max_tokens_per_doc:** `typing.Optional[int]` — Defaults to `4096`. Long documents will be automatically truncated to the specified number of tokens.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**relevant_spans:** `typing.Optional[RerankRelevantSpans]` 
     
 </dd>
 </dl>
