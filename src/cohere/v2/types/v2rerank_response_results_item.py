@@ -5,6 +5,7 @@ import typing
 import pydantic
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
 from ...core.unchecked_base_model import UncheckedBaseModel
+from ...types.rerank_relevant_span_response import RerankRelevantSpanResponse
 
 
 class V2RerankResponseResultsItem(UncheckedBaseModel):
@@ -16,6 +17,11 @@ class V2RerankResponseResultsItem(UncheckedBaseModel):
     relevance_score: float = pydantic.Field()
     """
     Relevance scores are normalized to be in the range `[0, 1]`. Scores close to `1` indicate a high relevance to the query, and scores closer to `0` indicate low relevance. It is not accurate to assume a score of 0.9 means the document is 2x more relevant than a document with a score of 0.45
+    """
+
+    relevant_spans: typing.Optional[typing.List[RerankRelevantSpanResponse]] = pydantic.Field(default=None)
+    """
+    The spans of this document that are most relevant to the query, ordered from most to least relevant. Only returned when the request enabled `relevant_spans` and the model found at least one span for the document.
     """
 
     if IS_PYDANTIC_V2:

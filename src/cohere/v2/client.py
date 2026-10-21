@@ -13,6 +13,7 @@ from ..types.embedding_type import EmbeddingType
 from ..types.parse_document import ParseDocument
 from ..types.parse_output_format import ParseOutputFormat
 from ..types.parse_response import ParseResponse
+from ..types.rerank_relevant_spans import RerankRelevantSpans
 from ..types.response_format_v2 import ResponseFormatV2
 from ..types.thinking import Thinking
 from ..types.tool_v2 import ToolV2
@@ -492,7 +493,7 @@ class V2Client:
 
         output_dimension : typing.Optional[int]
             The number of dimensions of the output embedding. This is only available for `embed-v4` and newer models.
-            Possible values are `256`, `512`, `1024`, and `1536`. The default is `1536`.
+            For supported dimensions, please refer to the [Embed models](https://docs.cohere.com/docs/cohere-embed) page.
 
         embedding_types : typing.Optional[typing.Sequence[EmbeddingType]]
             Specifies the types of embeddings you want to get back. Can be one or more of the following types.
@@ -532,8 +533,8 @@ class V2Client:
         )
         client.v2.embed(
             texts=["hello", "goodbye"],
-            model="embed-v4.0",
-            input_type="classification",
+            model="embed-v5.0-fast",
+            input_type="search_document",
             embedding_types=["float"],
         )
         """
@@ -560,6 +561,7 @@ class V2Client:
         documents: typing.Sequence[str],
         top_n: typing.Optional[int] = OMIT,
         max_tokens_per_doc: typing.Optional[int] = OMIT,
+        relevant_spans: typing.Optional[RerankRelevantSpans] = OMIT,
         priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> V2RerankResponse:
@@ -569,7 +571,7 @@ class V2Client:
         Parameters
         ----------
         model : str
-            The identifier of the model to use, eg `rerank-v3.5`.
+            The identifier of the model to use, eg `rerank-v5.0-pro`.
 
         query : str
             The search query
@@ -588,6 +590,8 @@ class V2Client:
         max_tokens_per_doc : typing.Optional[int]
             Defaults to `4096`. Long documents will be automatically truncated to the specified number of tokens.
 
+        relevant_spans : typing.Optional[RerankRelevantSpans]
+
         priority : typing.Optional[int]
             Controls how early the request is handled. Lower numbers indicate higher priority (default: 0, the highest). When the system is under load, higher-priority requests are processed first and are the least likely to be dropped.
 
@@ -601,7 +605,7 @@ class V2Client:
 
         Examples
         --------
-        from cohere import Client
+        from cohere import Client, RerankRelevantSpans
 
         client = Client(
             client_name="YOUR_CLIENT_NAME",
@@ -613,11 +617,16 @@ class V2Client:
                 "The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.",
                 "Capitalization or capitalisation in English grammar is the use of a capital letter at the start of a word. English usage varies from capitalization in other languages.",
                 "Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.",
-                "Capital punishment has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states.",
+                "Capital gains are profits from the sale of an asset such as stocks or real estate. In the United States, long-term capital gains are taxed at lower rates than ordinary income.",
             ],
             query="What is the capital of the United States?",
             top_n=3,
-            model="rerank-v4.0-pro",
+            model="rerank-v5.0-pro",
+            relevant_spans=RerankRelevantSpans(
+                mode="enabled",
+                threshold=0.1,
+                max_spans=3,
+            ),
         )
         """
         _response = self._raw_client.rerank(
@@ -626,6 +635,7 @@ class V2Client:
             documents=documents,
             top_n=top_n,
             max_tokens_per_doc=max_tokens_per_doc,
+            relevant_spans=relevant_spans,
             priority=priority,
             request_options=request_options,
         )
@@ -1117,7 +1127,7 @@ class AsyncV2Client:
 
         output_dimension : typing.Optional[int]
             The number of dimensions of the output embedding. This is only available for `embed-v4` and newer models.
-            Possible values are `256`, `512`, `1024`, and `1536`. The default is `1536`.
+            For supported dimensions, please refer to the [Embed models](https://docs.cohere.com/docs/cohere-embed) page.
 
         embedding_types : typing.Optional[typing.Sequence[EmbeddingType]]
             Specifies the types of embeddings you want to get back. Can be one or more of the following types.
@@ -1162,8 +1172,8 @@ class AsyncV2Client:
         async def main() -> None:
             await client.v2.embed(
                 texts=["hello", "goodbye"],
-                model="embed-v4.0",
-                input_type="classification",
+                model="embed-v5.0-fast",
+                input_type="search_document",
                 embedding_types=["float"],
             )
 
@@ -1193,6 +1203,7 @@ class AsyncV2Client:
         documents: typing.Sequence[str],
         top_n: typing.Optional[int] = OMIT,
         max_tokens_per_doc: typing.Optional[int] = OMIT,
+        relevant_spans: typing.Optional[RerankRelevantSpans] = OMIT,
         priority: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> V2RerankResponse:
@@ -1202,7 +1213,7 @@ class AsyncV2Client:
         Parameters
         ----------
         model : str
-            The identifier of the model to use, eg `rerank-v3.5`.
+            The identifier of the model to use, eg `rerank-v5.0-pro`.
 
         query : str
             The search query
@@ -1221,6 +1232,8 @@ class AsyncV2Client:
         max_tokens_per_doc : typing.Optional[int]
             Defaults to `4096`. Long documents will be automatically truncated to the specified number of tokens.
 
+        relevant_spans : typing.Optional[RerankRelevantSpans]
+
         priority : typing.Optional[int]
             Controls how early the request is handled. Lower numbers indicate higher priority (default: 0, the highest). When the system is under load, higher-priority requests are processed first and are the least likely to be dropped.
 
@@ -1236,7 +1249,7 @@ class AsyncV2Client:
         --------
         import asyncio
 
-        from cohere import AsyncClient
+        from cohere import AsyncClient, RerankRelevantSpans
 
         client = AsyncClient(
             client_name="YOUR_CLIENT_NAME",
@@ -1251,11 +1264,16 @@ class AsyncV2Client:
                     "The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.",
                     "Capitalization or capitalisation in English grammar is the use of a capital letter at the start of a word. English usage varies from capitalization in other languages.",
                     "Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.",
-                    "Capital punishment has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states.",
+                    "Capital gains are profits from the sale of an asset such as stocks or real estate. In the United States, long-term capital gains are taxed at lower rates than ordinary income.",
                 ],
                 query="What is the capital of the United States?",
                 top_n=3,
-                model="rerank-v4.0-pro",
+                model="rerank-v5.0-pro",
+                relevant_spans=RerankRelevantSpans(
+                    mode="enabled",
+                    threshold=0.1,
+                    max_spans=3,
+                ),
             )
 
 
@@ -1267,6 +1285,7 @@ class AsyncV2Client:
             documents=documents,
             top_n=top_n,
             max_tokens_per_doc=max_tokens_per_doc,
+            relevant_spans=relevant_spans,
             priority=priority,
             request_options=request_options,
         )

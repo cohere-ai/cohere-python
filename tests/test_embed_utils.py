@@ -205,6 +205,20 @@ class TestClient(unittest.TestCase):
         result = merge_embed_responses([resp1, resp2])
         self.assertEqual(result.embeddings.float_, [[1.0, 2.0]])  # type: ignore
 
+    def test_merge_embeddings_by_type_keeps_field_from_later_response(self) -> None:
+        resp1 = EmbeddingsByTypeEmbedResponse(
+            response_type="embeddings_by_type", id="1",
+            embeddings=EmbedByTypeResponseEmbeddings(float_=[[1.0, 2.0]]))
+        resp2 = EmbeddingsByTypeEmbedResponse(
+            response_type="embeddings_by_type", id="2",
+            embeddings=EmbedByTypeResponseEmbeddings(
+                float_=[[3.0, 4.0]], int8=[[3, 4]]))
+
+        result = merge_embed_responses([resp1, resp2])
+
+        self.assertEqual(result.embeddings.float_, [[1.0, 2.0], [3.0, 4.0]])  # type: ignore
+        self.assertEqual(result.embeddings.int8, [[3, 4]])  # type: ignore
+
     def test_sum_fields_if_not_none_with_none_entries(self) -> None:
         # billed_units list may contain None when ApiMeta.billed_units is unset;
         # sum_fields_if_not_none must skip None objects without raising AttributeError

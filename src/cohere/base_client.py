@@ -1147,8 +1147,8 @@ class BaseCohere:
         )
         client.embed(
             texts=["hello", "goodbye"],
-            model="embed-v4.0",
-            input_type="classification",
+            model="embed-v5.0-fast",
+            input_type="search_document",
         )
         """
         _response = self._raw_client.embed(
@@ -2747,8 +2747,8 @@ class AsyncBaseCohere:
         async def main() -> None:
             await client.embed(
                 texts=["hello", "goodbye"],
-                model="embed-v4.0",
-                input_type="classification",
+                model="embed-v5.0-fast",
+                input_type="search_document",
             )
 
 
