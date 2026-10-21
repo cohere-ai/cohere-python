@@ -1,24 +1,23 @@
 import asyncio
+import logging
 import os
 import typing
 from concurrent.futures import ThreadPoolExecutor
-from tokenizers import Tokenizer  # type: ignore
-import logging
 
 import httpx
-
-from cohere.types.detokenize_response import DetokenizeResponse
-from cohere.types.tokenize_response import TokenizeResponse
-
-from . import EmbedResponse, EmbedInputType, EmbeddingType, EmbedRequestTruncate
-from .base_client import BaseCohere, AsyncBaseCohere, OMIT
+from . import EmbeddingType, EmbedInputType, EmbedRequestTruncate, EmbedResponse
+from .base_client import OMIT, AsyncBaseCohere, BaseCohere
 from .config import embed_batch_size, embed_stream_batch_size
 from .core import RequestOptions
 from .environment import ClientEnvironment
-from .manually_maintained.cache import CacheMixin
 from .manually_maintained import tokenizers as local_tokenizers
+from .manually_maintained.cache import CacheMixin
 from .overrides import run_overrides
-from .utils import wait, async_wait, merge_embed_responses, SyncSdkUtils, AsyncSdkUtils
+from .utils import AsyncSdkUtils, SyncSdkUtils, async_wait, merge_embed_responses, wait
+from tokenizers import Tokenizer  # type: ignore
+
+from cohere.types.detokenize_response import DetokenizeResponse
+from cohere.types.tokenize_response import TokenizeResponse
 
 logger = logging.getLogger(__name__)
 run_overrides()
@@ -135,7 +134,7 @@ class Client(BaseCohere, CacheMixin):
         self,
         api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
         *,
-        base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
+        base_url: typing.Optional[str] = None,
         environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
         client_name: typing.Optional[str] = None,
         timeout: typing.Optional[float] = None,
@@ -147,7 +146,7 @@ class Client(BaseCohere, CacheMixin):
         if api_key is None:
             api_key = _get_api_key_from_environment()
 
-        base_url = fix_base_url(base_url)
+        base_url = fix_base_url(base_url if base_url is not None else os.getenv("CO_API_URL"))
 
         self._executor = thread_pool_executor
 
@@ -384,7 +383,7 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         self,
         api_key: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
         *,
-        base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
+        base_url: typing.Optional[str] = None,
         environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
         client_name: typing.Optional[str] = None,
         timeout: typing.Optional[float] = None,
@@ -396,7 +395,7 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         if api_key is None:
             api_key = _get_api_key_from_environment()
 
-        base_url = fix_base_url(base_url)
+        base_url = fix_base_url(base_url if base_url is not None else os.getenv("CO_API_URL"))
 
         self._executor = thread_pool_executor
 
