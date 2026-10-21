@@ -60,7 +60,7 @@ def _mount_environment_proxies(
         else:
             httpx_client._mounts[url_pattern] = transport_factory(proxy_url, keepalive)
     # Mirror httpx's own ordering so narrower bypass patterns are checked first.
-    httpx_client._mounts = dict(sorted(httpx_client._mounts.items()))
+    httpx_client._mounts = typing.cast(typing.Any, dict(sorted(httpx_client._mounts.items())))
 
 
 def validate_args(obj: typing.Any, method_name: str, check_fn: typing.Callable[[typing.Any], typing.Any]) -> None:
