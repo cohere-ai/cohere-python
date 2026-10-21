@@ -201,7 +201,7 @@ class Client(BaseCohere, CacheMixin):
         if httpx_client is None:
             _mount_environment_proxies(
                 self._client_wrapper.httpx_client.httpx_client,
-                lambda url, opts: httpx.HTTPTransport(proxy=url, socket_options=opts),
+                lambda url, opts: httpx.HTTPTransport(proxy=httpx.Proxy(url), socket_options=opts),
             )
 
         validate_args(self, "chat", throw_if_stream_is_true)
@@ -456,7 +456,7 @@ class AsyncClient(AsyncBaseCohere, CacheMixin):
         if httpx_client is None:
             _mount_environment_proxies(
                 self._client_wrapper.httpx_client.httpx_client,
-                lambda url, opts: httpx.AsyncHTTPTransport(proxy=url, socket_options=opts),
+                lambda url, opts: httpx.AsyncHTTPTransport(proxy=httpx.Proxy(url), socket_options=opts),
             )
 
         validate_args(self, "chat", throw_if_stream_is_true)
