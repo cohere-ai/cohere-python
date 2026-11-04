@@ -52,7 +52,9 @@ jobs:
 
   publish:
     needs: [compile, test]
-    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+    # Only publish on release tags. Fern pushes its own `fern-generation-base--*`
+    # tag during regeneration, which must not trigger a PyPI upload.
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && !startsWith(github.ref, 'refs/tags/fern-')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -66,6 +68,13 @@ jobs:
           curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
       - name: Install dependencies
         run: poetry install
+      - name: Verify tag matches package version
+        run: |
+          package_version="$(poetry version --short)"
+          if [ "$GITHUB_REF_NAME" != "$package_version" ]; then
+            echo "::error::Tag '$GITHUB_REF_NAME' does not match pyproject.toml version '$package_version'. Bump the version in pyproject.toml before tagging."
+            exit 1
+          fi
       - name: Publish to pypi
         run: |
           poetry config repositories.remote https://upload.pypi.org/legacy/
