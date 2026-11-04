@@ -8,7 +8,7 @@ import typing
 import httpx
 from .core.api_error import ApiError
 from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
-from .core.http_client import get_keepalive_socket_options
+from .core.http_client import get_async_keepalive_proxy_mounts, get_keepalive_proxy_mounts, get_keepalive_socket_options
 from .core.logging import LogConfig, Logger
 from .core.request_options import RequestOptions
 from .environment import ClientEnvironment
@@ -123,7 +123,7 @@ class BaseCohere:
         base_url: typing.Optional[str] = None,
         environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
         client_name: typing.Optional[str] = None,
-        token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"),
+        token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
         timeout: typing.Optional[float] = None,
         max_retries: typing.Optional[int] = None,
@@ -135,6 +135,7 @@ class BaseCohere:
     ):
         _defaulted_timeout = timeout if timeout is not None else 300 if httpx_client is None else None
         _defaulted_max_retries = max_retries if max_retries is not None else 2
+        token = token if token is not None else os.getenv("CO_API_KEY")
         if token is None:
             raise ApiError(body="The client must be instantiated be either passing in token or setting CO_API_KEY")
         self._client_wrapper = SyncClientWrapper(
@@ -148,11 +149,13 @@ class BaseCohere:
                 timeout=_defaulted_timeout,
                 follow_redirects=follow_redirects,
                 transport=httpx.HTTPTransport(socket_options=get_keepalive_socket_options(idle=60, intvl=30, cnt=5)),
+                mounts=get_keepalive_proxy_mounts(idle=60, intvl=30, cnt=5),
             )
             if follow_redirects is not None
             else httpx.Client(
                 timeout=_defaulted_timeout,
                 transport=httpx.HTTPTransport(socket_options=get_keepalive_socket_options(idle=60, intvl=30, cnt=5)),
+                mounts=get_keepalive_proxy_mounts(idle=60, intvl=30, cnt=5),
             ),
             timeout=_defaulted_timeout,
             max_retries=_defaulted_max_retries,
@@ -1612,8 +1615,6 @@ def _make_default_async_client(
     follow_redirects: typing.Optional[bool],
     transport: typing.Optional[httpx.AsyncBaseTransport] = None,
 ) -> httpx.AsyncClient:
-    if transport is None:
-        transport = httpx.AsyncHTTPTransport(socket_options=get_keepalive_socket_options(idle=60, intvl=30, cnt=5))
     try:
         import httpx_aiohttp  # type: ignore[import-not-found]
     except ImportError:
@@ -1623,9 +1624,13 @@ def _make_default_async_client(
             return httpx_aiohttp.HttpxAiohttpClient(timeout=timeout, follow_redirects=follow_redirects)
         return httpx_aiohttp.HttpxAiohttpClient(timeout=timeout)
 
+    mounts: typing.Optional[typing.Dict[str, typing.Optional[httpx.AsyncBaseTransport]]] = None
+    if transport is None:
+        transport = httpx.AsyncHTTPTransport(socket_options=get_keepalive_socket_options(idle=60, intvl=30, cnt=5))
+        mounts = get_async_keepalive_proxy_mounts(idle=60, intvl=30, cnt=5)
     if follow_redirects is not None:
-        return httpx.AsyncClient(timeout=timeout, follow_redirects=follow_redirects, transport=transport)
-    return httpx.AsyncClient(timeout=timeout, transport=transport)
+        return httpx.AsyncClient(timeout=timeout, follow_redirects=follow_redirects, transport=transport, mounts=mounts)
+    return httpx.AsyncClient(timeout=timeout, transport=transport, mounts=mounts)
 
 
 class AsyncBaseCohere:
@@ -1691,7 +1696,7 @@ class AsyncBaseCohere:
         base_url: typing.Optional[str] = None,
         environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
         client_name: typing.Optional[str] = None,
-        token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = os.getenv("CO_API_KEY"),
+        token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
         async_token: typing.Optional[typing.Callable[[], typing.Awaitable[str]]] = None,
         timeout: typing.Optional[float] = None,
@@ -1704,6 +1709,7 @@ class AsyncBaseCohere:
     ):
         _defaulted_timeout = timeout if timeout is not None else 300 if httpx_client is None else None
         _defaulted_max_retries = max_retries if max_retries is not None else 2
+        token = token if token is not None else os.getenv("CO_API_KEY")
         if token is None:
             raise ApiError(body="The client must be instantiated be either passing in token or setting CO_API_KEY")
         self._client_wrapper = AsyncClientWrapper(
