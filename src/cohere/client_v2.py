@@ -1,4 +1,3 @@
-import os
 import typing
 from concurrent.futures import ThreadPoolExecutor
 
@@ -34,7 +33,7 @@ class ClientV2(V2Client, Client):  # type: ignore
         api_key: typing.Optional[typing.Union[str,
                                               typing.Callable[[], str]]] = None,
         *,
-        base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
+        base_url: typing.Optional[str] = None,
         environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
         client_name: typing.Optional[str] = None,
         timeout: typing.Optional[float] = None,
@@ -69,7 +68,7 @@ class AsyncClientV2(AsyncV2Client, AsyncClient):  # type: ignore
         api_key: typing.Optional[typing.Union[str,
                                               typing.Callable[[], str]]] = None,
         *,
-        base_url: typing.Optional[str] = os.getenv("CO_API_URL"),
+        base_url: typing.Optional[str] = None,
         environment: ClientEnvironment = ClientEnvironment.PRODUCTION,
         client_name: typing.Optional[str] = None,
         timeout: typing.Optional[float] = None,
