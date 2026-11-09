@@ -3,18 +3,19 @@ import os
 import tarfile
 import tempfile
 import time
+import typing
 from typing import Any, Dict, List, Optional, Union
 
+from ..lazy_aws_deps import lazy_boto3, lazy_botocore, lazy_sagemaker
+from .chat import Chat, StreamingChat
 from .classification import Classification, Classifications
 from .embeddings import Embeddings
 from .error import CohereError
 from .generation import Generations, StreamingGenerations
-from .chat import Chat, StreamingChat
+from .mode import Mode
 from .rerank import Reranking
 from .summary import Summary
-from .mode import Mode
-import typing
-from ..lazy_aws_deps import lazy_boto3, lazy_botocore, lazy_sagemaker
+
 
 class Client:
     def __init__(
@@ -27,7 +28,7 @@ class Client:
         `aws configure set region us-west-2` or override it with `region_name` parameter.
         """
         self.mode = mode
-        if os.environ.get('AWS_DEFAULT_REGION') is None:
+        if os.environ.get('AWS_DEFAULT_REGION') is None and aws_region is not None:
             os.environ['AWS_DEFAULT_REGION'] = aws_region
 
         if self.mode == Mode.SAGEMAKER:
