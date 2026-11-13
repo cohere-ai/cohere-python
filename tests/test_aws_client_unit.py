@@ -250,3 +250,92 @@ class TestEmbedV4Params(unittest.TestCase):
 
             self.assertIsInstance(result, dict)
             self.assertEqual(result, by_type_embeddings)
+
+
+class TestAwsResponseMetaUsage(unittest.TestCase):
+    """SageMaker does not send Bedrock token-count headers. The response body
+    already carries billed usage, including search_units and image units."""
+
+    def _rewrite(self, endpoint: str, body: dict, headers: dict | None = None) -> dict:
+        from cohere.aws_client import map_response_from_bedrock
+
+        request = httpx.Request(
+            method="POST",
+            url="https://runtime.sagemaker.us-east-1.amazonaws.com/endpoints/cohere/invocations",
+        )
+        request.extensions["endpoint"] = endpoint
+        response_headers = {"content-type": "application/json"}
+        if headers:
+            response_headers.update(headers)
+        response = httpx.Response(200, json=body, headers=response_headers, request=request)
+        map_response_from_bedrock()(response)
+        return json.loads(response.read())
+
+    def test_sagemaker_chat_keeps_billed_usage_and_search_units(self) -> None:
+        parsed = self._rewrite(
+            "chat",
+            {
+                "text": "hello",
+                "generation_id": "gen-1",
+                "meta": {
+                    "api_version": {"version": "1"},
+                    "billed_units": {"input_tokens": 4, "output_tokens": 9, "search_units": 2},
+                    "tokens": {"input_tokens": 4, "output_tokens": 9},
+                },
+            },
+        )
+        billed = parsed["meta"]["billed_units"]
+        self.assertEqual(billed["input_tokens"], 4)
+        self.assertEqual(billed["output_tokens"], 9)
+        self.assertEqual(billed["search_units"], 2)
+        self.assertEqual(parsed["meta"]["tokens"]["input_tokens"], 4)
+        self.assertEqual(parsed["meta"]["tokens"]["output_tokens"], 9)
+        self.assertEqual(parsed["meta"]["api_version"]["version"], "1")
+
+    def test_sagemaker_embed_keeps_image_and_input_units(self) -> None:
+        parsed = self._rewrite(
+            "embed",
+            {
+                "response_type": "embeddings_floats",
+                "id": "emb-1",
+                "embeddings": [[0.1, 0.2]],
+                "texts": ["hello"],
+                "meta": {
+                    "api_version": {"version": "1"},
+                    "billed_units": {"input_tokens": 3, "images": 1},
+                    "tokens": {"input_tokens": 3},
+                },
+            },
+        )
+        billed = parsed["meta"]["billed_units"]
+        self.assertEqual(billed["input_tokens"], 3)
+        self.assertEqual(billed["images"], 1)
+        self.assertNotIn("output_tokens", billed)
+        self.assertEqual(parsed["meta"]["tokens"]["input_tokens"], 3)
+
+    def test_bedrock_headers_overlay_token_counts_and_keep_search_units(self) -> None:
+        parsed = self._rewrite(
+            "chat",
+            {
+                "text": "hello",
+                "meta": {
+                    "billed_units": {"input_tokens": 4, "output_tokens": 9, "search_units": 1},
+                    "tokens": {"input_tokens": 4, "output_tokens": 9},
+                },
+            },
+            headers={
+                "X-Amzn-Bedrock-Input-Token-Count": "11",
+                "X-Amzn-Bedrock-Output-Token-Count": "7",
+            },
+        )
+        billed = parsed["meta"]["billed_units"]
+        self.assertEqual(billed["input_tokens"], 11)
+        self.assertEqual(billed["output_tokens"], 7)
+        self.assertEqual(billed["search_units"], 1)
+        self.assertEqual(parsed["meta"]["tokens"]["output_tokens"], 7)
+
+    def test_missing_meta_and_headers_does_not_invent_negative_usage(self) -> None:
+        parsed = self._rewrite("chat", {"text": "hello"})
+        billed = (parsed.get("meta") or {}).get("billed_units") or {}
+        self.assertIsNone(billed.get("input_tokens"))
+        self.assertIsNone(billed.get("output_tokens"))
