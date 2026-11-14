@@ -336,6 +336,4 @@ class TestAwsResponseMetaUsage(unittest.TestCase):
 
     def test_missing_meta_and_headers_does_not_invent_negative_usage(self) -> None:
         parsed = self._rewrite("chat", {"text": "hello"})
-        billed = (parsed.get("meta") or {}).get("billed_units") or {}
-        self.assertIsNone(billed.get("input_tokens"))
-        self.assertIsNone(billed.get("output_tokens"))
+        self.assertNotIn("meta", parsed)
