@@ -7,8 +7,7 @@ import httpx
 from httpx import URL, SyncByteStream, ByteStream
 
 from . import GenerateStreamedResponse, Generation, \
-    NonStreamedChatResponse, EmbedResponse, StreamedChatResponse, RerankResponse, ApiMeta, ApiMetaTokens, \
-    ApiMetaBilledUnits
+    NonStreamedChatResponse, EmbedResponse, StreamedChatResponse, RerankResponse
 from .client import Client, ClientEnvironment
 from .core import construct_type
 from .manually_maintained.lazy_aws_deps import lazy_boto3, lazy_botocore
@@ -152,13 +151,41 @@ def stream_generator(response: httpx.Response, endpoint: str) -> typing.Iterator
                     yield (json.dumps(parsed.dict()) + "\n").encode("utf-8")  # type: ignore
 
 
-def map_token_counts(response: httpx.Response) -> ApiMeta:
-    input_tokens = int(response.headers.get("X-Amzn-Bedrock-Input-Token-Count", -1))
-    output_tokens = int(response.headers.get("X-Amzn-Bedrock-Output-Token-Count", -1))
-    return ApiMeta(
-        tokens=ApiMetaTokens(input_tokens=input_tokens, output_tokens=output_tokens),
-        billed_units=ApiMetaBilledUnits(input_tokens=input_tokens, output_tokens=output_tokens),
-    )
+def _bedrock_header_token(response: httpx.Response, name: str) -> typing.Optional[int]:
+    raw = response.headers.get(name)
+    if raw is None or raw == "":
+        return None
+    return int(raw)
+
+
+def map_token_counts(
+        meta: typing.Optional[typing.Dict[str, typing.Any]],
+        response: httpx.Response,
+) -> typing.Optional[typing.Dict[str, typing.Any]]:
+    """Keep billed usage from the model body.
+
+    Bedrock sends input/output token counts in headers and nothing else.
+    SageMaker does not send those headers. Replacing meta with a header-only
+    object defaults the counts to -1 and drops search_units, images, and the
+    rest of the body usage.
+    """
+    input_tokens = _bedrock_header_token(response, "X-Amzn-Bedrock-Input-Token-Count")
+    output_tokens = _bedrock_header_token(response, "X-Amzn-Bedrock-Output-Token-Count")
+    if input_tokens is None and output_tokens is None:
+        return meta
+
+    merged: typing.Dict[str, typing.Any] = dict(meta or {})
+    tokens = dict(merged.get("tokens") or {})
+    billed = dict(merged.get("billed_units") or {})
+    if input_tokens is not None:
+        tokens["input_tokens"] = input_tokens
+        billed["input_tokens"] = input_tokens
+    if output_tokens is not None:
+        tokens["output_tokens"] = output_tokens
+        billed["output_tokens"] = output_tokens
+    merged["tokens"] = tokens
+    merged["billed_units"] = billed
+    return merged
 
 
 def map_response_from_bedrock():
@@ -177,7 +204,12 @@ def map_response_from_bedrock():
         else:
             response_type = response_mapping[endpoint]
             response_obj = json.loads(response.read())
-            response_obj["meta"] = map_token_counts(response).dict()
+            body_meta = response_obj.get("meta")
+            if not isinstance(body_meta, dict):
+                body_meta = None
+            merged_meta = map_token_counts(body_meta, response)
+            if merged_meta is not None:
+                response_obj["meta"] = merged_meta
             cast_obj: typing.Any = typing.cast(response_type,  # type: ignore
                                    construct_type(
                                        type_=response_type,
