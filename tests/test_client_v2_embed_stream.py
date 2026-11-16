@@ -131,6 +131,15 @@ class TestClientV2EmbedStream(unittest.TestCase):
         self.assertEqual(first.index, 0)
         self.assertEqual(len(server.requests), 1)
 
+    def test_model_and_input_type_stay_optional(self) -> None:
+        server = _RecordingEmbedServer()
+
+        results = list(_client(server).embed_stream(texts=TEXTS[:5]))
+
+        self.assertEqual(len(results), 5)
+        self.assertNotIn("model", server.requests[0])
+        self.assertNotIn("input_type", server.requests[0])
+
     def test_empty_texts_sends_nothing(self) -> None:
         server = _RecordingEmbedServer()
 

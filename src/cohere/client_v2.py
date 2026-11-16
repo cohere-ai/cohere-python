@@ -70,8 +70,8 @@ class ClientV2(V2Client, Client):  # type: ignore
     def embed_stream(  # type: ignore[override]
         self,
         *,
-        model: str,
-        input_type: EmbedInputType,
+        model: typing.Optional[str] = OMIT,
+        input_type: typing.Optional[EmbedInputType] = OMIT,
         texts: typing.Optional[typing.Sequence[str]] = OMIT,
         inputs: typing.Optional[typing.Sequence[EmbedInput]] = OMIT,
         max_tokens: typing.Optional[int] = OMIT,
@@ -88,7 +88,9 @@ class ClientV2(V2Client, Client):  # type: ignore
         Splits `texts` or `inputs` into requests of `batch_size`, sends them to /v2/embed one after
         another, and yields a StreamedEmbedding per embedding as each response arrives, so large
         datasets can be written to a vector store without holding every embedding in memory.
-        Takes the same parameters as `embed()`, except `images`.
+        Takes the same parameters as `embed()`, except `images`. `model` and `input_type` stay optional,
+        as they were when ClientV2 inherited the v1 embed_stream(); when omitted, they are left out of
+        the request.
 
         Args:
             model: Embedding model ID.
@@ -121,8 +123,8 @@ class ClientV2(V2Client, Client):  # type: ignore
 
             response = V2Client.embed(
                 self,
-                model=model,
-                input_type=input_type,
+                model=typing.cast(str, model),
+                input_type=typing.cast(EmbedInputType, input_type),
                 texts=batch if has_texts else OMIT,
                 inputs=OMIT if has_texts else batch,
                 max_tokens=max_tokens,
