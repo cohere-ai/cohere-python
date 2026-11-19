@@ -66,6 +66,8 @@ jobs:
           curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
       - name: Install dependencies
         run: poetry install
+      - name: Set package version from tag
+        run: poetry version "${GITHUB_REF_NAME}"
       - name: Publish to pypi
         run: |
           poetry config repositories.remote https://upload.pypi.org/legacy/
