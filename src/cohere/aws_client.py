@@ -2,6 +2,7 @@ import base64
 import json
 import re
 import typing
+from urllib.parse import quote
 
 import httpx
 from httpx import URL, SyncByteStream, ByteStream
@@ -276,12 +277,16 @@ def get_url(
         model: str,
         stream: bool,
 ) -> str:
+    # The model id is one path segment. Bedrock accepts ARNs there (provisioned
+    # throughput, application inference profiles), and an ARN contains ":" and "/",
+    # so it has to be percent-encoded the way boto3 does it.
+    model_segment = quote(model, safe="")
     if platform == "bedrock":
         endpoint = "invoke" if not stream else "invoke-with-response-stream"
-        return f"https://{platform}-runtime.{aws_region}.amazonaws.com/model/{model}/{endpoint}"
+        return f"https://{platform}-runtime.{aws_region}.amazonaws.com/model/{model_segment}/{endpoint}"
     elif platform == "sagemaker":
         endpoint = "invocations" if not stream else "invocations-response-stream"
-        return f"https://runtime.sagemaker.{aws_region}.amazonaws.com/endpoints/{model}/{endpoint}"
+        return f"https://runtime.sagemaker.{aws_region}.amazonaws.com/endpoints/{model_segment}/{endpoint}"
     return ""
 
 

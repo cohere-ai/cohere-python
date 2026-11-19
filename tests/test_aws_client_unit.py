@@ -250,3 +250,79 @@ class TestEmbedV4Params(unittest.TestCase):
 
             self.assertIsInstance(result, dict)
             self.assertEqual(result, by_type_embeddings)
+
+
+class TestModelIdInUrl(unittest.TestCase):
+    """The model id is a single path segment. Bedrock accepts ARNs there
+    (provisioned throughput, application inference profiles), so ":" and "/"
+    must be percent-encoded the way boto3 encodes modelId."""
+
+    ARN = "arn:aws:bedrock:us-east-1:123456789012:application-inference-profile/a1b2c3d4e5f6"
+
+    def test_bedrock_arn_is_one_encoded_segment(self) -> None:
+        from cohere.aws_client import get_url
+
+        url = get_url(platform="bedrock", aws_region="us-east-1", model=self.ARN, stream=False)
+
+        # same URL boto3's bedrock-runtime client builds for invoke_model(modelId=ARN)
+        self.assertEqual(
+            url,
+            "https://bedrock-runtime.us-east-1.amazonaws.com/model/"
+            "arn%3Aaws%3Abedrock%3Aus-east-1%3A123456789012%3Aapplication-inference-profile%2Fa1b2c3d4e5f6"
+            "/invoke",
+        )
+        self.assertEqual(httpx.URL(url).raw_path.decode().split("/")[1:], [
+            "model",
+            "arn%3Aaws%3Abedrock%3Aus-east-1%3A123456789012%3Aapplication-inference-profile%2Fa1b2c3d4e5f6",
+            "invoke",
+        ])
+
+    def test_plain_model_ids_are_unchanged(self) -> None:
+        from cohere.aws_client import get_url
+
+        self.assertEqual(
+            get_url(platform="bedrock", aws_region="eu-central-1", model="cohere.embed-english-v3", stream=True),
+            "https://bedrock-runtime.eu-central-1.amazonaws.com/model/cohere.embed-english-v3/invoke-with-response-stream",
+        )
+        self.assertEqual(
+            get_url(platform="sagemaker", aws_region="us-east-1", model="my-endpoint", stream=False),
+            "https://runtime.sagemaker.us-east-1.amazonaws.com/endpoints/my-endpoint/invocations",
+        )
+
+    def test_hook_sends_and_signs_the_encoded_url(self) -> None:
+        captured: dict = {}
+
+        def capture_aws_request(**kwargs):  # type: ignore
+            captured.update(kwargs)
+            mock_req = MagicMock()
+            mock_req.prepare.return_value = MagicMock(headers={})
+            return mock_req
+
+        mock_botocore = MagicMock()
+        mock_botocore.awsrequest.AWSRequest.side_effect = capture_aws_request
+
+        mock_session = MagicMock()
+        mock_session.region_name = "us-east-1"
+        mock_boto3 = MagicMock()
+        mock_boto3.Session.return_value = mock_session
+
+        with patch("cohere.aws_client.lazy_botocore", return_value=mock_botocore), \
+             patch("cohere.aws_client.lazy_boto3", return_value=mock_boto3):
+            from cohere.aws_client import map_request_to_bedrock
+
+            hook = map_request_to_bedrock(service="bedrock", aws_region="us-east-1")
+            request = httpx.Request(
+                method="POST",
+                url="https://api.cohere.com/v2/embed",
+                headers={"connection": "keep-alive"},
+                json={"model": self.ARN, "texts": ["hi"]},
+            )
+            hook(request)
+
+        expected_path = (
+            "/model/arn%3Aaws%3Abedrock%3Aus-east-1%3A123456789012%3Aapplication-inference-profile"
+            "%2Fa1b2c3d4e5f6/invoke"
+        )
+        self.assertEqual(request.url.raw_path.decode(), expected_path)
+        self.assertTrue(captured["url"].endswith(expected_path))
+        self.assertNotIn("model", json.loads(request.content))
