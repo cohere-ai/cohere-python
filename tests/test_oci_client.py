@@ -806,6 +806,32 @@ class TestOciClientTransformations(unittest.TestCase):
         self.assertEqual(len(result["message"]["tool_calls"]), 1)
         self.assertEqual(result["message"]["tool_calls"][0]["id"], "call_123")
 
+    def test_v1_response_tool_calls_conversion(self):
+        """Test that V1 response forwards toolCalls as tool_calls."""
+        from cohere.oci_client import transform_oci_response_to_cohere
+
+        oci_response = {
+            "chatResponse": {
+                "text": "",
+                "chatHistory": [],
+                "toolCalls": [
+                    {
+                        "name": "get_weather",
+                        "parameters": {"city": "London"},
+                    }
+                ],
+                "finishReason": "COMPLETE",
+                "usage": {"inputTokens": 10, "completionTokens": 20},
+            }
+        }
+
+        result = transform_oci_response_to_cohere("chat", oci_response, is_v2=False)
+
+        self.assertIn("tool_calls", result)
+        self.assertEqual(len(result["tool_calls"]), 1)
+        self.assertEqual(result["tool_calls"][0]["name"], "get_weather")
+        self.assertEqual(result["tool_calls"][0]["parameters"], {"city": "London"})
+
     def test_normalize_model_for_oci(self):
         """Test model name normalization for OCI."""
         from cohere.oci_client import normalize_model_for_oci
@@ -1237,6 +1263,23 @@ region=us-chicago-1
         )
 
         self.assertEqual(result["response_type"], "embeddings_floats")
+
+    def test_embed_response_by_type_v1(self):
+        """Test V1 embed response preserves non-float embedding types."""
+        from cohere.oci_client import transform_oci_response_to_cohere
+
+        result = transform_oci_response_to_cohere(
+            "embed",
+            {
+                "id": "embed-id",
+                "embeddingsByType": {"INT8": [[1, 2, 3]]},
+                "usage": {"inputTokens": 3, "completionTokens": 0},
+            },
+            is_v2=False,
+        )
+
+        self.assertEqual(result["response_type"], "embeddings_by_type")
+        self.assertEqual(result["embeddings"], {"int8": [[1, 2, 3]]})
 
     def test_embed_response_includes_response_type_v2(self):
         """Test V2 embed response includes response_type=embeddings_by_type for SDK union."""

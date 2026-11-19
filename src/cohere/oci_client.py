@@ -889,8 +889,16 @@ def transform_oci_response_to_cohere(
 
         if is_v2:
             embeddings = normalized_embeddings
+            response_type = "embeddings_by_type"
+        elif "embeddingsByType" in oci_response or any(key != "float" for key in normalized_embeddings):
+            # V1: the request specified embedding_types, so OCI returned
+            # embeddingsByType; return the by-type dict so non-float types
+            # such as int8 are not silently dropped.
+            embeddings = normalized_embeddings
+            response_type = "embeddings_by_type"
         else:
             embeddings = normalized_embeddings.get("float", [])
+            response_type = "embeddings_floats"
 
         meta = {
             "api_version": {"version": "1"},
@@ -900,8 +908,6 @@ def transform_oci_response_to_cohere(
             meta["tokens"] = usage["tokens"]
         if "billed_units" in usage:
             meta["billed_units"] = usage["billed_units"]
-
-        response_type = "embeddings_by_type" if is_v2 else "embeddings_floats"
 
         return {
             "response_type": response_type,
@@ -964,7 +970,7 @@ def transform_oci_response_to_cohere(
         if "billed_units" in usage:
             meta["billed_units"] = usage["billed_units"]
 
-        return {
+        result = {
             "text": chat_response.get("text", ""),
             "generation_id": str(uuid.uuid4()),
             "chat_history": chat_response.get("chatHistory", []),
@@ -974,6 +980,13 @@ def transform_oci_response_to_cohere(
             "search_queries": chat_response.get("searchQueries", []),
             "meta": meta,
         }
+
+        # OCI COHERE-format tool calls ({name, parameters}) match the V1
+        # ToolCall shape, so forward them directly.
+        if "toolCalls" in chat_response:
+            result["tool_calls"] = chat_response["toolCalls"]
+
+        return result
 
     return oci_response
 
